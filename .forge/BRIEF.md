@@ -59,3 +59,52 @@ The findings that bind the build:
 - MDCG 2025-4 and the revised MDCG 2019-11 make the intended-purpose wording the classification test. Lab explanations give educational reference-range context, cite public sources, invite a professional, and never assess this person's condition.
 - HelloFresh has no public API and prohibits automated access. The only lawful import is a single artifact the owner already holds, parsed locally.
 - Uber Eats has no public API and no documented deep-link format. The app links to a search page and never claims nutrition it does not have.
+
+## Panel
+
+Four interviews, 2026-08-21, one man in his four modes: owner at the gym on a Tuesday, planner on the sofa on Sunday at 20:30, curator over a twenty-two row lab panel, operator in front of the cupboard. They agree more than they diverge, and where they agree they agree hard.
+
+### Findings
+
+**1. Silence is the failure mode, not error.** Nobody churns on a missing feature. They churn on the app doing something, or failing to, without saying so. The operator finds a dead Withings token by noticing a flat gap in a chart four days later: "I have to notice what isn't there, which is the worst possible failure signal, because I'm not looking for it." The curator's slow cases are exactly the ones where the honest answer is a conversion, a comparison, or a blank, and the app's temptation is to return one clean number instead. The planner's revocation trigger is an event he did not approve appearing in his calendar. Absence and smoothing are the same bug in different clothes. Every failure gets a named surface, a named cause, and one button to press. A green healthcheck on an unreachable app is the canonical version of this: two states, one signal.
+
+**2. Trust does not fail locally, it generalises.** Two interviews reached the same sentence independently. The planner, on a session that ignores logged shoulder pain: "that's the moment I stop trusting every other number on the dashboard too, including the ones that were right." The curator, on a defaulted sauce: "the moment it starts smoothing over gaps to look more finished, I stop trusting the parts I didn't check." One unexplained write costs the whole dashboard. That makes provenance and reason strings load-bearing rather than decorative. A reason names the cause it acted on, "moved from Thursday because your calendar shows you busy 18:00 to 23:00", never a label like "recommended" or "rescheduled".
+
+**3. Interruption is the normal case.** A call mid-set. A phone asleep on the mat. Three evenings gone before the week begins. A macOS update that drops the Tailscale listener. All four describe a life that interrupts the app constantly, and all four name the same unacceptable response: work that has to be redone, or a guilt message. "Two missed sessions because Thursday ran late is not a failure state, it's Tuesday." The app absorbs interruption. It reconciles from wall-clock time, commits locally, re-proposes without scoring, and learns a correction instead of asking for it again next Sunday. Correcting Wednesday to Friday three weeks running and being offered Wednesday in week four is the whole test of whether "adaptive" means anything.
+
+### Table stakes
+
+Miss one and the product does not clear the floor.
+
+**1. Nothing commits as a batch.** Per-item accept, edit and reject on one screen, not three flows. Per-row save on a lab panel behind an explicit save button, never autosave, never all-or-nothing across twenty-two rows. Two-tap undo that pulls one event back out of the dedicated calendar. A single whole-plan Accept gets the whole plan rejected the first time one line is wrong, and twenty minutes are gone.
+
+**2. Every value keeps its origin and its original.** Manual, Withings, Apple Health, PDF or AI estimate, stored permanently, not "recently imported". Correction history append-only. A converted lab value shown beside the printed original with the factor visible, never the converted number alone. Confidence per row so attention goes to the three rows that need it. An estimate badged as an estimate, a gap left as a gap. Any chart point walks back to its source page in two clicks. A stored correction survives re-import, and a conflict with a new value is a question, not a decision.
+
+**3. The capture path never blocks.** Offline write that commits locally in a basement gym with patchy signal and a wifi login screen every visit. Elapsed time from timestamps, never from interval ticks. Last week's working weight inline while the set is open, not behind a back button with a stranger waiting for the bench. Zero interstitials during a session: no rating prompt, no notification permission, no upsell, no ad. Nothing the owner logged himself sits behind a gate. Trends are the front door, 7 and 28 day, weight and waist on the same view, never the daily number leading.
+
+### Risk
+
+**The unapproved write.** The app mutates state the owner cannot see it mutating, and he finds out late or never. Two surfaces, one blast radius.
+
+The calendar write is the sharp one. The planner confirms at 20:45 while tired, and the only thing between that and a revoked OAuth grant is a diff he can read in four seconds: the dedicated calendar before and after, added, moved and deleted listed plainly. A summary sentence is the cheap version of that screen, it is what deadline pressure produces, and it fails the exact test it exists to pass. His response is revocation with no warning and no explanation. The integration does not degrade, it ends.
+
+The quiet one is the same shape with a longer fuse: a re-import that overwrites a corrected value, or a recipe format change that silently serves last month's macros as this month's. Nobody notices, so the trend is wrong and the wrong point cannot be found. "That's worse than not importing at all, because I won't know to check."
+
+One rule covers both. Nothing writes outside a confirmed diff, and every write is reversible from the surface that showed it.
+
+### Access boundaries
+
+Who must never see what, as the interviews put it. These sharpen the Roles table above rather than replacing it.
+
+| Who or what | Must never see | As raised |
+|---|---|---|
+| The schema | Blood pressure, from any source, any import, any PDF. Skipped at extraction, absent from the tables, verifiable by reading the schema. | "I don't want a hide BP toggle sitting on top of a BP value that's actually in the database." A UI filter is not a boundary. |
+| Claude | A whole lab PDF, a full medical record, raw history, credentials, an unnecessary photo. One task, one crop, one row. | "Not my full medical history riding along because it was easier to send the whole document." |
+| The browser, any API response, any log line | Third-party tokens, the master key, any secret value. Integration status shows connected, expiring, revoked or demo plus last successful sync, never the credential behind it. | "Status is not the same permission level as secrets, and I want the surface to enforce that distinction so I stop being the thing standing between convenient and leaked." |
+| The web session | The iOS Shortcut ingest token, and the reverse. Separate credential, shown once, stored encrypted, revocable. Ingest never grants web access. | Ingest is a different door from sign-in and must fail closed as one. |
+| The unauthenticated visitor on the tailnet | Everything but the sign-in screen and a health endpoint that returns liveness and nothing else. No integration names, no counts, no dates, and no requirement to SSH in to read it. | Tailscale is the network barrier, never the authentication. |
+| The primary Google Calendar | Any write, ever. Writes land in the dedicated calendar only, after a per-item confirm. A widened scope on an update is a new consent, not a changelog line. | "The instant I see a write in a calendar I didn't designate, I revoke and I don't come back to explain why." |
+| The owner | An AI estimate with its origin scrubbed. A converted value without the printed original beside it. A number defaulted over a gap it could not fill. | The owner is protected from false confidence, not only from disclosure. |
+| Disk, after validation | The source lab PDF, if the owner says so. The app asks at the point where it matters and does what it is told. | "That's not a setting buried in an admin panel." Retention is a decision, not a default. |
+
+One boundary the operator added that is not about data: every host dependency this build acquires is named at the greenlight in PREFLIGHT or it does not get to exist. Discovering that a restore needs `age` or `gpg` during the actual emergency is the failure the single gate exists to prevent.
