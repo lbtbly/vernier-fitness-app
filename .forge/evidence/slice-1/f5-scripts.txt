@@ -1,0 +1,56 @@
+# F5. up, down and status each exit 0 twice in a row and leave the container ids unchanged.
+
+$ docker compose ps -q     (before anything)
+d590869cf57a5a3eca9ce0a8ac8d81529696e0f4ebd56959f97b3214c5e0e1f3
+17c3e7217d76f1fc8d2a4d1f2baddf17c7201909c2fe28074e2cc791ff8ee2dc
+
+================ scripts/up.sh ================
+
+$ bash scripts/up.sh    (run 1)
+exit=0
+$ docker compose ps -q --all
+d590869cf57a5a3eca9ce0a8ac8d81529696e0f4ebd56959f97b3214c5e0e1f3
+17c3e7217d76f1fc8d2a4d1f2baddf17c7201909c2fe28074e2cc791ff8ee2dc
+
+$ bash scripts/up.sh    (run 2)
+exit=0
+$ docker compose ps -q --all
+d590869cf57a5a3eca9ce0a8ac8d81529696e0f4ebd56959f97b3214c5e0e1f3
+17c3e7217d76f1fc8d2a4d1f2baddf17c7201909c2fe28074e2cc791ff8ee2dc
+
+================ scripts/down.sh ================
+
+$ bash scripts/down.sh    (run 1)
+exit=0
+$ docker compose ps -q --all
+d590869cf57a5a3eca9ce0a8ac8d81529696e0f4ebd56959f97b3214c5e0e1f3
+17c3e7217d76f1fc8d2a4d1f2baddf17c7201909c2fe28074e2cc791ff8ee2dc
+
+$ bash scripts/down.sh    (run 2)
+exit=0
+$ docker compose ps -q --all
+d590869cf57a5a3eca9ce0a8ac8d81529696e0f4ebd56959f97b3214c5e0e1f3
+17c3e7217d76f1fc8d2a4d1f2baddf17c7201909c2fe28074e2cc791ff8ee2dc
+
+(down.sh stops, it never removes. The containers and both volumes survive, which is why the ids are identical.)
+
+================ scripts/status.sh ================
+
+$ bash scripts/status.sh    (run 1)
+exit=0
+$ docker compose ps -q --all
+d590869cf57a5a3eca9ce0a8ac8d81529696e0f4ebd56959f97b3214c5e0e1f3
+17c3e7217d76f1fc8d2a4d1f2baddf17c7201909c2fe28074e2cc791ff8ee2dc
+
+$ bash scripts/status.sh    (run 2)
+exit=0
+$ docker compose ps -q --all
+d590869cf57a5a3eca9ce0a8ac8d81529696e0f4ebd56959f97b3214c5e0e1f3
+17c3e7217d76f1fc8d2a4d1f2baddf17c7201909c2fe28074e2cc791ff8ee2dc
+
+$ grep -n 'down -v' scripts/*.sh    (must be empty)
+(no match anywhere in scripts/)
+
+$ docker volume ls | grep vernier
+local     vernier_pgdata
+local     vernier_storage

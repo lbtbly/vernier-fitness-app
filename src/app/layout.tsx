@@ -29,7 +29,8 @@ export async function generateMetadata(): Promise<Metadata> {
     icons: {
       icon: [
         { url: '/icons/vernier-mark.svg', type: 'image/svg+xml' },
-        { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+        { url: '/icons/favicon-32.png', sizes: '32x32', type: 'image/png' },
+        { url: '/favicon.ico', sizes: '32x32', type: 'image/x-icon' },
       ],
       apple: [{ url: '/icons/apple-touch-icon-180.png', sizes: '180x180', type: 'image/png' }],
     },

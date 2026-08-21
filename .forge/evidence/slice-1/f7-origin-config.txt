@@ -1,0 +1,69 @@
+# F7. Origin and relying party are configuration, not source.
+
+The owner's file carries APP_URL and WEBAUTHN_RP_ID. PLAN.md's prose called
+them APP_ORIGIN and RP_ID; the file that already exists on disk wins.
+
+$ checksum of every shipped source file, before the change
+974775bec73ce680c63d2a94826984e47419fe56
+
+$ curl -sS http://127.0.0.1:3000/sign-in | grep -o '<dd[^>]*>[^<]*</dd>'
+<dd data-config-field="Application origin">https://lamberts-mac-mini.tailda76d6.ts.net</dd>
+<dd data-config-field="Passkey relying party">tailda76d6.ts.net</dd>
+<dd data-config-field="Relying party name">Health</dd>
+
+$ node swap.mjs https://vernier-test.tailda76d6.ts.net tailda76d6.example.net
+  (writes only those two keys in the environment file, from Node, preserving every other byte)
+set APP_URL
+set WEBAUTHN_RP_ID
+
+$ docker compose up -d      (recreates the container with the new environment, no rebuild)
+ Container vernier-db-1 Healthy 
+ Container vernier-app-1 Starting 
+ Container vernier-app-1 Started 
+
+$ curl -sS http://127.0.0.1:3000/sign-in | grep -o '<dd[^>]*>[^<]*</dd>'
+<dd data-config-field="Application origin">https://vernier-test.tailda76d6.ts.net</dd>
+<dd data-config-field="Passkey relying party">tailda76d6.example.net</dd>
+<dd data-config-field="Relying party name">Health</dd>
+
+$ docker compose exec -T app printenv APP_URL WEBAUTHN_RP_ID
+https://vernier-test.tailda76d6.ts.net
+tailda76d6.example.net
+
+$ the same checksum, after
+974775bec73ce680c63d2a94826984e47419fe56
+identical: no source file was modified
+
+$ git status --porcelain     (only the slice's own new files, nothing modified by the swap)
+ M .forge/.checks-stamp
+ M .forge/.env-probe.json
+ M .forge/.progress-tokens.json
+ M .forge/.runlog-last
+ M .forge/PROGRESS.html
+ M .forge/RUNLOG.md
+ M public/sw.js
+ M scripts/build-icons.sh
+ M src/app/layout.tsx
+?? .forge/evidence/
+?? public/favicon.ico
+
+--- restoring the real values ---
+set APP_URL
+set WEBAUTHN_RP_ID
+ Container vernier-app-1 Starting 
+ Container vernier-app-1 Started 
+
+$ curl -sS http://127.0.0.1:3000/sign-in | grep -o '<dd[^>]*>[^<]*</dd>'
+<dd data-config-field="Application origin">https://lamberts-mac-mini.tailda76d6.ts.net</dd>
+<dd data-config-field="Passkey relying party">tailda76d6.ts.net</dd>
+<dd data-config-field="Relying party name">Health</dd>
+
+$ docker compose exec -T app printenv APP_URL WEBAUTHN_RP_ID
+https://lamberts-mac-mini.tailda76d6.ts.net
+tailda76d6.ts.net
+
+Note on `git status`. The entries above are this slice's own uncommitted work,
+which the checkpoint hook had not yet taken. None of them was touched by the
+swap: the checksum over every shipped source file is byte identical before and
+after, printed twice above, and the only thing that changed between the two
+renders is the environment file the app reads at request time.

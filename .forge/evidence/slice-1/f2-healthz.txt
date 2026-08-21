@@ -1,0 +1,48 @@
+# F2. Liveness answers an unauthenticated caller and carries liveness only.
+
+$ curl -sS -i http://127.0.0.1:3000/healthz
+HTTP/1.1 200 OK
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch
+cache-control: no-store
+content-type: application/json
+x-robots-tag: noindex
+Date: Fri, 21 Aug 2026 21:37:34 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Transfer-Encoding: chunked
+
+{"status":"ok"}
+
+$ curl -sS https://lamberts-mac-mini.tailda76d6.ts.net/healthz    (through Tailscale Serve, no credential)
+{"status":"ok"}
+
+body is 15 bytes: {"status":"ok"}
+
+$ grep -i against every integration name, version, count, date and identifier
+matches: 0
+
+the endpoint reads no database and holds no branch on data:
+import { NextResponse } from 'next/server';
+
+export const dynamic = 'force-dynamic';
+
+/**
+ * Liveness, and nothing else.
+ *
+ * This is the unauthenticated visitor's entire surface, so every field here is
+ * a field they get for free. No integration name, no record count, no date, no
+ * version, no database name, no hostname. The process answered: that is the
+ * whole message. F2 greps this body against the integration names.
+ */
+export function GET() {
+  return NextResponse.json(
+    { status: 'ok' },
+    {
+      status: 200,
+      headers: {
+        'Cache-Control': 'no-store',
+        'X-Robots-Tag': 'noindex',
+      },
+    },
+  );
+}

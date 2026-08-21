@@ -1,0 +1,67 @@
+# F4 and R1. HTTPS over Tailscale Serve, one proxy, zero Funnel, publicly trusted certificate.
+
+$ bash scripts/tailscale-serve.sh     (run 1)
+tailscale-serve: already serving https://lamberts-mac-mini.tailda76d6.ts.net to http://127.0.0.1:3000. Nothing changed.
+
+https://lamberts-mac-mini.tailda76d6.ts.net (tailnet only)
+|-- / proxy http://127.0.0.1:3000
+
+
+funnel: zero entries. No AllowFunnel key in the serve configuration.
+https proxies: 1
+exit=0
+
+$ bash scripts/tailscale-serve.sh     (run 2, must change nothing)
+tailscale-serve: already serving https://lamberts-mac-mini.tailda76d6.ts.net to http://127.0.0.1:3000. Nothing changed.
+
+https://lamberts-mac-mini.tailda76d6.ts.net (tailnet only)
+|-- / proxy http://127.0.0.1:3000
+
+
+funnel: zero entries. No AllowFunnel key in the serve configuration.
+https proxies: 1
+exit=0
+
+$ tailscale serve status --json
+{
+  "TCP": {
+    "443": {
+      "HTTPS": true
+    }
+  },
+  "Web": {
+    "lamberts-mac-mini.tailda76d6.ts.net:443": {
+      "Handlers": {
+        "/": {
+          "Proxy": "http://127.0.0.1:3000"
+        }
+      }
+    }
+  }
+}
+
+$ curl -sS -i https://lamberts-mac-mini.tailda76d6.ts.net/healthz
+HTTP/2 200 
+cache-control: no-store
+content-type: application/json
+date: Fri, 21 Aug 2026 21:38:03 GMT
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch
+x-robots-tag: noindex
+
+{"status":"ok"}
+
+$ curl -v https://lamberts-mac-mini.tailda76d6.ts.net/    (certificate chain, system trust store, no -k)
+* SSL connection using TLSv1.3 / AEAD-CHACHA20-POLY1305-SHA256 / [blank] / UNDEF
+*  subject: CN=lamberts-mac-mini.tailda76d6.ts.net
+*  expire date: Nov 19 19:56:05 2026 GMT
+*  subjectAltName: host "lamberts-mac-mini.tailda76d6.ts.net" matched cert's "lamberts-mac-mini.tailda76d6.ts.net"
+*  issuer: C=US; O=Let's Encrypt; CN=YE1
+*  SSL certificate verify ok.
+
+$ openssl-free chain read through curl --write-out
+http 200 over 2 to 100.65.127.62, TLS verify result 0
+
+$ tailscale status    (the tailnet, three nodes)
+100.65.127.62  lamberts-mac-mini     lambert.bouley@  macOS  -                                                               
+100.121.138.9  iphone181             lambert.bouley@  iOS    offline, last seen 8m ago                                       
+100.72.168.17  lamberts-macbook-air  lambert.bouley@  macOS  active; direct 192.168.1.254:41641, tx 9058881100 rx 216699588  

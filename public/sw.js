@@ -9,6 +9,7 @@ const SHELL_ASSETS = [
   '/icons/vernier-mark.svg',
   '/icons/apple-touch-icon-180.png',
   '/icons/icon-192.png',
+  '/favicon.ico',
 ];
 
 self.addEventListener('install', (event) => {

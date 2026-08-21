@@ -1,0 +1,70 @@
+# C3. A worker active at the root scope, served with a no-cache directive, and an offline screen naming the cause.
+
+$ curl -sS -I http://127.0.0.1:3000/sw.js
+HTTP/1.1 200 OK
+Cache-Control: no-cache, no-store, must-revalidate
+Content-Type: text/javascript; charset=utf-8
+Service-Worker-Allowed: /
+Accept-Ranges: bytes
+Last-Modified: Fri, 21 Aug 2026 21:35:36 GMT
+ETag: W/"8c0-1a026403040"
+Content-Length: 2240
+Vary: Accept-Encoding
+Date: Fri, 21 Aug 2026 21:39:57 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+
+$ curl -sS -I https://lamberts-mac-mini.tailda76d6.ts.net/sw.js
+HTTP/2 200 
+accept-ranges: bytes
+cache-control: no-cache, no-store, must-revalidate
+content-type: text/javascript; charset=utf-8
+date: Fri, 21 Aug 2026 21:39:57 GMT
+etag: W/"8c0-1a026403040"
+last-modified: Fri, 21 Aug 2026 21:35:36 GMT
+service-worker-allowed: /
+vary: Accept-Encoding
+content-length: 2240
+
+
+$ node scripts/pwa-check.mjs register
+{
+  "scope": "http://127.0.0.1:3000/",
+  "active": "activated",
+  "scriptURL": "http://127.0.0.1:3000/sw.js",
+  "controller": "http://127.0.0.1:3000/sw.js",
+  "cached": [
+    "vernier-shell-v1"
+  ],
+  "shellEntries": [
+    "/",
+    "/eat",
+    "/favicon.ico",
+    "/health",
+    "/icons/apple-touch-icon-180.png",
+    "/icons/icon-192.png",
+    "/icons/vernier-mark.svg",
+    "/manifest.webmanifest",
+    "/offline",
+    "/settings",
+    "/sign-in",
+    "/train"
+  ]
+}
+
+$ SHOT=.forge/evidence/slice-1/captures/offline-network-disabled.png node scripts/pwa-check.mjs offline
+worker scope: http://127.0.0.1:3000/
+worker script: http://127.0.0.1:3000/sw.js, state activated
+precached: / /eat /favicon.ico /health /icons/apple-touch-icon-180.png /icons/icon-192.png /icons/vernier-mark.svg /manifest.webmanifest /offline /settings /sign-in /train
+network: disabled on the page and on 3 worker target(s)
+offline, precached route /train -> "Train"
+offline, unvisited route -> "This phone cannot reach the Mac mini"
+offline copy: OFFLINE This phone cannot reach the Mac mini The app shell is stored on this device, so it opened. Everything else waits for lamberts-mac-mini.tailda76d6.ts.net. Either this device has left the tailnet, or the Mac mini is asleep or stopped. WHAT WORKS OFFLINE The shell, the five tabs and this screen. Nothing has been lost and nothing needs redoing. Try again Today Health Train Eat Settings
+offline action: ["Try again"]
+offline capture: /Users/lambertbouley/Claude/lbtbly-fitness-app/.forge/evidence/slice-1/captures/offline-network-disabled.png
+
+$ wc -l public/sw.js    (hand written, no next-pwa, no serwist, no plugin)
+      64 public/sw.js
+$ grep -rn 'next-pwa\|serwist\|workbox' package.json package-lock.json src public | head
+public/sw.js:1:// Vernier's service worker. Hand written, no next-pwa, which last shipped in

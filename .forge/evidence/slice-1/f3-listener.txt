@@ -1,0 +1,27 @@
+# F3. The host listener answers on 127.0.0.1 and on no other address.
+
+$ lsof -nP -iTCP -sTCP:LISTEN | grep ':3000'
+com.docke  1387 lambertbouley   99u  IPv4 0x9c6c10da34d8eb37      0t0  TCP 127.0.0.1:3000 (LISTEN)
+
+$ ipconfig getifaddr en1     (this machine's LAN address)
+192.168.1.97
+
+$ tailscale ip -4            (this machine's tailnet address)
+100.65.127.62
+
+$ curl --max-time 3 http://192.168.1.97:3000/healthz
+curl: (7) Failed to connect to 192.168.1.97 port 3000 after 1 ms: Couldn't connect to server
+http 000 after 0.001356s
+curl exit=7
+
+$ curl --max-time 3 http://100.65.127.62:3000/healthz    (tailnet address, direct on the port)
+curl: (7) Failed to connect to 100.65.127.62 port 3000 after 1 ms: Couldn't connect to server
+http 000 after 0.001093s
+curl exit=7
+
+$ grep -n '127.0.0.1:3000' compose.yaml
+60:      - "127.0.0.1:3000:3000"
+69:        - "fetch('http://127.0.0.1:3000/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+
+$ docker compose port app 3000
+127.0.0.1:3000

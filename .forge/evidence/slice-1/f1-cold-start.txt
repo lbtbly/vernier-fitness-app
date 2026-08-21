@@ -1,0 +1,46 @@
+# F1. Cold start on this Apple Silicon host, both images linux/arm64, healthy inside 120 s.
+
+$ docker compose down && docker volume rm vernier_pgdata vernier_storage
+ Container vernier-db-1 Removed 
+ Network vernier_default Removing 
+ Network vernier_default Removed 
+vernier_pgdata
+vernier_storage
+
+$ docker volume ls | grep vernier
+(none)
+
+$ time docker compose up -d --build
+ Container vernier-app-1 Creating 
+ Container vernier-app-1 Created 
+ Container vernier-db-1 Starting 
+ Container vernier-db-1 Started 
+ Container vernier-db-1 Waiting 
+ Container vernier-db-1 Healthy 
+ Container vernier-app-1 Starting 
+ Container vernier-app-1 Started 
+ Container vernier-db-1 Healthy 
+up.sh: db and app are healthy.
+SERVICE   STATUS                    PORTS
+app       Up 5 seconds (healthy)    127.0.0.1:3000->3000/tcp
+db        Up 11 seconds (healthy)   5432/tcp
+up.sh: local http://127.0.0.1:3000
+elapsed to both healthy: 13 seconds
+
+$ docker compose ps
+NAME            IMAGE                COMMAND                  SERVICE   CREATED          STATUS                    PORTS
+vernier-app-1   vernier-app:local    "docker-entrypoint.s…"   app       11 seconds ago   Up 5 seconds (healthy)    127.0.0.1:3000->3000/tcp
+vernier-db-1    postgres:18-alpine   "docker-entrypoint.s…"   db        11 seconds ago   Up 11 seconds (healthy)   5432/tcp
+
+$ docker image inspect --format '{{.Os}}/{{.Architecture}}' <each image>
+vernier-app:local    linux/arm64
+postgres:18-alpine   linux/arm64
+
+$ uname -sm
+Darwin arm64
+$ docker version --format '{{.Server.Version}}' ; docker compose version
+29.6.2
+Docker Compose version v5.3.1
+
+$ docker compose exec -T app node -v
+v24.19.0

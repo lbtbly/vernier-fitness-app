@@ -1,0 +1,155 @@
+# Shell. Five tab routes plus sign-in, at three viewports, with no horizontal scroll.
+
+$ node scripts/pwa-check.mjs layout
+393px /            viewport=393 scrollWidth=393 no horizontal scroll
+393px /health      viewport=393 scrollWidth=393 no horizontal scroll
+393px /train       viewport=393 scrollWidth=393 no horizontal scroll
+393px /eat         viewport=393 scrollWidth=393 no horizontal scroll
+393px /settings    viewport=393 scrollWidth=393 no horizontal scroll
+393px /sign-in     viewport=393 scrollWidth=393 no horizontal scroll
+393px /offline     viewport=393 scrollWidth=393 no horizontal scroll
+768px /            viewport=768 scrollWidth=768 no horizontal scroll
+768px /health      viewport=768 scrollWidth=768 no horizontal scroll
+768px /train       viewport=768 scrollWidth=768 no horizontal scroll
+768px /eat         viewport=768 scrollWidth=768 no horizontal scroll
+768px /settings    viewport=768 scrollWidth=768 no horizontal scroll
+768px /sign-in     viewport=768 scrollWidth=768 no horizontal scroll
+768px /offline     viewport=768 scrollWidth=768 no horizontal scroll
+1280px /            viewport=1280 scrollWidth=1280 no horizontal scroll
+1280px /health      viewport=1280 scrollWidth=1280 no horizontal scroll
+1280px /train       viewport=1280 scrollWidth=1280 no horizontal scroll
+1280px /eat         viewport=1280 scrollWidth=1280 no horizontal scroll
+1280px /settings    viewport=1280 scrollWidth=1280 no horizontal scroll
+1280px /sign-in     viewport=1280 scrollWidth=1280 no horizontal scroll
+1280px /offline     viewport=1280 scrollWidth=1280 no horizontal scroll
+
+$ for each route: curl -o /dev/null -w '%{http_code}' and the rendered title
+/                                200  h1=Today
+/health                          200  h1=Health
+/train                           200  h1=Train
+/eat                             200  h1=Eat
+/settings                        200  h1=Settings
+/sign-in                         200  h1=Sign in
+/offline                         200  h1=This phone cannot reach the Mac mini
+/a-route-that-does-not-exist     404  h1=No such page
+
+$ the tokens, copied verbatim from DESIGN.md section 3, both themes, dark first
+/*
+ * Vernier tokens. Section 3 of .forge/DESIGN.md, copied verbatim. :root holds
+ * the scales, the two theme blocks hold colour, and the attribute selectors
+ * outrank :root, so the order below is load bearing. Do not reorder.
+ */
+
+:root{
+  /* type */
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --t-display: 30px; --t-display-lh: 33px; --t-display-ls: -.02em;  /* screen title, hero metric */
+  --t-metric:  34px; --t-metric-lh:  36px; --t-metric-ls:  -.02em;  /* the number that is the point */
+  --t-title:   20px; --t-title-lh:   25px; --t-title-ls:  -.01em;
+  --t-head:    17px; --t-head-lh:    22px;
+  --t-body:    15px; --t-body-lh:    20px;
+  --t-sub:     13px; --t-sub-lh:     19px;
+  --t-note:    12px; --t-note-lh:    18px;
+  --t-label:   11px; --t-label-lh:   14px; --t-label-ls: .06em;     /* uppercase section labels */
+  --t-timer:   64px; --t-timer-ls:  -.03em;                          /* session player only */
+  /* every numeral that is data: font-variant-numeric: tabular-nums */
+
+  /* spacing, 4 based */
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:20px;
+  --s6:24px; --s7:32px; --s8:40px; --s9:48px;
+
+  /* radius */
+  --r-sm:8px; --r-md:12px; --r-lg:16px; --r-xl:22px; --r-full:999px;
+
+  /* targets and motion */
+  --touch:44px;
+  --dur-fast:120ms; --dur:200ms; --dur-slow:900ms;
+  --ease: cubic-bezier(.2,.6,.2,1);
+}
+
+html[data-theme=dark]{
+  color-scheme: dark;
+  --bg:#0A0A0B; --surface:#141416; --surface-2:#1C1C1F; --surface-3:#232327;
+  --line:#2A2A2E; --line-2:#3A3A40;
+  --text:#F5F5F7; --text-2:#A1A1A8; --text-3:#7C7C85;
+  --accent:#5AA9FF; --accent-ink:#08080A; --accent-soft:rgba(90,169,255,.14);
+  --good:#4FD08A; --good-soft:rgba(79,208,138,.13);
+  --warn:#E9B44C; --warn-soft:rgba(233,180,76,.13);
+  --alert:#F07A6A; --alert-soft:rgba(240,122,106,.13);
+  --chart-daily:#6E6E78;      /* daily reading, deliberately secondary */
+  --chart-avg:#E8E8EC;        /* 7-day moving average, the loudest line */
+  --chart-goal:#7C8BA1;       /* trajectory to 76.0 kg, dashed 5 5 */
+  --chart-band:rgba(124,139,161,.10);
+  --chart-grid:#232327;
+  --focus:#8FC4FF;
+}
+
+html[data-theme=light]{
+  color-scheme: light;
+  --bg:#F2F2F5; --surface:#FFFFFF; --surface-2:#EDEDF1; --surface-3:#E3E3E9;
+  --line:#DCDCE2; --line-2:#C6C6CE;
+  --text:#101013; --text-2:#4A4A52; --text-3:#6B6B73;
+  --accent:#0A6CD0; --accent-ink:#FFFFFF; --accent-soft:rgba(10,108,208,.10);
+  --good:#157F4E; --good-soft:rgba(21,127,78,.10);
+  --warn:#8A5A00; --warn-soft:rgba(138,90,0,.10);
+  --alert:#B3261E; --alert-soft:rgba(179,38,30,.10);
+  --chart-daily:#9A9AA2;
+  --chart-avg:#101013;
+  --chart-goal:#5B6B80;
+  --chart-band:rgba(91,107,128,.10);
+  --chart-grid:#E3E3E9;
+  --focus:#0A4C93;
+}
+
+/* ---------- shell ---------- */
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+html,body{background:var(--bg);color:var(--text)}
+
+body{
+
+$ the safe-area rule from .forge/research/ios-pwa.md section 1
+ * Tab bar geometry, from .forge/research/ios-pwa.md section 1. The bar is
+ * 49 px of content plus the home indicator, which is the 83 px DESIGN.md
+ * measures on an iPhone and 57 px on a machine with no indicator.
+ */
+:root{
+  --tabbar-h:49px;
+  --tabbar-pad:max(8px, env(safe-area-inset-bottom));
+  --gutter:16px;
+}
+
+.app{
+  min-height:100dvh;
+  display:flex;
+  flex-direction:column;
+}
+
+.app-scroll{
+  flex:1;
+  padding-top:max(var(--s2), env(safe-area-inset-top));
+  padding-bottom:calc(var(--tabbar-h) + var(--tabbar-pad) + var(--s5));
+  padding-left:max(var(--gutter), env(safe-area-inset-left));
+  padding-right:max(var(--gutter), env(safe-area-inset-right));
+  max-width:720px;
+  width:100%;
+  margin:0 auto;
+}
+
+.tabbar{
+  position:fixed;
+  inset:auto 0 0 0;
+  height:calc(var(--tabbar-h) + var(--tabbar-pad));
+  padding:0 6px var(--tabbar-pad);
+  padding-left:max(6px, env(safe-area-inset-left));
+  padding-right:max(6px, env(safe-area-inset-right));
+  display:flex;
+  background:var(--surface);
+  border-top:1px solid var(--line);
+  will-change:transform;
+  z-index:20;
+}
+
+.tabbar a{

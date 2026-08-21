@@ -1,0 +1,30 @@
+# F6. Migrations apply on first boot and apply zero on the second, count printed both times.
+
+$ docker compose logs app | grep -E 'Next.js|migrations:'   (first boot, cold database)
+app-1  | ▲ Next.js 16.3.2
+app-1  | [vernier] migrations: 1 applied, 1 total, in 35 ms
+
+$ docker compose restart app
+ Container vernier-app-1 Restarting 
+ Container vernier-app-1 Started 
+
+$ docker compose logs app | grep 'migrations:'   (both boots)
+app-1  | [vernier] migrations: 1 applied, 1 total, in 35 ms
+app-1  | [vernier] migrations: 0 applied, 1 total, in 24 ms
+
+$ docker compose exec -T db psql -U health -d health -c '\dt' and the ledger
+           List of tables
+ Schema |   Name   | Type  | Owner  
+--------+----------+-------+--------
+ public | app_meta | table | health
+(1 row)
+
+ id |                               hash                               |  created_at   
+----+------------------------------------------------------------------+---------------
+  1 | 9089dbeca973057accde6a02a46663807ad05594a0f7bb9b31563583b3a13c64 | 1787346613064
+(1 row)
+
+
+$ ls drizzle
+0000_app_meta.sql
+meta
