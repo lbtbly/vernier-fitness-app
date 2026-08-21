@@ -54,3 +54,5 @@ Triaged by /doc-health. Checked = handled.
 - [ ] 2026-08-22 🆕 Credential referenced → document access in ACCESS.md? — `src/components/SignInForm.tsx`
 - [ ] 2026-08-22 🆕 Credential referenced → document access in ACCESS.md? — `scripts/recovery.sh`
 - [ ] 2026-08-22 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `scripts/recovery.sh`
+- [ ] 2026-08-22 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `tests/e2e/software-authenticator.ts`
+- [ ] 2026-08-22 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `tests/e2e/gate.spec.ts`

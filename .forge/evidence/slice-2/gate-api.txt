@@ -1,0 +1,89 @@
+password used for this run: 28 characters, sha256 582d312e155d, never written to disk
+
+============================================================================
+F8. Owner creation succeeds exactly once
+============================================================================
+owner rows before: 0
+GET /sign-in -> 200, anti-forgery cookie issued: true
+POST /api/auth/bootstrap -> 201 {"ownerId":"687a9fa8-0423-4e32-b2ad-deea430a9b6b","displayName":"Owner","created":true}
+owner rows after the first: 1
+POST /api/auth/bootstrap again -> 409 {"error":"The owner account already exists.","detail":"Vernier holds exactly one account and it is created once. Sign in with your passkey or the backup password."}
+owner rows after the second: 1
+
+============================================================================
+F10. Argon2id parameters, read off the row
+============================================================================
+algorithm=argon2id memory=19456 passes=2 parallelism=1 tag_length=32 nonce_bytes=16 tag_bytes=32
+
+the row as psql prints it, tag and nonce truncated to 24 characters here only:
+687a9fa8-0423-4e32-b2ad-deea430a9b6b | Owner | argon2id | m=19456 t=2 p=1 | nonce VWShFeGadcR/WRUwsyLljw==... | tag eJLVEea30nuGrVAuB8mbgAfg...
+
+============================================================================
+F11. Session cookie attributes and rotation
+============================================================================
+Set-Cookie on the first sign-in (owner creation):
+  vernier_session=sYYfXp51uFks2O7DQVYX0EZ91ZtJ16f40UKGruyBVhc; Path=/; Expires=Sat, 22 Aug 2026 07:20:00 GMT; Max-Age=28800; Secure; HttpOnly; SameSite=strict
+POST /api/auth/sign-out -> 200
+POST /api/auth/password -> 200 {"signedIn":true,"method":"password"}
+Set-Cookie on the second sign-in (backup password):
+  vernier_session=h0yB0GaYwjuFftgDgzSAgjFhY9UurwEoeRww7OhEJII; Path=/; Expires=Sat, 22 Aug 2026 07:20:00 GMT; Max-Age=28800; Secure; HttpOnly; SameSite=strict
+
+the two values differ: true
+first value sha256 ccb298deaa3683e0, second 4ba8dee7f72949f3
+the first session row is gone after sign-out: true (one live session, the current one)
+
+============================================================================
+F12. Anti-forgery on a state-changing request
+============================================================================
+integration_credential rows before: 0
+auth_attempt rows before: 4
+POST /api/settings/integrations with no anti-forgery header -> 403 {"error":"Anti-forgery check failed.","detail":"This request carried no x-vernier-csrf header. Nothing was written."}
+integration_credential rows after the rejected request: 0
+auth_attempt rows after the rejected request: 4
+POST with a token that is not this browser's -> 403
+POST with the anti-forgery header -> 201
+integration_credential rows after the accepted request: 1
+
+============================================================================
+F15. The stored credential is ciphertext, and the screen never renders it
+============================================================================
+the raw row, straight out of psql:
+withings | state=connected | scope=user.metrics | ciphertext=g3tiY6aBARIEo9GvdBb2e8qe6z95vR7JGRCz9Tm+Ug== | nonce=pjR8epj5UIotPO+I | tag=8zcmENPHsCbpbIQWXzCVhg== | key=sHsmZk5IO-m18Rsy | last_sync=never
+
+GET /settings -> 23243 bytes of HTML
+the credential value appears in it: false
+the ciphertext appears in it: false
+  renders "not connected": true
+  renders "connected": true
+  renders "user.metrics": true
+  renders "No successful sync yet": true
+POST check -> 200, readable under the running key: true
+the check response carries the value: false
+
+============================================================================
+F13. Six failures inside 60 seconds, then a seventh with the right password
+============================================================================
+auth_attempt rows before the seven: 4
+  attempt 1, wrong password -> 401 That password does not match. 4 attempts left, then a 60 second pause.
+  attempt 2, wrong password -> 401 That password does not match. 3 attempts left, then a 60 second pause.
+  attempt 3, wrong password -> 401 That password does not match. 2 attempts left, then a 60 second pause.
+  attempt 4, wrong password -> 401 That password does not match. 1 attempt left, then a 60 second pause.
+  attempt 5, wrong password -> 401 That password does not match. Sign-in is paused for 60 seconds.
+  attempt 6, wrong password -> 429 Too many attempts. Five failures inside 60 seconds pauses sign-in. Wait 60 seconds and try again. A correct password will not open it any sooner.
+  attempt 7, correct password -> 429 Too many attempts. Five failures inside 60 seconds pauses sign-in. Wait 60 seconds and try again. A correct password will not open it any sooner.
+auth_attempt rows after the seven: 11, difference 7
+the seven rows:
+2026-08-22 01:20:01.748226+02 | password | rate-limited | refused by the rate limiter, 60 seconds left in the window | 100.65.127.62
+2026-08-22 01:20:01.740949+02 | password | rate-limited | refused by the rate limiter, 60 seconds left in the window | 100.65.127.62
+2026-08-22 01:20:01.732521+02 | password | failure | the backup password did not match | 100.65.127.62
+2026-08-22 01:20:01.706686+02 | password | failure | the backup password did not match | 100.65.127.62
+2026-08-22 01:20:01.682737+02 | password | failure | the backup password did not match | 100.65.127.62
+2026-08-22 01:20:01.659228+02 | password | failure | the backup password did not match | 100.65.127.62
+2026-08-22 01:20:01.630433+02 | password | failure | the backup password did not match | 100.65.127.62
+
+============================================================================
+The lockout, cleared from the host shell
+============================================================================
+recovery: the lockout window is clear. 5 failure(s) inside it are now ignored and still on the record.
+POST /api/auth/password with the correct password after unlock -> 200
+audit rows now: 13

@@ -1,4 +1,3 @@
-import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 import { cookies } from 'next/headers';
 import { deleteSession, insertSession, readSessionRow, touchSession, type SessionRow } from '@/db/auth';
 import {
@@ -8,6 +7,7 @@ import {
   SESSION_COOKIE,
   SESSION_MAX_AGE_SECONDS,
 } from '@/lib/cookie-names';
+import { hashSessionToken, mintToken, tokensMatch } from '@/lib/tokens';
 
 /**
  * The session cookie.
@@ -22,12 +22,9 @@ import {
  * table is therefore not a pile of usable sessions.
  */
 export { CSRF_COOKIE, CSRF_HEADER, CSRF_REQUEST_HEADER, SESSION_COOKIE, SESSION_MAX_AGE_SECONDS };
+export { hashSessionToken, tokensMatch };
 
 export type SignInMethod = 'password' | 'passkey' | 'recovery' | 'bootstrap';
-
-export function hashSessionToken(token: string): string {
-  return createHash('sha256').update(token).digest('base64url');
-}
 
 const COOKIE_BASE = {
   httpOnly: true,
@@ -49,8 +46,8 @@ export async function startSession(
   const previous = jar.get(SESSION_COOKIE)?.value;
   if (previous) await deleteSession(hashSessionToken(previous));
 
-  const token = randomBytes(32).toString('base64url');
-  const csrfToken = randomBytes(32).toString('base64url');
+  const token = mintToken();
+  const csrfToken = mintToken();
   await insertSession({
     id: hashSessionToken(token),
     ownerId,
@@ -89,14 +86,3 @@ export async function readSessionAndTouch(): Promise<SessionRow | null> {
   return row;
 }
 
-/**
- * Constant time, and length safe. `timingSafeEqual` throws on a length
- * mismatch, which would leak the length through an exception.
- */
-export function tokensMatch(a: string | undefined | null, b: string | undefined | null): boolean {
-  if (!a || !b) return false;
-  const left = Buffer.from(a, 'utf8');
-  const right = Buffer.from(b, 'utf8');
-  if (left.length !== right.length) return false;
-  return timingSafeEqual(left, right);
-}
