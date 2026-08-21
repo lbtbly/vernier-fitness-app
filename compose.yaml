@@ -1,0 +1,81 @@
+# Vernier on this Mac mini. Two services, two named volumes, one published port
+# bound to loopback.
+#
+# Configuration is interpolated from the environment file Compose reads out of
+# this directory on its own. There is no --env-file flag anywhere in the
+# scripts, and no credential value is written here.
+
+name: vernier
+
+services:
+  db:
+    image: postgres:18-alpine
+    platform: linux/arm64
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      TZ: ${TZ}
+      # Deterministic initdb, so a restore never depends on the host locale.
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    # No published port. Postgres is reachable on the compose network and
+    # nowhere else, not even on loopback.
+    volumes:
+      # Postgres 18 images store data in a major-version subdirectory and
+      # refuse to boot with the mount one level down. One mount at
+      # /var/lib/postgresql, which is also what pg_upgrade --link needs.
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\" -h 127.0.0.1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: vernier-app:local
+    platform: linux/arm64
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Identity and origin. The sign-in page renders these on every request.
+      APP_URL: ${APP_URL}
+      APP_NAME: ${APP_NAME:-Vernier}
+      WEBAUTHN_RP_ID: ${WEBAUTHN_RP_ID}
+      WEBAUTHN_RP_NAME: ${WEBAUTHN_RP_NAME}
+      TZ: ${TZ}
+      # The connection string is assembled here so the app never needs to know
+      # how the parts are stored.
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      MASTER_KEY: ${MASTER_KEY}
+    ports:
+      # 127.0.0.1 only. Tailscale Serve is the network barrier; the LAN address
+      # must refuse the connection, which is F3.
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - storage:/app/storage
+    healthcheck:
+      # node:24-slim carries no curl. Node's own fetch is always there.
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+volumes:
+  # Named explicitly. Postgres data never lives in the image, and down.sh never
+  # carries -v.
+  pgdata:
+    name: vernier_pgdata
+  storage:
+    name: vernier_storage

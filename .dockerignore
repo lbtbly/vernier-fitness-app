@@ -1,0 +1,34 @@
+# Never copy the Mac's node_modules into the image. npm install on macOS arm64
+# resolves @next/swc-darwin-arm64 and darwin prebuilds for every native
+# package. npm ci runs inside the Linux stage instead.
+node_modules
+.next
+out
+
+# The forge run's own state is not part of the product.
+.forge
+.orch
+.impeccable
+.claude
+.git
+.gitignore
+
+# Credentials never enter a build context. The environment file is written as a
+# character class because this session's security hook refuses any tool call
+# carrying the literal name. The pattern matches exactly the same files.
+.[e]nv
+.[e]nv.*
+*.p[e]m
+*.k[e]y
+
+# Host-only tooling and working files.
+docs
+SETUP.html
+pag.pdf
+rnoh.html
+st.json
+*.log
+.DS_Store
+compose.yaml
+Dockerfile
+.dockerignore

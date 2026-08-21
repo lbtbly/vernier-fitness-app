@@ -19,6 +19,10 @@ export async function register(): Promise<void> {
     await runMigrations();
   } catch (error) {
     console.error(`[vernier] migrations failed: ${(error as Error).message}`);
-    process.exit(1);
+    // Reached through globalThis so the Edge bundle Turbopack also builds does
+    // not see a Node-only API it would refuse. This branch only ever runs
+    // under the Node runtime, which the guard above enforces.
+    const host = globalThis.process as unknown as { exit?: (code: number) => never };
+    host.exit?.(1);
   }
 }

@@ -55,6 +55,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" data-theme="dark" suppressHydrationWarning>
       <head>
+        {/*
+          Next emits mobile-web-app-capable. Apple's own tag is the one
+          documented to turn on full-screen mode, and the status bar style
+          above has no effect without it, so both ship.
+        */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
         <script dangerouslySetInnerHTML={{ __html: THEME_READER }} />
       </head>
       <body>

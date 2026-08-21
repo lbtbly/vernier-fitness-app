@@ -36,7 +36,9 @@ export function getConfig(): AppConfig {
     throw new Error(`APP_URL is not a URL: ${appUrl}. Expected something like https://host.example.ts.net.`);
   }
   return {
-    appName: required('APP_NAME'),
+    // The product name is fixed by DESIGN.md, so an environment file written
+    // before the naming lands still boots. A value in the file always wins.
+    appName: process.env.APP_NAME?.trim() || 'Vernier',
     appUrl,
     originHost,
     rpId: required('WEBAUTHN_RP_ID'),

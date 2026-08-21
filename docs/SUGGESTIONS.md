@@ -36,3 +36,6 @@ Triaged by /doc-health. Checked = handled.
 - [ ] 2026-08-21 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `.forge/GREENLIGHT.md`
 - [ ] 2026-08-21 🆕 Credential referenced → document access in ACCESS.md? — `SETUP.html`
 - [ ] 2026-08-21 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `SETUP.html`
+- [ ] 2026-08-21 🆕 Credential referenced → document access in ACCESS.md? — `.env.example`
+- [ ] 2026-08-21 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `.env.example`
+- [ ] 2026-08-21 🆕 Credential referenced → document access in ACCESS.md? — `compose.yaml`
