@@ -169,7 +169,7 @@ export function OperatorPanel(props: Props) {
         </p>
 
         <label className="formfield" style={{ marginTop: 'var(--s4)' }}>
-          <span className="lbl">{strings.settings.integrationsTitle}</span>
+          <span className="lbl">{strings.settings.chooseIntegration}</span>
           <select className="input" value={provider} onChange={(event) => setProvider(event.target.value)}>
             {integrations.map((integration) => (
               <option key={integration.provider} value={integration.provider}>

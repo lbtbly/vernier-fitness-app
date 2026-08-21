@@ -1,0 +1,29 @@
+leak scan: INGEST_TOKEN is not in the app container's environment, so there is nothing of it to leak
+leak scan: WITHINGS_CLIENT_SECRET is not in the app container's environment, so there is nothing of it to leak
+leak scan: ANTHROPIC_API_KEY is not in the app container's environment, so there is nothing of it to leak
+recovery: one use, valid for 5 minutes. Open it on the device you want signed in.
+leak scan: 19 responses recorded from https://lamberts-mac-mini.tailda76d6.ts.net
+  every rendered document and API response body from this run withings credential          sha256 0883146112ca  0 hit(s)
+  every rendered document and API response body from this run apple_health credential      sha256 507977a98c80  0 hit(s)
+  every rendered document and API response body from this run google_calendar credential   sha256 7f6d4b53ef8e  0 hit(s)
+  every rendered document and API response body from this run mail_relay credential        sha256 c5e40c2752cb  0 hit(s)
+  every rendered document and API response body from this run the master key               sha256 d694fd7bc74e  0 hit(s)
+  the app container log                                      withings credential          sha256 0883146112ca  0 hit(s)
+  the app container log                                      apple_health credential      sha256 507977a98c80  0 hit(s)
+  the app container log                                      google_calendar credential   sha256 7f6d4b53ef8e  0 hit(s)
+  the app container log                                      mail_relay credential        sha256 c5e40c2752cb  0 hit(s)
+  the app container log                                      the master key               sha256 d694fd7bc74e  0 hit(s)
+  the database log                                           withings credential          sha256 0883146112ca  0 hit(s)
+  the database log                                           apple_health credential      sha256 507977a98c80  0 hit(s)
+  the database log                                           google_calendar credential   sha256 7f6d4b53ef8e  0 hit(s)
+  the database log                                           mail_relay credential        sha256 c5e40c2752cb  0 hit(s)
+  the database log                                           the master key               sha256 d694fd7bc74e  0 hit(s)
+  the git working tree, tracked and untracked                withings credential          sha256 0883146112ca  0 hit(s)
+  the git working tree, tracked and untracked                apple_health credential      sha256 507977a98c80  0 hit(s)
+  the git working tree, tracked and untracked                google_calendar credential   sha256 7f6d4b53ef8e  0 hit(s)
+  the git working tree, tracked and untracked                mail_relay credential        sha256 c5e40c2752cb  0 hit(s)
+  the git working tree, tracked and untracked                the master key               sha256 d694fd7bc74e  0 hit(s)
+
+  the master key is on disk in one file that git ignores, which is where it is supposed to live
+
+leak scan: 5 values, 4 corpora, 0 hit(s). The seeded credentials were disconnected and the session ended.

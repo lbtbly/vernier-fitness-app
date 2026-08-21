@@ -26,6 +26,13 @@ test.describe('the passkey round trip', () => {
   test('registers, then authenticates twice on a counter that never moves', async ({ browser }) => {
     test.skip(Number(query('select count(*) from owner')) === 0, 'no owner account on this installation yet');
 
+    // What the diagnostics signal said before this test touched anything. The
+    // signal is sticky true by design, and this test is not the owner's iPhone,
+    // so it puts the row back the way it found it on the way out.
+    const signalBefore = query(
+      "select coalesce((select observed::text from device_observation where signal = 'passkey_registered'), 'absent')",
+    );
+
     const seed = await makeAuthenticatorSeed();
     const context = await browser.newContext({ viewport: { width: 393, height: 852 } });
     await context.addInitScript(authenticatorInitScript(seed));
@@ -113,6 +120,10 @@ test.describe('the passkey round trip', () => {
         console.log(recovery('forget-passkey', seed.credentialId));
       } catch {
         console.log(`no credential ${seed.credentialId} to remove, the ceremony did not get that far`);
+      }
+      if (signalBefore === 'absent') {
+        query("delete from device_observation where signal = 'passkey_registered'");
+        console.log('device_observation: passkey_registered put back to absent, which is what it was');
       }
       await context.close();
     }

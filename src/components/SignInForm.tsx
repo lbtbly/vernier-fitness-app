@@ -202,7 +202,7 @@ export function SignInForm(props: Props) {
     <div className="app gate">
       <main className="app-scroll">
         {creating ? (
-          <div style={{ padding: '28px 0 10px' }}>
+          <div className="create" style={{ padding: '28px 0 10px' }}>
             <div className="mark">
               <KeyIcon />
             </div>

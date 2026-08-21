@@ -275,6 +275,8 @@ body{
   transition:opacity var(--dur-fast) var(--ease);
 }
 .btn:active{opacity:.7}
+/* A glyph inside a button is 20 px. Without this it takes the whole button. */
+.btn svg{width:20px;height:20px;flex:none}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
 .btn.quiet{background:transparent}
 .btn.block{width:100%}
@@ -321,6 +323,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,[tabindex]:focus-visibl
 .gate .btn{min-height:52px;font-size:16px}
 .gate .fill{flex:1;display:flex;flex-direction:column;justify-content:center;padding-bottom:var(--s8)}
 .gate h1{font-size:var(--t-display);line-height:var(--t-display-lh);letter-spacing:var(--t-display-ls);font-weight:700;margin-bottom:6px}
+/* First run carries a longer title, and the wireframe sets it two steps down. */
+.gate .create h1{font-size:26px;line-height:29px}
 .gate .lead{margin-bottom:var(--s1)}
 .gate .stacked > * + *{margin-top:10px}
 

@@ -1,0 +1,47 @@
+
+> vernier@0.1.0 test:unit
+> vitest run
+
+
+ RUN  v4.1.11 /Users/lambertbouley/Claude/lbtbly-fitness-app
+
+ ✓ tests/unit/routes.test.ts > the route table > opens exactly the five things an unauthenticated visitor may have 1ms
+ ✓ tests/unit/routes.test.ts > the route table > calls the sign-in endpoints the gate, because they cannot need a session 0ms
+ ✓ tests/unit/routes.test.ts > the route table > protects everything else, including a route nobody has written yet 1ms
+ ✓ tests/unit/routes.test.ts > the route table > is not fooled by a trailing slash 0ms
+ ✓ tests/unit/routes.test.ts > the route table > answers an API path with a status and a document with a redirect 0ms
+ ✓ tests/unit/routes.test.ts > the route table > leaves the liveness, offline, worker and diagnostics responses cookie free 0ms
+ ✓ tests/unit/tokens.test.ts > session and anti-forgery tokens > mints 32 bytes and never the same value twice 2ms
+ ✓ tests/unit/tokens.test.ts > session and anti-forgery tokens > stores a hash, not the token 1ms
+ ✓ tests/unit/tokens.test.ts > session and anti-forgery tokens > matches only an identical token, and survives a length mismatch 0ms
+ ✓ tests/unit/rate-limit.test.ts > the sign-in rate limiter > lets the first five failures through and counts them down 4ms
+ ✓ tests/unit/rate-limit.test.ts > the sign-in rate limiter > locks on the fifth failure inside the window 0ms
+ ✓ tests/unit/rate-limit.test.ts > the sign-in rate limiter > refuses a correct password while the window is open, which is the point 0ms
+ ✓ tests/unit/rate-limit.test.ts > the sign-in rate limiter > opens again exactly when the oldest failure that still counts falls out 0ms
+ ✓ tests/unit/rate-limit.test.ts > the sign-in rate limiter > never returns a pause longer than the window 0ms
+ ✓ tests/unit/master-key.test.ts > the master key > refuses to boot when it is absent, with a named error 2ms
+ ✓ tests/unit/master-key.test.ts > the master key > refuses a key that is not 32 bytes, naming what it read 0ms
+ ✓ tests/unit/master-key.test.ts > the master key > passes its own encrypt and decrypt self test at boot 1ms
+ ✓ tests/unit/master-key.test.ts > the master key > round trips a credential 0ms
+ ✓ tests/unit/master-key.test.ts > the master key > stores no plaintext anywhere in the sealed record 1ms
+ ✓ tests/unit/master-key.test.ts > the master key > fails loudly under a different key, and never returns an empty value 0ms
+ ✓ tests/unit/master-key.test.ts > the master key > refuses a ciphertext moved from one integration row into another 0ms
+ ✓ tests/unit/master-key.test.ts > the master key > refuses a tampered ciphertext rather than returning something 0ms
+ ✓ tests/unit/master-key.test.ts > the master key > fingerprints two keys differently, which is how a mismatch is named 0ms
+ ✓ tests/unit/webauthn-counter.test.ts > the signature counter > accepts a synced passkey reporting zero, over and over 1ms
+ ✓ tests/unit/webauthn-counter.test.ts > the signature counter > stores what the authenticator reported and never synthesises an increment 0ms
+ ✓ tests/unit/webauthn-counter.test.ts > the signature counter > still refuses a replay from an authenticator that does count 0ms
+ ✓ tests/unit/webauthn-counter.test.ts > the signature counter > refuses a counter that goes back to zero after counting 0ms
+ ✓ tests/unit/webauthn-counter.test.ts > the signature counter > accepts the first assertion from a counting authenticator 0ms
+ ✓ tests/unit/password.test.ts > the backup password > hashes with Argon2id at the parameters the rubric names 29ms
+ ✓ tests/unit/password.test.ts > the backup password > gives every owner a different nonce, so two identical passwords do not share a tag 43ms
+ ✓ tests/unit/password.test.ts > the backup password > verifies the right password and refuses the wrong one 81ms
+ ✓ tests/unit/password.test.ts > the backup password > reads its parameters from the row and not from the constants 52ms
+ ✓ tests/unit/password.test.ts > the backup password > refuses an algorithm it does not verify, rather than returning false quietly 24ms
+ ✓ tests/unit/password.test.ts > the backup password > states every reason a password is refused 1ms
+
+ Test Files  6 passed (6)
+      Tests  34 passed (34)
+   Start at  01:44:28
+   Duration  422ms (transform 149ms, setup 0ms, import 374ms, tests 253ms, environment 1ms)
+

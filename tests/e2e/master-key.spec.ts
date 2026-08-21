@@ -1,7 +1,6 @@
-import { execFileSync } from 'node:child_process';
 import { expect, test } from '@playwright/test';
 import { apiClient } from './api-client';
-import { projectRoot } from './host';
+import { scratchQuery, scratchUrl, testStack, waitForScratch } from './host';
 
 /**
  * F17, on the scratch instance, because both halves of it require breaking the
@@ -13,44 +12,7 @@ import { projectRoot } from './host';
  * starts lying.
  */
 
-const SCRATCH = process.env.SCRATCH_URL ?? 'http://127.0.0.1:3101';
-
-function testStack(...args: string[]): string {
-  return execFileSync('bash', ['scripts/test-stack.sh', ...args], {
-    cwd: projectRoot,
-    encoding: 'utf8',
-  }).trim();
-}
-
-/** The scratch instance answers on a port that was just republished, so ask until it does. */
-async function waitForScratch(): Promise<void> {
-  for (let attempt = 0; attempt < 60; attempt += 1) {
-    try {
-      const response = await fetch(`${SCRATCH}/healthz`);
-      if (response.ok) return;
-    } catch {
-      // Not listening yet.
-    }
-    await new Promise((resolve) => setTimeout(resolve, 500));
-  }
-  throw new Error(`the scratch instance never answered on ${SCRATCH}`);
-}
-
-function scratchQuery(statement: string): string {
-  return execFileSync(
-    'docker',
-    [
-      'compose',
-      'exec',
-      '-T',
-      'db',
-      'sh',
-      '-c',
-      `psql -U "$POSTGRES_USER" -d vernier_scratch -At -c ${JSON.stringify(statement.replace(/\s+/g, ' ').trim())}`,
-    ],
-    { cwd: projectRoot, encoding: 'utf8' },
-  ).trim();
-}
+const SCRATCH = scratchUrl;
 
 test.describe('the master key', () => {
   test.describe.configure({ mode: 'serial', timeout: 180_000 });

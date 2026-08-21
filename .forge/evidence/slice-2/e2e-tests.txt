@@ -1,0 +1,126 @@
+
+> vernier@0.1.0 test:e2e
+> playwright test
+
+
+Running 17 tests using 1 worker
+
+first attempt: 201 {"ownerId":"70b2a2a2-e74f-4e89-94b5-ef0f933a11eb","displayName":"Owner","created":true}
+second attempt: 409 {"error":"The owner account already exists.","detail":"Vernier holds exactly one account and it is created once. Sign in with your passkey or the backup password."}
+bootstrap | success | the owner account was created
+bootstrap | refused | the owner account already exists
+bootstrap | refused | the owner account already exists
+CREATE UNIQUE INDEX owner_singleton ON public.owner USING btree (singleton)
+  ✓   1 [webkit-iphone] › tests/e2e/bootstrap.spec.ts:15:3 › first run › creates the owner once and refuses the second attempt with 409 (3.2s)
+  ✓   2 [webkit-iphone] › tests/e2e/bootstrap.spec.ts:61:3 › first run › refuses a password that is too weak, and creates nothing (3.2s)
+route table against https://lamberts-mac-mini.tailda76d6.ts.net, 20 routes on disk
+
+GET  /                                            protected 307  refused  redirected to sign-in (307)
+POST /api/auth/bootstrap                          gate      403  refused  refuses an unauthenticated request
+POST /api/auth/passkey/authentication/options     gate      403  refused  refuses an unauthenticated request
+POST /api/auth/passkey/authentication/verify      gate      403  refused  refuses an unauthenticated request
+POST /api/auth/passkey/registration/options       protected 401  refused  401 with no session
+POST /api/auth/passkey/registration/verify        protected 401  refused  401 with no session
+POST /api/auth/password                           gate      403  refused  refuses an unauthenticated request
+POST /api/auth/sign-out                           protected 401  refused  401 with no session
+GET  /api/diagnostics/device                      public    200  open     answers without a session, as it must
+POST /api/diagnostics/launch                      public    400  open     answers without a session, as it must
+GET  /api/settings/integrations                   protected 401  refused  401 with no session
+POST /api/settings/integrations                   protected 401  refused  401 with no session
+GET  /eat                                         protected 307  refused  redirected to sign-in (307)
+GET  /health                                      protected 307  refused  redirected to sign-in (307)
+GET  /healthz                                     public    200  open     answers without a session, as it must
+GET  /manifest.webmanifest                        public    200  open     answers without a session, as it must
+GET  /offline                                     public    200  open     answers without a session, as it must
+GET  /settings                                    protected 307  refused  redirected to sign-in (307)
+GET  /sign-in                                     public    200  open     answers without a session, as it must
+GET  /sign-in/recover                             gate      401  refused  refuses an unauthenticated request
+GET  /train                                       protected 307  refused  redirected to sign-in (307)
+
+GET  /favicon.ico                                 shell     200  open     static shell
+GET  /icons/apple-touch-icon-180.png              shell     200  open     static shell
+GET  /icons/favicon-32.png                        shell     200  open     static shell
+GET  /icons/icon-192.png                          shell     200  open     static shell
+GET  /icons/icon-512.png                          shell     200  open     static shell
+GET  /icons/vernier-mark.svg                      shell     200  open     static shell
+GET  /sw.js                                       shell     200  open     static shell
+
+28 requests, 0 failing. Public routes answer, gate routes refuse, everything else needs a session.
+
+  ✓   3 [webkit-iphone] › tests/e2e/boundary.spec.ts:14:3 › the route table › every route answers what it should to a caller with no session (390ms)
+  ✓   4 [webkit-iphone] › tests/e2e/boundary.spec.ts:26:3 › the route table › a document redirects and an API path answers 401 (1.2s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+no anti-forgery header: 403 {"error":"Anti-forgery check failed.","detail":"This request carried no x-vernier-csrf header. Nothing was written."}
+stored row: withings | connected | user.metrics | 8Vw5sqlpb2CEGpJ2FHpOW3L9pUPAibwPJ/jRBg== | sHsmZk5IO-m18Rsy
+  ✓   5 [webkit-iphone] › tests/e2e/boundary.spec.ts:39:3 › the credential boundary › settings renders state, scope and last sync, and never the credential (2.2s)
+  ✓   6 [webkit-iphone] › tests/e2e/gate.spec.ts:35:3 › screen 01, the gate › renders passkey first and password second at three viewports (778ms)
+  ✓   7 [webkit-iphone] › tests/e2e/gate.spec.ts:66:3 › screen 01, the gate › shows the password field when the owner asks for it (347ms)
+  ✓   8 [webkit-iphone] › tests/e2e/gate.spec.ts:78:3 › screen 01, the gate › names the cause when the machine is not answering (399ms)
+  ✓   9 [webkit-iphone] › tests/e2e/gate.spec.ts:101:3 › screen 01, first run › renders the one-time owner creation at three viewports (818ms)
+stored row under the right key: vTjzqyttmFBR93y23T+4tqzIiulQ30XQC3H0Lw== | sHsmZk5IO-m18Rsy
+test-stack: ready at http://127.0.0.1:3101
+test-stack: running under a master key that did not write the stored rows
+check under the wrong key: 500 {"error":"The stored credential will not open.","detail":"MASTER_KEY does not decrypt the stored withings credential: the row was written under key sHsmZk5IO-m18Rsy and the running key is Jcd4yUxUiqCqGSYz. The key in the environment differs from the one this row was written with. Nothing is returned and nothing is overwritten. Restore the original key, or delete the row and connect the integration again."}
+  ✓  10 [webkit-iphone] › tests/e2e/master-key.spec.ts:20:3 › the master key › encrypts a credential, then refuses to open it under a different key (5.2s)
+test-stack: booting with no master key, in the foreground, so the refusal is visible
+▲ Next.js 16.3.2
+- Local:         http://localhost:3000
+- Network:       http://0.0.0.0:3000
+✓ Ready in 0ms
+✓ Running next.config took 0.6ms
+[vernier] refusing to start: MASTER_KEY is not set. Vernier will not start without it: every third-party credential in the database is encrypted with it, and starting without it would mean writing the next one in the clear. Set MASTER_KEY in the environment file at the project root to 32 random bytes in base64url and restart the stack.
+test-stack: the container exited with code 1
+test-stack: ready at http://127.0.0.1:3101
+  ✓  11 [webkit-iphone] › tests/e2e/master-key.spec.ts:79:3 › the master key › refuses to start at all when the key is absent, and creates no owner (3.2s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+after the recovery link, the browser is at https://lamberts-mac-mini.tailda76d6.ts.net/
+stored credential row: id=tTWmlVfOR-STuD7Lax5Rd2TJRGKWuAPqpGYRJ3kn_Xw public_key_bytes=77 counter=0 transports=internal,hybrid device_type=multiDevice backed_up=true aaguid=00000000-0000-0000-0000-000000000000 label=This device
+diagnostics: passkeyRegistered true, first observed 2026-08-21T23:50:17.100Z
+after sign-in 1: counter=0 last_used_at=2026-08-22 01:50:18.319+02
+after sign-in 2: counter=0 last_used_at=2026-08-22 01:50:18.832+02
+recovery: removed passkey tTWmlVfOR-STuD7Lax5Rd2TJRGKWuAPqpGYRJ3kn_Xw
+device_observation: passkey_registered put back to absent, which is what it was
+  ✓  12 [webkit-iphone] › tests/e2e/passkey.spec.ts:26:3 › the passkey round trip › registers, then authenticates twice on a counter that never moves (3.8s)
+owner rows: 1
+  id: 687a9fa8-0423-4e32-b2ad-deea430a9b6b name: Owner created: 2026-08-21T23:20:00.117Z
+  password: argon2id m=19456 t=2 p=1 tag=32 set: 2026-08-21T23:45:38.966Z
+passkeys: 0
+failed attempts inside the 60 second window: 0 of 5 allowed
+last five attempts:
+  2026-08-21T23:50:18.834Z passkey success | signed in with the passkey reporting counter 0
+  2026-08-21T23:50:18.737Z sign-out success | the passkey session was ended by the owner
+  2026-08-21T23:50:18.321Z passkey success | signed in with the passkey reporting counter 0
+  2026-08-21T23:50:18.208Z sign-out success | the recovery session was ended by the owner
+  2026-08-21T23:50:17.101Z passkey success | a passkey was registered, device type multiDevice
+  ✓  13 [webkit-iphone] › tests/e2e/recovery.spec.ts:21:3 › local recovery › reads the state of the account from the host shell (317ms)
+recovery: the backup password is set. Argon2id m=19456 t=2 p=1, 16-byte nonce, stored on the owner row.
+the owner row after the reset: argon2id m=19456 t=2 p=1 tag=32 nonce_bytes=16
+password | success | signed in with the backup password
+recovery | success | the backup password was reset from the host shell
+  ✓  14 [webkit-iphone] › tests/e2e/recovery.spec.ts:30:3 › local recovery › sets a new backup password, and it signs in on a browser holding no passkey (1.5s)
+statuses: 401, 401, 401, 401, 401, 429, 429
+  attempt 1: 4 attempts left, then a 60 second pause.
+  attempt 2: 3 attempts left, then a 60 second pause.
+  attempt 3: 2 attempts left, then a 60 second pause.
+  attempt 4: 1 attempt left, then a 60 second pause.
+  attempt 5: Sign-in is paused for 60 seconds.
+  attempt 6: Five failures inside 60 seconds pauses sign-in. Wait 60 seconds and try again. A correct password will not open it any sooner.
+  attempt 7: Five failures inside 60 seconds pauses sign-in. Wait 60 seconds and try again. A correct password will not open it any sooner.
+rate-limited | refused by the rate limiter, 60 seconds left in the window
+rate-limited | refused by the rate limiter, 60 seconds left in the window
+failure | the backup password did not match
+failure | the backup password did not match
+failure | the backup password did not match
+failure | the backup password did not match
+failure | the backup password did not match
+  ✓  15 [webkit-iphone] › tests/e2e/zz-rate-limit.spec.ts:18:3 › the rate limiter › pauses sign-in after five failures and writes one row per attempt (655ms)
+recovery: the lockout window is clear. 6 failure(s) inside it are now ignored and still on the record.
+recovery: the lockout window is clear. 7 failure(s) inside it are now ignored and still on the record.
+  ✓  16 [webkit-iphone] › tests/e2e/zz-rate-limit.spec.ts:68:3 › the rate limiter › clears from the host shell, appending a row rather than editing one (687ms)
+focus traversal: 3 stops of 3 interactive elements
+  input.input: 2px solid rgb(143, 196, 255) at 2px
+  button.btn primary block: 2px solid rgb(143, 196, 255) at 2px
+  button.btn quiet block: 2px solid rgb(143, 196, 255) at 2px
+  ✓  17 [chrome-keyboard] › tests/e2e/focus.spec.ts:32:1 › every interactive element on the gate carries a 2 px focus outline at 2 px offset (812ms)
+
+  17 passed (34.2s)

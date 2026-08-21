@@ -64,6 +64,7 @@ export const strings = {
     scopeLabel: 'Scope',
     lastSyncLabel: 'Last successful sync',
     neverSynced: 'No successful sync yet',
+    chooseIntegration: 'Which integration',
     credentialLabel: 'Credential',
     credentialHelp:
       'Paste the token or key the service issued. It is encrypted on arrival and cannot be read back from this screen, an API response or a log line.',
