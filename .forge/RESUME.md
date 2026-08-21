@@ -16,3 +16,5 @@ Notes for later sessions:
 - The session secret-guard hook blocks any Bash command whose text contains the bare word "secrets" (space-delimited), plus .env, .pem and .key paths. Write files with the Write tool, or reword. Hook false positive, not a project problem.
 - Repo is not a git repository yet. Slice 1 must run git init before scripts/commit.sh can work.
 - The scout agent has no Write tool. It returns prose; the lead persists it.
+
+checkpoint: 2026-08-21T15:46:20Z (SessionEnd)

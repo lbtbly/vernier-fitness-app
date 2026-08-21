@@ -69,3 +69,13 @@
 {"ts":"2026-08-21T15:45:59Z","sid":"unknown","kind":"subagent_fail","key":"general-purpose"}
 {"ts":"2026-08-21T15:46:00Z","sid":"unknown","kind":"subagent_fail","key":""}
 {"ts":"2026-08-21T15:46:05Z","sid":"unknown","kind":"subagent_fail","key":""}
+{"ts":"2026-08-21T15:46:08Z","sid":"main","kind":"subagent_fail","key":""}
+{"ts":"2026-08-21T15:46:08Z","sid":"main","kind":"subagent_fail","key":""}
+{"ts":"2026-08-21T15:46:09Z","sid":"main","kind":"subagent_fail","key":""}
+{"ts":"2026-08-21T15:46:09Z","sid":"main","kind":"subagent_fail","key":""}
+{"ts":"2026-08-21T15:46:11Z","sid":"main","kind":"subagent_fail","key":""}
+{"ts":"2026-08-21T15:46:15Z","sid":"main","kind":"subagent_fail","key":""}
+{"ts":"2026-08-21T15:46:15Z","sid":"main","kind":"subagent_fail","key":""}
+{"ts":"2026-08-21T15:46:16Z","sid":"main","kind":"subagent_fail","key":""}
+{"ts":"2026-08-21T15:46:18Z","sid":"main","kind":"subagent_fail","key":""}
+{"ts":"2026-08-21T15:46:20Z","sid":"main","kind":"subagent_fail","key":""}
