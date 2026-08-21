@@ -36,7 +36,9 @@ const client = new pg.default.Client({ connectionString: process.env.DATABASE_UR
 await client.connect();
 const owner = await client.query("select id, display_name, created_at, password_algorithm, password_memory, password_passes, password_parallelism, password_tag_length, password_updated_at from owner");
 const passkeys = await client.query("select id, label, device_type, backed_up, counter, last_used_at from webauthn_credential order by created_at");
-const failures = await client.query("select count(*)::int as n from auth_attempt where outcome = $1 and at > now() - interval \x2760 seconds\x27", ["failure"]);
+// The same rule the limiter applies: failures inside the window, and only
+// those since the last unlock row, so this line and the app agree.
+const failures = await client.query("select count(*)::int as n from auth_attempt where outcome = $1 and at > now() - interval \x2760 seconds\x27 and at > coalesce((select max(a.at) from auth_attempt a where a.outcome = \x27unlocked\x27), to_timestamp(0))", ["failure"]);
 const attempts = await client.query("select at, method, outcome, reason from auth_attempt order by at desc limit 5");
 console.log("owner rows:", owner.rowCount);
 for (const row of owner.rows) {

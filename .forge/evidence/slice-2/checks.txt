@@ -3,3 +3,11 @@ exit=0
 
 === FORGE_CHECKS_FULL=1 scripts/checks.sh
 exit=0
+
+=== npm run test:unit
+
+ Test Files  6 passed (6)
+      Tests  34 passed (34)
+   Start at  01:51:00
+   Duration  415ms (transform 167ms, setup 0ms, import 386ms, tests 257ms, environment 1ms)
+

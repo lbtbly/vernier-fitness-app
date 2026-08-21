@@ -1,0 +1,11 @@
+owner rows: 1
+  id: 687a9fa8-0423-4e32-b2ad-deea430a9b6b name: Owner created: 2026-08-21T23:20:00.117Z
+  password: argon2id m=19456 t=2 p=1 tag=32 set: 2026-08-21T23:51:40.835Z
+passkeys: 0
+failed attempts inside the 60 second window: 0 of 5 allowed
+last five attempts:
+  2026-08-21T23:51:42.889Z recovery unlocked | the sign-in lockout was cleared from the host shell
+  2026-08-21T23:51:42.591Z password failure | the backup password did not match
+  2026-08-21T23:51:42.213Z password success | signed in with the backup password
+  2026-08-21T23:51:40.837Z recovery success | the backup password was reset from the host shell
+  2026-08-21T23:51:14.482Z sign-out success | the recovery session was ended by the owner
