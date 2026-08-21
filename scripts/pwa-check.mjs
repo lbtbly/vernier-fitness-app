@@ -5,7 +5,9 @@
 //
 //   node scripts/pwa-check.mjs register   registration state and scope
 //   node scripts/pwa-check.mjs layout     scroll width at 393, 768 and 1280
-//   node scripts/pwa-check.mjs offline    reload with the origin unreachable
+//   node scripts/pwa-check.mjs offline [warm]  reload with the origin
+//                                         unreachable; cold by default, which
+//                                         never opens /offline while online
 //   node scripts/pwa-check.mjs shots DIR   one capture per route per viewport
 //
 // The offline run expects the app to be stopped from another shell first; it
@@ -191,12 +193,26 @@ async function main() {
       await tab.send('Emulation.setDeviceMetricsOverride', {
         width: 393, height: 852, deviceScaleFactor: 2, mobile: true,
       });
+      // Cold is the default and the real path: /offline is never opened while
+      // the network is up, so nothing about it can already be warm in this
+      // profile. `offline warm` opens it first, which must change nothing.
+      const warm = process.argv[3] === 'warm';
       await tab.navigate(`${ORIGIN}/`);
       await sleep(2500);
       const before = await tab.evaluate(REGISTRATION);
+      console.log(`run: ${warm ? 'warm, /offline opened while online' : 'cold, /offline never opened'}`);
       console.log(`worker scope: ${before.scope}`);
       console.log(`worker script: ${before.scriptURL}, state ${before.active}`);
       console.log(`precached: ${before.shellEntries.join(' ')}`);
+
+      // A route the owner really opened. Its document and the chunks it pulled
+      // both went through the worker, so both are in the cache.
+      await tab.navigate(`${ORIGIN}/train`);
+      await sleep(1500);
+      if (warm) {
+        await tab.navigate(`${ORIGIN}/offline`);
+        await sleep(1200);
+      }
 
       // The worker runs in its own target, and network conditions are set per
       // target. Setting only the page offline leaves the worker's own fetch
@@ -219,7 +235,7 @@ async function main() {
       await tab.navigate(`${ORIGIN}/train`);
       await sleep(1200);
       const cachedRoute = await tab.evaluate(READ_SCREEN);
-      console.log(`offline, precached route /train -> ${JSON.stringify(cachedRoute.heading)}`);
+      console.log(`offline, route opened while online /train -> ${JSON.stringify(cachedRoute.heading)}`);
 
       await tab.navigate(`${ORIGIN}/a-route-never-visited`);
       await sleep(1200);
@@ -227,6 +243,9 @@ async function main() {
       console.log(`offline, unvisited route -> ${JSON.stringify(fallback.heading)}`);
       console.log(`offline copy: ${fallback.text}`);
       console.log(`offline action: ${JSON.stringify(fallback.buttons)}`);
+      console.log(`offline scripts requested: ${JSON.stringify(await tab.evaluate(
+        `[...document.querySelectorAll('script[src], link[rel=stylesheet]')].map((n) => n.src || n.href)`,
+      ))}`);
       await screenshot(tab, process.env.SHOT ?? 'offline.png', 393, 852);
       console.log(`offline capture: ${process.env.SHOT ?? 'offline.png'}`);
     }

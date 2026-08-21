@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { DeviceReport } from '@/components/DeviceReport';
 import { ServiceWorker } from '@/components/ServiceWorker';
 import { getConfig } from '@/lib/config';
 import './globals.css';
@@ -63,6 +64,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         {children}
         <ServiceWorker />
+        <DeviceReport />
       </body>
     </html>
   );

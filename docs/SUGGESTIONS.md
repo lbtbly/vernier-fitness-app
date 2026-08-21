@@ -39,3 +39,8 @@ Triaged by /doc-health. Checked = handled.
 - [ ] 2026-08-21 🆕 Credential referenced → document access in ACCESS.md? — `.env.example`
 - [ ] 2026-08-21 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `.env.example`
 - [ ] 2026-08-21 🆕 Credential referenced → document access in ACCESS.md? — `compose.yaml`
+- [ ] 2026-08-22 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `src/app/offline/route.ts`
+- [ ] 2026-08-22 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `src/db/diagnostics.ts`
+- [ ] 2026-08-22 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `src/lib/request-origin.ts`
+- [ ] 2026-08-22 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `src/app/api/diagnostics/device/route.ts`
+- [ ] 2026-08-22 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `src/components/DeviceReport.tsx`
