@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>05 Labs review — Forge wireframe</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,sans-serif;
+--s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:20px;--s6:24px;--s7:32px;--s8:40px;--s9:48px;
+--r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:22px;--r-full:999px;--touch:44px;
+--dur-fast:120ms;--dur:200ms;--dur-slow:900ms;--ease:cubic-bezier(.2,.6,.2,1)}
+html[data-theme=dark]{color-scheme:dark;--bg:#0A0A0B;--surface:#141416;--surface-2:#1C1C1F;--surface-3:#232327;--line:#2A2A2E;--line-2:#3A3A40;--text:#F5F5F7;--text-2:#A1A1A8;--text-3:#7C7C85;--accent:#5AA9FF;--accent-ink:#08080A;--accent-soft:rgba(90,169,255,.14);--good:#4FD08A;--good-soft:rgba(79,208,138,.13);--warn:#E9B44C;--warn-soft:rgba(233,180,76,.13);--alert:#F07A6A;--alert-soft:rgba(240,122,106,.13);--chart-daily:#6E6E78;--chart-avg:#E8E8EC;--chart-goal:#7C8BA1;--chart-band:rgba(124,139,161,.10);--chart-grid:#232327;--focus:#8FC4FF;--page:#0E0E10;--page-ink:#8B8B93}
+html[data-theme=light]{color-scheme:light;--bg:#F2F2F5;--surface:#FFFFFF;--surface-2:#EDEDF1;--surface-3:#E3E3E9;--line:#DCDCE2;--line-2:#C6C6CE;--text:#101013;--text-2:#4A4A52;--text-3:#6B6B73;--accent:#0A6CD0;--accent-ink:#FFFFFF;--accent-soft:rgba(10,108,208,.10);--good:#157F4E;--good-soft:rgba(21,127,78,.10);--warn:#8A5A00;--warn-soft:rgba(138,90,0,.10);--alert:#B3261E;--alert-soft:rgba(179,38,30,.10);--chart-daily:#9A9AA2;--chart-avg:#101013;--chart-goal:#5B6B80;--chart-band:rgba(91,107,128,.10);--chart-grid:#E3E3E9;--focus:#0A4C93;--page:#E7E7EC;--page-ink:#55555C}
+body{font-family:var(--font);background:var(--page);color:var(--page-ink);padding:24px;-webkit-font-smoothing:antialiased}
+.bar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;max-width:1720px;margin:0 auto 20px}
+.bar h1{font-size:17px;color:var(--text);letter-spacing:-.01em}
+.bar p{font-size:13px;margin-top:4px;max-width:70ch;line-height:1.5}
+.themeswitch{min-height:34px;padding:0 14px;border-radius:var(--r-full);border:1px solid var(--line-2);background:transparent;color:var(--text);font:inherit;font-size:13px;cursor:pointer;flex:none}
+.frames{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start;max-width:1720px;margin:0 auto}
+figure.frame{margin:0;width:393px}
+figure.frame figcaption{font-size:12px;line-height:1.5;margin-bottom:8px;min-height:52px}
+figure.frame figcaption b{color:var(--text);font-weight:600}
+.phone{width:393px;height:852px;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);display:flex;flex-direction:column;border:1px solid var(--line-2);position:relative;font-size:15px;line-height:1.35}
+.status{height:54px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 6px;font-size:15px;font-weight:600;letter-spacing:-.01em}
+.status svg{width:68px;height:14px;color:var(--text)}
+.screen{flex:1;overflow-y:auto;padding:0 16px 20px}
+.lbl{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);font-weight:600}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px;margin-bottom:12px}
+.card.flat{background:transparent}
+.num{font-variant-numeric:tabular-nums}
+.sub{font-size:13px;color:var(--text-2);line-height:1.45}
+.mut{color:var(--text-3)}
+.good{color:var(--good)}.warn{color:var(--warn)}.alert{color:var(--alert)}
+.row{display:flex;gap:12px;align-items:center;min-height:44px;padding:8px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.grow{flex:1;min-width:0}
+.between{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.stack{display:flex;flex-direction:column;gap:2px}
+.chip{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:var(--r-full);border:1px solid var(--line-2);font-size:12px;color:var(--text-2);white-space:nowrap}
+.chip.g{color:var(--good);border-color:var(--good);background:var(--good-soft)}
+.chip.w{color:var(--warn);border-color:var(--warn);background:var(--warn-soft)}
+.chip.a{color:var(--alert);border-color:var(--alert);background:var(--alert-soft)}
+.src{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 7px;border-radius:6px;border:1px solid var(--line-2);background:var(--surface-2);color:var(--text-2);font-size:11px;white-space:nowrap}
+.src svg{width:12px;height:12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 16px;border-radius:var(--r-md);border:1px solid var(--line-2);background:var(--surface-2);color:var(--text);font:inherit;font-size:16px;font-weight:500;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn.quiet{background:transparent;border-color:transparent;color:var(--accent)}
+.btn.block{width:100%}
+.btn svg{width:20px;height:20px}
+.btn.icon{width:44px;height:44px;min-height:44px;padding:0;flex:none}
+.lrow{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:12px 14px;margin-bottom:8px}
+.lrow.attn{border-color:var(--warn)}
+.lrow.done{border-color:var(--good)}
+.lrow.rej{opacity:.55}
+.conv{font-size:12px;color:var(--text-2);background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:7px 9px;margin-top:8px;line-height:1.5;font-variant-numeric:tabular-nums}
+.seg{display:flex;gap:6px;flex:none}
+.seg button{width:44px;height:44px;border-radius:10px;border:1px solid var(--line-2);background:var(--surface-2);color:var(--text-2);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.seg button svg{width:20px;height:20px}
+.seg button[aria-pressed=true].ok{background:var(--good-soft);border-color:var(--good);color:var(--good)}
+.seg button[aria-pressed=true].ed{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.seg button[aria-pressed=true].no{background:var(--alert-soft);border-color:var(--alert);color:var(--alert)}
+.banner{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border-radius:var(--r-md);font-size:13px;line-height:1.45;margin-bottom:12px;border:1px solid var(--line);background:var(--surface-2);color:var(--text)}
+.banner svg{width:18px;height:18px;flex:none;margin-top:1px;color:var(--text-2)}
+.banner.w{background:var(--warn-soft);border-color:var(--warn)}.banner.w svg{color:var(--warn)}
+.stickybar{position:absolute;left:0;right:0;bottom:0;padding:12px 16px 28px;background:var(--surface);border-top:1px solid var(--line)}
+.input{width:100%;min-height:48px;border-radius:10px;border:1px solid var(--line-2);background:var(--surface-2);color:var(--text);font:inherit;font-size:17px;padding:0 12px;font-variant-numeric:tabular-nums}
+.pick{display:flex;gap:6px}
+.pick button{flex:1;min-height:44px;border-radius:10px;border:1px solid var(--line-2);background:var(--surface-2);color:var(--text-2);font:inherit;font-size:14px;cursor:pointer}
+.pick button[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+.pdf{background:var(--surface-2);border:1px solid var(--line-2);border-radius:8px;padding:10px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;line-height:1.7;color:var(--text-2)}
+.pdf mark{background:var(--accent-soft);color:var(--text);border-radius:3px;padding:1px 3px;box-shadow:inset 0 0 0 1px var(--accent)}
+.note{font-size:12px;color:var(--text-3);line-height:1.5}
+a:focus-visible,button:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="ok" viewBox="0 0 20 20"><path d="M4 10.5 8 14.5 16 5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="no" viewBox="0 0 20 20"><path d="M5.5 5.5 14.5 14.5M14.5 5.5 5.5 14.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="edit" viewBox="0 0 20 20"><path d="M4 16.5h3.2l8.6-8.6-3.2-3.2L4 13.3v3.2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+<symbol id="chev" viewBox="0 0 20 20"><path d="M7.5 4.5 13 10l-5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="info" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 9v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="6.2" r=".9" fill="currentColor"/></symbol>
+<symbol id="warn" viewBox="0 0 20 20"><path d="M10 3 18.2 17H1.8z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 8v3.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="10" cy="14.3" r=".9" fill="currentColor"/></symbol>
+<symbol id="doc" viewBox="0 0 20 20"><path d="M5 2.5h6.5L16 7v10.5H5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M11.2 2.6V7.2H15.8" fill="none" stroke="currentColor" stroke-width="1.4"/></symbol>
+<symbol id="trash" viewBox="0 0 20 20"><path d="M4.4 6h11.2M8 6V4.4h4V6M6 6l.7 10.4h6.6L14 6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="shield" viewBox="0 0 20 20"><path d="M10 2.6 16.4 5v5.4c0 3.6-2.6 6-6.4 7-3.8-1-6.4-3.4-6.4-7V5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M7 10.2 9.2 12.4l4-4.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="statr" viewBox="0 0 68 14"><path d="M1 10h2.4v3H1zM6 8h2.4v5H6zM11 5.6h2.4v7.4H11zM16 3.2h2.4v9.8H16z" fill="currentColor"/><path d="M27.4 5.4a8.6 8.6 0 0 1 10.4 0M29.8 8.2a5.2 5.2 0 0 1 5.6 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M32.6 10.9l1.6 1.7 1.6-1.7a2.4 2.4 0 0 0-3.2 0z" fill="currentColor"/><rect x="48" y="3.4" width="17" height="9" rx="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".55"/><rect x="49.6" y="5" width="11.4" height="5.8" rx="1.4" fill="currentColor"/><path d="M66.6 6.6v2.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" opacity=".55"/></symbol>
+</svg>
+
+<div class="bar">
+  <div>
+    <h1>05 Labs review</h1>
+    <p>The curator's screen. Twenty-two rows came out of one PDF and none of them are stored. Attention goes to the three that need it, conversions show the printed original with the factor, and any blood-pressure row is refused at extraction rather than hidden later.</p>
+  </div>
+  <button class="themeswitch" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark';this.textContent=document.documentElement.dataset.theme==='dark'?'Light mode':'Dark mode'">Light mode</button>
+</div>
+
+<div class="frames">
+
+<!-- FRAME 1 -->
+<figure class="frame">
+<figcaption><b>The review.</b> Nothing is saved. Rows needing a decision come first, clean rows follow already marked ready, and the footer commits only what you accepted.</figcaption>
+<div class="phone">
+  <div class="status"><span>21:02</span><svg><use href="#statr"/></svg></div>
+  <div class="screen" style="padding-bottom:132px">
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0 10px">
+      <button class="btn icon" aria-label="Cancel the import"><svg><use href="#no"/></svg></button>
+      <div class="grow"><div style="font-size:20px;font-weight:700;letter-spacing:-.01em">Review the panel</div><div class="note num">analyses-12-08-2026.pdf, 3 pages</div></div>
+    </div>
+
+    <div class="banner">
+      <svg><use href="#info"/></svg>
+      <div><b>Nothing is stored yet.</b> 22 rows read from the file, held in this review only. Panel date read as 12 August 2026, laboratory Cerballiance Paris 11.</div>
+    </div>
+
+    <div class="banner" style="border-color:var(--line-2)">
+      <svg><use href="#shield"/></svg>
+      <div><b>One row was refused.</b> Page 2 holds a blood-pressure reading. It was not extracted, is not displayed here and is not stored. This app has no field for it.</div>
+    </div>
+
+    <div class="lbl" style="margin:16px 0 8px">Needs your eyes, 3</div>
+
+    <div class="lrow attn">
+      <div class="between" style="align-items:flex-start">
+        <div class="stack grow">
+          <span style="font-weight:600">GGT</span>
+          <span class="sub num">62 &nbsp;<span class="warn">unit missing</span></span>
+          <span class="note num">ref 12 to 64 &middot; 12 Aug 2026</span>
+        </div>
+        <span class="chip w">Low confidence</span>
+      </div>
+      <div class="conv">Printed as "G.G.T. .... 62" with no unit on the sheet. The app will not guess between U/L and IU/L.</div>
+      <div class="between" style="margin-top:10px">
+        <span class="note">Pick a unit to accept</span>
+        <div class="seg">
+          <button class="ok" aria-label="Accept"><svg><use href="#ok"/></svg></button>
+          <button class="ed" aria-pressed="true" aria-label="Edit"><svg><use href="#edit"/></svg></button>
+          <button class="no" aria-label="Reject"><svg><use href="#no"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="lrow attn">
+      <div class="between" style="align-items:flex-start">
+        <div class="stack grow">
+          <span style="font-weight:600">Ferritin</span>
+          <span class="sub num">186 µg/L</span>
+          <span class="note num">ref 30 to 400 &middot; 12 Aug 2026</span>
+        </div>
+        <span class="chip w">Low confidence</span>
+      </div>
+      <div class="conv">The scan reads "1B6". 186 is the closest number. Check page 2 before accepting.</div>
+      <div class="between" style="margin-top:10px">
+        <button class="btn quiet" style="min-height:44px;padding:0"><svg><use href="#doc"/></svg>See page 2</button>
+        <div class="seg">
+          <button class="ok" aria-label="Accept"><svg><use href="#ok"/></svg></button>
+          <button class="ed" aria-label="Edit"><svg><use href="#edit"/></svg></button>
+          <button class="no" aria-label="Reject"><svg><use href="#no"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="lrow attn">
+      <div class="between" style="align-items:flex-start">
+        <div class="stack grow">
+          <span style="font-weight:600">Apolipoprotein B</span>
+          <span class="sub num">0.94 g/L</span>
+          <span class="note num">ref 0.55 to 1.30 &middot; 12 Aug 2026</span>
+        </div>
+        <span class="chip">New analyte</span>
+      </div>
+      <div class="conv">Not in your catalogue. Accepting it adds Apolipoprotein B and starts its trend from this panel.</div>
+      <div class="between" style="margin-top:10px">
+        <span class="note">Read cleanly, but new</span>
+        <div class="seg">
+          <button class="ok" aria-label="Accept"><svg><use href="#ok"/></svg></button>
+          <button class="ed" aria-label="Edit"><svg><use href="#edit"/></svg></button>
+          <button class="no" aria-label="Reject"><svg><use href="#no"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="lbl" style="margin:20px 0 8px">Read cleanly, 19</div>
+
+    <div class="lrow done">
+      <div class="between" style="align-items:flex-start">
+        <div class="stack grow">
+          <span style="font-weight:600">LDL cholesterol</span>
+          <span class="sub num">3.72 mmol/L</span>
+          <span class="note num">ref below 3.00 &middot; 12 Aug 2026</span>
+        </div>
+        <span class="chip g">Ready</span>
+      </div>
+      <div class="conv">Printed <b class="num">1.44 g/L</b> &nbsp;x 2.586&nbsp; stored <b class="num">3.72 mmol/L</b>. Both are kept.</div>
+      <div class="between" style="margin-top:10px">
+        <span class="note">Accepted at 21:01</span>
+        <div class="seg">
+          <button class="ok" aria-pressed="true" aria-label="Accept"><svg><use href="#ok"/></svg></button>
+          <button class="ed" aria-label="Edit"><svg><use href="#edit"/></svg></button>
+          <button class="no" aria-label="Reject"><svg><use href="#no"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="lrow done">
+      <div class="between" style="align-items:flex-start">
+        <div class="stack grow">
+          <span style="font-weight:600">Fasting glucose</span>
+          <span class="sub num">5.38 mmol/L</span>
+          <span class="note num">ref 3.90 to 5.50 &middot; 12 Aug 2026</span>
+        </div>
+        <span class="chip g">Ready</span>
+      </div>
+      <div class="conv">Printed <b class="num">0.97 g/L</b> &nbsp;x 5.551&nbsp; stored <b class="num">5.38 mmol/L</b>.</div>
+      <div class="between" style="margin-top:10px">
+        <span class="note">Accepted at 21:01</span>
+        <div class="seg">
+          <button class="ok" aria-pressed="true" aria-label="Accept"><svg><use href="#ok"/></svg></button>
+          <button class="ed" aria-label="Edit"><svg><use href="#edit"/></svg></button>
+          <button class="no" aria-label="Reject"><svg><use href="#no"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="lrow done">
+      <div class="between" style="align-items:flex-start">
+        <div class="stack grow">
+          <span style="font-weight:600">Non-HDL cholesterol</span>
+          <span class="sub num">4.37 mmol/L</span>
+          <span class="note num">total minus HDL &middot; 12 Aug 2026</span>
+        </div>
+        <span class="src">Derived</span>
+      </div>
+      <div class="conv">Not printed on the sheet. Computed as 5.61 minus 1.24. Stored as derived, never as a lab result.</div>
+      <div class="between" style="margin-top:10px">
+        <span class="note">Accepted at 21:01</span>
+        <div class="seg">
+          <button class="ok" aria-pressed="true" aria-label="Accept"><svg><use href="#ok"/></svg></button>
+          <button class="ed" aria-label="Edit"><svg><use href="#edit"/></svg></button>
+          <button class="no" aria-label="Reject"><svg><use href="#no"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="lrow rej">
+      <div class="between" style="align-items:flex-start">
+        <div class="stack grow">
+          <span style="font-weight:600"><s>Urine colour</s></span>
+          <span class="sub num">yellow</span>
+          <span class="note num">not a numeric result</span>
+        </div>
+        <span class="chip a">Rejected</span>
+      </div>
+      <div class="between" style="margin-top:10px">
+        <span class="note">Rejected at 21:02. It will not be offered again for this file.</span>
+        <div class="seg">
+          <button class="no" aria-pressed="true" aria-label="Rejected"><svg><use href="#no"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="note" style="text-align:center;padding-top:8px">16 more read cleanly. Scroll, or accept them together from the footer.</div>
+  </div>
+  <div class="stickybar">
+    <div class="between" style="margin-bottom:10px">
+      <span class="sub">18 ready, 3 waiting on you, 1 rejected</span>
+      <button class="btn quiet" style="min-height:32px;padding:0">Accept all clean</button>
+    </div>
+    <button class="btn primary block">Save 18 rows</button>
+    <div class="note" style="text-align:center;margin-top:8px">The 3 waiting rows stay in this review. Nothing is lost by saving now.</div>
+  </div>
+</div>
+</figure>
+
+<!-- FRAME 2 -->
+<figure class="frame">
+<figcaption><b>Editing one row.</b> The printed original stays on screen while you correct. Unit, reference interval and date are all editable, and this row saves on its own button.</figcaption>
+<div class="phone">
+  <div class="status"><span>21:04</span><svg><use href="#statr"/></svg></div>
+  <div class="screen" style="padding-bottom:20px">
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0 10px">
+      <button class="btn icon" aria-label="Back to the review" style="transform:scaleX(-1)"><svg><use href="#chev"/></svg></button>
+      <div class="grow"><div style="font-size:20px;font-weight:700;letter-spacing:-.01em">GGT</div><div class="note num">row 9 of 22</div></div>
+      <span class="chip w">Low confidence</span>
+    </div>
+
+    <div class="card">
+      <div class="lbl" style="margin-bottom:8px">As printed, page 1</div>
+      <div class="pdf">
+        BILAN HEPATIQUE<br>
+        ASAT (TGO) ......... 29 UI/L<br>
+        ALAT (TGP) ......... 41 UI/L<br>
+        <mark>G.G.T. ............. 62</mark><br>
+        PHOSPHATASES ALC ... 74 UI/L
+      </div>
+      <div class="note" style="margin-top:8px">The unit column is empty on this line. The rows above it print UI/L.</div>
+    </div>
+
+    <div class="card">
+      <div class="lbl" style="margin-bottom:8px">Result</div>
+      <input class="input" value="62" style="margin-bottom:14px" aria-label="Result">
+      <div class="lbl" style="margin-bottom:8px">Unit</div>
+      <div class="pick" style="margin-bottom:6px">
+        <button aria-pressed="true">U/L</button><button>IU/L</button><button>µkat/L</button>
+      </div>
+      <div class="note" style="margin-bottom:14px">U/L and IU/L are the same number here. Choosing one records the choice, it does not convert anything.</div>
+
+      <div class="lbl" style="margin-bottom:8px">Reference interval</div>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <input class="input" value="12" aria-label="Reference low"><input class="input" value="64" aria-label="Reference high">
+      </div>
+
+      <div class="lbl" style="margin-bottom:8px">Sample date</div>
+      <input class="input" value="12/08/2026" style="margin-bottom:6px" aria-label="Sample date">
+      <div class="note" style="margin-bottom:16px">Europe/Paris. Read from the header line "Prelevement du 12/08/2026 a 08:15".</div>
+
+      <button class="btn primary block" style="margin-bottom:8px">Save this row</button>
+      <button class="btn block">Reject this row</button>
+    </div>
+
+    <div class="card flat" style="border-style:dashed">
+      <div class="lbl" style="margin-bottom:6px">What gets stored</div>
+      <div class="sub">The value you approve, the unit you picked, the printed original, the confidence at extraction, the file and page it came from, and the fact that you corrected it at 21:04 on 21 August.</div>
+      <div class="note" style="margin-top:8px">If a later import of the same panel disagrees with this row, the app asks. It does not overwrite a correction.</div>
+    </div>
+  </div>
+</div>
+</figure>
+
+<!-- FRAME 3 -->
+<figure class="frame">
+<figcaption><b>Keep or delete the PDF, asked here.</b> At the moment of validation, not in a settings screen six weeks later. Both consequences are spelled out before the tap.</figcaption>
+<div class="phone">
+  <div class="status"><span>21:08</span><svg><use href="#statr"/></svg></div>
+  <div class="screen">
+    <div style="padding:12px 0 12px">
+      <div style="font-size:24px;font-weight:700;letter-spacing:-.02em;margin-bottom:4px">21 rows saved</div>
+      <div class="sub">Panel of 12 August 2026. Your trends now include LDL, glucose, GGT and 18 others.</div>
+    </div>
+
+    <div class="card">
+      <div class="row"><span class="grow sub mut">Accepted</span><span class="num">21</span></div>
+      <div class="row"><span class="grow sub mut">Corrected by you</span><span class="num">1, GGT unit</span></div>
+      <div class="row"><span class="grow sub mut">Rejected</span><span class="num">1, urine colour</span></div>
+      <div class="row"><span class="grow sub mut">Refused at extraction</span><span class="num">1, blood pressure</span></div>
+    </div>
+
+    <div class="lbl" style="margin:18px 0 10px">The file itself</div>
+    <div class="card">
+      <div class="between" style="margin-bottom:10px">
+        <div class="stack grow"><span style="font-weight:600">analyses-12-08-2026.pdf</span><span class="note num">1.8 MB, 3 pages, on the Mac mini</span></div>
+        <svg style="width:22px;height:22px;color:var(--text-3)"><use href="#doc"/></svg>
+      </div>
+      <button class="btn primary block" style="margin-bottom:8px">Keep it</button>
+      <div class="note" style="margin-bottom:14px">Stays in the encrypted volume, included in the nightly backup, and every value above keeps a two-tap link to its page.</div>
+      <button class="btn block" style="margin-bottom:8px"><svg><use href="#trash"/></svg>Delete it now</button>
+      <div class="note">The 21 values stay. The printed originals stay. The link to the page goes, and that cannot be undone.</div>
+    </div>
+
+    <div class="card">
+      <div class="between">
+        <div class="stack grow"><span>Ask me every time</span><span class="note">Retention is a decision, not a default.</span></div>
+        <div style="width:52px;height:32px;border-radius:16px;background:var(--accent);position:relative;flex:none"><span style="position:absolute;right:3px;top:3px;width:26px;height:26px;border-radius:50%;background:var(--accent-ink)"></span></div>
+      </div>
+    </div>
+
+    <div class="card flat" style="border-style:dashed">
+      <div class="lbl" style="margin-bottom:6px">What left this machine</div>
+      <div class="sub">Nothing. Extraction ran locally on the Mac mini. Claude was not called for this import.</div>
+    </div>
+  </div>
+</div>
+</figure>
+
+</div>
+</body>
+</html>

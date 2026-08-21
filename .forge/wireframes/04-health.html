@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>04 Health — Forge wireframe</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,sans-serif;
+--s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:20px;--s6:24px;--s7:32px;--s8:40px;--s9:48px;
+--r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:22px;--r-full:999px;--touch:44px;
+--dur-fast:120ms;--dur:200ms;--dur-slow:900ms;--ease:cubic-bezier(.2,.6,.2,1)}
+html[data-theme=dark]{color-scheme:dark;--bg:#0A0A0B;--surface:#141416;--surface-2:#1C1C1F;--surface-3:#232327;--line:#2A2A2E;--line-2:#3A3A40;--text:#F5F5F7;--text-2:#A1A1A8;--text-3:#7C7C85;--accent:#5AA9FF;--accent-ink:#08080A;--accent-soft:rgba(90,169,255,.14);--good:#4FD08A;--good-soft:rgba(79,208,138,.13);--warn:#E9B44C;--warn-soft:rgba(233,180,76,.13);--alert:#F07A6A;--alert-soft:rgba(240,122,106,.13);--chart-daily:#6E6E78;--chart-avg:#E8E8EC;--chart-goal:#7C8BA1;--chart-band:rgba(124,139,161,.10);--chart-grid:#232327;--focus:#8FC4FF;--page:#0E0E10;--page-ink:#8B8B93}
+html[data-theme=light]{color-scheme:light;--bg:#F2F2F5;--surface:#FFFFFF;--surface-2:#EDEDF1;--surface-3:#E3E3E9;--line:#DCDCE2;--line-2:#C6C6CE;--text:#101013;--text-2:#4A4A52;--text-3:#6B6B73;--accent:#0A6CD0;--accent-ink:#FFFFFF;--accent-soft:rgba(10,108,208,.10);--good:#157F4E;--good-soft:rgba(21,127,78,.10);--warn:#8A5A00;--warn-soft:rgba(138,90,0,.10);--alert:#B3261E;--alert-soft:rgba(179,38,30,.10);--chart-daily:#9A9AA2;--chart-avg:#101013;--chart-goal:#5B6B80;--chart-band:rgba(91,107,128,.10);--chart-grid:#E3E3E9;--focus:#0A4C93;--page:#E7E7EC;--page-ink:#55555C}
+body{font-family:var(--font);background:var(--page);color:var(--page-ink);padding:24px;-webkit-font-smoothing:antialiased}
+.bar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;max-width:1720px;margin:0 auto 20px}
+.bar h1{font-size:17px;color:var(--text);letter-spacing:-.01em}
+.bar p{font-size:13px;margin-top:4px;max-width:70ch;line-height:1.5}
+.themeswitch{min-height:34px;padding:0 14px;border-radius:var(--r-full);border:1px solid var(--line-2);background:transparent;color:var(--text);font:inherit;font-size:13px;cursor:pointer;flex:none}
+.frames{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start;max-width:1720px;margin:0 auto}
+figure.frame{margin:0;width:393px}
+figure.frame figcaption{font-size:12px;line-height:1.5;margin-bottom:8px;min-height:52px}
+figure.frame figcaption b{color:var(--text);font-weight:600}
+.phone{width:393px;height:852px;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);display:flex;flex-direction:column;border:1px solid var(--line-2);position:relative;font-size:15px;line-height:1.35}
+.status{height:54px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 6px;font-size:15px;font-weight:600;letter-spacing:-.01em}
+.status svg{width:68px;height:14px;color:var(--text)}
+.screen{flex:1;overflow-y:auto;padding:0 16px 20px}
+.title{padding:4px 0 12px}
+.title h2{font-size:30px;letter-spacing:-.02em;font-weight:700;line-height:1.1}
+.lbl{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);font-weight:600}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px;margin-bottom:12px}
+.card.flat{background:transparent}
+.metric{font-size:30px;letter-spacing:-.02em;font-variant-numeric:tabular-nums;font-weight:600;line-height:1.05}
+.metric small{font-size:14px;color:var(--text-2);font-weight:400;letter-spacing:0}
+.big{font-size:22px;font-variant-numeric:tabular-nums;font-weight:600;letter-spacing:-.02em}
+.num{font-variant-numeric:tabular-nums}
+.sub{font-size:13px;color:var(--text-2);line-height:1.45}
+.mut{color:var(--text-3)}
+.good{color:var(--good)}.warn{color:var(--warn)}.alert{color:var(--alert)}
+.row{display:flex;gap:12px;align-items:center;min-height:48px;padding:8px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row svg.ch{width:18px;height:18px;color:var(--text-3);flex:none}
+.grow{flex:1;min-width:0}
+.between{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.stack{display:flex;flex-direction:column;gap:2px}
+.src{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 7px;border-radius:6px;border:1px solid var(--line-2);background:var(--surface-2);color:var(--text-2);font-size:11px;white-space:nowrap}
+.src svg{width:12px;height:12px}
+.src.est{border-style:dashed}
+.chip{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:var(--r-full);border:1px solid var(--line-2);font-size:12px;color:var(--text-2);white-space:nowrap}
+.chip.g{color:var(--good);border-color:var(--good);background:var(--good-soft)}
+.chip.w{color:var(--warn);border-color:var(--warn);background:var(--warn-soft)}
+.dot{width:8px;height:8px;border-radius:50%;flex:none;display:inline-block}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 16px;border-radius:var(--r-md);border:1px solid var(--line-2);background:var(--surface-2);color:var(--text);font:inherit;font-size:16px;font-weight:500;cursor:pointer;text-decoration:none}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn.quiet{background:transparent;border-color:transparent;color:var(--accent)}
+.btn.block{width:100%}
+.btn svg{width:20px;height:20px}
+.btn.icon{width:44px;height:44px;min-height:44px;padding:0;flex:none}
+.segctl{display:flex;background:var(--surface-2);border-radius:12px;padding:3px;gap:3px;margin-bottom:14px}
+.segctl button{flex:1;min-height:38px;border:0;border-radius:9px;background:transparent;color:var(--text-2);font:inherit;font-size:13px;font-weight:500;cursor:pointer}
+.segctl button[aria-pressed=true]{background:var(--surface);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.3)}
+.banner{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border-radius:var(--r-md);font-size:13px;line-height:1.45;margin-bottom:12px;border:1px solid var(--line);background:var(--surface-2);color:var(--text)}
+.banner svg{width:18px;height:18px;flex:none;margin-top:1px;color:var(--text-2)}
+.banner.w{background:var(--warn-soft);border-color:var(--warn)}.banner.w svg{color:var(--warn)}
+.tabbar{height:83px;flex:none;padding:8px 6px 26px;display:flex;background:var(--surface);border-top:1px solid var(--line)}
+.tabbar a{flex:1;min-width:44px;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--text-3);text-decoration:none;font-size:10px}
+.tabbar a[aria-current=page]{color:var(--accent)}
+.tabbar svg{width:24px;height:24px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px}
+.legend span{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--text-2)}
+.sw{width:16px;height:0;border-top:2.5px solid var(--chart-avg);display:inline-block}
+.sw.goal{border-top:1.5px dashed var(--chart-goal)}
+.sw.daily{width:6px;height:6px;border:0;border-radius:50%;background:var(--chart-daily)}
+.note{font-size:12px;color:var(--text-3);line-height:1.5}
+.pdf{background:var(--surface-2);border:1px solid var(--line-2);border-radius:8px;padding:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;line-height:1.7;color:var(--text-2)}
+.pdf mark{background:var(--accent-soft);color:var(--text);border-radius:3px;padding:1px 3px;box-shadow:inset 0 0 0 1px var(--accent)}
+a:focus-visible,button:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="chev" viewBox="0 0 20 20"><path d="M7.5 4.5 13 10l-5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="info" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 9v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="6.2" r=".9" fill="currentColor"/></symbol>
+<symbol id="warn" viewBox="0 0 20 20"><path d="M10 3 18.2 17H1.8z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 8v3.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="10" cy="14.3" r=".9" fill="currentColor"/></symbol>
+<symbol id="sync" viewBox="0 0 20 20"><path d="M16.6 10a6.6 6.6 0 1 1-2-4.75" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M16.9 2.9v3.5h-3.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="doc" viewBox="0 0 20 20"><path d="M5 2.5h6.5L16 7v10.5H5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M11.2 2.6V7.2H15.8" fill="none" stroke="currentColor" stroke-width="1.4"/></symbol>
+<symbol id="scale" viewBox="0 0 20 20"><rect x="2.6" y="4.6" width="14.8" height="11" rx="2.4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M6.6 11.4 10 8.2l3.4 3.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+<symbol id="hand" viewBox="0 0 20 20"><path d="M6.5 10V4.6a1.5 1.5 0 0 1 3 0V9M9.5 9V3.6a1.5 1.5 0 0 1 3 0V9M12.5 9V5.6a1.5 1.5 0 0 1 3 0v6.6a5 5 0 0 1-5 5H9.4a4 4 0 0 1-3.1-1.5L3.6 11.8a1.5 1.5 0 0 1 2.3-1.9L6.5 11" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="cal" viewBox="0 0 24 24"><rect x="3.4" y="4.6" width="17.2" height="16" rx="3.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.4 9.6h17.2M8 3.2v3M16 3.2v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="wave" viewBox="0 0 24 24"><path d="M2.5 12.5h4l2-5.5 3.6 11 2.4-7 1.5 1.5h5.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="dumb" viewBox="0 0 24 24"><path d="M4 9v6M7 7.2v9.6M17 7.2v9.6M20 9v6M7 12h10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+<symbol id="fork" viewBox="0 0 24 24"><path d="M7 3v7M5 3v4.2a2 2 0 0 0 4 0V3M7 10v11M16.6 3c-1.8 2-1.8 6.4 0 8.4V21" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.1" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.6v3M12 18.4v3M21.4 12h-3M5.6 12h-3M18.6 5.4l-2.1 2.1M7.5 16.5l-2.1 2.1M18.6 18.6l-2.1-2.1M7.5 7.5 5.4 5.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="statr" viewBox="0 0 68 14"><path d="M1 10h2.4v3H1zM6 8h2.4v5H6zM11 5.6h2.4v7.4H11zM16 3.2h2.4v9.8H16z" fill="currentColor"/><path d="M27.4 5.4a8.6 8.6 0 0 1 10.4 0M29.8 8.2a5.2 5.2 0 0 1 5.6 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M32.6 10.9l1.6 1.7 1.6-1.7a2.4 2.4 0 0 0-3.2 0z" fill="currentColor"/><rect x="48" y="3.4" width="17" height="9" rx="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".55"/><rect x="49.6" y="5" width="11.4" height="5.8" rx="1.4" fill="currentColor"/><path d="M66.6 6.6v2.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" opacity=".55"/></symbol>
+</svg>
+
+<div class="bar">
+  <div>
+    <h1>04 Health</h1>
+    <p>The full trend view. Weight and waist share one axis so the two curves are read together. Activity, sleep, heart and the latest panel follow. Every number on this screen opens its source in two taps, and every hole in the data is drawn as a hole.</p>
+  </div>
+  <button class="themeswitch" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark';this.textContent=document.documentElement.dataset.theme==='dark'?'Light mode':'Dark mode'">Light mode</button>
+</div>
+
+<div class="frames">
+
+<!-- FRAME 1 -->
+<figure class="frame">
+<figcaption><b>Trends, 30 days.</b> Body composition first, on one axis. The gap of 8 to 11 August cuts through both charts in the same place, which is the point of sharing the axis.</figcaption>
+<div class="phone">
+  <div class="status"><span>07:22</span><svg><use href="#statr"/></svg></div>
+  <div class="screen">
+    <div class="title"><div class="lbl">Friday 21 August</div><h2>Health</h2></div>
+
+    <div class="segctl">
+      <button>7 days</button><button aria-pressed="true">30 days</button><button>6 months</button><button>Year</button>
+    </div>
+
+    <!-- BODY -->
+    <div class="card">
+      <div class="between">
+        <span class="lbl">Body</span>
+        <div style="display:flex;gap:6px"><span class="src"><svg><use href="#scale"/></svg>Withings</span><span class="src"><svg><use href="#hand"/></svg>Manual</span></div>
+      </div>
+      <div style="display:flex;gap:24px;margin:10px 0 10px">
+        <div class="stack"><span class="metric">86.4 <small>kg</small></span><span class="note">7-day average, -0.6 this week</span></div>
+        <div class="stack"><span class="metric">98.5 <small>cm</small></span><span class="note">waist, -3.5 since June</span></div>
+      </div>
+
+      <svg viewBox="0 0 329 212" width="329" height="212" role="img" aria-label="Weight over thirty days with a seven day average and a goal line to 76 kilograms, and waist measurements on the same time axis, both broken across the 8 to 11 August gap.">
+        <defs><pattern id="hatchH" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse"><line x1="0" y1="0" x2="0" y2="6" stroke="var(--warn)" stroke-width="1.3" opacity=".4"/></pattern></defs>
+        <text x="8" y="6" font-size="9.5" fill="var(--text-3)" font-family="-apple-system,system-ui">WEIGHT, KG</text>
+        <polygon points="8,35.9 321,69.6 321,94 8,60.3" fill="var(--chart-band)"/>
+        <line x1="8" y1="44.7" x2="321" y2="44.7" stroke="var(--chart-grid)" stroke-width="1"/>
+        <line x1="8" y1="93.6" x2="321" y2="93.6" stroke="var(--chart-grid)" stroke-width="1"/>
+        <text x="8" y="41.5" font-size="9.5" fill="var(--text-3)" font-family="-apple-system,system-ui">88</text>
+        <text x="8" y="90.5" font-size="9.5" fill="var(--text-3)" font-family="-apple-system,system-ui">86</text>
+        <rect x="175.3" y="14" width="43.2" height="104" fill="url(#hatchH)"/>
+        <line x1="175.3" y1="14" x2="175.3" y2="192" stroke="var(--warn)" stroke-width="1" stroke-dasharray="3 3" opacity=".6"/>
+        <line x1="218.5" y1="14" x2="218.5" y2="192" stroke="var(--warn)" stroke-width="1" stroke-dasharray="3 3" opacity=".6"/>
+        <line x1="8" y1="48.1" x2="321" y2="81.8" stroke="var(--chart-goal)" stroke-width="1.5" stroke-dasharray="5 5"/>
+        <g fill="var(--chart-daily)">
+          <circle cx="8" cy="30" r="2.1"/><circle cx="18.8" cy="22.7" r="2.1"/><circle cx="29.6" cy="34.9" r="2.1"/><circle cx="40.4" cy="32.4" r="2.1"/><circle cx="51.2" cy="39.8" r="2.1"/><circle cx="61.9" cy="30" r="2.1"/><circle cx="72.8" cy="42.2" r="2.1"/><circle cx="83.5" cy="47.1" r="2.1"/><circle cx="94.3" cy="37.3" r="2.1"/><circle cx="105.1" cy="49.6" r="2.1"/><circle cx="115.9" cy="44.7" r="2.1"/><circle cx="126.7" cy="54.4" r="2.1"/><circle cx="137.5" cy="47.1" r="2.1"/><circle cx="148.3" cy="59.3" r="2.1"/><circle cx="159.1" cy="54.4" r="2.1"/><circle cx="169.9" cy="64.2" r="2.1"/>
+          <circle cx="223.9" cy="69.1" r="2.1"/><circle cx="234.7" cy="74" r="2.1"/><circle cx="245.5" cy="66.7" r="2.1"/><circle cx="256.2" cy="78.9" r="2.1"/><circle cx="267" cy="71.6" r="2.1"/><circle cx="277.8" cy="83.8" r="2.1"/><circle cx="288.6" cy="81.3" r="2.1"/><circle cx="299.4" cy="91.1" r="2.1"/><circle cx="310.2" cy="86.2" r="2.1"/><circle cx="321" cy="96" r="2.1"/>
+        </g>
+        <path d="M72.8 33.2 83.5 35.6 94.3 37.6 105.1 39.8 115.9 41.5 126.7 43.7 137.5 46.1 148.3 48.6 159.1 49.6 169.9 53.5" fill="none" stroke="var(--chart-avg)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M267 72 277.8 74 288.6 75" fill="none" stroke="var(--chart-avg)" stroke-width="2.6" stroke-dasharray="4 4" stroke-linecap="round" opacity=".75"/>
+        <path d="M288.6 75 299.4 78.2 310.2 79.9 321 84" fill="none" stroke="var(--chart-avg)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="321" cy="84" r="4.4" fill="var(--chart-avg)" stroke="var(--surface)" stroke-width="2"/>
+
+        <line x1="8" y1="128" x2="321" y2="128" stroke="var(--line)" stroke-width="1"/>
+        <text x="8" y="140" font-size="9.5" fill="var(--text-3)" font-family="-apple-system,system-ui">WAIST, CM</text>
+        <path d="M51.2 148.3 126.7 160 213.1 170" fill="none" stroke="var(--chart-avg)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M213.1 170 288.6 181.7" fill="none" stroke="var(--chart-avg)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        <g fill="var(--chart-avg)"><circle cx="51.2" cy="148.3" r="2.8"/><circle cx="126.7" cy="160" r="2.8"/><circle cx="213.1" cy="170" r="2.8"/><circle cx="288.6" cy="181.7" r="4" stroke="var(--surface)" stroke-width="1.6"/></g>
+        <text x="51.2" y="145" font-size="9.5" fill="var(--text-3)" text-anchor="middle" font-family="-apple-system,system-ui">100.5</text>
+        <text x="288.6" y="194" font-size="9.5" fill="var(--text-3)" text-anchor="middle" font-family="-apple-system,system-ui">98.5</text>
+
+        <text x="8" y="208" font-size="10" fill="var(--text-3)" font-family="-apple-system,system-ui">23 Jul</text>
+        <text x="196.9" y="208" font-size="10" fill="var(--warn)" text-anchor="middle" font-family="-apple-system,system-ui">8 to 11 Aug</text>
+        <text x="321" y="208" font-size="10" fill="var(--text-3)" text-anchor="end" font-family="-apple-system,system-ui">21 Aug</text>
+      </svg>
+
+      <div class="legend">
+        <span><i class="sw"></i>7-day average</span>
+        <span><i class="sw daily"></i>Daily reading</span>
+        <span><i class="sw goal"></i>Line to 76.0 kg</span>
+      </div>
+      <div class="row" style="margin-top:8px"><span class="grow sub">Fat mass 22.4 %, muscle 62.8 kg, body water 53.1 %</span><svg class="ch"><use href="#chev"/></svg></div>
+      <div class="note" style="margin-top:8px">Percentages from the scale move with hydration. Read the 28-day direction, not today.</div>
+    </div>
+
+    <!-- ACTIVITY -->
+    <div class="card">
+      <div class="between">
+        <span class="lbl">Activity</span>
+        <span class="src" style="border-color:var(--warn);color:var(--warn)"><svg><use href="#warn"/></svg>Health, 3 days old</span>
+      </div>
+      <div class="between" style="align-items:flex-end;margin:8px 0 10px">
+        <div class="stack"><span class="metric">9,412</span><span class="note">steps, 17 August</span></div>
+        <div class="stack" style="align-items:flex-end"><span class="big">8,740</span><span class="note">10-day average</span></div>
+      </div>
+      <svg viewBox="0 0 329 76" width="329" height="76" role="img" aria-label="Fourteen days of step counts, the last four hatched as missing">
+        <defs><pattern id="hatchA" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse"><line x1="0" y1="0" x2="0" y2="6" stroke="var(--warn)" stroke-width="1.3" opacity=".4"/></pattern></defs>
+        <g fill="var(--chart-daily)">
+          <rect x="4" y="33.2" width="18" height="28.8" rx="3"/><rect x="27" y="9" width="18" height="53" rx="3"/><rect x="50" y="25" width="18" height="37" rx="3"/><rect x="73" y="27.8" width="18" height="34.2" rx="3"/><rect x="96" y="16.5" width="18" height="45.5" rx="3"/><rect x="119" y="23.6" width="18" height="38.4" rx="3"/><rect x="142" y="34.5" width="18" height="27.5" rx="3"/><rect x="165" y="6" width="18" height="56" rx="3"/><rect x="188" y="26.6" width="18" height="35.4" rx="3"/><rect x="211" y="18.6" width="18" height="43.4" rx="3" fill="var(--chart-avg)"/>
+        </g>
+        <rect x="232" y="6" width="93" height="56" fill="url(#hatchA)" stroke="var(--warn)" stroke-width="1" stroke-dasharray="3 3" opacity=".85"/>
+        <text x="278.5" y="38" font-size="10" fill="var(--warn)" text-anchor="middle" font-family="-apple-system,system-ui">no data</text>
+        <line x1="4" y1="62" x2="325" y2="62" stroke="var(--line)" stroke-width="1"/>
+        <text x="4" y="74" font-size="10" fill="var(--text-3)" font-family="-apple-system,system-ui">8 Aug</text>
+        <text x="325" y="74" font-size="10" fill="var(--text-3)" text-anchor="end" font-family="-apple-system,system-ui">21 Aug</text>
+      </svg>
+      <div class="row" style="margin-top:6px"><span class="grow sub">Distance 6.8 km, floors 11, workout minutes 42</span><span class="note num">17 Aug</span></div>
+      <button class="btn block" style="margin-top:12px"><svg><use href="#sync"/></svg>Run the iPhone shortcut</button>
+    </div>
+
+    <!-- SLEEP -->
+    <div class="card">
+      <div class="between"><span class="lbl">Sleep</span><span class="src" style="border-color:var(--warn);color:var(--warn)"><svg><use href="#warn"/></svg>Health, 3 days old</span></div>
+      <div class="between" style="align-items:flex-end;margin:8px 0 10px">
+        <div class="stack"><span class="metric">7 h 04</span><span class="note">night of 16 August</span></div>
+        <div class="stack" style="align-items:flex-end"><span class="big">6 h 51</span><span class="note">10-night average</span></div>
+      </div>
+      <svg viewBox="0 0 329 54" width="329" height="54" role="img" aria-label="Ten nights of sleep duration with the last four nights missing">
+        <g fill="var(--chart-daily)">
+          <rect x="4" y="14" width="18" height="26" rx="3"/><rect x="27" y="8" width="18" height="32" rx="3"/><rect x="50" y="18" width="18" height="22" rx="3"/><rect x="73" y="11" width="18" height="29" rx="3"/><rect x="96" y="6" width="18" height="34" rx="3"/><rect x="119" y="16" width="18" height="24" rx="3"/><rect x="142" y="12" width="18" height="28" rx="3"/><rect x="165" y="9" width="18" height="31" rx="3"/><rect x="188" y="14" width="18" height="26" rx="3"/><rect x="211" y="10" width="18" height="30" rx="3" fill="var(--chart-avg)"/>
+        </g>
+        <rect x="232" y="6" width="93" height="34" fill="url(#hatchA)" stroke="var(--warn)" stroke-width="1" stroke-dasharray="3 3" opacity=".85"/>
+        <line x1="4" y1="40" x2="325" y2="40" stroke="var(--line)" stroke-width="1"/>
+        <text x="4" y="52" font-size="10" fill="var(--text-3)" font-family="-apple-system,system-ui">7 Aug</text>
+        <text x="325" y="52" font-size="10" fill="var(--text-3)" text-anchor="end" font-family="-apple-system,system-ui">20 Aug</text>
+      </svg>
+      <div class="note" style="margin-top:8px">Phases arrive when the watch records them. Nights without phases are stored as a duration only, never padded out.</div>
+    </div>
+
+    <!-- HEART -->
+    <div class="card">
+      <div class="between"><span class="lbl">Heart</span><span class="src"><svg><use href="#wave"/></svg>Health</span></div>
+      <div class="between" style="align-items:flex-end;margin:8px 0 10px">
+        <div class="stack"><span class="metric">58 <small>bpm</small></span><span class="note">resting, 17 August</span></div>
+        <div class="stack" style="align-items:flex-end"><span class="big good">-3</span><span class="note">over 28 days</span></div>
+      </div>
+      <svg viewBox="0 0 329 56" width="329" height="56" role="img" aria-label="Resting heart rate falling from 61 to 58 over 28 days, ending 17 August">
+        <path d="M8 12 42 16 76 11 110 19 144 15 178 22 212 18 246 26 280 22" fill="none" stroke="var(--chart-avg)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="280" cy="22" r="4" fill="var(--chart-avg)" stroke="var(--surface)" stroke-width="1.6"/>
+        <rect x="288" y="4" width="37" height="34" fill="url(#hatchA)" stroke="var(--warn)" stroke-width="1" stroke-dasharray="3 3" opacity=".85"/>
+        <text x="8" y="52" font-size="10" fill="var(--text-3)" font-family="-apple-system,system-ui">24 Jul, 61 bpm</text>
+        <text x="325" y="52" font-size="10" fill="var(--text-3)" text-anchor="end" font-family="-apple-system,system-ui">17 Aug, 58 bpm</text>
+      </svg>
+      <div class="row" style="margin-top:6px"><span class="grow">Recovery, heart rate variability</span><span class="num">46 ms</span><svg class="ch"><use href="#chev"/></svg></div>
+      <div class="row"><span class="grow">VO2 max</span><span class="num">38.4</span><span class="note num">9 Aug</span><svg class="ch"><use href="#chev"/></svg></div>
+      <div class="note" style="margin-top:8px">VO2 max arrives from the watch every few weeks. Between two readings the app shows the last one with its date, not a fresh-looking number.</div>
+    </div>
+
+    <!-- LABS -->
+    <div class="card">
+      <div class="between"><span class="lbl">Blood panel, 12 August 2026</span><span class="src"><svg><use href="#doc"/></svg>Lab PDF</span></div>
+      <div class="row"><div class="stack grow"><span>LDL cholesterol</span><span class="note num">ref below 3.00</span></div><span class="num">3.72 mmol/L</span><svg class="ch"><use href="#chev"/></svg></div>
+      <div class="row"><div class="stack grow"><span>HDL cholesterol</span><span class="note num">ref above 1.00</span></div><span class="num">1.24 mmol/L</span><svg class="ch"><use href="#chev"/></svg></div>
+      <div class="row"><div class="stack grow"><span>Triglycerides</span><span class="note num">ref below 1.70</span></div><span class="num">1.42 mmol/L</span><svg class="ch"><use href="#chev"/></svg></div>
+      <div class="row"><div class="stack grow"><span>Fasting glucose</span><span class="note num">ref 3.90 to 5.50</span></div><span class="num">5.38 mmol/L</span><svg class="ch"><use href="#chev"/></svg></div>
+      <div class="row"><div class="stack grow"><span>GGT</span><span class="note num">ref 12 to 64</span></div><span class="num">62 U/L</span><svg class="ch"><use href="#chev"/></svg></div>
+      <div class="row"><div class="stack grow"><span>Ferritin</span><span class="note num">ref 30 to 400</span></div><span class="num">186 µg/L</span><svg class="ch"><use href="#chev"/></svg></div>
+      <button class="btn block" style="margin-top:12px">All 14 analytes and their trends</button>
+      <div class="note" style="margin-top:10px">Reference intervals are the ones printed by Cerballiance Paris 11 on this sheet. This app explains what an analyte measures and never tells you what your result means for you. Take questions to your doctor.</div>
+    </div>
+
+    <div class="note" style="text-align:center;padding:4px 16px 0">Tap any number to see where it came from and every correction it has ever had.</div>
+  </div>
+  <nav class="tabbar">
+    <a href="#"><svg><use href="#cal"/></svg>Today</a>
+    <a href="#" aria-current="page"><svg><use href="#wave"/></svg>Health</a>
+    <a href="#"><svg><use href="#dumb"/></svg>Train</a>
+    <a href="#"><svg><use href="#fork"/></svg>Eat</a>
+    <a href="#"><svg><use href="#gear"/></svg>Settings</a>
+  </nav>
+</div>
+</figure>
+
+<!-- FRAME 2 -->
+<figure class="frame">
+<figcaption><b>One analyte, back to the page it was printed on.</b> Three panels, the converted value beside the printed original, the factor visible, and the PDF page underneath with the row highlighted.</figcaption>
+<div class="phone">
+  <div class="status"><span>07:26</span><svg><use href="#statr"/></svg></div>
+  <div class="screen">
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0 12px">
+      <button class="btn icon" aria-label="Back" style="transform:scaleX(-1)"><svg><use href="#chev"/></svg></button>
+      <div><div style="font-size:20px;font-weight:700;letter-spacing:-.01em">LDL cholesterol</div><div class="note">3 results since February</div></div>
+    </div>
+
+    <div class="card">
+      <div class="between"><span class="lbl">Latest</span><span class="src"><svg><use href="#doc"/></svg>Lab PDF</span></div>
+      <div class="metric" style="margin:8px 0 2px">3.72 <small>mmol/L</small></div>
+      <div class="sub" style="margin-bottom:12px">12 August 2026. Reference below 3.00 mmol/L on this sheet.</div>
+      <svg viewBox="0 0 297 92" width="297" height="92" role="img" aria-label="LDL falling from 4.08 in February to 3.72 in August, with the laboratory reference line at 3.00">
+        <line x1="8" y1="76" x2="289" y2="76" stroke="var(--chart-goal)" stroke-width="1.5" stroke-dasharray="5 5"/>
+        <text x="289" y="88" font-size="10" fill="var(--chart-goal)" text-anchor="end" font-family="-apple-system,system-ui">lab reference 3.00</text>
+        <path d="M20 18 148 30 276 42" fill="none" stroke="var(--chart-avg)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <g fill="var(--chart-avg)"><circle cx="20" cy="18" r="4"/><circle cx="148" cy="30" r="4"/><circle cx="276" cy="42" r="5.4" stroke="var(--surface)" stroke-width="2"/></g>
+        <text x="20" y="10" font-size="10" fill="var(--text-2)" text-anchor="middle" font-family="-apple-system,system-ui">4.08</text>
+        <text x="148" y="22" font-size="10" fill="var(--text-2)" text-anchor="middle" font-family="-apple-system,system-ui">3.91</text>
+        <text x="276" y="34" font-size="10" fill="var(--text)" text-anchor="middle" font-family="-apple-system,system-ui">3.72</text>
+        <text x="20" y="58" font-size="10" fill="var(--text-3)" text-anchor="middle" font-family="-apple-system,system-ui">12 Feb</text>
+        <text x="148" y="58" font-size="10" fill="var(--text-3)" text-anchor="middle" font-family="-apple-system,system-ui">15 May</text>
+        <text x="276" y="58" font-size="10" fill="var(--text-3)" text-anchor="middle" font-family="-apple-system,system-ui">12 Aug</text>
+      </svg>
+    </div>
+
+    <div class="card">
+      <div class="lbl" style="margin-bottom:10px">This value, as printed and as stored</div>
+      <div class="row"><span class="grow sub mut">Printed on the sheet</span><span class="num">1.44 g/L</span></div>
+      <div class="row"><span class="grow sub mut">Conversion factor</span><span class="num">x 2.586</span></div>
+      <div class="row"><span class="grow sub mut">Stored</span><span class="num">3.72 mmol/L</span></div>
+      <div class="row"><span class="grow sub mut">Validated by you</span><span class="num">12 Aug 2026, 21:04</span></div>
+      <div class="row"><span class="grow sub mut">Confidence at extraction</span><span class="chip g">High</span></div>
+    </div>
+
+    <div class="card">
+      <div class="between" style="margin-bottom:10px"><span class="lbl">Source, page 1 of 3</span><span class="note">analyses-12-08-2026.pdf</span></div>
+      <div class="pdf">
+        CERBALLIANCE PARIS 11<br>
+        Prelevement du 12/08/2026 a 08:15<br><br>
+        CHOLESTEROL TOTAL ... 2.17 g/L<br>
+        <mark>LDL CHOLESTEROL ... 1.44 g/L (&lt; 1.16)</mark><br>
+        HDL CHOLESTEROL ... 0.48 g/L<br>
+        TRIGLYCERIDES ...... 1.26 g/L
+      </div>
+      <button class="btn block" style="margin-top:12px"><svg><use href="#doc"/></svg>Open the full PDF</button>
+      <div class="note" style="margin-top:10px">The file is kept on the Mac mini because you chose to keep it on 12 August. You can delete it from here and the values stay.</div>
+    </div>
+
+    <div class="card flat" style="border-style:dashed">
+      <div class="lbl" style="margin-bottom:6px">What LDL is</div>
+      <div class="sub">LDL carries cholesterol from the liver into the blood. Laboratories print a reference interval for the general population next to the result, and the one on this sheet is below 3.00 mmol/L.</div>
+      <div class="note" style="margin-top:8px">General information, not an assessment of your health. Your doctor reads your result with the rest of your history.</div>
+    </div>
+  </div>
+  <nav class="tabbar">
+    <a href="#"><svg><use href="#cal"/></svg>Today</a>
+    <a href="#" aria-current="page"><svg><use href="#wave"/></svg>Health</a>
+    <a href="#"><svg><use href="#dumb"/></svg>Train</a>
+    <a href="#"><svg><use href="#fork"/></svg>Eat</a>
+    <a href="#"><svg><use href="#gear"/></svg>Settings</a>
+  </nav>
+</div>
+</figure>
+
+<!-- FRAME 3 -->
+<figure class="frame">
+<figcaption><b>Nothing connected yet, demo data on.</b> The dashboard is meaningful on first open, and every card says out loud that the numbers are invented. Demo is a border style, not a colour.</figcaption>
+<div class="phone">
+  <div class="status"><span>21:12</span><svg><use href="#statr"/></svg></div>
+  <div class="screen">
+    <div class="title"><div class="lbl">Tuesday 30 June</div><h2>Health</h2></div>
+
+    <div class="banner">
+      <svg><use href="#info"/></svg>
+      <div class="grow"><b>Demo data.</b> Nothing here was measured. Connect a source and the demo rows disappear on the first real reading.</div>
+    </div>
+
+    <div class="card" style="border-style:dashed">
+      <div class="between"><span class="lbl">Body</span><span class="src" style="border-style:dotted">Demo</span></div>
+      <div class="metric" style="margin:8px 0 2px">89.0 <small>kg</small></div>
+      <div class="sub">Generated sample, 30 days. Replaced the moment a scale or a manual entry arrives.</div>
+      <svg viewBox="0 0 329 60" width="329" height="60" style="margin-top:10px" role="img" aria-label="Demonstration weight line">
+        <path d="M8 14 60 18 112 21 164 26 216 29 268 34 321 38" fill="none" stroke="var(--chart-avg)" stroke-width="2.4" stroke-dasharray="6 4" opacity=".5" stroke-linecap="round"/>
+        <text x="8" y="56" font-size="10" fill="var(--text-3)" font-family="-apple-system,system-ui">Dashed because it is not real</text>
+      </svg>
+    </div>
+
+    <div class="card" style="border-style:dashed">
+      <div class="lbl">Waist</div>
+      <div style="margin:8px 0 4px;font-size:17px;font-weight:600">No measurement yet</div>
+      <div class="sub">Two minutes with a tape measure gives the trend that body-composition percentages cannot.</div>
+      <button class="btn primary block" style="margin-top:12px">Measure your waist</button>
+    </div>
+
+    <div class="card" style="border-style:dashed">
+      <div class="lbl">Activity, sleep and heart</div>
+      <div style="margin:8px 0 4px;font-size:17px;font-weight:600">The iPhone is not sending anything</div>
+      <div class="sub">These come from a shortcut you build once in the Shortcuts app. Ten steps, five minutes, no App Store.</div>
+      <button class="btn block" style="margin-top:12px">Set up the shortcut</button>
+    </div>
+
+    <div class="card" style="border-style:dashed">
+      <div class="lbl">Blood panel</div>
+      <div style="margin:8px 0 4px;font-size:17px;font-weight:600">No panel imported</div>
+      <div class="sub">Import a PDF from your laboratory, or type the numbers in. Either way you validate every row before anything is stored.</div>
+      <div style="display:flex;gap:8px;margin-top:12px"><button class="btn grow">Import a PDF</button><button class="btn grow">Type it in</button></div>
+    </div>
+
+    <div class="note" style="text-align:center;padding:4px 16px 0">Blood pressure is not handled anywhere in this app, by design. There is no field to fill and no toggle to find.</div>
+  </div>
+  <nav class="tabbar">
+    <a href="#"><svg><use href="#cal"/></svg>Today</a>
+    <a href="#" aria-current="page"><svg><use href="#wave"/></svg>Health</a>
+    <a href="#"><svg><use href="#dumb"/></svg>Train</a>
+    <a href="#"><svg><use href="#fork"/></svg>Eat</a>
+    <a href="#"><svg><use href="#gear"/></svg>Settings</a>
+  </nav>
+</div>
+</figure>
+
+</div>
+</body>
+</html>

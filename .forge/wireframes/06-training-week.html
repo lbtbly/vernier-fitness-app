@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>06 Training week — Forge wireframe</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,sans-serif;
+--s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:20px;--s6:24px;--s7:32px;--s8:40px;--s9:48px;
+--r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:22px;--r-full:999px;--touch:44px;
+--dur-fast:120ms;--dur:200ms;--dur-slow:900ms;--ease:cubic-bezier(.2,.6,.2,1)}
+html[data-theme=dark]{color-scheme:dark;--bg:#0A0A0B;--surface:#141416;--surface-2:#1C1C1F;--surface-3:#232327;--line:#2A2A2E;--line-2:#3A3A40;--text:#F5F5F7;--text-2:#A1A1A8;--text-3:#7C7C85;--accent:#5AA9FF;--accent-ink:#08080A;--accent-soft:rgba(90,169,255,.14);--good:#4FD08A;--good-soft:rgba(79,208,138,.13);--warn:#E9B44C;--warn-soft:rgba(233,180,76,.13);--alert:#F07A6A;--alert-soft:rgba(240,122,106,.13);--chart-daily:#6E6E78;--chart-avg:#E8E8EC;--chart-goal:#7C8BA1;--chart-band:rgba(124,139,161,.10);--chart-grid:#232327;--focus:#8FC4FF;--page:#0E0E10;--page-ink:#8B8B93}
+html[data-theme=light]{color-scheme:light;--bg:#F2F2F5;--surface:#FFFFFF;--surface-2:#EDEDF1;--surface-3:#E3E3E9;--line:#DCDCE2;--line-2:#C6C6CE;--text:#101013;--text-2:#4A4A52;--text-3:#6B6B73;--accent:#0A6CD0;--accent-ink:#FFFFFF;--accent-soft:rgba(10,108,208,.10);--good:#157F4E;--good-soft:rgba(21,127,78,.10);--warn:#8A5A00;--warn-soft:rgba(138,90,0,.10);--alert:#B3261E;--alert-soft:rgba(179,38,30,.10);--chart-daily:#9A9AA2;--chart-avg:#101013;--chart-goal:#5B6B80;--chart-band:rgba(91,107,128,.10);--chart-grid:#E3E3E9;--focus:#0A4C93;--page:#E7E7EC;--page-ink:#55555C}
+body{font-family:var(--font);background:var(--page);color:var(--page-ink);padding:24px;-webkit-font-smoothing:antialiased}
+.bar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;max-width:1720px;margin:0 auto 20px}
+.bar h1{font-size:17px;color:var(--text);letter-spacing:-.01em}
+.bar p{font-size:13px;margin-top:4px;max-width:70ch;line-height:1.5}
+.themeswitch{min-height:34px;padding:0 14px;border-radius:var(--r-full);border:1px solid var(--line-2);background:transparent;color:var(--text);font:inherit;font-size:13px;cursor:pointer;flex:none}
+.frames{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start;max-width:1720px;margin:0 auto}
+figure.frame{margin:0;width:393px}
+figure.frame figcaption{font-size:12px;line-height:1.5;margin-bottom:8px;min-height:52px}
+figure.frame figcaption b{color:var(--text);font-weight:600}
+.phone{width:393px;height:852px;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);display:flex;flex-direction:column;border:1px solid var(--line-2);position:relative;font-size:15px;line-height:1.35}
+.status{height:54px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 6px;font-size:15px;font-weight:600;letter-spacing:-.01em}
+.status svg{width:68px;height:14px;color:var(--text)}
+.screen{flex:1;overflow-y:auto;padding:0 16px 20px}
+.title{padding:4px 0 12px}
+.title h2{font-size:30px;letter-spacing:-.02em;font-weight:700;line-height:1.1}
+.lbl{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);font-weight:600}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px;margin-bottom:12px}
+.card.flat{background:transparent}
+.num{font-variant-numeric:tabular-nums}
+.big{font-size:22px;font-variant-numeric:tabular-nums;font-weight:600;letter-spacing:-.02em}
+.sub{font-size:13px;color:var(--text-2);line-height:1.45}
+.mut{color:var(--text-3)}
+.good{color:var(--good)}.warn{color:var(--warn)}.alert{color:var(--alert)}
+.row{display:flex;gap:12px;align-items:center;min-height:44px;padding:8px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.grow{flex:1;min-width:0}
+.between{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.stack{display:flex;flex-direction:column;gap:2px}
+.chip{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:var(--r-full);border:1px solid var(--line-2);font-size:12px;color:var(--text-2);white-space:nowrap}
+.chip.g{color:var(--good);border-color:var(--good);background:var(--good-soft)}
+.chip.w{color:var(--warn);border-color:var(--warn);background:var(--warn-soft)}
+.chip.a{color:var(--alert);border-color:var(--alert);background:var(--alert-soft)}
+.src{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 7px;border-radius:6px;border:1px solid var(--line-2);background:var(--surface-2);color:var(--text-2);font-size:11px;white-space:nowrap}
+.src.est{border-style:dashed}
+.src svg{width:12px;height:12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 16px;border-radius:var(--r-md);border:1px solid var(--line-2);background:var(--surface-2);color:var(--text);font:inherit;font-size:16px;font-weight:500;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn.quiet{background:transparent;border-color:transparent;color:var(--accent)}
+.btn.block{width:100%}
+.btn svg{width:20px;height:20px}
+.btn.icon{width:44px;height:44px;min-height:44px;padding:0;flex:none}
+.seg{display:flex;gap:6px;flex:none}
+.seg button{width:44px;height:44px;border-radius:10px;border:1px solid var(--line-2);background:var(--surface-2);color:var(--text-2);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.seg button svg{width:20px;height:20px}
+.seg button[aria-pressed=true].ok{background:var(--good-soft);border-color:var(--good);color:var(--good)}
+.seg button[aria-pressed=true].ed{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.seg button[aria-pressed=true].no{background:var(--alert-soft);border-color:var(--alert);color:var(--alert)}
+.reason{font-size:12px;color:var(--text-2);line-height:1.5;background:var(--surface-2);border-left:2px solid var(--line-2);border-radius:0 8px 8px 0;padding:8px 10px;margin-top:10px}
+.banner{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border-radius:var(--r-md);font-size:13px;line-height:1.45;margin-bottom:12px;border:1px solid var(--line);background:var(--surface-2);color:var(--text)}
+.banner svg{width:18px;height:18px;flex:none;margin-top:1px;color:var(--text-2)}
+.stickybar{position:absolute;left:0;right:0;bottom:0;padding:12px 16px 28px;background:var(--surface);border-top:1px solid var(--line)}
+.tabbar{height:83px;flex:none;padding:8px 6px 26px;display:flex;background:var(--surface);border-top:1px solid var(--line)}
+.tabbar a{flex:1;min-width:44px;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--text-3);text-decoration:none;font-size:10px}
+.tabbar a[aria-current=page]{color:var(--accent)}
+.tabbar svg{width:24px;height:24px}
+.note{font-size:12px;color:var(--text-3);line-height:1.5}
+.slot{display:flex;gap:8px;margin-bottom:8px}
+.slot button{flex:1;min-height:56px;border-radius:12px;border:1px solid var(--line-2);background:var(--surface-2);color:var(--text);font:inherit;font-size:14px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-variant-numeric:tabular-nums}
+.slot button[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+.slot button[disabled]{opacity:.45;cursor:not-allowed}
+a:focus-visible,button:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="ok" viewBox="0 0 20 20"><path d="M4 10.5 8 14.5 16 5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="no" viewBox="0 0 20 20"><path d="M5.5 5.5 14.5 14.5M14.5 5.5 5.5 14.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="edit" viewBox="0 0 20 20"><path d="M4 16.5h3.2l8.6-8.6-3.2-3.2L4 13.3v3.2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+<symbol id="chev" viewBox="0 0 20 20"><path d="M7.5 4.5 13 10l-5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="info" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 9v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="6.2" r=".9" fill="currentColor"/></symbol>
+<symbol id="undo" viewBox="0 0 20 20"><path d="M4 8.6h8.2a4.2 4.2 0 1 1 0 8.4H8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 5.6 4 8.6l3 3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="spark" viewBox="0 0 20 20"><path d="M10 2.5 11.6 7 16 8.6 11.6 10.2 10 14.7 8.4 10.2 4 8.6 8.4 7z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></symbol>
+<symbol id="cal" viewBox="0 0 24 24"><rect x="3.4" y="4.6" width="17.2" height="16" rx="3.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.4 9.6h17.2M8 3.2v3M16 3.2v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="wave" viewBox="0 0 24 24"><path d="M2.5 12.5h4l2-5.5 3.6 11 2.4-7 1.5 1.5h5.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="dumb" viewBox="0 0 24 24"><path d="M4 9v6M7 7.2v9.6M17 7.2v9.6M20 9v6M7 12h10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+<symbol id="fork" viewBox="0 0 24 24"><path d="M7 3v7M5 3v4.2a2 2 0 0 0 4 0V3M7 10v11M16.6 3c-1.8 2-1.8 6.4 0 8.4V21" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.1" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.6v3M12 18.4v3M21.4 12h-3M5.6 12h-3M18.6 5.4l-2.1 2.1M7.5 16.5l-2.1 2.1M18.6 18.6l-2.1-2.1M7.5 7.5 5.4 5.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="statr" viewBox="0 0 68 14"><path d="M1 10h2.4v3H1zM6 8h2.4v5H6zM11 5.6h2.4v7.4H11zM16 3.2h2.4v9.8H16z" fill="currentColor"/><path d="M27.4 5.4a8.6 8.6 0 0 1 10.4 0M29.8 8.2a5.2 5.2 0 0 1 5.6 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M32.6 10.9l1.6 1.7 1.6-1.7a2.4 2.4 0 0 0-3.2 0z" fill="currentColor"/><rect x="48" y="3.4" width="17" height="9" rx="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".55"/><rect x="49.6" y="5" width="11.4" height="5.8" rx="1.4" fill="currentColor"/><path d="M66.6 6.6v2.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" opacity=".55"/></symbol>
+</svg>
+
+<div class="bar">
+  <div>
+    <h1>06 Training week</h1>
+    <p>Four sessions proposed for next week, each carrying the reason it landed where it did. Every reason names the cause it acted on. Per session accept, edit or reject, and nothing reaches a calendar from this screen: it hands over to the confirm diff.</p>
+  </div>
+  <button class="themeswitch" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark';this.textContent=document.documentElement.dataset.theme==='dark'?'Light mode':'Dark mode'">Light mode</button>
+</div>
+
+<div class="frames">
+
+<!-- FRAME 1 -->
+<figure class="frame">
+<figcaption><b>The proposal.</b> Every card says why. Accepting is the default for a placement the app can justify; the progression to 10 kg is badged as a proposal because it is one.</figcaption>
+<div class="phone">
+  <div class="status"><span>20:31</span><svg><use href="#statr"/></svg></div>
+  <div class="screen" style="padding-bottom:124px">
+    <div class="title"><div class="lbl">Mon 24 to Sun 30 August</div><h2>Next week</h2></div>
+
+    <div class="card" style="padding:14px 16px">
+      <div class="between">
+        <div class="stack"><span class="big">4 sessions</span><span class="note">your range is 3 to 5</span></div>
+        <div class="stack" style="align-items:flex-end"><span class="big">2 h 50</span><span class="note">total</span></div>
+      </div>
+      <div class="note" style="margin-top:10px">One gym cardio, one interval, one home strength, one walk. Read from your calendar at 20:28 today.</div>
+    </div>
+
+    <!-- session 1 -->
+    <div class="card">
+      <div class="between" style="align-items:flex-start">
+        <div class="stack grow">
+          <span class="lbl">Monday 24</span>
+          <span style="font-size:17px;font-weight:600;margin-top:2px">Neoness cardio, 45 min</span>
+          <span class="sub num">19:00 to 19:45 &middot; zone 2, 128 to 142 bpm</span>
+        </div>
+        <div class="seg">
+          <button class="ok" aria-pressed="true" aria-label="Accept"><svg><use href="#ok"/></svg></button>
+          <button class="ed" aria-label="Edit"><svg><use href="#edit"/></svg></button>
+          <button class="no" aria-label="Reject"><svg><use href="#no"/></svg></button>
+        </div>
+      </div>
+      <div class="reason">Placed at 19:00 because your calendar is clear from 18:30 and Monday is the day you finished a session in 3 of the last 4 weeks.</div>
+    </div>
+
+    <!-- session 2 -->
+    <div class="card">
+      <div class="between" style="align-items:flex-start">
+        <div class="stack grow">
+          <span class="lbl">Wednesday 26</span>
+          <span style="font-size:17px;font-weight:600;margin-top:2px">Home strength, 35 min</span>
+          <span class="sub num">07:00 to 07:35 &middot; mat and backpack</span>
+        </div>
+        <div class="seg">
+          <button class="ok" aria-pressed="true" aria-label="Accept"><svg><use href="#ok"/></svg></button>
+          <button class="ed" aria-label="Edit"><svg><use href="#edit"/></svg></button>
+          <button class="no" aria-label="Reject"><svg><use href="#no"/></svg></button>
+        </div>
+      </div>
+      <div class="reason">Morning slot because your calendar shows you busy 18:00 to 22:30 on Wednesday.</div>
+      <div class="between" style="margin-top:10px">
+        <div class="stack grow"><span class="sub">Backpack 10 kg, up from 8 kg</span><span class="note">You logged RPE 7 on all three sets last Wednesday.</span></div>
+        <span class="src est"><svg><use href="#spark"/></svg>Proposal</span>
+      </div>
+    </div>
+
+    <!-- session 3 -->
+    <div class="card">
+      <div class="between" style="align-items:flex-start">
+        <div class="stack grow">
+          <span class="lbl">Friday 28</span>
+          <span style="font-size:17px;font-weight:600;margin-top:2px">Neoness intervals, 40 min</span>
+          <span class="sub num">07:15 to 07:55 &middot; zone 4 peaks, 158 to 172 bpm</span>
+        </div>
+        <div class="seg">
+          <button class="ok" aria-pressed="true" aria-label="Accept"><svg><use href="#ok"/></svg></button>
+          <button class="ed" aria-label="Edit"><svg><use href="#edit"/></svg></button>
+          <button class="no" aria-label="Reject"><svg><use href="#no"/></svg></button>
+        </div>
+      </div>
+      <div class="reason">Moved from Thursday, your calendar shows you busy 18:00 to 23:00.</div>
+    </div>
+
+    <!-- session 4 -->
+    <div class="card">
+      <div class="between" style="align-items:flex-start">
+        <div class="stack grow">
+          <span class="lbl">Saturday 29</span>
+          <span style="font-size:17px;font-weight:600;margin-top:2px">Recovery walk, 50 min</span>
+          <span class="sub num">10:30 to 11:20 &middot; easy pace</span>
+        </div>
+        <div class="seg">
+          <button class="ok" aria-label="Accept"><svg><use href="#ok"/></svg></button>
+          <button class="ed" aria-label="Edit"><svg><use href="#edit"/></svg></button>
+          <button class="no" aria-pressed="true" aria-label="Reject"><svg><use href="#no"/></svg></button>
+        </div>
+      </div>
+      <div class="reason">Added because you were under 8,000 steps on 5 of the last 7 days that have data.</div>
+      <div class="note" style="margin-top:10px">Rejected. It will not be offered again for this week, and the reason is kept so the app can tell whether Saturdays never work or just this one.</div>
+    </div>
+
+    <div class="card flat" style="border-style:dashed">
+      <div class="between" style="margin-bottom:6px"><span class="lbl">What the app learned</span><span class="src est"><svg><use href="#spark"/></svg>From your edits</span></div>
+      <div class="sub">You moved Wednesday evening to Friday morning three weeks running. From next week Friday morning is proposed first, and you will not be asked about Wednesday evening again.</div>
+    </div>
+
+    <div class="note" style="text-align:center;padding-top:4px">Missing a session does not change the plan's difficulty. Two missed in a month is normal and gets no message.</div>
+  </div>
+  <div class="stickybar">
+    <div class="between" style="margin-bottom:10px"><span class="sub">3 accepted, 1 rejected</span><button class="btn quiet" style="min-height:32px;padding:0">Ask for a different week</button></div>
+    <button class="btn primary block">Review the calendar changes</button>
+    <div class="note" style="text-align:center;margin-top:8px">Next screen shows exactly what gets written, before anything is written.</div>
+  </div>
+</div>
+</figure>
+
+<!-- FRAME 2 -->
+<figure class="frame">
+<figcaption><b>Editing a session.</b> Busy time comes from the calendar and is shown as unavailable rather than hidden. Duration is adaptive, so it is a control, not a fixed property.</figcaption>
+<div class="phone">
+  <div class="status"><span>20:34</span><svg><use href="#statr"/></svg></div>
+  <div class="screen" style="padding-bottom:20px">
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0 12px">
+      <button class="btn icon" aria-label="Back" style="transform:scaleX(-1)"><svg><use href="#chev"/></svg></button>
+      <div class="grow"><div style="font-size:20px;font-weight:700;letter-spacing:-.01em">Wednesday 26</div><div class="note">Home strength</div></div>
+    </div>
+
+    <div class="card">
+      <div class="lbl" style="margin-bottom:10px">Start time</div>
+      <div class="slot">
+        <button aria-pressed="true">07:00<span class="note">clear</span></button>
+        <button>12:30<span class="note">clear</span></button>
+        <button disabled>18:00<span class="note">busy</span></button>
+      </div>
+      <div class="slot">
+        <button disabled>19:30<span class="note">busy</span></button>
+        <button disabled>21:00<span class="note">busy</span></button>
+        <button>22:30<span class="note">late</span></button>
+      </div>
+      <div class="note" style="margin-top:6px">Busy from 18:00 to 22:30, read from the calendars you selected. Titles are not read and never leave the machine.</div>
+    </div>
+
+    <div class="card">
+      <div class="lbl" style="margin-bottom:10px">Duration</div>
+      <div class="slot">
+        <button>20 min</button><button aria-pressed="true">35 min</button><button>50 min</button>
+      </div>
+      <div class="note" style="margin-top:6px">A short session on a hard day beats a skipped one. The plan absorbs it without changing the week.</div>
+    </div>
+
+    <div class="card">
+      <div class="lbl" style="margin-bottom:10px">Type</div>
+      <div class="slot">
+        <button aria-pressed="true">Strength</button><button>Cardio</button><button>Walk</button>
+      </div>
+      <div class="row" style="margin-top:8px"><span class="grow">Equipment</span><span class="sub">Mat, backpack</span></div>
+      <div class="row"><span class="grow">Working load</span><span class="sub num">10 kg, was 8 kg</span></div>
+      <div class="row"><span class="grow">Movements</span><span class="sub">6, see the session</span><svg style="width:18px;height:18px;color:var(--text-3)"><use href="#chev"/></svg></div>
+    </div>
+
+    <button class="btn primary block" style="margin-bottom:8px">Save this session</button>
+    <button class="btn block">Reject this session</button>
+    <div class="note" style="text-align:center;margin-top:12px">Your edit is remembered as a correction, not as a one-off. Three of the same correction changes what gets proposed.</div>
+  </div>
+</div>
+</figure>
+
+<!-- FRAME 3 -->
+<figure class="frame">
+<figcaption><b>After the write.</b> The result is a list, not a sentence, and undo stays on the screen that did the writing. This is the same component the weekly review uses.</figcaption>
+<div class="phone">
+  <div class="status"><span>20:47</span><svg><use href="#statr"/></svg></div>
+  <div class="screen">
+    <div class="title"><div class="lbl">Mon 24 to Sun 30 August</div><h2>Week confirmed</h2></div>
+
+    <div class="banner" style="border-color:var(--good)">
+      <svg style="color:var(--good)"><use href="#ok"/></svg>
+      <div><b>3 events written to Health (app).</b> Your primary calendar was not touched.</div>
+    </div>
+
+    <div class="card">
+      <div class="row"><div class="stack grow"><span>Neoness cardio</span><span class="note num">Mon 24, 19:00</span></div><span class="chip g">Added</span></div>
+      <div class="row"><div class="stack grow"><span>Home strength</span><span class="note num">Wed 26, 07:00</span></div><span class="chip g">Added</span></div>
+      <div class="row"><div class="stack grow"><span>Neoness intervals</span><span class="note num">Fri 28, 07:15</span></div><span class="chip g">Added</span></div>
+      <div class="row"><div class="stack grow"><span class="mut">Recovery walk</span><span class="note num">Sat 29, 10:30</span></div><span class="chip">Not written</span></div>
+      <button class="btn block" style="margin-top:12px"><svg><use href="#undo"/></svg>Undo all three</button>
+    </div>
+
+    <div class="card">
+      <div class="lbl" style="margin-bottom:10px">Reminders</div>
+      <div class="row"><div class="stack grow"><span>Push, 30 min before each session</span><span class="note">Grouped. Quiet hours 22:00 to 07:00.</span></div><span class="chip g">On</span></div>
+      <div class="row"><div class="stack grow"><span>Calendar alert, 1 hour before</span><span class="note">In the dedicated calendar only.</span></div><span class="chip g">On</span></div>
+    </div>
+
+    <div class="card flat" style="border-style:dashed">
+      <div class="lbl" style="margin-bottom:6px">If the week goes sideways</div>
+      <div class="sub">Miss one and nothing recalculates. The next Sunday proposal reads what happened and offers a week that fits, without a score and without a message about consistency.</div>
+    </div>
+  </div>
+  <nav class="tabbar">
+    <a href="#"><svg><use href="#cal"/></svg>Today</a>
+    <a href="#"><svg><use href="#wave"/></svg>Health</a>
+    <a href="#" aria-current="page"><svg><use href="#dumb"/></svg>Train</a>
+    <a href="#"><svg><use href="#fork"/></svg>Eat</a>
+    <a href="#"><svg><use href="#gear"/></svg>Settings</a>
+  </nav>
+</div>
+</figure>
+
+</div>
+</body>
+</html>

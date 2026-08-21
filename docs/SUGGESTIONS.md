@@ -12,3 +12,9 @@ Triaged by /doc-health. Checked = handled.
 - [ ] 2026-08-21 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `.forge/research/ios-pwa.md`
 - [ ] 2026-08-21 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `.forge/wireframes/00-patterns.html`
 - [ ] 2026-08-21 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `.forge/wireframes/01-sign-in.html`
+- [ ] 2026-08-21 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `.forge/wireframes/02-today.html`
+- [ ] 2026-08-21 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `.forge/research/apple-health-shortcut.md`
+- [ ] 2026-08-21 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `.forge/wireframes/03-quick-log.html`
+- [ ] 2026-08-21 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `.forge/wireframes/04-health.html`
+- [ ] 2026-08-21 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `.forge/wireframes/05-labs-review.html`
+- [ ] 2026-08-21 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `.forge/wireframes/06-training-week.html`
