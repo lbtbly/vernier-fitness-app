@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>00 Patterns — Forge wireframe</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,sans-serif;
+--s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:20px;--s6:24px;--s7:32px;--s8:40px;--s9:48px;
+--r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:22px;--r-full:999px;--touch:44px;
+--dur-fast:120ms;--dur:200ms;--dur-slow:900ms;--ease:cubic-bezier(.2,.6,.2,1)}
+html[data-theme=dark]{color-scheme:dark;--bg:#0A0A0B;--surface:#141416;--surface-2:#1C1C1F;--surface-3:#232327;--line:#2A2A2E;--line-2:#3A3A40;--text:#F5F5F7;--text-2:#A1A1A8;--text-3:#7C7C85;--accent:#5AA9FF;--accent-ink:#08080A;--accent-soft:rgba(90,169,255,.14);--good:#4FD08A;--good-soft:rgba(79,208,138,.13);--warn:#E9B44C;--warn-soft:rgba(233,180,76,.13);--alert:#F07A6A;--alert-soft:rgba(240,122,106,.13);--chart-daily:#6E6E78;--chart-avg:#E8E8EC;--chart-goal:#7C8BA1;--chart-band:rgba(124,139,161,.10);--chart-grid:#232327;--focus:#8FC4FF;--page:#0E0E10;--page-ink:#8B8B93}
+html[data-theme=light]{color-scheme:light;--bg:#F2F2F5;--surface:#FFFFFF;--surface-2:#EDEDF1;--surface-3:#E3E3E9;--line:#DCDCE2;--line-2:#C6C6CE;--text:#101013;--text-2:#4A4A52;--text-3:#6B6B73;--accent:#0A6CD0;--accent-ink:#FFFFFF;--accent-soft:rgba(10,108,208,.10);--good:#157F4E;--good-soft:rgba(21,127,78,.10);--warn:#8A5A00;--warn-soft:rgba(138,90,0,.10);--alert:#B3261E;--alert-soft:rgba(179,38,30,.10);--chart-daily:#9A9AA2;--chart-avg:#101013;--chart-goal:#5B6B80;--chart-band:rgba(91,107,128,.10);--chart-grid:#E3E3E9;--focus:#0A4C93;--page:#E7E7EC;--page-ink:#55555C}
+body{font-family:var(--font);background:var(--page);color:var(--page-ink);padding:24px;-webkit-font-smoothing:antialiased}
+.bar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;max-width:1720px;margin:0 auto 20px}
+.bar h1{font-size:17px;color:var(--text);letter-spacing:-.01em}
+.bar p{font-size:13px;margin-top:4px;max-width:70ch;line-height:1.5}
+.themeswitch{min-height:34px;padding:0 14px;border-radius:var(--r-full);border:1px solid var(--line-2);background:transparent;color:var(--text);font:inherit;font-size:13px;cursor:pointer;flex:none}
+.frames{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start;max-width:1720px;margin:0 auto}
+figure.frame{margin:0;width:393px}
+figure.frame figcaption{font-size:12px;line-height:1.5;margin-bottom:8px;min-height:36px}
+figure.frame figcaption b{color:var(--text);font-weight:600}
+.phone{width:393px;height:852px;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);display:flex;flex-direction:column;border:1px solid var(--line-2);position:relative;font-size:15px;line-height:1.35}
+.status{height:54px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 6px;font-size:15px;font-weight:600;letter-spacing:-.01em}
+.status svg{width:68px;height:14px;color:var(--text)}
+.screen{flex:1;overflow-y:auto;padding:0 16px 20px}
+.title{padding:4px 0 12px}
+.title h2{font-size:28px;letter-spacing:-.02em;font-weight:700}
+.title .sub{font-size:13px;color:var(--text-2);margin-top:2px}
+.lbl{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);font-weight:600}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px;margin-bottom:12px}
+.card.flat{background:transparent}
+.metric{font-size:34px;letter-spacing:-.02em;font-variant-numeric:tabular-nums;font-weight:600;line-height:1.05}
+.metric small{font-size:15px;color:var(--text-2);font-weight:400;letter-spacing:0}
+.big{font-size:28px;font-variant-numeric:tabular-nums;font-weight:600;letter-spacing:-.02em}
+.num{font-variant-numeric:tabular-nums}
+.sub{font-size:13px;color:var(--text-2);line-height:1.45}
+.mut{color:var(--text-3)}
+.good{color:var(--good)}.warn{color:var(--warn)}.alert{color:var(--alert)}
+.row{display:flex;gap:12px;align-items:center;min-height:44px;padding:9px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.grow{flex:1;min-width:0}
+.between{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.stack{display:flex;flex-direction:column;gap:2px}
+.hr{height:1px;background:var(--line);margin:12px 0}
+.src{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 7px;border-radius:6px;border:1px solid var(--line-2);background:var(--surface-2);color:var(--text-2);font-size:11px;white-space:nowrap}
+.src svg{width:12px;height:12px}
+.src.est{border-style:dashed}
+.chip{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:var(--r-full);border:1px solid var(--line-2);font-size:12px;color:var(--text-2);white-space:nowrap}
+.chip.g{color:var(--good);border-color:var(--good);background:var(--good-soft)}
+.chip.w{color:var(--warn);border-color:var(--warn);background:var(--warn-soft)}
+.chip.a{color:var(--alert);border-color:var(--alert);background:var(--alert-soft)}
+.dot{width:8px;height:8px;border-radius:50%;flex:none;display:inline-block}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:var(--r-md);border:1px solid var(--line-2);background:var(--surface-2);color:var(--text);font:inherit;font-size:15px;font-weight:500;cursor:pointer;text-decoration:none;transition:opacity var(--dur-fast) var(--ease)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn.quiet{background:transparent}
+.btn.block{width:100%}
+.btn svg{width:18px;height:18px}
+.btn.icon{width:44px;height:44px;padding:0;flex:none}
+.seg{display:flex;gap:6px;flex:none}
+.seg button{width:44px;height:44px;border-radius:10px;border:1px solid var(--line-2);background:var(--surface-2);color:var(--text-2);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.seg button svg{width:20px;height:20px}
+.seg button[aria-pressed=true].ok{background:var(--good-soft);border-color:var(--good);color:var(--good)}
+.seg button[aria-pressed=true].ed{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.seg button[aria-pressed=true].no{background:var(--alert-soft);border-color:var(--alert);color:var(--alert)}
+.banner{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border-radius:var(--r-md);font-size:13px;line-height:1.45;margin-bottom:12px;border:1px solid var(--line);background:var(--surface-2);color:var(--text)}
+.banner svg{width:18px;height:18px;flex:none;margin-top:1px;color:var(--text-2)}
+.banner.w{background:var(--warn-soft);border-color:var(--warn)}
+.banner.w svg{color:var(--warn)}
+.banner.a{background:var(--alert-soft);border-color:var(--alert)}
+.banner.a svg{color:var(--alert)}
+.skel{background:var(--surface-2);border-radius:6px;height:12px;animation:pulse 1.4s var(--ease) infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.tabbar{height:83px;flex:none;padding:8px 6px 26px;display:flex;background:var(--surface);border-top:1px solid var(--line)}
+.tabbar a{flex:1;min-width:44px;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--text-3);text-decoration:none;font-size:10px}
+.tabbar a[aria-current=page]{color:var(--accent)}
+.tabbar svg{width:24px;height:24px}
+.scrim{position:absolute;inset:0;background:rgba(0,0,0,.6)}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:22px 22px 0 0;border-top:1px solid var(--line);padding:8px 16px 30px;max-height:92%;overflow-y:auto}
+.grabber{width:36px;height:5px;border-radius:3px;background:var(--line-2);margin:0 auto 14px}
+.stickybar{position:absolute;left:0;right:0;bottom:0;padding:12px 16px 28px;background:var(--surface);border-top:1px solid var(--line)}
+a:focus-visible,button:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.focusdemo{outline:2px solid var(--focus);outline-offset:2px}
+.tag{font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;color:var(--text-3)}
+.note{font-size:12px;color:var(--text-3);line-height:1.45}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="ok" viewBox="0 0 20 20"><path d="M4 10.5 8 14.5 16 5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="no" viewBox="0 0 20 20"><path d="M5.5 5.5 14.5 14.5M14.5 5.5 5.5 14.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="edit" viewBox="0 0 20 20"><path d="M4 16.5h3.2l8.6-8.6-3.2-3.2L4 13.3v3.2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+<symbol id="chev" viewBox="0 0 20 20"><path d="M7.5 4.5 13 10l-5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="info" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 9v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="6.2" r=".9" fill="currentColor"/></symbol>
+<symbol id="warn" viewBox="0 0 20 20"><path d="M10 3 18.2 17H1.8z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 8v3.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="10" cy="14.3" r=".9" fill="currentColor"/></symbol>
+<symbol id="undo" viewBox="0 0 20 20"><path d="M4 8.6h8.2a4.2 4.2 0 1 1 0 8.4H8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 5.6 4 8.6l3 3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="sync" viewBox="0 0 20 20"><path d="M16.6 10a6.6 6.6 0 1 1-2-4.75" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M16.9 2.9v3.5h-3.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="plus" viewBox="0 0 20 20"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="minus" viewBox="0 0 20 20"><path d="M4 10h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="doc" viewBox="0 0 20 20"><path d="M5 2.5h6.5L16 7v10.5H5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M11.2 2.6V7.2H15.8" fill="none" stroke="currentColor" stroke-width="1.4"/></symbol>
+<symbol id="scale" viewBox="0 0 20 20"><rect x="2.6" y="4.6" width="14.8" height="11" rx="2.4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M6.6 11.4 10 8.2l3.4 3.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+<symbol id="hand" viewBox="0 0 20 20"><path d="M6.5 10V4.6a1.5 1.5 0 0 1 3 0V9M9.5 9V3.6a1.5 1.5 0 0 1 3 0V9M12.5 9V5.6a1.5 1.5 0 0 1 3 0v6.6a5 5 0 0 1-5 5H9.4a4 4 0 0 1-3.1-1.5L3.6 11.8a1.5 1.5 0 0 1 2.3-1.9L6.5 11" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="spark" viewBox="0 0 20 20"><path d="M10 2.5 11.6 7 16 8.6 11.6 10.2 10 14.7 8.4 10.2 4 8.6 8.4 7z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></symbol>
+<symbol id="cal" viewBox="0 0 24 24"><rect x="3.4" y="4.6" width="17.2" height="16" rx="3.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.4 9.6h17.2M8 3.2v3M16 3.2v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="wave" viewBox="0 0 24 24"><path d="M2.5 12.5h4l2-5.5 3.6 11 2.4-7 1.5 1.5h5.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="dumb" viewBox="0 0 24 24"><path d="M4 9v6M7 7.2v9.6M17 7.2v9.6M20 9v6M7 12h10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+<symbol id="fork" viewBox="0 0 24 24"><path d="M7 3v7M5 3v4.2a2 2 0 0 0 4 0V3M7 10v11M16.6 3c-1.8 2-1.8 6.4 0 8.4V21" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.1" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.6v3M12 18.4v3M21.4 12h-3M5.6 12h-3M18.6 5.4l-2.1 2.1M7.5 16.5l-2.1 2.1M18.6 18.6l-2.1-2.1M7.5 7.5 5.4 5.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="statr" viewBox="0 0 68 14"><path d="M1 10h2.4v3H1zM6 8h2.4v5H6zM11 5.6h2.4v7.4H11zM16 3.2h2.4v9.8H16z" fill="currentColor"/><path d="M27.4 5.4a8.6 8.6 0 0 1 10.4 0M29.8 8.2a5.2 5.2 0 0 1 5.6 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M32.6 10.9l1.6 1.7 1.6-1.7a2.4 2.4 0 0 0-3.2 0z" fill="currentColor"/><rect x="48" y="3.4" width="17" height="9" rx="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".55"/><rect x="49.6" y="5" width="11.4" height="5.8" rx="1.4" fill="currentColor"/><path d="M66.6 6.6v2.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" opacity=".55"/></symbol>
+</svg>
+
+<div class="bar">
+  <div>
+    <h1>00 Patterns</h1>
+    <p>Reference sheet, not a route. The five states, the provenance affordance and the confirm diff, defined once so no screen improvises them. Every other wireframe copies these components verbatim. 393 x 852.</p>
+  </div>
+  <button class="themeswitch" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark';this.textContent=document.documentElement.dataset.theme==='dark'?'Light mode':'Dark mode'">Light mode</button>
+</div>
+
+<div class="frames">
+
+<!-- ============ FRAME 1: the five states on one card ============ -->
+<figure class="frame">
+<figcaption><b>The five states.</b> One card, six renderings. Same geometry every time, so a state change never reflows the page.</figcaption>
+<div class="phone">
+  <div class="status"><span>06:58</span><svg><use href="#statr"/></svg></div>
+  <div class="screen">
+    <div class="title"><h2>States</h2><div class="sub">Weight card, every state</div></div>
+
+    <div class="tag" style="margin-bottom:6px">1 · Loaded</div>
+    <div class="card">
+      <div class="between"><span class="lbl">Weight</span><span class="src"><svg><use href="#scale"/></svg>Withings</span></div>
+      <div class="metric" style="margin:8px 0 2px">86.4 <small>kg, 7-day average</small></div>
+      <div class="sub"><span class="good">-0.6 kg</span> this week. 0.1 kg below the line to 76.0 kg.</div>
+    </div>
+
+    <div class="tag" style="margin-bottom:6px">2 · Loading</div>
+    <div class="card">
+      <div class="between"><span class="lbl">Weight</span><span class="skel" style="width:74px;height:22px;border-radius:6px"></span></div>
+      <div class="skel" style="width:186px;height:34px;margin:8px 0 8px"></div>
+      <div class="skel" style="width:250px;height:13px"></div>
+      <div class="note" style="margin-top:10px">Skeleton holds the final geometry. No spinner under 600 ms, no placeholder curve, never a fake number.</div>
+    </div>
+
+    <div class="tag" style="margin-bottom:6px">3 · Empty</div>
+    <div class="card" style="border-style:dashed">
+      <div class="between"><span class="lbl">Weight</span></div>
+      <div style="margin:8px 0 4px;font-size:17px;font-weight:600">No weight yet</div>
+      <div class="sub">Step on the Withings scale, or type a number. Either one starts the trend.</div>
+      <div style="display:flex;gap:8px;margin-top:12px"><button class="btn primary grow">Enter weight</button><button class="btn">Connect scale</button></div>
+    </div>
+
+    <div class="tag" style="margin-bottom:6px">4 · Error</div>
+    <div class="card" style="border-color:var(--alert)">
+      <div class="between"><span class="lbl">Weight</span><span class="chip a">Failed</span></div>
+      <div style="margin:8px 0 4px;font-size:17px;font-weight:600">Withings refused the sync</div>
+      <div class="sub">HTTP 401, invalid&nbsp;grant, at 06:54. The refresh token was revoked. The last 42 readings are still here and the trend below is unaffected.</div>
+      <div style="display:flex;gap:8px;margin-top:12px"><button class="btn primary grow">Reconnect Withings</button><button class="btn icon" aria-label="Retry"><svg><use href="#sync"/></svg></button></div>
+    </div>
+
+    <div class="tag" style="margin-bottom:6px">5 · Offline</div>
+    <div class="card">
+      <div class="between"><span class="lbl">Weight</span><span class="chip">Queued</span></div>
+      <div class="metric" style="margin:8px 0 2px">86.4 <small>kg, 7-day average</small></div>
+      <div class="sub">Saved on this phone at 06:58. It uploads when the Mac mini is reachable. Nothing to redo.</div>
+    </div>
+
+    <div class="tag" style="margin-bottom:6px">6 · Stale sync</div>
+    <div class="card">
+      <div class="between"><span class="lbl">Activity</span><span class="src" style="border-color:var(--warn);color:var(--warn)"><svg><use href="#warn"/></svg>Health, 3 days old</span></div>
+      <div class="metric" style="margin:8px 0 2px">9,412 <small>steps, 17 August</small></div>
+      <svg viewBox="0 0 329 44" width="329" height="44" style="margin:10px 0 6px" role="img" aria-label="Seven day step bars with a hatched gap for 18 to 21 August">
+        <defs><pattern id="hatch1" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse"><line x1="0" y1="0" x2="0" y2="6" stroke="var(--warn)" stroke-width="1.4" opacity=".45"/></pattern></defs>
+        <rect x="0" y="0" width="188" height="44" fill="none"/>
+        <rect x="8" y="14" width="22" height="26" rx="3" fill="var(--chart-daily)"/>
+        <rect x="40" y="8" width="22" height="32" rx="3" fill="var(--chart-daily)"/>
+        <rect x="72" y="20" width="22" height="20" rx="3" fill="var(--chart-daily)"/>
+        <rect x="104" y="4" width="22" height="36" rx="3" fill="var(--chart-daily)"/>
+        <rect x="136" y="0" width="188" height="0" fill="none"/>
+        <rect x="136" y="2" width="186" height="38" fill="url(#hatch1)" stroke="var(--warn)" stroke-width="1" stroke-dasharray="3 3" opacity=".8"/>
+        <text x="229" y="26" text-anchor="middle" font-size="11" fill="var(--warn)" font-family="-apple-system,system-ui">no data, 18 to 21 Aug</text>
+      </svg>
+      <div class="sub">The iPhone shortcut last sent a batch on 18 August at 07:12. Run it, or open the shortcut guide.</div>
+      <button class="btn block" style="margin-top:12px">Fix the shortcut</button>
+    </div>
+
+    <div class="card flat" style="border-style:dashed;padding:14px">
+      <div class="lbl" style="margin-bottom:6px">The absence rule</div>
+      <div class="sub">A gap is drawn as a gap. No interpolation, no carry-forward, no zero-fill, no default. The chart line breaks, the missing range is hatched and named, and any average computed on a short window says so.</div>
+    </div>
+  </div>
+  <nav class="tabbar">
+    <a href="#"><svg><use href="#cal"/></svg>Today</a>
+    <a href="#" aria-current="page"><svg><use href="#wave"/></svg>Health</a>
+    <a href="#"><svg><use href="#dumb"/></svg>Train</a>
+    <a href="#"><svg><use href="#fork"/></svg>Eat</a>
+    <a href="#"><svg><use href="#gear"/></svg>Settings</a>
+  </nav>
+</div>
+</figure>
+
+<!-- ============ FRAME 2: provenance tap 1 ============ -->
+<figure class="frame">
+<figcaption><b>Provenance, tap 1.</b> Every value carries a source chip. Tapping the value opens this sheet: raw value, unit, both timestamps, confidence, append-only correction history.</figcaption>
+<div class="phone">
+  <div class="status"><span>07:04</span><svg><use href="#statr"/></svg></div>
+  <div class="screen" style="filter:blur(1px)">
+    <div class="title"><h2>Health</h2><div class="sub">Friday 21 August 2026</div></div>
+    <div class="card"><div class="between"><span class="lbl">Weight</span><span class="src"><svg><use href="#scale"/></svg>Withings</span></div><div class="metric" style="margin-top:8px">86.4 <small>kg</small></div></div>
+    <div class="card"><div class="between"><span class="lbl">Waist</span><span class="src"><svg><use href="#hand"/></svg>Manual</span></div><div class="metric" style="margin-top:8px">98.5 <small>cm</small></div></div>
+  </div>
+  <div class="scrim"></div>
+  <div class="sheet">
+    <div class="grabber"></div>
+    <div class="between" style="margin-bottom:2px">
+      <div class="stack"><span class="lbl">Weight</span><span class="big">85.9 kg</span></div>
+      <button class="btn icon" aria-label="Close"><svg><use href="#no"/></svg></button>
+    </div>
+    <div class="sub" style="margin-bottom:14px">One reading. The card above shows the 7-day average, not this number.</div>
+
+    <div class="row"><span class="grow sub mut">Stored value</span><span class="num">85.9 kg</span></div>
+    <div class="row"><span class="grow sub mut">Measured</span><span class="num">21 Aug 2026, 06:52</span></div>
+    <div class="row"><span class="grow sub mut">Imported</span><span class="num">21 Aug 2026, 06:54</span></div>
+    <div class="row"><span class="grow sub mut">Source</span><span class="src"><svg><use href="#scale"/></svg>Withings Body Smart</span></div>
+    <div class="row"><span class="grow sub mut">Confidence</span><span class="chip g">Measured, device</span></div>
+    <div class="row"><span class="grow sub mut">Deduplication</span><span class="sub">Kept. Manual entry 86.0 kg at 07:10 was dropped as the same day.</span></div>
+
+    <div class="lbl" style="margin:16px 0 8px">Correction history</div>
+    <div class="card tight" style="padding:12px 14px;margin-bottom:8px">
+      <div class="between"><span class="sub">No correction on this value.</span></div>
+    </div>
+    <div class="card tight" style="padding:12px 14px">
+      <div class="between" style="align-items:flex-start"><div class="stack"><span style="font-size:15px">Waist, 11 Aug</span><span class="sub">99.2 cm, was <s class="mut">92.2 cm</s></span><span class="note">Corrected by you, 11 Aug 21:14. Typed a 2 for a 9. Original kept.</span></div><span class="chip">Append only</span></div>
+    </div>
+    <div class="note" style="margin:12px 0 14px">A correction is never overwritten. A later import that disagrees becomes a question, not a decision.</div>
+
+    <button class="btn block primary"><svg><use href="#doc"/></svg>Open the source</button>
+    <div class="note" style="margin-top:8px;text-align:center">Tap 2 reaches the Withings sync log entry that carried this reading.</div>
+  </div>
+</div>
+</figure>
+
+<!-- ============ FRAME 3: provenance tap 2 ============ -->
+<figure class="frame">
+<figcaption><b>Provenance, tap 2.</b> The source itself. Same destination shape for all six sources: the sync batch, the shortcut payload, the PDF page, the photo, the manual entry, the derivation.</figcaption>
+<div class="phone">
+  <div class="status"><span>07:05</span><svg><use href="#statr"/></svg></div>
+  <div class="screen">
+    <div class="title" style="display:flex;align-items:center;gap:10px;padding-top:8px">
+      <button class="btn icon" aria-label="Back" style="transform:scaleX(-1)"><svg><use href="#chev"/></svg></button>
+      <div><h2 style="font-size:20px">Source</h2><div class="sub">Withings sync, 21 Aug 06:54</div></div>
+    </div>
+
+    <div class="card">
+      <div class="lbl" style="margin-bottom:10px">Sync batch 1184</div>
+      <div class="row"><span class="grow sub mut">Started</span><span class="num">21 Aug 2026, 06:54:02</span></div>
+      <div class="row"><span class="grow sub mut">Endpoint</span><span class="num" style="font-size:13px">measure?action=getmeas</span></div>
+      <div class="row"><span class="grow sub mut">Window</span><span class="num" style="font-size:13px">20 Aug 06:54 to 21 Aug 06:54</span></div>
+      <div class="row"><span class="grow sub mut">Rows received</span><span class="num">7</span></div>
+      <div class="row"><span class="grow sub mut">Stored</span><span class="num">6, 1 duplicate dropped</span></div>
+      <div class="row"><span class="grow sub mut">Result</span><span class="chip g">200 OK</span></div>
+    </div>
+
+    <div class="card">
+      <div class="lbl" style="margin-bottom:10px">Rows in this batch</div>
+      <div class="row"><span class="grow">Weight</span><span class="num">85.9 kg</span></div>
+      <div class="row"><span class="grow">Fat mass</span><span class="num">22.4 %</span></div>
+      <div class="row"><span class="grow">Muscle mass</span><span class="num">62.8 kg</span></div>
+      <div class="row"><span class="grow">Body water</span><span class="num">53.1 %</span></div>
+      <div class="row"><span class="grow">Visceral fat index</span><span class="num">9</span></div>
+      <div class="row"><span class="grow">Standing heart rate</span><span class="num">61 bpm</span></div>
+    </div>
+
+    <div class="card flat" style="border-style:dashed">
+      <div class="sub">Body composition percentages move with hydration. The app trends them over 7 and 28 days and never reads one day as a change.</div>
+    </div>
+
+    <div class="card flat" style="border-style:dashed;border-color:var(--line-2)">
+      <div class="lbl" style="margin-bottom:6px">Sources, one chip each</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
+        <span class="src"><svg><use href="#scale"/></svg>Withings</span>
+        <span class="src"><svg><use href="#wave"/></svg>Health</span>
+        <span class="src"><svg><use href="#hand"/></svg>Manual</span>
+        <span class="src"><svg><use href="#doc"/></svg>Lab PDF</span>
+        <span class="src est"><svg><use href="#spark"/></svg>Estimate</span>
+        <span class="src"><svg><use href="#sync"/></svg>Derived</span>
+        <span class="src" style="border-style:dotted">Demo</span>
+      </div>
+      <div class="note">Estimate is neutral chrome with a dashed border, never a colour. Colour is reserved for state.</div>
+    </div>
+  </div>
+  <nav class="tabbar">
+    <a href="#"><svg><use href="#cal"/></svg>Today</a>
+    <a href="#" aria-current="page"><svg><use href="#wave"/></svg>Health</a>
+    <a href="#"><svg><use href="#dumb"/></svg>Train</a>
+    <a href="#"><svg><use href="#fork"/></svg>Eat</a>
+    <a href="#"><svg><use href="#gear"/></svg>Settings</a>
+  </nav>
+</div>
+</figure>
+
+<!-- ============ FRAME 4: confirm diff ============ -->
+<figure class="frame">
+<figcaption><b>The confirm diff.</b> One component, two uses: the training week and the calendar write. Count first, then rows grouped by verb, each carrying the cause. Nothing writes until Apply.</figcaption>
+<div class="phone">
+  <div class="status"><span>20:45</span><svg><use href="#statr"/></svg></div>
+  <div class="screen" style="padding-bottom:120px">
+    <div class="title"><h2 style="font-size:22px">Confirm the changes</h2><div class="sub">Nothing is written yet.</div></div>
+
+    <div class="card" style="padding:14px 16px">
+      <div class="between"><span class="lbl">Summary</span><span class="chip">4 of 5 selected</span></div>
+      <div style="display:flex;gap:18px;margin-top:10px">
+        <div class="stack"><span class="big good">3</span><span class="note">added</span></div>
+        <div class="stack"><span class="big">1</span><span class="note">moved</span></div>
+        <div class="stack"><span class="big warn">1</span><span class="note">removed</span></div>
+      </div>
+    </div>
+
+    <div class="lbl" style="margin:16px 0 8px">Added</div>
+    <div class="card" style="padding:12px 14px;margin-bottom:8px">
+      <div class="between" style="align-items:flex-start">
+        <div class="stack grow"><span style="font-weight:600">Neoness cardio, 45 min</span><span class="sub num">Mon 24 Aug, 19:00 to 19:45</span><span class="note">Placed at 19:00 because your calendar is clear from 18:30 and the gym is 8 minutes away.</span></div>
+        <div class="seg"><button class="ok" aria-pressed="true" aria-label="Accept"><svg><use href="#ok"/></svg></button><button class="no" aria-pressed="false" aria-label="Reject"><svg><use href="#no"/></svg></button></div>
+      </div>
+    </div>
+    <div class="card" style="padding:12px 14px;margin-bottom:8px">
+      <div class="between" style="align-items:flex-start">
+        <div class="stack grow"><span style="font-weight:600">Home strength, 35 min</span><span class="sub num">Wed 26 Aug, 07:00 to 07:35</span><span class="note">Morning slot because Wednesday evening is booked 18:00 to 22:30.</span></div>
+        <div class="seg"><button class="ok" aria-pressed="true" aria-label="Accept"><svg><use href="#ok"/></svg></button><button class="no" aria-pressed="false" aria-label="Reject"><svg><use href="#no"/></svg></button></div>
+      </div>
+    </div>
+
+    <div class="lbl" style="margin:16px 0 8px">Moved</div>
+    <div class="card" style="padding:12px 14px;margin-bottom:8px">
+      <div class="between" style="align-items:flex-start">
+        <div class="stack grow"><span style="font-weight:600">Neoness intervals, 40 min</span>
+          <span class="sub num"><s class="mut">Thu 27 Aug, 19:00</s> &nbsp;to&nbsp; <b>Fri 28 Aug, 07:15</b></span>
+          <span class="note">Moved from Thursday, your calendar shows you busy 18:00 to 23:00.</span></div>
+        <div class="seg"><button class="ok" aria-pressed="true" aria-label="Accept"><svg><use href="#ok"/></svg></button><button class="no" aria-pressed="false" aria-label="Reject"><svg><use href="#no"/></svg></button></div>
+      </div>
+    </div>
+
+    <div class="lbl" style="margin:16px 0 8px">Removed</div>
+    <div class="card" style="padding:12px 14px;border-color:var(--warn)">
+      <div class="between" style="align-items:flex-start">
+        <div class="stack grow"><span style="font-weight:600"><s>Active recovery walk</s></span><span class="sub num">Sat 22 Aug, 10:30 to 11:20</span><span class="note">Removed because you marked Saturday unavailable on 19 August.</span></div>
+        <div class="seg"><button class="ok" aria-pressed="false" aria-label="Accept removal"><svg><use href="#ok"/></svg></button><button class="no" aria-pressed="true" aria-label="Keep it"><svg><use href="#no"/></svg></button></div>
+      </div>
+      <div class="note" style="margin-top:8px;color:var(--warn)">Removals start unselected. You opt in to a delete, never out of it.</div>
+    </div>
+
+    <div class="card flat" style="border-style:dashed;margin-top:16px">
+      <div class="lbl" style="margin-bottom:6px">Written where</div>
+      <div class="sub">Calendar <b>Health (app)</b> only. Nothing is written to your primary calendar, ever.</div>
+    </div>
+  </div>
+  <div class="stickybar">
+    <div class="between" style="margin-bottom:10px"><span class="sub">4 changes selected, 1 held back</span><button class="btn quiet" style="min-height:32px;padding:0;color:var(--accent)">Select all</button></div>
+    <button class="btn primary block">Apply 4 changes</button>
+    <div class="note" style="text-align:center;margin-top:8px">Undo stays on this screen after the write.</div>
+  </div>
+</div>
+</figure>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>01 Sign in — Forge wireframe</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,sans-serif;
+--s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:20px;--s6:24px;--s7:32px;--s8:40px;--s9:48px;
+--r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:22px;--r-full:999px;--touch:44px;
+--dur-fast:120ms;--dur:200ms;--dur-slow:900ms;--ease:cubic-bezier(.2,.6,.2,1)}
+html[data-theme=dark]{color-scheme:dark;--bg:#0A0A0B;--surface:#141416;--surface-2:#1C1C1F;--surface-3:#232327;--line:#2A2A2E;--line-2:#3A3A40;--text:#F5F5F7;--text-2:#A1A1A8;--text-3:#7C7C85;--accent:#5AA9FF;--accent-ink:#08080A;--accent-soft:rgba(90,169,255,.14);--good:#4FD08A;--good-soft:rgba(79,208,138,.13);--warn:#E9B44C;--warn-soft:rgba(233,180,76,.13);--alert:#F07A6A;--alert-soft:rgba(240,122,106,.13);--chart-daily:#6E6E78;--chart-avg:#E8E8EC;--chart-goal:#7C8BA1;--chart-band:rgba(124,139,161,.10);--chart-grid:#232327;--focus:#8FC4FF;--page:#0E0E10;--page-ink:#8B8B93}
+html[data-theme=light]{color-scheme:light;--bg:#F2F2F5;--surface:#FFFFFF;--surface-2:#EDEDF1;--surface-3:#E3E3E9;--line:#DCDCE2;--line-2:#C6C6CE;--text:#101013;--text-2:#4A4A52;--text-3:#6B6B73;--accent:#0A6CD0;--accent-ink:#FFFFFF;--accent-soft:rgba(10,108,208,.10);--good:#157F4E;--good-soft:rgba(21,127,78,.10);--warn:#8A5A00;--warn-soft:rgba(138,90,0,.10);--alert:#B3261E;--alert-soft:rgba(179,38,30,.10);--chart-daily:#9A9AA2;--chart-avg:#101013;--chart-goal:#5B6B80;--chart-band:rgba(91,107,128,.10);--chart-grid:#E3E3E9;--focus:#0A4C93;--page:#E7E7EC;--page-ink:#55555C}
+body{font-family:var(--font);background:var(--page);color:var(--page-ink);padding:24px;-webkit-font-smoothing:antialiased}
+.bar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;max-width:1720px;margin:0 auto 20px}
+.bar h1{font-size:17px;color:var(--text);letter-spacing:-.01em}
+.bar p{font-size:13px;margin-top:4px;max-width:70ch;line-height:1.5}
+.themeswitch{min-height:34px;padding:0 14px;border-radius:var(--r-full);border:1px solid var(--line-2);background:transparent;color:var(--text);font:inherit;font-size:13px;cursor:pointer;flex:none}
+.frames{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start;max-width:1720px;margin:0 auto}
+figure.frame{margin:0;width:393px}
+figure.frame figcaption{font-size:12px;line-height:1.5;margin-bottom:8px;min-height:36px}
+figure.frame figcaption b{color:var(--text);font-weight:600}
+.phone{width:393px;height:852px;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);display:flex;flex-direction:column;border:1px solid var(--line-2);position:relative;font-size:15px;line-height:1.35}
+.status{height:54px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 6px;font-size:15px;font-weight:600;letter-spacing:-.01em}
+.status svg{width:68px;height:14px;color:var(--text)}
+.screen{flex:1;overflow-y:auto;padding:0 20px 20px;display:flex;flex-direction:column}
+.lbl{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);font-weight:600}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px;margin-bottom:12px}
+.card.flat{background:transparent}
+.num{font-variant-numeric:tabular-nums}
+.sub{font-size:13px;color:var(--text-2);line-height:1.45}
+.mut{color:var(--text-3)}
+.good{color:var(--good)}.warn{color:var(--warn)}.alert{color:var(--alert)}
+.row{display:flex;gap:12px;align-items:center;min-height:44px;padding:9px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.grow{flex:1;min-width:0}
+.between{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.stack{display:flex;flex-direction:column;gap:2px}
+.chip{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:var(--r-full);border:1px solid var(--line-2);font-size:12px;color:var(--text-2);white-space:nowrap}
+.chip.g{color:var(--good);border-color:var(--good);background:var(--good-soft)}
+.chip.w{color:var(--warn);border-color:var(--warn);background:var(--warn-soft)}
+.chip.a{color:var(--alert);border-color:var(--alert);background:var(--alert-soft)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 16px;border-radius:var(--r-md);border:1px solid var(--line-2);background:var(--surface-2);color:var(--text);font:inherit;font-size:16px;font-weight:500;cursor:pointer;text-decoration:none}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn.quiet{background:transparent;border-color:transparent;color:var(--accent)}
+.btn.block{width:100%}
+.btn svg{width:20px;height:20px}
+.banner{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border-radius:var(--r-md);font-size:13px;line-height:1.45;margin-bottom:14px;border:1px solid var(--line);background:var(--surface-2);color:var(--text)}
+.banner svg{width:18px;height:18px;flex:none;margin-top:1px;color:var(--text-2)}
+.banner.w{background:var(--warn-soft);border-color:var(--warn)}.banner.w svg{color:var(--warn)}
+.banner.a{background:var(--alert-soft);border-color:var(--alert)}.banner.a svg{color:var(--alert)}
+.field{display:block;margin-bottom:14px}
+.field .lbl{display:block;margin-bottom:6px}
+.input{width:100%;min-height:52px;border-radius:var(--r-md);border:1px solid var(--line-2);background:var(--surface-2);color:var(--text);font:inherit;font-size:17px;padding:0 14px;letter-spacing:.06em}
+.input.plain{letter-spacing:0}
+.mark{width:66px;height:66px;border-radius:20px;background:var(--surface-2);border:1px solid var(--line-2);display:flex;align-items:center;justify-content:center;color:var(--accent)}
+.mark svg{width:30px;height:30px}
+.note{font-size:12px;color:var(--text-3);line-height:1.5}
+.host{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--text-2);word-break:break-all}
+.check{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--text-2);min-height:24px}
+.check svg{width:16px;height:16px;flex:none}
+a:focus-visible,button:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.focusdemo{outline:2px solid var(--focus);outline-offset:2px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="ok" viewBox="0 0 20 20"><path d="M4 10.5 8 14.5 16 5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="no" viewBox="0 0 20 20"><path d="M5.5 5.5 14.5 14.5M14.5 5.5 5.5 14.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="chev" viewBox="0 0 20 20"><path d="M7.5 4.5 13 10l-5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="info" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 9v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="6.2" r=".9" fill="currentColor"/></symbol>
+<symbol id="warn" viewBox="0 0 20 20"><path d="M10 3 18.2 17H1.8z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 8v3.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="10" cy="14.3" r=".9" fill="currentColor"/></symbol>
+<symbol id="face" viewBox="0 0 20 20"><path d="M2.6 6.6V4.4a1.8 1.8 0 0 1 1.8-1.8h2.2M13.4 2.6h2.2a1.8 1.8 0 0 1 1.8 1.8v2.2M17.4 13.4v2.2a1.8 1.8 0 0 1-1.8 1.8h-2.2M6.6 17.4H4.4a1.8 1.8 0 0 1-1.8-1.8v-2.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M7.2 8v1.6M12.8 8v1.6M7.4 13a4 4 0 0 0 5.2 0M10 8v3.2h-1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="key" viewBox="0 0 20 20"><circle cx="7.2" cy="7.2" r="3.6" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M9.8 9.8 16.4 16.4M13.6 13.6l-1.5 1.5M15.2 15.2l1.4 1.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+<symbol id="lock" viewBox="0 0 20 20"><rect x="4" y="8.6" width="12" height="8.4" rx="2.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M6.8 8.6V6.4a3.2 3.2 0 0 1 6.4 0v2.2" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="statr" viewBox="0 0 68 14"><path d="M1 10h2.4v3H1zM6 8h2.4v5H6zM11 5.6h2.4v7.4H11zM16 3.2h2.4v9.8H16z" fill="currentColor"/><path d="M27.4 5.4a8.6 8.6 0 0 1 10.4 0M29.8 8.2a5.2 5.2 0 0 1 5.6 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M32.6 10.9l1.6 1.7 1.6-1.7a2.4 2.4 0 0 0-3.2 0z" fill="currentColor"/><rect x="48" y="3.4" width="17" height="9" rx="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".55"/><rect x="49.6" y="5" width="11.4" height="5.8" rx="1.4" fill="currentColor"/><path d="M66.6 6.6v2.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" opacity=".55"/></symbol>
+<symbol id="statr-off" viewBox="0 0 68 14"><path d="M1 10h2.4v3H1zM6 8h2.4v5H6z" fill="currentColor" opacity=".4"/><path d="M27 4.4 38.2 12M38.2 4.4 27 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".7"/><rect x="48" y="3.4" width="17" height="9" rx="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".55"/><rect x="49.6" y="5" width="11.4" height="5.8" rx="1.4" fill="currentColor"/></symbol>
+</svg>
+
+<div class="bar">
+  <div>
+    <h1>01 Sign in</h1>
+    <p>The gate. Tailscale gets you to this screen and no further. Passkey first, password second, and a first-run state that exists exactly once. No product marketing, no name to remember: the machine identifies itself by the hostname that is also the passkey RP ID.</p>
+  </div>
+  <button class="themeswitch" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark';this.textContent=document.documentElement.dataset.theme==='dark'?'Light mode':'Dark mode'">Light mode</button>
+</div>
+
+<div class="frames">
+
+<!-- FRAME 1 -->
+<figure class="frame">
+<figcaption><b>Default.</b> Passkey is the primary action and the only accented element on the screen. Password sits under it as plain text, always reachable, never louder.</figcaption>
+<div class="phone">
+  <div class="status"><span>06:57</span><svg><use href="#statr"/></svg></div>
+  <div class="screen">
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding-bottom:40px">
+      <div class="mark" style="margin-bottom:24px"><svg><use href="#lock"/></svg></div>
+      <h2 style="font-size:30px;letter-spacing:-.02em;font-weight:700;margin-bottom:6px">Sign in</h2>
+      <p class="sub" style="margin-bottom:4px">Your health data, on your machine.</p>
+      <p class="host" style="margin-bottom:28px">lamberts-mac-mini.tailda76d6.ts.net</p>
+
+      <button class="btn primary block" style="margin-bottom:10px"><svg><use href="#face"/></svg>Sign in with passkey</button>
+      <button class="btn quiet block">Use the backup password</button>
+    </div>
+
+    <div class="card flat" style="border-style:dashed;padding:14px;margin-bottom:0">
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        <svg style="width:18px;height:18px;flex:none;margin-top:1px;color:var(--text-3)"><use href="#info"/></svg>
+        <div class="note">Tailscale gets you to this screen. It does not get you in. A passkey or the backup password is always required.</div>
+      </div>
+    </div>
+    <div class="note" style="text-align:center;margin-top:14px">Passkeys are registered to this hostname. Renaming the Mac mini invalidates them.</div>
+  </div>
+</div>
+</figure>
+
+<!-- FRAME 2 -->
+<figure class="frame">
+<figcaption><b>First run, once.</b> Creating the owner account. The password is mandatory because it is the recovery path, and the passkey is enrolled straight after. This screen never appears again.</figcaption>
+<div class="phone">
+  <div class="status"><span>21:06</span><svg><use href="#statr"/></svg></div>
+  <div class="screen">
+    <div style="padding:28px 0 10px">
+      <div class="mark" style="margin-bottom:20px"><svg><use href="#key"/></svg></div>
+      <h2 style="font-size:26px;letter-spacing:-.02em;font-weight:700;margin-bottom:6px">Create the owner account</h2>
+      <p class="sub">This runs once. After it completes, this screen is gone and the only way in is a passkey or this password.</p>
+    </div>
+
+    <label class="field">
+      <span class="lbl">Backup password</span>
+      <input class="input" type="password" value="························" aria-describedby="pwreq">
+    </label>
+    <div id="pwreq" style="margin:-4px 0 16px">
+      <div class="check"><svg class="good"><use href="#ok"/></svg>At least 12 characters. You typed 24.</div>
+      <div class="check"><svg class="good"><use href="#ok"/></svg>Not a password you use anywhere else.</div>
+      <div class="check"><svg class="mut"><use href="#info"/></svg>Hashed with Argon2id on this machine. It never leaves it.</div>
+    </div>
+
+    <label class="field">
+      <span class="lbl">Repeat it</span>
+      <input class="input focusdemo" type="password" value="························">
+    </label>
+
+    <div class="card" style="margin-top:4px">
+      <div class="between" style="margin-bottom:8px"><span class="lbl">Next step</span><span class="chip">Recommended</span></div>
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        <svg style="width:20px;height:20px;flex:none;margin-top:2px;color:var(--accent)"><use href="#face"/></svg>
+        <div class="sub">Add a passkey with Face ID right after. The password stays as the way back in if the phone is lost.</div>
+      </div>
+    </div>
+
+    <button class="btn primary block" style="margin-top:6px">Create account and add a passkey</button>
+
+    <div class="card flat" style="border-style:dashed;padding:14px;margin-top:14px;margin-bottom:0">
+      <div class="lbl" style="margin-bottom:6px">If you lose both</div>
+      <div class="note">Recovery is a local procedure you run on the Mac mini, written down in docs/security.md. No security question. No password sent by email. Nothing to phone up and ask for.</div>
+    </div>
+  </div>
+</div>
+</figure>
+
+<!-- FRAME 3 -->
+<figure class="frame">
+<figcaption><b>Passkey rejected, and the host unreachable.</b> Both failures name the cause and leave one button to press. Rate limiting is stated as a number, not felt as a mystery.</figcaption>
+<div class="phone">
+  <div class="status"><span>06:58</span><svg><use href="#statr-off"/></svg></div>
+  <div class="screen">
+    <div style="padding:24px 0 8px">
+      <div class="mark" style="margin-bottom:20px;color:var(--alert)"><svg><use href="#lock"/></svg></div>
+      <h2 style="font-size:26px;letter-spacing:-.02em;font-weight:700;margin-bottom:6px">Sign in</h2>
+      <p class="host" style="margin-bottom:20px">lamberts-mac-mini.tailda76d6.ts.net</p>
+    </div>
+
+    <div class="banner a">
+      <svg><use href="#warn"/></svg>
+      <div>No passkey on this device matched. 2 attempts left, then a 60 second pause.</div>
+    </div>
+
+    <label class="field">
+      <span class="lbl">Backup password</span>
+      <input class="input" type="password" value="············">
+    </label>
+    <button class="btn primary block" style="margin-bottom:10px">Sign in</button>
+    <button class="btn quiet block" style="margin-bottom:20px">Try the passkey again</button>
+
+    <div class="banner w" style="margin-bottom:12px">
+      <svg><use href="#warn"/></svg>
+      <div><b>The Mac mini is not answering.</b><br>Tailscale reports lamberts-mac-mini offline. Last reached today at 06:41. Sign-in needs the machine; nothing here works from the cache.</div>
+    </div>
+    <button class="btn block">Try again</button>
+
+    <div class="note" style="text-align:center;margin-top:auto;padding-top:20px">Two states, one signal. A green healthcheck on an unreachable app would be a lie, so this screen reports what the phone actually sees.</div>
+  </div>
+</div>
+</figure>
+
+</div>
+</body>
+</html>

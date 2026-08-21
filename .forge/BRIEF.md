@@ -53,8 +53,9 @@ Full notes in `.forge/research/`: scout.md (comparables, platform rules, legal),
 The findings that bind the build:
 - iOS Web Push needs iOS 16.4+, a PWA already installed to the Home Screen, and a permission call inside a user gesture. Push is untestable until installation works, so installability ships early.
 - Safari evicts script-writable storage after 7 unused days, and an installed PWA is exempt. Offline support depends on installation, not on clever caching.
-- The WebAuthn RP ID must be the full tailnet hostname, `lamberts-mac-mini.tailda76d6.ts.net`, never a bare `ts.net`, and it must be configurable because renaming the machine invalidates every registered passkey.
-- Wake Lock keeps the screen on during a session; iOS still suspends timers when the app backgrounds, so elapsed time is reconciled from wall-clock timestamps, never from interval ticks.
+- The WebAuthn RP ID is the tailnet domain `tailda76d6.ts.net`, not the full host and not a bare `ts.net`. `ts.net` and `*.c.ts.net` are Public Suffix List entries, so `ts.net` throws; `tailda76d6.ts.net` is legal and, unlike the full hostname, survives renaming the Mac, which would otherwise destroy every registered passkey with no migration path. It stays configurable.
+- Wake Lock is iOS 18.4 and installed-PWA only, not 16.4. SpeechSynthesis `speak()` returns silently when it has no user gesture, so the voice must be primed on the session start tap. Vibration does not exist in any Safari. Timers derive from wall-clock `Date.now()`, never from accumulated ticks.
+- iOS does not implement `pushsubscriptionchange`, and deleting the Home Screen icon destroys the push subscription. A push-woken service worker is the only substitute for Background Sync.
 - GDPR's household exemption (Art. 2(2)(c)) covers the owner's own processing, but the third parties that receive data are bound independently. Minimising what leaves the machine is the real obligation.
 - MDCG 2025-4 and the revised MDCG 2019-11 make the intended-purpose wording the classification test. Lab explanations give educational reference-range context, cite public sources, invite a professional, and never assess this person's condition.
 - HelloFresh has no public API and prohibits automated access. The only lawful import is a single artifact the owner already holds, parsed locally.
