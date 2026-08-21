@@ -1089,3 +1089,9 @@
 {"ts":"2026-08-21T17:08:50Z","sid":"main","kind":"guard_block","key":"secret_egress","severity":"security"}
 {"ts":"2026-08-21T19:59:01Z","sid":"main","kind":"subagent_fail","key":""}
 {"ts":"2026-08-21T20:13:24Z","sid":"main","kind":"subagent_fail","key":"workflow-subagent"}
+{"ts":"2026-08-21T20:13:32Z","sid":"main","kind":"subagent_fail","key":"workflow-subagent"}
+{"ts":"2026-08-21T20:14:51Z","sid":"main","kind":"subagent_fail","key":"workflow-subagent"}
+{"ts":"2026-08-21T20:15:08Z","sid":"main","kind":"subagent_fail","key":"workflow-subagent"}
+{"ts":"2026-08-21T20:17:42Z","sid":"main","kind":"subagent_fail","key":"workflow-subagent"}
+{"ts":"2026-08-21T20:21:22Z","sid":"main","kind":"subagent_fail","key":"workflow-subagent"}
+{"ts":"2026-08-21T20:24:22Z","sid":"main","kind":"subagent_fail","key":"workflow-subagent"}

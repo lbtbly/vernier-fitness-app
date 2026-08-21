@@ -1071,3 +1071,9 @@
 2026-08-21T17:07:27Z | architect | stopped | 32s
 2026-08-21T19:59:01Z | a6f5f8d9fcd7e6193 | stopped | 10294s
 2026-08-21T20:13:24Z | workflow-subagent | stopped | 863s
+2026-08-21T20:13:32Z | workflow-subagent | stopped | 8s
+2026-08-21T20:14:52Z | workflow-subagent | stopped | 79s
+2026-08-21T20:15:08Z | workflow-subagent | stopped | 17s
+2026-08-21T20:17:42Z | workflow-subagent | stopped | 154s
+2026-08-21T20:21:22Z | workflow-subagent | stopped | 220s
+2026-08-21T20:24:22Z | workflow-subagent | stopped | 180s
