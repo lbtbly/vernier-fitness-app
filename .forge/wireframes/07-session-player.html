@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>07 Session player — Forge wireframe</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,sans-serif;
+--s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:20px;--s6:24px;--s7:32px;--s8:40px;--s9:48px;
+--r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:22px;--r-full:999px;--touch:44px;
+--dur-fast:120ms;--dur:200ms;--dur-slow:900ms;--ease:cubic-bezier(.2,.6,.2,1)}
+html[data-theme=dark]{color-scheme:dark;--bg:#0A0A0B;--surface:#141416;--surface-2:#1C1C1F;--surface-3:#232327;--line:#2A2A2E;--line-2:#3A3A40;--text:#F5F5F7;--text-2:#A1A1A8;--text-3:#7C7C85;--accent:#5AA9FF;--accent-ink:#08080A;--accent-soft:rgba(90,169,255,.14);--good:#4FD08A;--good-soft:rgba(79,208,138,.13);--warn:#E9B44C;--warn-soft:rgba(233,180,76,.13);--alert:#F07A6A;--alert-soft:rgba(240,122,106,.13);--chart-daily:#6E6E78;--chart-avg:#E8E8EC;--chart-goal:#7C8BA1;--chart-band:rgba(124,139,161,.10);--chart-grid:#232327;--focus:#8FC4FF;--page:#0E0E10;--page-ink:#8B8B93}
+html[data-theme=light]{color-scheme:light;--bg:#F2F2F5;--surface:#FFFFFF;--surface-2:#EDEDF1;--surface-3:#E3E3E9;--line:#DCDCE2;--line-2:#C6C6CE;--text:#101013;--text-2:#4A4A52;--text-3:#6B6B73;--accent:#0A6CD0;--accent-ink:#FFFFFF;--accent-soft:rgba(10,108,208,.10);--good:#157F4E;--good-soft:rgba(21,127,78,.10);--warn:#8A5A00;--warn-soft:rgba(138,90,0,.10);--alert:#B3261E;--alert-soft:rgba(179,38,30,.10);--chart-daily:#9A9AA2;--chart-avg:#101013;--chart-goal:#5B6B80;--chart-band:rgba(91,107,128,.10);--chart-grid:#E3E3E9;--focus:#0A4C93;--page:#E7E7EC;--page-ink:#55555C}
+body{font-family:var(--font);background:var(--page);color:var(--page-ink);padding:24px;-webkit-font-smoothing:antialiased}
+.bar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;max-width:1720px;margin:0 auto 20px}
+.bar h1{font-size:17px;color:var(--text);letter-spacing:-.01em}
+.bar p{font-size:13px;margin-top:4px;max-width:70ch;line-height:1.5}
+.themeswitch{min-height:34px;padding:0 14px;border-radius:var(--r-full);border:1px solid var(--line-2);background:transparent;color:var(--text);font:inherit;font-size:13px;cursor:pointer;flex:none}
+.frames{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start;max-width:1720px;margin:0 auto}
+figure.frame{margin:0;width:393px}
+figure.frame figcaption{font-size:12px;line-height:1.5;margin-bottom:8px;min-height:52px}
+figure.frame figcaption b{color:var(--text);font-weight:600}
+.phone{width:393px;height:852px;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);display:flex;flex-direction:column;border:1px solid var(--line-2);position:relative;font-size:15px;line-height:1.35}
+.status{height:54px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 6px;font-size:15px;font-weight:600;letter-spacing:-.01em}
+.status svg{width:68px;height:14px;color:var(--text)}
+.screen{flex:1;overflow-y:auto;padding:0 16px 20px;display:flex;flex-direction:column}
+.lbl{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);font-weight:600}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px;margin-bottom:12px}
+.card.flat{background:transparent}
+.num{font-variant-numeric:tabular-nums}
+.sub{font-size:13px;color:var(--text-2);line-height:1.45}
+.mut{color:var(--text-3)}
+.good{color:var(--good)}.warn{color:var(--warn)}.alert{color:var(--alert)}
+.row{display:flex;gap:12px;align-items:center;min-height:44px;padding:8px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.grow{flex:1;min-width:0}
+.between{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.stack{display:flex;flex-direction:column;gap:2px}
+.chip{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 10px;border-radius:var(--r-full);border:1px solid var(--line-2);font-size:12px;color:var(--text-2);white-space:nowrap}
+.chip.g{color:var(--good);border-color:var(--good);background:var(--good-soft)}
+.chip.now{color:var(--accent);border-color:var(--accent);background:var(--accent-soft);font-weight:600}
+.src{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 7px;border-radius:6px;border:1px solid var(--line-2);background:var(--surface-2);color:var(--text-2);font-size:11px}
+.src svg{width:12px;height:12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:56px;padding:0 14px;border-radius:14px;border:1px solid var(--line-2);background:var(--surface-2);color:var(--text);font:inherit;font-size:16px;font-weight:500;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700;min-height:88px;font-size:22px;border-radius:18px;letter-spacing:-.01em}
+.btn.quiet{background:transparent;border-color:transparent;color:var(--accent)}
+.btn.block{width:100%}
+.btn svg{width:20px;height:20px}
+.btn.icon{width:48px;height:48px;min-height:48px;padding:0;flex:none;border-radius:14px}
+.hdr{display:flex;align-items:center;gap:10px;padding:6px 0 10px}
+.blocks{display:flex;gap:4px;margin-bottom:14px}
+.blocks i{flex:1;height:5px;border-radius:3px;background:var(--surface-3);display:block}
+.blocks i.done{background:var(--good)}
+.blocks i.now{background:var(--accent)}
+.demo{height:168px;border-radius:14px;background:var(--surface-2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.demo .play{width:64px;height:64px;border-radius:50%;background:rgba(0,0,0,.45);border:1.5px solid var(--text-2);display:flex;align-items:center;justify-content:center}
+.demo .play svg{width:26px;height:26px;color:var(--text)}
+.demo figcaption{position:absolute;left:0;right:0;bottom:0;padding:6px 10px;font-size:10.5px;color:var(--text-2);background:linear-gradient(transparent,rgba(0,0,0,.6));min-height:0;margin:0}
+.move{font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.timer{font-size:64px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1}
+.grid3{display:flex;gap:8px}
+.grid3 .btn{flex:1;font-size:14px;min-height:56px}
+.note{font-size:12px;color:var(--text-3);line-height:1.5}
+.scrim{position:absolute;inset:0;background:rgba(0,0,0,.6)}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:22px 22px 0 0;border-top:1px solid var(--line);padding:8px 16px 28px;max-height:86%;overflow-y:auto}
+.grabber{width:36px;height:5px;border-radius:3px;background:var(--line-2);margin:0 auto 14px}
+.scale10{display:flex;gap:5px;flex-wrap:wrap}
+.scale10 button{width:56px;height:52px;border-radius:12px;border:1px solid var(--line-2);background:var(--surface-2);color:var(--text-2);font:inherit;font-size:17px;font-variant-numeric:tabular-nums;cursor:pointer}
+.scale10 button[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+.pick{display:flex;gap:6px;flex-wrap:wrap}
+.pick button{min-height:48px;padding:0 14px;border-radius:12px;border:1px solid var(--line-2);background:var(--surface-2);color:var(--text-2);font:inherit;font-size:15px;cursor:pointer}
+.pick button[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+.ta{width:100%;min-height:76px;border-radius:12px;border:1px solid var(--line-2);background:var(--surface-2);color:var(--text);font:inherit;font-size:15px;padding:12px 14px;resize:none}
+a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="ok" viewBox="0 0 20 20"><path d="M4 10.5 8 14.5 16 5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="no" viewBox="0 0 20 20"><path d="M5.5 5.5 14.5 14.5M14.5 5.5 5.5 14.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="chev" viewBox="0 0 20 20"><path d="M7.5 4.5 13 10l-5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="play" viewBox="0 0 20 20"><path d="M6.5 4.2 15.5 10l-9 5.8z" fill="currentColor"/></symbol>
+<symbol id="sound" viewBox="0 0 20 20"><path d="M4 7.6h3.2L11 4.2v11.6L7.2 12.4H4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M13.6 7.4a3.6 3.6 0 0 1 0 5.2M15.8 5.2a6.8 6.8 0 0 1 0 9.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="mute" viewBox="0 0 20 20"><path d="M4 7.6h3.2L11 4.2v11.6L7.2 12.4H4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M13.6 7.6 18 12M18 7.6l-4.4 4.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="swap" viewBox="0 0 20 20"><path d="M3.4 7h11.2M12 4.4 14.6 7 12 9.6M16.6 13H5.4M8 10.4 5.4 13 8 15.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="plus" viewBox="0 0 20 20"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="info" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 9v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="6.2" r=".9" fill="currentColor"/></symbol>
+<symbol id="statr" viewBox="0 0 68 14"><path d="M1 10h2.4v3H1zM6 8h2.4v5H6zM11 5.6h2.4v7.4H11zM16 3.2h2.4v9.8H16z" fill="currentColor"/><path d="M27.4 5.4a8.6 8.6 0 0 1 10.4 0M29.8 8.2a5.2 5.2 0 0 1 5.6 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M32.6 10.9l1.6 1.7 1.6-1.7a2.4 2.4 0 0 0-3.2 0z" fill="currentColor"/><rect x="48" y="3.4" width="17" height="9" rx="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".55"/><rect x="49.6" y="5" width="11.4" height="5.8" rx="1.4" fill="currentColor"/><path d="M66.6 6.6v2.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" opacity=".55"/></symbol>
+<symbol id="statr-off" viewBox="0 0 68 14"><path d="M1 10h2.4v3H1zM6 8h2.4v5H6z" fill="currentColor" opacity=".4"/><path d="M27 4.4 38.2 12M38.2 4.4 27 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".7"/><rect x="48" y="3.4" width="17" height="9" rx="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".55"/><rect x="49.6" y="5" width="11.4" height="5.8" rx="1.4" fill="currentColor"/></symbol>
+</svg>
+
+<div class="bar">
+  <div>
+    <h1>07 Session player</h1>
+    <p>Guided session, offline, screen kept awake. Everything you touch mid-set is at least 56 px tall and the one you touch most is 88. Last week's load is on the screen while the set is open. Zero interstitials: no rating prompt, no permission ask, no upsell, from first block to last.</p>
+  </div>
+  <button class="themeswitch" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark';this.textContent=document.documentElement.dataset.theme==='dark'?'Light mode':'Dark mode'">Light mode</button>
+</div>
+
+<div class="frames">
+
+<!-- FRAME 1 -->
+<figure class="frame">
+<figcaption><b>Working set.</b> Movement, target, last week's load and the heart-rate zone as a number. Set done is the only accent and the largest object on the screen.</figcaption>
+<div class="phone">
+  <div class="status"><span>18:52</span><svg><use href="#statr-off"/></svg></div>
+  <div class="screen">
+    <div class="hdr">
+      <button class="btn icon" aria-label="Pause and leave"><svg><use href="#no"/></svg></button>
+      <div class="grow stack"><span style="font-weight:600">Home strength</span><span class="note num">Block 2 of 4 &middot; 12:38 elapsed</span></div>
+      <button class="btn icon" aria-label="Spoken cues on, tap to mute"><svg><use href="#sound"/></svg></button>
+    </div>
+    <div class="blocks"><i class="done"></i><i class="now"></i><i></i><i></i></div>
+
+    <figure class="demo" style="margin-bottom:12px">
+      <div class="play"><svg><use href="#play"/></svg></div>
+      <figcaption>Photo sequence, 6 frames. Source: British Heart Foundation exercise library, CC BY 4.0, checked 12 Aug 2026.</figcaption>
+    </figure>
+
+    <div class="move">Backpack squat</div>
+    <div class="sub" style="margin:4px 0 12px">Heels down, chest up, knees tracking over the toes. Two counts down, one up.</div>
+
+    <div class="card" style="padding:14px 16px">
+      <div class="between" style="margin-bottom:10px">
+        <div class="stack"><span class="lbl">Set 2 of 3</span><span style="font-size:26px;font-weight:700;letter-spacing:-.02em" class="num">12 reps</span></div>
+        <div class="stack" style="align-items:flex-end"><span class="lbl">Load</span><span style="font-size:26px;font-weight:700;letter-spacing:-.02em" class="num">10 kg</span></div>
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:10px">
+        <span class="chip g">Set 1 &middot; 12 done</span><span class="chip now">Set 2 now</span><span class="chip">Set 3</span>
+      </div>
+      <div class="row" style="border-top:1px solid var(--line);border-bottom:0;padding-top:10px">
+        <span class="grow sub">Last week</span><span class="num">8 kg, 3 x 10, RPE 7</span>
+      </div>
+    </div>
+
+    <div class="card" style="padding:12px 16px">
+      <div class="between">
+        <div class="stack grow"><span class="lbl">Target zone</span><span class="num" style="font-size:17px;font-weight:600">Zone 2, 128 to 142 bpm</span></div>
+        <svg style="width:20px;height:20px;color:var(--text-3)"><use href="#info"/></svg>
+      </div>
+      <div class="note" style="margin-top:6px">A number to aim at. The app does not read your heart rate and does not pretend to.</div>
+    </div>
+
+    <div style="flex:1"></div>
+
+    <button class="btn primary block" style="margin-bottom:10px">Set done</button>
+    <div class="grid3">
+      <button class="btn">Easier</button>
+      <button class="btn">Harder</button>
+      <button class="btn"><svg><use href="#swap"/></svg>Replace</button>
+    </div>
+    <div class="note" style="text-align:center;margin-top:10px">Screen stays awake. Elapsed time is read from the clock, so a phone call does not lose the session.</div>
+  </div>
+</div>
+</figure>
+
+<!-- FRAME 2 -->
+<figure class="frame">
+<figcaption><b>Rest.</b> The countdown is the biggest thing on the phone, readable at arm's length on a mat. What comes next is already on screen so nothing has to be remembered.</figcaption>
+<div class="phone">
+  <div class="status"><span>18:54</span><svg><use href="#statr-off"/></svg></div>
+  <div class="screen">
+    <div class="hdr">
+      <button class="btn icon" aria-label="Pause and leave"><svg><use href="#no"/></svg></button>
+      <div class="grow stack"><span style="font-weight:600">Home strength</span><span class="note num">Block 2 of 4 &middot; 14:06 elapsed</span></div>
+      <button class="btn icon" aria-label="Spoken cues muted, tap to unmute" style="color:var(--text-3)"><svg><use href="#mute"/></svg></button>
+    </div>
+    <div class="blocks"><i class="done"></i><i class="now"></i><i></i><i></i></div>
+
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-bottom:12px">
+      <div class="lbl" style="margin-bottom:10px">Rest</div>
+      <svg viewBox="0 0 220 220" width="220" height="220" role="img" aria-label="Rest countdown, 45 seconds of 75 remaining">
+        <circle cx="110" cy="110" r="96" fill="none" stroke="var(--surface-3)" stroke-width="10"/>
+        <circle cx="110" cy="110" r="96" fill="none" stroke="var(--accent)" stroke-width="10" stroke-linecap="round" stroke-dasharray="603" stroke-dashoffset="241" transform="rotate(-90 110 110)"/>
+        <text x="110" y="126" text-anchor="middle" font-size="62" font-weight="700" fill="var(--text)" font-family="-apple-system,system-ui" letter-spacing="-2">0:45</text>
+      </svg>
+      <div class="sub" style="margin-top:14px">of 75 seconds</div>
+      <div class="card" style="width:100%;margin-top:20px;padding:14px 16px">
+        <div class="lbl" style="margin-bottom:4px">Next</div>
+        <div class="between"><span style="font-size:17px;font-weight:600">Backpack squat, set 3 of 3</span><span class="num" style="font-weight:600">12 x 10 kg</span></div>
+        <div class="note" style="margin-top:6px">Then block 3: push-ups, 3 sets. Muted, so no spoken cue at 10 seconds.</div>
+      </div>
+    </div>
+
+    <div class="grid3" style="margin-bottom:10px">
+      <button class="btn"><svg><use href="#plus"/></svg>30 s</button>
+      <button class="btn" style="flex:2">Skip rest</button>
+    </div>
+    <button class="btn primary block" style="min-height:56px;font-size:16px;border-radius:14px">Start set 3</button>
+  </div>
+</div>
+</figure>
+
+<!-- FRAME 3 -->
+<figure class="frame">
+<figcaption><b>Replace this movement.</b> Alternatives carry the reason they fit, the load is carried across, and the swap applies to this session only unless you say otherwise.</figcaption>
+<div class="phone">
+  <div class="status"><span>18:55</span><svg><use href="#statr-off"/></svg></div>
+  <div class="screen">
+    <div class="hdr">
+      <button class="btn icon" aria-label="Pause and leave"><svg><use href="#no"/></svg></button>
+      <div class="grow stack"><span style="font-weight:600">Home strength</span><span class="note num">Block 2 of 4</span></div>
+      <button class="btn icon" aria-label="Spoken cues on"><svg><use href="#sound"/></svg></button>
+    </div>
+    <div class="blocks"><i class="done"></i><i class="now"></i><i></i><i></i></div>
+    <div class="move" style="opacity:.4">Backpack squat</div>
+  </div>
+  <div class="scrim"></div>
+  <div class="sheet">
+    <div class="grabber"></div>
+    <div class="between" style="margin-bottom:4px">
+      <span style="font-size:20px;font-weight:700;letter-spacing:-.01em">Replace the squat</span>
+      <button class="btn icon" aria-label="Close"><svg><use href="#no"/></svg></button>
+    </div>
+    <div class="sub" style="margin-bottom:14px">Same muscles, same block length. Your 10 kg carries over.</div>
+
+    <div class="card" style="padding:12px 14px">
+      <div class="between"><span style="font-weight:600">Split squat</span><span class="chip">Same difficulty</span></div>
+      <div class="note" style="margin-top:4px">One leg at a time, less load on the back. Useful if the backpack shifts.</div>
+      <button class="btn block" style="margin-top:10px;min-height:48px">Use this</button>
+    </div>
+
+    <div class="card" style="padding:12px 14px">
+      <div class="between"><span style="font-weight:600">Wall sit</span><span class="chip">Easier</span></div>
+      <div class="note" style="margin-top:4px">Static hold, no knee travel. 40 seconds replaces 12 reps.</div>
+      <button class="btn block" style="margin-top:10px;min-height:48px">Use this</button>
+    </div>
+
+    <div class="card" style="padding:12px 14px">
+      <div class="between"><span style="font-weight:600">Bulgarian split squat</span><span class="chip">Harder</span></div>
+      <div class="note" style="margin-top:4px">Rear foot on the sofa. Expect to drop to 8 reps at this load.</div>
+      <button class="btn block" style="margin-top:10px;min-height:48px">Use this</button>
+    </div>
+
+    <div class="card" style="padding:12px 14px;border-style:dashed;background:transparent">
+      <div class="between">
+        <div class="stack grow"><span>Remember this swap</span><span class="note">Applies to every future session, not just tonight.</span></div>
+        <div style="width:52px;height:32px;border-radius:16px;background:var(--surface-3);border:1px solid var(--line-2);position:relative;flex:none"><span style="position:absolute;left:3px;top:2px;width:26px;height:26px;border-radius:50%;background:var(--text-3)"></span></div>
+      </div>
+    </div>
+    <div class="note" style="text-align:center;margin-top:6px">Demonstrations come from a whitelisted source list you curate. Nothing loads from an arbitrary domain.</div>
+  </div>
+</div>
+</figure>
+
+<!-- FRAME 4 -->
+<figure class="frame">
+<figcaption><b>Finished.</b> The one moment of motion in the product: the ring closes and fills once, 900 ms, with a single haptic. Then effort and pain, asked once, after the work, never during it.</figcaption>
+<div class="phone">
+  <div class="status"><span>19:21</span><svg><use href="#statr-off"/></svg></div>
+  <div class="screen">
+    <div style="display:flex;flex-direction:column;align-items:center;padding:16px 0 8px">
+      <svg viewBox="0 0 160 160" width="150" height="150" role="img" aria-label="Session complete, ring closed">
+        <circle cx="80" cy="80" r="68" fill="none" stroke="var(--surface-3)" stroke-width="12"/>
+        <circle cx="80" cy="80" r="68" fill="none" stroke="var(--good)" stroke-width="12" stroke-linecap="round" stroke-dasharray="427" stroke-dashoffset="0" transform="rotate(-90 80 80)"/>
+        <path d="M62 80 74 92 99 66" fill="none" stroke="var(--good)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div style="font-size:24px;font-weight:700;letter-spacing:-.02em;margin-top:14px">Session done</div>
+      <div class="sub num">35 min 12 s &middot; 4 blocks &middot; 18 sets</div>
+    </div>
+
+    <div class="card" style="padding:14px 16px">
+      <div class="row"><span class="grow sub mut">Squat</span><span class="num">3 x 12 at 10 kg</span></div>
+      <div class="row"><span class="grow sub mut">Push-ups</span><span class="num">3 x 11</span></div>
+      <div class="row"><span class="grow sub mut">Row, backpack</span><span class="num">3 x 12 at 10 kg</span></div>
+      <div class="row"><span class="grow sub mut">Plank</span><span class="num">3 x 45 s</span></div>
+    </div>
+
+    <div class="lbl" style="margin:14px 0 8px">How hard was that, 1 to 10</div>
+    <div class="scale10" style="margin-bottom:6px">
+      <button>1</button><button>2</button><button>3</button><button>4</button><button>5</button>
+    </div>
+    <div class="scale10" style="margin-bottom:18px">
+      <button>6</button><button aria-pressed="true">7</button><button>8</button><button>9</button><button>10</button>
+    </div>
+
+    <div class="lbl" style="margin-bottom:8px">Any pain</div>
+    <div class="pick" style="margin-bottom:8px">
+      <button aria-pressed="true">None</button><button>Knee</button><button>Shoulder</button><button>Back</button><button>Other</button>
+    </div>
+    <div class="note" style="margin-bottom:16px">Pain logged here changes next week's proposal, and the change says it was because of this.</div>
+
+    <div class="lbl" style="margin-bottom:8px">Anything else</div>
+    <textarea class="ta" placeholder="Optional." style="margin-bottom:14px"></textarea>
+
+    <button class="btn primary block" style="min-height:56px;font-size:16px;border-radius:14px">Save and finish</button>
+    <div class="note" style="text-align:center;margin-top:10px">Saved on the phone. It uploads when the Mac mini is reachable. No prompt to rate the app, ever.</div>
+  </div>
+</div>
+</figure>
+
+</div>
+</body>
+</html>

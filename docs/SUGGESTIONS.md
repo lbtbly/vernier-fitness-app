@@ -18,3 +18,10 @@ Triaged by /doc-health. Checked = handled.
 - [ ] 2026-08-21 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `.forge/wireframes/04-health.html`
 - [ ] 2026-08-21 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `.forge/wireframes/05-labs-review.html`
 - [ ] 2026-08-21 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `.forge/wireframes/06-training-week.html`
+- [ ] 2026-08-21 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `.forge/wireframes/07-session-player.html`
+- [ ] 2026-08-21 🆕 Credential referenced → document access in ACCESS.md? — `.forge/research/exercise-media.md`
+- [ ] 2026-08-21 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `.forge/research/exercise-media.md`
+- [ ] 2026-08-21 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `.forge/wireframes/08-nutrition-week.html`
+- [ ] 2026-08-21 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `.forge/wireframes/09-meal-estimate.html`
+- [ ] 2026-08-21 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `.forge/wireframes/10-shopping-list.html`
+- [ ] 2026-08-21 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `.forge/wireframes/11-weekly-review.html`

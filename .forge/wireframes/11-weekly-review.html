@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>11 Weekly review — Forge wireframe</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,sans-serif;
+--s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:20px;--s6:24px;--s7:32px;--s8:40px;--s9:48px;
+--r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:22px;--r-full:999px;--touch:44px;
+--dur-fast:120ms;--dur:200ms;--dur-slow:900ms;--ease:cubic-bezier(.2,.6,.2,1)}
+html[data-theme=dark]{color-scheme:dark;--bg:#0A0A0B;--surface:#141416;--surface-2:#1C1C1F;--surface-3:#232327;--line:#2A2A2E;--line-2:#3A3A40;--text:#F5F5F7;--text-2:#A1A1A8;--text-3:#7C7C85;--accent:#5AA9FF;--accent-ink:#08080A;--accent-soft:rgba(90,169,255,.14);--good:#4FD08A;--good-soft:rgba(79,208,138,.13);--warn:#E9B44C;--warn-soft:rgba(233,180,76,.13);--alert:#F07A6A;--alert-soft:rgba(240,122,106,.13);--chart-daily:#6E6E78;--chart-avg:#E8E8EC;--chart-goal:#7C8BA1;--chart-band:rgba(124,139,161,.10);--chart-grid:#232327;--focus:#8FC4FF;--page:#0E0E10;--page-ink:#8B8B93}
+html[data-theme=light]{color-scheme:light;--bg:#F2F2F5;--surface:#FFFFFF;--surface-2:#EDEDF1;--surface-3:#E3E3E9;--line:#DCDCE2;--line-2:#C6C6CE;--text:#101013;--text-2:#4A4A52;--text-3:#6B6B73;--accent:#0A6CD0;--accent-ink:#FFFFFF;--accent-soft:rgba(10,108,208,.10);--good:#157F4E;--good-soft:rgba(21,127,78,.10);--warn:#8A5A00;--warn-soft:rgba(138,90,0,.10);--alert:#B3261E;--alert-soft:rgba(179,38,30,.10);--chart-daily:#9A9AA2;--chart-avg:#101013;--chart-goal:#5B6B80;--chart-band:rgba(91,107,128,.10);--chart-grid:#E3E3E9;--focus:#0A4C93;--page:#E7E7EC;--page-ink:#55555C}
+body{font-family:var(--font);background:var(--page);color:var(--page-ink);padding:24px;-webkit-font-smoothing:antialiased}
+.bar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;max-width:1720px;margin:0 auto 20px}
+.bar h1{font-size:17px;color:var(--text);letter-spacing:-.01em}
+.bar p{font-size:13px;margin-top:4px;max-width:70ch;line-height:1.5}
+.themeswitch{min-height:34px;padding:0 14px;border-radius:var(--r-full);border:1px solid var(--line-2);background:transparent;color:var(--text);font:inherit;font-size:13px;cursor:pointer;flex:none}
+.frames{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start;max-width:1720px;margin:0 auto}
+figure.frame{margin:0;width:393px}
+figure.frame figcaption{font-size:12px;line-height:1.5;margin-bottom:8px;min-height:52px}
+figure.frame figcaption b{color:var(--text);font-weight:600}
+.phone{width:393px;height:852px;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);display:flex;flex-direction:column;border:1px solid var(--line-2);position:relative;font-size:15px;line-height:1.35}
+.status{height:54px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 6px;font-size:15px;font-weight:600;letter-spacing:-.01em}
+.status svg{width:68px;height:14px;color:var(--text)}
+.screen{flex:1;overflow-y:auto;padding:0 16px 20px}
+.title{padding:4px 0 12px}
+.title h2{font-size:30px;letter-spacing:-.02em;font-weight:700;line-height:1.1}
+.lbl{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);font-weight:600}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px;margin-bottom:12px}
+.card.flat{background:transparent}
+.num{font-variant-numeric:tabular-nums}
+.metric{font-size:30px;letter-spacing:-.02em;font-variant-numeric:tabular-nums;font-weight:600;line-height:1.05}
+.metric small{font-size:14px;color:var(--text-2);font-weight:400;letter-spacing:0}
+.big{font-size:22px;font-variant-numeric:tabular-nums;font-weight:600;letter-spacing:-.02em}
+.count{font-size:34px;font-variant-numeric:tabular-nums;font-weight:700;letter-spacing:-.03em;line-height:1}
+.sub{font-size:13px;color:var(--text-2);line-height:1.45}
+.mut{color:var(--text-3)}
+.good{color:var(--good)}.warn{color:var(--warn)}.alert{color:var(--alert)}
+.row{display:flex;gap:12px;align-items:center;min-height:44px;padding:9px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.grow{flex:1;min-width:0}
+.between{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.stack{display:flex;flex-direction:column;gap:2px}
+.chip{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:var(--r-full);border:1px solid var(--line-2);font-size:12px;color:var(--text-2);white-space:nowrap}
+.chip.g{color:var(--good);border-color:var(--good);background:var(--good-soft)}
+.chip.w{color:var(--warn);border-color:var(--warn);background:var(--warn-soft)}
+.src{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 7px;border-radius:6px;border:1px solid var(--line-2);background:var(--surface-2);color:var(--text-2);font-size:11px;white-space:nowrap}
+.src svg{width:12px;height:12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 16px;border-radius:var(--r-md);border:1px solid var(--line-2);background:var(--surface-2);color:var(--text);font:inherit;font-size:16px;font-weight:500;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn.quiet{background:transparent;border-color:transparent;color:var(--accent)}
+.btn.block{width:100%}
+.btn svg{width:20px;height:20px}
+.btn.icon{width:44px;height:44px;min-height:44px;padding:0;flex:none}
+.seg{display:flex;gap:6px;flex:none}
+.seg button{width:44px;height:44px;border-radius:10px;border:1px solid var(--line-2);background:var(--surface-2);color:var(--text-2);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.seg button svg{width:20px;height:20px}
+.seg button[aria-pressed=true].ok{background:var(--good-soft);border-color:var(--good);color:var(--good)}
+.seg button[aria-pressed=true].no{background:var(--alert-soft);border-color:var(--alert);color:var(--alert)}
+.reason{font-size:12px;color:var(--text-2);line-height:1.5;background:var(--surface-2);border-left:2px solid var(--line-2);border-radius:0 8px 8px 0;padding:8px 10px;margin-top:10px}
+.banner{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border-radius:var(--r-md);font-size:13px;line-height:1.45;margin-bottom:12px;border:1px solid var(--line);background:var(--surface-2);color:var(--text)}
+.banner svg{width:18px;height:18px;flex:none;margin-top:1px;color:var(--text-2)}
+.banner.w{background:var(--warn-soft);border-color:var(--warn)}.banner.w svg{color:var(--warn)}
+.stickybar{position:absolute;left:0;right:0;bottom:0;padding:12px 16px 28px;background:var(--surface);border-top:1px solid var(--line)}
+.cols{display:flex;gap:10px}
+.col{flex:1;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:10px}
+.col h4{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);font-weight:600;margin-bottom:8px}
+.ev{font-size:12px;line-height:1.4;padding:5px 0;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.ev:last-child{border-bottom:0}
+.ev b{font-weight:600;display:block}
+.ev.add{color:var(--good)}
+.ev.gone{color:var(--text-3);text-decoration:line-through}
+.tabbar{height:83px;flex:none;padding:8px 6px 26px;display:flex;background:var(--surface);border-top:1px solid var(--line)}
+.tabbar a{flex:1;min-width:44px;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--text-3);text-decoration:none;font-size:10px}
+.tabbar a[aria-current=page]{color:var(--accent)}
+.tabbar svg{width:24px;height:24px}
+.note{font-size:12px;color:var(--text-3);line-height:1.5}
+a:focus-visible,button:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="ok" viewBox="0 0 20 20"><path d="M4 10.5 8 14.5 16 5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="no" viewBox="0 0 20 20"><path d="M5.5 5.5 14.5 14.5M14.5 5.5 5.5 14.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="chev" viewBox="0 0 20 20"><path d="M7.5 4.5 13 10l-5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="info" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 9v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="6.2" r=".9" fill="currentColor"/></symbol>
+<symbol id="warn" viewBox="0 0 20 20"><path d="M10 3 18.2 17H1.8z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 8v3.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="10" cy="14.3" r=".9" fill="currentColor"/></symbol>
+<symbol id="undo" viewBox="0 0 20 20"><path d="M4 8.6h8.2a4.2 4.2 0 1 1 0 8.4H8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 5.6 4 8.6l3 3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="mail" viewBox="0 0 20 20"><rect x="2.4" y="4.6" width="15.2" height="10.8" rx="2.4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="m3.4 6.4 6.6 4.6 6.6-4.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+<symbol id="cal" viewBox="0 0 24 24"><rect x="3.4" y="4.6" width="17.2" height="16" rx="3.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.4 9.6h17.2M8 3.2v3M16 3.2v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="wave" viewBox="0 0 24 24"><path d="M2.5 12.5h4l2-5.5 3.6 11 2.4-7 1.5 1.5h5.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="dumb" viewBox="0 0 24 24"><path d="M4 9v6M7 7.2v9.6M17 7.2v9.6M20 9v6M7 12h10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+<symbol id="fork" viewBox="0 0 24 24"><path d="M7 3v7M5 3v4.2a2 2 0 0 0 4 0V3M7 10v11M16.6 3c-1.8 2-1.8 6.4 0 8.4V21" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.1" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.6v3M12 18.4v3M21.4 12h-3M5.6 12h-3M18.6 5.4l-2.1 2.1M7.5 16.5l-2.1 2.1M18.6 18.6l-2.1-2.1M7.5 7.5 5.4 5.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="statr" viewBox="0 0 68 14"><path d="M1 10h2.4v3H1zM6 8h2.4v5H6zM11 5.6h2.4v7.4H11zM16 3.2h2.4v9.8H16z" fill="currentColor"/><path d="M27.4 5.4a8.6 8.6 0 0 1 10.4 0M29.8 8.2a5.2 5.2 0 0 1 5.6 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M32.6 10.9l1.6 1.7 1.6-1.7a2.4 2.4 0 0 0-3.2 0z" fill="currentColor"/><rect x="48" y="3.4" width="17" height="9" rx="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".55"/><rect x="49.6" y="5" width="11.4" height="5.8" rx="1.4" fill="currentColor"/><path d="M66.6 6.6v2.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" opacity=".55"/></symbol>
+</svg>
+
+<div class="bar">
+  <div>
+    <h1>11 Weekly review</h1>
+    <p>Sunday, 20:45, tired. Read the week back, then the proposal, then the calendar write. The third frame is the one the panel called the risk: the diff a tired person reads in four seconds, before a single event is created. Counts first, list second, reasons third.</p>
+  </div>
+  <button class="themeswitch" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark';this.textContent=document.documentElement.dataset.theme==='dark'?'Light mode':'Dark mode'">Light mode</button>
+</div>
+
+<div class="frames">
+
+<!-- FRAME 1 -->
+<figure class="frame">
+<figcaption><b>The week, read back.</b> No score, no streak, no message about consistency. Where the data is short, the count says so instead of averaging over a hole.</figcaption>
+<div class="phone">
+  <div class="status"><span>20:45</span><svg><use href="#statr"/></svg></div>
+  <div class="screen" style="padding-bottom:110px">
+    <div class="title"><div class="lbl">Mon 17 to Sun 23 August</div><h2>Your week</h2></div>
+
+    <div class="card">
+      <div class="between">
+        <div class="stack"><span class="lbl">Weight, 7-day average</span><span class="metric" style="margin-top:6px">86.4 <small>kg</small></span></div>
+        <div class="stack" style="align-items:flex-end"><span class="big good">-0.6</span><span class="note">kg this week</span></div>
+      </div>
+      <div class="sub" style="margin-top:8px">0.1 kg below the line to 76.0 kg on 29 March.</div>
+    </div>
+
+    <div class="card">
+      <div class="row"><div class="stack grow"><span>Waist</span><span class="note num">measured Friday</span></div><span class="num" style="font-weight:600">98.0 cm</span><span class="good note num">-0.5</span></div>
+      <div class="row"><div class="stack grow"><span>Sessions</span><span class="note">Wednesday was missed, your calendar was full 18:00 to 22:30.</span></div><span class="num" style="font-weight:600">3 of 4</span></div>
+      <div class="row"><div class="stack grow"><span>Steps</span><span class="note warn">Average over 3 days. The phone sent nothing after 18 August.</span></div><span class="num" style="font-weight:600">8,740</span></div>
+      <div class="row"><div class="stack grow"><span>Sleep</span><span class="note warn">4 nights of 7 have data.</span></div><span class="num" style="font-weight:600">6 h 51</span></div>
+      <div class="row"><div class="stack grow"><span>Meals logged</span><span class="note">Thursday and Friday have no entry.</span></div><span class="num" style="font-weight:600">5 of 7 days</span></div>
+      <div class="row"><div class="stack grow"><span>Calories on the days logged</span><span class="note num">target 2,150</span></div><span class="num" style="font-weight:600">2,090</span></div>
+    </div>
+
+    <div class="card">
+      <div class="lbl" style="margin-bottom:8px">What went well</div>
+      <div class="sub">Three sessions in a week with three booked evenings. The morning slot worked twice.</div>
+      <div class="lbl" style="margin:16px 0 8px">What was hard</div>
+      <div class="sub">Two days without a food log, both after 21:00 finishes. The calorie average uses 5 days, so read it loosely.</div>
+    </div>
+
+    <div class="banner w">
+      <svg><use href="#warn"/></svg>
+      <div><b>One thing to fix before next week.</b> Apple Health has sent nothing since 18 August. Run the shortcut once and the activity numbers come back.</div>
+    </div>
+
+    <div class="card flat" style="border-style:dashed">
+      <div class="between"><span class="lbl">Email version</span><span class="src"><svg><use href="#mail"/></svg>Preview only</span></div>
+      <div class="sub" style="margin-top:8px">The same summary is prepared as an email every Sunday at 20:30. No SMTP host is configured, so it sits in the local preview until you set one.</div>
+    </div>
+  </div>
+  <div class="stickybar">
+    <button class="btn primary block">See next week's plan</button>
+    <div class="note" style="text-align:center;margin-top:8px">Nothing has changed yet. Reading the week changes nothing.</div>
+  </div>
+</div>
+</figure>
+
+<!-- FRAME 2 -->
+<figure class="frame">
+<figcaption><b>The proposal.</b> Three blocks, each confirmable on its own. Rejecting the menu does not reject the sessions, and neither writes to a calendar from here.</figcaption>
+<div class="phone">
+  <div class="status"><span>20:46</span><svg><use href="#statr"/></svg></div>
+  <div class="screen" style="padding-bottom:110px">
+    <div class="title"><div class="lbl">Mon 24 to Sun 30 August</div><h2>Next week</h2></div>
+
+    <div class="card">
+      <div class="between" style="align-items:flex-start">
+        <div class="stack grow"><span class="lbl">Training</span><span style="font-size:17px;font-weight:600;margin-top:2px">3 sessions, 2 h 00</span><span class="sub num">Mon 19:00 cardio &middot; Wed 07:00 strength &middot; Fri 07:15 intervals</span></div>
+        <div class="seg"><button class="ok" aria-pressed="true" aria-label="Accept training"><svg><use href="#ok"/></svg></button><button class="no" aria-label="Reject training"><svg><use href="#no"/></svg></button></div>
+      </div>
+      <div class="reason">Three, not four, because you finished three in each of the last two weeks and a fourth was dropped both times.</div>
+      <button class="btn block" style="margin-top:12px">Open the week and edit a session</button>
+    </div>
+
+    <div class="card">
+      <div class="between" style="align-items:flex-start">
+        <div class="stack grow"><span class="lbl">Nutrition</span><span style="font-size:17px;font-weight:600;margin-top:2px">2,150 kcal a day</span><span class="sub num">2 HelloFresh recipes &middot; 2 Uber Eats slots &middot; 5 home dinners</span></div>
+        <div class="seg"><button class="ok" aria-pressed="true" aria-label="Accept the menu"><svg><use href="#ok"/></svg></button><button class="no" aria-label="Reject the menu"><svg><use href="#no"/></svg></button></div>
+      </div>
+      <div class="reason">Target held at 2,150 because the 28-day trend is on the line. It moves when the trend moves, not when one weigh-in does.</div>
+      <button class="btn block" style="margin-top:12px">Open the menu</button>
+    </div>
+
+    <div class="card">
+      <div class="between" style="align-items:flex-start">
+        <div class="stack grow"><span class="lbl">Shopping</span><span style="font-size:17px;font-weight:600;margin-top:2px">23 items, 7 deducted</span><span class="sub num">Saturday 10:00, about 40 minutes</span></div>
+        <div class="seg"><button class="ok" aria-pressed="true" aria-label="Accept the list"><svg><use href="#ok"/></svg></button><button class="no" aria-label="Reject the list"><svg><use href="#no"/></svg></button></div>
+      </div>
+      <div class="reason">Saturday morning because the last four shops happened then, and the HelloFresh box lands Monday.</div>
+    </div>
+
+    <div class="card flat" style="border-style:dashed">
+      <div class="lbl" style="margin-bottom:6px">Not proposed</div>
+      <div class="sub">A calorie cut. Nothing in this week's data asks for one, and the app does not tighten a target to look active.</div>
+    </div>
+  </div>
+  <div class="stickybar">
+    <div class="between" style="margin-bottom:10px"><span class="sub">3 of 3 accepted</span><button class="btn quiet" style="min-height:32px;padding:0">Ask again</button></div>
+    <button class="btn primary block">Review the calendar changes</button>
+  </div>
+</div>
+</figure>
+
+<!-- FRAME 3 -->
+<figure class="frame">
+<figcaption><b>The four-second read.</b> Three counts, then the dedicated calendar before and after, then every change as a line with its cause. No summary sentence stands in for this screen.</figcaption>
+<div class="phone">
+  <div class="status"><span>20:47</span><svg><use href="#statr"/></svg></div>
+  <div class="screen" style="padding-bottom:124px">
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0 10px">
+      <button class="btn icon" aria-label="Back" style="transform:scaleX(-1)"><svg><use href="#chev"/></svg></button>
+      <div class="grow"><div style="font-size:20px;font-weight:700;letter-spacing:-.01em">Calendar changes</div><div class="note">Nothing is written yet.</div></div>
+    </div>
+
+    <div class="card" style="padding:16px">
+      <div style="display:flex;gap:20px">
+        <div class="stack"><span class="count good">3</span><span class="note" style="margin-top:4px">added</span></div>
+        <div class="stack"><span class="count">1</span><span class="note" style="margin-top:4px">moved</span></div>
+        <div class="stack"><span class="count warn">1</span><span class="note" style="margin-top:4px">removed</span></div>
+      </div>
+      <div class="sub" style="margin-top:12px">All of it in <b>Health (app)</b>. Your primary calendar is read only and is never written to.</div>
+    </div>
+
+    <div class="cols" style="margin-bottom:12px">
+      <div class="col">
+        <h4>Before, 2 events</h4>
+        <div class="ev"><b>Thu 27, 19:00</b>Neoness intervals</div>
+        <div class="ev"><b>Sat 29, 10:30</b>Recovery walk</div>
+      </div>
+      <div class="col">
+        <h4>After, 4 events</h4>
+        <div class="ev add"><b>Mon 24, 19:00</b>Neoness cardio</div>
+        <div class="ev add"><b>Wed 26, 07:00</b>Home strength</div>
+        <div class="ev"><b>Fri 28, 07:15</b>Neoness intervals</div>
+        <div class="ev add"><b>Sat 29, 10:00</b>Shop for the week</div>
+        <div class="ev gone"><b>Sat 29, 10:30</b>Recovery walk</div>
+      </div>
+    </div>
+
+    <div class="lbl" style="margin:16px 0 8px">Added</div>
+    <div class="card" style="padding:12px 14px;margin-bottom:8px">
+      <div class="between" style="align-items:flex-start">
+        <div class="stack grow"><span style="font-weight:600">Neoness cardio, 45 min</span><span class="sub num">Mon 24 Aug, 19:00 to 19:45</span><span class="note">Your calendar is clear from 18:30.</span></div>
+        <div class="seg"><button class="ok" aria-pressed="true" aria-label="Confirm"><svg><use href="#ok"/></svg></button><button class="no" aria-label="Skip"><svg><use href="#no"/></svg></button></div>
+      </div>
+    </div>
+    <div class="card" style="padding:12px 14px;margin-bottom:8px">
+      <div class="between" style="align-items:flex-start">
+        <div class="stack grow"><span style="font-weight:600">Home strength, 35 min</span><span class="sub num">Wed 26 Aug, 07:00 to 07:35</span><span class="note">Morning, because your calendar shows you busy 18:00 to 22:30.</span></div>
+        <div class="seg"><button class="ok" aria-pressed="true" aria-label="Confirm"><svg><use href="#ok"/></svg></button><button class="no" aria-label="Skip"><svg><use href="#no"/></svg></button></div>
+      </div>
+    </div>
+    <div class="card" style="padding:12px 14px;margin-bottom:8px">
+      <div class="between" style="align-items:flex-start">
+        <div class="stack grow"><span style="font-weight:600">Shop for the week, 40 min</span><span class="sub num">Sat 29 Aug, 10:00 to 10:40</span><span class="note">The last four shops happened Saturday morning.</span></div>
+        <div class="seg"><button class="ok" aria-pressed="true" aria-label="Confirm"><svg><use href="#ok"/></svg></button><button class="no" aria-label="Skip"><svg><use href="#no"/></svg></button></div>
+      </div>
+    </div>
+
+    <div class="lbl" style="margin:16px 0 8px">Moved</div>
+    <div class="card" style="padding:12px 14px;margin-bottom:8px">
+      <div class="between" style="align-items:flex-start">
+        <div class="stack grow"><span style="font-weight:600">Neoness intervals, 40 min</span><span class="sub num"><s class="mut">Thu 27, 19:00</s> to <b>Fri 28, 07:15</b></span><span class="note">Moved from Thursday, your calendar shows you busy 18:00 to 23:00.</span></div>
+        <div class="seg"><button class="ok" aria-pressed="true" aria-label="Confirm"><svg><use href="#ok"/></svg></button><button class="no" aria-label="Skip"><svg><use href="#no"/></svg></button></div>
+      </div>
+    </div>
+
+    <div class="lbl" style="margin:16px 0 8px">Removed</div>
+    <div class="card" style="padding:12px 14px;border-color:var(--warn)">
+      <div class="between" style="align-items:flex-start">
+        <div class="stack grow"><span style="font-weight:600"><s>Recovery walk, 50 min</s></span><span class="sub num">Sat 29 Aug, 10:30 to 11:20</span><span class="note">You rejected this session in the plan on 23 August at 20:33.</span></div>
+        <div class="seg"><button class="ok" aria-pressed="true" aria-label="Confirm the removal"><svg><use href="#ok"/></svg></button><button class="no" aria-label="Keep it"><svg><use href="#no"/></svg></button></div>
+      </div>
+      <div class="note" style="margin-top:8px;color:var(--warn)">Removals start unselected. You confirmed this one at 20:47.</div>
+    </div>
+
+    <div class="card flat" style="border-style:dashed;margin-top:12px">
+      <div class="lbl" style="margin-bottom:6px">Scope</div>
+      <div class="sub">Write access covers one calendar, Health (app). Reading covers the two calendars you selected, time ranges only, no titles. A wider scope would be a new consent screen, not a line in a changelog.</div>
+    </div>
+  </div>
+  <div class="stickybar">
+    <div class="between" style="margin-bottom:10px"><span class="sub">5 of 5 confirmed</span><button class="btn quiet" style="min-height:32px;padding:0">Unselect all</button></div>
+    <button class="btn primary block">Apply 5 changes</button>
+  </div>
+</div>
+</figure>
+
+<!-- FRAME 4 -->
+<figure class="frame">
+<figcaption><b>Written, and reversible.</b> The result is the same list, now with what happened to each line, and undo lives on the screen that did the writing.</figcaption>
+<div class="phone">
+  <div class="status"><span>20:48</span><svg><use href="#statr"/></svg></div>
+  <div class="screen">
+    <div class="title"><div class="lbl">Sunday 23 August, 20:48</div><h2>Written</h2></div>
+
+    <div class="banner" style="border-color:var(--good)">
+      <svg style="color:var(--good)"><use href="#ok"/></svg>
+      <div><b>5 changes applied to Health (app).</b> 3 added, 1 moved, 1 removed. Your primary calendar was not touched.</div>
+    </div>
+
+    <div class="card">
+      <div class="row"><div class="stack grow"><span>Neoness cardio</span><span class="note num">Mon 24, 19:00</span></div><span class="chip g">Added</span></div>
+      <div class="row"><div class="stack grow"><span>Home strength</span><span class="note num">Wed 26, 07:00</span></div><span class="chip g">Added</span></div>
+      <div class="row"><div class="stack grow"><span>Neoness intervals</span><span class="note num">Thu 27 19:00 to Fri 28 07:15</span></div><span class="chip">Moved</span></div>
+      <div class="row"><div class="stack grow"><span>Shop for the week</span><span class="note num">Sat 29, 10:00</span></div><span class="chip g">Added</span></div>
+      <div class="row"><div class="stack grow"><span class="mut"><s>Recovery walk</s></span><span class="note num">Sat 29, 10:30</span></div><span class="chip w">Removed</span></div>
+      <button class="btn block" style="margin-top:12px"><svg><use href="#undo"/></svg>Undo all 5</button>
+      <div class="note" style="margin-top:8px">Undo puts the calendar back exactly as the Before column showed it, including the walk.</div>
+    </div>
+
+    <div class="card">
+      <div class="lbl" style="margin-bottom:10px">The write log</div>
+      <div class="row"><span class="grow sub mut">Applied</span><span class="num">23 Aug 2026, 20:48:11</span></div>
+      <div class="row"><span class="grow sub mut">Calendar</span><span class="num">Health (app)</span></div>
+      <div class="row"><span class="grow sub mut">Events created</span><span class="num">3</span></div>
+      <div class="row"><span class="grow sub mut">Events updated</span><span class="num">1</span></div>
+      <div class="row"><span class="grow sub mut">Events deleted</span><span class="num">1</span></div>
+      <div class="row"><span class="grow sub mut">Result</span><span class="chip g">All 5 accepted by Google</span></div>
+      <div class="note" style="margin-top:10px">Every write this app has ever made is in this log, oldest first, and each one still has its undo.</div>
+    </div>
+
+    <div class="card flat" style="border-style:dashed">
+      <div class="lbl" style="margin-bottom:6px">Reminders that follow</div>
+      <div class="sub">Push 30 minutes before each session, grouped, silent between 22:00 and 07:00. One button in the notification marks it done.</div>
+    </div>
+  </div>
+  <nav class="tabbar">
+    <a href="#" aria-current="page"><svg><use href="#cal"/></svg>Today</a>
+    <a href="#"><svg><use href="#wave"/></svg>Health</a>
+    <a href="#"><svg><use href="#dumb"/></svg>Train</a>
+    <a href="#"><svg><use href="#fork"/></svg>Eat</a>
+    <a href="#"><svg><use href="#gear"/></svg>Settings</a>
+  </nav>
+</div>
+</figure>
+
+</div>
+</body>
+</html>

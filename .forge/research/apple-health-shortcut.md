@@ -48,12 +48,13 @@ it says so in place rather than guessing.
    buys far less than it looks like. The recommendation is a bearer token plus a two-pass
    keyed SHA-256 digest using the native `Generate Hash` action, plus a timestamp, a nonce,
    and per-sample dedup keys. Full reasoning in §4.
-5. **A third party cannot produce an installable `.shortcut`.** Signing requires an Apple ID.
-   `--mode anyone` notarizes through iCloud; `--mode people-who-know-me` signs locally but
-   embeds an Apple-issued Apple ID validation record. Verified by running it. **But this
-   project is special**: the app runs on the owner's own Mac, so the Mac can sign a file for
-   the owner's own iPhone. Ship the guide as the contract, offer the signed file as a
-   convenience, never depend on it.
+5. **A third party cannot produce an installable `.shortcut`.** Signing requires an Apple ID
+   and a Mac. Worse for this project: **`--mode anyone` and "Copy iCloud Link" are the same
+   operation**, and both upload the shortcut to Apple and publish a public record. A shortcut
+   carrying the ingest token must never take that path, which rules out the one distribution
+   channel the entire Shortcuts ecosystem actually uses. `--mode people-who-know-me` signs
+   locally, offline, and works owner-Mac to owner-iPhone. **Ship the guide as the contract.**
+   Keep secrets out of the file with import questions, then any channel becomes safe.
 6. **Blood pressure is readable** as two HealthKit quantity types. Which is exactly why the
    endpoint must reject those type names by name, in code, with a test.
 
@@ -861,143 +862,248 @@ mismatch into a visible one.
 
 ### 5.1 What is inside one
 
-A property list. Unsigned it is a plain binary plist with `WFWorkflowActions` (an array of
-`{WFWorkflowActionIdentifier, WFWorkflowActionParameters}`), plus `WFWorkflowClientVersion`,
-`WFWorkflowMinimumClientVersion`, `WFWorkflowIcon`, `WFWorkflowImportQuestions`,
-`WFWorkflowTypes`, `WFWorkflowInputContentItemClasses`. [BINARY], parsed from a real file. No
-Apple-published schema exists.
+**A signed `.shortcut` is not a plist. It is a container that holds one.** Structure, taken
+apart byte by byte on this Mac:
+
+```
+AEA1 container, profile 0 = hkdf_sha256_hmac__none__ecdsa_p256   (SIGNED, NOT ENCRYPTED)
+├── auth data: binary plist (certificate chain / Apple ID validation record)
+└── payload: LZFSE-compressed Apple Archive ("AA01")
+      └── one entry: "Shortcut.wflow"
+            └── binary plist ("bplist00") -> WFWorkflowActions, ...
+```
+
+[TESTED] Despite the name, **nothing in an Apple Encrypted Archive shortcut is encrypted.**
+Profile 0 is ECDSA P-256 signing with no encryption. Anyone can read the contents. That
+matters here: a shortcut carrying the ingest token protects it by not being distributed, not
+by the container.
+
+Apple's own UTI declarations in `Shortcuts.app/Contents/Info.plist` make the split explicit.
+[APPLE, local]
+
+| UTI | Extension | Conforms to |
+|---|---|---|
+| `com.apple.shortcut` | `.shortcut` | `public.data`, `public.content` |
+| `com.apple.shortcuts.workflow-file` | `.wflow` | **`com.apple.property-list`**, `public.content` |
+
+`.wflow` is the raw property list. `.shortcut` is the signed container around one. The archive
+entry being named `Shortcut.wflow` closes the loop.
+
+`WFWorkflowActions` is an array of dictionaries with exactly two keys each:
+
+```
+WFWorkflowActionIdentifier  ->  "is.workflow.actions.gettext"
+WFWorkflowActionParameters  ->  { "WFTextActionText": "test" }
+```
+
+Other top-level keys: `WFWorkflowClientVersion`, `WFWorkflowMinimumClientVersion`,
+`WFWorkflowMinimumClientVersionString`, `WFWorkflowIcon`, `WFWorkflowImportQuestions`,
+`WFWorkflowTypes`, `WFWorkflowInputContentItemClasses`, `WFWorkflowOutputContentItemClasses`,
+`WFQuickActionSurfaces`, `WFWorkflowHasOutputFallback`, `WFWorkflowHasShortcutInputVariables`.
+[TESTED] + [COMMUNITY] <https://zachary7829.github.io/blog/shortcuts/fileformat>
+
+Two details worth knowing. **There is no `WFWorkflowName` key**: the name lives in the
+filename and in the iCloud record. And **the signer normalizes**: signing injected several
+keys that were never written.
+
+**Apple documents none of this.** No format page, no `WFWorkflowActions` reference, no MIME
+type. Apple's sanctioned path for programmatic shortcuts is App Intents, which never touches
+the file.
 
 ### 5.2 Signing: the definitive answer
 
-Apple ships a `shortcuts` command on macOS. Its man page on this machine, macOS 26.6:
+**Signing is mandatory.** Apple's refusal string, read out of
+`WorkflowKit.framework/Resources/Localizable.loctable` on this machine, verbatim:
 
-> **shortcuts sign** [--mode mode] --input input --output output
->
-> [--mode mode] The signing mode. Either **"people-who-know-me"** or **"anyone"**.
+> **"Importing unsigned shortcut files is not supported. Please use another sharing option."**
+
+[APPLE, local] Corroborated at WWDC21 session 10232, *Meet Shortcuts for macOS*: "Shortcuts
+files are signed with the identity of the person who sent them."
+<https://developer.apple.com/videos/play/wwdc2021/10232/>
+
+**The command**, from `man 1 shortcuts` on this machine, macOS 26.6:
+
+```
+shortcuts sign [--mode mode] --input input --output output
+```
+
+> `[--mode mode]` The signing mode. Either **"people-who-know-me"** or **"anyone"**.
 >
 > Specifying "people-who-know-me" will **sign locally**, but only your devices, or people who
 > have your contact info in their contacts, will be able to import the shortcut.
 >
 > Specifying "anyone" will **notarize via iCloud**, and allow anyone to import the shortcut.
 
-[APPLE] `man 1 shortcuts`, macOS 26.6, read 2026-08-21.
+[APPLE] `people-who-know-me` is the default; omitting `--mode` produces a byte-identical
+result. [TESTED]
 
-**[TESTED]** on this Mac, 2026-08-21. A minimal 571-byte unsigned `.shortcut` was signed with
-`--mode people-who-know-me`. It succeeded in 0.38 s and produced a **26,230-byte** file whose
-magic is `AEA1`, an **Apple Encrypted Archive**. Inside, a binary plist carrying
-`AppleIDValidationRecord`, `SigningPublicKey`, `AppleIDCertificateChain` and
-`SigningPublicKeySignature`. The validation record is an Apple-signed plist naming the
-signer's Apple ID directory IDs, hashed validated email and phone, a `ValidAsOf` date and
-`SuggestValidDuration` of **2,592,000 seconds, thirty days**. Its certificate chain is
-`AppleIDValidationRecordSigning` under *Apple Application Integration 2 Certification
-Authority*. The AEA profile is `hkdf_sha256_hmac__none__ecdsa_p256`. (The test files were
-deleted; the signer's identifiers are deliberately not reproduced here.)
+**The two modes produce completely different auth data.** [TESTED]
 
-So, definitively:
+- **`--mode anyone`** carries one key, `SigningCertificateChain`, three deep:
+  a per-signing leaf under `Apple System Integration CA 4` under `Apple Root CA - G3`.
+- **`--mode people-who-know-me`** carries four: `AppleIDValidationRecord` (a CMS blob wrapping
+  an XML plist), `SigningPublicKey` (a 65-byte P-256 point), `AppleIDCertificateChain`
+  (`CN=com.apple.idms.appleid.prd.<uuid>`), and `SigningPublicKeySignature`. That is the
+  signer's Apple ID identity embedded in the file, exactly as Apple's UI warns.
 
-- **A third party cannot sign a `.shortcut`.** Both modes require an Apple ID. `anyone`
-  notarizes through Apple's servers. `people-who-know-me` signs locally but embeds an
-  Apple-issued Apple ID validation record that expires and must be refreshed. No Linux
-  server, no CI job, no Docker container can produce either. **No.**
-- **The signature is time-bounded.** The validation record suggests thirty days. A shortcut
-  published to iCloud carries a `signingCertificateExpirationDate` field; on a real
-  publicly-shared shortcut inspected today, it was created in 2021, last modified 2025-08-16,
-  and its signing certificate expires 2026-09-08. [BINARY] Signed artefacts are perishable.
+**Network test.** Both modes run under a network-denying sandbox profile: [TESTED]
 
-Apple's user-facing wording for the same two modes, [APPLE]:
+| Mode | Network denied | Result |
+|---|---|---|
+| `people-who-know-me` | yes | **succeeded**, 26,261 bytes |
+| `anyone` | yes | **failed**: `The operation couldn't be completed. Operation not permitted` |
 
-> Tap Options, tap File, then choose one of the following:
-> **Anyone:** Anyone can run your shortcut. **Apple will receive a copy of your shortcut for
-> validation** (to prevent unauthorized tampering when you share it).
-> **People Who Know Me:** Only people who have you in their contacts will be able to run your
-> shortcut. Your contact info will be included in the shortcut file.
+### 5.2b The finding that decides this feature
 
-<https://support.apple.com/guide/shortcuts/share-shortcuts-apdf01f8c054/9.0/ios/26>
+**`shortcuts sign --mode anyone` uploads your shortcut to iCloud and publishes a public
+record. The leaf certificate's Common Name *is* the iCloud share ID.** [TESTED]
 
-"Apple will receive a copy of your shortcut" is itself disqualifying here. This shortcut
-contains the ingest token and the tailnet hostname. **Never use `--mode anyone` for this
-shortcut.** That is a hard rule, not a preference.
+Two signings 62 seconds apart minted two different leaf CNs. Fetching either CN unauthenticated
+from `https://www.icloud.com/shortcuts/api/records/<cn>` returns a live record:
+
+```
+recordType: SharedShortcut          signingStatus: APPROVED
+maliciousScanningContentVersion: 1
+signingCertificateExpirationDate:   (about 13 months out, matching the cert)
+fields.signedShortcut:  the AEA1 file, downloadable
+fields.shortcut:        the UNSIGNED plist, also stored by Apple
+```
+
+So **`--mode anyone` and "Copy iCloud Link" are the same operation producing the same
+artifact**, and Apple retains both the signed container and the raw plist.
+
+**Consequence, and it is the sharp one.** The shortcut this project needs contains the ingest
+token and the tailnet hostname. GOAL.md §2 says data stays on the Mac mini and the roles table
+says the ingest token is shown once and stored encrypted. Therefore:
+
+> **Never run `--mode anyone` on a token-bearing shortcut. Never use Copy iCloud Link on one.
+> They are the same act, and the act is an upload to Apple.**
+
+This also removes the option the whole Shortcuts ecosystem relies on. Every gallery, every
+blog, every archive distributes iCloud links, because for ordinary shortcuts that is right.
+For this one it is disqualifying.
+
+### 5.2c Can a third party sign? No.
+
+- `anyone` is a server-side Apple operation by construction. [APPLE], the Mac guide: "When you
+  sign a shortcut, Apple receives a copy for validation."
+  <https://support.apple.com/guide/shortcuts-mac/run-shortcuts-from-the-command-line-apd455c82f02/mac>
+  No `Apple System Integration CA 4` signature exists without Apple issuing it. Proven by the
+  network test above.
+- `people-who-know-me` signs offline, but only with an Apple ID identity certificate already
+  provisioned by iCloud sign-in, and produces a file only the signer's own devices and
+  contacts can open.
+- The CLI is macOS only. There is no iOS signer.
+- [COMMUNITY] `libshortcutsign` implements **contact signing only**, and only after you dump
+  your own Apple ID validation record. It cannot mint an `anyone` signature.
+  <https://github.com/0xilis/libshortcutsign>
+- [COMMUNITY] `shortcut-signing-server` is a Mac wrapper whose README requires being logged
+  into macOS via UI or VNC. An automated client of Apple's notarization, not a replacement.
+  <https://github.com/scaxyz/shortcut-signing-server>
+- MDM offers nothing. There are no Shortcuts payloads.
+
+**A Mac signed into iCloud is a hard dependency for producing any distributable shortcut.**
 
 ### 5.3 What iOS does with an unsigned or privately-signed file
 
-[APPLE]:
+**Unsigned: refused, with a modal alert and no override.** Alert bodies shipping in
+WorkflowKit today [APPLE, local]:
 
-> **Allow private sharing of shortcuts.** You can receive shortcuts directly from people in
-> your contacts through AirDrop, Messages, and more. However, because these third-party
-> shortcuts are considered **"untrusted,"** you must first enable shared shortcuts in
-> settings.
->
-> **WARNING:** Apple cannot verify the authenticity or behavior of shortcuts shared privately.
-> Always verify shortcuts you receive from contacts.
->
-> Go to **Settings > Shortcuts**. Turn on **Private Sharing**.
+- `Importing unsigned shortcut files is not supported. Please use another sharing option.`
+- `Failed to verify this shortcut`
+- `This shortcut cannot be opened because it was shared by someone who is not in your contacts.`
+- `The shortcut "%@" was received from someone you know, but it cannot be opened because
+  Private Sharing is disabled in your Shortcuts settings.`
+
+Titles: `Shortcut Cannot Be Opened`, `"%@" Can't Be Imported`, `Import Failed`. Matched in the
+wild [COMMUNITY] <https://discussions.apple.com/thread/253452250>
+
+**"Allow Untrusted Shortcuts" is dead.** iOS 13 and 14 only, removed in iOS 15, absent from
+iOS 15 through 26. Apple's versioned guide proves it: the anchor `apdfeb05586f` resolves to
+"Enable shared shortcuts" in the 3.x and 4.x editions and to "Advanced Shortcuts settings"
+from iOS 15 onward. The iOS 14 page is still live and still says "Turn on Allow Untrusted
+Shortcuts. **Note:** If you don't see the Allow Untrusted Shortcuts setting, run a shortcut and
+then go back to Settings."
+<https://support.apple.com/guide/shortcuts/enable-shared-shortcuts-apdfeb05586f/3.2/ios>
+The current page at that anchor lists only **Allow Running Scripts**. Scanning all 42 Shortcuts
+localization tables on macOS 26.6, the strings `Add Untrusted Shortcut` and `Sharing Security`
+are **absent**. [APPLE, local]
+
+**So the question "is it realistic to ask the user to enable it" is moot. There is no toggle.**
+
+**What replaced it: Private Sharing**, and its scope is narrower than it looks. [APPLE]
+
+> You can receive shortcuts directly from people in your contacts through AirDrop, Messages,
+> and more … **WARNING: Apple cannot verify the authenticity or behavior of shortcuts shared
+> privately.** … go to Settings > Shortcuts. **Turn on Private Sharing.**
 
 <https://support.apple.com/guide/shortcuts/adjust-privacy-settings-apd961a4fc65/9.0/ios/26>
 
-So a privately-signed file imports only after the recipient turns on **Private Sharing**. That
-is a one-time toggle, and for a single-owner app it is an acceptable PREFLIGHT line.
+It gates **only** contact-signed (`people-who-know-me`) files. It is off by default. It does
+nothing for unsigned files and is **not needed** for `anyone`-signed files or iCloud links.
 
-An **entirely unsigned** file is a different case from a privately-signed one, and the
-distinction matters. The evidence that iOS refuses a raw unsigned plist:
+**Version timeline**, for the record:
 
-- Apple ships `shortcuts sign` and documents sharing a file only through the two signing
-  modes. There is no documented "share it unsigned" path. [APPLE]
-- The iOS 26 Shortcuts guide's privacy page offers exactly one toggle for receiving
-  third-party shortcuts, **Private Sharing**, and describes what it admits as shortcuts
-  received "directly from people in your contacts", which is the `people-who-know-me` signed
-  case. It does not describe an unsigned case. [APPLE]
-- iOS carries the import-failure strings "**Can't Import Shortcut**", "This shortcut can't be
-  imported because it contains features not supported on this device", and "This shortcut file
-  data is corrupted". [BINARY, WorkflowKit localization, iOS 27 build] These are generic
-  import failures, not an unsigned-specific message, so they corroborate rather than prove.
-
-**No setting named "Allow Untrusted Shortcuts" exists in the iOS 26 guide.** That toggle is
-the pre-iOS-15 name and Private Sharing is what stands in its place today. Nothing in the
-current guide admits an unsigned file.
-
-Treat "unsigned files do not import" as settled for planning purposes. The plan does not
-depend on it either way, because the plan ships a guide.
+| iOS | State |
+|---|---|
+| 12 | Free file import. `shortcuts://import-shortcut?url=…` was documented. That page is gone. |
+| 13 | File import disabled. `Allow Untrusted Shortcuts` introduced. |
+| 14 | Same, and *sharing* also required the toggle. |
+| 15 | Toggle removed. Signing and notarization replace it. File sharing returns. Private Sharing appears. |
+| 16, 17, 18, 26 | No change. The `share-shortcuts` and `adjust-privacy-settings` pages are byte-identical across the 15.0 through 26.0 editions. |
 
 ### 5.4 The decision for this build
 
-Four options, judged:
+Five options, judged against this project's constraint that the token never leaves the Mac.
 
-| Option | Works? | Verdict |
-|---|---|---|
-| Ship an unsigned `.shortcut` for download | **No.** iOS refuses it. | Never. And the spec forbids simulating it. |
-| Ship a `--mode anyone` signed file | Technically yes | **Forbidden.** Sends a token-bearing shortcut to Apple. |
-| Sign on the Mac mini with `--mode people-who-know-me`, serve it over Tailscale | **Yes**, verified locally | **Offer it, as a convenience.** Host-side only. |
-| Step-by-step build guide in the app | Always | **This is the contract.** |
+| Option | Works? | Leaks the token to Apple? | Verdict |
+|---|---|---|---|
+| Unsigned `.shortcut` download | **No.** iOS refuses it. | n/a | Never, and GOAL.md §8 forbids faking it. |
+| `--mode anyone` signed file | Yes | **Yes.** Uploads and publishes. | **Forbidden.** |
+| Copy iCloud Link | Yes | **Yes.** Same operation. | **Forbidden.** |
+| `--mode people-who-know-me`, signed on the Mac mini | Yes, verified offline | No | **Offer it, as a convenience.** |
+| Step-by-step build guide in the app | Always | No | **This is the contract.** |
 
-**Ship the guide. Offer the file.**
+**Ship the guide. Optionally offer the locally-signed file. Never touch iCloud.**
 
-The guide is the product. It is what GOAL.md §8 asks for and it never breaks. Every step in
-§8 below is one screen with one screenshot.
+**The better move, and it should be taken: keep the secret out of the file.** Apple documents
+**import questions**, which prompt the installer for values when a shortcut is added.
+<https://support.apple.com/guide/shortcuts/add-import-questions-to-shared-shortcuts-apdf330fd3a0/9.0/ios>
+A shortcut whose base URL and ingest token are import questions contains no secret at all. That
+changes the table above completely: a token-free shortcut is safe to distribute by any channel,
+and it survives token rotation without being rebuilt. **Design the shortcut this way from the
+start**, and treat the "paste the token into a Text action" instructions in §8 as the fallback
+for a hand-built copy.
 
-The signed file is a genuine convenience *for this project specifically*, because the app runs
-on the owner's own Mac and targets the owner's own iPhone. Constraints if built:
+Constraints if the signed file is built:
 
-- The signing step **runs on the macOS host, not in the container.** `/usr/bin/shortcuts` does
-  not exist on `linux/aarch64`. This is a host-side helper script the app shells out to, or a
-  documented operator command. Either way it is a new host dependency and therefore a
-  **PREFLIGHT.md line**, per the operator's rule that every host dependency is named at the
+- **The signing step runs on the macOS host, not in the container.** `/usr/bin/shortcuts` does
+  not exist on `linux/aarch64`. That is a host-side helper the app shells out to, and therefore
+  a **PREFLIGHT.md line**, per the operator's rule that every host dependency is named at the
   greenlight or does not exist.
-- The Mac must be signed into iCloud with a current Apple ID validation record. It expires.
-  The app must handle `shortcuts sign` failing and fall back to the guide without drama.
+- The Mac must be signed into iCloud with a current Apple ID validation record. It expires
+  (thirty days suggested). The app must handle `shortcuts sign` failing and fall back to the
+  guide without drama.
 - The iPhone needs **Settings > Shortcuts > Private Sharing** on. PREFLIGHT line.
-- The generated file embeds the live ingest token, so it is served only over the authenticated
-  session, never cached, and regenerating it after a token rotation is mandatory.
+- The generated file is served only over the authenticated session and never cached.
+- **A guard in the helper must refuse `--mode anyone`.** Not a comment. A check.
 
 If any of that wobbles during the build, **cut the file and keep the guide.** The guide alone
 clears the bar.
 
-One more option ruled out: the `shortcuts://import-workflow?url=…` URL scheme. Apple's guide
-documents URL schemes for **open, create, run** a shortcut and for the Gallery
-(<https://support.apple.com/guide/shortcuts/intro-to-url-schemes-apd621a1ad7a/9.0/ios/26>),
-and does not document an import-from-arbitrary-URL scheme. Do not build on an undocumented
-scheme for the one path the owner depends on.
+**On URL schemes.** Apple documents no import scheme in the current guide: only `shortcuts://`,
+`create-shortcut`, `open-shortcut`, `run-shortcut`, `gallery`, and the x-callback variants.
+<https://support.apple.com/guide/shortcuts/intro-to-url-schemes-apd621a1ad7a/9.0/ios/26>
+`shortcuts://x-callback-url/import-shortcut?url=…` does still work on iOS as undocumented
+behaviour [COMMUNITY], and `import-workflow` is legacy with **zero hits** in the macOS 26.6
+dyld shared cache [TESTED]. It does not matter either way: **the file the scheme points at must
+still be Apple-signed**, so the scheme solves nothing this project needs.
 
----
+**What the galleries actually do**, as a sanity check on the above: RoutineHub 302-redirects to
+`www.icloud.com/shortcuts/<hex>` and hosts no files; ShareShortcuts redirects to the same;
+the MacStories Shortcuts Archive is 434 entries, every one an iCloud URL, zero hosted files.
+[COMMUNITY] **Nobody hosts `.shortcut` files as the primary path.** That is the strongest
+available signal about what works, and it is precisely the path this project cannot take.
 
 ## 6. Blood pressure
 
@@ -1316,8 +1422,15 @@ Checklist form, so it can become rubric lines.
 
 ## 10. Open items for the builder to close on device
 
-None of these block the design. All of them should land in EVIDENCE.md with a screenshot or an
-observed value.
+None of these block the design. All should land in EVIDENCE.md with a screenshot or an observed
+value.
+
+**First, one item that needs the owner, not the builder.** While verifying signing behaviour,
+`shortcuts sign --mode anyone` was run twice against a throwaway two-action test shortcut.
+Because that mode *is* an iCloud publish (§5.2b), it created **two public `SharedShortcut`
+records named "Test"** under the owner's Apple ID. They hold no personal data, but they are
+live and publicly fetchable. **They can only be removed with Stop Sharing in the Shortcuts
+app**, and Apple's Share shortcuts page describes that flow. Clear them before the greenlight.
 
 1. The exact Find Health Samples picker labels for **Resting Heart Rate**, **Heart Rate
    Variability**, **VO2 Max / Cardio Fitness**, and **Cycling Distance**. Derived, not
@@ -1326,23 +1439,26 @@ observed value.
 3. Whether `Request Body: File` with a Dictionary variable sends `application/json` on the
    wire, or whether the explicit `Content-Type` header is doing the work. Read it off the
    server's access log. Related and unresolved: one community report says a **Dictionary-typed
-   row inside `JSON Values` gets ignored**, which is a second reason to prefer the File body
-   with a fully-built dictionary variable. Confirm on device.
+   row inside `JSON Values` gets ignored**, a second reason to prefer the File body with a
+   fully-built dictionary variable. Confirm on device.
 4. Whether `Generate Hash` over a `Text` variable hashes exactly the UTF-8 bytes with no
    trailing newline. The diagnostics screen in §4.3 answers this in one comparison.
-5. Observed row counts per metric for a 48-hour window, so the caps in §7.1 are set from
+5. Observed row counts per metric for a 48-hour window, so the caps in §7.1 come from
    measurement rather than guesswork.
-6. Whether `shortcuts sign --mode people-who-know-me` output actually imports on `iphone181`
+6. Whether **import questions** can carry the base URL and the ingest token cleanly (§5.4). If
+   they can, no secret ever enters the shortcut file and the distribution problem softens a
+   long way. Build it this way first and confirm the prompt appears on install.
+7. Whether `shortcuts sign --mode people-who-know-me` output actually imports on `iphone181`
    with Private Sharing on. If it does not, cut the file and keep the guide.
-7. Whether a non-2xx response aborts the shortcut or lets it continue to the
+8. Whether a non-2xx response aborts the shortcut or lets it continue to the
    `Get Dictionary Value` step. Only the invisibility of the status code is confirmed. If a
-   non-2xx aborts, the notification never fires and the owner sees nothing, which would make
-   the `last_successful_ingest` staleness badge the only signal. Test with a deliberate 401.
-8. The `Get Contents of URL` timeout value. Known only to be non-configurable. Measure it with
-   a deliberately slow test endpoint and size the batch under it.
-9. Whether the version numbers behind the crash and loop benchmarks still hold. They are
-   iOS 16 and 17 era. Nothing published benchmarks `Repeat with Each` on iOS 26. The columnar
-   design sidesteps this, which is another reason to keep it.
+   non-2xx aborts, the notification never fires and the owner sees nothing, leaving the
+   `last_successful_ingest` staleness badge as the only signal. Test with a deliberate 401.
+9. The `Get Contents of URL` timeout value. Known only to be non-configurable. Measure it
+   against a deliberately slow test endpoint and size the batch under it.
+10. Whether the version numbers behind the crash and loop benchmarks still hold. They are
+    iOS 16 and 17 era, and nothing published benchmarks `Repeat with Each` on iOS 26. The
+    columnar design sidesteps this, which is another reason to keep it.
 
 ---
 
@@ -1419,3 +1535,18 @@ Community, named:
   last push 2026-04: <https://github.com/melon-lang/melon-lang>
 - Actions by Sindre Sorhus, the free third-party action pack:
   <https://sindresorhus.com/actions>
+- Zachary7829, the reverse-engineered `.shortcut` file format:
+  <https://zachary7829.github.io/blog/shortcuts/fileformat>
+- libshortcutsign, contact-mode signing only:
+  <https://github.com/0xilis/libshortcutsign>
+- shortcut-signing-server, a Mac wrapper around Apple's notarization:
+  <https://github.com/scaxyz/shortcut-signing-server>
+- WWDC21 session 10232, Meet Shortcuts for macOS:
+  <https://developer.apple.com/videos/play/wwdc2021/10232/>
+- Apple guide, Add import questions to shared shortcuts:
+  <https://support.apple.com/guide/shortcuts/add-import-questions-to-shared-shortcuts-apdf330fd3a0/9.0/ios>
+- Apple guide, Run shortcuts from the command line (macOS):
+  <https://support.apple.com/guide/shortcuts-mac/run-shortcuts-from-the-command-line-apd455c82f02/mac>
+- Apple guide, Enable shared shortcuts, iOS 14 edition, kept live and showing the retired
+  Allow Untrusted Shortcuts toggle:
+  <https://support.apple.com/guide/shortcuts/enable-shared-shortcuts-apdfeb05586f/3.2/ios>

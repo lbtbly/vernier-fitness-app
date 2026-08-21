@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>10 Shopping list — Forge wireframe</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,sans-serif;
+--s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:20px;--s6:24px;--s7:32px;--s8:40px;--s9:48px;
+--r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:22px;--r-full:999px;--touch:44px;
+--dur-fast:120ms;--dur:200ms;--dur-slow:900ms;--ease:cubic-bezier(.2,.6,.2,1)}
+html[data-theme=dark]{color-scheme:dark;--bg:#0A0A0B;--surface:#141416;--surface-2:#1C1C1F;--surface-3:#232327;--line:#2A2A2E;--line-2:#3A3A40;--text:#F5F5F7;--text-2:#A1A1A8;--text-3:#7C7C85;--accent:#5AA9FF;--accent-ink:#08080A;--accent-soft:rgba(90,169,255,.14);--good:#4FD08A;--good-soft:rgba(79,208,138,.13);--warn:#E9B44C;--warn-soft:rgba(233,180,76,.13);--alert:#F07A6A;--alert-soft:rgba(240,122,106,.13);--chart-daily:#6E6E78;--chart-avg:#E8E8EC;--chart-goal:#7C8BA1;--chart-band:rgba(124,139,161,.10);--chart-grid:#232327;--focus:#8FC4FF;--page:#0E0E10;--page-ink:#8B8B93}
+html[data-theme=light]{color-scheme:light;--bg:#F2F2F5;--surface:#FFFFFF;--surface-2:#EDEDF1;--surface-3:#E3E3E9;--line:#DCDCE2;--line-2:#C6C6CE;--text:#101013;--text-2:#4A4A52;--text-3:#6B6B73;--accent:#0A6CD0;--accent-ink:#FFFFFF;--accent-soft:rgba(10,108,208,.10);--good:#157F4E;--good-soft:rgba(21,127,78,.10);--warn:#8A5A00;--warn-soft:rgba(138,90,0,.10);--alert:#B3261E;--alert-soft:rgba(179,38,30,.10);--chart-daily:#9A9AA2;--chart-avg:#101013;--chart-goal:#5B6B80;--chart-band:rgba(91,107,128,.10);--chart-grid:#E3E3E9;--focus:#0A4C93;--page:#E7E7EC;--page-ink:#55555C}
+body{font-family:var(--font);background:var(--page);color:var(--page-ink);padding:24px;-webkit-font-smoothing:antialiased}
+.bar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;max-width:1720px;margin:0 auto 20px}
+.bar h1{font-size:17px;color:var(--text);letter-spacing:-.01em}
+.bar p{font-size:13px;margin-top:4px;max-width:70ch;line-height:1.5}
+.themeswitch{min-height:34px;padding:0 14px;border-radius:var(--r-full);border:1px solid var(--line-2);background:transparent;color:var(--text);font:inherit;font-size:13px;cursor:pointer;flex:none}
+.frames{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start;max-width:1720px;margin:0 auto}
+figure.frame{margin:0;width:393px}
+figure.frame figcaption{font-size:12px;line-height:1.5;margin-bottom:8px;min-height:52px}
+figure.frame figcaption b{color:var(--text);font-weight:600}
+.phone{width:393px;height:852px;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);display:flex;flex-direction:column;border:1px solid var(--line-2);position:relative;font-size:15px;line-height:1.35}
+.status{height:54px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 6px;font-size:15px;font-weight:600;letter-spacing:-.01em}
+.status svg{width:68px;height:14px;color:var(--text)}
+.screen{flex:1;overflow-y:auto;padding:0 16px 20px}
+.title{padding:4px 0 12px}
+.title h2{font-size:30px;letter-spacing:-.02em;font-weight:700;line-height:1.1}
+.lbl{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);font-weight:600}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:8px 16px;margin-bottom:12px}
+.card.pad{padding:16px}
+.card.flat{background:transparent}
+.num{font-variant-numeric:tabular-nums}
+.big{font-size:22px;font-variant-numeric:tabular-nums;font-weight:600;letter-spacing:-.02em}
+.sub{font-size:13px;color:var(--text-2);line-height:1.45}
+.mut{color:var(--text-3)}
+.good{color:var(--good)}.warn{color:var(--warn)}.alert{color:var(--alert)}
+.grow{flex:1;min-width:0}
+.between{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.stack{display:flex;flex-direction:column;gap:2px}
+.item{display:flex;gap:12px;align-items:center;min-height:56px;padding:6px 0;border-bottom:1px solid var(--line)}
+.item:last-child{border-bottom:0}
+.box{width:28px;height:28px;border-radius:8px;border:1.8px solid var(--line-2);flex:none;display:flex;align-items:center;justify-content:center;background:transparent;cursor:pointer;color:transparent}
+.box svg{width:18px;height:18px}
+.box[aria-checked=true]{background:var(--good);border-color:var(--good);color:#08080A}
+.tap{min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;flex:none}
+.item.off{opacity:.5}
+.item.off .name{text-decoration:line-through}
+.qty{display:flex;align-items:center;gap:2px;flex:none}
+.qty button{width:44px;height:44px;border-radius:10px;border:1px solid var(--line-2);background:var(--surface-2);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.qty button svg{width:18px;height:18px}
+.qty .v{min-width:64px;text-align:center;font-variant-numeric:tabular-nums;font-weight:600}
+.chip{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:var(--r-full);border:1px solid var(--line-2);font-size:11px;color:var(--text-2);white-space:nowrap}
+.chip.g{color:var(--good);border-color:var(--good);background:var(--good-soft)}
+.src{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 7px;border-radius:6px;border:1px solid var(--line-2);background:var(--surface-2);color:var(--text-2);font-size:11px;white-space:nowrap}
+.src svg{width:12px;height:12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 16px;border-radius:var(--r-md);border:1px solid var(--line-2);background:var(--surface-2);color:var(--text);font:inherit;font-size:16px;font-weight:500;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn.quiet{background:transparent;border-color:transparent;color:var(--accent)}
+.btn.block{width:100%}
+.btn svg{width:20px;height:20px}
+.btn.icon{width:44px;height:44px;min-height:44px;padding:0;flex:none}
+.banner{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border-radius:var(--r-md);font-size:13px;line-height:1.45;margin-bottom:12px;border:1px solid var(--line);background:var(--surface-2);color:var(--text)}
+.banner svg{width:18px;height:18px;flex:none;margin-top:1px;color:var(--text-2)}
+.bars{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--surface-3);margin:10px 0 6px}
+.bars i{display:block;height:100%}
+.tabbar{height:83px;flex:none;padding:8px 6px 26px;display:flex;background:var(--surface);border-top:1px solid var(--line)}
+.tabbar a{flex:1;min-width:44px;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--text-3);text-decoration:none;font-size:10px}
+.tabbar a[aria-current=page]{color:var(--accent)}
+.tabbar svg{width:24px;height:24px}
+.scrim{position:absolute;inset:0;background:rgba(0,0,0,.6)}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:22px 22px 0 0;border-top:1px solid var(--line);padding:8px 16px 28px}
+.grabber{width:36px;height:5px;border-radius:3px;background:var(--line-2);margin:0 auto 14px}
+.note{font-size:12px;color:var(--text-3);line-height:1.5}
+a:focus-visible,button:focus-visible,input:focus-visible,[tabindex]:focus-visible,[role=checkbox]:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="ok" viewBox="0 0 20 20"><path d="M4 10.5 8 14.5 16 5.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="no" viewBox="0 0 20 20"><path d="M5.5 5.5 14.5 14.5M14.5 5.5 5.5 14.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="chev" viewBox="0 0 20 20"><path d="M7.5 4.5 13 10l-5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="plus" viewBox="0 0 20 20"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="minus" viewBox="0 0 20 20"><path d="M4 10h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="info" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 9v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="6.2" r=".9" fill="currentColor"/></symbol>
+<symbol id="box" viewBox="0 0 20 20"><path d="M2.6 6.4 10 3l7.4 3.4v7.2L10 17l-7.4-3.4z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M2.6 6.4 10 9.8l7.4-3.4M10 9.8V17" fill="none" stroke="currentColor" stroke-width="1.3"/></symbol>
+<symbol id="home" viewBox="0 0 20 20"><path d="M3.4 8.6 10 3.2l6.6 5.4V16a1 1 0 0 1-1 1H4.4a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol>
+<symbol id="cal" viewBox="0 0 24 24"><rect x="3.4" y="4.6" width="17.2" height="16" rx="3.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.4 9.6h17.2M8 3.2v3M16 3.2v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="wave" viewBox="0 0 24 24"><path d="M2.5 12.5h4l2-5.5 3.6 11 2.4-7 1.5 1.5h5.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="dumb" viewBox="0 0 24 24"><path d="M4 9v6M7 7.2v9.6M17 7.2v9.6M20 9v6M7 12h10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+<symbol id="fork" viewBox="0 0 24 24"><path d="M7 3v7M5 3v4.2a2 2 0 0 0 4 0V3M7 10v11M16.6 3c-1.8 2-1.8 6.4 0 8.4V21" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.1" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.6v3M12 18.4v3M21.4 12h-3M5.6 12h-3M18.6 5.4l-2.1 2.1M7.5 16.5l-2.1 2.1M18.6 18.6l-2.1-2.1M7.5 7.5 5.4 5.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="statr" viewBox="0 0 68 14"><path d="M1 10h2.4v3H1zM6 8h2.4v5H6zM11 5.6h2.4v7.4H11zM16 3.2h2.4v9.8H16z" fill="currentColor"/><path d="M27.4 5.4a8.6 8.6 0 0 1 10.4 0M29.8 8.2a5.2 5.2 0 0 1 5.6 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M32.6 10.9l1.6 1.7 1.6-1.7a2.4 2.4 0 0 0-3.2 0z" fill="currentColor"/><rect x="48" y="3.4" width="17" height="9" rx="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".55"/><rect x="49.6" y="5" width="11.4" height="5.8" rx="1.4" fill="currentColor"/><path d="M66.6 6.6v2.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" opacity=".55"/></symbol>
+<symbol id="statr-off" viewBox="0 0 68 14"><path d="M1 10h2.4v3H1zM6 8h2.4v5H6z" fill="currentColor" opacity=".4"/><path d="M27 4.4 38.2 12M38.2 4.4 27 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".7"/><rect x="48" y="3.4" width="17" height="9" rx="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".55"/><rect x="49.6" y="5" width="11.4" height="5.8" rx="1.4" fill="currentColor"/></symbol>
+</svg>
+
+<div class="bar">
+  <div>
+    <h1>10 Shopping list</h1>
+    <p>One consolidated week, grouped the way the shop is laid out. What the HelloFresh box already contains and what is already in the cupboard are struck through and stay visible, so you can see the deduction rather than trust it.</p>
+  </div>
+  <button class="themeswitch" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark';this.textContent=document.documentElement.dataset.theme==='dark'?'Light mode':'Dark mode'">Light mode</button>
+</div>
+
+<div class="frames">
+
+<!-- FRAME 1 -->
+<figure class="frame">
+<figcaption><b>In the shop.</b> 28 px checkboxes inside 56 px rows, one hand, trolley in the other. Deducted lines stay on screen with the reason attached.</figcaption>
+<div class="phone">
+  <div class="status"><span>11:04</span><svg><use href="#statr-off"/></svg></div>
+  <div class="screen">
+    <div class="title"><div class="lbl">Mon 24 to Sun 30 August</div><h2>Shopping</h2></div>
+
+    <div class="card pad">
+      <div class="between">
+        <div class="stack"><span class="big">23 to buy</span><span class="note">7 deducted, 4 already in the trolley</span></div>
+      </div>
+      <div class="bars">
+        <i style="background:var(--good);width:17%"></i>
+        <i style="background:var(--chart-daily);width:60%"></i>
+        <i style="background:var(--surface-3);width:23%"></i>
+      </div>
+      <div class="note">Checked, still to find, and deducted before you left the house.</div>
+    </div>
+
+    <div class="lbl" style="margin:14px 0 6px">Produce</div>
+    <div class="card">
+      <div class="item">
+        <button class="box" role="checkbox" aria-checked="true" aria-label="Spinach, bought"><svg><use href="#ok"/></svg></button>
+        <div class="stack grow"><span class="name" style="text-decoration:line-through;color:var(--text-3)">Spinach</span><span class="note num">400 g &middot; 3 meals</span></div>
+      </div>
+      <div class="item">
+        <button class="box" role="checkbox" aria-checked="false" aria-label="Broccoli"><svg><use href="#ok"/></svg></button>
+        <div class="stack grow"><span class="name">Broccoli</span><span class="note num">2 heads &middot; traybake, dal</span></div>
+        <div class="qty"><button aria-label="One fewer"><svg><use href="#minus"/></svg></button><span class="v">2</span><button aria-label="One more"><svg><use href="#plus"/></svg></button></div>
+      </div>
+      <div class="item">
+        <button class="box" role="checkbox" aria-checked="false" aria-label="Potatoes"><svg><use href="#ok"/></svg></button>
+        <div class="stack grow"><span class="name">Potatoes</span><span class="note num">1.5 kg &middot; 2 meals</span></div>
+        <div class="qty"><button aria-label="Less"><svg><use href="#minus"/></svg></button><span class="v">1.5 kg</span><button aria-label="More"><svg><use href="#plus"/></svg></button></div>
+      </div>
+      <div class="item off">
+        <div class="tap"><svg style="width:20px;height:20px;color:var(--text-3)"><use href="#box"/></svg></div>
+        <div class="stack grow"><span class="name">Fresh dill</span><span class="note">In your HelloFresh box, Monday</span></div>
+      </div>
+      <div class="item off">
+        <div class="tap"><svg style="width:20px;height:20px;color:var(--text-3)"><use href="#box"/></svg></div>
+        <div class="stack grow"><span class="name">Green beans</span><span class="note">In your HelloFresh box, Monday</span></div>
+      </div>
+    </div>
+
+    <div class="lbl" style="margin:14px 0 6px">Fish and meat</div>
+    <div class="card">
+      <div class="item">
+        <button class="box" role="checkbox" aria-checked="false" aria-label="Salmon fillets"><svg><use href="#ok"/></svg></button>
+        <div class="stack grow"><span class="name">Salmon fillets</span><span class="note num">4 x 130 g &middot; Mon lunch, Fri</span></div>
+        <div class="qty"><button aria-label="One fewer"><svg><use href="#minus"/></svg></button><span class="v">4</span><button aria-label="One more"><svg><use href="#plus"/></svg></button></div>
+      </div>
+      <div class="item">
+        <button class="box" role="checkbox" aria-checked="false" aria-label="Chicken thighs"><svg><use href="#ok"/></svg></button>
+        <div class="stack grow"><span class="name">Chicken thighs</span><span class="note num">800 g &middot; traybake</span></div>
+      </div>
+      <div class="item off">
+        <div class="tap"><svg style="width:20px;height:20px;color:var(--text-3)"><use href="#box"/></svg></div>
+        <div class="stack grow"><span class="name">Salmon fillet, 2 portions</span><span class="note">In your HelloFresh box, Monday</span></div>
+      </div>
+      <div class="note" style="padding:4px 0 10px">No shellfish appears on this list, in any week. It is an exclusion in your profile, not a filter on this screen.</div>
+    </div>
+
+    <div class="lbl" style="margin:14px 0 6px">Dairy and chilled</div>
+    <div class="card">
+      <div class="item">
+        <button class="box" role="checkbox" aria-checked="true" aria-label="Greek yoghurt, bought"><svg><use href="#ok"/></svg></button>
+        <div class="stack grow"><span class="name" style="text-decoration:line-through;color:var(--text-3)">Greek yoghurt, lactose-free</span><span class="note num">1 kg &middot; 4 breakfasts</span></div>
+      </div>
+      <div class="item">
+        <button class="box" role="checkbox" aria-checked="false" aria-label="Eggs"><svg><use href="#ok"/></svg></button>
+        <div class="stack grow"><span class="name">Eggs</span><span class="note num">12</span></div>
+        <div class="qty"><button aria-label="Fewer"><svg><use href="#minus"/></svg></button><span class="v">12</span><button aria-label="More"><svg><use href="#plus"/></svg></button></div>
+      </div>
+      <div class="item off">
+        <div class="tap"><svg style="width:20px;height:20px;color:var(--text-3)"><use href="#home"/></svg></div>
+        <div class="stack grow"><span class="name">Milk, lactose-free</span><span class="note num">In stock, 1.5 L, marked 19 Aug</span></div>
+      </div>
+    </div>
+
+    <div class="lbl" style="margin:14px 0 6px">Dry goods</div>
+    <div class="card">
+      <div class="item">
+        <button class="box" role="checkbox" aria-checked="false" aria-label="Red lentils"><svg><use href="#ok"/></svg></button>
+        <div class="stack grow"><span class="name">Red lentils</span><span class="note num">500 g &middot; Sunday dal</span></div>
+      </div>
+      <div class="item">
+        <button class="box" role="checkbox" aria-checked="false" aria-label="Basmati rice"><svg><use href="#ok"/></svg></button>
+        <div class="stack grow"><span class="name">Basmati rice</span><span class="note num">1 kg</span></div>
+      </div>
+      <div class="item">
+        <button class="box" role="checkbox" aria-checked="true" aria-label="Walnuts, bought"><svg><use href="#ok"/></svg></button>
+        <div class="stack grow"><span class="name" style="text-decoration:line-through;color:var(--text-3)">Walnuts</span><span class="note num">200 g</span></div>
+      </div>
+      <div class="item off">
+        <div class="tap"><svg style="width:20px;height:20px;color:var(--text-3)"><use href="#home"/></svg></div>
+        <div class="stack grow"><span class="name">Polenta</span><span class="note num">In stock, 800 g, marked 19 Aug</span></div>
+      </div>
+      <div class="item off">
+        <div class="tap"><svg style="width:20px;height:20px;color:var(--text-3)"><use href="#home"/></svg></div>
+        <div class="stack grow"><span class="name">Rolled oats</span><span class="note num">In stock, 1.2 kg, marked 19 Aug</span></div>
+      </div>
+      <div class="item off">
+        <div class="tap"><svg style="width:20px;height:20px;color:var(--text-3)"><use href="#home"/></svg></div>
+        <div class="stack grow"><span class="name">Olive oil</span><span class="note num">In stock, 700 ml, marked 19 Aug</span></div>
+      </div>
+    </div>
+
+    <button class="btn block" style="margin-bottom:10px"><svg><use href="#plus"/></svg>Add something</button>
+    <div class="note" style="text-align:center">Works offline. Ticks save on the phone and sync later.</div>
+  </div>
+  <nav class="tabbar">
+    <a href="#"><svg><use href="#cal"/></svg>Today</a>
+    <a href="#"><svg><use href="#wave"/></svg>Health</a>
+    <a href="#"><svg><use href="#dumb"/></svg>Train</a>
+    <a href="#" aria-current="page"><svg><use href="#fork"/></svg>Eat</a>
+    <a href="#"><svg><use href="#gear"/></svg>Settings</a>
+  </nav>
+</div>
+</figure>
+
+<!-- FRAME 2 -->
+<figure class="frame">
+<figcaption><b>One line, opened.</b> Where the quantity came from, which meals need it, and the choice to mark it in stock. Changing a quantity here does not change the recipes.</figcaption>
+<div class="phone">
+  <div class="status"><span>11:06</span><svg><use href="#statr-off"/></svg></div>
+  <div class="screen">
+    <div class="title"><div class="lbl">Mon 24 to Sun 30 August</div><h2>Shopping</h2></div>
+    <div class="card pad"><div class="big">23 to buy</div><div class="note" style="margin-top:4px">7 deducted, 4 in the trolley</div></div>
+  </div>
+  <div class="scrim"></div>
+  <div class="sheet">
+    <div class="grabber"></div>
+    <div class="between" style="margin-bottom:14px">
+      <div class="stack"><span style="font-size:20px;font-weight:700;letter-spacing:-.01em">Potatoes</span><span class="note">Produce</span></div>
+      <button class="btn icon" aria-label="Close"><svg><use href="#no"/></svg></button>
+    </div>
+
+    <div class="lbl" style="margin-bottom:10px">Quantity</div>
+    <div class="qty" style="justify-content:space-between;margin-bottom:8px">
+      <button aria-label="Less" style="width:64px;height:56px"><svg><use href="#minus"/></svg></button>
+      <span class="v" style="font-size:28px;font-weight:700;letter-spacing:-.02em">1.5 kg</span>
+      <button aria-label="More" style="width:64px;height:56px"><svg><use href="#plus"/></svg></button>
+    </div>
+    <div class="note" style="margin-bottom:18px">Steps of 100 g. Your edit sticks for this week only and is not treated as a preference.</div>
+
+    <div class="card pad" style="margin-bottom:12px">
+      <div class="lbl" style="margin-bottom:8px">Where this comes from</div>
+      <div class="item" style="min-height:44px"><div class="stack grow"><span>Salmon, dill potatoes, green beans</span><span class="note num">Monday dinner &middot; 600 g</span></div></div>
+      <div class="item" style="min-height:44px"><div class="stack grow"><span>Polenta, roasted vegetables, eggs</span><span class="note num">Friday dinner &middot; 500 g</span></div></div>
+      <div class="item" style="min-height:44px"><div class="stack grow"><span>Rounded to a shop unit</span><span class="note num">1.1 kg needed, 1.5 kg bag</span></div></div>
+    </div>
+
+    <div class="card pad" style="margin-bottom:12px">
+      <div class="between">
+        <div class="stack grow"><span>I already have these</span><span class="note">Deducts from this list and every list until you say otherwise.</span></div>
+        <div style="width:52px;height:32px;border-radius:16px;background:var(--surface-3);border:1px solid var(--line-2);position:relative;flex:none"><span style="position:absolute;left:3px;top:2px;width:26px;height:26px;border-radius:50%;background:var(--text-3)"></span></div>
+      </div>
+    </div>
+
+    <div class="banner" style="margin-bottom:14px">
+      <svg><use href="#info"/></svg>
+      <div>Stock counts are yours, not measured. The app never assumes you used something up.</div>
+    </div>
+
+    <button class="btn primary block" style="margin-bottom:8px">Save</button>
+    <button class="btn block">Remove from this week</button>
+  </div>
+</div>
+</figure>
+
+</div>
+</body>
+</html>
