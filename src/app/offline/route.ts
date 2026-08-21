@@ -1,5 +1,5 @@
-import { renderOfflineDocument } from '@/components/OfflineDocument';
 import { getConfig } from '@/lib/config';
+import { renderOfflineDocument } from '@/lib/offline-document';
 
 export const dynamic = 'force-dynamic';
 

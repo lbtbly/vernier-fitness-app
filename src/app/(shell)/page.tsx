@@ -20,8 +20,12 @@ export default async function TodayPage() {
   //
   // after(), so a slow write never delays Today, and inside a try so a database
   // that is down costs a log line and not the screen.
+  // Only a request that came through the proxy carries a peer address. Next
+  // fills x-forwarded-for from the socket for everything else, which on this
+  // machine is the container bridge gateway: not a visitor, not evidence, and
+  // a row that would only mislead.
   const { peerAddress, viaTailscale } = readRequestOrigin(await headers());
-  if (peerAddress) {
+  if (viaTailscale && peerAddress) {
     after(async () => {
       try {
         await recordRequestOrigin({ peerAddress, viaTailscale });

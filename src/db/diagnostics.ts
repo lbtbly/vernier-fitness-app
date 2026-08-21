@@ -47,6 +47,12 @@ const PEER_LIMIT = 5;
  * seen, and opening the same install in Safari afterwards does not un-see it.
  * The two timestamps keep that honest, one for when it first became true and
  * one for the last launch that reported at all.
+ *
+ * Wake Lock is only believed from a launch that was standalone. The preflight
+ * line asks whether the installed app on the phone has it, and a desktop
+ * browser tab answering yes would answer a different question. No launch is
+ * told apart from any other here, because telling them apart would mean
+ * storing a device identifier, and this endpoint stores none.
  */
 export async function recordDeviceLaunch(report: {
   standalone: boolean;
@@ -55,7 +61,9 @@ export async function recordDeviceLaunch(report: {
   const db = getDb();
   const rows = [
     { signal: SIGNALS.standaloneSeen, observed: report.standalone },
-    { signal: SIGNALS.wakeLockAvailable, observed: report.wakeLock },
+    ...(report.standalone
+      ? [{ signal: SIGNALS.wakeLockAvailable, observed: report.wakeLock }]
+      : []),
   ];
 
   for (const row of rows) {
@@ -78,9 +86,10 @@ export async function recordDeviceLaunch(report: {
 }
 
 /**
- * A visit to the app root, reduced to its origin. Called only when the request
- * carried a forwarded address: a request straight to the loopback port has no
- * address to store and inventing one would be a lie.
+ * A visit to the app root, reduced to its origin. Called only for a request
+ * that came through the Tailscale proxy, which is the only kind that carries a
+ * real peer address. A request straight to the loopback port arrives from the
+ * container bridge and has nothing about a visitor to store.
  */
 export async function recordRequestOrigin(origin: {
   peerAddress: string;

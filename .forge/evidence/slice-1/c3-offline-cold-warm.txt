@@ -1,0 +1,7 @@
+C3, the offline screen with the network disabled, after the fix. 2026-08-21T22:37Z
+Every run below uses a fresh Chrome profile, device scale 2, 393x852, against
+https://lamberts-mac-mini.tailda76d6.ts.net, with the network disabled on the
+page target AND on every service_worker target, because Network.emulateNetworkConditions
+is per target.
+
+$ ORIGIN=https://lamberts-mac-mini.tailda76d6.ts.net node scripts/pwa-check.mjs offline
