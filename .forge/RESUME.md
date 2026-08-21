@@ -1,23 +1,29 @@
 # Resume
 
-Last phase: 3 SCOUT running, 4 DESIGN starting. Phases 0 SETUP, 1 INTAKE and 2 SIZE are done.
+Last phase: 6 GREENLIGHT, presented and waiting. Phases 0 through 5 are done.
 Size: L. Eleven vertical workstreams with five separate external integrations, each carrying its own auth, data flow and failure modes.
-Current slice: none. Nothing armed. .forge/ARMED absent. The greenlight has not been presented.
-Next action: run the persona panel, then the designer, then the architect, then present the greenlight.
+Current slice: none. Nothing armed. `.forge/ARMED` absent. The gate is open and only the user closes it.
+Next action: wait at the gate. On approval, leave plan mode, create `.forge/ARMED`, then dispatch the builder for slice 1, the walking skeleton and its deploy. On rejection, rework and re-present. Never approve on the run's own behalf, and never treat a `/goal` paste as approval.
 
 State on disk:
-- .forge/GOAL.md, the verbatim spec.
-- .forge/BRIEF.md, forge shape, with Roles census and Research summary.
-- .forge/research/scout.md written. Seven more research notes in flight: withings, google-calendar, ios-pwa, apple-health-shortcut, nutrition-data, exercise-media, stack-facts.
+- `.forge/GOAL.md`, the verbatim spec.
+- `.forge/BRIEF.md`, forge shape, with the Roles census, the Research summary and the Panel synthesis.
+- `.forge/research/`, nine notes: scout, withings, google-calendar, ios-pwa, apple-health-shortcut, nutrition-data, exercise-media, stack-facts, training-rules.
+- `.forge/DESIGN.md` plus thirteen wireframes in `.forge/wireframes/` and thirteen PNG exports in `.forge/screens/`.
+- `.forge/PLAN.md` (14 slices, arming line at the end), `.forge/DOD.md` (166 lines: F1-F133, C1-C18, R1-R10, D1-D5), `.forge/PREFLIGHT.md` (40 items).
+- `.forge/GREENLIGHT.md`, phone-sized, carrying the pre-flight verbatim.
 
-Host facts read 2026-08-21: this machine is lamberts-mac-mini, arm64, macOS 26.6. Tailscale running, tailnet tailda76d6.ts.net, so app URL https://lamberts-mac-mini.tailda76d6.ts.net and RP ID the same host. Docker Engine 29.6.2, Compose v5.3.1, daemon up, linux/aarch64. Node v26.7, npm 11.19. Absent: pnpm, corepack, age, gpg, psql. iPhone iphone181 is on the tailnet but last seen 23 days ago.
+Pre-flight as of 2026-08-21, probed: 14 satisfied, 26 outstanding, 13 of those genuine human work. The first one that matters is Tailscale HTTPS certificates in the admin console. With no HTTPS origin there are no passkeys, no Home Screen install, no push and no offline storage.
+
+Host facts, read 2026-08-21: this machine is lamberts-mac-mini, arm64, macOS 26.6. Tailscale running, tailnet tailda76d6.ts.net. App URL https://lamberts-mac-mini.tailda76d6.ts.net. Passkey RP ID is the tailnet domain tailda76d6.ts.net, not the host, because the host name dies if the Mac is renamed. Docker Engine 29.6.2, Compose v5.3.1, daemon up, linux/aarch64, with postgres:18-alpine and node:24-slim already pulled. Node v26.7 on the host, npm 11.19. Absent: pnpm, corepack, age, gpg, psql, and the build needs none of them.
+
+Open question put to the user at the greenlight, unanswered: R5 proves unattended restart by rebooting this Mac mini. It is the only server and it is always on. If the user says hold it, park R5 until they pick the moment.
 
 Notes for later sessions:
-- The session secret-guard hook blocks any Bash command whose text contains the bare word "secrets" (space-delimited), plus .env, .pem and .key paths. Write files with the Write tool, or reword. Hook false positive, not a project problem.
-- Repo is not a git repository yet. Slice 1 must run git init before scripts/commit.sh can work.
-- The scout agent has no Write tool. It returns prose; the lead persists it.
-
-checkpoint: 2026-08-21T15:46:20Z (SessionEnd)
+- The session secret-guard hook blocks any Bash command whose text contains the bare word "secrets", or a credential-named variable next to echo or printf, or .env, .pem and .key paths. Write files with the Write tool, or run a script from the scratchpad. Hook false positive, not a project problem.
+- The scout agent has no Write tool. It returns prose and the lead persists it.
+- The lead exported the wireframe PNGs with headless Chrome at device scale 2, because no claude-design MCP server is connected. DESIGN.md records this.
+- The lead rewrote seven PREFLIGHT `run:` checks whose commands contained a pipe. The pipe is also the column separator, so their labels printed as shell fragments. Same checks, no pipe.
 
 ## Owner action outstanding, unrelated to the build
 

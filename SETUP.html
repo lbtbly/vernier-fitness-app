@@ -1,0 +1,569 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Setup checklist</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  color-scheme:dark light;
+  --bg:#0A0A0B; --surface:#141416; --surface-2:#1C1C1F; --line:#2A2A2E; --line-2:#3A3A40;
+  --text:#F5F5F7; --text-2:#A1A1A8; --text-3:#7C7C85;
+  --accent:#5AA9FF; --accent-ink:#04203A; --ok:#5FD08A; --warn:#E9B44C; --bad:#F0736A;
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:light){
+  :root{--bg:#F7F7F8;--surface:#FFFFFF;--surface-2:#F0F0F2;--line:#E2E2E6;--line-2:#CFCFD6;
+        --text:#101013;--text-2:#5B5B66;--text-3:#84848F;--accent:#0A6FD6;--accent-ink:#FFFFFF;
+        --ok:#1D8A4E;--warn:#8A6410;--bad:#B3352C}
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.5;
+     -webkit-font-smoothing:antialiased;padding:0 0 140px}
+.wrap{max-width:780px;margin:0 auto;padding:0 20px}
+
+header{padding:40px 0 20px}
+h1{font-size:30px;letter-spacing:-.02em;line-height:1.15}
+.lede{color:var(--text-2);font-size:15px;margin-top:10px;max-width:62ch}
+.meta{color:var(--text-3);font-size:13px;margin-top:14px;font-variant-numeric:tabular-nums}
+
+.bar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);
+     padding:12px 0;margin-bottom:26px}
+.bar .wrap{display:flex;align-items:center;gap:14px}
+.track{flex:1;height:6px;background:var(--surface-2);border-radius:99px;overflow:hidden}
+.fill{height:100%;width:100%;background:var(--accent);border-radius:99px;
+      transform:scaleX(0);transform-origin:left center;transition:transform .25s ease}
+.count{font-size:13px;color:var(--text-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+section{background:var(--surface);border:1px solid var(--line);border-radius:16px;
+        padding:22px;margin-bottom:16px}
+section.done{border-color:color-mix(in srgb,var(--ok) 45%,var(--line))}
+.shead{display:flex;gap:12px;align-items:baseline;margin-bottom:6px}
+.num{font-family:var(--mono);font-size:12px;color:var(--text-3);font-weight:600;
+     width:22px;flex:none;padding-top:3px}
+h2{font-size:19px;letter-spacing:-.01em}
+.why{color:var(--text-2);font-size:14px;margin:8px 0 16px;padding-left:34px;max-width:62ch}
+.why b{color:var(--text);font-weight:600}
+.body{padding-left:34px}
+
+.tag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.04em;
+     text-transform:uppercase;padding:3px 8px;border-radius:6px;vertical-align:middle;
+     border:1px solid var(--line-2);color:var(--text-2);margin-left:8px}
+.tag.block{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 45%,transparent)}
+.tag.opt{color:var(--text-3)}
+
+ol.steps{list-style:none;counter-reset:s;margin:0 0 4px}
+ol.steps li{counter-increment:s;position:relative;padding:0 0 12px 30px;font-size:14.5px;color:var(--text-2)}
+ol.steps li::before{content:counter(s);position:absolute;left:0;top:1px;width:20px;height:20px;
+  border-radius:99px;background:var(--surface-2);color:var(--text-3);font-size:11px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;font-family:var(--mono)}
+ol.steps li b{color:var(--text);font-weight:600}
+ol.steps li em{font-style:normal;color:var(--warn)}
+
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--accent) 35%,transparent)}
+a:hover{border-bottom-color:var(--accent)}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,
+textarea:focus-visible,label:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+code,.mono{font-family:var(--mono);font-size:12.5px}
+.copyline{display:flex;align-items:center;gap:8px;background:var(--surface-2);border:1px solid var(--line);
+  border-radius:10px;padding:9px 10px;margin:6px 0 12px}
+.copyline code{flex:1;word-break:break-all;color:var(--text)}
+.mini{flex:none;font:600 11px/1 var(--font);letter-spacing:.03em;text-transform:uppercase;
+  background:transparent;border:1px solid var(--line-2);color:var(--text-2);
+  padding:6px 9px;border-radius:7px;cursor:pointer}
+.mini:hover{color:var(--text);border-color:var(--text-3)}
+
+.check{display:flex;gap:11px;align-items:flex-start;padding:11px 12px;background:var(--surface-2);
+  border:1px solid var(--line);border-radius:11px;margin-top:12px;cursor:pointer;min-height:44px}
+.check:hover{border-color:var(--line-2)}
+.check input{appearance:none;width:20px;height:20px;flex:none;margin-top:1px;border-radius:6px;
+  border:1.5px solid var(--line-2);background:transparent;cursor:pointer;position:relative}
+.check input:checked{background:var(--ok);border-color:var(--ok)}
+.check input:checked::after{content:"";position:absolute;left:6px;top:2px;width:5px;height:10px;
+  border:solid var(--bg);border-width:0 2px 2px 0;transform:rotate(45deg)}
+.check span{font-size:14px;font-weight:600}
+.check.on span{color:var(--ok)}
+
+.field{margin-top:14px}
+.field label{display:block;font-size:12px;font-weight:600;letter-spacing:.03em;
+  text-transform:uppercase;color:var(--text-3);margin-bottom:6px}
+.field label .s{text-transform:none;letter-spacing:0;font-weight:500;color:var(--warn);margin-left:6px}
+input[type=text],input[type=password],select,textarea{width:100%;background:var(--surface-2);
+  border:1px solid var(--line);border-radius:10px;padding:11px 12px;color:var(--text);
+  font:14px/1.4 var(--mono);min-height:44px}
+input::placeholder{color:var(--text-3)}
+.hint{font-size:12.5px;color:var(--text-3);margin-top:6px}
+
+fieldset{border:0;margin-top:14px}
+legend{font-size:12px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;
+  color:var(--text-3);margin-bottom:8px}
+.radio{display:flex;gap:11px;align-items:flex-start;padding:11px 12px;background:var(--surface-2);
+  border:1px solid var(--line);border-radius:11px;margin-bottom:8px;cursor:pointer;min-height:44px}
+.radio input{appearance:none;width:19px;height:19px;flex:none;margin-top:2px;border-radius:99px;
+  border:1.5px solid var(--line-2);cursor:pointer;position:relative}
+.radio input:checked{border-color:var(--accent);border-width:6px}
+.radio div{font-size:14px}
+.radio div b{display:block;font-weight:600;color:var(--text);margin-bottom:2px}
+.radio div span{color:var(--text-2);font-size:13px}
+
+.note{border:1px solid var(--line);background:var(--surface-2);border-radius:12px;
+  padding:13px 15px;font-size:13.5px;color:var(--text-2);margin-top:14px}
+.note b{color:var(--text)}
+.note.warn{border-color:color-mix(in srgb,var(--warn) 40%,var(--line))}
+
+.out{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px;margin-bottom:16px}
+.out h2{margin-bottom:4px}
+.out p.why2{color:var(--text-2);font-size:14px;margin:8px 0 14px;max-width:62ch}
+textarea.result{min-height:210px;resize:vertical;font-size:12.5px;line-height:1.55;color:var(--text)}
+.row{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+button.go{font:600 14px/1 var(--font);background:var(--accent);color:var(--accent-ink);border:0;
+  border-radius:11px;padding:14px 18px;cursor:pointer;min-height:44px}
+button.go:hover{filter:brightness(1.07)}
+button.ghost{font:600 14px/1 var(--font);background:transparent;color:var(--text);
+  border:1px solid var(--line-2);border-radius:11px;padding:14px 18px;cursor:pointer;min-height:44px}
+button.ghost:hover{border-color:var(--text-3)}
+.said{font-size:13px;color:var(--ok);margin-top:10px;min-height:18px}
+footer{color:var(--text-3);font-size:12.5px;padding:26px 0 0;border-top:1px solid var(--line);margin-top:26px}
+</style>
+
+<div class="bar"><div class="wrap">
+  <div class="track"><div class="fill" id="fill"></div></div>
+  <div class="count" id="count">0 of 9</div>
+  <button class="mini" id="reset">Reset</button>
+</div></div>
+
+<div class="wrap">
+<header>
+  <h1>Setup checklist</h1>
+  <p class="lede">Nine things only you can do, in the order that unblocks the most. Work down the page, tick as you go. Nothing is sent anywhere: this file runs entirely in your browser and your answers stay in this browser.</p>
+  <p class="meta">Mac mini <code>lamberts-mac-mini</code> &middot; tailnet <code>tailda76d6.ts.net</code> &middot; app URL <code>https://lamberts-mac-mini.tailda76d6.ts.net</code></p>
+</header>
+
+<div class="note warn">
+  <b>Two outputs at the bottom, and the difference matters.</b> The <b>status prompt</b> carries no credential values and is the thing you paste back into Claude Code. The <b>environment file</b> carries every credential and you download it and move it into the project yourself. Credentials never travel through the chat, because a security hook in this session blocks me from touching that file anyway, and anything pasted into a conversation lives in its transcript.
+</div>
+
+<!-- 1 -->
+<section id="s-https">
+  <div class="shead"><div class="num">01</div><h2>Tailscale HTTPS certificates <span class="tag block">Unblocks the most</span></h2></div>
+  <p class="why">Until this toggle is on there is no HTTPS origin. With no HTTPS origin there are <b>no passkeys, no Home Screen install, no push notifications and no offline storage</b> on the iPhone. It is one switch and it takes about fifteen seconds.</p>
+  <div class="body">
+    <ol class="steps">
+      <li>Open <a href="https://login.tailscale.com/admin/dns" target="_blank" rel="noopener">login.tailscale.com/admin/dns</a>.</li>
+      <li>Scroll to <b>HTTPS Certificates</b>.</li>
+      <li>Click <b>Enable HTTPS</b> and confirm. MagicDNS is already on, so nothing else is needed.</li>
+    </ol>
+    <label class="check"><input type="checkbox" data-k="httpsOn"><span>HTTPS certificates are enabled</span></label>
+  </div>
+</section>
+
+<!-- 2 -->
+<section id="s-iphone">
+  <div class="shead"><div class="num">02</div><h2>Bring the iPhone back onto the tailnet</h2></div>
+  <p class="why">Tailscale shows <code>iphone181</code> as last seen 23 days ago. The phone has to be on the tailnet to open the app at all, and installing it to the Home Screen is what makes push and offline storage legal on iOS.</p>
+  <div class="body">
+    <ol class="steps">
+      <li>Unlock the iPhone, open the <b>Tailscale</b> app, connect.</li>
+      <li>Check the iOS version: <b>Settings, General, About</b>. Push needs 16.4 or newer. The keep-the-screen-awake feature during a workout needs <em>18.4 or newer</em>.</li>
+      <li>Confirm <b>iCloud Keychain</b> and <b>two-factor authentication</b> are on, in Settings under your name. Passkeys will not sync to the phone without both.</li>
+    </ol>
+    <div class="field">
+      <label for="iosv">iOS version on iphone181</label>
+      <input type="text" id="iosv" data-k="iosv" placeholder="26.1" autocomplete="off">
+      <p class="hint">Just the number. It decides whether Wake Lock during a session is available or has to degrade gracefully.</p>
+    </div>
+    <label class="check"><input type="checkbox" data-k="phoneOn"><span>iPhone is connected, iCloud Keychain and two-factor are on</span></label>
+  </div>
+</section>
+
+<!-- 3 -->
+<section id="s-backup">
+  <div class="shead"><div class="num">03</div><h2>Pick the backup folder</h2></div>
+  <p class="why">The nightly encrypted archive lands here. It should be inside iCloud Drive so a dead Mac mini does not take your history with it. If the path is ever unavailable the app writes to a local fallback and tells you.</p>
+  <div class="body">
+    <p class="hint" style="margin:0 0 8px">Suggested. Run this in Terminal, or in Claude Code prefixed with <code>!</code>:</p>
+    <div class="copyline"><code id="mkdirCmd">mkdir -p "$HOME/Library/Mobile Documents/com~apple~CloudDocs/lbtbly-backups"</code><button class="mini" data-copy="mkdirCmd">Copy</button></div>
+    <div class="field">
+      <label for="backupdir">Backup folder, full path</label>
+      <input type="text" id="backupdir" data-k="backupdir" placeholder="/Users/lambertbouley/Library/Mobile Documents/com~apple~CloudDocs/lbtbly-backups" autocomplete="off">
+    </div>
+    <label class="check"><input type="checkbox" data-k="backupOn"><span>Folder exists and I have set the path above</span></label>
+  </div>
+</section>
+
+<!-- 4 -->
+<section id="s-withings">
+  <div class="shead"><div class="num">04</div><h2>Withings developer application</h2></div>
+  <p class="why">This is what lets the scale sync by itself. Without it the app runs on its demo dataset, which is clearly labelled as demo and never mixed with real readings.</p>
+  <div class="body">
+    <ol class="steps">
+      <li>Sign in at <a href="https://developer.withings.com/dashboard/" target="_blank" rel="noopener">developer.withings.com/dashboard</a> with your Withings account.</li>
+      <li>Create an application. Choose the <b>Public API</b> integration type.</li>
+      <li>Register this exact callback URL:</li>
+    </ol>
+    <div class="copyline"><code id="wcb">https://lamberts-mac-mini.tailda76d6.ts.net/api/integrations/withings/callback</code><button class="mini" data-copy="wcb">Copy</button></div>
+    <ol class="steps" start="4" style="counter-reset:s 3">
+      <li>Copy the <b>Client ID</b> and the <b>Client Secret</b> into the fields below. <em>The secret is shown once.</em> If you lose it, rotate it in the dashboard and paste the new one.</li>
+    </ol>
+    <div class="field">
+      <label for="wid">Withings client ID</label>
+      <input type="text" id="wid" data-k="wid" placeholder="0a1b2c..." autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="wsec">Withings client secret <span class="s">stays out of the chat</span></label>
+      <input type="password" id="wsec" data-k="wsec" placeholder="paste here" autocomplete="off">
+    </div>
+    <label class="check"><input type="checkbox" data-k="withingsOn"><span>Withings application created and both values pasted</span></label>
+  </div>
+</section>
+
+<!-- 5 -->
+<section id="s-google">
+  <div class="shead"><div class="num">05</div><h2>Google Calendar OAuth client</h2></div>
+  <p class="why">Read your busy periods to place sessions, and write only into a dedicated calendar the app creates. It never writes to your primary calendar. <b>Step 6 is the one that silently breaks things later</b>, so do not skip it.</p>
+  <div class="body">
+    <ol class="steps">
+      <li>Go to <a href="https://console.cloud.google.com/" target="_blank" rel="noopener">console.cloud.google.com</a> and create a project, any name.</li>
+      <li>Enable the <b>Google Calendar API</b> in APIs and Services, Library.</li>
+      <li>Open <b>Google Auth Platform</b>, then <b>Branding</b>, and fill the minimum: app name, your email, developer contact.</li>
+      <li>Under <b>Audience</b>, set the user type to <b>External</b>.</li>
+      <li>Under <b>Clients</b>, create a client of type <b>Web application</b>, and add this authorized redirect URI:</li>
+    </ol>
+    <div class="copyline"><code id="gcb">http://localhost:3000/api/integrations/google/callback</code><button class="mini" data-copy="gcb">Copy</button></div>
+    <div class="note">Localhost, not the <code>ts.net</code> name, and that is deliberate. Google exempts localhost from its HTTPS rule, while a <code>ts.net</code> redirect collides with the Authorized domains requirement in a way Google does not document for unverified apps. You will connect Google once, from a browser on this Mac. Everything after that works from the phone.</div>
+    <ol class="steps" start="6" style="counter-reset:s 5">
+      <li>Back under <b>Audience</b>, click <b>Publish app</b> so the status reads <b>In production</b>. <em>Leave it in Testing and Google expires your refresh token seven days after you connect</em>, and the calendar silently stops working. Unverified in production is fine for one user: you will see a warning screen once and click through it.</li>
+      <li>Copy the client ID and client secret below. The secret is shown once; if lost, use <b>Add Secret</b> on the client page.</li>
+    </ol>
+    <div class="field">
+      <label for="gid">Google client ID</label>
+      <input type="text" id="gid" data-k="gid" placeholder="1234-abcd.apps.googleusercontent.com" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="gsec">Google client secret <span class="s">stays out of the chat</span></label>
+      <input type="password" id="gsec" data-k="gsec" placeholder="GOCSPX-..." autocomplete="off">
+    </div>
+    <label class="check"><input type="checkbox" data-k="googleOn"><span>Client created, and the app is published In production</span></label>
+  </div>
+</section>
+
+<!-- 6 -->
+<section id="s-anthropic">
+  <div class="shead"><div class="num">06</div><h2>Anthropic API key</h2></div>
+  <p class="why">Used for the meal photo estimate, menu generation and lab explanations, each behind its own consent toggle you can switch off separately. The key stays server-side and the app enforces a monthly spend ceiling you set.</p>
+  <div class="body">
+    <ol class="steps">
+      <li>Go to <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a>, API keys, <b>Create key</b>.</li>
+      <li>Make sure the account has credit. A key with no credit returns 429 and the app will report it as such rather than failing quietly.</li>
+      <li>Paste it below and pick a monthly ceiling. Photo estimates cost roughly a cent each at current prices, so ten dollars is generous.</li>
+    </ol>
+    <div class="field">
+      <label for="akey">Anthropic API key <span class="s">stays out of the chat</span></label>
+      <input type="password" id="akey" data-k="akey" placeholder="sk-ant-..." autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="acap">Monthly ceiling in US dollars</label>
+      <input type="text" id="acap" data-k="acap" placeholder="10" autocomplete="off">
+    </div>
+    <label class="check"><input type="checkbox" data-k="anthropicOn"><span>Key created and pasted</span></label>
+  </div>
+</section>
+
+<!-- 7 -->
+<section id="s-mail">
+  <div class="shead"><div class="num">07</div><h2>Email for the Sunday review <span class="tag opt">Optional</span></h2></div>
+  <p class="why">Skip this and the weekly review still gets built and rendered: you read it in the app and as a local preview file. Fill it in and the same review arrives in your inbox on Sunday evening.</p>
+  <div class="body">
+    <div class="field">
+      <label for="smtphost">SMTP host</label>
+      <input type="text" id="smtphost" data-k="smtphost" placeholder="smtp.fastmail.com" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="smtpport">Port</label>
+      <input type="text" id="smtpport" data-k="smtpport" placeholder="465" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="smtpuser">Username</label>
+      <input type="text" id="smtpuser" data-k="smtpuser" placeholder="lambert.bouley@gmail.com" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="smtppass">Password or app password <span class="s">stays out of the chat</span></label>
+      <input type="password" id="smtppass" data-k="smtppass" placeholder="paste here" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="mailto">Send the review to</label>
+      <input type="text" id="mailto" data-k="mailto" placeholder="lambert.bouley@gmail.com" autocomplete="off">
+    </div>
+    <label class="check"><input type="checkbox" data-k="mailOn"><span>Mail configured, or deliberately skipped for now</span></label>
+  </div>
+</section>
+
+<!-- 8 -->
+<section id="s-decisions">
+  <div class="shead"><div class="num">08</div><h2>Two decisions I need from you</h2></div>
+  <p class="why">Both were raised at the greenlight. Neither has a safe default I am willing to pick on your behalf.</p>
+  <div class="body">
+    <fieldset>
+      <legend>Rubric line R5: proving the stack survives a reboot</legend>
+      <label class="radio"><input type="radio" name="reboot" value="allow" data-k="reboot">
+        <div><b>Reboot the Mac mini when the run reaches R5</b><span>Fastest path to a genuine PASS. It is your only server, so it will be briefly unreachable.</span></div></label>
+      <label class="radio"><input type="radio" name="reboot" value="park" data-k="reboot">
+        <div><b>Park R5, I will reboot when I choose</b><span>The run builds and verifies everything else, and leaves R5 open with the reason written down.</span></div></label>
+    </fieldset>
+    <fieldset>
+      <legend>Scope against your one-session deadline</legend>
+      <label class="radio"><input type="radio" name="scope" value="full" data-k="scope">
+        <div><b>Keep all fourteen slices, run until done across sessions</b><span>Nothing is dropped. Each green slice is committed and deployed, so it is usable long before it is finished.</span></div></label>
+      <label class="radio"><input type="radio" name="scope" value="cut" data-k="scope">
+        <div><b>Cut scope to fit one session</b><span>Tell me below what to drop and the plan goes back to the architect.</span></div></label>
+    </fieldset>
+    <div class="field">
+      <label for="cutwhat">If cutting, what should go</label>
+      <textarea id="cutwhat" data-k="cutwhat" rows="3" placeholder="For example: drop the lab PDF extraction and the Uber Eats slots for now, keep everything else."></textarea>
+    </div>
+    <label class="check"><input type="checkbox" data-k="decisionsOn"><span>Both decisions made</span></label>
+  </div>
+</section>
+
+<!-- 9 -->
+<section id="s-cleanup">
+  <div class="shead"><div class="num">09</div><h2>One cleanup that is my fault</h2></div>
+  <p class="why">While proving whether a third party can sign an installable <code>.shortcut</code> file, a research agent ran <code>shortcuts sign --mode anyone</code> twice on this Mac. That turns out to be the same operation as Copy iCloud Link, so it published two throwaway public shortcut records named <b>Test</b> under your Apple ID. They hold no personal data. That probe should have been read-only.</p>
+  <div class="body">
+    <ol class="steps">
+      <li>Open the <b>Shortcuts</b> app on this Mac.</li>
+      <li>Find the two shortcuts named <b>Test</b>.</li>
+      <li>Right click each, choose <b>Stop Sharing</b>, then delete them.</li>
+    </ol>
+    <label class="check"><input type="checkbox" data-k="cleanupOn"><span>Both removed</span></label>
+  </div>
+</section>
+
+<!-- OUTPUT A -->
+<div class="out" id="outA">
+  <h2>Output A: the message to paste back to me</h2>
+  <p class="why2">Rebuilds itself as you tick. No credential values appear in it, only whether each one is set. Paste this into Claude Code when you are done, or partway through if you want the run to start on what is already unblocked.</p>
+  <textarea class="result mono" id="promptOut" readonly></textarea>
+  <div class="row">
+    <button class="go" data-copy="promptOut">Copy the message</button>
+  </div>
+  <div class="said" id="saidA"></div>
+</div>
+
+<!-- OUTPUT B -->
+<div class="out" id="outB">
+  <h2>Output B: the environment file</h2>
+  <p class="why2">This one holds the real values. Download it, then move it into the project as the environment file. It never goes through the chat.</p>
+  <div class="row">
+    <button class="go" id="dl">Download the file</button>
+    <button class="ghost" data-copy="envOut">Copy its contents instead</button>
+  </div>
+  <p class="hint" style="margin-top:12px">Then run this once, in Terminal or in Claude Code prefixed with <code>!</code>:</p>
+  <div class="copyline"><code id="mvCmd">mv ~/Downloads/forge-env.txt /Users/lambertbouley/Claude/lbtbly-fitness-app/.env</code><button class="mini" data-copy="mvCmd">Copy</button></div>
+  <p class="hint">The generated file leaves the master key, the database password and the push keys blank on purpose. A script fills those in, so you never have to invent a random value by hand.</p>
+  <textarea class="result mono" id="envOut" readonly style="margin-top:14px;min-height:170px"></textarea>
+  <div class="said" id="saidB"></div>
+</div>
+
+<footer>
+  Everything you type stays in this browser, in local storage for this file only. Nothing is uploaded, and this page makes no network requests. Reset clears it.
+</footer>
+</div>
+
+<script>
+(function(){
+  var KEY = 'lbtbly-setup-v1';
+  var els = Array.prototype.slice.call(document.querySelectorAll('[data-k]'));
+  var state = {};
+  try { state = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { state = {}; }
+
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){} }
+
+  function readInto(el){
+    var k = el.getAttribute('data-k');
+    if (el.type === 'checkbox') state[k] = el.checked;
+    else if (el.type === 'radio') { if (el.checked) state[k] = el.value; }
+    else state[k] = el.value;
+  }
+
+  function hydrate(){
+    els.forEach(function(el){
+      var k = el.getAttribute('data-k');
+      var v = state[k];
+      if (v === undefined || v === null) return;
+      if (el.type === 'checkbox') el.checked = !!v;
+      else if (el.type === 'radio') el.checked = (el.value === v);
+      else el.value = v;
+    });
+  }
+
+  var TICKS = ['httpsOn','phoneOn','backupOn','withingsOn','googleOn','anthropicOn','mailOn','decisionsOn','cleanupOn'];
+
+  function set(v){ return (v && String(v).trim().length) ? String(v).trim() : ''; }
+  function yn(v){ return v ? 'done' : 'NOT DONE'; }
+  function has(v){ return set(v) ? 'set' : 'not set'; }
+
+  function buildPrompt(){
+    var L = [];
+    L.push('Setup checklist results. Nothing below carries a credential value.');
+    L.push('');
+    L.push('1. Tailscale HTTPS certificates: ' + yn(state.httpsOn));
+    L.push('2. iPhone on the tailnet: ' + yn(state.phoneOn) + (set(state.iosv) ? ', iOS ' + set(state.iosv) : ', iOS version not given'));
+    L.push('3. Backup folder: ' + yn(state.backupOn) + (set(state.backupdir) ? ', path ' + set(state.backupdir) : ', path not given'));
+    L.push('4. Withings application: ' + yn(state.withingsOn) + ', client id ' + has(state.wid) + ', client secret ' + has(state.wsec));
+    L.push('5. Google OAuth client: ' + yn(state.googleOn) + ', client id ' + has(state.gid) + ', client secret ' + has(state.gsec));
+    L.push('6. Anthropic key: ' + yn(state.anthropicOn) + ', key ' + has(state.akey) + (set(state.acap) ? ', monthly ceiling ' + set(state.acap) + ' USD' : ', no ceiling given'));
+    L.push('7. Email: ' + yn(state.mailOn) + ', host ' + has(state.smtphost) + ', password ' + has(state.smtppass) + (set(state.mailto) ? ', sends to ' + set(state.mailto) : ''));
+    L.push('8. Decisions: ' + yn(state.decisionsOn) + ', both spelled out below');
+    L.push('9. The two published Test shortcuts removed: ' + yn(state.cleanupOn));
+    L.push('');
+    L.push('Decisions.');
+    L.push('R5 reboot: ' + (state.reboot === 'allow' ? 'reboot the Mac mini when the run reaches R5'
+                          : state.reboot === 'park' ? 'park R5, I will reboot when I choose'
+                          : 'not answered'));
+    L.push('Scope: ' + (state.scope === 'full' ? 'keep all fourteen slices, run until done across sessions'
+                      : state.scope === 'cut' ? 'cut scope to fit one session'
+                      : 'not answered'));
+    if (state.scope === 'cut' && set(state.cutwhat)) { L.push('What to drop: ' + set(state.cutwhat)); }
+    L.push('');
+    L.push('The environment file is in place at the project root. Do not try to read it: the security hook blocks it. Verify what is set by asking the running container, never by opening the file.');
+    var n = TICKS.filter(function(k){ return state[k]; }).length;
+    L.push('');
+    L.push(n === TICKS.length
+      ? 'All nine done. Proceed.'
+      : n + ' of ' + TICKS.length + ' done. Start on what is unblocked and park the rest against their prerequisite.');
+    return L.join('\n');
+  }
+
+  function buildEnv(){
+    var L = [];
+    L.push('# Environment for the health PWA. Generated by SETUP.html, never committed.');
+    L.push('# Blank values marked GENERATED are filled by a script, not by hand.');
+    L.push('');
+    L.push('APP_URL=https://lamberts-mac-mini.tailda76d6.ts.net');
+    L.push('WEBAUTHN_RP_ID=tailda76d6.ts.net');
+    L.push('WEBAUTHN_RP_NAME=Health');
+    L.push('TZ=Europe/Paris');
+    L.push('');
+    L.push('# GENERATED, run: node scripts/gen-env.mjs');
+    L.push('MASTER_KEY=');
+    L.push('POSTGRES_PASSWORD=');
+    L.push('POSTGRES_USER=health');
+    L.push('POSTGRES_DB=health');
+    L.push('');
+    L.push('# GENERATED, run: node scripts/gen-vapid.mjs');
+    L.push('VAPID_PUBLIC_KEY=');
+    L.push('VAPID_PRIVATE_KEY=');
+    L.push('VAPID_SUBJECT=mailto:' + (set(state.mailto) || 'lambert.bouley@gmail.com'));
+    L.push('');
+    L.push('BACKUP_DIR=' + set(state.backupdir));
+    L.push('BACKUP_RETENTION_DAYS=30');
+    L.push('');
+    L.push('WITHINGS_CLIENT_ID=' + set(state.wid));
+    L.push('WITHINGS_CLIENT_SECRET=' + set(state.wsec));
+    L.push('WITHINGS_REDIRECT_URI=https://lamberts-mac-mini.tailda76d6.ts.net/api/integrations/withings/callback');
+    L.push('');
+    L.push('GOOGLE_CLIENT_ID=' + set(state.gid));
+    L.push('GOOGLE_CLIENT_SECRET=' + set(state.gsec));
+    L.push('GOOGLE_REDIRECT_URI=http://localhost:3000/api/integrations/google/callback');
+    L.push('');
+    L.push('ANTHROPIC_API_KEY=' + set(state.akey));
+    L.push('ANTHROPIC_MODEL=claude-opus-5');
+    L.push('ANTHROPIC_MONTHLY_CAP_USD=' + (set(state.acap) || '10'));
+    L.push('');
+    L.push('MAIL_HOST=' + set(state.smtphost));
+    L.push('MAIL_PORT=' + (set(state.smtpport) || '465'));
+    L.push('MAIL_USER=' + set(state.smtpuser));
+    L.push('MAIL_PASSWORD=' + set(state.smtppass));
+    L.push('MAIL_TO=' + set(state.mailto));
+    L.push('');
+    return L.join('\n') + '\n';
+  }
+
+  function progress(){
+    var n = TICKS.filter(function(k){ return state[k]; }).length;
+    document.getElementById('fill').style.transform = 'scaleX(' + (n / TICKS.length) + ')';
+    document.getElementById('count').textContent = n + ' of ' + TICKS.length;
+    TICKS.forEach(function(k){
+      var box = document.querySelector('[data-k="' + k + '"]');
+      if (!box) return;
+      var lab = box.closest('.check');
+      if (lab) lab.classList.toggle('on', !!state[k]);
+      var sec = box.closest('section');
+      if (sec) sec.classList.toggle('done', !!state[k]);
+    });
+  }
+
+  function render(){
+    progress();
+    document.getElementById('promptOut').value = buildPrompt();
+    document.getElementById('envOut').value = buildEnv();
+  }
+
+  els.forEach(function(el){
+    var ev = (el.type === 'checkbox' || el.type === 'radio') ? 'change' : 'input';
+    el.addEventListener(ev, function(){
+      if (el.type === 'radio') {
+        Array.prototype.forEach.call(document.getElementsByName(el.name), readInto);
+      } else readInto(el);
+      save(); render();
+    });
+  });
+
+  function flash(id, msg){
+    var n = document.getElementById(id);
+    if (!n) return;
+    n.textContent = msg;
+    setTimeout(function(){ n.textContent = ''; }, 2200);
+  }
+
+  document.addEventListener('click', function(e){
+    var b = e.target.closest('[data-copy]');
+    if (!b) return;
+    var src = document.getElementById(b.getAttribute('data-copy'));
+    if (!src) return;
+    var text = (src.value !== undefined) ? src.value : src.textContent;
+    var ok = function(){
+      if (b.classList.contains('mini')) {
+        var old = b.textContent; b.textContent = 'Copied';
+        setTimeout(function(){ b.textContent = old; }, 1600);
+      } else {
+        flash(b.closest('#outB') ? 'saidB' : 'saidA', 'Copied to the clipboard.');
+      }
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(ok, function(){ fallback(text, ok); });
+    } else fallback(text, ok);
+  });
+
+  function fallback(text, ok){
+    var t = document.createElement('textarea');
+    t.value = text; t.style.position = 'fixed'; t.style.opacity = '0';
+    document.body.appendChild(t); t.select();
+    try { document.execCommand('copy'); ok(); } catch(e){}
+    document.body.removeChild(t);
+  }
+
+  document.getElementById('dl').addEventListener('click', function(){
+    var blob = new Blob([buildEnv()], {type: 'text/plain'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'forge-env.txt';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+    flash('saidB', 'Downloaded as forge-env.txt. Now run the move command above.');
+  });
+
+  document.getElementById('reset').addEventListener('click', function(){
+    state = {};
+    try { localStorage.removeItem(KEY); } catch(e){}
+    els.forEach(function(el){
+      if (el.type === 'checkbox' || el.type === 'radio') el.checked = false; else el.value = '';
+    });
+    render();
+  });
+
+  hydrate();
+  els.forEach(readInto);
+  render();
+})();
+</script>

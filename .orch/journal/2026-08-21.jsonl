@@ -1083,3 +1083,8 @@
 {"ts":"2026-08-21T17:03:48Z","sid":"main","kind":"subagent_fail","key":""}
 {"ts":"2026-08-21T17:05:50Z","sid":"main","kind":"subagent_fail","key":""}
 {"ts":"2026-08-21T17:06:23Z","sid":"main","kind":"subagent_fail","key":""}
+{"ts":"2026-08-21T17:06:55Z","sid":"main","kind":"subagent_fail","key":""}
+{"ts":"2026-08-21T17:07:27Z","sid":"main","kind":"subagent_fail","key":"architect"}
+{"ts":"2026-08-21T17:07:31Z","sid":"main","kind":"user_correction","key":"contradiction","length":"long"}
+{"ts":"2026-08-21T17:08:50Z","sid":"main","kind":"guard_block","key":"secret_egress","severity":"security"}
+{"ts":"2026-08-21T19:59:01Z","sid":"main","kind":"subagent_fail","key":""}

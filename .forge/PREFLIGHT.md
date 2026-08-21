@@ -99,12 +99,12 @@ with no code change and no warning. Do not add test users instead.
 
 - [ ] env:GOOGLE_CLIENT_ID | Google id, this Mac | console.cloud.google.com, Auth Platform, Clients, Web application
 - [ ] env:GOOGLE_CLIENT_SECRET | Google secret, this Mac | shown once; if lost, Add Secret on the client page, then substitute. Then Audience, Publish app
-- [ ] run:sh -c 'set -a; . ./.env 2>/dev/null; set +a; curl -sS -d client_id="$GOOGLE_CLIENT_ID" -d client_secret="$GOOGLE_CLIENT_SECRET" -d grant_type=refresh_token -d refresh_token=preflight-probe https://oauth2.googleapis.com/token | grep -q invalid_grant' | Google client pair valid | a client-id or secret error reports invalid_client; recheck both values
+- [ ] run:bash -c 'set -a; . ./.env 2>/dev/null; set +a; out=$(curl -sS -d client_id="$GOOGLE_CLIENT_ID" -d client_secret="$GOOGLE_CLIENT_SECRET" -d grant_type=refresh_token -d refresh_token=preflight-probe https://oauth2.googleapis.com/token); case "$out" in *invalid_grant*) exit 0;; *) exit 1;; esac' | Google client pair valid | a client-id or secret error reports invalid_client; recheck both values
 
 **Anthropic**, before slice 10.
 
 - [ ] env:ANTHROPIC_API_KEY | Anthropic key, this Mac | console.anthropic.com, API keys, Create key
-- [ ] run:sh -c 'set -a; . ./.env 2>/dev/null; set +a; curl -sS -o /dev/null -w "%{http_code}" -H "x-api-key: $ANTHROPIC_API_KEY" -H "anthropic-version: 2023-06-01" https://api.anthropic.com/v1/models | grep -q "^200$"' | Anthropic key authorised | a 401 means the key is wrong or revoked, a 429 means the account has no credit
+- [ ] run:bash -c 'set -a; . ./.env 2>/dev/null; set +a; code=$(curl -sS -o /dev/null -w "%{http_code}" -H "x-api-key: $ANTHROPIC_API_KEY" -H "anthropic-version: 2023-06-01" https://api.anthropic.com/v1/models); test "$code" = 200' | Anthropic key authorised | a 401 means the key is wrong or revoked, a 429 means the account has no credit
 
 **Mail**, before slice 12, and optional. Without it the weekly review renders in a
 local preview and the live-send rubric line parks.
@@ -139,11 +139,11 @@ this Mac can see directly.
 - [ ] run:docker compose exec -T app printenv WITHINGS_CLIENT_SECRET >/dev/null 2>&1 | Withings secret in container | docker compose up -d --force-recreate
 - [ ] run:docker compose exec -T app printenv GOOGLE_CLIENT_SECRET >/dev/null 2>&1 | Google secret in container | docker compose up -d --force-recreate
 - [ ] run:docker compose exec -T app printenv ANTHROPIC_API_KEY >/dev/null 2>&1 | Anthropic key in container | docker compose up -d --force-recreate
-- [ ] run:curl -fsS --max-time 8 https://lamberts-mac-mini.tailda76d6.ts.net/api/diagnostics/device | grep -q '"standaloneSeen":true' | Standalone launch recorded | on the iPhone open the URL in Safari, Share, Add to Home Screen, then open it from the icon
-- [ ] run:curl -fsS --max-time 8 https://lamberts-mac-mini.tailda76d6.ts.net/api/diagnostics/device | grep -q '"wakeLockAvailable":true' | Wake Lock reported | update the iPhone to iOS 18.4 or newer, then reopen from the Home Screen icon
-- [ ] run:curl -fsS --max-time 8 https://lamberts-mac-mini.tailda76d6.ts.net/api/diagnostics/device | grep -q '"passkeyRegistered":true' | Passkey registered recorded | sign in on the iPhone and register a passkey; needs iCloud Keychain and two-factor on
-- [ ] run:curl -fsS --max-time 8 https://lamberts-mac-mini.tailda76d6.ts.net/api/diagnostics/device | grep -q '"pushSubscription":true' | Push subscription recorded | in the installed app, Settings, Enable notifications; the tap must be inside the app, not Safari
-- [ ] run:curl -fsS --max-time 8 https://lamberts-mac-mini.tailda76d6.ts.net/api/diagnostics/ingest | grep -q '"lastIngestWithin36h":true' | Health batch within 36h | build the Shortcut from the in-app guide and run it once; turn on Allow Sharing Large Amounts of Data first
+- [ ] run:bash -c 'out=$(curl -fsS --max-time 8 https://lamberts-mac-mini.tailda76d6.ts.net/api/diagnostics/device); case "$out" in *\"standaloneSeen\":true*) exit 0;; *) exit 1;; esac' | Standalone launch recorded | on the iPhone open the URL in Safari, Share, Add to Home Screen, then open it from the icon
+- [ ] run:bash -c 'out=$(curl -fsS --max-time 8 https://lamberts-mac-mini.tailda76d6.ts.net/api/diagnostics/device); case "$out" in *\"wakeLockAvailable\":true*) exit 0;; *) exit 1;; esac' | Wake Lock reported | update the iPhone to iOS 18.4 or newer, then reopen from the Home Screen icon
+- [ ] run:bash -c 'out=$(curl -fsS --max-time 8 https://lamberts-mac-mini.tailda76d6.ts.net/api/diagnostics/device); case "$out" in *\"passkeyRegistered\":true*) exit 0;; *) exit 1;; esac' | Passkey registered recorded | sign in on the iPhone and register a passkey; needs iCloud Keychain and two-factor on
+- [ ] run:bash -c 'out=$(curl -fsS --max-time 8 https://lamberts-mac-mini.tailda76d6.ts.net/api/diagnostics/device); case "$out" in *\"pushSubscription\":true*) exit 0;; *) exit 1;; esac' | Push subscription recorded | in the installed app, Settings, Enable notifications; the tap must be inside the app, not Safari
+- [ ] run:bash -c 'out=$(curl -fsS --max-time 8 https://lamberts-mac-mini.tailda76d6.ts.net/api/diagnostics/ingest); case "$out" in *\"lastIngestWithin36h\":true*) exit 0;; *) exit 1;; esac' | Health batch within 36h | build the Shortcut from the in-app guide and run it once; turn on Allow Sharing Large Amounts of Data first
 
 ---
 

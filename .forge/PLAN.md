@@ -171,7 +171,7 @@ the live URL can be measured the day its slice lands.
 
 ---
 
-## Slice 1 — The walking skeleton and the live URL
+## Slice 1. The walking skeleton and the live URL
 
 **The owner, in operator mode, can reach a running app at
 `https://lamberts-mac-mini.tailda76d6.ts.net` from his iPhone, add it to the Home
@@ -200,7 +200,7 @@ Closes: F1, F2, F3, F4, F5, F6, F7, C1, C2, C3, R1
 
 ---
 
-## Slice 2 — The gate: passkey, password and the credential boundary
+## Slice 2. The gate: passkey, password and the credential boundary
 
 **The owner can create his single account once, sign in with a passkey on the
 iPhone or Touch ID on the Mac, fall back to a complex password, and know that no
@@ -231,7 +231,7 @@ Closes: F8, F9, F10, F11, F12, F13, F14, F15, F16, F17, F18, C4
 
 ---
 
-## Slice 3 — The provenance spine and the quick log
+## Slice 3. The provenance spine and the quick log
 
 **The owner, in daily mode, can log a waist measurement, an energy rating or a
 note in six taps from Today, in a basement gym with no signal, and every value he
@@ -260,7 +260,7 @@ Closes: F19, F20, F21, F22, F23, F24, F25, F26, C5, C6
 
 ---
 
-## Slice 4 — Today, Health and the trend charts
+## Slice 4. Today, Health and the trend charts
 
 **The owner opens Today and answers "what do I do today" and "is my health
 improving" in under ten seconds, with the trend leading, the goal visible, and
@@ -289,7 +289,7 @@ Closes: F27, F28, F29, F30, F31, F32, F33, F34, F35, C7, C8, C9
 
 ---
 
-## Slice 5 — Withings, demo and real
+## Slice 5. Withings, demo and real
 
 **The owner connects his Body Smart once and thereafter steps on the scale and
 sees the trend move, with a status screen that tells him the moment it stops.**
@@ -320,7 +320,7 @@ Closes: F36, F37, F38, F39, F40, F41, F42, F43, F44
 
 ---
 
-## Slice 6 — Apple Health ingest and the Shortcut guide
+## Slice 6. Apple Health ingest and the Shortcut guide
 
 **The owner builds one Shortcut on his iPhone from a guide that names every action
 correctly, and three times a day his steps, sleep, heart rate and VO2 max arrive
@@ -354,7 +354,7 @@ Closes: F45, F46, F47, F48, F49, F50, F51, F52, F53, F54, F55, F56
 
 ---
 
-## Slice 7 — Blood tests: manual, PDF, and per-row validation
+## Slice 7. Blood tests: manual, PDF, and per-row validation
 
 **The owner, in curator mode, drops a twenty-two row lab PDF into the app and
 walks it row by row, accepting the fifteen that are obviously right, correcting
@@ -387,7 +387,7 @@ Closes: F57, F58, F59, F60, F61, F62, F63, F64, F65, C10, R2
 
 ---
 
-## Slice 8 — Train: the catalogue, the week and the guided session
+## Slice 8. Train: the catalogue, the week and the guided session
 
 **The owner opens Train on a Tuesday evening, accepts three of the four proposed
 sessions, taps into the calisthenics one, and runs it end to end in a basement gym
@@ -446,7 +446,7 @@ Closes: F66, F67, F68, F69, F70, F71, F72, F73, F74, F75, F76, F77, C11
 
 ---
 
-## Slice 9 — The nutrition week and the shopping list
+## Slice 9. The nutrition week and the shopping list
 
 **The owner, planning on a Sunday, generates a week of breakfasts, weekday lunches
 and home dinners inside his calorie and macro targets, accepts them one at a time,
@@ -479,7 +479,7 @@ Closes: F78, F79, F80, F81, F82, F83, F84, F85, F86, F87, F88, F89, C12
 
 ---
 
-## Slice 10 — HelloFresh, Uber Eats and the meal estimate
+## Slice 10. HelloFresh, Uber Eats and the meal estimate
 
 **The owner photographs his lunch, sees a range rather than a false number,
 corrects the portion, saves it, and the entry still says "estimate" three edits
@@ -518,7 +518,7 @@ Closes: F90, F91, F92, F93, F94, F95, F96, F97, F98, F99, F100, C13, R3
 
 ---
 
-## Slice 11 — Google Calendar and the confirmed diff
+## Slice 11. Google Calendar and the confirmed diff
 
 **The owner, tired at 20:45 on a Sunday, reads a four-second diff of exactly what
 will land in his dedicated calendar, confirms five of six rows, and can pull any of
@@ -560,7 +560,7 @@ Closes: F101, F102, F103, F104, F105, F106, F107, F108, F109, F110, F111, F112, 
 
 ---
 
-## Slice 12 — Push, the email review and the Sunday run
+## Slice 12. Push, the email review and the Sunday run
 
 **The owner gets one grouped reminder at the right time, a weekly review he can
 read on a Sunday evening, and a plan that fires exactly once even if the Mac was
@@ -599,7 +599,7 @@ Closes: F113, F114, F115, F116, F117, F118, F119, F120, F121, F122, F123, C15
 
 ---
 
-## Slice 13 — Backup, restore, export, deletion and the operator console
+## Slice 13. Backup, restore, export, deletion and the operator console
 
 **The owner, in operator mode in front of the cupboard, can see at a glance that
 the machine is healthy, prove a backup restores, export everything he owns, and
@@ -638,7 +638,7 @@ Closes: F124, F125, F126, F127, F128, F129, F130, F131, F132, F133, C16, R4
 
 ---
 
-## Slice 14 — The final gate
+## Slice 14. The final gate
 
 **A technical stranger can install this from zero on a fresh Mac mini, and the
 owner can see one matrix proving every acceptance criterion he wrote is met.**
@@ -685,3 +685,5 @@ Closes: C17, C18, R5, R6, R7, R8, R9, R10, D1, D2, D3, D4, D5
 
 F1 through F133, C1 through C18, R1 through R10, D1 through D5. One hundred and
 sixty-six lines. No id appears twice. No id is unassigned.
+
+/goal Every line of .forge/DOD.md checked, with evidence recorded in .forge/EVIDENCE.md, and a PASS verdict from the verifier agent.

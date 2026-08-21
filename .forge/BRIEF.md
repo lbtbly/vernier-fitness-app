@@ -8,7 +8,7 @@ Size: L. Eleven vertical workstreams with five separate external integrations, e
 
 Deployed and reachable. Not just "docker compose up works": the run ends with the app served from this machine over Tailscale Serve HTTPS on its private *.ts.net name, the PWA installed and exercised on the iPhone, healthcheck green, and the host listener bound to 127.0.0.1 only. The Tailscale name is configurable because it sets the WebAuthn origin and passkey RP ID.
 
-Measured facts about the target host, read 2026-08-21: this machine is `lamberts-mac-mini`, arm64, macOS 26.6. Tailscale is running, tailnet `tailda76d6.ts.net`, so the app URL is `https://lamberts-mac-mini.tailda76d6.ts.net` and the RP ID is that same hostname. Docker Engine 29.6.2 with Compose v5.3.1, daemon up, `linux/aarch64`. Node v26.7, npm 11.19. Absent: pnpm, corepack, age, gpg, psql. The iPhone `iphone181` is on the tailnet but last seen 23 days ago, so it must be brought online before the PWA can be installed.
+Measured facts about the target host, read 2026-08-21: this machine is `lamberts-mac-mini`, arm64, macOS 26.6. Tailscale is running, tailnet `tailda76d6.ts.net`, so the app URL is `https://lamberts-mac-mini.tailda76d6.ts.net` and the RP ID is the tailnet domain `tailda76d6.ts.net`, not the full host. The reason is under Research below: the tailnet domain survives renaming the Mac, the hostname does not. Docker Engine 29.6.2 with Compose v5.3.1, daemon up, `linux/aarch64`. Node v26.7, npm 11.19. Absent: pnpm, corepack, age, gpg, psql. The iPhone `iphone181` is on the tailnet but last seen 23 days ago, so it must be brought online before the PWA can be installed.
 
 ## Hard constraints
 
