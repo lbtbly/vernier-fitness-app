@@ -122,9 +122,9 @@ export async function readDeviceDiagnostics(): Promise<DeviceDiagnostics> {
   return {
     standaloneSeen: observed('standaloneSeen'),
     wakeLockAvailable: observed('wakeLockAvailable'),
-    // No slice writes these yet: passkeys land in slice 2, push in slice 12.
-    // They read false because nothing has been observed, which is the truth,
-    // and they are present because a key the preflight greps for must exist.
+    // passkeyRegistered gets its source in slice 2, from the registration
+    // ceremony. Push lands in slice 12 and until then reads false because
+    // nothing has been observed, which is the truth.
     passkeyRegistered: observed('passkeyRegistered'),
     pushSubscription: observed('pushSubscription'),
     firstObservedAt: {
@@ -146,4 +146,32 @@ export async function readDeviceDiagnostics(): Promise<DeviceDiagnostics> {
       lastSeenAt: peer.lastSeenAt.toISOString(),
     })),
   };
+}
+
+/**
+ * A passkey registered successfully. Written the same way a launch is: sticky
+ * true, timestamped once when it first became true and again on every later
+ * report.
+ *
+ * `.forge/PREFLIGHT.md` greps this key, and until slice 2 nothing wrote it, so
+ * it answered false because nothing had been observed. Now it has a source.
+ * The other three signals are untouched.
+ */
+export async function recordPasskeyRegistered(): Promise<void> {
+  const db = getDb();
+  await db
+    .insert(deviceObservation)
+    .values({
+      signal: SIGNALS.passkeyRegistered,
+      observed: true,
+      firstObservedAt: new Date(),
+    })
+    .onConflictDoUpdate({
+      target: deviceObservation.signal,
+      set: {
+        observed: sql`${deviceObservation.observed} or excluded.observed`,
+        firstObservedAt: sql`coalesce(${deviceObservation.firstObservedAt}, excluded.first_observed_at)`,
+        lastReportedAt: sql`now()`,
+      },
+    });
 }

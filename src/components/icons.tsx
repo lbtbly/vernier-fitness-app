@@ -96,3 +96,78 @@ export function WarnIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+/**
+ * The gate glyphs, lifted from .forge/wireframes/01-sign-in.html so the shipped
+ * screen and the approved wireframe draw the same shapes.
+ */
+export function LockIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} aria-hidden="true" focusable="false">
+      <rect x="4" y="8.6" width="12" height="8.4" rx="2.4" fill="none" stroke="currentColor" strokeWidth="1.6" />
+      <path d="M6.8 8.6V6.4a3.2 3.2 0 0 1 6.4 0v2.2" fill="none" stroke="currentColor" strokeWidth="1.6" />
+    </svg>
+  );
+}
+
+export function KeyIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} aria-hidden="true" focusable="false">
+      <circle cx="7.2" cy="7.2" r="3.6" fill="none" stroke="currentColor" strokeWidth="1.7" />
+      <path
+        d="M9.8 9.8 16.4 16.4M13.6 13.6l-1.5 1.5M15.2 15.2l1.4 1.4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+export function FaceIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} aria-hidden="true" focusable="false">
+      <path
+        d="M2.6 6.6V4.4a1.8 1.8 0 0 1 1.8-1.8h2.2M13.4 2.6h2.2a1.8 1.8 0 0 1 1.8 1.8v2.2M17.4 13.4v2.2a1.8 1.8 0 0 1-1.8 1.8h-2.2M6.6 17.4H4.4a1.8 1.8 0 0 1-1.8-1.8v-2.2"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      <path
+        d="M7.2 8v1.6M12.8 8v1.6M7.4 13a4 4 0 0 0 5.2 0M10 8v3.2h-1"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function InfoIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} aria-hidden="true" focusable="false">
+      <circle cx="10" cy="10" r="7.4" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M10 9v5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <circle cx="10" cy="6.2" r=".9" fill="currentColor" />
+    </svg>
+  );
+}
+
+export function OkIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} aria-hidden="true" focusable="false">
+      <path
+        d="M4 10.5 8 14.5 16 5.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}

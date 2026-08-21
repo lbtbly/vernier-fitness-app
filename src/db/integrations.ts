@@ -1,0 +1,142 @@
+import { eq } from 'drizzle-orm';
+import { getDb } from './client';
+import { integrationCredential } from './schema';
+import { openSecret, sealSecret } from '@/lib/master-key';
+
+/**
+ * Third-party credentials, encrypted at rest, and the only place any of them is
+ * ever read back.
+ *
+ * The plaintext never leaves this file except as a return value to the adapter
+ * that is about to make the call it belongs to. Nothing here returns a secret
+ * to a route handler, a page or a log line, and `describeIntegrations()` below
+ * is deliberately the only shape the settings screen can render.
+ */
+
+export const INTEGRATIONS = [
+  {
+    provider: 'withings',
+    name: 'Withings',
+    purpose: 'Weight, fat mass and heart rate from the Body Smart scale.',
+    scope: 'user.metrics',
+  },
+  {
+    provider: 'apple_health',
+    name: 'Apple Health',
+    purpose: 'Steps, workouts, sleep and resting heart rate from the iPhone shortcut.',
+    scope: 'ingest.write',
+  },
+  {
+    provider: 'google_calendar',
+    name: 'Google Calendar',
+    purpose: 'Free-busy reads and writes into the Vernier calendar only.',
+    scope: 'calendar.events.owned calendar.freebusy calendar.calendars.own',
+  },
+  {
+    provider: 'mail_relay',
+    name: 'Mail relay',
+    purpose: 'The Sunday review, sent from this machine.',
+    scope: 'smtp.send',
+  },
+] as const;
+
+export type IntegrationProvider = (typeof INTEGRATIONS)[number]['provider'];
+
+export function isIntegrationProvider(value: string): value is IntegrationProvider {
+  return INTEGRATIONS.some((integration) => integration.provider === value);
+}
+
+/** Exactly what the settings screen is allowed to know. No ciphertext, no length, no shape. */
+export type IntegrationView = {
+  provider: string;
+  name: string;
+  purpose: string;
+  scope: string;
+  state: 'connected' | 'not connected' | 'error';
+  lastSuccessfulSyncAt: string | null;
+  lastError: string | null;
+};
+
+export async function describeIntegrations(): Promise<IntegrationView[]> {
+  const db = getDb();
+  const rows = await db.select().from(integrationCredential);
+  const byProvider = new Map(rows.map((row) => [row.provider, row]));
+
+  return INTEGRATIONS.map((integration) => {
+    const row = byProvider.get(integration.provider);
+    const state: IntegrationView['state'] =
+      row?.state === 'connected' ? 'connected' : row?.state === 'error' ? 'error' : 'not connected';
+    return {
+      provider: integration.provider,
+      name: integration.name,
+      purpose: integration.purpose,
+      scope: row?.scope ?? integration.scope,
+      state,
+      lastSuccessfulSyncAt: row?.lastSuccessfulSyncAt?.toISOString() ?? null,
+      lastError: row?.lastError ?? null,
+    };
+  });
+}
+
+export async function storeIntegrationSecret(input: {
+  provider: IntegrationProvider;
+  secret: string;
+  scope?: string;
+}): Promise<void> {
+  const db = getDb();
+  const sealed = sealSecret(input.secret, input.provider);
+  const catalogue = INTEGRATIONS.find((entry) => entry.provider === input.provider);
+  const values = {
+    provider: input.provider,
+    state: 'connected',
+    scope: input.scope?.trim() || catalogue?.scope || '',
+    secretCiphertext: sealed.ciphertext,
+    secretNonce: sealed.nonce,
+    secretTag: sealed.tag,
+    keyFingerprint: sealed.keyFingerprint,
+    lastError: null,
+    updatedAt: new Date(),
+  };
+  await db
+    .insert(integrationCredential)
+    .values(values)
+    .onConflictDoUpdate({ target: integrationCredential.provider, set: values });
+}
+
+export async function forgetIntegrationSecret(provider: IntegrationProvider): Promise<void> {
+  const db = getDb();
+  await db.delete(integrationCredential).where(eq(integrationCredential.provider, provider));
+}
+
+/**
+ * The one read path. It throws a named error when the key does not match rather
+ * than returning an empty string, because an empty string reads downstream as
+ * "nothing stored" and that is how a credential store starts lying.
+ */
+export async function readIntegrationSecret(provider: IntegrationProvider): Promise<string | null> {
+  const db = getDb();
+  const [row] = await db
+    .select()
+    .from(integrationCredential)
+    .where(eq(integrationCredential.provider, provider));
+  if (!row || !row.secretCiphertext || !row.secretNonce || !row.secretTag) return null;
+  return openSecret(
+    {
+      ciphertext: row.secretCiphertext,
+      nonce: row.secretNonce,
+      tag: row.secretTag,
+      keyFingerprint: row.keyFingerprint ?? '',
+    },
+    provider,
+  );
+}
+
+/**
+ * Proves the stored credential still opens under the running key, and answers
+ * with a boolean. The value itself is not returned, not counted and not
+ * measured.
+ */
+export async function checkIntegrationSecret(provider: IntegrationProvider): Promise<boolean> {
+  const secret = await readIntegrationSecret(provider);
+  return secret !== null && secret.length > 0;
+}

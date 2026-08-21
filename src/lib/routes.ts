@@ -70,3 +70,25 @@ export function isOpenRoute(pathname: string): boolean {
 export function isApiRoute(pathname: string): boolean {
   return pathname === '/api' || pathname.startsWith('/api/');
 }
+
+/**
+ * Where the anti-forgery cookie is issued: on the screens that can raise a
+ * mutating request, and nowhere else.
+ *
+ * Liveness, the offline document, the worker, the icons and the two
+ * diagnostics endpoints stay exactly as slice 1 shipped them, with no cookie
+ * added to a response that a preflight script or a service worker reads.
+ */
+const NO_COOKIE_PATHS: string[] = [
+  '/healthz',
+  '/offline',
+  '/sw.js',
+  '/manifest.webmanifest',
+  '/favicon.ico',
+];
+const NO_COOKIE_PREFIXES: string[] = ['/_next/', '/icons/', '/api/diagnostics/'];
+
+export function shouldIssueCsrfCookie(pathname: string): boolean {
+  if (NO_COOKIE_PATHS.includes(pathname)) return false;
+  return !NO_COOKIE_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+}

@@ -306,3 +306,76 @@ a:focus-visible,button:focus-visible,input:focus-visible,[tabindex]:focus-visibl
   overflow:hidden;
   white-space:nowrap;
 }
+
+/* ---------- the gate, screen 01 ---------- */
+
+/*
+ * Sign-in is the one screen with no tab bar, so its column fills the viewport
+ * and the passkey action sits on the optical centre, exactly as
+ * .forge/wireframes/01-sign-in.html frame 1 draws it. The buttons and inputs
+ * are 52 px here rather than the shell's 44: this is a screen you use with one
+ * thumb, once, and the wireframe measures 52.
+ */
+.gate{padding-bottom:var(--s5)}
+.gate .app-scroll{padding-bottom:var(--s5);display:flex;flex-direction:column}
+.gate .btn{min-height:52px;font-size:16px}
+.gate .fill{flex:1;display:flex;flex-direction:column;justify-content:center;padding-bottom:var(--s8)}
+.gate h1{font-size:var(--t-display);line-height:var(--t-display-lh);letter-spacing:var(--t-display-ls);font-weight:700;margin-bottom:6px}
+.gate .lead{margin-bottom:var(--s1)}
+.gate .stacked > * + *{margin-top:10px}
+
+.mark{
+  width:66px;height:66px;
+  border-radius:20px;
+  background:var(--surface-2);
+  border:1px solid var(--line-2);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--accent);
+  margin-bottom:var(--s6);
+}
+.mark svg{width:30px;height:30px}
+.mark.alert{color:var(--alert)}
+
+.host{
+  font-family:var(--font-mono);
+  font-size:var(--t-note);
+  line-height:var(--t-note-lh);
+  color:var(--text-2);
+  word-break:break-all;
+}
+
+/*
+ * A form field, which is a different thing from the .field a configuration row
+ * uses. Label above, control below, 52 px of control.
+ */
+.formfield{display:block;margin-bottom:14px}
+.formfield .lbl{margin-bottom:6px}
+
+.input{
+  width:100%;
+  min-height:52px;
+  border-radius:var(--r-md);
+  border:1px solid var(--line-2);
+  background:var(--surface-2);
+  color:var(--text);
+  font:inherit;
+  font-size:17px;
+  padding:0 14px;
+}
+.input[type=password]{letter-spacing:.06em}
+
+.check{
+  display:flex;gap:var(--s2);align-items:center;
+  font-size:var(--t-sub);line-height:var(--t-sub-lh);
+  color:var(--text-2);
+  min-height:24px;
+}
+.check svg{width:16px;height:16px;flex:none}
+.check .good{color:var(--good)}
+.check .mut{color:var(--text-3)}
+
+.hint{display:flex;gap:10px;align-items:flex-start}
+.hint svg{width:18px;height:18px;flex:none;margin-top:1px;color:var(--text-3)}
+.hint svg.accent{width:20px;height:20px;margin-top:2px;color:var(--accent)}
+
+.centre{text-align:center}
