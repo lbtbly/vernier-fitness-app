@@ -58,5 +58,14 @@ echo
 "$TS" serve status
 
 echo
-FUNNEL="$("$TS" funnel status 2>&1 || true)"
-printf 'funnel: %s\n' "$FUNNEL"
+# `tailscale funnel status` prints the serve config as well, which reads as a
+# Funnel entry to anyone skimming it. The configuration itself is the answer:
+# no AllowFunnel key means nothing is on the public internet.
+AFTER="$("$TS" serve status --json 2>/dev/null || echo '{}')"
+if printf '%s' "$AFTER" | grep -q '"AllowFunnel"'; then
+  echo "funnel: an AllowFunnel key is present in the serve configuration. Investigate."
+else
+  echo "funnel: zero entries. No AllowFunnel key in the serve configuration."
+fi
+COUNT="$(printf '%s' "$AFTER" | grep -c '"Proxy"' || true)"
+echo "https proxies: ${COUNT}"

@@ -23,9 +23,9 @@ export default function SettingsPage() {
         <span className="lbl">{strings.settings.installationTitle}</span>
         <dl>
           {rows.map(([label, value]) => (
-            <div className="row" key={label}>
-              <dt className="grow sub mut">{label}</dt>
-              <dd className="mono">{value}</dd>
+            <div className="field" key={label}>
+              <dt>{label}</dt>
+              <dd>{value}</dd>
             </div>
           ))}
         </dl>

@@ -42,11 +42,9 @@ export default function SignInPage() {
           <span className="lbl">{strings.signIn.configTitle}</span>
           <dl>
             {rows.map(([label, value]) => (
-              <div className="row" key={label}>
-                <dt className="grow sub mut">{label}</dt>
-                <dd className="mono" data-config-field={label}>
-                  {value}
-                </dd>
+              <div className="field" key={label}>
+                <dt>{label}</dt>
+                <dd data-config-field={label}>{value}</dd>
               </div>
             ))}
           </dl>

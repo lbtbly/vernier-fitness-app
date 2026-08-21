@@ -198,6 +198,29 @@ body{
 .between{display:flex;align-items:center;justify-content:space-between;gap:var(--s3)}
 .stack{display:flex;flex-direction:column;gap:2px}
 
+/*
+ * A configuration field. Label over value, never side by side: an origin is
+ * long enough to collide with its own label at 393 px, and a value the reader
+ * has to verify character by character must never wrap around anything.
+ */
+.field{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  min-height:var(--touch);
+  padding:10px 0;
+  border-bottom:1px solid var(--line);
+}
+.field:last-child{border-bottom:0}
+.field dt{font-size:var(--t-sub);line-height:var(--t-sub-lh);color:var(--text-3)}
+.field dd{
+  font-family:var(--font-mono);
+  font-size:var(--t-sub);
+  line-height:var(--t-sub-lh);
+  color:var(--text);
+  overflow-wrap:anywhere;
+}
+
 .chip{
   display:inline-flex;
   align-items:center;

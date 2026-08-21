@@ -45,15 +45,12 @@ export const viewport: Viewport = {
 };
 
 /**
- * Dark first. The attribute is written server side so the first paint is never
- * light, and the inline reader below hands the theme over to a system that
- * explicitly asks for light. Both theme blocks ship either way.
+ * Dark first, exactly as the wireframes render. The light theme block ships in
+ * the stylesheet too and takes over the moment data-theme reads light.
  */
-const THEME_READER = `try{if(matchMedia('(prefers-color-scheme: light)').matches){document.documentElement.dataset.theme='light'}}catch(e){}`;
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-theme="dark" suppressHydrationWarning>
+    <html lang="en" data-theme="dark">
       <head>
         {/*
           Next emits mobile-web-app-capable. Apple's own tag is the one
@@ -61,7 +58,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           above has no effect without it, so both ship.
         */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <script dangerouslySetInnerHTML={{ __html: THEME_READER }} />
       </head>
       <body>
         {children}
