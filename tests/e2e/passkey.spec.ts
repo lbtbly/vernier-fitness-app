@@ -36,6 +36,7 @@ test.describe('the passkey round trip', () => {
       // docs/security.md tells the owner to do it. No back door: the link is
       // one use, it expires, and spending it writes an audit row.
       await page.goto(mintSignInLink());
+      console.log(`after the recovery link, the browser is at ${page.url()}`);
       await expect(page.getByRole('heading', { name: 'Today' })).toBeVisible();
 
       /* ---------------------------------------------------- registration */
@@ -47,7 +48,8 @@ test.describe('the passkey round trip', () => {
       await page.screenshot({ path: `${CAPTURES}f9-settings-passkey-registered.png`, fullPage: true });
 
       const stored = query(
-        `select 'id=' || id || ' public_key_bytes=' || octet_length(decode(public_key, 'base64')) ||
+        `select 'id=' || id || ' public_key_bytes=' ||
+                octet_length(decode(translate(public_key, '-_', '+/') || repeat('=', (4 - length(public_key) % 4) % 4), 'base64')) ||
                 ' counter=' || counter || ' transports=' || array_to_string(transports, ',') ||
                 ' device_type=' || device_type || ' backed_up=' || backed_up ||
                 ' aaguid=' || aaguid || ' label=' || label
@@ -63,7 +65,11 @@ test.describe('the passkey round trip', () => {
 
       // The relying party this credential was verified against, as the app
       // itself reports it, read from WEBAUTHN_RP_ID on every request.
-      const rpId = await page.locator('dd', { hasText: 'tailda76d6.ts.net' }).first().textContent();
+      const rpId = await page
+        .locator('.field')
+        .filter({ hasText: 'Passkey relying party' })
+        .locator('dd')
+        .textContent();
       expect(rpId).toBe('tailda76d6.ts.net');
 
       // The diagnostics signal now has a source, which it did not before.
@@ -103,7 +109,11 @@ test.describe('the passkey round trip', () => {
       // The credential this test made belongs to a key that lives for the
       // length of the test. Leaving it behind would leave the owner's account
       // trusting an authenticator that no longer exists.
-      console.log(recovery('forget-passkey', seed.credentialId));
+      try {
+        console.log(recovery('forget-passkey', seed.credentialId));
+      } catch {
+        console.log(`no credential ${seed.credentialId} to remove, the ceremony did not get that far`);
+      }
       await context.close();
     }
   });

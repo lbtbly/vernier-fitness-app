@@ -210,8 +210,14 @@ export function authenticatorInitScript(seed: AuthenticatorSeed): string {
     };
   };
 
-  Object.defineProperty(navigator.credentials, 'create', { value: create, configurable: true, writable: true });
-  Object.defineProperty(navigator.credentials, 'get', { value: get, configurable: true, writable: true });
+  // The prototype, not the instance. WebKit hands back a fresh
+  // CredentialsContainer wrapper on some accesses, so a property defined on the
+  // object read here is not the property the app reads later.
+  const container = Object.getPrototypeOf(navigator.credentials);
+  for (const [name, implementation] of [['create', create], ['get', get]]) {
+    Object.defineProperty(container, name, { value: implementation, configurable: true, writable: true });
+    Object.defineProperty(navigator.credentials, name, { value: implementation, configurable: true, writable: true });
+  }
   window.__vernierSoftwareAuthenticator = { credentialId: SEED.credentialId };
 })();`;
 }

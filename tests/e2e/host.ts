@@ -18,6 +18,9 @@ export function baseUrl(): string {
 
 /** A read of the database, through the db container, so no credential is passed on a command line. */
 export function query(statement: string): string {
+  // One line, always. A statement written across several lines in a test would
+  // reach psql with the newlines escaped, and psql would refuse it.
+  const oneLine = statement.replace(/\s+/g, ' ').trim();
   return execFileSync(
     'docker',
     [
@@ -27,7 +30,7 @@ export function query(statement: string): string {
       'db',
       'sh',
       '-c',
-      `psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -At -c ${JSON.stringify(statement)}`,
+      `psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -At -c ${JSON.stringify(oneLine)}`,
     ],
     { cwd: projectRoot, encoding: 'utf8' },
   ).trim();

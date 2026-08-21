@@ -15,7 +15,7 @@ import { projectRoot } from './host';
  */
 
 const CAPTURES = `${projectRoot}.forge/evidence/slice-2/captures`;
-const SCRATCH = process.env.SCRATCH_URL ?? 'http://localhost:3101';
+const SCRATCH = process.env.SCRATCH_URL ?? 'http://127.0.0.1:3101';
 
 const VIEWPORTS = [
   { name: '393x852', width: 393, height: 852 },

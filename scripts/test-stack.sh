@@ -25,7 +25,7 @@ IMAGE=vernier-app:local
 NETWORK=vernier_default
 PORT=3101
 SCRATCH_DB=vernier_scratch
-ORIGIN="http://localhost:${PORT}"
+ORIGIN="http://127.0.0.1:${PORT}"
 
 need_stack() {
   if ! docker compose ps --status running --services 2>/dev/null | grep -qx app; then
@@ -113,14 +113,20 @@ case "${1:-up}" in
     need_stack
     remove_container
     echo "test-stack: booting with no master key, in the foreground, so the refusal is visible"
-    docker run --rm --name "${CONTAINER}-nokey" --network "$NETWORK" \
+    # It is meant to fail, so the failure is captured rather than fatal here.
+    set +e
+    output=$(docker run --rm --name "${CONTAINER}-nokey" --network "$NETWORK" \
       -e APP_URL="$ORIGIN" \
       -e APP_NAME=Vernier \
       -e WEBAUTHN_RP_ID=localhost \
       -e WEBAUTHN_RP_NAME=Vernier \
       -e DATABASE_URL="$(scratch_url)" \
-      "$IMAGE" 2>&1 | head -20
-    echo "test-stack: exit code ${PIPESTATUS[0]}"
+      -p "127.0.0.1:3102:3000" \
+      "$IMAGE" 2>&1)
+    code=$?
+    set -e
+    printf '%s\n' "$output" | head -30
+    echo "test-stack: the container exited with code ${code}"
     ;;
   down)
     remove_container

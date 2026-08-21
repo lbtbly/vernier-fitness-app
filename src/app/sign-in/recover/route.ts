@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { consumeRecoveryGrant, readOwner, recordAuthAttempt } from '@/db/auth';
+import { getConfig } from '@/lib/config';
 import { NO_STORE, peerOf } from '@/lib/gate';
 import { startSession } from '@/lib/session';
 
@@ -62,6 +63,9 @@ export async function GET(request: Request) {
     peer,
   });
 
-  const target = new URL('/', url);
+  // The configured origin, not the request's own. Inside the container the
+  // request arrives addressed to the bind address, and a Location built from it
+  // sends the browser to https://0.0.0.0:3000, which no browser will follow.
+  const target = new URL('/', getConfig().appUrl);
   return NextResponse.redirect(target, { status: 303, headers: { ...NO_STORE } });
 }
