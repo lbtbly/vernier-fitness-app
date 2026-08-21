@@ -1070,3 +1070,4 @@
 2026-08-21T17:06:55Z | a0c0a8f187a47a7df | stopped | 32s
 2026-08-21T17:07:27Z | architect | stopped | 32s
 2026-08-21T19:59:01Z | a6f5f8d9fcd7e6193 | stopped | 10294s
+2026-08-21T20:13:24Z | workflow-subagent | stopped | 863s
