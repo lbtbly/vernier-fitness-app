@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<noscript><meta http-equiv="refresh" content="15"></noscript>
+<title>A personal self-hosted PWA on an always-on Ap... · forge</title>
+<style>
+:root{--bg:#0B0B0B;--surface:#1C1C1C;--raised:#262626;--ink:#FAFAFA;
+--muted:#8C8C8C;--line:#333333;--accent:#3FBF52;--accent-ink:#052A0C;
+--dot:rgba(255,255,255,0.10);--warn:#E0A32E;--negative:#E0503F;
+--sans:"Inter","General Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+--mono:"JetBrains Mono",ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace}
+*{box-sizing:border-box;margin:0}
+html{font-size:clamp(12px,0.85vw,17px)}
+body{height:100dvh;overflow:hidden;display:grid;
+grid-template-rows:auto auto 1fr auto;grid-template-columns:minmax(0,1fr);
+gap:.8rem;padding:1rem 1.25rem .6rem;
+background-color:var(--bg);
+background-image:radial-gradient(var(--dot) 1px,transparent 1px);
+background-size:24px 24px;background-position:-1px -1px;
+color:var(--ink);font:400 .75rem/1.35 var(--sans)}
+.lbl{font:500 .625rem/1.3 var(--mono);letter-spacing:.04em;color:var(--muted)}
+header{display:flex;gap:1.25rem;align-items:center}
+header .id{flex:1;min-width:0}
+h1{font:500 1.25rem/1.3 var(--sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chips{margin-top:.35rem;display:flex;gap:.4rem;white-space:nowrap;overflow:hidden}
+.envs{margin-top:.4rem;display:flex;gap:.4rem;flex-wrap:wrap;align-items:center}
+.env{display:inline-flex;align-items:center;gap:.4rem;padding:3px 9px;border-radius:6px;
+border:1px solid var(--line);background:var(--surface);text-decoration:none;
+font:400 .68rem/1.4 var(--mono);color:var(--muted)}
+.env:hover{border-color:var(--muted)}
+.env .d{width:6px;height:6px;border-radius:50%;flex:none;background:var(--line)}
+.env--up{color:var(--ink)}
+.env--up .d{background:var(--accent)}
+.env--down .d{background:transparent;border:1px solid var(--negative)}
+.env--dead{opacity:.5;cursor:help}
+.env--dead .d{background:transparent;border:1px dashed var(--muted)}
+.env .el{font-weight:500}
+.env .eu{opacity:.65}
+@media (prefers-reduced-motion:no-preference){.env--up .d{animation:pulse 2.4s ease-in-out infinite}}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:6px;
+font:500 .625rem/1.2 var(--sans);letter-spacing:.04em;
+background:var(--raised);color:var(--muted);border:1px solid var(--line)}
+.chip--ok{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
+.chip--bad{color:var(--negative);border-color:color-mix(in srgb,var(--negative) 40%,var(--line))}
+.chip .d{width:6px;height:6px;border-radius:50%;background:currentColor}
+.pct{text-align:right;flex:none}
+.pct .n{font:500 2.4rem/1 var(--sans);font-variant-numeric:tabular-nums}
+.pct .cap{font:400 .625rem/1.4 var(--mono);color:var(--muted)}
+.meter{height:.35rem;background:var(--raised);border:1px solid var(--line);
+border-radius:99px;overflow:hidden;display:flex}
+.pct .meter{margin-top:.4rem;width:10.5rem}
+.m-v{background:var(--accent)}.m-e{background:var(--warn)}
+/* In build reads as scope, not progress: an outline rather than a fill, so it
+   can never be mistaken for a line that is part-way to PASS. Unrecorded is the
+   only thing on this board allowed to look like a problem. */
+.m-b{background:repeating-linear-gradient(90deg,var(--line) 0 3px,transparent 3px 6px)}
+.m-u{background:var(--negative)}
+/* Ruled against is a solid negative, unrecorded a hatched one: both are red,
+   and the difference between "the verifier said no" and "nobody wrote it
+   down" is worth a texture. */
+.m-f{background:var(--negative)}
+.m-u{background:repeating-linear-gradient(90deg,var(--negative) 0 3px,transparent 3px 6px)}
+/* Where the hours went. Not a measurement and never drawn as one: the tooltip
+   carries the reconstruction and its coverage. */
+.tsplit{height:.25rem;width:10.5rem;margin-top:.35rem;display:flex;gap:1px;
+border-radius:99px;overflow:hidden;cursor:help}
+.t-b{background:color-mix(in srgb,var(--accent) 70%,transparent)}
+.t-v{background:var(--warn)}
+.t-o{background:var(--line)}
+.chip--warn{color:var(--negative);border-color:color-mix(in srgb,var(--negative) 45%,var(--line))}
+.debt{margin-top:.6rem;padding:.45rem .55rem;border-radius:6px;
+border:1px solid color-mix(in srgb,var(--negative) 40%,var(--line));
+font:500 .68rem/1.5 var(--mono);color:var(--negative)}
+.debt--bad{background:color-mix(in srgb,var(--negative) 12%,transparent);
+border-color:var(--negative);cursor:help}
+.debtwhy{font:400 .64rem/1.45 var(--sans);color:var(--muted);margin-top:.2rem}
+.stale{margin-bottom:.5rem;padding:.3rem .5rem;border-radius:5px;cursor:help;
+border:1px solid color-mix(in srgb,var(--warn) 40%,var(--line));
+font:400 .64rem/1.45 var(--mono);color:var(--warn)}
+.graph{display:flex;align-items:stretch;padding:.5rem 0 .2rem}
+.pnode{flex:3;min-width:0;background:var(--surface);border:1px solid var(--line);
+border-radius:10px;padding:.75rem .85rem .65rem;box-shadow:0 2px 8px rgb(0 0 0 / .5)}
+.pnode .ph{display:flex;align-items:center;gap:.55rem;min-width:0}
+.pmark{width:1.05rem;height:1.05rem;border-radius:50%;background:var(--raised);
+border:1px solid var(--line);flex:none;display:flex;align-items:center;
+justify-content:center;font:700 .62rem/1 var(--sans);color:var(--bg)}
+.pt{font-size:1.18rem;font-weight:500;letter-spacing:-.01em;color:var(--muted);
+white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pf{font:500 .66rem/1.4 var(--mono);color:var(--muted);margin:.3rem 0 0 1.6rem;
+white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Completion is a FILLED state; in progress is an OUTLINED one. Done used to
+   be painted in --muted while the active node held the only green, so a
+   finished step read as dimmed and the step still running looked more complete
+   than the ones behind it. The wash stays low so the board keeps its one
+   rationed green: intensity is still reserved for what is live. */
+.pnode.done{background:color-mix(in srgb,var(--accent) 10%,var(--surface));
+border-color:color-mix(in srgb,var(--accent) 30%,var(--line))}
+.pnode.done .pt{color:var(--ink)}
+.pnode.done .pf{color:var(--ink);opacity:.8}
+.pnode.done .pmark{background:var(--accent);border-color:var(--accent);
+color:var(--accent-ink)}
+.pnode.active{border-color:var(--accent);
+box-shadow:0 0 0 1px var(--accent),0 2px 8px rgb(0 0 0 / .5)}
+.pnode.active .pt{color:var(--ink)}
+.pnode.active .pf{color:var(--ink)}
+.pnode.active .pmark{background:var(--accent);border-color:var(--accent)}
+.pnode.pending{opacity:.55}
+.pnode.skipped{opacity:.5;background-image:repeating-linear-gradient(45deg,
+transparent 0 7px,rgb(255 255 255 / .05) 7px 8px)}
+.pnode.skipped .pt{text-decoration:line-through}
+.pnode.skipped .pmark{color:var(--muted)}
+.wire{flex:1;min-width:.7rem;align-self:center;height:2px;background:var(--line);
+position:relative;margin:0 -1px;z-index:0}
+.wire::after{content:"";position:absolute;right:0;top:-3px;
+border-left:6px solid var(--line);border-top:4px solid transparent;
+border-bottom:4px solid transparent}
+.wire.w-done{background:color-mix(in srgb,var(--accent) 50%,var(--line))}
+.wire.w-done::after{border-left-color:color-mix(in srgb,var(--accent) 50%,var(--line))}
+.wire.w-live{background:var(--accent)}.wire.w-live::after{border-left-color:var(--accent)}
+@media (prefers-reduced-motion:no-preference){
+.pnode.active{animation:ring 1.6s ease-in-out infinite}
+.pnode.active .pmark{animation:pulse 1.6s ease-in-out infinite}
+.wire.w-live{background:repeating-linear-gradient(90deg,var(--accent) 0 7px,
+transparent 7px 12px);animation:flow .7s linear infinite}
+@keyframes ring{50%{box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 35%,transparent),
+0 2px 8px rgb(0 0 0 / .5)}}
+@keyframes flow{to{background-position:-12px 0}}
+@keyframes pulse{50%{opacity:.35}}}
+/* The dot is gone: it cost a fixed 11px of every chip plus its gap, on a strip
+   that has to carry thirteen titles. The slice NUMBER carries the state
+   instead, so the indicator costs nothing the label was not already paying. */
+.slices{display:flex;flex-wrap:wrap;gap:.35rem;justify-content:center;
+margin-top:.5rem;overflow:hidden}
+.slices .chip{font-size:.72rem;padding:3px 8px;gap:.45rem;max-width:15rem;
+min-width:0;color:var(--muted)}
+.slices .chip b{font:500 .66rem/1.4 var(--mono);color:var(--muted);flex:none}
+.slices .chip i{font:400 .62rem/1.4 var(--mono);font-style:normal;
+color:var(--muted);opacity:.7;flex:none}
+.slices .chip>:not(b):not(i){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* The fill used to sit on the ACTIVE chip and nothing on the done ones, which
+   inverted the reading: the slice still being worked looked settled and the
+   three finished behind it looked pending. */
+.slices .sl-done{color:var(--ink);
+background:color-mix(in srgb,var(--accent) 13%,var(--surface));
+border-color:color-mix(in srgb,var(--accent) 32%,var(--line))}
+.slices .sl-done b{color:var(--accent)}
+.slices .sl-done i{color:var(--accent);opacity:.9}
+.slices .sl-active{color:var(--ink);background:var(--surface);
+border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.slices .sl-active b{color:var(--accent)}
+.slices .sl-active i{color:var(--ink);opacity:1}
+/* A slice carrying a line the verifier ruled against wears the count in red,
+   whatever else it is. Done and failing are not exclusive: a slice can be
+   fully built, mostly verified, and still owe one refused line. */
+.slices .sl-fail{border-color:var(--negative)}
+.slices .chip u{font:500 .6rem/1.4 var(--mono);text-decoration:none;flex:none;
+color:var(--negative);padding:0 .25rem;border-radius:3px;
+background:color-mix(in srgb,var(--negative) 18%,transparent)}
+main{display:grid;grid-template-columns:1.05fr 1.45fr .72fr;
+grid-template-rows:1.3fr .8fr;gap:.8rem;min-height:0}
+.panel.rub{grid-column:1;grid-row:1/3}
+.panel.act{grid-column:2;grid-row:1}
+.panel.cap{grid-column:3;grid-row:1}
+.panel.disp{grid-column:2/4;grid-row:2}
+/* The screenmap claims a fourth column, full height, only when the run has
+   screens to draw. Without it the board keeps its three-column shape. */
+main.smx{grid-template-columns:1fr 1.4fr .7fr .78fr}
+main.smx .panel.scr{grid-column:4;grid-row:1/3}
+.smap{display:flex;flex-direction:column;gap:.1rem;overflow-y:auto;min-height:0;flex:1}
+/* A sitemap is a tree, so the rows are indented by depth. --d is the segment
+   depth, set per row: /account/reset/confirm sits two steps in from /account
+   and reads as belonging to it without a single box-drawing character.
+   ONE LINE PER NODE. Two lines fitted seven designer screens and hid two
+   thirds of twenty-six routes, and half a sitemap answers none of the
+   questions a whole one does. */
+.srow{display:flex;align-items:center;gap:.35rem;min-width:0;
+padding:.09rem .1rem .09rem calc(var(--d,0) * .55rem + .1rem);position:relative}
+.srow[style*="--d:1"],.srow[style*="--d:2"],.srow[style*="--d:3"],.srow[style*="--d:4"]{
+border-left:1px solid var(--line);margin-left:.25rem}
+.sh{display:flex;align-items:center;gap:.4rem;min-width:0}
+.sdot{width:.5rem;height:.5rem;border-radius:50%;flex:none;
+border:1px solid var(--line);background:transparent}
+.s-cap .sdot{background:var(--accent);border-color:var(--accent)}
+.srow.s-cap{background:color-mix(in srgb,var(--accent) 9%,transparent);
+border-radius:5px;padding-top:.1rem;padding-bottom:.1rem}
+.s-bld .sdot{border-color:var(--warn)}
+/* A path segment with no page of its own is scaffolding, not a screen. */
+.s-stub{opacity:.55}
+.s-stub .sdot{border-style:dashed}
+.sn{font:500 .62rem/1.4 var(--mono);color:var(--muted);flex:none}
+.snm{font:400 .7rem/1.4 var(--mono);color:var(--ink);white-space:nowrap;
+overflow:hidden;text-overflow:ellipsis;flex:none;max-width:8rem}
+.sal{font-size:.66rem;color:var(--muted);white-space:nowrap;overflow:hidden;
+text-overflow:ellipsis;flex:1;min-width:0}
+.srow>.cov{margin-left:auto}
+.srow>.snb{margin-left:.15rem}
+.dlink{font-size:.62rem;color:var(--muted);text-decoration:none;flex:none;
+padding:0 .15rem;border-radius:3px}
+.dlink:hover{color:var(--accent);background:var(--raised)}
+.phead .dlink{margin-left:auto;margin-right:.5rem;font-family:var(--mono)}
+.s-pln .snm{opacity:.5}
+.sgrp{margin-top:.45rem;padding-top:.35rem;border-top:1px solid var(--line);
+font:500 .6rem/1.3 var(--mono);letter-spacing:.04em;color:var(--muted)}
+.sm{display:flex;align-items:center;gap:.4rem;padding-left:.9rem;min-width:0}
+/* Four cells, mobile light and dark then desktop light and dark. A screen
+   proved on a laptop only is half filled, and says so without a legend. */
+.cov{display:flex;gap:2px;flex:none}
+.cov i{width:.32rem;height:.32rem;border-radius:1px;display:block;
+border:1px solid var(--line);background:transparent}
+.cov i.on{background:var(--accent);border-color:var(--accent)}
+.srt{font:400 .61rem/1.4 var(--mono);color:var(--muted);white-space:nowrap;
+overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+.srt.gone{color:var(--warn)}
+.ssl{font:400 .6rem/1.4 var(--mono);color:var(--muted);opacity:.75;flex:1;
+min-width:0;overflow:hidden}
+.sbar{width:2.4rem;height:3px;border-radius:2px;background:var(--line);flex:none;overflow:hidden}
+.sbar i{display:block;height:100%;background:var(--accent)}
+.snb{font:400 .61rem/1.4 var(--mono);color:var(--muted);width:2.5ch;text-align:right;flex:none}
+.swarn{color:var(--negative)}
+.sfoot{margin-top:.5rem;padding-top:.45rem;border-top:1px solid var(--line);
+font-size:.61rem;line-height:1.45;color:var(--muted)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;
+padding:.8rem .9rem;overflow:hidden;min-height:0;display:flex;flex-direction:column;
+box-shadow:0 2px 8px rgb(0 0 0 / .5)}
+.panel .lbl{margin-bottom:.55rem}
+.rgrid{display:grid;grid-template-columns:max-content 1fr 2.6ch 2.6ch 2.6ch 2.6ch 2.9ch;
+gap:.3rem .55rem;align-items:center;font-size:.72rem}
+.rgrid .h{font:500 .6rem/1.2 var(--mono);color:var(--muted);text-align:right}
+.rgrid .nm{color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:9em}
+.rgrid .n{font:400 .68rem/1.2 var(--mono);font-variant-numeric:tabular-nums;
+text-align:right;color:var(--muted)}
+.rgrid .n.on{color:var(--ink)}
+.rgrid .nm.full{color:var(--accent)}
+.dotln{width:.5rem;height:.5rem;border-radius:50%;flex:none;margin-top:.28rem}
+.dotln.ok{background:var(--accent)}
+.dotln.wait{background:transparent;border:1px solid var(--warn)}
+.dotln.idle{background:transparent;border:1px solid var(--line)}
+.dotln.bld{background:transparent;border:1px dashed var(--muted)}
+.dotln.bad{background:var(--negative)}
+.dotln.fail{background:var(--negative);box-shadow:0 0 0 2px color-mix(in srgb,var(--negative) 30%,transparent)}
+.rgrid .n.bad{color:var(--negative)}
+.play{margin-top:.7rem;padding-top:.55rem;border-top:1px solid var(--line);
+overflow:hidden;min-height:0;flex:1}
+.play .row{display:flex;gap:.5rem;padding:.22rem 0;align-items:flex-start}
+.play .id{font:500 .62rem/1.5 var(--mono);color:var(--muted);flex:none;width:2.6ch}
+.play .tx{font-size:.7rem;color:var(--ink);opacity:.85;overflow:hidden;
+display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.kv{display:grid;grid-template-columns:max-content 1fr;gap:.15rem .7rem;margin-bottom:.6rem}
+.kv .k{font:500 .62rem/1.6 var(--mono);color:var(--muted);white-space:nowrap}
+.kv .v{font-size:.72rem;color:var(--ink);overflow:hidden;display:-webkit-box;
+-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.feed{overflow:hidden;min-height:0}
+.feed .row{display:flex;gap:.55rem;padding:.3rem 0;border-bottom:1px solid var(--line);align-items:flex-start}
+.feed .row:last-child{border-bottom:none}
+.feed .t{font:400 .62rem/1.6 var(--mono);color:var(--muted);flex:none}
+.feed .tag{font:500 .6rem/1.2 var(--mono);color:var(--muted);background:var(--raised);
+border:1px solid var(--line);border-radius:6px;padding:2px 6px;flex:none;margin-top:.1rem}
+.feed .tx{font-size:.7rem;color:var(--ink);opacity:.85;overflow:hidden;
+display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.gap{margin-top:.7rem}
+.live{display:inline-block;width:.5rem;height:.5rem;border-radius:50%;
+background:var(--line);margin-right:.4rem;vertical-align:baseline}
+.live.ok{background:var(--accent)}.live.warn{background:var(--warn)}
+.spark{display:flex;align-items:flex-end;gap:2px;height:1.5rem;width:15rem;flex:none}
+.spark .bar{flex:1;min-width:2px;background:var(--raised);border-radius:1px}
+.spark .bar.hot{background:var(--accent)}
+.seats{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.5rem}
+.seats .chip{font-size:.62rem}
+.seats .chip b{color:var(--ink);font-weight:500}
+.troot{font:500 .66rem/1.4 var(--mono);color:var(--muted);margin:.45rem 0 .1rem}
+.tree{flex:1;min-height:0;overflow:hidden;column-count:2;column-gap:1.8rem}
+.tnode{break-inside:avoid;display:flex;gap:.5rem;align-items:baseline;
+padding:.16rem 0 .16rem .8rem;position:relative;border-left:1px solid var(--line);min-width:0}
+.tnode::before{content:"";position:absolute;left:0;top:.72rem;width:.5rem;
+height:1px;background:var(--line)}
+.tdot{width:.5rem;height:.5rem;border-radius:50%;flex:none;background:var(--muted);
+position:relative;top:.05rem}
+.tdot.on{background:var(--accent)}
+@media (prefers-reduced-motion:no-preference){
+.tdot.on{animation:pulse 1.6s ease-in-out infinite}}
+.tnode .tds{font-size:.7rem;color:var(--muted);white-space:nowrap;
+overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+.tnode.on .tds{color:var(--ink)}
+.tnode.on .tag{color:var(--ink)}
+.tnode .tdu{font:400 .62rem/1.5 var(--mono);color:var(--muted);flex:none}
+.tnode .tmk{font:400 .6rem/1.4 var(--mono);color:var(--muted);flex:none;
+background:var(--raised);border:1px solid var(--line);border-radius:6px;padding:1px 5px}
+.tkid{margin-left:1.3rem}
+.shots{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:1fr;gap:.5rem;flex:1;min-height:0}
+.shots figure{overflow:hidden;border-radius:6px;border:1px solid var(--line);
+position:relative;min-height:0;cursor:pointer;background:var(--raised)}
+.shots img{width:100%;height:100%;object-fit:cover;display:block}
+.shots figcaption{position:absolute;left:0;right:0;bottom:0;
+font:400 .58rem/1.4 var(--mono);padding:.15rem .35rem;
+background:rgb(11 11 11 / .78);color:var(--muted);
+white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* What width and theme this capture proves, taken from its own filename. */
+.vpb{position:absolute;top:.25rem;right:.25rem;border-radius:4px;
+font:500 .55rem/1.4 var(--mono);padding:.05rem .3rem;
+background:rgb(11 11 11 / .8);color:var(--muted)}
+.empty{color:var(--muted);font-size:.72rem;margin:auto;text-align:center;padding:1rem}
+footer{border-top:1px solid var(--line);padding-top:.45rem;display:flex;gap:2rem;
+font:400 .62rem/1.4 var(--mono);color:var(--muted);white-space:nowrap}
+.mw{flex:1;min-width:0;overflow:hidden}
+.marq{display:flex;width:max-content}
+.marq .mi{padding-right:4rem}
+@media (prefers-reduced-motion:no-preference){
+.marq{animation:marq 45s linear infinite}
+@keyframes marq{to{transform:translateX(-50%)}}}
+.marq.still{animation:none}
+.marq.still .mi+.mi{display:none}
+footer .d{display:inline-block;width:6px;height:6px;border-radius:50%;
+background:var(--accent);margin-right:.4rem;vertical-align:baseline}
+.phead{display:flex;justify-content:space-between;align-items:center;margin-bottom:.55rem}
+.phead .lbl{margin-bottom:0}
+.btn-all{font:500 .66rem/1.2 var(--sans);padding:4px 10px;border-radius:8px;
+background:var(--raised);color:var(--ink);border:1px solid var(--line);cursor:pointer}
+.btn-all:hover{background:#2E2E2E}
+.rb{position:fixed;inset:0;display:none;background:rgb(0 0 0 / .6);z-index:9;
+align-items:center;justify-content:center;padding:2rem}
+.rb.open{display:flex}
+.rb .box{background:var(--surface);border:1px solid var(--line);border-radius:10px;
+box-shadow:0 8px 32px rgb(0 0 0 / .7);max-width:62rem;width:100%;max-height:88vh;
+display:flex;flex-direction:column;overflow:hidden}
+.rb .bh{display:flex;justify-content:space-between;align-items:center;gap:1rem;
+padding:.75rem 1rem;border-bottom:1px solid var(--line)}
+.rb .bh .ti{font:500 .85rem/1.3 var(--sans);color:var(--ink)}
+.rb .bh .lg{font:400 .64rem/1.4 var(--mono);color:var(--muted);
+display:flex;align-items:center;gap:.4rem;flex:none}
+.rb .bh .lg .dotln{margin-top:0}
+.rb .bh .lg .dotln:not(:first-child){margin-left:.7rem}
+.rb .bb{overflow-y:auto;padding:.4rem 1rem 1rem}
+.rb .grp{display:flex;gap:.25rem;flex:none}
+.rb .grp button{font:500 .62rem/1.2 var(--sans);padding:3px 9px;border-radius:7px;
+border:1px solid var(--line);background:var(--raised);color:var(--muted);cursor:pointer}
+.rb .grp button:hover{color:var(--ink)}
+.rb .grp button.on{color:var(--ink);border-color:color-mix(in srgb,var(--accent) 45%,var(--line));
+background:color-mix(in srgb,var(--accent) 12%,var(--raised))}
+.rb .bb-sec{display:none}
+.rb.by-sec .bb-slice{display:none}
+.rb.by-sec .bb-sec{display:block}
+.rb .sec b{font:400 .62rem/1.3 var(--mono);color:var(--muted);font-weight:400}
+.rb .sec b.full{color:var(--accent)}
+.rb .sec{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;
+font:500 .64rem/1.3 var(--mono);letter-spacing:.04em;color:var(--muted);
+margin:.9rem 0 .3rem}
+.rb .row{display:flex;gap:.6rem;padding:.34rem 0;border-bottom:1px solid var(--line);
+align-items:flex-start}
+.rb .row:last-child{border-bottom:none}
+.rb .id{font:500 .64rem/1.6 var(--mono);color:var(--muted);flex:none;min-width:2.8ch}
+.rb .tx{font-size:.73rem;line-height:1.5;color:var(--ink);opacity:.9}
+/* The ruling, beside the line it ruled on. A rubric that shows only what is
+   left tells you nothing about what was refused and why. */
+.rb .why{flex:none;max-width:22rem;font:400 .66rem/1.45 var(--mono);
+color:var(--negative);opacity:.85}
+.lb{position:fixed;inset:0;display:none;background:rgb(0 0 0 / .6);z-index:9;
+align-items:center;justify-content:center;gap:1rem;padding:1.5rem;cursor:pointer}
+.lb.open{display:flex}
+.lb .nav{flex:none;width:2.6rem;height:2.6rem;border-radius:50%;cursor:pointer;
+background:var(--raised);color:var(--ink);border:1px solid var(--line);
+font:400 1.4rem/1 var(--sans);display:flex;align-items:center;justify-content:center}
+.lb .nav:hover{background:#2E2E2E}
+.lb figure{cursor:default}
+.lb figure{max-width:92vw;max-height:92vh;background:var(--surface);
+border:1px solid var(--line);border-radius:10px;overflow:hidden;
+box-shadow:0 8px 32px rgb(0 0 0 / .7);display:flex;flex-direction:column;min-height:0}
+.lb img{max-width:100%;min-height:0;object-fit:contain}
+.lb figcaption{font:400 .68rem/1.5 var(--mono);color:var(--muted);padding:.4rem .7rem}
+@media (max-width:900px),(orientation:portrait){
+body{height:auto;overflow:auto;grid-template-rows:none}
+main,main.smx{grid-template-columns:1fr;grid-template-rows:none}
+main.smx .panel.scr{grid-column:auto;grid-row:auto}
+.panel.rub{grid-row:auto;grid-column:auto}
+.panel.act,.panel.cap{grid-column:auto;grid-row:auto}
+.panel.disp{grid-column:auto;grid-row:auto}
+.tree{column-count:1}
+h1{white-space:normal}
+.graph{flex-wrap:wrap;gap:.5rem}
+.pnode{flex:1 1 30%}
+.wire{display:none}
+.slices{flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<header>
+  <div class="id">
+    <h1 title="A personal self-hosted PWA on an always-on Apple Silicon Mac mini that is the daily health dashboard and coach for one man (38, 183 cm, 89 kg now, 76 kg in 9 months), joining manual health logging, Withings Body Smart sync, Apple Health via an iOS Shortcut, validated blood-test import, an adaptive training coach with guided sessions, a nutrition coach with menus, recipes, macros and a shopping list, Google Calendar planning, and iPhone push plus weekly email reviews. Full spec, verbatim: .forge/GOAL.md">A personal self-hosted PWA on an always-on Ap...</h1>
+    <div class="chips">
+    <span class="chip">pre-greenlight</span>
+    
+    
+    
+    
+    </div>
+    <div class="envs">
+    <a class="env env--down" href="https://lamberts-mac-mini.tailda76d6.ts.net" target="_blank" rel="noreferrer" title="https://lamberts-mac-mini.tailda76d6.ts.net · no answer"><span class="d"></span><span class="el">production</span><span class="eu">lamberts-mac-mini.tailda76d6.ts.net</span></a>
+    
+    </div>
+  </div>
+  <div class="pct">
+    <div class="n">13%</div>
+    <div class="cap">complete, estimated</div>
+    <div class="cap">running 7m · 30.5M tokens</div>
+    
+    <div class="tsplit" title="Measured from 2 seat-named stop(s) of 68: each stretch is charged to the seat that ended it, gaps over 15 minutes dropped.
+whole run · build 0m · verify 0m · other 5m
+today · build 0m · verify 0m · other 5m"><span class="t-b" style="width:0.0%"></span><span class="t-v" style="width:0.0%"></span><span class="t-o" style="width:100.0%"></span></div>
+    <div class="cap" title="Measured from 2 seat-named stop(s) of 68: each stretch is charged to the seat that ended it, gaps over 15 minutes dropped.
+whole run · build 0m · verify 0m · other 5m
+today · build 0m · verify 0m · other 5m">0% verifying · 0% today</div>
+  </div>
+</header>
+
+<section>
+  <div class="lbl">Pipeline</div>
+  <div class="graph">
+  <div class="pnode done"><div class="ph"><span class="pmark">&check;</span><span class="pt">Intake</span></div><div class="pf">deployed and reachable....</div></div><div class="wire w-done"></div>
+  <div class="pnode done"><div class="ph"><span class="pmark">&check;</span><span class="pt">Size</span></div><div class="pf">sized L</div></div><div class="wire w-done"></div>
+  <div class="pnode done"><div class="ph"><span class="pmark">&check;</span><span class="pt">Scout</span></div><div class="pf">1 brief(s) in</div></div><div class="wire w-done"></div>
+  <div class="pnode skipped"><div class="ph"><span class="pmark">&times;</span><span class="pt">Design</span></div><div class="pf">skipped</div></div><div class="wire w-live"></div>
+  <div class="pnode active"><div class="ph"><span class="pmark"></span><span class="pt">Plan</span></div><div class="pf">slices + rubric</div></div><div class="wire "></div>
+  <div class="pnode pending"><div class="ph"><span class="pmark"></span><span class="pt">Gate + arm</span></div><div class="pf">the one stop</div></div><div class="wire "></div>
+  <div class="pnode pending"><div class="ph"><span class="pmark"></span><span class="pt">Build</span></div><div class="pf">slice by slice</div></div><div class="wire "></div>
+  <div class="pnode pending"><div class="ph"><span class="pmark"></span><span class="pt">Verify</span></div><div class="pf">evidence rules</div></div><div class="wire "></div>
+  <div class="pnode pending"><div class="ph"><span class="pmark"></span><span class="pt">Ship</span></div><div class="pf">deploy + report</div></div>
+  </div>
+  
+</section>
+
+<main class="">
+  <div class="panel rub">
+    <div class="phead"><span class="lbl">Rubric</span></div>
+    <p class="empty">The rubric arrives with the plan. Nothing is measured before it exists.</p>
+  </div>
+
+  <div class="panel act">
+    <div class="lbl">Activity</div>
+    
+    <div class="kv">
+    <span class="k">last phase</span><span class="v">3 SCOUT running, 4 DESIGN starting. Phases 0 SETUP, 1 INTAKE and 2 SIZE are done.</span>
+    <span class="k">current slice</span><span class="v">none. Nothing armed. .forge/ARMED absent. The greenlight has not been presented.</span>
+    <span class="k">next action</span><span class="v">run the persona panel, then the designer, then the architect, then present the greenlight.</span>
+    </div>
+    <p class="empty">No evidence recorded yet.</p>
+  </div>
+
+  <div class="panel cap">
+    <div class="lbl">Latest captures</div>
+    <p class="empty">Captures appear as the build starts producing screenshots.</p>
+  </div>
+
+  <div class="panel disp">
+    <div class="phead"><span class="lbl"><span class="live ok"></span>Dispatches · 23 agent(s) · 68 stop(s) · last just now</span><div class="spark"><div class="bar" style="height:14%"></div><div class="bar" style="height:4%"></div><div class="bar" style="height:4%"></div><div class="bar" style="height:4%"></div><div class="bar" style="height:4%"></div><div class="bar" style="height:4%"></div><div class="bar" style="height:4%"></div><div class="bar" style="height:4%"></div><div class="bar" style="height:4%"></div><div class="bar" style="height:14%"></div><div class="bar" style="height:4%"></div><div class="bar" style="height:20%"></div><div class="bar" style="height:14%"></div><div class="bar" style="height:20%"></div><div class="bar" style="height:20%"></div><div class="bar" style="height:30%"></div><div class="bar" style="height:30%"></div><div class="bar" style="height:20%"></div><div class="bar" style="height:40%"></div><div class="bar" style="height:40%"></div><div class="bar" style="height:30%"></div><div class="bar" style="height:40%"></div><div class="bar" style="height:50%"></div><div class="bar" style="height:50%"></div><div class="bar" style="height:50%"></div><div class="bar" style="height:50%"></div><div class="bar" style="height:100%"></div><div class="bar hot" style="height:60%"></div></div></div>
+    <div class="troot">lead · the session</div>
+    <div class="tree">
+    <div class="tnode on" title="running"><span class="tdot on"></span><span class="tag">general-purpose</span><span class="tds">Research Withings API</span><span class="tmk">opus-5</span><span class="tmk">5.3M</span><span class="tdu">running</span></div>
+    <div class="tnode on" title="running"><span class="tdot on"></span><span class="tag">general-purpose</span><span class="tds">Research Google Calendar OAuth</span><span class="tmk">opus-5</span><span class="tmk">2.2M</span><span class="tdu">running</span></div>
+    <div class="tnode on" title="running"><span class="tdot on"></span><span class="tag">general-purpose</span><span class="tds">Research iOS PWA and passkeys</span><span class="tmk">opus-5</span><span class="tmk">1.9M</span><span class="tdu">running</span></div>
+    <div class="tnode on" title="running"><span class="tdot on"></span><span class="tag">general-purpose</span><span class="tds">Research Apple Health Shortcut</span><span class="tmk">opus-5</span><span class="tmk">1.7M</span><span class="tdu">running</span></div><div class="tkid"><div class="tnode on" title="running"><span class="tdot on"></span><span class="tag">general-purpose</span><span class="tds">Research Shortcuts HTTP POST and JSON</span><span class="tmk">opus-5</span><span class="tmk">593k</span><span class="tdu">running</span></div><div class="tkid"><div class="tnode on" title="running"><span class="tdot on"></span><span class="tag">general-purpose</span><span class="tds">Research Shortcuts practical limits</span><span class="tmk">opus-5</span><span class="tmk">147k</span><span class="tdu">running</span></div></div></div><div class="tkid"><div class="tnode on" title="running"><span class="tdot on"></span><span class="tag">general-purpose</span><span class="tds">Research Shortcuts automation reliability</span><span class="tmk">opus-5</span><span class="tmk">726k</span><span class="tdu">running</span></div></div><div class="tkid"><div class="tnode on" title="running"><span class="tdot on"></span><span class="tag">general-purpose</span><span class="tds">Research .shortcut file signing</span><span class="tmk">opus-5</span><span class="tmk">383k</span><span class="tdu">running</span></div></div><div class="tkid"><div class="tnode on" title="running"><span class="tdot on"></span><span class="tag">general-purpose</span><span class="tds">Research HMAC and crypto in Shortcuts</span><span class="tmk">opus-5</span><span class="tmk">195k</span><span class="tdu">running</span></div></div>
+    <div class="tnode on" title="running"><span class="tdot on"></span><span class="tag">general-purpose</span><span class="tds">Research food composition data</span><span class="tmk">opus-5</span><span class="tmk">1.7M</span><span class="tdu">running</span></div>
+    <div class="tnode on" title="running"><span class="tdot on"></span><span class="tag">general-purpose</span><span class="tds">Research exercise media licensing</span><span class="tmk">opus-5</span><span class="tmk">1.1M</span><span class="tdu">running</span></div><div class="tkid"><div class="tnode on" title="running"><span class="tdot on"></span><span class="tag">general-purpose</span><span class="tds">YouTube embedding terms research</span><span class="tmk">opus-5</span><span class="tmk">1.4M</span><span class="tdu">running</span></div></div><div class="tkid"><div class="tnode on" title="running"><span class="tdot on"></span><span class="tag">general-purpose</span><span class="tds">Open licensed exercise media</span><span class="tmk">opus-5</span><span class="tmk">1.2M</span><span class="tdu">running</span></div></div><div class="tkid"><div class="tnode on" title="running"><span class="tdot on"></span><span class="tag">general-purpose</span><span class="tds">Authoritative technique cue sources</span><span class="tmk">opus-5</span><span class="tmk">881k</span><span class="tdu">running</span></div></div><div class="tkid"><div class="tnode on" title="running"><span class="tdot on"></span><span class="tag">general-purpose</span><span class="tds">HR zones and progression rules</span><span class="tmk">opus-5</span><span class="tmk">166k</span><span class="tdu">running</span></div><div class="tkid"><div class="tnode on" title="running"><span class="tdot on"></span><span class="tag">general-purpose</span><span class="tds">HRmax formulas and critiques</span><span class="tmk">opus-5</span><span class="tmk">150k</span><span class="tdu">running</span></div></div></div>
+    <div class="tnode on" title="running"><span class="tdot on"></span><span class="tag">general-purpose</span><span class="tds">Research stack libraries</span><span class="tmk">opus-5</span><span class="tmk">736k</span><span class="tdu">running</span></div><div class="tkid"><div class="tnode on" title="running"><span class="tdot on"></span><span class="tag">general-purpose</span><span class="tds">Research web push, WebAuthn, argon2</span><span class="tmk">opus-5</span><span class="tmk">800k</span><span class="tdu">running</span></div></div><div class="tkid"><div class="tnode on" title="running"><span class="tdot on"></span><span class="tag">general-purpose</span><span class="tds">Research PDF extraction, OCR, scheduling</span><span class="tmk">opus-5</span><span class="tmk">411k</span><span class="tdu">running</span></div></div><div class="tkid"><div class="tnode on" title="running"><span class="tdot on"></span><span class="tag">general-purpose</span><span class="tds">Research ORM and backup encryption</span><span class="tmk">opus-5</span><span class="tmk">200k</span><span class="tdu">running</span></div></div><div class="tkid"><div class="tnode on" title="running"><span class="tdot on"></span><span class="tag">general-purpose</span><span class="tds">Research charts and Next.js PWA</span><span class="tmk">opus-5</span><span class="tmk">30k</span><span class="tdu">running</span></div></div>
+    <div class="tnode" title="ran 22s"><span class="tdot"></span><span class="tag">router</span><span class="tds">Size the forge goal</span><span class="tmk">haiku-4-5</span><span class="tmk">47k</span><span class="tdu">17:39</span></div>
+    <div class="tnode" title="ran 2m 51s"><span class="tdot"></span><span class="tag">scout</span><span class="tds">Scout market and platform</span><span class="tmk">sonnet-5</span><span class="tmk">513k</span><span class="tdu">17:43</span></div>
+    </div>
+    <div class="seats">
+    <span class="chip">general-purpose <b>&times;21</b></span>
+    <span class="chip">router <b>&times;1</b></span>
+    <span class="chip">scout <b>&times;1</b></span>
+    <span class="chip">helper stops <b>&times;66</b></span>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="mw"><div class="marq"><span class="mi"><span class="d"></span>Drawn from .forge/ by scripts/progress.mjs after every dispatch, checkpoint, and evidence line. The state files win over this page.</span><span class="mi"><span class="d"></span>Drawn from .forge/ by scripts/progress.mjs after every dispatch, checkpoint, and evidence line. The state files win over this page.</span></div></div>
+  <div class="mw"><div class="marq" style="animation-duration:38s"><span class="mi">estimate: gate 20 + rubric 80, evidence at half weight, 100 only when every line is verified and the report exists · tokens sum every session and subagent transcript for this folder, cache reads included · rendered 2026-08-21T15:46:05Z · refresh 15s</span><span class="mi">estimate: gate 20 + rubric 80, evidence at half weight, 100 only when every line is verified and the report exists · tokens sum every session and subagent transcript for this folder, cache reads included · rendered 2026-08-21T15:46:05Z · refresh 15s</span></div></div>
+</footer>
+
+
+<div class="lb">
+  <button class="nav prev" aria-label="previous capture">&#8249;</button>
+  <figure><img alt=""><figcaption></figcaption></figure>
+  <button class="nav next" aria-label="next capture">&#8250;</button>
+</div>
+<script>
+var G=[],gi=0
+var lb=document.querySelector('.lb')
+document.querySelectorAll('.marq').forEach(function(m){
+  if(m.scrollWidth/2<=m.parentElement.clientWidth)m.classList.add('still')
+})
+// vf narrows the walk to one viewport, so a reviewer can step through every
+// mobile capture without the desktop ones in between. m, d, a to switch.
+var vf=''
+function pool(){return vf?G.filter(function(x){return x.v===vf}):G}
+function show(i){
+  if(!G.length)return
+  gi=((i%G.length)+G.length)%G.length
+  var P=pool(),at=P.indexOf(G[gi])
+  lb.querySelector('img').src=G[gi].s
+  lb.querySelector('figcaption').textContent=(at<0?gi+1:at+1)+' / '+(at<0?G.length:P.length)
+    +(vf?' · '+(vf==='m'?'mobile':'desktop')+' only':'')
+    +(G[gi].b?' · '+G[gi].b:'')+' · '+G[gi].c
+  lb.classList.add('open')
+}
+function step(d){
+  var P=pool()
+  if(!P.length){show(gi+d);return}
+  var at=P.indexOf(G[gi])
+  show(G.indexOf(at<0?P[d>0?0:P.length-1]:P[(at+d+P.length)%P.length]))
+}
+var rb=document.querySelector('.rb')
+setInterval(function(){if(!document.querySelector('.lb.open,.rb.open'))location.reload()},15000)
+document.addEventListener('click',function(e){
+  if(rb&&e.target.closest('.btn-all')){rb.classList.add('open');return}
+  if(rb&&rb.classList.contains('open')){
+    var g=e.target.closest('.rb .grp button')
+    if(g){rb.classList.toggle('by-sec',g.dataset.g==='sec')
+      rb.querySelectorAll('.grp button').forEach(function(b){b.classList.toggle('on',b===g)})
+      return}
+    if(!e.target.closest('.rb .box'))rb.classList.remove('open')
+    return}
+  var f=e.target.closest('.shots figure')
+  if(f){show(+f.dataset.i);return}
+  if(e.target.closest('.lb .prev')){step(-1);return}
+  if(e.target.closest('.lb .next')){step(1);return}
+  if(e.target.closest('.lb figure'))return
+  lb.classList.remove('open')
+})
+document.addEventListener('keydown',function(e){
+  if(rb&&rb.classList.contains('open')){
+    if(e.key==='Escape')rb.classList.remove('open')
+    return}
+  if(!lb.classList.contains('open'))return
+  if(e.key==='Escape')lb.classList.remove('open')
+  else if(e.key==='ArrowLeft')step(-1)
+  else if(e.key==='ArrowRight')step(1)
+  else if(e.key==='m'||e.key==='d'){vf=vf===e.key?'':e.key;show(gi)}
+  else if(e.key==='a'){vf='';show(gi)}
+})
+</script>
+</body></html>
