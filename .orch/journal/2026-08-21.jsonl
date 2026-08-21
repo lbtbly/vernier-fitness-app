@@ -1073,3 +1073,8 @@
 {"ts":"2026-08-21T16:35:44Z","sid":"main","kind":"subagent_fail","key":""}
 {"ts":"2026-08-21T16:36:16Z","sid":"main","kind":"subagent_fail","key":""}
 {"ts":"2026-08-21T16:39:18Z","sid":"main","kind":"subagent_fail","key":"general-purpose"}
+{"ts":"2026-08-21T16:39:21Z","sid":"main","kind":"user_correction","key":"contradiction","length":"long"}
+{"ts":"2026-08-21T16:42:30Z","sid":"main","kind":"subagent_fail","key":""}
+{"ts":"2026-08-21T16:42:48Z","sid":"main","kind":"subagent_fail","key":""}
+{"ts":"2026-08-21T16:47:28Z","sid":"main","kind":"subagent_fail","key":""}
+{"ts":"2026-08-21T16:56:03Z","sid":"main","kind":"subagent_fail","key":""}
