@@ -14,16 +14,16 @@ viewports means 393x852, 768 and 1280 CSS pixels wide, captured.
 
 ## Function
 
-- [ ] **F1.** Both containers reach running from a cold start on this Apple
+- [x] **F1.** Both containers reach running from a cold start on this Apple
   Silicon host and report healthy within 120 seconds, and both images are
   `linux/arm64`. Evidence: `docker compose up -d --build`, then
   `docker compose ps` and `docker image inspect --format '{{.Os}}/{{.Architecture}}'`
   for each image.
-- [ ] **F2.** The liveness endpoint returns HTTP 200 to an unauthenticated
+- [x] **F2.** The liveness endpoint returns HTTP 200 to an unauthenticated
   caller and its body contains no integration name, no record count, no date and
   no third-party version string. Evidence: the full response body, plus a grep of
   it against the list of integration names.
-- [ ] **F3.** The host listener answers on 127.0.0.1 and on no other address: a
+- [x] **F3.** The host listener answers on 127.0.0.1 and on no other address: a
   request to this machine's LAN address on the same port fails to connect within
   3 seconds. Evidence: `lsof -nP -iTCP -sTCP:LISTEN` filtered to the port, plus
   the failed `curl --max-time 3` against the LAN address.
@@ -32,14 +32,14 @@ viewports means 393x852, 768 and 1280 CSS pixels wide, captured.
   tailnet, through exactly one HTTPS proxy to 127.0.0.1 and zero Funnel entries.
   Evidence: the serve configuration listing and the response from the second
   device.
-- [ ] **F5.** The start, stop and status scripts each exit 0 twice in a row
+- [x] **F5.** The start, stop and status scripts each exit 0 twice in a row
   against an already-running stack and leave the container ids unchanged.
   Evidence: two consecutive runs of each with `docker compose ps -q` before and
   after.
-- [ ] **F6.** Schema migrations apply automatically on first boot and apply zero
+- [x] **F6.** Schema migrations apply automatically on first boot and apply zero
   migrations on the second boot, printing the count both times. Evidence: both
   boot logs.
-- [ ] **F7.** The application origin and the passkey relying-party identifier are
+- [x] **F7.** The application origin and the passkey relying-party identifier are
   read from configuration: changing both in the environment file and restarting
   changes the origin the sign-in page reports, with no source file modified.
   Evidence: `git status` clean, the two rendered pages, and the two configuration
@@ -571,7 +571,7 @@ viewports means 393x852, 768 and 1280 CSS pixels wide, captured.
 Every line here is measured against the approved screens in `.forge/screens/`,
 their interaction detail in `.forge/wireframes/`, and the standards skill.
 
-- [ ] **C1.** The web app manifest is served with the manifest content type and a
+- [x] **C1.** The web app manifest is served with the manifest content type and a
   standalone display mode, and a 180x180 opaque touch icon is linked in the
   document head. Neither icon is a framework default. Evidence: the manifest
   response headers and body, the icon at its byte size, and its pixel dimensions.
@@ -703,13 +703,13 @@ above.
 - [ ] **D1.** No placeholder copy ships. Searching the rendered output of all
   thirteen screens for lorem text, "TBD", "Coming soon", "Lorem", "example.com" and
   duplicated boilerplate returns zero matches. Evidence: the search output.
-- [ ] **D2.** The favicon and touch icon are the product's own artwork, not a
+- [x] **D2.** The favicon and touch icon are the product's own artwork, not a
   framework default. Evidence: the icon bytes and their checksums against the
   framework defaults, which differ.
 - [ ] **D3.** Every empty state and every error state on all thirteen screens is
   styled to the definitions on screen 00 and names what to do next in one sentence.
   Evidence: one capture per state per screen.
-- [ ] **D4.** Zero `TODO`, `FIXME`, `XXX` or `HACK` markers exist in shipped
+- [x] **D4.** Zero `TODO`, `FIXME`, `XXX` or `HACK` markers exist in shipped
   source. Evidence: the repository search output.
 - [ ] **D5.** Every screen is verified at 393, 768 and 1280 CSS pixels wide with no
   horizontal scroll and no overlapping element. Evidence: thirty-nine captures.
