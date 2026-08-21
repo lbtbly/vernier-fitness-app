@@ -15,6 +15,13 @@
       "when": 1787351213952,
       "tag": "0001_diagnostics",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1787352978967,
+      "tag": "0002_gate",
+      "breakpoints": true
     }
   ]
 }
