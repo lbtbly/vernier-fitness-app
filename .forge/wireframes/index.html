@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wireframes — Forge</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html[data-theme=dark]{color-scheme:dark;--bg:#0A0A0B;--surface:#141416;--surface-2:#1C1C1F;--line:#2A2A2E;--line-2:#3A3A40;--text:#F5F5F7;--text-2:#A1A1A8;--text-3:#7C7C85;--accent:#5AA9FF;--warn:#E9B44C}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);padding:32px 24px 64px;-webkit-font-smoothing:antialiased;line-height:1.45}
+.wrap{max-width:760px;margin:0 auto}
+h1{font-size:26px;letter-spacing:-.02em;margin-bottom:6px}
+.sub{font-size:14px;color:var(--text-2);margin-bottom:8px}
+.note{font-size:13px;color:var(--text-3);line-height:1.6;background:var(--surface);border:1px solid var(--line);border-left:2px solid var(--warn);border-radius:0 12px 12px 0;padding:12px 14px;margin:18px 0 24px}
+a.item{display:flex;gap:14px;align-items:baseline;text-decoration:none;color:inherit;padding:14px 16px;border:1px solid var(--line);background:var(--surface);border-radius:14px;margin-bottom:8px}
+a.item:hover{border-color:var(--line-2)}
+a.item:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+a.item .n{font-variant-numeric:tabular-nums;color:var(--text-3);font-size:13px;font-weight:600;width:22px;flex:none}
+a.item .t{font-weight:600;flex:none;width:150px}
+a.item .d{font-size:13px;color:var(--text-2);flex:1;min-width:0}
+.lbl{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);font-weight:600;margin:26px 0 10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Wireframes</h1>
+  <p class="sub">Single-owner health PWA. 393 x 852, dark first, light mode on every page via the toggle in the top bar.</p>
+  <div class="note">The claude-design MCP server was unavailable, so these standalone HTML files are the approved artefact. There are no PNG exports and no share link. Full spec in <b>.forge/DESIGN.md</b>.</div>
+
+  <div class="lbl">Reference</div>
+  <a class="item" href="00-patterns.html"><span class="n">00</span><span class="t">Patterns</span><span class="d">The five states, provenance, the confirm diff</span></a>
+
+  <div class="lbl">Screens</div>
+  <a class="item" href="01-sign-in.html"><span class="n">01</span><span class="t">Sign in</span><span class="d">Passkey, password fallback, first run</span></a>
+  <a class="item" href="02-today.html"><span class="n">02</span><span class="t">Today</span><span class="d">The home. Plan and trend above the fold</span></a>
+  <a class="item" href="03-quick-log.html"><span class="n">03</span><span class="t">Quick log</span><span class="d">Fast capture sheet, one handed, offline</span></a>
+  <a class="item" href="04-health.html"><span class="n">04</span><span class="t">Health</span><span class="d">Every trend, every source two taps away</span></a>
+  <a class="item" href="05-labs-review.html"><span class="n">05</span><span class="t">Labs review</span><span class="d">Validate a panel row by row before it is stored</span></a>
+  <a class="item" href="06-training-week.html"><span class="n">06</span><span class="t">Training week</span><span class="d">Sessions proposed with the cause that placed them</span></a>
+  <a class="item" href="07-session-player.html"><span class="n">07</span><span class="t">Session player</span><span class="d">Guided session, large controls, no interstitials</span></a>
+  <a class="item" href="08-nutrition-week.html"><span class="n">08</span><span class="t">Nutrition week</span><span class="d">Meals, macros with fibre, HelloFresh, Uber Eats</span></a>
+  <a class="item" href="09-meal-estimate.html"><span class="n">09</span><span class="t">Meal estimate</span><span class="d">Consent, ranges, an origin that survives the save</span></a>
+  <a class="item" href="10-shopping-list.html"><span class="n">10</span><span class="t">Shopping list</span><span class="d">By aisle, with deductions you can see</span></a>
+  <a class="item" href="11-weekly-review.html"><span class="n">11</span><span class="t">Weekly review</span><span class="d">Sunday 20:45, and the four-second calendar diff</span></a>
+  <a class="item" href="12-settings-integrations.html"><span class="n">12</span><span class="t">Settings</span><span class="d">Integration status, AI consent, data, backups</span></a>
+</div>
+</body>
+</html>

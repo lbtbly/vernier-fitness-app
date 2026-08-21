@@ -38,9 +38,12 @@ it says so in place rather than guessing.
    is columnar: pull `Value`, `Unit`, `Start Date`, `End Date`, `Source`, `Type` off the
    sample list as six parallel arrays, with no `Repeat with Each` loop at all.
 3. **Daily automation is possible but not dependable.** A `Time of Day` Personal Automation
-   can run with `Ask Before Running` off and no notification. But **HealthKit encrypts its
-   store when the device is locked**, Apple's own words, so a 06:00 run against a locked
-   phone reads nothing. Design for "usually automatic, always visible when it isn't."
+   runs with `Ask Before Running` off and no notification. But **HealthKit encrypts its store
+   when the device is locked**, Apple's own words, so an overnight run against a locked phone
+   reads nothing. Exactly this setup, on iOS 27 with "Allow Running When Locked" on, is on
+   record failing every night. Shortcuts also **throttle severely when the screen is off and
+   the phone is not on cable power**. Design for "usually automatic, always visible when it
+   isn't", and tell the owner about the cable.
 4. **HMAC is achievable and still the wrong choice.** It cannot be built from arithmetic:
    Shortcuts has no XOR and no byte handling. But a real HMAC-SHA256 does run headlessly
    through an undocumented `data:text/html` trick, and one free App Store app offers it
@@ -603,17 +606,72 @@ in iOS 16.3 as "the ability to disable a shortcut from being run while the devic
 **Do not confuse the two.** Allowing the shortcut to run while locked does not decrypt the
 HealthKit store. It removes one gate; the HealthKit gate stays shut.
 
-Other caveats, all [COMMUNITY] and consistent across sources: automations occasionally do not
-fire at all, Low Power Mode makes this worse, and a shortcut launched from an automation runs
-under a background execution budget and can be killed mid-run.
+**This exact scenario is already on record, on iOS 27, and it failed.** A developer's issue
+tracker carries a report of a Personal Automation, Time of Day 11:30 PM nightly, running a
+Health export, with **"Allow Running When Locked" enabled** and all permissions granted. It
+failed every night. The maintainer's reply: "health data cannot be accessed on iOS while the
+phone is locked, **this is a hard limit set by Apple**." [COMMUNITY]
+<https://github.com/CodyBontecou/health-md/issues/87> The reporter's own conclusion is the one
+to internalise: an overnight schedule means the phone is almost always locked when it fires,
+so this limit specifically destroys the most natural scheduling choice for a fitness app.
 
-**One caveat is specific enough to change the build.** An automation whose actions are written
-**inline** is capped at roughly **4 minutes** before the system kills it. An automation whose
-single action is **`Run Shortcut`** pointing at a saved shortcut is not bound by that cap.
-[COMMUNITY] So the automation must be one action long. Step 27 in §8 does this, and the reason
-is here rather than there.
+**The rule, stated cleanly.** Sindre Sorhus, asked directly whether non-UI actions still run
+from an automation while locked, answered **"Yes"**, and that actions requiring UI cannot open
+when locked with "no possible workaround". [COMMUNITY]
+<https://github.com/sindresorhus/Actions/issues/203> So: **headless actions survive lock,
+anything needing UI does not, and HealthKit reads are blocked on top of that by encryption.**
 
-Never invoke this from Siri. A Siri-invoked shortcut gets about **15 seconds**. [COMMUNITY]
+**Correction to a common claim.** "Low Power Mode suppresses automations" is **not supported by
+evidence.** A targeted search turned up no credible report of LPM-as-a-state blocking an
+automation from firing. The reports that look like it are about Low Power Mode *as a trigger*
+breaking, which is a different thing. Do not put it in the docs.
+
+**The real degradation is throttling, not a clean kill,** and it has a mitigation:
+
+> "Shortcut execution becomes slow if the screen is off for more than **10 seconds** and the
+> device is **not connected to power**. 'Wait 1' can take up to 5 minutes, for example."
+>
+> "Shortcuts do not slow down when the device is locked **if it's charging over cable**. It
+> looks like they slow down if charging wirelessly even when Always On Display is on."
+
+[COMMUNITY] <https://talk.automators.fm/t/19013> (gluebyte, consolidated October 2025)
+
+So a throttled shortcut does not die, it grinds, and then trips a timeout. **Cable power is the
+one reliable mitigation, and wireless charging does not count.** That is a concrete instruction
+for the guide: the most dependable nightly run is one scheduled while the iPhone is on a cable.
+
+Error strings for a killed run, worth recognising in a support doc: **"automation failed: took
+too long to run"** [COMMUNITY] <https://discussions.apple.com/thread/254249430> and
+`WFBackgroundShortcutRunnerErrorDomain error 1`.
+
+**After a reboot, automations are deferred.** iOS posts "Automations will run once your iPhone
+is unlocked". [COMMUNITY] <https://discussions.apple.com/thread/255473986> Deferral until first
+unlock is Apple's stated design, and reporters describe a further multi-minute warm-up after
+that.
+
+**One caveat is specific enough to change the build.** An automation with **inline** actions
+"runs only up to **4 minutes** on iOS/iPadOS if you manually add actions (including *Run
+Shortcut*)", but "runs much longer if you **select an existing shortcut** to run". [COMMUNITY]
+<https://talk.automators.fm/t/19013> So the automation must be one action long and must point
+at a saved shortcut. Step 27 in §8 does this; the reason is here.
+
+Do not conflate that 4 minutes with the other ceilings in circulation. They measure different
+things: **~20 to 30 s** per third-party app intent, **15 s** for a Siri-invoked shortcut,
+**10 min** for a HomeKit hub, which is a different execution context entirely. The widely-cited
+30 s and 180 s figures trace to the intent timeout and to
+`beginBackgroundTaskWithExpirationHandler`, and **neither is a Shortcuts automation watchdog.**
+[COMMUNITY] Never invoke this shortcut from Siri.
+
+**A silent-data-loss trap worth designing against.** In one fitness app, per-item HealthKit
+errors did not set the top-level error, so a fully-failed locked run **still advanced the sync
+checkpoint**, permanently skipping any activity that was only ever seen during a locked fire.
+[COMMUNITY] <https://github.com/holmes1371/FitnessLoadTracker/issues/35> The windowed,
+dedup-keyed design in §7 has no checkpoint to corrupt, which is a second reason to keep it.
+**Never build a "last synced at" cursor that a failed run can move.**
+
+**On authority.** Across ten Apple Developer Forums threads on automation reliability, several
+with thousands of views, there is **not one Apple engineer reply**. Everything in this
+subsection except the HealthKit encryption quote is third-party. Weigh it accordingly.
 
 ### 3.5 The design that follows
 
@@ -631,6 +689,11 @@ Do not promise hands-off. Build this instead:
    The app must notice for him.
 5. **An Apple Watch Workout automation, End**, as a bonus trigger. Right after a workout the
    phone is usually unlocked and in hand, and it is the moment the data matters most.
+6. **Tell the owner about the cable.** If he wants a genuinely dependable overnight run, the
+   phone has to be on a cable, not a wireless pad. That is one sentence in the guide and it is
+   the difference between a run that grinds and one that completes.
+7. **No sync cursor.** Every run re-reads a fixed 48-hour window and the server dedups. There
+   is deliberately no "last synced" pointer for a failed locked run to advance past.
 
 ---
 
@@ -1456,7 +1519,12 @@ app**, and Apple's Share shortcuts page describes that flow. Clear them before t
    `last_successful_ingest` staleness badge as the only signal. Test with a deliberate 401.
 9. The `Get Contents of URL` timeout value. Known only to be non-configurable. Measure it
    against a deliberately slow test endpoint and size the batch under it.
-10. Whether the version numbers behind the crash and loop benchmarks still hold. They are
+10. **Does `Get Contents of URL` complete from a locked-phone automation?** Genuinely
+    contested: one forum anecdote says no, while the "headless actions run when locked" rule
+    and the entire webhook ecosystem say yes. Ten minutes of on-device testing settles it, and
+    the answer decides whether a locked run can at least POST an empty result to prove
+    liveness.
+11. Whether the version numbers behind the crash and loop benchmarks still hold. They are
     iOS 16 and 17 era, and nothing published benchmarks `Repeat with Each` on iOS 26. The
     columnar design sidesteps this, which is another reason to keep it.
 
@@ -1531,6 +1599,18 @@ Community, named:
     <https://talk.automators.fm/t/request-triggered-by-shortcuts-instant-error-but-runs-without-response/18420>
   - `Get Contents of URL` timeout is not extendable:
     <https://talk.automators.fm/t/get-contents-from-url/17822>
+  - gluebyte's consolidated table of Shortcuts execution limits, Oct 2025, the source for the
+    4-minute inline cap and the screen-off throttling: <https://talk.automators.fm/t/19013>
+- The locked-device reports, which corroborate Apple's HealthKit encryption note on exactly
+  this use case:
+  - health-md issue 87, a nightly Time of Day Health export failing on iOS 27 with "Allow
+    Running When Locked" enabled: <https://github.com/CodyBontecou/health-md/issues/87>
+  - Actions issue 203, Sindre Sorhus on headless versus UI actions while locked:
+    <https://github.com/sindresorhus/Actions/issues/203>
+  - FitnessLoadTracker issue 35, a failed locked run silently advancing a sync checkpoint:
+    <https://github.com/holmes1371/FitnessLoadTracker/issues/35>
+  - Apple Discussions 254249430 ("took too long to run") and 255473986 ("Automations will run
+    once your iPhone is unlocked")
 - melon-lang, a language interpreter built on `data:text/html` plus `Get Contents of Webpage`,
   last push 2026-04: <https://github.com/melon-lang/melon-lang>
 - Actions by Sindre Sorhus, the free third-party action pack:

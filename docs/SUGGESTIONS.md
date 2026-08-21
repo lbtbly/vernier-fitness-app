@@ -25,3 +25,5 @@ Triaged by /doc-health. Checked = handled.
 - [ ] 2026-08-21 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `.forge/wireframes/09-meal-estimate.html`
 - [ ] 2026-08-21 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `.forge/wireframes/10-shopping-list.html`
 - [ ] 2026-08-21 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `.forge/wireframes/11-weekly-review.html`
+- [ ] 2026-08-21 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `.forge/wireframes/12-settings-integrations.html`
+- [ ] 2026-08-21 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `.forge/DESIGN.md`

@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>12 Settings and integrations — Forge wireframe</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,sans-serif;
+--s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:20px;--s6:24px;--s7:32px;--s8:40px;--s9:48px;
+--r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:22px;--r-full:999px;--touch:44px;
+--dur-fast:120ms;--dur:200ms;--dur-slow:900ms;--ease:cubic-bezier(.2,.6,.2,1)}
+html[data-theme=dark]{color-scheme:dark;--bg:#0A0A0B;--surface:#141416;--surface-2:#1C1C1F;--surface-3:#232327;--line:#2A2A2E;--line-2:#3A3A40;--text:#F5F5F7;--text-2:#A1A1A8;--text-3:#7C7C85;--accent:#5AA9FF;--accent-ink:#08080A;--accent-soft:rgba(90,169,255,.14);--good:#4FD08A;--good-soft:rgba(79,208,138,.13);--warn:#E9B44C;--warn-soft:rgba(233,180,76,.13);--alert:#F07A6A;--alert-soft:rgba(240,122,106,.13);--chart-daily:#6E6E78;--chart-avg:#E8E8EC;--chart-goal:#7C8BA1;--chart-band:rgba(124,139,161,.10);--chart-grid:#232327;--focus:#8FC4FF;--page:#0E0E10;--page-ink:#8B8B93}
+html[data-theme=light]{color-scheme:light;--bg:#F2F2F5;--surface:#FFFFFF;--surface-2:#EDEDF1;--surface-3:#E3E3E9;--line:#DCDCE2;--line-2:#C6C6CE;--text:#101013;--text-2:#4A4A52;--text-3:#6B6B73;--accent:#0A6CD0;--accent-ink:#FFFFFF;--accent-soft:rgba(10,108,208,.10);--good:#157F4E;--good-soft:rgba(21,127,78,.10);--warn:#8A5A00;--warn-soft:rgba(138,90,0,.10);--alert:#B3261E;--alert-soft:rgba(179,38,30,.10);--chart-daily:#9A9AA2;--chart-avg:#101013;--chart-goal:#5B6B80;--chart-band:rgba(91,107,128,.10);--chart-grid:#E3E3E9;--focus:#0A4C93;--page:#E7E7EC;--page-ink:#55555C}
+body{font-family:var(--font);background:var(--page);color:var(--page-ink);padding:24px;-webkit-font-smoothing:antialiased}
+.bar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;max-width:1720px;margin:0 auto 20px}
+.bar h1{font-size:17px;color:var(--text);letter-spacing:-.01em}
+.bar p{font-size:13px;margin-top:4px;max-width:70ch;line-height:1.5}
+.themeswitch{min-height:34px;padding:0 14px;border-radius:var(--r-full);border:1px solid var(--line-2);background:transparent;color:var(--text);font:inherit;font-size:13px;cursor:pointer;flex:none}
+.frames{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start;max-width:1720px;margin:0 auto}
+figure.frame{margin:0;width:393px}
+figure.frame figcaption{font-size:12px;line-height:1.5;margin-bottom:8px;min-height:52px}
+figure.frame figcaption b{color:var(--text);font-weight:600}
+.phone{width:393px;height:852px;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);display:flex;flex-direction:column;border:1px solid var(--line-2);position:relative;font-size:15px;line-height:1.35}
+.status{height:54px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 6px;font-size:15px;font-weight:600;letter-spacing:-.01em}
+.status svg{width:68px;height:14px;color:var(--text)}
+.screen{flex:1;overflow-y:auto;padding:0 16px 20px}
+.title{padding:4px 0 12px}
+.title h2{font-size:30px;letter-spacing:-.02em;font-weight:700;line-height:1.1}
+.lbl{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);font-weight:600}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px;margin-bottom:12px}
+.card.flat{background:transparent}
+.num{font-variant-numeric:tabular-nums}
+.big{font-size:22px;font-variant-numeric:tabular-nums;font-weight:600;letter-spacing:-.02em}
+.sub{font-size:13px;color:var(--text-2);line-height:1.45}
+.mut{color:var(--text-3)}
+.good{color:var(--good)}.warn{color:var(--warn)}.alert{color:var(--alert)}
+.row{display:flex;gap:12px;align-items:center;min-height:48px;padding:9px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.grow{flex:1;min-width:0}
+.between{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.stack{display:flex;flex-direction:column;gap:2px}
+.chip{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:var(--r-full);border:1px solid var(--line-2);font-size:12px;color:var(--text-2);white-space:nowrap}
+.chip.g{color:var(--good);border-color:var(--good);background:var(--good-soft)}
+.chip.w{color:var(--warn);border-color:var(--warn);background:var(--warn-soft)}
+.chip.a{color:var(--alert);border-color:var(--alert);background:var(--alert-soft)}
+.chip.d{border-style:dotted}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 16px;border-radius:var(--r-md);border:1px solid var(--line-2);background:var(--surface-2);color:var(--text);font:inherit;font-size:16px;font-weight:500;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn.quiet{background:transparent;border-color:transparent;color:var(--accent)}
+.btn.danger{border-color:var(--alert);color:var(--alert)}
+.btn.block{width:100%}
+.btn svg{width:20px;height:20px}
+.btn.icon{width:44px;height:44px;min-height:44px;padding:0;flex:none}
+.tog{width:52px;height:32px;border-radius:16px;background:var(--surface-3);border:1px solid var(--line-2);position:relative;flex:none;cursor:pointer}
+.tog span{position:absolute;left:3px;top:2px;width:26px;height:26px;border-radius:50%;background:var(--text-3);transition:all var(--dur) var(--ease)}
+.tog[aria-checked=true]{background:var(--accent);border-color:var(--accent)}
+.tog[aria-checked=true] span{left:auto;right:3px;top:3px;background:var(--accent-ink)}
+.banner{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border-radius:var(--r-md);font-size:13px;line-height:1.45;margin-bottom:12px;border:1px solid var(--line);background:var(--surface-2);color:var(--text)}
+.banner svg{width:18px;height:18px;flex:none;margin-top:1px;color:var(--text-2)}
+.banner.w{background:var(--warn-soft);border-color:var(--warn)}.banner.w svg{color:var(--warn)}
+.tabbar{height:83px;flex:none;padding:8px 6px 26px;display:flex;background:var(--surface);border-top:1px solid var(--line)}
+.tabbar a{flex:1;min-width:44px;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--text-3);text-decoration:none;font-size:10px}
+.tabbar a[aria-current=page]{color:var(--accent)}
+.tabbar svg{width:24px;height:24px}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--text-2);word-break:break-all}
+.note{font-size:12px;color:var(--text-3);line-height:1.5}
+a:focus-visible,button:focus-visible,input:focus-visible,[tabindex]:focus-visible,[role=switch]:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="ok" viewBox="0 0 20 20"><path d="M4 10.5 8 14.5 16 5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="no" viewBox="0 0 20 20"><path d="M5.5 5.5 14.5 14.5M14.5 5.5 5.5 14.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="chev" viewBox="0 0 20 20"><path d="M7.5 4.5 13 10l-5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="info" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 9v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="6.2" r=".9" fill="currentColor"/></symbol>
+<symbol id="warn" viewBox="0 0 20 20"><path d="M10 3 18.2 17H1.8z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 8v3.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="10" cy="14.3" r=".9" fill="currentColor"/></symbol>
+<symbol id="sync" viewBox="0 0 20 20"><path d="M16.6 10a6.6 6.6 0 1 1-2-4.75" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M16.9 2.9v3.5h-3.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="shield" viewBox="0 0 20 20"><path d="M10 2.6 16.4 5v5.4c0 3.6-2.6 6-6.4 7-3.8-1-6.4-3.4-6.4-7V5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M7 10.2 9.2 12.4l4-4.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="down" viewBox="0 0 20 20"><path d="M10 3.4v10M6 9.6 10 13.6l4-4M4 16.6h12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="trash" viewBox="0 0 20 20"><path d="M4.4 6h11.2M8 6V4.4h4V6M6 6l.7 10.4h6.6L14 6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="spark" viewBox="0 0 20 20"><path d="M10 2.5 11.6 7 16 8.6 11.6 10.2 10 14.7 8.4 10.2 4 8.6 8.4 7z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></symbol>
+<symbol id="cal" viewBox="0 0 24 24"><rect x="3.4" y="4.6" width="17.2" height="16" rx="3.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.4 9.6h17.2M8 3.2v3M16 3.2v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="wave" viewBox="0 0 24 24"><path d="M2.5 12.5h4l2-5.5 3.6 11 2.4-7 1.5 1.5h5.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="dumb" viewBox="0 0 24 24"><path d="M4 9v6M7 7.2v9.6M17 7.2v9.6M20 9v6M7 12h10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+<symbol id="fork" viewBox="0 0 24 24"><path d="M7 3v7M5 3v4.2a2 2 0 0 0 4 0V3M7 10v11M16.6 3c-1.8 2-1.8 6.4 0 8.4V21" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.1" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.6v3M12 18.4v3M21.4 12h-3M5.6 12h-3M18.6 5.4l-2.1 2.1M7.5 16.5l-2.1 2.1M18.6 18.6l-2.1-2.1M7.5 7.5 5.4 5.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="statr" viewBox="0 0 68 14"><path d="M1 10h2.4v3H1zM6 8h2.4v5H6zM11 5.6h2.4v7.4H11zM16 3.2h2.4v9.8H16z" fill="currentColor"/><path d="M27.4 5.4a8.6 8.6 0 0 1 10.4 0M29.8 8.2a5.2 5.2 0 0 1 5.6 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M32.6 10.9l1.6 1.7 1.6-1.7a2.4 2.4 0 0 0-3.2 0z" fill="currentColor"/><rect x="48" y="3.4" width="17" height="9" rx="2.6" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".55"/><rect x="49.6" y="5" width="11.4" height="5.8" rx="1.4" fill="currentColor"/><path d="M66.6 6.6v2.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" opacity=".55"/></symbol>
+</svg>
+
+<div class="bar">
+  <div>
+    <h1>12 Settings and integrations</h1>
+    <p>The operator's screen. Five states per integration, connected, expiring, revoked, stale or demo, each with its last successful sync and a test button. No credential value is ever rendered, and the screen says so where a value would otherwise sit.</p>
+  </div>
+  <button class="themeswitch" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark';this.textContent=document.documentElement.dataset.theme==='dark'?'Light mode':'Dark mode'">Light mode</button>
+</div>
+
+<div class="frames">
+
+<!-- FRAME 1 -->
+<figure class="frame">
+<figcaption><b>Integration status.</b> One row per integration, status word plus the last time it actually worked. Two are unhappy right now and both say what to press.</figcaption>
+<div class="phone">
+  <div class="status"><span>07:31</span><svg><use href="#statr"/></svg></div>
+  <div class="screen">
+    <div class="title"><div class="lbl">lamberts-mac-mini.tailda76d6.ts.net</div><h2>Settings</h2></div>
+
+    <div class="banner w">
+      <svg><use href="#warn"/></svg>
+      <div><b>2 integrations need you.</b> Apple Health has not sent a batch in 3 days, and the Google token expires in 6 days.</div>
+    </div>
+
+    <div class="lbl" style="margin:16px 0 8px">Integrations</div>
+
+    <div class="card">
+      <div class="between" style="align-items:flex-start">
+        <div class="stack grow"><span style="font-weight:600">Withings Body Smart</span><span class="note num">Last sync today at 06:54 &middot; 42 readings stored</span></div>
+        <span class="chip g">Connected</span>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px"><button class="btn grow"><svg><use href="#sync"/></svg>Test</button><button class="btn grow">Disconnect</button></div>
+    </div>
+
+    <div class="card" style="border-color:var(--warn)">
+      <div class="between" style="align-items:flex-start">
+        <div class="stack grow"><span style="font-weight:600">Apple Health shortcut</span><span class="note num">Last batch 18 Aug at 07:12 &middot; 3 days ago</span></div>
+        <span class="chip w">Stale</span>
+      </div>
+      <div class="sub" style="margin-top:8px">The endpoint is up and the token is valid. The shortcut has not run. Open it on the iPhone, or check the automation you set for 07:00.</div>
+      <div style="display:flex;gap:8px;margin-top:12px"><button class="btn grow">Open the guide</button><button class="btn grow">Rotate token</button></div>
+      <div class="note" style="margin-top:10px">The ingest token is a separate credential from your sign-in. It was shown once on 4 July and cannot be shown again. Rotating it invalidates the shortcut until you paste the new one.</div>
+    </div>
+
+    <div class="card" style="border-color:var(--warn)">
+      <div class="between" style="align-items:flex-start">
+        <div class="stack grow"><span style="font-weight:600">Google Calendar</span><span class="note num">Last sync today at 06:30 &middot; refresh failed once on 19 Aug</span></div>
+        <span class="chip w">Expiring</span>
+      </div>
+      <div class="sub" style="margin-top:8px">Access ends in 6 days. Reconnecting keeps the same scopes: read two calendars, write to Health (app) only.</div>
+      <div style="display:flex;gap:8px;margin-top:12px"><button class="btn primary grow">Reconnect</button><button class="btn grow"><svg><use href="#sync"/></svg>Test</button></div>
+    </div>
+
+    <div class="card">
+      <div class="between" style="align-items:flex-start">
+        <div class="stack grow"><span style="font-weight:600">Anthropic</span><span class="note num">Last call today at 06:12 &middot; claude-opus-5</span></div>
+        <span class="chip g">Connected</span>
+      </div>
+      <div class="row" style="margin-top:6px"><span class="grow sub">This month</span><span class="num">4.18 of 15.00 EUR</span></div>
+      <div class="row"><span class="grow sub">Calls this month</span><span class="num">62</span></div>
+      <div class="note" style="margin-top:8px">The key lives in the server environment. It is never sent to this browser, never logged and never returned by any endpoint.</div>
+    </div>
+
+    <div class="card">
+      <div class="between" style="align-items:flex-start">
+        <div class="stack grow"><span style="font-weight:600">Push notifications</span><span class="note num">iPhone, installed to the Home Screen 12 Jul</span></div>
+        <span class="chip g">Connected</span>
+      </div>
+      <div class="row" style="margin-top:6px"><span class="grow sub">Quiet hours</span><span class="num">22:00 to 07:00</span></div>
+      <button class="btn block" style="margin-top:12px">Send a test notification</button>
+    </div>
+
+    <div class="card">
+      <div class="between" style="align-items:flex-start">
+        <div class="stack grow"><span style="font-weight:600">Email reviews</span><span class="note">No SMTP host set. Sunday summaries wait in the local preview.</span></div>
+        <span class="chip d">Demo</span>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px"><button class="btn grow">Set it up</button><button class="btn grow">Read the preview</button></div>
+    </div>
+
+    <div class="card flat" style="border-style:dashed">
+      <div class="between" style="margin-bottom:6px"><span class="lbl">What this screen never shows</span><svg style="width:18px;height:18px;color:var(--good)"><use href="#shield"/></svg></div>
+      <div class="sub">Any token, key or password value. Status is a different permission level from the credential behind it, and this screen holds the line.</div>
+    </div>
+  </div>
+  <nav class="tabbar">
+    <a href="#"><svg><use href="#cal"/></svg>Today</a>
+    <a href="#"><svg><use href="#wave"/></svg>Health</a>
+    <a href="#"><svg><use href="#dumb"/></svg>Train</a>
+    <a href="#"><svg><use href="#fork"/></svg>Eat</a>
+    <a href="#" aria-current="page"><svg><use href="#gear"/></svg>Settings</a>
+  </nav>
+</div>
+</figure>
+
+<!-- FRAME 2 -->
+<figure class="frame">
+<figcaption><b>AI consent, three separate switches.</b> Each one names what it sends. Turning one off does not degrade the others, and each disclosure is the same text shown at the moment of use.</figcaption>
+<div class="phone">
+  <div class="status"><span>07:34</span><svg><use href="#statr"/></svg></div>
+  <div class="screen">
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0 12px">
+      <button class="btn icon" aria-label="Back" style="transform:scaleX(-1)"><svg><use href="#chev"/></svg></button>
+      <div class="grow"><div style="font-size:20px;font-weight:700;letter-spacing:-.01em">What goes to Claude</div><div class="note">Three uses, three switches</div></div>
+    </div>
+
+    <div class="card">
+      <div class="between">
+        <div class="stack grow"><span style="font-weight:600">Photo meal estimation</span><span class="note">One photo at 1092 px, EXIF removed, plus three words of context.</span></div>
+        <div class="tog" role="switch" aria-checked="true" tabindex="0" aria-label="Photo meal estimation"><span></span></div>
+      </div>
+      <div class="row" style="margin-top:8px"><span class="grow sub mut">Never sent</span><span class="sub">weight, labs, name, location</span></div>
+      <div class="row"><span class="grow sub mut">Used</span><span class="num">14 times this month</span></div>
+    </div>
+
+    <div class="card">
+      <div class="between">
+        <div class="stack grow"><span style="font-weight:600">Menu generation</span><span class="note">Your targets, exclusions, cuisines and cooking time. No health history.</span></div>
+        <div class="tog" role="switch" aria-checked="true" tabindex="0" aria-label="Menu generation"><span></span></div>
+      </div>
+      <div class="row" style="margin-top:8px"><span class="grow sub mut">Never sent</span><span class="sub">weight, waist, lab values, calendar titles</span></div>
+      <div class="row"><span class="grow sub mut">Used</span><span class="num">4 times this month</span></div>
+    </div>
+
+    <div class="card">
+      <div class="between">
+        <div class="stack grow"><span style="font-weight:600">Health explanations</span><span class="note">One analyte name at a time. Never your result, never your history.</span></div>
+        <div class="tog" role="switch" aria-checked="false" tabindex="0" aria-label="Health explanations"><span></span></div>
+      </div>
+      <div class="row" style="margin-top:8px"><span class="grow sub mut">Off since</span><span class="num">14 Jul 2026</span></div>
+      <div class="note" style="margin-top:8px">While this is off, analyte pages show the reference interval printed by your laboratory and a short local description. Nothing is missing from your trends.</div>
+    </div>
+
+    <div class="card">
+      <div class="lbl" style="margin-bottom:10px">Never sent, under any switch</div>
+      <div class="row"><span class="grow mut">A whole lab PDF</span><span class="sub">extracted locally</span></div>
+      <div class="row"><span class="grow mut">Your full record or raw history</span><span class="sub">stays here</span></div>
+      <div class="row"><span class="grow mut">Calendar event titles</span><span class="sub">time ranges only</span></div>
+      <div class="row"><span class="grow mut">Any token, key or password</span><span class="sub">never</span></div>
+      <div class="row"><span class="grow mut">A photo you did not choose</span><span class="sub">never</span></div>
+    </div>
+
+    <div class="card flat" style="border-style:dashed">
+      <div class="between" style="margin-bottom:6px"><span class="lbl">Not a medical service</span></div>
+      <div class="sub">This app is not a doctor, a medical device or a diagnostic tool. Explanations are general and educational, they cite the laboratory's own reference interval, and they always point you to a professional for anything about your own health.</div>
+    </div>
+  </div>
+  <nav class="tabbar">
+    <a href="#"><svg><use href="#cal"/></svg>Today</a>
+    <a href="#"><svg><use href="#wave"/></svg>Health</a>
+    <a href="#"><svg><use href="#dumb"/></svg>Train</a>
+    <a href="#"><svg><use href="#fork"/></svg>Eat</a>
+    <a href="#" aria-current="page"><svg><use href="#gear"/></svg>Settings</a>
+  </nav>
+</div>
+</figure>
+
+<!-- FRAME 3 -->
+<figure class="frame">
+<figcaption><b>Your data and the machine.</b> Export, delete, backup and the two facts an operator checks at 23:00: what the listener binds to, and whether last night's archive verified.</figcaption>
+<div class="phone">
+  <div class="status"><span>07:36</span><svg><use href="#statr"/></svg></div>
+  <div class="screen">
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0 12px">
+      <button class="btn icon" aria-label="Back" style="transform:scaleX(-1)"><svg><use href="#chev"/></svg></button>
+      <div class="grow"><div style="font-size:20px;font-weight:700;letter-spacing:-.01em">Data and backups</div></div>
+    </div>
+
+    <div class="card">
+      <div class="lbl" style="margin-bottom:10px">Last backup</div>
+      <div class="between" style="align-items:flex-end">
+        <div class="stack"><span class="big">Today, 03:00</span><span class="note num">42.6 MB, encrypted</span></div>
+        <span class="chip g">Integrity checked</span>
+      </div>
+      <div class="row" style="margin-top:10px"><span class="grow sub mut">Destination</span><span class="num" style="font-size:13px">iCloud Drive folder</span></div>
+      <div class="row"><span class="grow sub mut">Retention</span><span class="num">30 archives</span></div>
+      <div class="row"><span class="grow sub mut">Restore tested</span><span class="num">19 Aug 2026</span></div>
+      <div style="display:flex;gap:8px;margin-top:12px"><button class="btn grow">Back up now</button><button class="btn grow">Restore guide</button></div>
+    </div>
+
+    <div class="card">
+      <div class="lbl" style="margin-bottom:8px">Export everything</div>
+      <div class="row"><div class="stack grow"><span>JSON</span><span class="note">Every value with its source, confidence and correction history.</span></div><button class="btn icon" aria-label="Export JSON"><svg><use href="#down"/></svg></button></div>
+      <div class="row"><div class="stack grow"><span>CSV</span><span class="note">One file per measurement type, for a spreadsheet.</span></div><button class="btn icon" aria-label="Export CSV"><svg><use href="#down"/></svg></button></div>
+      <div class="row"><div class="stack grow"><span>PDF summary</span><span class="note">A readable report of trends and the latest panel.</span></div><button class="btn icon" aria-label="Export PDF"><svg><use href="#down"/></svg></button></div>
+    </div>
+
+    <div class="card">
+      <div class="lbl" style="margin-bottom:10px">This machine</div>
+      <div class="row"><span class="grow sub mut">Listening on</span><span class="mono">127.0.0.1:3000</span></div>
+      <div class="row"><span class="grow sub mut">Reachable at</span><span class="mono">tailda76d6.ts.net</span></div>
+      <div class="row"><span class="grow sub mut">Passkey RP ID</span><span class="mono">lamberts-mac-mini...</span></div>
+      <div class="row"><span class="grow sub mut">Health check</span><span class="chip g">Green, 07:36</span></div>
+      <div class="note" style="margin-top:10px">No LAN port is open and Funnel is off. Tailscale is the network barrier, never the authentication.</div>
+    </div>
+
+    <div class="card" style="border-color:var(--alert)">
+      <div class="lbl" style="margin-bottom:8px">Delete everything</div>
+      <div class="sub">Removes every measurement, meal, session, lab value and file from the Mac mini. Backups are not touched, so a restore can still bring it back.</div>
+      <button class="btn danger block" style="margin-top:12px"><svg><use href="#trash"/></svg>Delete all data</button>
+      <div class="note" style="margin-top:8px">Asks you to type the word delete, then does it. No undo, no grace period, no soft delete.</div>
+    </div>
+
+    <div class="card flat" style="border-style:dashed">
+      <div class="lbl" style="margin-bottom:6px">Blood pressure</div>
+      <div class="sub">There is no setting here because there is nothing to configure. The schema has no column for it, no import reads it, and any PDF row containing it is refused at extraction.</div>
+    </div>
+  </div>
+  <nav class="tabbar">
+    <a href="#"><svg><use href="#cal"/></svg>Today</a>
+    <a href="#"><svg><use href="#wave"/></svg>Health</a>
+    <a href="#"><svg><use href="#dumb"/></svg>Train</a>
+    <a href="#"><svg><use href="#fork"/></svg>Eat</a>
+    <a href="#" aria-current="page"><svg><use href="#gear"/></svg>Settings</a>
+  </nav>
+</div>
+</figure>
+
+</div>
+</body>
+</html>
