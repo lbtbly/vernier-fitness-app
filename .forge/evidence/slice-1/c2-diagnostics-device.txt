@@ -1,0 +1,74 @@
+C2, the durable record of how the app was launched. 2026-08-21T22:41Z
+
+GET /api/diagnostics/device is the form .forge/PREFLIGHT.md already specified
+and it was a 404. It is unauthenticated because the four preflight lines curl it
+with no session. The values come from the browser, posted once per launch to
+POST /api/diagnostics/launch, and are persisted through Drizzle in the
+device_observation table, migration drizzle/0001_diagnostics.sql.
+
+== The four preflight lines, run as written ==
+standaloneSeen       exit 1, false, waiting on the owner
+wakeLockAvailable    exit 1, false, waiting on the owner
+passkeyRegistered    exit 1, false, waiting on the owner
+pushSubscription     exit 1, false, waiting on the owner
+
+== The whole body, headers included ==
+$ curl -si https://lamberts-mac-mini.tailda76d6.ts.net/api/diagnostics/device
+HTTP/2 200 
+cache-control: no-store
+content-type: application/json
+date: Fri, 21 Aug 2026 22:41:00 GMT
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch
+x-robots-tag: noindex
+
+{"standaloneSeen":false,"wakeLockAvailable":false,"passkeyRegistered":false,"pushSubscription":false,"firstObservedAt":{"standaloneSeen":null,"wakeLockAvailable":null,"passkeyRegistered":null,"pushSubscription":null},"lastReportedAt":{"standaloneSeen":"2026-08-21T22:39:13.656Z","wakeLockAvailable":null,"passkeyRegistered":null,"pushSubscription":null},"tailscaleProxySeen":true,"recentPeers":[{"address":"100.65.127.62","viaTailscale":true,"lastSeenAt":"2026-08-21T22:40:28.463Z"}]}
+
+== F2's rule applied to it: nothing in the body that is not a boolean, a
+timestamp or a tailnet address ==
+$ curl -s .../api/diagnostics/device | grep -ciE "withings|apple ?health|google|anthropic|hellofresh|uber|postgres|user-agent|Mozilla|@gmail|tailscale-user|MASTER_KEY|password|token"
+0
+
+== The write path, exercised end to end and then reset ==
+A curl is not a Home Screen launch, so the true it wrote was deleted again.
+Recorded here in full because the alternative is testimony:
+
+$ curl -X POST -d {"standalone":true,"wakeLock":true} .../api/diagnostics/launch  -> 204
+  standaloneSeen true, firstObservedAt 2026-08-21T22:34:25.073Z
+  wakeLockAvailable true, firstObservedAt 2026-08-21T22:34:25.083Z
+$ curl -X POST -d {"standalone":false,"wakeLock":false} ...                       -> 204
+  standaloneSeen still true, firstObservedAt unchanged, lastReportedAt advanced
+  to 22:34:34.897Z. True is sticky: a later browser tab does not un-see a
+  standalone launch, and the two timestamps show when it was seen and when the
+  reading was last refreshed.
+$ curl -X POST -d {"standalone":"yes","wakeLock":true} ...                        -> 400
+$ psql -c "delete from device_observation where signal in (...)"                 -> DELETE 2
+
+== A real browser launch afterwards, which is the honest state now ==
+$ ORIGIN=https://lamberts-mac-mini.tailda76d6.ts.net node scripts/pwa-check.mjs register
+{
+  "scope": "https://lamberts-mac-mini.tailda76d6.ts.net/",
+  "active": "activated",
+  "scriptURL": "https://lamberts-mac-mini.tailda76d6.ts.net/sw.js",
+  "controller": "https://lamberts-mac-mini.tailda76d6.ts.net/sw.js",
+  "cached": [
+    "vernier-shell-v2"
+  ],
+  "shellEntries": [
+    "/favicon.ico",
+    "/icons/apple-touch-icon-180.png",
+    "/icons/icon-192.png",
+    "/icons/vernier-mark.svg",
+    "/manifest.webmanifest",
+    "/offline"
+  ]
+}
+
+$ curl -s .../api/diagnostics/device
+{"standaloneSeen":false,"wakeLockAvailable":false,"passkeyRegistered":false,"pushSubscription":false,"firstObservedAt":{"standaloneSeen":null,"wakeLockAvailable":null,"passkeyRegistered":null,"pushSubscription":null},"lastReportedAt":{"standaloneSeen":"2026-08-21T22:41:03.277Z","wakeLockAvailable":null,"passkeyRegistered":null,"pushSubscription":null},"tailscaleProxySeen":true,"recentPeers":[{"address":"100.65.127.62","viaTailscale":true,"lastSeenAt":"2026-08-21T22:41:03.182Z"}]}
+
+Headless Chrome on this Mac is not a Home Screen launch, so standaloneSeen is
+false and lastReportedAt.standaloneSeen carries the time it said so. Wake Lock is
+only believed from a launch that was standalone, so a desktop tab cannot flip it:
+the preflight line asks about the installed app on the phone. passkeyRegistered
+and pushSubscription have no source until slices 2 and 12 and read false because
+nothing has been observed, which is the truth.

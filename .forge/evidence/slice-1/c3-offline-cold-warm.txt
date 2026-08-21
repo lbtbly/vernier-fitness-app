@@ -5,3 +5,41 @@ page target AND on every service_worker target, because Network.emulateNetworkCo
 is per target.
 
 $ ORIGIN=https://lamberts-mac-mini.tailda76d6.ts.net node scripts/pwa-check.mjs offline
+run: cold, /offline never opened
+worker scope: https://lamberts-mac-mini.tailda76d6.ts.net/
+worker script: https://lamberts-mac-mini.tailda76d6.ts.net/sw.js, state activated
+precached: /favicon.ico /icons/apple-touch-icon-180.png /icons/icon-192.png /icons/vernier-mark.svg /manifest.webmanifest /offline
+network: disabled on the page and on 3 worker target(s)
+offline, route opened while online /train -> "Train"
+offline, unvisited route -> "This phone cannot reach the Mac mini"
+offline copy: OFFLINE This phone cannot reach the Mac mini The app shell is stored on this device, so it opened. Everything else waits for lamberts-mac-mini.tailda76d6.ts.net. Either this device has left the tailnet, or the Mac mini is asleep or stopped. WHAT WORKS OFFLINE The shell, the five tabs and this screen. Nothing has been lost and nothing needs redoing. Try again Today Health Train Eat Settings
+offline action: ["Try again"]
+offline scripts requested: []
+offline capture: .forge/evidence/slice-1/captures/offline-cold.png
+
+$ ORIGIN=https://lamberts-mac-mini.tailda76d6.ts.net node scripts/pwa-check.mjs offline warm
+run: warm, /offline opened while online
+worker scope: https://lamberts-mac-mini.tailda76d6.ts.net/
+worker script: https://lamberts-mac-mini.tailda76d6.ts.net/sw.js, state activated
+precached: /favicon.ico /icons/apple-touch-icon-180.png /icons/icon-192.png /icons/vernier-mark.svg /manifest.webmanifest /offline
+network: disabled on the page and on 3 worker target(s)
+offline, route opened while online /train -> "Train"
+offline, unvisited route -> "This phone cannot reach the Mac mini"
+offline copy: OFFLINE This phone cannot reach the Mac mini The app shell is stored on this device, so it opened. Everything else waits for lamberts-mac-mini.tailda76d6.ts.net. Either this device has left the tailnet, or the Mac mini is asleep or stopped. WHAT WORKS OFFLINE The shell, the five tabs and this screen. Nothing has been lost and nothing needs redoing. Try again Today Health Train Eat Settings
+offline action: ["Try again"]
+offline scripts requested: []
+offline capture: .forge/evidence/slice-1/captures/offline-warm.png
+
+== The verifier's own reproduction, rerun unchanged ==
+The script that produced the defect: .forge/evidence/slice-1/verify/offline2.mjs,
+navigating to /settings/backup, a route never visited, with the network down.
+
+$ node .forge/evidence/slice-1/verify/offline2.mjs
+--- COLD (offline page never visited) ---
+{"title":"Offline · Vernier","h1":"This phone cannot reach the Mac mini","text":"OFFLINE\nThis phone cannot reach the Mac mini\nThe app shell is stored on this device, so it opened. Everything else waits for lamberts-mac-mini.tailda76d6.ts.net. Either this device has left the tailnet, or the Mac mini is asleep or stopped.\nWHAT WORKS OFFLINE\n\nThe shell, the five tabs and this screen. Nothing has been lost and nothing needs redoing.\n\nTry again\nToday\nHealth\nTrain\nEat\nSettings"}
+failed requests: []
+
+$ node .forge/evidence/slice-1/verify/offline2.mjs warm
+--- WARM (offline page visited while online) ---
+{"title":"Offline · Vernier","h1":"This phone cannot reach the Mac mini","text":"OFFLINE\nThis phone cannot reach the Mac mini\nThe app shell is stored on this device, so it opened. Everything else waits for lamberts-mac-mini.tailda76d6.ts.net. Either this device has left the tailnet, or the Mac mini is asleep or stopped.\nWHAT WORKS OFFLINE\n\nThe shell, the five tabs and this screen. Nothing has been lost and nothing needs redoing.\n\nTry again\nToday\nHealth\nTrain\nEat\nSettings"}
+failed requests: []

@@ -1,0 +1,42 @@
+The gate after the three defect fixes. 2026-08-21T22:41Z
+
+$ npm run typecheck
+
+> vernier@0.1.0 typecheck
+> tsc --noEmit
+
+exit 0
+
+$ FORGE_CHECKS_FULL=1 scripts/checks.sh
+exit 0
+
+$ docker compose build app
+#20 unpacking to docker.io/library/vernier-app:local done
+#20 DONE 0.0s
+
+#21 resolving provenance for metadata file
+#21 DONE 0.0s
+ Image vernier-app:local Built 
+
+$ docker compose ps
+NAME            IMAGE                                                                     COMMAND                  SERVICE   CREATED          STATUS                    PORTS
+vernier-app-1   sha256:f9551160f342c647ff30bd01f82e00fc3402c7feeb20f5ec8d9739f768f77b93   "docker-entrypoint.s…"   app       4 minutes ago    Up 4 minutes (healthy)    127.0.0.1:3000->3000/tcp
+vernier-db-1    postgres:18-alpine                                                        "docker-entrypoint.s…"   db        38 minutes ago   Up 38 minutes (healthy)   5432/tcp
+
+$ docker image inspect --format "{{.Os}}/{{.Architecture}}" vernier-app:local postgres:18-alpine
+linux/arm64
+linux/arm64
+
+$ docker compose logs app | grep migrations
+app-1  | [vernier] migrations: 0 applied, 2 total, in 20 ms
+
+$ curl -s http://127.0.0.1:3000/healthz    (F2 unchanged)
+{"status":"ok"}
+
+$ lsof -nP -iTCP:3000 -sTCP:LISTEN        (F3 unchanged)
+COMMAND    PID          USER   FD   TYPE            DEVICE SIZE/OFF NODE NAME
+com.docke 1387 lambertbouley  101u  IPv4 0x2f144966a946fb6      0t0  TCP 127.0.0.1:3000 (LISTEN)
+
+The boot immediately after this build applied the new migration and printed:
+  app-1  | [vernier] migrations: 1 applied, 2 total, in 30 ms
+The boot above is the next one, which applies 0. F6 still holds with three tables.

@@ -1,0 +1,81 @@
+F4 and R1, what Tailscale Serve actually forwards, and what the app records.
+Probe run on this machine, 2026-08-22, measured rather than assumed.
+
+== The probe ==
+A header-dumping server on 127.0.0.1:3999, a second serve proxy in front of it
+on port 8443 so the live 443 proxy was never touched, one request through the
+HTTPS name, then the proxy removed again.
+
+$ tailscale serve --bg --https=8443 http://127.0.0.1:3999
+$ curl -s -o /dev/null -w "%{http_code}" https://lamberts-mac-mini.tailda76d6.ts.net:8443/probe-through-serve
+200
+
+What arrived at the probe, verbatim, with the three identity values redacted
+because they are the owner ("no user agent string, no identifier"). The header
+NAMES are the finding; the values are not recorded anywhere, by the probe or by
+the app:
+
+  --- GET /probe-through-serve from socket 127.0.0.1
+  Host: lamberts-mac-mini.tailda76d6.ts.net:8443
+  User-Agent: curl/8.7.1
+  Accept: */*
+  Tailscale-Headers-Info: https://tailscale.com/s/serve-headers
+  Tailscale-User-Login: <redacted, an email address>
+  Tailscale-User-Name: <redacted, a display name>
+  Tailscale-User-Profile-Pic: <redacted, a URL>
+  X-Forwarded-For: 100.65.127.62
+  X-Forwarded-Host: lamberts-mac-mini.tailda76d6.ts.net:8443
+  X-Forwarded-Proto: https
+  Accept-Encoding: gzip
+
+The same probe called directly on 127.0.0.1:3999 received Host, User-Agent and
+Accept and nothing else. So the marker of the proxy hop is Tailscale-Headers-Info,
+and the peer address is the first entry of X-Forwarded-For. The three
+Tailscale-User-* headers are identity: the app never reads them, never stores
+them and never authorises on them. The BRIEF is explicit that Tailscale is the
+network barrier and never the authentication.
+
+$ tailscale serve --https=8443 off
+
+== The serve configuration afterwards: one HTTPS proxy, zero Funnel entries ==
+$ tailscale serve status --json
+{
+  "TCP": {
+    "443": {
+      "HTTPS": true
+    }
+  },
+  "Web": {
+    "lamberts-mac-mini.tailda76d6.ts.net:443": {
+      "Handlers": {
+        "/": {
+          "Proxy": "http://127.0.0.1:3000"
+        }
+      }
+    }
+  }
+}
+
+== What the app records now ==
+$ curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:3000/     (no proxy in front)
+200
+$ curl -s -o /dev/null -w "%{http_code}" https://lamberts-mac-mini.tailda76d6.ts.net/   (through the proxy)
+200
+
+$ curl -s https://lamberts-mac-mini.tailda76d6.ts.net/api/diagnostics/device
+{"standaloneSeen":false,"wakeLockAvailable":false,"passkeyRegistered":false,"pushSubscription":false,"firstObservedAt":{"standaloneSeen":null,"wakeLockAvailable":null,"passkeyRegistered":null,"pushSubscription":null},"lastReportedAt":{"standaloneSeen":"2026-08-21T22:39:13.656Z","wakeLockAvailable":null,"passkeyRegistered":null,"pushSubscription":null},"tailscaleProxySeen":true,"recentPeers":[{"address":"100.65.127.62","viaTailscale":true,"lastSeenAt":"2026-08-21T22:40:27.322Z"}]}
+
+The loopback request stored nothing: it carries no forwarded peer, only the
+container bridge gateway, which is not a visitor. The proxied request is the
+single entry in recentPeers, and 100.65.127.62 is this Mac mini itself on the
+tailnet, which is where the request came from.
+
+$ tailscale status
+100.65.127.62  lamberts-mac-mini     <owner>         macOS  -                                                               
+100.121.138.9  iphone181             <owner>         iOS    -                                                               
+100.72.168.17  lamberts-macbook-air  <owner>         macOS  active; direct 192.168.1.26:41641, tx 21550105064 rx 276652064  
+
+The iPhone at 100.121.138.9 has not appeared in recentPeers yet. Ports 22, 5900,
+3283, 3031, 88 and 8080 are closed on both peers, so no agent on this machine can
+originate a request from a second device. That entry appears the moment the owner
+opens https://lamberts-mac-mini.tailda76d6.ts.net on the iPhone.
