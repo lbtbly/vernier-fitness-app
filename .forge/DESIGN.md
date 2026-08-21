@@ -1,6 +1,23 @@
 # Design
 
-Single-owner self-hosted health PWA. iPhone first, 393 x 852, dark first.
+**Vernier.** Single-owner self-hosted health PWA. iPhone first, 393 x 852, dark first.
+
+## Name and mark
+
+The product is called Vernier. The wordmark sets in the token type stack, seven
+caps, no descenders and no awkward pair, so it holds at any size and takes wide
+tracking in small caps for the Sunday email header.
+
+The favicon and touch icon do NOT draw a caliper. A literal vernier offset is a
+sub-gradation and a sub-gradation is the first thing a 16 px grid destroys. Draw
+the idea instead: two horizontal rules stacked with a generous half-step offset,
+three ticks on the upper rule and two on the lower, one tick inked solid where
+the two align. Two weights, five strokes, no hairlines. The fallback, if that
+fails to read at 16 px, is a heavy V with a single horizontal rule struck through
+the vertex. Either way it is the product's own artwork, never a framework
+default, which rubric line D2 checks by checksum.
+
+
 Direction taken from the brief's taste references and executed, not explored:
 Apple Health and Apple Fitness settle it, and a single-user product with no
 acquisition surface has nothing for a design tournament to optimise.

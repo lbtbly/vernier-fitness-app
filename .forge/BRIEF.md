@@ -1,5 +1,7 @@
 # Brief
 
+Name: **Vernier**. Chosen 2026-08-21 from 30 candidates, 9 shortlisted, each collision-checked against the app stores and against French, then ranked by three independent judges. A vernier scale reads finer than the instrument it sits on: the instrument does not improve, the reading does. That is the product's whole claim, a 7-day average pulled out of a scale that moves with hydration, and a vernier assists a judgement without ever issuing one, which is the proposes-never-imposes rule in one word. Home Screen label `Vernier`, seven letters, no descenders, no truncation. French /vɛʁ.nje/, English VER-nee-ay; the split does not matter because there is one user and he is French. Nothing in health, fitness, wellness or nutrition uses the name on either store. Vernier Science Education owns the search results, which costs a private app nothing.
+
 Goal: A personal self-hosted PWA on an always-on Apple Silicon Mac mini that is the daily health dashboard and coach for one man (38, 183 cm, 89 kg now, 76 kg in 9 months), joining manual health logging, Withings Body Smart sync, Apple Health via an iOS Shortcut, validated blood-test import, an adaptive training coach with guided sessions, a nutrition coach with menus, recipes, macros and a shopping list, Google Calendar planning, and iPhone push plus weekly email reviews. Full spec, verbatim: .forge/GOAL.md
 
 Size: L. Eleven vertical workstreams with five separate external integrations, each carrying its own auth, data flow and failure modes.

@@ -1,9 +1,17 @@
 # Resume
 
-Last phase: 6 GREENLIGHT, presented and waiting. Phases 0 through 5 are done.
+Name: Vernier. Chosen 2026-08-21 by the naming workflow, recorded in BRIEF.md with its reasoning and in DESIGN.md with its mark. Every later phase uses it: manifest, Home Screen label, push titles, the Sunday email, the docs, and WEBAUTHN_RP_NAME.
+
+Owner decisions, taken 2026-08-21, binding:
+- R5 is PARKED by the owner's instruction. The run never reboots this Mac mini on its own. R5 stays in the rubric, unchecked, with "parked, awaiting the owner's chosen moment" as its reason. Parking is not softening: the line and its threshold are untouched.
+- Scope is FULL. All fourteen slices, run to completion across as many sessions as it takes. Nothing dropped.
+
+Last phase: 7 ARM, done. The user approved in plan mode and pasted the goal line on 2026-08-21. .forge/ARMED exists and the Stop gate is live. Phases 0 through 6 are done.
 Size: L. Eleven vertical workstreams with five separate external integrations, each carrying its own auth, data flow and failure modes.
-Current slice: none. Nothing armed. `.forge/ARMED` absent. The gate is open and only the user closes it.
-Next action: wait at the gate. On approval, leave plan mode, create `.forge/ARMED`, then dispatch the builder for slice 1, the walking skeleton and its deploy. On rejection, rework and re-present. Never approve on the run's own behalf, and never treat a `/goal` paste as approval.
+Current slice: 1, the walking skeleton and the live URL. Closes F1-F7, C1-C3, R1.
+Next action: builder dispatched for slice 1. On green, commit, then verify.
+
+Outstanding on the owner, not blocking slice 1: re-download the environment file from SETUP.html so BACKUP_DIR is quoted. An unquoted path with spaces breaks any shell that sources the file. It bites at slice 13, backup, not before.
 
 State on disk:
 - `.forge/GOAL.md`, the verbatim spec.

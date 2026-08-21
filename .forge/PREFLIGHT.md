@@ -61,7 +61,7 @@ for the tailnet in the admin console. This is a per-tailnet setting, it is off b
 default, and its state on this tailnet is unknown. Certificates are cached after
 the first issuance, so this check costs one issuance and no more.
 
-- [ ] run:/Applications/Tailscale.app/Contents/MacOS/Tailscale cert --cert-file=- --key-file=/dev/null lamberts-mac-mini.tailda76d6.ts.net >/dev/null 2>&1 | tailscale cert succeeds | admin console, DNS, HTTPS Certificates, Enable
+- [ ] run:bash -c 'd=$(mktemp -d); /Applications/Tailscale.app/Contents/MacOS/Tailscale cert --cert-file "$d/c" --key-file "$d/k" lamberts-mac-mini.tailda76d6.ts.net >/dev/null 2>&1; r=$?; rm -rf "$d"; exit $r' | tailscale cert succeeds | admin console, DNS, HTTPS Certificates, Enable
 - [ ] run:/Applications/Tailscale.app/Contents/MacOS/Tailscale serve status >/dev/null 2>&1 | Serve subcommand runs | update Tailscale to 1.60 or newer
 
 ## Before anything writes to disk: the archive destination
@@ -109,7 +109,7 @@ with no code change and no warning. Do not add test users instead.
 **Mail**, before slice 12, and optional. Without it the weekly review renders in a
 local preview and the live-send rubric line parks.
 
-- [ ] env:SMTP_URL | Mail transport, this Mac | any SMTP account, or leave unset and keep preview-only
+- [ ] env:MAIL_HOST | Mail transport, this Mac | any SMTP account, or leave unset and keep preview-only
 
 ## The iPhone, before install, push and offline storage
 

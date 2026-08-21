@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Setup checklist</title>
+<title>Vernier setup</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -133,7 +133,7 @@ footer{color:var(--text-3);font-size:12.5px;padding:26px 0 0;border-top:1px soli
 
 <div class="wrap">
 <header>
-  <h1>Setup checklist</h1>
+  <h1>Vernier<span style="color:var(--text-3);font-weight:400"> setup</span></h1>
   <p class="lede">Nine things only you can do, in the order that unblocks the most. Work down the page, tick as you go. Nothing is sent anywhere: this file runs entirely in your browser and your answers stay in this browser.</p>
   <p class="meta">Mac mini <code>lamberts-mac-mini</code> &middot; tailnet <code>tailda76d6.ts.net</code> &middot; app URL <code>https://lamberts-mac-mini.tailda76d6.ts.net</code></p>
 </header>
@@ -399,6 +399,9 @@ footer{color:var(--text-3);font-size:12.5px;padding:26px 0 0;border-top:1px soli
   var TICKS = ['httpsOn','phoneOn','backupOn','withingsOn','googleOn','anthropicOn','mailOn','decisionsOn','cleanupOn'];
 
   function set(v){ return (v && String(v).trim().length) ? String(v).trim() : ''; }
+  // Values are quoted in the environment file: a bare space breaks `. ./file`
+  // in any POSIX shell, and both Compose and dotenv strip the quotes back off.
+  function q(v){ return '"' + String(set(v)).replace(/(["\\$`])/g, '\\$1') + '"'; }
   function yn(v){ return v ? 'done' : 'NOT DONE'; }
   function has(v){ return set(v) ? 'set' : 'not set'; }
 
@@ -441,7 +444,8 @@ footer{color:var(--text-3);font-size:12.5px;padding:26px 0 0;border-top:1px soli
     L.push('');
     L.push('APP_URL=https://lamberts-mac-mini.tailda76d6.ts.net');
     L.push('WEBAUTHN_RP_ID=tailda76d6.ts.net');
-    L.push('WEBAUTHN_RP_NAME=Health');
+    L.push('WEBAUTHN_RP_NAME=Vernier');
+    L.push('APP_NAME=Vernier');
     L.push('TZ=Europe/Paris');
     L.push('');
     L.push('# GENERATED, run: node scripts/gen-env.mjs');
@@ -453,28 +457,28 @@ footer{color:var(--text-3);font-size:12.5px;padding:26px 0 0;border-top:1px soli
     L.push('# GENERATED, run: node scripts/gen-vapid.mjs');
     L.push('VAPID_PUBLIC_KEY=');
     L.push('VAPID_PRIVATE_KEY=');
-    L.push('VAPID_SUBJECT=mailto:' + (set(state.mailto) || 'lambert.bouley@gmail.com'));
+    L.push('VAPID_SUBJECT=' + q('mailto:' + (set(state.mailto) || 'lambert.bouley@gmail.com')));
     L.push('');
-    L.push('BACKUP_DIR=' + set(state.backupdir));
+    L.push('BACKUP_DIR=' + q(state.backupdir));
     L.push('BACKUP_RETENTION_DAYS=30');
     L.push('');
-    L.push('WITHINGS_CLIENT_ID=' + set(state.wid));
-    L.push('WITHINGS_CLIENT_SECRET=' + set(state.wsec));
+    L.push('WITHINGS_CLIENT_ID=' + q(state.wid));
+    L.push('WITHINGS_CLIENT_SECRET=' + q(state.wsec));
     L.push('WITHINGS_REDIRECT_URI=https://lamberts-mac-mini.tailda76d6.ts.net/api/integrations/withings/callback');
     L.push('');
-    L.push('GOOGLE_CLIENT_ID=' + set(state.gid));
-    L.push('GOOGLE_CLIENT_SECRET=' + set(state.gsec));
+    L.push('GOOGLE_CLIENT_ID=' + q(state.gid));
+    L.push('GOOGLE_CLIENT_SECRET=' + q(state.gsec));
     L.push('GOOGLE_REDIRECT_URI=http://localhost:3000/api/integrations/google/callback');
     L.push('');
-    L.push('ANTHROPIC_API_KEY=' + set(state.akey));
+    L.push('ANTHROPIC_API_KEY=' + q(state.akey));
     L.push('ANTHROPIC_MODEL=claude-opus-5');
     L.push('ANTHROPIC_MONTHLY_CAP_USD=' + (set(state.acap) || '10'));
     L.push('');
-    L.push('MAIL_HOST=' + set(state.smtphost));
+    L.push('MAIL_HOST=' + q(state.smtphost));
     L.push('MAIL_PORT=' + (set(state.smtpport) || '465'));
-    L.push('MAIL_USER=' + set(state.smtpuser));
-    L.push('MAIL_PASSWORD=' + set(state.smtppass));
-    L.push('MAIL_TO=' + set(state.mailto));
+    L.push('MAIL_USER=' + q(state.smtpuser));
+    L.push('MAIL_PASSWORD=' + q(state.smtppass));
+    L.push('MAIL_TO=' + q(state.mailto));
     L.push('');
     return L.join('\n') + '\n';
   }
