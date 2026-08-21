@@ -1,0 +1,2682 @@
+{
+ "393-today": {
+  "scrollWidth": 393,
+  "innerWidth": 393,
+  "docHeight": 852,
+  "overlaps": [],
+  "tokens": {
+   "--bg": "#0a0a0b",
+   "--surface": "#141416",
+   "--text": "#f5f5f7",
+   "--accent": "#5aa9ff",
+   "--focus": "#8fc4ff",
+   "--touch": "44px",
+   "--t-display": "30px",
+   "--s4": "16px",
+   "--r-lg": "16px",
+   "--font": "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif"
+  },
+  "targets": [
+   {
+    "el": "a.btn.primary.block",
+    "w": 327,
+    "h": 44
+   },
+   {
+    "el": "a",
+    "w": 76,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 76,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 76,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 76,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 76,
+    "h": 48
+   }
+  ],
+  "focus": null,
+  "clipped": [],
+  "h1": {
+   "size": "30px",
+   "lh": "33px",
+   "ls": "-0.6px",
+   "weight": "700",
+   "color": "rgb(245, 245, 247)",
+   "family": "-apple-system, \"system-ui\", \"S"
+  },
+  "body": {
+   "bg": "rgb(10, 10, 11)",
+   "color": "rgb(245, 245, 247)",
+   "size": "15px",
+   "lh": "20px"
+  },
+  "tabbar": {
+   "h": 57,
+   "top": 795,
+   "bg": "rgb(20, 20, 22)",
+   "borderTop": "1px rgb(42, 42, 46)",
+   "items": [
+    {
+     "label": "Today",
+     "w": 76,
+     "h": 48,
+     "color": "rgb(90, 169, 255)",
+     "current": "page"
+    },
+    {
+     "label": "Health",
+     "w": 76,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Train",
+     "w": 76,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Eat",
+     "w": 76,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Settings",
+     "w": 76,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    }
+   ]
+  },
+  "consoleErrors": [],
+  "failed": [
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=5CB68i4pnAekjehf",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/health?_rsc=5CB68i4pnAekjehf",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=5CB68i4pnAekjehf",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/settings?_rsc=5CB68i4pnAekjehf",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/sign-in?_rsc=5CB68i4pnAekjehf",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/?_rsc=tXyZJ52UQVBCVsD3",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/health?_rsc=tXyZJ52UQVBCVsD3",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=tXyZJ52UQVBCVsD3",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=tXyZJ52UQVBCVsD3",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/settings?_rsc=tXyZJ52UQVBCVsD3",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/sign-in?_rsc=tXyZJ52UQVBCVsD3"
+  ]
+ },
+ "393-health": {
+  "scrollWidth": 393,
+  "innerWidth": 393,
+  "docHeight": 852,
+  "overlaps": [],
+  "tokens": {
+   "--bg": "#0a0a0b",
+   "--surface": "#141416",
+   "--text": "#f5f5f7",
+   "--accent": "#5aa9ff",
+   "--focus": "#8fc4ff",
+   "--touch": "44px",
+   "--t-display": "30px",
+   "--s4": "16px",
+   "--r-lg": "16px",
+   "--font": "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif"
+  },
+  "targets": [
+   {
+    "el": "a.btn.primary.block",
+    "w": 327,
+    "h": 44
+   },
+   {
+    "el": "a",
+    "w": 76,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 76,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 76,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 76,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 76,
+    "h": 48
+   }
+  ],
+  "focus": null,
+  "clipped": [],
+  "h1": {
+   "size": "30px",
+   "lh": "33px",
+   "ls": "-0.6px",
+   "weight": "700",
+   "color": "rgb(245, 245, 247)",
+   "family": "-apple-system, \"system-ui\", \"S"
+  },
+  "body": {
+   "bg": "rgb(10, 10, 11)",
+   "color": "rgb(245, 245, 247)",
+   "size": "15px",
+   "lh": "20px"
+  },
+  "tabbar": {
+   "h": 57,
+   "top": 795,
+   "bg": "rgb(20, 20, 22)",
+   "borderTop": "1px rgb(42, 42, 46)",
+   "items": [
+    {
+     "label": "Today",
+     "w": 76,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Health",
+     "w": 76,
+     "h": 48,
+     "color": "rgb(90, 169, 255)",
+     "current": "page"
+    },
+    {
+     "label": "Train",
+     "w": 76,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Eat",
+     "w": 76,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Settings",
+     "w": 76,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    }
+   ]
+  },
+  "consoleErrors": [],
+  "failed": [
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/settings?_rsc=iGZHr1cF3VIlPIPq",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=iGZHr1cF3VIlPIPq",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/?_rsc=iGZHr1cF3VIlPIPq",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=iGZHr1cF3VIlPIPq",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/sign-in?_rsc=iGZHr1cF3VIlPIPq",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/health?_rsc=lg5ssDP88m-D8xVd",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/?_rsc=lg5ssDP88m-D8xVd",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=lg5ssDP88m-D8xVd",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=lg5ssDP88m-D8xVd",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/sign-in?_rsc=lg5ssDP88m-D8xVd",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/settings?_rsc=lg5ssDP88m-D8xVd"
+  ]
+ },
+ "393-train": {
+  "scrollWidth": 393,
+  "innerWidth": 393,
+  "docHeight": 852,
+  "overlaps": [],
+  "tokens": {
+   "--bg": "#0a0a0b",
+   "--surface": "#141416",
+   "--text": "#f5f5f7",
+   "--accent": "#5aa9ff",
+   "--focus": "#8fc4ff",
+   "--touch": "44px",
+   "--t-display": "30px",
+   "--s4": "16px",
+   "--r-lg": "16px",
+   "--font": "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif"
+  },
+  "targets": [
+   {
+    "el": "a.btn.primary.block",
+    "w": 327,
+    "h": 44
+   },
+   {
+    "el": "a",
+    "w": 76,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 76,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 76,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 76,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 76,
+    "h": 48
+   }
+  ],
+  "focus": null,
+  "clipped": [],
+  "h1": {
+   "size": "30px",
+   "lh": "33px",
+   "ls": "-0.6px",
+   "weight": "700",
+   "color": "rgb(245, 245, 247)",
+   "family": "-apple-system, \"system-ui\", \"S"
+  },
+  "body": {
+   "bg": "rgb(10, 10, 11)",
+   "color": "rgb(245, 245, 247)",
+   "size": "15px",
+   "lh": "20px"
+  },
+  "tabbar": {
+   "h": 57,
+   "top": 795,
+   "bg": "rgb(20, 20, 22)",
+   "borderTop": "1px rgb(42, 42, 46)",
+   "items": [
+    {
+     "label": "Today",
+     "w": 76,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Health",
+     "w": 76,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Train",
+     "w": 76,
+     "h": 48,
+     "color": "rgb(90, 169, 255)",
+     "current": "page"
+    },
+    {
+     "label": "Eat",
+     "w": 76,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Settings",
+     "w": 76,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    }
+   ]
+  },
+  "consoleErrors": [],
+  "failed": [
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/?_rsc=q7N37Cb2CBVx9DVH",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=q7N37Cb2CBVx9DVH",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/settings?_rsc=q7N37Cb2CBVx9DVH",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/?_rsc=mIo9tHpk4MBRgsK2",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=mIo9tHpk4MBRgsK2",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=mIo9tHpk4MBRgsK2",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/health?_rsc=mIo9tHpk4MBRgsK2",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/sign-in?_rsc=q7N37Cb2CBVx9DVH",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/settings?_rsc=mIo9tHpk4MBRgsK2"
+  ]
+ },
+ "393-eat": {
+  "scrollWidth": 393,
+  "innerWidth": 393,
+  "docHeight": 852,
+  "overlaps": [],
+  "tokens": {
+   "--bg": "#0a0a0b",
+   "--surface": "#141416",
+   "--text": "#f5f5f7",
+   "--accent": "#5aa9ff",
+   "--focus": "#8fc4ff",
+   "--touch": "44px",
+   "--t-display": "30px",
+   "--s4": "16px",
+   "--r-lg": "16px",
+   "--font": "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif"
+  },
+  "targets": [
+   {
+    "el": "a.btn.primary.block",
+    "w": 327,
+    "h": 44
+   },
+   {
+    "el": "a",
+    "w": 76,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 76,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 76,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 76,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 76,
+    "h": 48
+   }
+  ],
+  "focus": null,
+  "clipped": [],
+  "h1": {
+   "size": "30px",
+   "lh": "33px",
+   "ls": "-0.6px",
+   "weight": "700",
+   "color": "rgb(245, 245, 247)",
+   "family": "-apple-system, \"system-ui\", \"S"
+  },
+  "body": {
+   "bg": "rgb(10, 10, 11)",
+   "color": "rgb(245, 245, 247)",
+   "size": "15px",
+   "lh": "20px"
+  },
+  "tabbar": {
+   "h": 57,
+   "top": 795,
+   "bg": "rgb(20, 20, 22)",
+   "borderTop": "1px rgb(42, 42, 46)",
+   "items": [
+    {
+     "label": "Today",
+     "w": 76,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Health",
+     "w": 76,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Train",
+     "w": 76,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Eat",
+     "w": 76,
+     "h": 48,
+     "color": "rgb(90, 169, 255)",
+     "current": "page"
+    },
+    {
+     "label": "Settings",
+     "w": 76,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    }
+   ]
+  },
+  "consoleErrors": [],
+  "failed": [
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/?_rsc=3gZ5Yr6gKSXM-A6w",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=3gZ5Yr6gKSXM-A6w",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/settings?_rsc=3gZ5Yr6gKSXM-A6w",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/sign-in?_rsc=3gZ5Yr6gKSXM-A6w",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=ZahwXxoO8FSNtwKd",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/health?_rsc=ZahwXxoO8FSNtwKd",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=ZahwXxoO8FSNtwKd",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/settings?_rsc=ZahwXxoO8FSNtwKd",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/sign-in?_rsc=ZahwXxoO8FSNtwKd"
+  ]
+ },
+ "393-settings": {
+  "scrollWidth": 393,
+  "innerWidth": 393,
+  "docHeight": 852,
+  "overlaps": [],
+  "tokens": {
+   "--bg": "#0a0a0b",
+   "--surface": "#141416",
+   "--text": "#f5f5f7",
+   "--accent": "#5aa9ff",
+   "--focus": "#8fc4ff",
+   "--touch": "44px",
+   "--t-display": "30px",
+   "--s4": "16px",
+   "--r-lg": "16px",
+   "--font": "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif"
+  },
+  "targets": [
+   {
+    "el": "a.btn.primary.block",
+    "w": 327,
+    "h": 44
+   },
+   {
+    "el": "a",
+    "w": 76,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 76,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 76,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 76,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 76,
+    "h": 48
+   }
+  ],
+  "focus": null,
+  "clipped": [],
+  "h1": {
+   "size": "30px",
+   "lh": "33px",
+   "ls": "-0.6px",
+   "weight": "700",
+   "color": "rgb(245, 245, 247)",
+   "family": "-apple-system, \"system-ui\", \"S"
+  },
+  "body": {
+   "bg": "rgb(10, 10, 11)",
+   "color": "rgb(245, 245, 247)",
+   "size": "15px",
+   "lh": "20px"
+  },
+  "tabbar": {
+   "h": 57,
+   "top": 795,
+   "bg": "rgb(20, 20, 22)",
+   "borderTop": "1px rgb(42, 42, 46)",
+   "items": [
+    {
+     "label": "Today",
+     "w": 76,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Health",
+     "w": 76,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Train",
+     "w": 76,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Eat",
+     "w": 76,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Settings",
+     "w": 76,
+     "h": 48,
+     "color": "rgb(90, 169, 255)",
+     "current": "page"
+    }
+   ]
+  },
+  "consoleErrors": [],
+  "failed": [
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/?_rsc=DQxjArDrgutTG17x",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=DQxjArDrgutTG17x",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=DQxjArDrgutTG17x",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/?_rsc=j-_vjoKOn8bxlRO7",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=j-_vjoKOn8bxlRO7",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=j-_vjoKOn8bxlRO7",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/health?_rsc=j-_vjoKOn8bxlRO7",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/settings?_rsc=j-_vjoKOn8bxlRO7",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/sign-in?_rsc=j-_vjoKOn8bxlRO7"
+  ]
+ },
+ "393-sign-in": {
+  "scrollWidth": 393,
+  "innerWidth": 393,
+  "docHeight": 852,
+  "overlaps": [],
+  "tokens": {
+   "--bg": "#0a0a0b",
+   "--surface": "#141416",
+   "--text": "#f5f5f7",
+   "--accent": "#5aa9ff",
+   "--focus": "#8fc4ff",
+   "--touch": "44px",
+   "--t-display": "30px",
+   "--s4": "16px",
+   "--r-lg": "16px",
+   "--font": "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif"
+  },
+  "targets": [
+   {
+    "el": "a.btn.primary.block",
+    "w": 327,
+    "h": 44
+   }
+  ],
+  "focus": null,
+  "clipped": [],
+  "h1": {
+   "size": "30px",
+   "lh": "33px",
+   "ls": "-0.6px",
+   "weight": "700",
+   "color": "rgb(245, 245, 247)",
+   "family": "-apple-system, \"system-ui\", \"S"
+  },
+  "body": {
+   "bg": "rgb(10, 10, 11)",
+   "color": "rgb(245, 245, 247)",
+   "size": "15px",
+   "lh": "20px"
+  },
+  "consoleErrors": [],
+  "failed": [
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/?_rsc=T0opqrCVYcqyEkf7"
+  ]
+ },
+ "393-offline": {
+  "scrollWidth": 393,
+  "innerWidth": 393,
+  "docHeight": 852,
+  "overlaps": [],
+  "tokens": {
+   "--bg": "#0a0a0b",
+   "--surface": "#141416",
+   "--text": "#f5f5f7",
+   "--accent": "#5aa9ff",
+   "--focus": "#8fc4ff",
+   "--touch": "44px",
+   "--t-display": "30px",
+   "--s4": "16px",
+   "--r-lg": "16px",
+   "--font": "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif"
+  },
+  "targets": [
+   {
+    "el": "button.btn.primary.block",
+    "w": 327,
+    "h": 44
+   },
+   {
+    "el": "a",
+    "w": 76,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 76,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 76,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 76,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 76,
+    "h": 48
+   }
+  ],
+  "focus": null,
+  "clipped": [],
+  "h1": {
+   "size": "30px",
+   "lh": "33px",
+   "ls": "-0.6px",
+   "weight": "700",
+   "color": "rgb(245, 245, 247)",
+   "family": "-apple-system, \"system-ui\", \"S"
+  },
+  "body": {
+   "bg": "rgb(10, 10, 11)",
+   "color": "rgb(245, 245, 247)",
+   "size": "15px",
+   "lh": "20px"
+  },
+  "tabbar": {
+   "h": 57,
+   "top": 795,
+   "bg": "rgb(20, 20, 22)",
+   "borderTop": "1px rgb(42, 42, 46)",
+   "items": [
+    {
+     "label": "Today",
+     "w": 76,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Health",
+     "w": 76,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Train",
+     "w": 76,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Eat",
+     "w": 76,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Settings",
+     "w": 76,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    }
+   ]
+  },
+  "consoleErrors": [],
+  "failed": [
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/?_rsc=tzXhcABF5iuaBZYx",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/health?_rsc=tzXhcABF5iuaBZYx",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=tzXhcABF5iuaBZYx",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/settings?_rsc=tzXhcABF5iuaBZYx",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/health?_rsc=h--gvs_-MZSs1z_g",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/?_rsc=h--gvs_-MZSs1z_g",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=h--gvs_-MZSs1z_g",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=h--gvs_-MZSs1z_g",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/settings?_rsc=h--gvs_-MZSs1z_g"
+  ]
+ },
+ "393-notfound": {
+  "scrollWidth": 393,
+  "innerWidth": 393,
+  "docHeight": 852,
+  "overlaps": [],
+  "tokens": {
+   "--bg": "#0a0a0b",
+   "--surface": "#141416",
+   "--text": "#f5f5f7",
+   "--accent": "#5aa9ff",
+   "--focus": "#8fc4ff",
+   "--touch": "44px",
+   "--t-display": "30px",
+   "--s4": "16px",
+   "--r-lg": "16px",
+   "--font": "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif"
+  },
+  "targets": [
+   {
+    "el": "a.btn.primary.block",
+    "w": 327,
+    "h": 44
+   },
+   {
+    "el": "a",
+    "w": 76,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 76,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 76,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 76,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 76,
+    "h": 48
+   }
+  ],
+  "focus": null,
+  "clipped": [],
+  "h1": {
+   "size": "30px",
+   "lh": "33px",
+   "ls": "-0.6px",
+   "weight": "700",
+   "color": "rgb(245, 245, 247)",
+   "family": "-apple-system, \"system-ui\", \"S"
+  },
+  "body": {
+   "bg": "rgb(10, 10, 11)",
+   "color": "rgb(245, 245, 247)",
+   "size": "15px",
+   "lh": "20px"
+  },
+  "tabbar": {
+   "h": 57,
+   "top": 795,
+   "bg": "rgb(20, 20, 22)",
+   "borderTop": "1px rgb(42, 42, 46)",
+   "items": [
+    {
+     "label": "Today",
+     "w": 76,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Health",
+     "w": 76,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Train",
+     "w": 76,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Eat",
+     "w": 76,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Settings",
+     "w": 76,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    }
+   ]
+  },
+  "consoleErrors": [
+   "Log.entryAdded: {\"entry\":{\"source\":\"network\",\"level\":\"error\",\"text\":\"Failed to load resource: the server responded with a status of 404 ()\",\"timestamp\":1787349262843.042,\"url\":\"https://lamberts-mac-mini.tailda76d6.ts.net/nope\",\"networkRequestId\":\"635F221083A77F7815F97EB3D0880C16\"}}"
+  ],
+  "failed": [
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/health?_rsc=OXEfaXsCQr9qpu4a",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/?_rsc=OXEfaXsCQr9qpu4a",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=OXEfaXsCQr9qpu4a",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/settings?_rsc=OXEfaXsCQr9qpu4a",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=DC1NWWGCccKhW_Hq",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/health?_rsc=dCPgX_sCLW4HWyPL",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/?_rsc=DkIWp-xXBwaG4ASb",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=_RXNvIE-RVxvwFXz",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/health?_rsc=242tnRB5_IlegzMX",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=242tnRB5_IlegzMX",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/settings?_rsc=242tnRB5_IlegzMX",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=242tnRB5_IlegzMX"
+  ]
+ },
+ "768-today": {
+  "scrollWidth": 768,
+  "innerWidth": 768,
+  "docHeight": 1024,
+  "overlaps": [],
+  "tokens": {
+   "--bg": "#0a0a0b",
+   "--surface": "#141416",
+   "--text": "#f5f5f7",
+   "--accent": "#5aa9ff",
+   "--focus": "#8fc4ff",
+   "--touch": "44px",
+   "--t-display": "30px",
+   "--s4": "16px",
+   "--r-lg": "16px",
+   "--font": "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif"
+  },
+  "targets": [
+   {
+    "el": "a.btn.primary.block",
+    "w": 654,
+    "h": 44
+   },
+   {
+    "el": "a",
+    "w": 151,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 151,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 151,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 151,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 151,
+    "h": 48
+   }
+  ],
+  "focus": null,
+  "clipped": [],
+  "h1": {
+   "size": "30px",
+   "lh": "33px",
+   "ls": "-0.6px",
+   "weight": "700",
+   "color": "rgb(245, 245, 247)",
+   "family": "-apple-system, \"system-ui\", \"S"
+  },
+  "body": {
+   "bg": "rgb(10, 10, 11)",
+   "color": "rgb(245, 245, 247)",
+   "size": "15px",
+   "lh": "20px"
+  },
+  "tabbar": {
+   "h": 57,
+   "top": 967,
+   "bg": "rgb(20, 20, 22)",
+   "borderTop": "1px rgb(42, 42, 46)",
+   "items": [
+    {
+     "label": "Today",
+     "w": 151,
+     "h": 48,
+     "color": "rgb(90, 169, 255)",
+     "current": "page"
+    },
+    {
+     "label": "Health",
+     "w": 151,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Train",
+     "w": 151,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Eat",
+     "w": 151,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Settings",
+     "w": 151,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    }
+   ]
+  },
+  "consoleErrors": [],
+  "failed": [
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/health?_rsc=5CB68i4pnAekjehf",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=5CB68i4pnAekjehf",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=5CB68i4pnAekjehf",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/settings?_rsc=5CB68i4pnAekjehf",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/sign-in?_rsc=5CB68i4pnAekjehf",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/?_rsc=tXyZJ52UQVBCVsD3",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=tXyZJ52UQVBCVsD3",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/health?_rsc=tXyZJ52UQVBCVsD3",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/sign-in?_rsc=tXyZJ52UQVBCVsD3",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=tXyZJ52UQVBCVsD3",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/settings?_rsc=tXyZJ52UQVBCVsD3"
+  ]
+ },
+ "768-health": {
+  "scrollWidth": 768,
+  "innerWidth": 768,
+  "docHeight": 1024,
+  "overlaps": [],
+  "tokens": {
+   "--bg": "#0a0a0b",
+   "--surface": "#141416",
+   "--text": "#f5f5f7",
+   "--accent": "#5aa9ff",
+   "--focus": "#8fc4ff",
+   "--touch": "44px",
+   "--t-display": "30px",
+   "--s4": "16px",
+   "--r-lg": "16px",
+   "--font": "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif"
+  },
+  "targets": [
+   {
+    "el": "a.btn.primary.block",
+    "w": 654,
+    "h": 44
+   },
+   {
+    "el": "a",
+    "w": 151,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 151,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 151,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 151,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 151,
+    "h": 48
+   }
+  ],
+  "focus": null,
+  "clipped": [],
+  "h1": {
+   "size": "30px",
+   "lh": "33px",
+   "ls": "-0.6px",
+   "weight": "700",
+   "color": "rgb(245, 245, 247)",
+   "family": "-apple-system, \"system-ui\", \"S"
+  },
+  "body": {
+   "bg": "rgb(10, 10, 11)",
+   "color": "rgb(245, 245, 247)",
+   "size": "15px",
+   "lh": "20px"
+  },
+  "tabbar": {
+   "h": 57,
+   "top": 967,
+   "bg": "rgb(20, 20, 22)",
+   "borderTop": "1px rgb(42, 42, 46)",
+   "items": [
+    {
+     "label": "Today",
+     "w": 151,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Health",
+     "w": 151,
+     "h": 48,
+     "color": "rgb(90, 169, 255)",
+     "current": "page"
+    },
+    {
+     "label": "Train",
+     "w": 151,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Eat",
+     "w": 151,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Settings",
+     "w": 151,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    }
+   ]
+  },
+  "consoleErrors": [],
+  "failed": [
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/?_rsc=iGZHr1cF3VIlPIPq",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=iGZHr1cF3VIlPIPq",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=iGZHr1cF3VIlPIPq",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/settings?_rsc=iGZHr1cF3VIlPIPq",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/sign-in?_rsc=iGZHr1cF3VIlPIPq",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/?_rsc=lg5ssDP88m-D8xVd",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/health?_rsc=lg5ssDP88m-D8xVd",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=lg5ssDP88m-D8xVd",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=lg5ssDP88m-D8xVd",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/settings?_rsc=lg5ssDP88m-D8xVd",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/sign-in?_rsc=lg5ssDP88m-D8xVd"
+  ]
+ },
+ "768-train": {
+  "scrollWidth": 768,
+  "innerWidth": 768,
+  "docHeight": 1024,
+  "overlaps": [],
+  "tokens": {
+   "--bg": "#0a0a0b",
+   "--surface": "#141416",
+   "--text": "#f5f5f7",
+   "--accent": "#5aa9ff",
+   "--focus": "#8fc4ff",
+   "--touch": "44px",
+   "--t-display": "30px",
+   "--s4": "16px",
+   "--r-lg": "16px",
+   "--font": "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif"
+  },
+  "targets": [
+   {
+    "el": "a.btn.primary.block",
+    "w": 654,
+    "h": 44
+   },
+   {
+    "el": "a",
+    "w": 151,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 151,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 151,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 151,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 151,
+    "h": 48
+   }
+  ],
+  "focus": null,
+  "clipped": [],
+  "h1": {
+   "size": "30px",
+   "lh": "33px",
+   "ls": "-0.6px",
+   "weight": "700",
+   "color": "rgb(245, 245, 247)",
+   "family": "-apple-system, \"system-ui\", \"S"
+  },
+  "body": {
+   "bg": "rgb(10, 10, 11)",
+   "color": "rgb(245, 245, 247)",
+   "size": "15px",
+   "lh": "20px"
+  },
+  "tabbar": {
+   "h": 57,
+   "top": 967,
+   "bg": "rgb(20, 20, 22)",
+   "borderTop": "1px rgb(42, 42, 46)",
+   "items": [
+    {
+     "label": "Today",
+     "w": 151,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Health",
+     "w": 151,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Train",
+     "w": 151,
+     "h": 48,
+     "color": "rgb(90, 169, 255)",
+     "current": "page"
+    },
+    {
+     "label": "Eat",
+     "w": 151,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Settings",
+     "w": 151,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    }
+   ]
+  },
+  "consoleErrors": [],
+  "failed": [
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=q7N37Cb2CBVx9DVH",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=mIo9tHpk4MBRgsK2"
+  ]
+ },
+ "768-eat": {
+  "scrollWidth": 768,
+  "innerWidth": 768,
+  "docHeight": 1024,
+  "overlaps": [],
+  "tokens": {
+   "--bg": "#0a0a0b",
+   "--surface": "#141416",
+   "--text": "#f5f5f7",
+   "--accent": "#5aa9ff",
+   "--focus": "#8fc4ff",
+   "--touch": "44px",
+   "--t-display": "30px",
+   "--s4": "16px",
+   "--r-lg": "16px",
+   "--font": "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif"
+  },
+  "targets": [
+   {
+    "el": "a.btn.primary.block",
+    "w": 654,
+    "h": 44
+   },
+   {
+    "el": "a",
+    "w": 151,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 151,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 151,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 151,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 151,
+    "h": 48
+   }
+  ],
+  "focus": null,
+  "clipped": [],
+  "h1": {
+   "size": "30px",
+   "lh": "33px",
+   "ls": "-0.6px",
+   "weight": "700",
+   "color": "rgb(245, 245, 247)",
+   "family": "-apple-system, \"system-ui\", \"S"
+  },
+  "body": {
+   "bg": "rgb(10, 10, 11)",
+   "color": "rgb(245, 245, 247)",
+   "size": "15px",
+   "lh": "20px"
+  },
+  "tabbar": {
+   "h": 57,
+   "top": 967,
+   "bg": "rgb(20, 20, 22)",
+   "borderTop": "1px rgb(42, 42, 46)",
+   "items": [
+    {
+     "label": "Today",
+     "w": 151,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Health",
+     "w": 151,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Train",
+     "w": 151,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Eat",
+     "w": 151,
+     "h": 48,
+     "color": "rgb(90, 169, 255)",
+     "current": "page"
+    },
+    {
+     "label": "Settings",
+     "w": 151,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    }
+   ]
+  },
+  "consoleErrors": [],
+  "failed": [
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=3gZ5Yr6gKSXM-A6w",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/settings?_rsc=3gZ5Yr6gKSXM-A6w",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/sign-in?_rsc=3gZ5Yr6gKSXM-A6w",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/?_rsc=ZahwXxoO8FSNtwKd",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=ZahwXxoO8FSNtwKd",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=ZahwXxoO8FSNtwKd",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/settings?_rsc=ZahwXxoO8FSNtwKd",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/sign-in?_rsc=ZahwXxoO8FSNtwKd"
+  ]
+ },
+ "768-settings": {
+  "scrollWidth": 768,
+  "innerWidth": 768,
+  "docHeight": 1024,
+  "overlaps": [],
+  "tokens": {
+   "--bg": "#0a0a0b",
+   "--surface": "#141416",
+   "--text": "#f5f5f7",
+   "--accent": "#5aa9ff",
+   "--focus": "#8fc4ff",
+   "--touch": "44px",
+   "--t-display": "30px",
+   "--s4": "16px",
+   "--r-lg": "16px",
+   "--font": "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif"
+  },
+  "targets": [
+   {
+    "el": "a.btn.primary.block",
+    "w": 654,
+    "h": 44
+   },
+   {
+    "el": "a",
+    "w": 151,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 151,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 151,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 151,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 151,
+    "h": 48
+   }
+  ],
+  "focus": null,
+  "clipped": [],
+  "h1": {
+   "size": "30px",
+   "lh": "33px",
+   "ls": "-0.6px",
+   "weight": "700",
+   "color": "rgb(245, 245, 247)",
+   "family": "-apple-system, \"system-ui\", \"S"
+  },
+  "body": {
+   "bg": "rgb(10, 10, 11)",
+   "color": "rgb(245, 245, 247)",
+   "size": "15px",
+   "lh": "20px"
+  },
+  "tabbar": {
+   "h": 57,
+   "top": 967,
+   "bg": "rgb(20, 20, 22)",
+   "borderTop": "1px rgb(42, 42, 46)",
+   "items": [
+    {
+     "label": "Today",
+     "w": 151,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Health",
+     "w": 151,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Train",
+     "w": 151,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Eat",
+     "w": 151,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Settings",
+     "w": 151,
+     "h": 48,
+     "color": "rgb(90, 169, 255)",
+     "current": "page"
+    }
+   ]
+  },
+  "consoleErrors": [],
+  "failed": [
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=DQxjArDrgutTG17x",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/health?_rsc=DQxjArDrgutTG17x",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/sign-in?_rsc=DQxjArDrgutTG17x",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/?_rsc=j-_vjoKOn8bxlRO7",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=j-_vjoKOn8bxlRO7",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/health?_rsc=j-_vjoKOn8bxlRO7",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=j-_vjoKOn8bxlRO7",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/settings?_rsc=j-_vjoKOn8bxlRO7",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/sign-in?_rsc=j-_vjoKOn8bxlRO7"
+  ]
+ },
+ "768-sign-in": {
+  "scrollWidth": 768,
+  "innerWidth": 768,
+  "docHeight": 1024,
+  "overlaps": [],
+  "tokens": {
+   "--bg": "#0a0a0b",
+   "--surface": "#141416",
+   "--text": "#f5f5f7",
+   "--accent": "#5aa9ff",
+   "--focus": "#8fc4ff",
+   "--touch": "44px",
+   "--t-display": "30px",
+   "--s4": "16px",
+   "--r-lg": "16px",
+   "--font": "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif"
+  },
+  "targets": [
+   {
+    "el": "a.btn.primary.block",
+    "w": 654,
+    "h": 44
+   }
+  ],
+  "focus": null,
+  "clipped": [],
+  "h1": {
+   "size": "30px",
+   "lh": "33px",
+   "ls": "-0.6px",
+   "weight": "700",
+   "color": "rgb(245, 245, 247)",
+   "family": "-apple-system, \"system-ui\", \"S"
+  },
+  "body": {
+   "bg": "rgb(10, 10, 11)",
+   "color": "rgb(245, 245, 247)",
+   "size": "15px",
+   "lh": "20px"
+  },
+  "consoleErrors": [],
+  "failed": []
+ },
+ "768-offline": {
+  "scrollWidth": 768,
+  "innerWidth": 768,
+  "docHeight": 1024,
+  "overlaps": [],
+  "tokens": {
+   "--bg": "#0a0a0b",
+   "--surface": "#141416",
+   "--text": "#f5f5f7",
+   "--accent": "#5aa9ff",
+   "--focus": "#8fc4ff",
+   "--touch": "44px",
+   "--t-display": "30px",
+   "--s4": "16px",
+   "--r-lg": "16px",
+   "--font": "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif"
+  },
+  "targets": [
+   {
+    "el": "button.btn.primary.block",
+    "w": 654,
+    "h": 44
+   },
+   {
+    "el": "a",
+    "w": 151,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 151,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 151,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 151,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 151,
+    "h": 48
+   }
+  ],
+  "focus": null,
+  "clipped": [],
+  "h1": {
+   "size": "30px",
+   "lh": "33px",
+   "ls": "-0.6px",
+   "weight": "700",
+   "color": "rgb(245, 245, 247)",
+   "family": "-apple-system, \"system-ui\", \"S"
+  },
+  "body": {
+   "bg": "rgb(10, 10, 11)",
+   "color": "rgb(245, 245, 247)",
+   "size": "15px",
+   "lh": "20px"
+  },
+  "tabbar": {
+   "h": 57,
+   "top": 967,
+   "bg": "rgb(20, 20, 22)",
+   "borderTop": "1px rgb(42, 42, 46)",
+   "items": [
+    {
+     "label": "Today",
+     "w": 151,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Health",
+     "w": 151,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Train",
+     "w": 151,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Eat",
+     "w": 151,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Settings",
+     "w": 151,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    }
+   ]
+  },
+  "consoleErrors": [],
+  "failed": [
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/?_rsc=tzXhcABF5iuaBZYx",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/health?_rsc=tzXhcABF5iuaBZYx",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=tzXhcABF5iuaBZYx",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=tzXhcABF5iuaBZYx",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/settings?_rsc=tzXhcABF5iuaBZYx",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/?_rsc=h--gvs_-MZSs1z_g",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/health?_rsc=h--gvs_-MZSs1z_g",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=h--gvs_-MZSs1z_g",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=h--gvs_-MZSs1z_g"
+  ]
+ },
+ "768-notfound": {
+  "scrollWidth": 768,
+  "innerWidth": 768,
+  "docHeight": 1024,
+  "overlaps": [],
+  "tokens": {
+   "--bg": "#0a0a0b",
+   "--surface": "#141416",
+   "--text": "#f5f5f7",
+   "--accent": "#5aa9ff",
+   "--focus": "#8fc4ff",
+   "--touch": "44px",
+   "--t-display": "30px",
+   "--s4": "16px",
+   "--r-lg": "16px",
+   "--font": "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif"
+  },
+  "targets": [
+   {
+    "el": "a.btn.primary.block",
+    "w": 654,
+    "h": 44
+   },
+   {
+    "el": "a",
+    "w": 151,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 151,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 151,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 151,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 151,
+    "h": 48
+   }
+  ],
+  "focus": null,
+  "clipped": [],
+  "h1": {
+   "size": "30px",
+   "lh": "33px",
+   "ls": "-0.6px",
+   "weight": "700",
+   "color": "rgb(245, 245, 247)",
+   "family": "-apple-system, \"system-ui\", \"S"
+  },
+  "body": {
+   "bg": "rgb(10, 10, 11)",
+   "color": "rgb(245, 245, 247)",
+   "size": "15px",
+   "lh": "20px"
+  },
+  "tabbar": {
+   "h": 57,
+   "top": 967,
+   "bg": "rgb(20, 20, 22)",
+   "borderTop": "1px rgb(42, 42, 46)",
+   "items": [
+    {
+     "label": "Today",
+     "w": 151,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Health",
+     "w": 151,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Train",
+     "w": 151,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Eat",
+     "w": 151,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Settings",
+     "w": 151,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    }
+   ]
+  },
+  "consoleErrors": [
+   "Log.entryAdded: {\"entry\":{\"source\":\"network\",\"level\":\"error\",\"text\":\"Failed to load resource: the server responded with a status of 404 ()\",\"timestamp\":1787349269758.53,\"url\":\"https://lamberts-mac-mini.tailda76d6.ts.net/nope\",\"networkRequestId\":\"E688DE314E9998EF29A8ADD5DCB29792\"}}"
+  ],
+  "failed": [
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=OXEfaXsCQr9qpu4a",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=OXEfaXsCQr9qpu4a",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/?_rsc=DkIWp-xXBwaG4ASb",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=DC1NWWGCccKhW_Hq",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=_RXNvIE-RVxvwFXz",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/settings?_rsc=242tnRB5_IlegzMX",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/health?_rsc=242tnRB5_IlegzMX",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=242tnRB5_IlegzMX",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=242tnRB5_IlegzMX"
+  ]
+ },
+ "1280-today": {
+  "scrollWidth": 1280,
+  "innerWidth": 1280,
+  "docHeight": 800,
+  "overlaps": [],
+  "tokens": {
+   "--bg": "#0a0a0b",
+   "--surface": "#141416",
+   "--text": "#f5f5f7",
+   "--accent": "#5aa9ff",
+   "--focus": "#8fc4ff",
+   "--touch": "44px",
+   "--t-display": "30px",
+   "--s4": "16px",
+   "--r-lg": "16px",
+   "--font": "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif"
+  },
+  "targets": [
+   {
+    "el": "a.btn.primary.block",
+    "w": 654,
+    "h": 44
+   },
+   {
+    "el": "a",
+    "w": 254,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 254,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 254,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 254,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 254,
+    "h": 48
+   }
+  ],
+  "focus": null,
+  "clipped": [],
+  "h1": {
+   "size": "30px",
+   "lh": "33px",
+   "ls": "-0.6px",
+   "weight": "700",
+   "color": "rgb(245, 245, 247)",
+   "family": "-apple-system, \"system-ui\", \"S"
+  },
+  "body": {
+   "bg": "rgb(10, 10, 11)",
+   "color": "rgb(245, 245, 247)",
+   "size": "15px",
+   "lh": "20px"
+  },
+  "tabbar": {
+   "h": 57,
+   "top": 743,
+   "bg": "rgb(20, 20, 22)",
+   "borderTop": "1px rgb(42, 42, 46)",
+   "items": [
+    {
+     "label": "Today",
+     "w": 254,
+     "h": 48,
+     "color": "rgb(90, 169, 255)",
+     "current": "page"
+    },
+    {
+     "label": "Health",
+     "w": 254,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Train",
+     "w": 254,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Eat",
+     "w": 254,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Settings",
+     "w": 254,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    }
+   ]
+  },
+  "consoleErrors": [],
+  "failed": [
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/health?_rsc=5CB68i4pnAekjehf",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=5CB68i4pnAekjehf",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/settings?_rsc=5CB68i4pnAekjehf",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=5CB68i4pnAekjehf",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/?_rsc=tXyZJ52UQVBCVsD3",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/health?_rsc=tXyZJ52UQVBCVsD3",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=tXyZJ52UQVBCVsD3",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/settings?_rsc=tXyZJ52UQVBCVsD3",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/sign-in?_rsc=tXyZJ52UQVBCVsD3"
+  ]
+ },
+ "1280-health": {
+  "scrollWidth": 1280,
+  "innerWidth": 1280,
+  "docHeight": 800,
+  "overlaps": [],
+  "tokens": {
+   "--bg": "#0a0a0b",
+   "--surface": "#141416",
+   "--text": "#f5f5f7",
+   "--accent": "#5aa9ff",
+   "--focus": "#8fc4ff",
+   "--touch": "44px",
+   "--t-display": "30px",
+   "--s4": "16px",
+   "--r-lg": "16px",
+   "--font": "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif"
+  },
+  "targets": [
+   {
+    "el": "a.btn.primary.block",
+    "w": 654,
+    "h": 44
+   },
+   {
+    "el": "a",
+    "w": 254,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 254,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 254,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 254,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 254,
+    "h": 48
+   }
+  ],
+  "focus": null,
+  "clipped": [],
+  "h1": {
+   "size": "30px",
+   "lh": "33px",
+   "ls": "-0.6px",
+   "weight": "700",
+   "color": "rgb(245, 245, 247)",
+   "family": "-apple-system, \"system-ui\", \"S"
+  },
+  "body": {
+   "bg": "rgb(10, 10, 11)",
+   "color": "rgb(245, 245, 247)",
+   "size": "15px",
+   "lh": "20px"
+  },
+  "tabbar": {
+   "h": 57,
+   "top": 743,
+   "bg": "rgb(20, 20, 22)",
+   "borderTop": "1px rgb(42, 42, 46)",
+   "items": [
+    {
+     "label": "Today",
+     "w": 254,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Health",
+     "w": 254,
+     "h": 48,
+     "color": "rgb(90, 169, 255)",
+     "current": "page"
+    },
+    {
+     "label": "Train",
+     "w": 254,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Eat",
+     "w": 254,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Settings",
+     "w": 254,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    }
+   ]
+  },
+  "consoleErrors": [],
+  "failed": [
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=iGZHr1cF3VIlPIPq",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/sign-in?_rsc=iGZHr1cF3VIlPIPq",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/?_rsc=lg5ssDP88m-D8xVd",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/health?_rsc=lg5ssDP88m-D8xVd",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=lg5ssDP88m-D8xVd",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=lg5ssDP88m-D8xVd",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/sign-in?_rsc=lg5ssDP88m-D8xVd",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/settings?_rsc=lg5ssDP88m-D8xVd"
+  ]
+ },
+ "1280-train": {
+  "scrollWidth": 1280,
+  "innerWidth": 1280,
+  "docHeight": 800,
+  "overlaps": [],
+  "tokens": {
+   "--bg": "#0a0a0b",
+   "--surface": "#141416",
+   "--text": "#f5f5f7",
+   "--accent": "#5aa9ff",
+   "--focus": "#8fc4ff",
+   "--touch": "44px",
+   "--t-display": "30px",
+   "--s4": "16px",
+   "--r-lg": "16px",
+   "--font": "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif"
+  },
+  "targets": [
+   {
+    "el": "a.btn.primary.block",
+    "w": 654,
+    "h": 44
+   },
+   {
+    "el": "a",
+    "w": 254,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 254,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 254,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 254,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 254,
+    "h": 48
+   }
+  ],
+  "focus": null,
+  "clipped": [],
+  "h1": {
+   "size": "30px",
+   "lh": "33px",
+   "ls": "-0.6px",
+   "weight": "700",
+   "color": "rgb(245, 245, 247)",
+   "family": "-apple-system, \"system-ui\", \"S"
+  },
+  "body": {
+   "bg": "rgb(10, 10, 11)",
+   "color": "rgb(245, 245, 247)",
+   "size": "15px",
+   "lh": "20px"
+  },
+  "tabbar": {
+   "h": 57,
+   "top": 743,
+   "bg": "rgb(20, 20, 22)",
+   "borderTop": "1px rgb(42, 42, 46)",
+   "items": [
+    {
+     "label": "Today",
+     "w": 254,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Health",
+     "w": 254,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Train",
+     "w": 254,
+     "h": 48,
+     "color": "rgb(90, 169, 255)",
+     "current": "page"
+    },
+    {
+     "label": "Eat",
+     "w": 254,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Settings",
+     "w": 254,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    }
+   ]
+  },
+  "consoleErrors": [],
+  "failed": [
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/?_rsc=q7N37Cb2CBVx9DVH",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/health?_rsc=q7N37Cb2CBVx9DVH",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=q7N37Cb2CBVx9DVH",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/settings?_rsc=q7N37Cb2CBVx9DVH",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/sign-in?_rsc=q7N37Cb2CBVx9DVH",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/?_rsc=mIo9tHpk4MBRgsK2",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/health?_rsc=mIo9tHpk4MBRgsK2",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=mIo9tHpk4MBRgsK2",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=mIo9tHpk4MBRgsK2",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/settings?_rsc=mIo9tHpk4MBRgsK2",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/sign-in?_rsc=mIo9tHpk4MBRgsK2"
+  ]
+ },
+ "1280-eat": {
+  "scrollWidth": 1280,
+  "innerWidth": 1280,
+  "docHeight": 800,
+  "overlaps": [],
+  "tokens": {
+   "--bg": "#0a0a0b",
+   "--surface": "#141416",
+   "--text": "#f5f5f7",
+   "--accent": "#5aa9ff",
+   "--focus": "#8fc4ff",
+   "--touch": "44px",
+   "--t-display": "30px",
+   "--s4": "16px",
+   "--r-lg": "16px",
+   "--font": "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif"
+  },
+  "targets": [
+   {
+    "el": "a.btn.primary.block",
+    "w": 654,
+    "h": 44
+   },
+   {
+    "el": "a",
+    "w": 254,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 254,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 254,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 254,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 254,
+    "h": 48
+   }
+  ],
+  "focus": null,
+  "clipped": [],
+  "h1": {
+   "size": "30px",
+   "lh": "33px",
+   "ls": "-0.6px",
+   "weight": "700",
+   "color": "rgb(245, 245, 247)",
+   "family": "-apple-system, \"system-ui\", \"S"
+  },
+  "body": {
+   "bg": "rgb(10, 10, 11)",
+   "color": "rgb(245, 245, 247)",
+   "size": "15px",
+   "lh": "20px"
+  },
+  "tabbar": {
+   "h": 57,
+   "top": 743,
+   "bg": "rgb(20, 20, 22)",
+   "borderTop": "1px rgb(42, 42, 46)",
+   "items": [
+    {
+     "label": "Today",
+     "w": 254,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Health",
+     "w": 254,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Train",
+     "w": 254,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Eat",
+     "w": 254,
+     "h": 48,
+     "color": "rgb(90, 169, 255)",
+     "current": "page"
+    },
+    {
+     "label": "Settings",
+     "w": 254,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    }
+   ]
+  },
+  "consoleErrors": [],
+  "failed": [
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/health?_rsc=3gZ5Yr6gKSXM-A6w",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/settings?_rsc=3gZ5Yr6gKSXM-A6w",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/?_rsc=3gZ5Yr6gKSXM-A6w",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=3gZ5Yr6gKSXM-A6w",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/sign-in?_rsc=3gZ5Yr6gKSXM-A6w",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/?_rsc=ZahwXxoO8FSNtwKd",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/health?_rsc=ZahwXxoO8FSNtwKd",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=ZahwXxoO8FSNtwKd",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=ZahwXxoO8FSNtwKd"
+  ]
+ },
+ "1280-settings": {
+  "scrollWidth": 1280,
+  "innerWidth": 1280,
+  "docHeight": 800,
+  "overlaps": [],
+  "tokens": {
+   "--bg": "#0a0a0b",
+   "--surface": "#141416",
+   "--text": "#f5f5f7",
+   "--accent": "#5aa9ff",
+   "--focus": "#8fc4ff",
+   "--touch": "44px",
+   "--t-display": "30px",
+   "--s4": "16px",
+   "--r-lg": "16px",
+   "--font": "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif"
+  },
+  "targets": [
+   {
+    "el": "a.btn.primary.block",
+    "w": 654,
+    "h": 44
+   },
+   {
+    "el": "a",
+    "w": 254,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 254,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 254,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 254,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 254,
+    "h": 48
+   }
+  ],
+  "focus": null,
+  "clipped": [],
+  "h1": {
+   "size": "30px",
+   "lh": "33px",
+   "ls": "-0.6px",
+   "weight": "700",
+   "color": "rgb(245, 245, 247)",
+   "family": "-apple-system, \"system-ui\", \"S"
+  },
+  "body": {
+   "bg": "rgb(10, 10, 11)",
+   "color": "rgb(245, 245, 247)",
+   "size": "15px",
+   "lh": "20px"
+  },
+  "tabbar": {
+   "h": 57,
+   "top": 743,
+   "bg": "rgb(20, 20, 22)",
+   "borderTop": "1px rgb(42, 42, 46)",
+   "items": [
+    {
+     "label": "Today",
+     "w": 254,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Health",
+     "w": 254,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Train",
+     "w": 254,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Eat",
+     "w": 254,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Settings",
+     "w": 254,
+     "h": 48,
+     "color": "rgb(90, 169, 255)",
+     "current": "page"
+    }
+   ]
+  },
+  "consoleErrors": [],
+  "failed": [
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/sign-in?_rsc=DQxjArDrgutTG17x",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/health?_rsc=j-_vjoKOn8bxlRO7",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=j-_vjoKOn8bxlRO7",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=j-_vjoKOn8bxlRO7"
+  ]
+ },
+ "1280-sign-in": {
+  "scrollWidth": 1280,
+  "innerWidth": 1280,
+  "docHeight": 800,
+  "overlaps": [],
+  "tokens": {
+   "--bg": "#0a0a0b",
+   "--surface": "#141416",
+   "--text": "#f5f5f7",
+   "--accent": "#5aa9ff",
+   "--focus": "#8fc4ff",
+   "--touch": "44px",
+   "--t-display": "30px",
+   "--s4": "16px",
+   "--r-lg": "16px",
+   "--font": "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif"
+  },
+  "targets": [
+   {
+    "el": "a.btn.primary.block",
+    "w": 654,
+    "h": 44
+   }
+  ],
+  "focus": null,
+  "clipped": [],
+  "h1": {
+   "size": "30px",
+   "lh": "33px",
+   "ls": "-0.6px",
+   "weight": "700",
+   "color": "rgb(245, 245, 247)",
+   "family": "-apple-system, \"system-ui\", \"S"
+  },
+  "body": {
+   "bg": "rgb(10, 10, 11)",
+   "color": "rgb(245, 245, 247)",
+   "size": "15px",
+   "lh": "20px"
+  },
+  "consoleErrors": [],
+  "failed": []
+ },
+ "1280-offline": {
+  "scrollWidth": 1280,
+  "innerWidth": 1280,
+  "docHeight": 800,
+  "overlaps": [],
+  "tokens": {
+   "--bg": "#0a0a0b",
+   "--surface": "#141416",
+   "--text": "#f5f5f7",
+   "--accent": "#5aa9ff",
+   "--focus": "#8fc4ff",
+   "--touch": "44px",
+   "--t-display": "30px",
+   "--s4": "16px",
+   "--r-lg": "16px",
+   "--font": "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif"
+  },
+  "targets": [
+   {
+    "el": "button.btn.primary.block",
+    "w": 654,
+    "h": 44
+   },
+   {
+    "el": "a",
+    "w": 254,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 254,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 254,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 254,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 254,
+    "h": 48
+   }
+  ],
+  "focus": null,
+  "clipped": [],
+  "h1": {
+   "size": "30px",
+   "lh": "33px",
+   "ls": "-0.6px",
+   "weight": "700",
+   "color": "rgb(245, 245, 247)",
+   "family": "-apple-system, \"system-ui\", \"S"
+  },
+  "body": {
+   "bg": "rgb(10, 10, 11)",
+   "color": "rgb(245, 245, 247)",
+   "size": "15px",
+   "lh": "20px"
+  },
+  "tabbar": {
+   "h": 57,
+   "top": 743,
+   "bg": "rgb(20, 20, 22)",
+   "borderTop": "1px rgb(42, 42, 46)",
+   "items": [
+    {
+     "label": "Today",
+     "w": 254,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Health",
+     "w": 254,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Train",
+     "w": 254,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Eat",
+     "w": 254,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Settings",
+     "w": 254,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    }
+   ]
+  },
+  "consoleErrors": [],
+  "failed": [
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/health?_rsc=tzXhcABF5iuaBZYx",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=tzXhcABF5iuaBZYx",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/?_rsc=tzXhcABF5iuaBZYx",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=tzXhcABF5iuaBZYx",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/settings?_rsc=tzXhcABF5iuaBZYx",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/health?_rsc=h--gvs_-MZSs1z_g",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/?_rsc=h--gvs_-MZSs1z_g",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=h--gvs_-MZSs1z_g",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/settings?_rsc=h--gvs_-MZSs1z_g",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=h--gvs_-MZSs1z_g"
+  ]
+ },
+ "1280-notfound": {
+  "scrollWidth": 1280,
+  "innerWidth": 1280,
+  "docHeight": 800,
+  "overlaps": [],
+  "tokens": {
+   "--bg": "#0a0a0b",
+   "--surface": "#141416",
+   "--text": "#f5f5f7",
+   "--accent": "#5aa9ff",
+   "--focus": "#8fc4ff",
+   "--touch": "44px",
+   "--t-display": "30px",
+   "--s4": "16px",
+   "--r-lg": "16px",
+   "--font": "-apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif"
+  },
+  "targets": [
+   {
+    "el": "a.btn.primary.block",
+    "w": 654,
+    "h": 44
+   },
+   {
+    "el": "a",
+    "w": 254,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 254,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 254,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 254,
+    "h": 48
+   },
+   {
+    "el": "a",
+    "w": 254,
+    "h": 48
+   }
+  ],
+  "focus": null,
+  "clipped": [],
+  "h1": {
+   "size": "30px",
+   "lh": "33px",
+   "ls": "-0.6px",
+   "weight": "700",
+   "color": "rgb(245, 245, 247)",
+   "family": "-apple-system, \"system-ui\", \"S"
+  },
+  "body": {
+   "bg": "rgb(10, 10, 11)",
+   "color": "rgb(245, 245, 247)",
+   "size": "15px",
+   "lh": "20px"
+  },
+  "tabbar": {
+   "h": 57,
+   "top": 743,
+   "bg": "rgb(20, 20, 22)",
+   "borderTop": "1px rgb(42, 42, 46)",
+   "items": [
+    {
+     "label": "Today",
+     "w": 254,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Health",
+     "w": 254,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Train",
+     "w": 254,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Eat",
+     "w": 254,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    },
+    {
+     "label": "Settings",
+     "w": 254,
+     "h": 48,
+     "color": "rgb(124, 124, 133)",
+     "current": null
+    }
+   ]
+  },
+  "consoleErrors": [
+   "Log.entryAdded: {\"entry\":{\"source\":\"network\",\"level\":\"error\",\"text\":\"Failed to load resource: the server responded with a status of 404 ()\",\"timestamp\":1787349276820.204,\"url\":\"https://lamberts-mac-mini.tailda76d6.ts.net/nope\",\"networkRequestId\":\"2EDD9020F6EB51608A286AC1F40C6B45\"}}"
+  ],
+  "failed": [
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/health?_rsc=OXEfaXsCQr9qpu4a",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/?_rsc=OXEfaXsCQr9qpu4a",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=OXEfaXsCQr9qpu4a",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=OXEfaXsCQr9qpu4a",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/settings?_rsc=OXEfaXsCQr9qpu4a",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/health?_rsc=dCPgX_sCLW4HWyPL",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/?_rsc=DkIWp-xXBwaG4ASb",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/health?_rsc=242tnRB5_IlegzMX",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/settings?_rsc=242tnRB5_IlegzMX",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/train?_rsc=242tnRB5_IlegzMX",
+   "net::ERR_ABORTED Fetch https://lamberts-mac-mini.tailda76d6.ts.net/eat?_rsc=242tnRB5_IlegzMX"
+  ]
+ }
+}

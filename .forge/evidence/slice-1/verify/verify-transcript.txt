@@ -1,0 +1,60 @@
+Verifier re-test of slice 1, 2026-08-21T22:11:21Z. Every command below was run by the verifier against the running stack, not copied from the builder's transcript.
+
+== F2, liveness to an unauthenticated caller ==
+$ curl -sS -i https://lamberts-mac-mini.tailda76d6.ts.net/healthz
+HTTP/2 200 
+cache-control: no-store
+content-type: application/json
+date: Fri, 21 Aug 2026 22:11:21 GMT
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch
+x-robots-tag: noindex
+
+{"status":"ok"}
+body bytes:       15
+grep -icE against 25 integration, version and count terms: 0
+
+== F3, listener bound to loopback only ==
+$ lsof -nP -iTCP -sTCP:LISTEN | grep :3000
+com.docke  1387 lambertbouley  115u  IPv4 0xe3810fe99294a4df      0t0  TCP 127.0.0.1:3000 (LISTEN)
+$ docker compose port app 3000
+127.0.0.1:3000
+$ curl --max-time 3 http://192.168.1.97:3000/healthz
+curl: (7) Failed to connect to 192.168.1.97 port 3000 after 1 ms: Couldn't connect to server
+exit=7
+$ curl --max-time 3 http://100.65.127.62:3000/healthz
+curl: (7) Failed to connect to 100.65.127.62 port 3000 after 1 ms: Couldn't connect to server
+exit=7
+
+== C1, manifest and icons ==
+content-type: application/manifest+json; charset=utf-8
+display: standalone name: Vernier icons: 4
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon-180.png" sizes="180x180" type="image/png"/>
+public/icons/apple-touch-icon-180.png: PNG image data, 180 x 180, 8-bit/color RGB, non-interlaced
+
+== D2, icon checksums against create-next-app 16.3.2 defaults ==
+shipped:
+39056eda0b087f440f1bd14d31f103ce7509b3a24eecc987c98a1343b386b90b  public/favicon.ico
+9f907702c32b177471ff50b223488c49d7a432c38dca66898eb8a62b4e5178ea  public/icons/apple-touch-icon-180.png
+0a8f10a8f16156a204a3fa9dc5626f9f389b9495d2e22f1c345d716ff50405b7  public/icons/favicon-32.png
+b6e7375745728145fda2870585eea7ea80fe3c443140737bbecd30072389abc0  public/icons/icon-192.png
+27331d9c7189e05e65f90fe672e5f3925521e89b73b81e0ae0337dadc1154c0e  public/icons/icon-512.png
+ace0c559c9fafd05fb80d67abe126c8513f31cfb367144685075a497331d7b33  public/icons/vernier-mark.svg
+framework defaults (from registry.npmjs.org/create-next-app/-/create-next-app-16.3.2.tgz):
+  2b8ad2d33455a8f736fc3a8ebf8f0bdea8848ad4c0db48a2833bd0f9cd775932  favicon.ico (25931 bytes)
+  55995dfad6ecb4945a1e856ddca03c5e16aa5bf13fd21b4df6a74ae79357bcfc  next.svg
+  f081337b2fee635b455b63275406a3e7f39d6a014e25ad90dab5a67e62a12ac4  vercel.svg
+  2b67812c325c199a02536cdbeea0c593a72f707d323b72ee3e08dbab06753bd4  file.svg
+  b614b9bf183925957661ac851498fe1d8029fd43a62fbfed86f9e2624a57e7cf  globe.svg
+  644768c4aaeb4767bce293344eeb0c125fb804a94d801440424072202d85e3a1  window.svg
+intersection of the two sets: none
+container copy:
+39056eda0b087f440f1bd14d31f103ce7509b3a24eecc987c98a1343b386b90b  /app/public/favicon.ico
+9f907702c32b177471ff50b223488c49d7a432c38dca66898eb8a62b4e5178ea  /app/public/icons/apple-touch-icon-180.png
+ace0c559c9fafd05fb80d67abe126c8513f31cfb367144685075a497331d7b33  /app/public/icons/vernier-mark.svg
+0a8f10a8f16156a204a3fa9dc5626f9f389b9495d2e22f1c345d716ff50405b7  /app/public/icons/favicon-32.png
+27331d9c7189e05e65f90fe672e5f3925521e89b73b81e0ae0337dadc1154c0e  /app/public/icons/icon-512.png
+b6e7375745728145fda2870585eea7ea80fe3c443140737bbecd30072389abc0  /app/public/icons/icon-192.png
+
+== D4, markers in shipped source ==
+$ grep -rnE '(TODO|FIXME|XXX|HACK)' src public scripts drizzle Dockerfile compose.yaml next.config.ts
+matches: 1  (1 = zero matches)

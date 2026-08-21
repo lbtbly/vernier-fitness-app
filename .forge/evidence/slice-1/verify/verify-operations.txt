@@ -1,0 +1,118 @@
+Verifier re-test of the operational lines, slice 1, 2026-08-21T21:58Z to 22:10Z.
+Every result below was produced by the verifier running the command on this
+host against the shipped stack. Nothing here is copied from the builder.
+
+== F1, cold start ==
+$ docker compose ps -q --all
+5663317e0147... (app)   17c3e7217d76... (db)
+$ docker compose down            # no -v; both named volumes survive
+ Container vernier-db-1 Removed / Network vernier_default Removed
+$ docker volume ls --filter name=vernier
+vernier_pgdata
+vernier_storage
+$ docker compose up -d --build   # timed until both report healthy
+seconds to both healthy: 15      (the bar is 120)
+SERVICE   STATUS
+app       Up 7 seconds (healthy)
+db        Up 12 seconds (healthy)
+$ docker image inspect --format '{{.Os}}/{{.Architecture}}'
+vernier-app:local -> linux/arm64
+postgres:18-alpine -> linux/arm64
+
+== F5, the three scripts, twice each, against a running stack ==
+ids0: 53d561b6ee57... 868d3b2407e5...
+up.sh run 1 exit=0 / up.sh run 2 exit=0
+ids1: 53d561b6ee57... 868d3b2407e5...
+status.sh run 1 exit=0 / status.sh run 2 exit=0
+ids2: 53d561b6ee57... 868d3b2407e5...
+down.sh run 1 exit=0 / down.sh run 2 exit=0     (compose stop, not down)
+ids3: 53d561b6ee57... 868d3b2407e5...           app Exited (143), db Exited (0)
+$ docker volume ls --filter name=vernier  ->  vernier_pgdata, vernier_storage
+up.sh restore exit=0
+ids4: 53d561b6ee57... 868d3b2407e5...
+$ grep -rn 'down -v|down --volumes' scripts/  ->  none
+Six runs, six exit 0, one pair of container ids at all five checkpoints.
+
+== F6, migrations, on a database the verifier made cold ==
+The owner's database was not destroyed. A scratch database was created inside
+the same postgres container, the shipped image was booted against it twice,
+and the scratch database was dropped afterwards.
+$ docker compose exec -T db psql ... -c "create database verify_cold"
+$ docker compose run -d --no-deps app sh -c 'export DATABASE_URL="${DATABASE_URL%/*}/verify_cold"; node server.js'
+[vernier] migrations: 1 applied, 1 total, in 28 ms
+$ (same command again)
+[vernier] migrations: 0 applied, 1 total, in 16 ms
+$ psql -d verify_cold -c "\dt" -c "select count(*) from drizzle.__drizzle_migrations"
+ public | app_meta | table     count = 1
+$ docker compose exec -T db psql ... -c "drop database verify_cold"
+And on the live database, this boot: [vernier] migrations: 0 applied, 1 total, in 18 ms
+
+== F7, origin and relying party read from configuration ==
+Two independent demonstrations.
+
+1. From the environment file itself, observed at both ends by the verifier.
+   Before the lead repaired the file, /sign-in reported
+     Relying party name = Health
+   After the repair and `bash scripts/up.sh`, with no source file touched,
+   the same page reported
+     Relying party name = Vernier
+   git status over src, public, scripts, drizzle, Dockerfile, compose.yaml,
+   next.config.ts and package.json: clean, both before and after.
+
+2. The two values F7 names, on the shipped image, without touching the file:
+$ docker compose run -d --no-deps -p 127.0.0.1:3001:3000 \
+    -e APP_URL=https://vernier-test.tailda76d6.ts.net \
+    -e WEBAUTHN_RP_ID=tailda76d6.example.net app
+   port 3000 (the live container):
+     Application origin = https://lamberts-mac-mini.tailda76d6.ts.net
+     Passkey relying party = tailda76d6.ts.net
+   port 3001 (same image, two variables changed):
+     Application origin = https://vernier-test.tailda76d6.ts.net
+     Passkey relying party = tailda76d6.example.net
+     /offline names the host vernier-test.tailda76d6.ts.net
+   port 3000 again after the one-off container was removed: unchanged.
+   Digest over every shipped source file, before and after:
+     7a94f18de855c7f71241175b14098c30531ffb0aaa639b66f1bca907254b4595
+     7a94f18de855c7f71241175b14098c30531ffb0aaa639b66f1bca907254b4595
+   The path from file to process is compose interpolation, APP_URL: ${APP_URL}
+   and WEBAUTHN_RP_ID: ${WEBAUTHN_RP_ID} in compose.yaml, which demonstration 1
+   exercised end to end.
+
+== R1, certificate and exposure ==
+$ curl -sS -o /dev/null -w 'http=%{http_code} ssl_verify=%{ssl_verify_result}' https://lamberts-mac-mini.tailda76d6.ts.net/healthz
+http=200 ssl_verify=0            (system trust store, no -k, no manual step)
+subject=CN=lamberts-mac-mini.tailda76d6.ts.net
+issuer=C=US, O=Let's Encrypt, CN=YE1
+notBefore=Aug 21 19:56:06 2026 GMT   notAfter=Nov 19 19:56:05 2026 GMT
+$ tailscale serve status --json
+one Web handler, lamberts-mac-mini.tailda76d6.ts.net:443 -> Proxy http://127.0.0.1:3000
+TCP 443 HTTPS true. No AllowFunnel key anywhere in the configuration.
+$ bash scripts/tailscale-serve.sh   (twice)
+run 1 exit=0, run 2 exit=0, both print "already serving ... Nothing changed",
+"funnel: zero entries", "https proxies: 1".
+sha256 of the serve configuration before and after both runs:
+a7baba93e68911bfd9b7fd6e064a0586202e82ec67e1737cf577b0cbab4d1960  (identical)
+
+== The second device, F4 and R1 ==
+$ tailscale status
+100.65.127.62  lamberts-mac-mini     macOS
+100.121.138.9  iphone181             iOS     online, pong in 35 ms
+100.72.168.17  lamberts-macbook-air  macOS   online, pong in 7 ms
+Both peers answer tailscale ping. Neither can be driven from this host:
+$ nc -z -w 4 <peer> 22 / 5900 / 3283 / 3031 / 88 / 8080  ->  every port closed
+on both peers, so there is no SSH, no Tailscale SSH, no ARD and no Remote
+Apple Events. The verifier therefore cannot originate an HTTP request on a
+second device and did not observe one.
+$ curl -o /dev/null -w '%{http_code}' https://lamberts-mac-mini.tailda76d6.ts.net/api/diagnostics/device
+404   The endpoint PREFLIGHT.md names as the durable record of a device visit
+      does not exist yet, so the owner's Home Screen launch left nothing a
+      command can read back.
+
+== The test suite ==
+There is none. package.json declares dev, build, start, typecheck, db:generate
+and icons, and no test runner is installed. No file in the tree matches
+*.test.* or *.spec.*. No line of DOD.md names a test suite.
+What does exist, run by the verifier against the shipped tree:
+$ npm run typecheck   ->  tsc --noEmit, exit 0, no output
+$ docker compose build app  ->  exit 0, vernier-app:local linux/arm64
+$ FORGE_CHECKS_FULL=1 bash scripts/checks.sh  ->  exit 0

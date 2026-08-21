@@ -1,0 +1,94 @@
+Verifier craft re-test, slice 1, 2026-08-21T21:52Z to 22:05Z.
+Driven by the verifier's own CDP script (cdp.mjs, layout.mjs, offline2.mjs,
+focus.mjs, loading.mjs in this directory), headless Chrome, device scale 2,
+against https://lamberts-mac-mini.tailda76d6.ts.net. No project script was
+reused.
+
+== The walk, owner in daily mode ==
+Tapped each tab in the tab bar, client side, and read the result:
+  tap Health   -> /health   h1 Health   aria-current Health   title "Health · Vernier"   620 ms
+  tap Train    -> /train    h1 Train    aria-current Train    title "Train · Vernier"    609 ms
+  tap Eat      -> /eat      h1 Eat      aria-current Eat      title "Eat · Vernier"      605 ms
+  tap Settings -> /settings h1 Settings aria-current Settings title "Settings · Vernier" 609 ms
+  tap Today    -> /         h1 Today    aria-current Today    title "Today · Vernier"    608 ms
+Console errors during the walk: 0.
+
+== The walk, unauthenticated visitor on the tailnet ==
+Every route answers 200 with no credential in the rendered output. A grep of
+all eight rendered documents for postgres://, MASTER_KEY, DATABASE_URL,
+POSTGRES_PASSWORD, a private key header, client_secret, api_key and bearer
+returns zero matches. /settings exposes the application name, the origin, the
+relying-party identifier and the time zone, and nothing else.
+The gate itself is slice 2 (F8 to F18), so the visitor reaching the five tabs
+today is per plan, not a slice 1 defect. It is recorded here so the boundary is
+measured the day its slice lands.
+
+== Layout, 8 routes x 3 viewports, 24 captures in captures/ ==
+393 x 852, 768 x 1024, 1280 x 800, deviceScaleFactor 2.
+scrollWidth equals innerWidth on all 24: no horizontal scroll anywhere.
+Overlapping siblings, excluding SVG internals: zero on all 24.
+Clipped or overflowing leaf text: zero on all 24.
+Touch targets under 44 px: none. Tab bar items measure 76 x 48.
+Console errors: zero on every route except /nope, where the single entry is the
+browser reporting the 404 status of the navigation itself, not a script error.
+Aborted requests seen on the tab routes are Next's own ?_rsc= prefetches, torn
+down when the harness navigates away; none is a user-visible failure.
+
+== Tokens, measured in the browser against DESIGN.md section 3 ==
+--bg #0a0a0b, --surface #141416, --text #f5f5f7, --accent #5aa9ff,
+--focus #8fc4ff, --touch 44px, --t-display 30px, --s4 16px, --r-lg 16px,
+--font -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui.
+h1 computes to 30px / 33px / -0.6px / 700 / rgb(245,245,247), which is
+--t-display, --t-display-lh and --t-display-ls at -0.02em.
+Tab bar: 57 px tall on a machine with no home indicator, --surface ground,
+1 px --line top border, current item --accent, the other four --text-3.
+html lang="en", data-theme="dark", one h1 per page, nav[aria-label], main,
+no image without alt, no unlabelled svg.
+
+== The five states against screen 00 ==
+Loading   captures/loading-health.png. Seven skeleton blocks at the final
+          geometry, --surface-2 ground, pulse 1.4s, no spinner, no fake curve,
+          aria-busy with a "Loading" label for a screen reader.
+Empty     captures/393-today.png and the four sibling tabs. Dashed card, label,
+          a title naming what is absent, a sentence, one primary action.
+          Six distinct bodies, no boilerplate repeated.
+Error     captures/offline-cold.png. Solid card, --alert border, "Failed" chip,
+          the failure in words, a line saying what still works, one button.
+Offline   captures/offline-warm.png. Named cause, the host in bold, what works
+          offline, one action, "Try again". Correct only on the warm path;
+          see the defect below.
+Focus     2 px solid rgb(143,196,255) at 2 px offset on every one of the seven
+          tab stops, verified with real Tab key events, captures/focus-keyboard.png.
+
+== C3, the defect ==
+Two runs of offline2.mjs, same code, one variable: whether /offline was opened
+in the browser while the network was up.
+
+COLD, which is the owner's real path (install, use the five tabs, lose the
+network, then open anything not already cached):
+  navigate to /settings/backup with the network disabled on the page and on the
+  service worker target
+  document.title  "Offline · Vernier"
+  what renders    "This screen failed to load /
+                   Failed to load chunk /_next/static/chunks/1ekd5rmj9g-ub.js
+                   from module 64893 /
+                   The rest of the app is unaffected. The five tabs below still
+                   work. / Try again"
+  failed request  net::ERR_FAILED .../_next/static/chunks/1ekd5rmj9g-ub.js
+  capture         captures/offline-cold.png
+
+WARM, only after /offline had been opened once while online:
+  what renders    "This phone cannot reach the Mac mini / The app shell is
+                   stored on this device, so it opened. Everything else waits
+                   for lamberts-mac-mini.tailda76d6.ts.net. Either this device
+                   has left the tailnet, or the Mac mini is asleep or stopped.
+                   / WHAT WORKS OFFLINE ... / Try again"
+  capture         captures/offline-warm.png
+
+Cause: public/sw.js SHELL_ASSETS precaches the /offline document but no
+/_next/static entry. cache.addAll stores the HTML only, so the JS chunk that
+/offline's client bundle needs is fetched lazily on a real visit and is absent
+from a cache built by the install event. Offline, that chunk request fails and
+the error boundary paints over the offline screen. The service worker itself is
+correct: registration is active at scope /, the controller is /sw.js, and
+/sw.js is served with cache-control: no-cache, no-store, must-revalidate.
