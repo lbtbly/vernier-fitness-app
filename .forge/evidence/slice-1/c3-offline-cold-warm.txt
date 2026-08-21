@@ -43,3 +43,19 @@ $ node .forge/evidence/slice-1/verify/offline2.mjs warm
 --- WARM (offline page visited while online) ---
 {"title":"Offline · Vernier","h1":"This phone cannot reach the Mac mini","text":"OFFLINE\nThis phone cannot reach the Mac mini\nThe app shell is stored on this device, so it opened. Everything else waits for lamberts-mac-mini.tailda76d6.ts.net. Either this device has left the tailnet, or the Mac mini is asleep or stopped.\nWHAT WORKS OFFLINE\n\nThe shell, the five tabs and this screen. Nothing has been lost and nothing needs redoing.\n\nTry again\nToday\nHealth\nTrain\nEat\nSettings"}
 failed requests: []
+
+== The offline document keeps the shell's craft, measured in the browser ==
+Six real Tab key events on /offline at 393x852, reading the computed style of
+document.activeElement each time:
+
+{"tag":"button","text":"Try again","outline":"rgb(143, 196, 255) solid 2px","offset":"2px","w":327,"h":44}
+{"tag":"a","text":"Today","outline":"rgb(143, 196, 255) solid 2px","offset":"2px","w":76,"h":48}
+{"tag":"a","text":"Health","outline":"rgb(143, 196, 255) solid 2px","offset":"2px","w":76,"h":48}
+{"tag":"a","text":"Train","outline":"rgb(143, 196, 255) solid 2px","offset":"2px","w":76,"h":48}
+{"tag":"a","text":"Eat","outline":"rgb(143, 196, 255) solid 2px","offset":"2px","w":76,"h":48}
+{"tag":"a","text":"Settings","outline":"rgb(143, 196, 255) solid 2px","offset":"2px","w":76,"h":48}
+
+2 px solid rgb(143,196,255), which is --focus, at 2 px offset on all six stops.
+The action is 44 px tall and the five tab items are 76 x 48, the same geometry
+the verifier measured on the React shell. Layout at three viewports: 393, 768
+and 1280 all report scrollWidth equal to viewport, no horizontal scroll.
