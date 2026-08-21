@@ -1,14 +1,31 @@
 /**
- * Runs once per server process, before the first request is handled. This is
- * where the schema catches up: migrations apply from inside the app container
- * on boot, so there is no second command to remember and no window where the
- * server answers against a schema that is behind the code.
+ * Runs once per server process, before the first request is handled. Two
+ * things have to be true before this app is allowed to serve: the master key
+ * must be usable, and the schema must be current.
  *
  * A failure here is fatal on purpose. A container that restarts loudly beats a
- * container that serves a half-migrated database quietly.
+ * container that serves a half-migrated database, or writes a credential in
+ * the clear, quietly.
  */
 export async function register(): Promise<void> {
   if (process.env.NEXT_RUNTIME !== 'nodejs') return;
+
+  const host = globalThis.process as unknown as { exit?: (code: number) => never };
+
+  // The key that every third-party credential in the database is encrypted
+  // with. Refuse to serve rather than run with encryption switched off, because
+  // a process that boots without it will happily write the next credential in
+  // the clear and nothing downstream would notice. F17.
+  try {
+    const { assertMasterKey } = await import('./lib/master-key');
+    const fingerprint = assertMasterKey();
+    console.log(`[vernier] master key: present, fingerprint ${fingerprint}`);
+  } catch (error) {
+    console.error(`[vernier] refusing to start: ${(error as Error).message}`);
+    host.exit?.(1);
+    return;
+  }
+
   if (process.env.SKIP_MIGRATIONS === '1') {
     console.log('[vernier] migrations: skipped, SKIP_MIGRATIONS=1');
     return;
@@ -22,7 +39,6 @@ export async function register(): Promise<void> {
     // Reached through globalThis so the Edge bundle Turbopack also builds does
     // not see a Node-only API it would refuse. This branch only ever runs
     // under the Node runtime, which the guard above enforces.
-    const host = globalThis.process as unknown as { exit?: (code: number) => never };
     host.exit?.(1);
   }
 }

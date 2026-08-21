@@ -1,12 +1,27 @@
-import { EmptyState } from '@/components/EmptyState';
+import { redirect } from 'next/navigation';
+import { OperatorPanel } from '@/components/OperatorPanel';
 import { ScreenTitle } from '@/components/ScreenTitle';
+import { listCredentials } from '@/db/auth';
+import { describeIntegrations } from '@/db/integrations';
 import { getConfig } from '@/lib/config';
+import { readCsrfToken } from '@/lib/csrf';
+import { longDate, time24 } from '@/lib/format';
+import { readSession } from '@/lib/session';
 import { strings } from '@/lib/strings';
 
 export const metadata = { title: strings.settings.title };
+export const dynamic = 'force-dynamic';
 
-export default function SettingsPage() {
+export default async function SettingsPage() {
   const config = getConfig();
+  const session = await readSession();
+  if (!session) redirect('/sign-in');
+
+  const [integrations, passkeys, csrfToken] = await Promise.all([
+    describeIntegrations(),
+    listCredentials(session.ownerId),
+    readCsrfToken(),
+  ]);
 
   const rows: Array<[string, string]> = [
     [strings.settings.fieldAppName, config.appName],
@@ -14,6 +29,9 @@ export default function SettingsPage() {
     [strings.settings.fieldRpId, config.rpId],
     [strings.settings.fieldTimeZone, config.timeZone],
   ];
+
+  const when = (date: Date) =>
+    `${longDate(date, config.timeZone)}, ${time24(date, config.timeZone)}`;
 
   return (
     <>
@@ -34,12 +52,45 @@ export default function SettingsPage() {
         </p>
       </section>
 
-      <EmptyState
-        label="Integrations"
-        title={strings.settings.emptyTitle}
-        body={strings.settings.emptyBody}
-        actionLabel={strings.common.createAccount}
-        actionHref="/sign-in"
+      <section className="card">
+        <span className="lbl">{strings.settings.passkeysTitle}</span>
+        {passkeys.length === 0 ? (
+          <p className="sub" style={{ marginTop: 'var(--s2)' }}>
+            {strings.settings.passkeysEmpty}
+          </p>
+        ) : (
+          passkeys.map((passkey) => (
+            <div className="row" key={passkey.id}>
+              <div className="grow stack">
+                <div className="head">{passkey.label}</div>
+                <div className="note">
+                  {strings.settings.passkeyDeviceType}: {passkey.deviceType}
+                </div>
+                <div className="note">
+                  {strings.settings.passkeyBackedUp}:{' '}
+                  {passkey.backedUp ? strings.settings.yes : strings.settings.no}
+                </div>
+                <div className="note">
+                  {strings.settings.passkeyLastUsed}:{' '}
+                  {passkey.lastUsedAt ? when(passkey.lastUsedAt) : strings.settings.passkeyNeverUsed}
+                </div>
+              </div>
+              <span className={passkey.backedUp ? 'chip g' : 'chip'}>
+                {passkey.backedUp ? strings.settings.passkeySynced : strings.settings.passkeyLocal}
+              </span>
+            </div>
+          ))
+        )}
+        <p className="note" style={{ marginTop: 'var(--s3)' }}>
+          {strings.settings.passkeysNote}
+        </p>
+      </section>
+
+      <OperatorPanel
+        integrations={integrations}
+        method={session.method}
+        expiresAt={when(session.expiresAt)}
+        csrfToken={csrfToken}
       />
     </>
   );

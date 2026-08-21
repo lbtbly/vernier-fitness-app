@@ -85,6 +85,8 @@ export const strings = {
     passkeyBackedUp: 'Backed up',
     passkeyLastUsed: 'Last used',
     passkeyNeverUsed: 'Not used yet',
+    passkeySynced: 'Synced',
+    passkeyLocal: 'This device only',
     yes: 'Yes',
     no: 'No',
 

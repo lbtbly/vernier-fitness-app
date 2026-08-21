@@ -238,6 +238,11 @@ export async function recordAuthAttempt(input: {
  * The failures inside the current window. Refusals by the limiter itself are
  * excluded: they are not attempts on the credential and must not extend the
  * pause.
+ *
+ * Failures older than the last `unlocked` row are excluded too. That is how
+ * `scripts/recovery.sh unlock` clears a lockout without deleting or editing a
+ * single audit row: the log stays append only and the window simply starts
+ * again from the moment the operator said so.
  */
 export async function recentFailures(): Promise<Date[]> {
   const db = getDb();
@@ -248,6 +253,7 @@ export async function recentFailures(): Promise<Date[]> {
       and(
         eq(authAttempt.outcome, 'failure'),
         sql`${authAttempt.at} > now() - make_interval(secs => ${SIGN_IN_WINDOW_SECONDS})`,
+        sql`${authAttempt.at} > coalesce((select max(a.at) from auth_attempt a where a.outcome = 'unlocked'), to_timestamp(0))`,
       ),
     );
   return rows.map((row) => row.at);
