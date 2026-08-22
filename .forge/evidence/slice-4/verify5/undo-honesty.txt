@@ -1,0 +1,21 @@
+Undo, tested against what the database actually holds. Chrome, scratch instance.
+
+A. Undo tapped while the send is in the air (POST delayed 4 s, then allowed).
+   discard() waits for the flight to settle, 9.0 s measured, then reports
+   tooLate. Chip reads "Stored". The row IS in the database. TRUTHFUL.
+
+B. Undo tapped offline, entry sitting in the queue.
+   Chip reads "Removed". No row in the database. TRUTHFUL.
+
+C. The Mac mini answers 422 to the queued write (PARK_ON in src/lib/outbox.ts
+   holds 400, 404, 405, 410, 413, 422).
+   The entry is parked. depth() filters parked, so the offline line and its
+   count DISAPPEAR. stillQueued() filters parked, so the row flips to state
+   "applied" and the chip reads "Stored". Nothing is in the database. Undo is
+   gone and a "Correct it" link points at a measurement that does not exist.
+   FALSE, in three places at once.
+   LIMIT: reproduced by fulfilling the response, not through a shipped path. I
+   could find no request the shipped client can make that the shipped server
+   answers with one of those six statuses: the client pre-validates with the
+   same function the route uses, and a 6,000,000-character note was accepted
+   and stored rather than refused. Recorded as latent.

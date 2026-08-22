@@ -1,0 +1,57 @@
+F27, amended (A5). Independent re-verification, verifier, 2026-08-22.
+Image rebuilt from the working tree at 03ae35d and restarted before measuring.
+Scratch instance, same image, DEMO_MODE=1. Viewport 393x852, scrollY 0 on every reading.
+
+BASELINE, both engines, identical to the pixel
+  trend bottom 600   fold 715   adherence top 1051 (below the trend)
+  header.title 63   details.notices 46 (1 notice)   section.card.day 294
+  card padding 16px   card gap 12px   sideways scroll 0
+
+WORST CASE REACHED, both engines, identical
+  101 queued entries + 2 notices (stale source + open import question)
+  + one write of all six values F23 names + a 2,240-character note
+  trend bottom 679   header.title 63   .banner.queue 39 ("Offline. 101 entries
+  saved on this phone.", class "banner queue", not "banner w", outside the
+  notice region)   details.notices 46   section.card.day 322
+  card padding 16px   card gap 12px   sideways scroll 0
+
+EACH BOUND ATTACKED, not observed
+  day card, session row     500-char title, 276-char place, 535-char cause:
+                            294 px, unmoved. A 400-char unbreakable token:
+                            294 px, unmoved, sideways scroll 0.
+  day card, entry row       2,376-char note with all six values, queued, with
+                            Undo and Edit drawn: 322 px. The head is clamped to
+                            two lines; every other line is nowrap + ellipsis.
+  day card, many writes     101 queued entries draw ONE entry row. justLogged
+                            is a single value, so no count can append a row.
+  notice region             1 and 2 real notices: 46 px. An 8,000-character
+                            string injected into summary > b: 46 px. A 19,500-
+                            character breakable string: 46 px.
+  offline line              1 and 101 real queued entries: 39 px. The same two
+                            injected strings: 39 px.
+  header.title              all 84 weekday x month labels the formatter can
+                            produce, at day 28: 63 px, every one, both engines.
+  weight card above chart   measured 85 px card top to chart top, 165 px card
+                            top to chart bottom, in every state and both
+                            engines. The builder states 177, which is
+                            conservative against the measurement.
+
+THE SUM
+  8 scroll padding + 63 title + 39 offline line + 46 notice region
+  + 322 day card + 177 weight card above its chart + 36 three card gaps = 691
+  691 <= 715. Substituting the measured 165 for the claimed 177 gives 679,
+  which is exactly the deepest trend bottom observed.
+
+THE TWO CARD VALUES
+  getComputedStyle(section.card.day).paddingTop = 16px and marginBottom = 12px
+  on every reading, on the scratch instance and on the live install, in both
+  engines, at 393, 768 and 1280. DESIGN.md section 3. The .today compression is
+  gone from the stylesheet.
+
+WHAT IS NOT CLAMPED, and why it still holds
+  header.title and the weight card's header take their size from a closed set of
+  catalogued strings and formatted numerals, not from any count of rows. The
+  title is proven over its whole population above. The weight header carries
+  strings.metrics.weight_average_7d, a SourceChip from a six-value enum, a
+  number inside the 20-400 kg band and one catalogued note. Neither carries a
+  clamp, so neither would resist a longer string written into it later.

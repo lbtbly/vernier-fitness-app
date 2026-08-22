@@ -1,0 +1,87 @@
+C7, C8, F32, F34, re-ruled on the live install after the layout change.
+https://lamberts-mac-mini.tailda76d6.ts.net, WebKit and Chrome, 393x852,
+768x1024, 1280x900. Twelve captures c7-{engine}-{width}-{today,health}.png.
+
+C7
+  order on Today, every viewport, both engines:
+    header.title | details.notices | section.card.day | section.card (weight,
+    carrying [data-chart=today-weight]) | section.card (waist) |
+    section.card.adherence | ...
+  adherence top 1051 against a trend bottom of 600. Below the trend, which is
+  screen 02's order.
+  card padding 16px, card gap 12px, computed off section.card.day.
+  accented actions: exactly 1 per screen, every viewport, both engines.
+    Today "Quick log", Health "Save the goal".
+  origin chips: 14 on Today, 6 on Health, every one rgb(161,161,168) on
+    rgb(28,28,31) with a rgb(58,58,64) border. Neutral chrome. The only
+    coloured chip is .src.stale, which DESIGN.md section 5 gives --warn.
+  sideways scroll 0 at all three widths on both screens.
+  restored and present: the seven day-pills with their date labels, the waist
+    card's Measure control, and the sentence "Two missed sessions in a month is
+    not a failure state, and the app does not colour it like one."
+  the waist headline "99.0 cm" does not wrap at 393.
+  LIMIT: 04-health.html frame 1 draws a body-composition row, "Fat mass 22.4 %,
+    muscle 62.8 kg, body water 53.1 %". No fat-mass, muscle or body-water metric
+    exists in src/lib/provenance.ts at all; they arrive with Withings in slice 5.
+    Screen 04 frame 3 draws Health without that row, which is the state this
+    install is in. Every other clause of C7 is proven at three viewports in two
+    engines. The final full-scope pass must compare that row on a build that
+    holds Withings body composition.
+
+C8
+  Read over CDP Accessibility.getFullAXTree on the pages as served, no mutation.
+  Today: 2 tables, 30 data rows each, wrapper display block, overflow hidden,
+  aria-hidden absent. Health: 5 tables, 30 rows each. Sample cell names read
+  back "88.3 kg", "Withings", "88.4 kg", "Withings". Every chart svg[role=img]
+  carries a title and a description: 2 of 2 on Today, 4 of 4 on Health.
+  The clip is on a wrapper, so the table lays out at its own width inside a
+  clipped box: sideways scroll 0 on both screens at 393. display:none, the trap,
+  is not used.
+  LIMIT carried unchanged from the earlier tick: still no VoiceOver recording.
+  What was read is the platform tree VoiceOver consumes.
+
+F32
+  Present state, live install: Activity 9,412 steps, Sleep 7 h 04, Heart 58 bpm,
+  Recovery 46 ms, VO2 max 38.4. Five of five.
+  Absent state, scratch instance with an empty database: five empty states, each
+  naming what is absent and what to do.
+    "No step counts stored / Steps arrive from a shortcut on the iPhone. Until
+     one does, this stays empty rather than showing a zero you did not walk. /
+     Open integrations"
+    "No sleep stored / ... / Open integrations"
+    "No resting heart rate stored / ... / Open integrations"
+    "Recovery, heart rate variability — Not stored. Heart rate variability
+     arrives from the watch."
+    "VO2 max — Not stored. The watch estimates it every few weeks."
+  No bare zero anywhere on the page. Captures f32-empty-health.png,
+  f32-empty-today.png.
+
+F34
+  Live install: the warn chip reads "Health, 4 days old", the cause sentence
+  reads "The iPhone shortcut last sent a batch on 18 Aug, 07:18.", and the
+  affected range is hatched on the activity, sleep and heart charts.
+  trend-scratch.spec.ts proves 37 hours, 35 hours and a fresh sample; it passed
+  in the full run.
+  The hollow assertion is moved, not deleted: line 186 asks the notice-region
+  count on Today, where NoticeRegion renders and the assertion can fail, with
+  the quiet-source count printed beside it. tests/unit/suite-safety.test.ts
+  asserts that no [data-notices] locator survives on the /health half of that
+  file.
+  The sweep is real. I counted the class myself with the same regex over
+  tests/e2e/*.spec.ts and got quick-log 10, passkey 1, trend-scratch 5, today 6,
+  notices 3, suite-privilege 1 = 26, matching the inventory exactly, and the
+  unit test fails if any count moves. I spot-read passkey:77, notices:443 and
+  today:374-375 and each is a real assertion over a printed population.
+  GAP, recorded not ruled: the sweep's regex does not reach
+  expect(query(...)).toBe('0'), of which bootstrap.spec.ts and demo-seed.spec.ts
+  carry 16. I read them; every one is a real zero over a population the test
+  itself created. But a hollow assertion written in that shape in slice 5 or 13
+  would pass the sweep unrecorded.
+
+F4, R1, C2
+  device_observation read before this dispatch and again after it, through the
+  read-only suite role:
+    standalone_seen      t  first 2026-08-22 16:13:55.795+02  last 20:28:20.543872+02
+    wake_lock_available  t  first 2026-08-22 16:13:55.804+02  last 16:13:55.804748+02
+  Unmoved to the microsecond. The owner's census is unchanged at 90 measurement,
+  38 source_record, 1 not seeded. The three lines stay unchecked, owner-blocked.

@@ -1,0 +1,28 @@
+C5, quick log against screen 03, three viewports, WebKit unless noted.
+
+HOLDS
+  presented as a sheet, .sheet[role=dialog][aria-modal=true], at 393, 768, 1280
+  Save 52 px, DESIGN.md section 2b's quick-log escalation
+  card padding 16 px inside the sheet: the .today compression no longer leaks
+  loading  skeleton card at the final geometry, no spinner
+  empty    screen 03 frame 3's card and its instruction sentence, verbatim
+  error    (Chrome; WebKit will not route the sheet's own fetch) alert border
+           rgb(240,122,106), the actual failure in words, one button "Try again",
+           and the line saying the sheet still saves
+  offline  neutral line under the title with the count on it
+  stale    "Waist last measured 3 days ago / Measure again at the navel..."
+  footer   "Saves on this phone first. Nothing here needs a network."
+
+FAILS
+  1. The waist value cannot be typed. See f23-first-waist.txt. Screen 03 frame
+     2's own caption reads "No spinner, no retry loop, no lost typing."
+  2. Typing is lost to the snapshot read. With GET /api/log delayed 3.5 s, the
+     sheet opens, the field is editable, 91.4 is typed into it, and when the
+     read lands setWaist(snapshot.lastWaist) replaces it with 98.5. Both
+     engines. The loading skeleton is drawn BESIDE the live field, so nothing on
+     screen says the value is about to be replaced. Captures race-chrome.png,
+     race-webkit.png.
+  3. The waist field is 133x40 px, under C5's 44 px minimum target, at all three
+     viewports. DESIGN.md section 2b: 44 px is the floor a control may not go
+     under. The sheet draws the value as a div.metric; the build made it a field
+     to allow typing and did not give it the floor.

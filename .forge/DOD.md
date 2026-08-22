@@ -138,7 +138,7 @@ advance, so the budget does not have to be re-argued once per slice.
 - [ ] **F23.** Waist, energy, fatigue, hunger, satiety and a free note each commit
   from Today in six taps or fewer. Evidence: a scripted interaction printing the
   tap count for each of the six.
-- [ ] **F24.** With the origin unreachable, a quick-log write commits locally,
+- [x] **F24.** With the origin unreachable, a quick-log write commits locally,
   shows a queued marker and the queue count, and replays exactly once when the
   origin returns: one row in the database and one idempotency key in the request
   log. Evidence: the capture, the row count and the request log.
@@ -149,7 +149,7 @@ advance, so the budget does not have to be re-argued once per slice.
   holding both values and writes nothing until it is answered: the stored value is
   byte-identical before and after the import. Evidence: the question capture and
   the two row states.
-- [ ] **F27.** At 393x852 with no scrolling, a freshly loaded Today shows the
+- [x] **F27.** At 393x852 with no scrolling, a freshly loaded Today shows the
   session row, the meals, what needs logging and the weight trend within the top
   715 pixels, in every state the owner's own data can produce and not in one.
   Adherence is never drawn above the weight trend. Every element the page can draw
@@ -652,7 +652,7 @@ their interaction detail in `.forge/wireframes/`, and the standards skill.
   string the product authored with its key, produced by a walk that prints the
   surfaces it covered and covers at least one stored value per source, and a
   timezone-shifted run across six zones producing identical rendered dates.
-- [ ] **C7.** Today matches screen 02 and Health matches screen 04 at three
+- [x] **C7.** Today matches screen 02 and Health matches screen 04 at three
   viewports, with exactly one accented action per screen and origin badges rendered
   as neutral chrome rather than a semantic colour. Evidence: six captures plus a
   count of accented elements per screen.

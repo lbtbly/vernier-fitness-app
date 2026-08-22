@@ -1,0 +1,26 @@
+F23, first-ever waist. Scratch instance, DEMO_MODE=0, zero waist rows.
+
+The state renders exactly as 03-quick-log.html frame 3 draws it:
+  input value ""        placeholder "--"    class "metric mut waistfield"
+  minus disabled true   plus disabled true
+  empty card "No waist measurement yet / Tape at the navel, standing, breathing
+  out. Same spot each time matters more than the exact number."
+  footer "Fill what you have. Blank fields stay blank, they are not stored as
+  zero."
+
+And the value cannot be typed. The field is controlled on
+value={waist.toFixed(1)}, so every keystroke is round-tripped through Number()
+and toFixed(1) and the caret is reset to the end of the re-rendered string:
+
+  chrome  "9" -> "9.0" caret 3   "9" -> "9.1" caret 3   "." -> "9.1"   "0" -> "9.1"
+  webkit  "9" -> "9.0" caret 3   "9" -> "9.1" caret 3   "." -> "9.1"   "0" -> "9.1"
+
+Typing "99.0" yields 9.1. Save is then refused by the client band, correctly,
+at 30 cm, and nothing is stored. Both stepper hands are disabled while the field
+is blank, so there is no second path. On an install with no waist ever measured
+the first waist cannot be committed at all, at any tap count.
+
+The builder's evidence used page.locator('#quick-log-waist').fill('99.0'), which
+sets the whole value in one input event and never exercises typing.
+
+Capture: typing-webkit.png, typing-chrome.png, f23-first-chrome.png
