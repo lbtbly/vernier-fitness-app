@@ -1,0 +1,100 @@
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+
+### q196  anchor 2026-02-07, 1 quiet source(s), 1 open question(s)
+q196 chrome region 46 px, 2 notice(s), banners 1, trend ends 689, fold 715, scrollY 0
+q196 chrome line: 2 things are waiting on you
+      8..  65  h  57  header.title 
+     65.. 111  h  46  details.notices banner w data-notices=2
+    119.. 342  h 223  section.card day 
+    350.. 524  h 174  section.card adherence data-adherence=6
+    532.. 861  h 329  section.card data-card=weight
+    869..1082  h 214  section.card data-card=waist
+   1090..1428  h 338  section.card data-card=signals
+   1436..2219  h 783  section.card 
+   2227..2249  h  22  p.note centre 
+q196 webkit region 46 px, 2 notice(s), banners 1, trend ends 689, fold 715, scrollY 0
+q196 webkit line: 2 things are waiting on you
+      8..  65  h  57  header.title 
+     65.. 111  h  46  details.notices banner w data-notices=2
+    119.. 342  h 223  section.card day 
+    350.. 524  h 174  section.card adherence data-adherence=6
+    532.. 861  h 329  section.card data-card=weight
+    869..1082  h 214  section.card data-card=waist
+   1090..1428  h 338  section.card data-card=signals
+   1436..2219  h 783  section.card 
+   2227..2249  h  22  p.note centre 
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+
+### q198  anchor 2026-02-05, 2 quiet source(s), 1 open question(s)
+q198 chrome region 46 px, 2 notice(s), banners 1, trend ends 689, fold 715, scrollY 0
+q198 chrome line: 2 things are waiting on you
+      8..  65  h  57  header.title 
+     65.. 111  h  46  details.notices banner w data-notices=2
+    119.. 342  h 223  section.card day 
+    350.. 524  h 174  section.card adherence data-adherence=7
+    532.. 879  h 347  section.card data-card=weight
+    887..1100  h 214  section.card data-card=waist
+   1108..1479  h 371  section.card data-card=signals
+   1487..2270  h 783  section.card 
+   2278..2300  h  22  p.note centre 
+q198 webkit region 46 px, 2 notice(s), banners 1, trend ends 689, fold 715, scrollY 0
+q198 webkit line: 2 things are waiting on you
+      8..  65  h  57  header.title 
+     65.. 111  h  46  details.notices banner w data-notices=2
+    119.. 342  h 223  section.card day 
+    350.. 524  h 174  section.card adherence data-adherence=7
+    532.. 879  h 347  section.card data-card=weight
+    887..1100  h 214  section.card data-card=waist
+   1108..1479  h 371  section.card data-card=signals
+   1487..2270  h 783  section.card 
+   2278..2300  h  22  p.note centre 
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+
+### q199  anchor 2026-02-04, 2 quiet source(s), 1 open question(s)
+q199 chrome region 46 px, 2 notice(s), banners 1, trend ends 689, fold 715, scrollY 0
+q199 chrome line: 2 things are waiting on you
+      8..  65  h  57  header.title 
+     65.. 111  h  46  details.notices banner w data-notices=2
+    119.. 342  h 223  section.card day 
+    350.. 524  h 174  section.card adherence data-adherence=9
+    532.. 925  h 393  section.card data-card=weight
+    933..1146  h 214  section.card data-card=waist
+   1154..1525  h 371  section.card data-card=signals
+   1533..2316  h 783  section.card 
+   2324..2346  h  22  p.note centre 
+q199 webkit region 46 px, 2 notice(s), banners 1, trend ends 689, fold 715, scrollY 0
+q199 webkit line: 2 things are waiting on you
+      8..  65  h  57  header.title 
+     65.. 111  h  46  details.notices banner w data-notices=2
+    119.. 342  h 223  section.card day 
+    350.. 524  h 174  section.card adherence data-adherence=9
+    532.. 925  h 393  section.card data-card=weight
+    933..1146  h 214  section.card data-card=waist
+   1154..1525  h 371  section.card data-card=signals
+   1533..2316  h 783  section.card 
+   2324..2346  h  22  p.note centre 
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+
+### q200  anchor 2026-02-03, 2 quiet source(s), 1 open question(s)
+q200 chrome region 46 px, 2 notice(s), banners 1, trend ends 689, fold 715, scrollY 0
+q200 chrome line: 2 things are waiting on you
+      8..  65  h  57  header.title 
+     65.. 111  h  46  details.notices banner w data-notices=2
+    119.. 342  h 223  section.card day 
+    350.. 524  h 174  section.card adherence data-adherence=10
+    532.. 925  h 393  section.card data-card=weight
+    933..1146  h 214  section.card data-card=waist
+   1154..1510  h 356  section.card data-card=signals
+   1518..2301  h 783  section.card 
+   2309..2331  h  22  p.note centre 
+q200 webkit region 46 px, 2 notice(s), banners 1, trend ends 689, fold 715, scrollY 0
+q200 webkit line: 2 things are waiting on you
+      8..  65  h  57  header.title 
+     65.. 111  h  46  details.notices banner w data-notices=2
+    119.. 342  h 223  section.card day 
+    350.. 524  h 174  section.card adherence data-adherence=10
+    532.. 925  h 393  section.card data-card=weight
+    933..1146  h 214  section.card data-card=waist
+   1154..1510  h 356  section.card data-card=signals
+   1518..2301  h 783  section.card 
+   2309..2331  h  22  p.note centre 

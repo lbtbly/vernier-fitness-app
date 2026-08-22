@@ -1,0 +1,4 @@
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+anchor 2026-02-03, 2 quiet, 1 open question(s)
+chrome on load                     trend ends   689  fold 715  scrollY 0  region 46  notices 2  banners 1  dayCard 223
+chrome notices open                trend ends   827  fold 715  scrollY 0  region 184  notices 2  banners 1  dayCard 223
