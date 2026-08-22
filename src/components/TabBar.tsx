@@ -17,7 +17,7 @@ export function TabBar() {
   const pathname = usePathname();
 
   return (
-    <nav className="tabbar" aria-label="Sections">
+    <nav className="tabbar" aria-label={strings.common.sections}>
       {TABS.map(({ href, label, Icon }) => {
         const current = href === '/' ? pathname === '/' : pathname.startsWith(href);
         return (

@@ -23,10 +23,10 @@ export default function ShellError({
   return (
     <div className="card error" role="alert">
       <div className="between">
-        <span className="lbl">Vernier</span>
+        <span className="lbl">{strings.common.productName}</span>
         <span className="chip a">
           <WarnIcon />
-          Failed
+          {strings.error.failedChip}
         </span>
       </div>
       <div className="head">{strings.error.title}</div>

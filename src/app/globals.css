@@ -256,19 +256,30 @@ body{
 .banner.a{background:var(--alert-soft);border-color:var(--alert)}
 .banner.a svg{color:var(--alert)}
 
+/*
+ * The base button is 48 px and 16 px. .forge/DESIGN.md section 2b settles it:
+ * nine of the thirteen sheets say 48 and 16, 00-patterns.html alone says 44 and
+ * 15, and it is the outlier because it was written first. --touch is 44 px and
+ * that is the floor a control may not go under, never the size of a primary
+ * action, so this rule states its own numbers rather than borrowing the floor.
+ *
+ * The escalations above it are deliberate and stay: 52 px on the gate and the
+ * quick-log sheet, 56 px in the session player with 88 px on the transport,
+ * 44x44 square on .btn.icon.
+ */
 .btn{
   display:inline-flex;
   align-items:center;
   justify-content:center;
   gap:var(--s2);
-  min-height:var(--touch);
+  min-height:48px;
   padding:0 var(--s4);
   border-radius:var(--r-md);
   border:1px solid var(--line-2);
   background:var(--surface-2);
   color:var(--text);
   font:inherit;
-  font-size:var(--t-body);
+  font-size:16px;
   font-weight:500;
   cursor:pointer;
   text-decoration:none;
@@ -287,6 +298,12 @@ body{
  */
 .btn.quiet{background:transparent;border-color:transparent;color:var(--accent)}
 .btn.block{width:100%}
+/*
+ * An icon-only control. 44x44 square, which is the floor and is right here:
+ * a close cross or a retry arrow is incidental, never the thing due now.
+ * Eleven sheets agree on this one, including 00-patterns.html.
+ */
+.btn.icon{width:var(--touch);height:var(--touch);min-height:var(--touch);padding:0;flex:none}
 
 .skel{
   background:var(--surface-2);
@@ -390,3 +407,147 @@ a:focus-visible,button:focus-visible,input:focus-visible,[tabindex]:focus-visibl
 .hint svg.accent{width:20px;height:20px;margin-top:2px;color:var(--accent)}
 
 .centre{text-align:center}
+
+/* ---------- provenance, screen 00 ---------- */
+
+/*
+ * The source chip. Neutral chrome at 22 px, never a semantic colour, because
+ * origin is not a state: DESIGN.md reserves colour for what needs attention.
+ * An estimate is the same chip with a dashed border and a demonstration row a
+ * dotted one, which is the whole of the difference.
+ */
+.src{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  height:22px;
+  padding:0 7px;
+  border-radius:6px;
+  border:1px solid var(--line-2);
+  background:var(--surface-2);
+  color:var(--text-2);
+  font-size:var(--t-label);
+  line-height:1;
+  white-space:nowrap;
+  text-decoration:none;
+}
+.src svg{width:12px;height:12px;flex:none}
+.src.est{border-style:dashed}
+.src.demo{border-style:dotted}
+.src.stale{border-color:var(--warn);color:var(--warn)}
+
+/*
+ * A chevron at the end of a row is 18 px, from .forge/wireframes/02-today.html.
+ * Without this it inherits the row's flex sizing and fills the card, which is
+ * exactly what it did the first time it shipped.
+ */
+.row svg.ch{width:18px;height:18px;color:var(--text-3);flex:none}
+.banner svg.ch{width:18px;height:18px;flex:none}
+
+/*
+ * A value that walks back to its origin. One tap, and it looks like one. It is
+ * always worn with .row, so it inherits that row's flex layout rather than
+ * setting a display of its own: an earlier version set display:block here, the
+ * row stopped being a flex row, and its chevron grew to fill the card.
+ */
+a.value-link{color:inherit;text-decoration:none}
+a.value-link:active{opacity:.7}
+
+.card.tight{padding:12px 14px}
+.dot{width:8px;height:8px;border-radius:50%;flex:none;display:inline-block}
+.was{color:var(--text-3)}
+
+/* ---------- the sheet, screen 03 ---------- */
+
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:30;border:0;width:100%;padding:0}
+
+.sheet{
+  position:fixed;
+  left:0;right:0;bottom:0;
+  z-index:31;
+  background:var(--surface);
+  border-radius:var(--r-xl) var(--r-xl) 0 0;
+  border-top:1px solid var(--line);
+  padding:var(--s2) var(--gutter) 0;
+  padding-left:max(var(--gutter), env(safe-area-inset-left));
+  padding-right:max(var(--gutter), env(safe-area-inset-right));
+  display:flex;
+  flex-direction:column;
+  max-height:88dvh;
+  max-width:720px;
+  margin:0 auto;
+  animation:sheet-in var(--dur) var(--ease);
+}
+@keyframes sheet-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){.sheet{animation:none}}
+
+.grabber{width:36px;height:5px;border-radius:3px;background:var(--line-2);margin:0 auto var(--s3);flex:none}
+.sheet-head{margin-bottom:var(--s3)}
+.sheet-head .title-line{font-size:var(--t-title);line-height:var(--t-title-lh);letter-spacing:var(--t-title-ls);font-weight:700}
+.sheetbody{overflow-y:auto;padding-bottom:var(--s3)}
+.sheetfoot{
+  flex:none;
+  padding:var(--s3) 0 28px;
+  padding-bottom:max(28px, env(safe-area-inset-bottom));
+  border-top:1px solid var(--line);
+  background:var(--surface);
+}
+
+/*
+ * 52 px inside the sheet. One committed action, reached one-handed, and the
+ * escalation DESIGN.md section 2b keeps over the 48 px base.
+ */
+.sheet .btn{min-height:52px}
+.sheet .btn.icon{min-height:var(--touch);height:var(--touch)}
+
+.stepper{display:flex;align-items:center;gap:14px}
+.stepper button{
+  width:60px;height:60px;
+  border-radius:18px;
+  border:1px solid var(--line-2);
+  background:var(--surface-2);
+  color:var(--text);
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+.stepper button svg{width:24px;height:24px}
+.stepper button:disabled{opacity:.4;cursor:default}
+
+.scale5{display:flex;gap:var(--s2)}
+.scale5 button{
+  flex:1;
+  height:52px;
+  border-radius:var(--r-md);
+  border:1px solid var(--line-2);
+  background:var(--surface-2);
+  color:var(--text-2);
+  font:inherit;
+  font-size:var(--t-head);
+  font-variant-numeric:tabular-nums;
+  cursor:pointer;
+}
+.scale5 button[aria-pressed=true]{
+  background:var(--accent-soft);
+  border-color:var(--accent);
+  color:var(--accent);
+  font-weight:600;
+}
+
+.anchors{display:flex;justify-content:space-between;margin-top:6px}
+.anchors span{font-size:var(--t-label);line-height:var(--t-label-lh);color:var(--text-3)}
+
+.ta{
+  width:100%;
+  min-height:80px;
+  border-radius:var(--r-md);
+  border:1px solid var(--line-2);
+  background:var(--surface-2);
+  color:var(--text);
+  font:inherit;
+  font-size:var(--t-body);
+  padding:12px 14px;
+  resize:none;
+}
+
+.field-block{margin-bottom:18px}
+.field-block .lbl{margin-bottom:var(--s2)}

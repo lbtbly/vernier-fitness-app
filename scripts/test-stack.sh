@@ -67,6 +67,7 @@ start() {
     -e WEBAUTHN_RP_ID=localhost \
     -e WEBAUTHN_RP_NAME=Vernier \
     -e TZ="$(app_env TZ)" \
+    -e DEMO_MODE="${DEMO_MODE:-0}" \
     -e DATABASE_URL="$(scratch_url)" \
     -e MASTER_KEY="$key" \
     -p "127.0.0.1:${PORT}:3000" \

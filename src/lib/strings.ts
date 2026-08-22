@@ -166,6 +166,7 @@ export const strings = {
   },
 
   error: {
+    failedChip: 'Failed',
     title: 'This screen failed to load',
     lead: 'The rest of the app is unaffected. The five tabs below still work.',
     action: 'Try again',
@@ -175,5 +176,234 @@ export const strings = {
   common: {
     createAccount: 'Set up the owner account',
     loading: 'Loading',
+    close: 'Close',
+    back: 'Back',
+    cancel: 'Cancel',
+    retry: 'Try again',
+    /** The product name, which is copy like any other and has a key like any other. */
+    productName: 'Vernier',
+    sections: 'Sections',
+  },
+
+  /**
+   * The quick-log sheet, screen 03. Six values, one Save, and the copy says
+   * plainly that the write lands on the phone first, because that is what makes
+   * a basement gym with a captive wifi portal a non-event rather than a bug.
+   */
+  quickLog: {
+    open: 'Quick log',
+    title: 'Quick log',
+    firstTime: 'First time',
+    close: 'Close the quick log',
+    save: 'Save',
+    saving: 'Saving',
+    savedNote: 'Saves on this phone first. Nothing here needs a network.',
+    blankNote: 'Fill what you have. Blank fields stay blank, they are not stored as zero.',
+    waist: 'Waist',
+    waistDown: 'Down half a centimetre',
+    waistUp: 'Up half a centimetre',
+    waistLastPrefix: 'Last',
+    waistEmptyTitle: 'No waist measurement yet',
+    waistEmptyBody:
+      'Tape at the navel, standing, breathing out. Same spot each time matters more than the exact number.',
+    energy: 'Energy',
+    energyLow: 'Drained',
+    energyHigh: 'Strong',
+    fatigue: 'Fatigue',
+    fatigueLow: 'None',
+    fatigueHigh: 'Wiped out',
+    hunger: 'Hunger',
+    hungerLow: 'None',
+    hungerHigh: 'Ravenous',
+    satiety: 'Satiety after eating',
+    satietyLow: 'Still empty',
+    satietyHigh: 'Too full',
+    note: 'Note',
+    notePlaceholder: 'Anything worth remembering.',
+    ratingOf: (value: number, max: number) => `${value} of ${max}`,
+    ratingLabel: (field: string, value: number, max: number) => `${field}, ${value} of ${max}`,
+    nothingToSave: 'Nothing is filled in yet, so there is nothing to save.',
+    loadingLabel: 'Reading your last measurements',
+    errorTitle: 'Your last measurements did not load',
+    errorBody: (detail: string) =>
+      `${detail} The sheet still saves: a write goes to this phone first and uploads when the Mac mini answers.`,
+    staleTitle: (days: number) =>
+      days === 1 ? 'Waist last measured yesterday' : `Waist last measured ${days} days ago`,
+    staleBody: 'Measure again at the navel, standing, breathing out.',
+    offlineTitle: 'Saved on this phone',
+    offlineBody: (queued: number) =>
+      queued === 1
+        ? '1 entry is waiting to upload. It keeps the time you typed it, not the time it arrives.'
+        : `${queued} entries are waiting to upload. Each keeps the time you typed it, not the time it arrives.`,
+  },
+
+  /** Today's own additions this slice: the entry point and what was just logged. */
+  todayLog: {
+    justLogged: 'Just logged',
+    justLoggedEmpty: 'Nothing logged today yet.',
+    queued: 'Queued',
+    stored: 'Stored',
+    needsLogging: 'Needs logging',
+    nothingDue: 'Nothing is due right now.',
+    waistDue: 'Waist, due today.',
+    openValue: 'Open the value',
+  },
+
+  /**
+   * Provenance. Every label on the value sheet and the source screen lives
+   * here, including the deduplication reasons, which are rendered once at write
+   * time and stored beside the row the way an audit reason is.
+   */
+  provenance: {
+    sourceLabel: 'Source',
+    sources: {
+      withings: 'Withings',
+      apple_health_shortcut: 'Health',
+      manual: 'Manual',
+      lab_pdf: 'Lab PDF',
+      derived: 'Derived',
+      demo: 'Demo',
+    },
+    standsInFor: (source: string) => `Demonstration data, standing in for ${source}.`,
+    staleLabel: (source: string, days: number) =>
+      days === 1 ? `${source}, 1 day old` : `${source}, ${days} days old`,
+    confidenceLabel: 'Confidence',
+    confidences: {
+      measured_device: 'Measured, device',
+      measured_manual: 'Measured by hand',
+      reported: 'Reported by you',
+      printed: 'Printed by the laboratory',
+      estimated: 'Estimated',
+      derived: 'Derived from stored values',
+      demo: 'Demonstration data',
+    },
+    dedupLabel: 'Deduplication',
+    dedupDecisions: {
+      unique: 'Kept',
+      kept_over_duplicate: 'Kept',
+      correction: 'Correction',
+    },
+    dedupReasons: {
+      identical: (params: { metric: string; value: string; source: string }) =>
+        `The same ${params.metric} of ${params.value} from ${params.source} was already stored for that day.`,
+      conflictsWithCorrection: (params: { source: string; incoming: string; corrected: string }) =>
+        `${params.source} sent ${params.incoming} where you corrected the stored value to ${params.corrected}. Nothing was written.`,
+      keptOverOther: (params: { source: string; value: string }) =>
+        `Kept. ${params.source} ${params.value} was already stored for that day and reads second.`,
+      otherWins: (params: { source: string; value: string }) =>
+        `${params.source} ${params.value} is the better reading for that day, so this one was not stored.`,
+      firstOfDay: () => 'The first reading of this metric on this day.',
+    },
+    correctionOf: (shortId: string) => `Corrects the reading ${shortId}, which stays readable.`,
+    seeded: 'Seeded. Nothing else described this metric on this day.',
+
+    valueSheetTitle: 'Value',
+    storedValue: 'Stored value',
+    measuredAt: 'Measured',
+    importedAt: 'Imported',
+    importVersion: 'Import version',
+    timeZoneLabel: 'Time zone',
+    printedOriginal: 'Printed by the laboratory',
+    conversionLine: (printed: string, factor: string, stored: string) =>
+      `${printed}  x ${factor}  ${stored}`,
+    correctionHistory: 'Correction history',
+    correctThisValue: 'Correct this value',
+    correctionValueLabel: (unit: string) =>
+      unit === '' ? 'The number it should be' : `The number it should be, in ${unit}`,
+    correctionReasonLabel: 'Why, in your own words',
+    saveCorrection: 'Save the correction',
+    noCorrection: 'No correction on this value.',
+    appendOnly: 'Append only',
+    correctionRow: (from: string, to: string) => `${to}, was ${from}`,
+    correctionBy: (when: string, reason: string) => `Corrected by you, ${when}. ${reason}`,
+    original: 'Original',
+    neverOverwritten:
+      'A correction is never overwritten. A later import that disagrees becomes a question, not a decision.',
+    openSource: 'Open the source',
+    openSourceHint: 'Tap 2 reaches the record that carried this reading.',
+    valueNotFound: 'No such value',
+    valueNotFoundBody: 'That value is not in this database. Nothing was deleted; the id does not exist.',
+
+    sourceScreenTitle: 'Source',
+    sourceKinds: {
+      sync_batch: 'Device sync batch',
+      shortcut_payload: 'Phone payload',
+      lab_page: 'Laboratory page',
+      model_reply: 'Photo and model reply',
+      derivation: 'Derivation',
+      manual_entry: 'Manual entry',
+      demo_record: 'Demonstration record',
+    },
+    sourceReference: 'Reference',
+    sourceOccurredAt: 'Recorded',
+    sourceImportedAt: 'Stored',
+    sourceRows: 'Rows from this record',
+    sourceNoRows: 'This record carried no stored row.',
+    sourceNotFound: 'No such source',
+    sourceNotFoundBody: 'That source record is not in this database.',
+    fields: {
+      'source.field.endpoint': 'Endpoint',
+      'source.field.window': 'Window',
+      'source.field.rowsReceived': 'Rows received',
+      'source.field.rowsStored': 'Rows stored',
+      'source.field.result': 'HTTP result',
+      'source.field.shortcut': 'Shortcut',
+      'source.field.laboratory': 'Laboratory',
+      'source.field.page': 'Page',
+      'source.field.printedValue': 'Printed value',
+      'source.field.factor': 'Conversion factor',
+      'source.field.storedValue': 'Stored value',
+      'source.field.inputs': 'Inputs',
+      'source.field.rule': 'Rule',
+      'source.field.seed': 'Seed version',
+      'source.field.enteredOn': 'Entered on',
+      'source.field.method': 'Method',
+      'source.field.correctedFrom': 'Corrected from',
+      'source.field.correctedTo': 'Corrected to',
+      'source.field.correctionOf': 'Correction of',
+      'source.field.reason': 'Reason',
+    },
+    allSourcesLabel: 'Sources, one chip each',
+    allSourcesNote:
+      'Origin is chrome, never a colour. An estimate is the same chip with a dashed border and a demonstration row a dotted one, because colour is reserved for state.',
+  },
+
+  /** The re-import question, which holds both values and writes nothing. */
+  question: {
+    title: 'An import disagrees with your correction',
+    body: 'Nothing was written. Both values are here and the stored one has not moved.',
+    stored: 'What you corrected it to',
+    incoming: 'What the import sent',
+    raisedAt: 'Raised',
+    openCount: (count: number) =>
+      count === 1 ? '1 import is waiting on you' : `${count} imports are waiting on you`,
+  },
+
+  /** Units, so a number and its unit are never concatenated inside a component. */
+  units: {
+    kg: 'kg',
+    cm: 'cm',
+    km: 'km',
+    kcal: 'kcal',
+    g: 'g',
+    step: 'steps',
+    point: 'of 5',
+    'mmol/L': 'mmol/L',
+    'g/L': 'g/L',
+    'µg/L': 'µg/L',
+    text: '',
+  },
+
+  metrics: {
+    weight: 'Weight',
+    waist: 'Waist',
+    energy: 'Energy',
+    fatigue: 'Fatigue',
+    hunger: 'Hunger',
+    satiety: 'Satiety',
+    note: 'Note',
+    steps: 'Steps',
+    weight_average_7d: 'Weight, 7-day average',
+    ldl_cholesterol: 'LDL cholesterol',
   },
 } as const;

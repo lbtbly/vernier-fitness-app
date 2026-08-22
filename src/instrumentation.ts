@@ -40,5 +40,28 @@ export async function register(): Promise<void> {
     // not see a Node-only API it would refuse. This branch only ever runs
     // under the Node runtime, which the guard above enforces.
     host.exit?.(1);
+    return;
+  }
+
+  // The demonstration seed, which loads only under DEMO_MODE=1 and refuses out
+  // loud otherwise. It sits here, one line after the migration count, because
+  // both facts belong in the same boot log: what the schema did and what the
+  // data did. A seed that failed is never fatal; the app has nothing to
+  // demonstrate and says so.
+  try {
+    const { seedDemoData } = await import('./db/demo');
+    const { getConfig } = await import('./lib/config');
+    const result = await seedDemoData(getConfig().timeZone);
+    if (result.ran) {
+      console.log(
+        `[vernier] demo seed: ran, ${result.written} new row(s), ${result.measurements} row(s) stamped demo, ${result.sourceRecords} source record(s)`,
+      );
+    } else {
+      console.log(
+        `[vernier] demo seed: refused, ${result.reason} Rows stamped demo: ${result.measurements}`,
+      );
+    }
+  } catch (error) {
+    console.error(`[vernier] demo seed did not run: ${(error as Error).message}`);
   }
 }

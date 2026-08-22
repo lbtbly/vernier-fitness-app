@@ -1,0 +1,35 @@
+F25. The demonstration seed, both runs, on a scratch instance with an empty database.
+
+=== Run 1: DEMO_MODE off ===
+test-stack: ready at http://127.0.0.1:3101
+$ docker exec vernier-scratch printenv DEMO_MODE
+0
+boot log:
+[vernier] migrations: 4 applied, 4 total, in 56 ms
+[vernier] demo seed: refused, DEMO_MODE is not 1, so the demonstration seed refused to run and wrote nothing. Rows stamped demo: 0
+measurement rows: 0
+source_record rows: 0
+
+=== Run 2: DEMO_MODE=1, same empty database ===
+test-stack: ready at http://127.0.0.1:3101
+$ docker exec vernier-scratch printenv DEMO_MODE
+1
+boot log:
+[vernier] demo seed: ran, 6 new row(s), 6 row(s) stamped demo, 6 source record(s)
+rows by source:
+demo|6
+rows NOT stamped demo: 0
+confidence values: demo
+source records, one per shape:
+apple_health_shortcut | shortcut_payload
+demo | demo_record
+derived | derivation
+lab_pdf | lab_page
+manual | manual_entry
+withings | sync_batch
+
+=== Run 3: a second boot under DEMO_MODE=1 writes nothing new ===
+test-stack: ready at http://127.0.0.1:3101
+[vernier] demo seed: ran, 0 new row(s), 6 row(s) stamped demo, 6 source record(s)
+measurement rows: 6
+test-stack: stopped, scratch database dropped

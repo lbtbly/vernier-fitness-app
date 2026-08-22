@@ -92,3 +92,26 @@ export async function waitForScratch(): Promise<void> {
 export function ownerExists(): boolean {
   return Number(query('select count(*) from owner')) > 0;
 }
+
+/**
+ * A clean provenance spine plus the demonstration seed, which is the state the
+ * quick-log suite starts every destructive test from.
+ *
+ * TRUNCATE rather than DELETE, because the measurement table carries a trigger
+ * that refuses DELETE outright and that refusal is the point of F20: a row-level
+ * delete has to be impossible from every code path including this one. TRUNCATE
+ * is a table-level operation the owner can run at a psql prompt and the app
+ * cannot reach at all.
+ *
+ * The restart is what re-seeds, through the same boot path the container uses in
+ * anger, so nothing here writes a demonstration row by hand.
+ */
+export function resetProvenance(): void {
+  query('truncate measurement, source_record, import_question, idempotency_key, write_request');
+  execFileSync('docker', ['compose', 'restart', 'app'], { cwd: projectRoot, encoding: 'utf8' });
+  execFileSync(
+    'bash',
+    ['-c', `for i in $(seq 1 60); do curl -fsS ${baseUrl()}/healthz >/dev/null 2>&1 && exit 0; sleep 1; done; exit 1`],
+    { cwd: projectRoot, encoding: 'utf8' },
+  );
+}

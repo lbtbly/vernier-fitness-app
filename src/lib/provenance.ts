@@ -1,0 +1,286 @@
+/**
+ * The provenance spine, as rules rather than as tables.
+ *
+ * Every value this product ever stores passes through here: the six sources,
+ * the confidences, the deduplication decision and the correction chain. Eleven
+ * slices write through it, so it is deliberately pure. No database, no request,
+ * no clock of its own, which is what lets the unit suite grade the decision
+ * itself rather than a round trip that happens to contain one.
+ *
+ * Dependency free and free of TypeScript that needs more than type stripping,
+ * so a script can import it straight from Node, the same way
+ * `scripts/route-table.mjs` imports `src/lib/routes.ts`.
+ */
+
+/**
+ * The six, and there is no seventh. `estimated` is a confidence and not a
+ * source: an estimate comes from a model reply or a photo, and the dashed chip
+ * DESIGN.md draws for it is driven by the confidence column. Demo is a source,
+ * because a demonstration row's origin really is the seed, and that has to be
+ * legible by reading the database rather than by trusting a badge.
+ */
+export const SOURCES = [
+  'withings',
+  'apple_health_shortcut',
+  'manual',
+  'lab_pdf',
+  'derived',
+  'demo',
+] as const;
+
+export type Source = (typeof SOURCES)[number];
+
+export function isSource(value: string): value is Source {
+  return (SOURCES as readonly string[]).includes(value);
+}
+
+/**
+ * How the number came to be, which is a different question from where it came
+ * from. A tape measure and a Body Smart are both trustworthy and not equally
+ * so; a rating out of five is neither measured nor estimated, it is reported.
+ */
+export const CONFIDENCES = [
+  'measured_device',
+  'measured_manual',
+  'reported',
+  'printed',
+  'estimated',
+  'derived',
+  'demo',
+] as const;
+
+export type Confidence = (typeof CONFIDENCES)[number];
+
+/**
+ * What deduplication decided about a row that was stored. A row is never
+ * written without one, and the decision is readable on the value sheet, because
+ * "why is there one reading here when I took two" is a question the owner will
+ * ask months later.
+ */
+export const STORED_DEDUP_DECISIONS = ['unique', 'kept_over_duplicate', 'correction'] as const;
+
+export type StoredDedupDecision = (typeof STORED_DEDUP_DECISIONS)[number];
+
+/**
+ * Why a decision went the way it did, as a key into the string catalogue plus
+ * the data that fills it. Never a sentence: this module has to stay importable
+ * by a plain Node script, and C6 wants every user-facing string to have one
+ * home and one key. The caller renders it and stores the rendered line beside
+ * the row, frozen at write time, the way an audit reason is.
+ */
+export type DedupReason = {
+  key: 'identical' | 'conflictsWithCorrection' | 'keptOverOther' | 'otherWins' | 'firstOfDay';
+  params: Record<string, string>;
+};
+
+/**
+ * The two outcomes that never become a row. A duplicate is the same fact
+ * arriving twice and there is nothing to store; a disagreement with a stored
+ * correction is a question, and a question writes nothing at all.
+ */
+export type DedupOutcome =
+  | { decision: StoredDedupDecision; reason: DedupReason; store: true }
+  | { decision: 'dropped_as_duplicate'; reason: DedupReason; store: false; keptId: string }
+  | { decision: 'held_for_question'; reason: DedupReason; store: false; conflictsWith: string };
+
+/**
+ * The contract version the row was written under. It changes when the shape of
+ * what an importer sends changes, so a value stored in August 2026 can always
+ * be read back knowing what the writer meant. Stored on every row and on every
+ * source record.
+ */
+export const IMPORT_VERSION = '2026-08-3';
+
+/**
+ * The metrics this slice writes. Units are metric and fixed by DESIGN.md:
+ * kg, cm, km, kcal, g, and the laboratory's printed unit where there is one.
+ * `point` is a rating out of five and `text` is a free note, which has no
+ * number and is never stored as a zero.
+ */
+export const METRICS = {
+  weight: { unit: 'kg', kind: 'number' },
+  waist: { unit: 'cm', kind: 'number' },
+  energy: { unit: 'point', kind: 'rating' },
+  fatigue: { unit: 'point', kind: 'rating' },
+  hunger: { unit: 'point', kind: 'rating' },
+  satiety: { unit: 'point', kind: 'rating' },
+  note: { unit: 'text', kind: 'text' },
+  steps: { unit: 'step', kind: 'number' },
+  weight_average_7d: { unit: 'kg', kind: 'number' },
+  /** The laboratory's own unit, kept as printed. A converted value never appears alone. */
+  ldl_cholesterol: { unit: 'mmol/L', kind: 'number' },
+} as const;
+
+export type Metric = keyof typeof METRICS;
+
+export function isMetric(value: string): value is Metric {
+  return Object.hasOwn(METRICS, value);
+}
+
+/** The six the quick-log sheet commits, in the order the sheet draws them. */
+export const QUICK_LOG_METRICS = [
+  'waist',
+  'energy',
+  'fatigue',
+  'hunger',
+  'satiety',
+  'note',
+] as const;
+
+export const RATING_MIN = 1;
+export const RATING_MAX = 5;
+
+/**
+ * What deduplication needs to know about a value already in the table. Kept to
+ * the fields that decide, so a test can build one by hand.
+ */
+export type StoredCandidate = {
+  id: string;
+  metric: string;
+  source: string;
+  rawValue: string;
+  measuredAt: Date;
+  /** True when this row is itself a correction, which is what makes it precious. */
+  isCorrection: boolean;
+};
+
+export type IncomingValue = {
+  metric: string;
+  source: Source;
+  rawValue: string;
+  measuredAt: Date;
+  timeZone: string;
+};
+
+/** Two instants on the same calendar day, read in the zone the value was taken in. */
+export function sameDay(left: Date, right: Date, timeZone: string): boolean {
+  const day = (date: Date) =>
+    new Intl.DateTimeFormat('en-CA', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      timeZone,
+    }).format(date);
+  return day(left) === day(right);
+}
+
+/**
+ * A device reading outranks a hand-typed one for the same metric on the same
+ * day, and both outrank a demonstration row. Nothing here silently discards a
+ * disagreement: precedence only decides which of two rows describing the same
+ * event is the one the charts read, and the loser is named in the reason.
+ */
+const PRECEDENCE: Record<Source, number> = {
+  withings: 4,
+  apple_health_shortcut: 3,
+  lab_pdf: 4,
+  manual: 2,
+  derived: 1,
+  demo: 0,
+};
+
+/**
+ * The deduplication decision, in one place, for every writer there will ever
+ * be. Four questions in a fixed order, and the order is the rule:
+ *
+ * 1. Does the table already hold this exact fact? Then there is nothing to
+ *    store and the row that is already there keeps its id.
+ * 2. Does it disagree with a stored correction? Then it is a question and it
+ *    writes nothing. This is the quiet half of the unapproved-write risk: an
+ *    import that overwrites a correction produces a wrong number nobody knows
+ *    to go looking for.
+ * 3. Does something else already describe the same day? Then precedence
+ *    decides, and the reason names what lost.
+ * 4. Otherwise it is the first of its kind.
+ */
+export function decideDedup(incoming: IncomingValue, stored: StoredCandidate[]): DedupOutcome {
+  const sameMetricSameDay = stored.filter(
+    (row) =>
+      row.metric === incoming.metric && sameDay(row.measuredAt, incoming.measuredAt, incoming.timeZone),
+  );
+
+  const identical = sameMetricSameDay.find(
+    (row) => row.source === incoming.source && row.rawValue === incoming.rawValue,
+  );
+  if (identical) {
+    return {
+      decision: 'dropped_as_duplicate',
+      store: false,
+      keptId: identical.id,
+      reason: {
+        key: 'identical',
+        params: { metric: incoming.metric, value: incoming.rawValue, source: incoming.source },
+      },
+    };
+  }
+
+  const correction = sameMetricSameDay.find((row) => row.isCorrection);
+  if (correction && correction.rawValue !== incoming.rawValue) {
+    return {
+      decision: 'held_for_question',
+      store: false,
+      conflictsWith: correction.id,
+      reason: {
+        key: 'conflictsWithCorrection',
+        params: {
+          source: incoming.source,
+          incoming: incoming.rawValue,
+          corrected: correction.rawValue,
+        },
+      },
+    };
+  }
+
+  const other = sameMetricSameDay.find((row) => row.source !== incoming.source);
+  if (other) {
+    const mine = PRECEDENCE[incoming.source];
+    const theirs = isSource(other.source) ? PRECEDENCE[other.source] : 0;
+    if (mine >= theirs) {
+      return {
+        decision: 'kept_over_duplicate',
+        store: true,
+        reason: { key: 'keptOverOther', params: { source: other.source, value: other.rawValue } },
+      };
+    }
+    return {
+      decision: 'dropped_as_duplicate',
+      store: false,
+      keptId: other.id,
+      reason: { key: 'otherWins', params: { source: other.source, value: other.rawValue } },
+    };
+  }
+
+  return {
+    decision: 'unique',
+    store: true,
+    reason: { key: 'firstOfDay', params: {} },
+  };
+}
+
+/** One row of a correction chain, as the value sheet reads it. */
+export type ChainRow = {
+  id: string;
+  rootId: string;
+  correctsId: string | null;
+  correctionIndex: number;
+  rawValue: string;
+};
+
+/**
+ * The chain, oldest first: the original and every correction after it. Nothing
+ * is dropped and nothing is collapsed, because the original struck through is
+ * exactly what the value sheet renders.
+ */
+export function orderChain<T extends ChainRow>(rows: T[]): T[] {
+  return [...rows].sort((left, right) => left.correctionIndex - right.correctionIndex);
+}
+
+/** The value that stands today: the last correction, or the original if there is none. */
+export function currentOfChain<T extends ChainRow>(rows: T[]): T | undefined {
+  return orderChain(rows).at(-1);
+}
+
+/** The original, which survives every edit. */
+export function originalOfChain<T extends ChainRow>(rows: T[]): T | undefined {
+  return orderChain(rows).at(0);
+}

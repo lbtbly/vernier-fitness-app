@@ -1,0 +1,75 @@
+C6, second half. A timezone-shifted run producing identical rendered dates.
+
+$ TZ=Europe/Paris node scripts/tz-shift.mjs   -> sha256
+34a015c5047e40fdcd351820fd745a6e46d2422e1f70dfbb50d718cdb14b2c0d  -
+$ TZ=Pacific/Auckland node scripts/tz-shift.mjs   -> sha256
+34a015c5047e40fdcd351820fd745a6e46d2422e1f70dfbb50d718cdb14b2c0d  -
+$ TZ=America/Los_Angeles node scripts/tz-shift.mjs   -> sha256
+34a015c5047e40fdcd351820fd745a6e46d2422e1f70dfbb50d718cdb14b2c0d  -
+$ TZ=Asia/Tokyo node scripts/tz-shift.mjs   -> sha256
+34a015c5047e40fdcd351820fd745a6e46d2422e1f70dfbb50d718cdb14b2c0d  -
+$ TZ=UTC node scripts/tz-shift.mjs   -> sha256
+34a015c5047e40fdcd351820fd745a6e46d2422e1f70dfbb50d718cdb14b2c0d  -
+
+$ diff <(TZ=Europe/Paris node scripts/tz-shift.mjs) <(TZ=Pacific/Auckland node scripts/tz-shift.mjs)
+(no difference)
+
+$ TZ=Pacific/Auckland node scripts/tz-shift.mjs
+app zone: Europe/Paris
+process TZ: (deliberately not printed, it must not matter)
+
+2026-08-21T04:52:00Z
+  shortDate      21 Aug
+  longDate       Friday 21 August
+  time24         06:52
+  shortDateTime  21 Aug, 06:52
+  longDateTime   Friday 21 August, 06:52
+2026-08-21T16:32:00Z
+  shortDate      21 Aug
+  longDate       Friday 21 August
+  time24         18:32
+  shortDateTime  21 Aug, 18:32
+  longDateTime   Friday 21 August, 18:32
+2026-08-21T22:40:00Z
+  shortDate      22 Aug
+  longDate       Saturday 22 August
+  time24         00:40
+  shortDateTime  22 Aug, 00:40
+  longDateTime   Saturday 22 August, 00:40
+2026-01-15T23:30:00Z
+  shortDate      16 Jan
+  longDate       Friday 16 January
+  time24         00:30
+  shortDateTime  16 Jan, 00:30
+  longDateTime   Friday 16 January, 00:30
+2026-03-29T00:30:00Z
+  shortDate      29 Mar
+  longDate       Sunday 29 March
+  time24         01:30
+  shortDateTime  29 Mar, 01:30
+  longDateTime   Sunday 29 March, 01:30
+2026-10-25T00:30:00Z
+  shortDate      25 Oct
+  longDate       Sunday 25 October
+  time24         02:30
+  shortDateTime  25 Oct, 02:30
+  longDateTime   Sunday 25 October, 02:30
+2026-12-31T23:59:00Z
+  shortDate      1 Jan
+  longDate       Friday 1 January
+  time24         00:59
+  shortDateTime  1 Jan, 00:59
+  longDateTime   Friday 1 January, 00:59
+
+units
+  86.4 kg
+  98.5 cm
+  5.20 km
+  2,150 kcal
+  148 g
+  9,412 step
+  3.72 mmol/L
+  1.44 g/L
+
+days between
+  18 Aug to 21 Aug: 3

@@ -1,0 +1,97 @@
+F19. The measurement table definition, and four writes it refuses.
+
+$ docker compose exec -T db psql -c '\d measurement'
+                          Table "public.measurement"
+      Column       |           Type           | Collation | Nullable | Default 
+-------------------+--------------------------+-----------+----------+---------
+ id                | text                     |           | not null | 
+ metric            | text                     |           | not null | 
+ raw_value         | text                     |           | not null | 
+ raw_unit          | text                     |           | not null | 
+ value             | double precision         |           |          | 
+ unit              | text                     |           | not null | 
+ conversion_factor | double precision         |           |          | 
+ time_zone         | text                     |           | not null | 
+ source            | text                     |           | not null | 
+ measured_at       | timestamp with time zone |           | not null | 
+ imported_at       | timestamp with time zone |           | not null | now()
+ confidence        | text                     |           | not null | 
+ import_version    | text                     |           | not null | 
+ dedup_decision    | text                     |           | not null | 
+ dedup_reason      | text                     |           | not null | 
+ source_record_id  | text                     |           | not null | 
+ root_id           | text                     |           | not null | 
+ corrects_id       | text                     |           |          | 
+ correction_index  | integer                  |           | not null | 0
+ correction_reason | text                     |           |          | 
+Indexes:
+    "measurement_pkey" PRIMARY KEY, btree (id)
+    "measurement_metric_measured_at" btree (metric, measured_at)
+    "measurement_root" btree (root_id, correction_index)
+    "measurement_source" btree (source)
+Check constraints:
+    "measurement_confidence_is_named" CHECK (confidence = ANY (ARRAY['measured_device'::text, 'measured_manual'::text, 'reported'::text, 'printed'::text, 'estimated'::text, 'derived'::text, 'demo'::text]))
+    "measurement_correction_chain" CHECK (correction_index = 0 AND corrects_id IS NULL AND root_id = id OR correction_index > 0 AND corrects_id IS NOT NULL AND root_id <> id)
+    "measurement_dedup_decision_is_named" CHECK (dedup_decision = ANY (ARRAY['unique'::text, 'kept_over_duplicate'::text, 'correction'::text]))
+    "measurement_number_or_text" CHECK (value IS NOT NULL OR unit = 'text'::text)
+    "measurement_source_is_one_of_six" CHECK (source = ANY (ARRAY['withings'::text, 'apple_health_shortcut'::text, 'manual'::text, 'lab_pdf'::text, 'derived'::text, 'demo'::text]))
+Foreign-key constraints:
+    "measurement_corrects_id_measurement_id_fk" FOREIGN KEY (corrects_id) REFERENCES measurement(id)
+    "measurement_root_id_measurement_id_fk" FOREIGN KEY (root_id) REFERENCES measurement(id)
+    "measurement_source_record_id_source_record_id_fk" FOREIGN KEY (source_record_id) REFERENCES source_record(id)
+Referenced by:
+    TABLE "import_question" CONSTRAINT "import_question_measurement_id_measurement_id_fk" FOREIGN KEY (measurement_id) REFERENCES measurement(id)
+    TABLE "measurement" CONSTRAINT "measurement_corrects_id_measurement_id_fk" FOREIGN KEY (corrects_id) REFERENCES measurement(id)
+    TABLE "measurement" CONSTRAINT "measurement_root_id_measurement_id_fk" FOREIGN KEY (root_id) REFERENCES measurement(id)
+Triggers:
+    measurement_append_only BEFORE DELETE OR UPDATE ON measurement FOR EACH ROW EXECUTE FUNCTION measurement_append_only()
+
+
+$ docker compose exec -T db psql -c '\d source_record'
+                        Table "public.source_record"
+     Column     |           Type           | Collation | Nullable | Default 
+----------------+--------------------------+-----------+----------+---------
+ id             | text                     |           | not null | 
+ source         | text                     |           | not null | 
+ kind           | text                     |           | not null | 
+ reference      | text                     |           | not null | 
+ occurred_at    | timestamp with time zone |           | not null | 
+ recorded_at    | timestamp with time zone |           | not null | now()
+ import_version | text                     |           | not null | 
+ detail         | jsonb                    |           | not null | 
+Indexes:
+    "source_record_pkey" PRIMARY KEY, btree (id)
+    "source_record_occurred_at" btree (occurred_at)
+Check constraints:
+    "source_record_source_is_one_of_six" CHECK (source = ANY (ARRAY['withings'::text, 'apple_health_shortcut'::text, 'manual'::text, 'lab_pdf'::text, 'derived'::text, 'demo'::text]))
+Referenced by:
+    TABLE "measurement" CONSTRAINT "measurement_source_record_id_source_record_id_fk" FOREIGN KEY (source_record_id) REFERENCES source_record(id)
+
+
+Four refusals: a missing source, a missing dedup decision, a seventh source, and an UPDATE.
+--- 1. an insert with no source column ---
+psql:<stdin>:3: ERROR:  null value in column "source" of relation "measurement" violates not-null constraint
+DETAIL:  Failing row contains (f19-no-source, waist, 98.0, cm, 98, cm, null, Europe/Paris, null, 2026-08-22 03:52:38.926251+02, 2026-08-22 03:52:38.926251+02, measured_manual, 2026-08-3, unique, test, demo_src_waist, f19-no-source, null, 0, null).
+--- 2. an insert with no dedup_decision ---
+psql:<stdin>:6: ERROR:  null value in column "dedup_decision" of relation "measurement" violates not-null constraint
+DETAIL:  Failing row contains (f19-no-dedup, waist, 98.0, cm, 98, cm, null, Europe/Paris, manual, 2026-08-22 03:52:38.927741+02, 2026-08-22 03:52:38.927741+02, measured_manual, 2026-08-3, null, test, demo_src_waist, f19-no-dedup, null, 0, null).
+--- 3. a source outside the six ---
+psql:<stdin>:9: ERROR:  new row for relation "measurement" violates check constraint "measurement_source_is_one_of_six"
+DETAIL:  Failing row contains (f19-bad-source, waist, 98.0, cm, 98, cm, null, Europe/Paris, fitbit, 2026-08-22 03:52:38.927926+02, 2026-08-22 03:52:38.927926+02, measured_manual, 2026-08-3, unique, test, demo_src_waist, f19-bad-source, null, 0, null).
+--- 4. an update, which the table refuses outright ---
+--- 5. a delete, same answer ---
+psql:<stdin>:11: ERROR:  measurement is append only: UPDATE is refused. Correct a value by inserting a new row that names it in corrects_id, and re-import by deciding a dedup outcome or raising an import_question.
+CONTEXT:  PL/pgSQL function measurement_append_only() line 3 at RAISE
+psql:<stdin>:13: ERROR:  measurement is append only: DELETE is refused. Correct a value by inserting a new row that names it in corrects_id, and re-import by deciding a dedup outcome or raising an import_question.
+CONTEXT:  PL/pgSQL function measurement_append_only() line 3 at RAISE
+--- rows still there, untouched ---
+      id      | raw_value | source | confidence | dedup_decision 
+--------------+-----------+--------+------------+----------------
+ demo_average | 86.4      | demo   | demo       | unique
+ demo_energy  | 4         | demo   | demo       | unique
+ demo_ldl     | 1.44      | demo   | demo       | unique
+ demo_steps   | 9412      | demo   | demo       | unique
+ demo_waist   | 98.5      | demo   | demo       | unique
+ demo_weight  | 85.9      | demo   | demo       | unique
+(6 rows)
+

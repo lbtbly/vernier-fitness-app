@@ -1,8 +1,10 @@
 import {
   bigint,
   boolean,
+  doublePrecision,
   index,
   integer,
+  jsonb,
   pgTable,
   text,
   timestamp,
@@ -213,3 +215,170 @@ export const recoveryGrant = pgTable('recovery_grant', {
   expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
   usedAt: timestamp('used_at', { withTimezone: true }),
 });
+
+/**
+ * ---------------------------------------------------------------------------
+ * The provenance spine. Slice 3.
+ *
+ * Eleven slices write through these tables, so the shape is settled here once.
+ * Withings, the iPhone shortcut, a typed number, a laboratory PDF, a derivation
+ * and the demonstration seed all land in the same row shape, and none of them
+ * gets to invent its own.
+ * ---------------------------------------------------------------------------
+ */
+
+/**
+ * Where a value came from, told in full, once, so tap 2 has a destination.
+ *
+ * One record per real event: a Withings sync batch, one shortcut payload, one
+ * page of a laboratory PDF, one model reply, one derivation, one manual entry,
+ * one demonstration record. `detail` holds ordered rows of `{ key, value }`
+ * where the key names a line in the string catalogue and the value is data.
+ * No user-facing sentence is stored here, which is what keeps C6's inventory
+ * complete and what lets a second language reach the source screen too.
+ */
+export const sourceRecord = pgTable(
+  'source_record',
+  {
+    id: text('id').primaryKey(),
+    source: text('source').notNull(),
+    kind: text('kind').notNull(),
+    /** A short identifier of the event itself: 'Sync batch 1184', 'Panel 12 Aug, page 2'. */
+    reference: text('reference').notNull(),
+    occurredAt: timestamp('occurred_at', { withTimezone: true }).notNull(),
+    recordedAt: timestamp('recorded_at', { withTimezone: true }).notNull().defaultNow(),
+    importVersion: text('import_version').notNull(),
+    detail: jsonb('detail').notNull(),
+  },
+  (table) => [index('source_record_occurred_at').on(table.occurredAt)],
+);
+
+/**
+ * One stored measurement, and every one of them carries its origin forever.
+ *
+ * The nine columns F19 names are all NOT NULL and the source is one of six
+ * values enforced by the database, not by a handler: `withings`,
+ * `apple_health_shortcut`, `manual`, `lab_pdf`, `derived`, `demo`. A demo row
+ * is therefore distinguishable from a real one by reading the table, which is
+ * the only place that distinction can be trusted.
+ *
+ * `rawValue` is text and holds what actually arrived: "98.0", "4", the typed
+ * note, or the laboratory's printed "1.44". `value` is the canonical number in
+ * `unit` and is null for a free note, because a note has no number and storing
+ * a zero for one is exactly the smoothing this product refuses. A converted
+ * laboratory value keeps `rawUnit` and `conversionFactor` beside it so the
+ * printed original, the factor and the stored value can sit on one line.
+ *
+ * Corrections append. `rootId` is the original's id and equals `id` on an
+ * original; `correctsId` names the row this one corrects. Four rows, one chain,
+ * and the original is still readable after three edits. A trigger in
+ * 0003_provenance.sql refuses UPDATE and DELETE on this table outright, so an
+ * overwrite is impossible from any code path, present or future. A later slice
+ * that re-imports the same reading does not update: it decides a dedup
+ * outcome, or it raises a question.
+ */
+export const measurement = pgTable(
+  'measurement',
+  {
+    /** The client UUID that carried the write, which is also its Idempotency-Key. */
+    id: text('id').primaryKey(),
+    metric: text('metric').notNull(),
+    rawValue: text('raw_value').notNull(),
+    rawUnit: text('raw_unit').notNull(),
+    value: doublePrecision('value'),
+    unit: text('unit').notNull(),
+    conversionFactor: doublePrecision('conversion_factor'),
+    timeZone: text('time_zone').notNull(),
+    source: text('source').notNull(),
+    measuredAt: timestamp('measured_at', { withTimezone: true }).notNull(),
+    importedAt: timestamp('imported_at', { withTimezone: true }).notNull().defaultNow(),
+    confidence: text('confidence').notNull(),
+    importVersion: text('import_version').notNull(),
+    dedupDecision: text('dedup_decision').notNull(),
+    dedupReason: text('dedup_reason').notNull(),
+    sourceRecordId: text('source_record_id')
+      .notNull()
+      .references(() => sourceRecord.id),
+    rootId: text('root_id').notNull(),
+    correctsId: text('corrects_id'),
+    correctionIndex: integer('correction_index').notNull().default(0),
+    /** Null on an original. A correction says why in the owner's own words. */
+    correctionReason: text('correction_reason'),
+  },
+  (table) => [
+    index('measurement_metric_measured_at').on(table.metric, table.measuredAt),
+    index('measurement_root').on(table.rootId, table.correctionIndex),
+    index('measurement_source').on(table.source),
+  ],
+);
+
+/**
+ * A re-import that disagrees with a stored correction. It holds both values and
+ * it writes nothing to `measurement` until the owner answers.
+ *
+ * This is the quiet half of the panel's unapproved-write risk. The loud half is
+ * an event appearing in a calendar nobody approved; this one has a longer fuse,
+ * because a silently overwritten correction is a wrong number nobody knows to
+ * look for. The owner's words: "that's worse than not importing at all, because
+ * I won't know to check."
+ */
+export const importQuestion = pgTable(
+  'import_question',
+  {
+    id: text('id').primaryKey(),
+    metric: text('metric').notNull(),
+    measurementId: text('measurement_id')
+      .notNull()
+      .references(() => measurement.id),
+    storedRawValue: text('stored_raw_value').notNull(),
+    storedUnit: text('stored_unit').notNull(),
+    storedSource: text('stored_source').notNull(),
+    storedMeasuredAt: timestamp('stored_measured_at', { withTimezone: true }).notNull(),
+    incomingRawValue: text('incoming_raw_value').notNull(),
+    incomingUnit: text('incoming_unit').notNull(),
+    incomingSource: text('incoming_source').notNull(),
+    incomingMeasuredAt: timestamp('incoming_measured_at', { withTimezone: true }).notNull(),
+    incomingImportVersion: text('incoming_import_version').notNull(),
+    raisedAt: timestamp('raised_at', { withTimezone: true }).notNull().defaultNow(),
+    state: text('state').notNull().default('open'),
+    answeredAt: timestamp('answered_at', { withTimezone: true }),
+    answer: text('answer'),
+  },
+  (table) => [index('import_question_state').on(table.state, table.raisedAt)],
+);
+
+/**
+ * A seen idempotency key and the answer it got the first time.
+ *
+ * The outbox retries. A request that succeeded but whose response was lost on
+ * the way home comes back, and without this it would log the same waist reading
+ * twice. The stored response is returned verbatim on a repeat, so a replay is
+ * indistinguishable from the original as far as the phone is concerned, and the
+ * table holds exactly one row per key however many times it arrives.
+ */
+export const idempotencyKey = pgTable('idempotency_key', {
+  key: text('key').primaryKey(),
+  route: text('route').notNull(),
+  status: integer('status').notNull(),
+  body: text('body').notNull(),
+  firstSeenAt: timestamp('first_seen_at', { withTimezone: true }).notNull().defaultNow(),
+  lastSeenAt: timestamp('last_seen_at', { withTimezone: true }).notNull().defaultNow(),
+  replays: integer('replays').notNull().default(0),
+});
+
+/**
+ * The request log: one appended row per arrival of a mutating write, whatever
+ * the outcome. F24 counts rows in `measurement` and keys in here, and the pair
+ * is what proves a replay applied once and no more.
+ */
+export const writeRequest = pgTable(
+  'write_request',
+  {
+    id: text('id').primaryKey(),
+    key: text('key').notNull(),
+    route: text('route').notNull(),
+    outcome: text('outcome').notNull(),
+    at: timestamp('at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index('write_request_key').on(table.key)],
+);

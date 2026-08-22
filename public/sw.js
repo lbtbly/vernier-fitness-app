@@ -1,6 +1,6 @@
 // Vernier's service worker. Hand written, no next-pwa, which last shipped in
 // 2022. Serve it with Cache-Control: no-cache; next.config.ts does that.
-const VERSION = 'v2';
+const VERSION = 'v3';
 const SHELL = `vernier-shell-${VERSION}`;
 const OFFLINE = '/offline';
 
@@ -77,5 +77,102 @@ self.addEventListener('fetch', (event) => {
     const fresh = await fetch(request);
     if (fresh.ok && fresh.type === 'basic') (await caches.open(SHELL)).put(request, fresh.clone());
     return fresh;
+  })());
+});
+
+// ---------------------------------------------------------------------------
+// Trigger 6 of the outbox's six: a push wakes this worker while the app is
+// closed, and that is the only background execution iOS offers. Draining the
+// queue here is legitimate as long as the notification the push was for is
+// still shown, so both happen and the notification happens either way.
+//
+// The store, the key and the Idempotency-Key header are the same ones
+// src/lib/outbox.ts uses. Written out longhand because a worker cannot import
+// the module, and kept to the minimum that a background wake can be trusted
+// with: send, drop on success, leave everything else exactly where it is for
+// the foreground flusher to deal with.
+const OUTBOX_DB = 'vernier';
+const OUTBOX_STORE = 'outbox';
+const OUTBOX_META = 'meta';
+
+function openOutbox() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(OUTBOX_DB, 1);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(OUTBOX_STORE)) {
+        db.createObjectStore(OUTBOX_STORE, { keyPath: 'id' });
+      }
+      if (!db.objectStoreNames.contains(OUTBOX_META)) db.createObjectStore(OUTBOX_META);
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+function outboxRequest(db, mode, run, storeName) {
+  return new Promise((resolve, reject) => {
+    const name = storeName || OUTBOX_STORE;
+    const tx = db.transaction(name, mode);
+    const request = run(tx.objectStore(name));
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function drainOutbox() {
+  let db;
+  try {
+    db = await openOutbox();
+  } catch {
+    return 0;
+  }
+  let sent = 0;
+  try {
+    const csrf = (await outboxRequest(db, 'readonly', (store) => store.get('csrf'), OUTBOX_META)) || '';
+    const entries = (await outboxRequest(db, 'readonly', (store) => store.getAll()) || [])
+      .filter((entry) => !entry.parked)
+      .sort((left, right) => left.createdAt - right.createdAt);
+    for (const entry of entries) {
+      try {
+        const response = await fetch(entry.url, {
+          method: entry.method,
+          headers: { ...entry.headers, 'Idempotency-Key': entry.id, 'x-vernier-csrf': csrf },
+          body: entry.body,
+        });
+        if (response.ok || response.status === 409) {
+          await outboxRequest(db, 'readwrite', (store) => store.delete(entry.id));
+          sent += 1;
+          continue;
+        }
+      } catch {
+        // Still unreachable. Stop the run: order is meaning on this queue.
+      }
+      break;
+    }
+  } finally {
+    db.close();
+  }
+  return sent;
+}
+
+self.addEventListener('push', (event) => {
+  const payload = (() => {
+    try {
+      return event.data ? event.data.json() : {};
+    } catch {
+      return {};
+    }
+  })();
+
+  event.waitUntil((async () => {
+    await drainOutbox();
+    if (payload.title) {
+      await self.registration.showNotification(payload.title, {
+        body: payload.body,
+        tag: payload.tag,
+        data: payload.data,
+      });
+    }
   })());
 });

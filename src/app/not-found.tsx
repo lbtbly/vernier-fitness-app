@@ -9,7 +9,7 @@ export default function NotFound() {
       <main className="app-scroll">
         <ScreenTitle title={strings.notFound.title} />
         <div className="card empty">
-          <span className="lbl">Vernier</span>
+          <span className="lbl">{strings.common.productName}</span>
           <p className="sub" style={{ marginTop: 'var(--s2)' }}>
             {strings.notFound.body}
           </p>

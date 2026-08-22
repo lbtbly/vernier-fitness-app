@@ -50,6 +50,11 @@ services:
       WEBAUTHN_RP_ID: ${WEBAUTHN_RP_ID}
       WEBAUTHN_RP_NAME: ${WEBAUTHN_RP_NAME}
       TZ: ${TZ}
+      # Demonstration mode. Off unless it is explicitly 1, and the seed refuses
+      # to write anything at all when it is off. Every row it does write carries
+      # source 'demo', so a demonstration reading is tellable from a real one by
+      # reading the table.
+      DEMO_MODE: ${DEMO_MODE:-0}
       # The connection string is assembled here so the app never needs to know
       # how the parts are stored.
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}

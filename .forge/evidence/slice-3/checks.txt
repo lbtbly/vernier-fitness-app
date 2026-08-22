@@ -1,0 +1,5 @@
+$ npm run typecheck
+(clean, exit 0)
+
+$ FORGE_CHECKS_FULL=1 scripts/checks.sh
+exit 0
