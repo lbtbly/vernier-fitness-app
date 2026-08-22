@@ -1,0 +1,132 @@
+rendered strings: the population this walk covers
+  6 stored values walked, floor 1
+  6 source records walked, floor 1
+  1 ratings on the one to five scale, floor 1
+  6 sources with a stored value behind them, floor 6
+  source kinds behind a value: demo_record, derivation, lab_page, manual_entry, shortcut_payload, sync_batch
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+rendered strings: 50 surface states walked, 1696 fragments read against 433 catalogue keys, 0 stored data values the owner or a device wrote, 7 value shapes and 1 distinct message(s) harvested from WebKit.
+  73 file(s) of the shipped tree read for the browser's own words: "Load failed"
+  platform text  / quick log / the answer carried no words  "Load failed"  provenance: WebKit, on a fetch aborted with aborted
+  platform text  / quick log / the fetch never reached the machine  "Load failed"  provenance: WebKit, on a fetch aborted with aborted
+  platform text  / quick log / the fetch never reached the machine  "Load failed"  provenance: WebKit, on a fetch aborted with aborted
+  platform text  / quick log / the session removed mid-screen  "Load failed"  provenance: WebKit, on a fetch aborted with aborted
+
+rendered strings: 1 literal(s) in the shipped tree impersonate the platform, which C6 does not allow:
+  src/components/QuickLog.tsx:459  "Load failed"
+    why: WebKit, on a fetch aborted with aborted said this, so the product may not write it down. Say what Vernier knows, in a catalogued sentence.
+
+rendered strings: 28 fragment(s) with no key, which C6 does not allow:
+  /settings  [four integrations, no passkey]  span.chip::after
+    read: "Not synced yet"
+    unaccounted: "Not synced yet"
+    why: no catalogue key accounts for it
+  /settings  [four integrations, no passkey]  span.chip::after
+    read: "Not synced yet"
+    unaccounted: "Not synced yet"
+    why: no catalogue key accounts for it
+  /settings  [four integrations, no passkey]  span.chip::after
+    read: "Not synced yet"
+    unaccounted: "Not synced yet"
+    why: no catalogue key accounts for it
+  /settings  [four integrations, no passkey]  span.chip::after
+    read: "Not synced yet"
+    unaccounted: "Not synced yet"
+    why: no catalogue key accounts for it
+  /value/[id]  [stored value demo_average]  span.chip::after
+    read: "Not synced yet"
+    unaccounted: "Not synced yet"
+    why: no catalogue key accounts for it
+  /value/[id]  [stored value demo_average]  span.chip::after
+    read: "Not synced yet"
+    unaccounted: "Not synced yet"
+    why: no catalogue key accounts for it
+  /value/[id]  [stored value demo_weight]  span.chip::after
+    read: "Not synced yet"
+    unaccounted: "Not synced yet"
+    why: no catalogue key accounts for it
+  /value/[id]  [stored value demo_weight]  span.chip::after
+    read: "Not synced yet"
+    unaccounted: "Not synced yet"
+    why: no catalogue key accounts for it
+  /value/[id]  [stored value demo_energy]  span.chip::after
+    read: "Not synced yet"
+    unaccounted: "Not synced yet"
+    why: no catalogue key accounts for it
+  /value/[id]  [stored value demo_energy]  span.chip::after
+    read: "Not synced yet"
+    unaccounted: "Not synced yet"
+    why: no catalogue key accounts for it
+  /value/[id]  [stored value demo_waist]  span.chip::after
+    read: "Not synced yet"
+    unaccounted: "Not synced yet"
+    why: no catalogue key accounts for it
+  /value/[id]  [stored value demo_waist]  span.chip::after
+    read: "Not synced yet"
+    unaccounted: "Not synced yet"
+    why: no catalogue key accounts for it
+  /value/[id]  [stored value demo_steps]  span.chip::after
+    read: "Not synced yet"
+    unaccounted: "Not synced yet"
+    why: no catalogue key accounts for it
+  /value/[id]  [stored value demo_steps]  span.chip::after
+    read: "Not synced yet"
+    unaccounted: "Not synced yet"
+    why: no catalogue key accounts for it
+  /value/[id]  [stored value demo_ldl]  span.chip::after
+    read: "Not synced yet"
+    unaccounted: "Not synced yet"
+    why: no catalogue key accounts for it
+  /value/[id]  [stored value demo_ldl]  span.chip::after
+    read: "Not synced yet"
+    unaccounted: "Not synced yet"
+    why: no catalogue key accounts for it
+  /source/[id]  [source record demo_src_ldl]  span.num
+    read: "page 4, row 11"
+    unaccounted: "page 4, row 11"
+    why: no catalogue key accounts for it
+  /value/[id]  [correction refused by the range]  span.chip::after
+    read: "Not synced yet"
+    unaccounted: "Not synced yet"
+    why: no catalogue key accounts for it
+  /value/[id]  [correction refused by the range]  span.chip::after
+    read: "Not synced yet"
+    unaccounted: "Not synced yet"
+    why: no catalogue key accounts for it
+  /value/[id]  [correction refused by the range]  span.chip.a::after
+    read: "Not synced yet"
+    unaccounted: "Not synced yet"
+    why: no catalogue key accounts for it
+  / quick log  [the answer carried no words]  code
+    read: "sign-in"
+    unaccounted: "sign-in"
+    why: no catalogue key accounts for it
+  / quick log  [the answer carried no words]  span.chip.a::after
+    read: "Not synced yet"
+    unaccounted: "Not synced yet"
+    why: no catalogue key accounts for it
+  / quick log  [the fetch never reached the machine]  code
+    read: "sign-in"
+    unaccounted: "sign-in"
+    why: no catalogue key accounts for it
+  / quick log  [the fetch never reached the machine]  span.chip.a::after
+    read: "Not synced yet"
+    unaccounted: "Not synced yet"
+    why: no catalogue key accounts for it
+  /  [a write queued on this phone]  span.chip::after
+    read: "Not synced yet"
+    unaccounted: "Not synced yet"
+    why: no catalogue key accounts for it
+  /  [the queued write undone]  span.chip::after
+    read: "Not synced yet"
+    unaccounted: "Not synced yet"
+    why: no catalogue key accounts for it
+  / quick log  [the session removed mid-screen]  code
+    read: "sign-in"
+    unaccounted: "sign-in"
+    why: no catalogue key accounts for it
+  / quick log  [the session removed mid-screen]  span.chip.a::after
+    read: "Not synced yet"
+    unaccounted: "Not synced yet"
+    why: no catalogue key accounts for it

@@ -1,0 +1,10 @@
+
+433 keys in src/lib/strings.ts
+strings: 72 files under src/, 70 module(s) parsed and 1 stylesheet(s) read, against 433 keys.
+  outside this walk  public/sw.js, which cannot import the catalogue and answers its own 503 body
+  outside this walk  public/icons and public/favicon.ico, which carry no words
+  outside this walk  drizzle/*.sql, and the four config files at the root
+  outside this walk  scripts/ and tests/, which speak to an operator and never to a screen
+  outside this walk  docs/ and SETUP.html, documents rather than product surfaces
+strings: user-facing text written inline, which C6 does not allow:
+  src/middleware.ts:40  sentence  "Vernier checked the door and the door was locked."

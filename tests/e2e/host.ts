@@ -130,6 +130,41 @@ export function ownerExists(): boolean {
   return Number(query('select count(*) from owner')) > 0;
 }
 
+/** The stamp the global setup writes, so every worker of one run shares one anchor. */
+export const RUN_STAMP = 'VERNIER_SUITE_STARTED_AT';
+
+export function suiteStartedAt(): string {
+  const stamp = process.env[RUN_STAMP];
+  if (!stamp) {
+    throw new Error(
+      `${RUN_STAMP} is not set, so this run cannot tell its own writes from the owner's. ` +
+        'It is set by tests/e2e/global-setup.ts, which playwright.config.ts names. Run the suite through that config.',
+    );
+  }
+  return stamp;
+}
+
+/**
+ * Rows that are not seed data and were already here when this run started.
+ *
+ * The suite writes real rows through the product, so "not seed" alone cannot be
+ * the question: a quick-log test logs a waist measurement and that row is as
+ * un-seeded as a Withings import. What can be answered is when a row arrived.
+ * Anything older than this run is somebody else's, and the only somebody else
+ * on this machine is the owner.
+ */
+export function rowsOlderThanThisRun(): number {
+  const started = suiteStartedAt();
+  return Number(
+    query(
+      `select (select count(*) from measurement
+                where not seed and imported_at < timestamptz '${started}')
+            + (select count(*) from source_record
+                where not seed and recorded_at < timestamptz '${started}')`,
+    ),
+  );
+}
+
 /**
  * A clean provenance spine plus the demonstration seed, which is the state the
  * quick-log suite starts every destructive test from.
@@ -143,32 +178,28 @@ export function ownerExists(): boolean {
  * The restart is what re-seeds, through the same boot path the container uses in
  * anger, so nothing here writes a demonstration row by hand.
  *
- * AND IT REFUSES TO RUN AGAINST ANYTHING THAT IS NOT THE SEED. This helper runs
- * against the owner's live install, and the append-only trigger does not save
- * it: TRUNCATE walks straight past a row-level trigger, which is how a
- * permanent row was removed from this database during a verification. Harmless
- * while every row is demonstration data and destructive the moment slice 5
- * writes the first real Withings reading. So it counts the rows that are not
- * seed first, in both tables the seed touches, and if there is one it throws and
- * writes nothing at all. The suite fails loudly and the owner's history stays
- * where it is. To run these tests against a database with real readings in it,
- * point the suite at the scratch instance: `bash scripts/test-stack.sh reset`
- * builds an empty one on 127.0.0.1:3101 and nothing there is the owner's.
+ * AND IT REFUSES TO TAKE A ROW IT DID NOT WRITE. This helper runs against the
+ * owner's live install and the append-only trigger does not save it: TRUNCATE
+ * walks straight past a row-level trigger, which is how permanent rows were
+ * removed from this database during a verification. Harmless while every row is
+ * demonstration data, destructive the moment slice 5 imports a real Withings
+ * reading. So it counts first, and what it counts is rows that are not seed data
+ * AND predate this run. If there is one it throws, writes nothing at all, and
+ * says where to go instead: the suite fails loudly and the owner's history stays
+ * where it is. The scratch instance is the target for a database with real
+ * readings in it, `bash scripts/test-stack.sh reset`, and nothing there is the
+ * owner's.
+ *
+ * What the run wrote itself is fair game, and the global teardown truncates it
+ * at the end, so a run leaves this database as it found it and the next run's
+ * count means what it says.
  */
-export function ownerRowsHeld(): number {
-  return Number(
-    query(
-      `select (select count(*) from measurement where not seed)
-            + (select count(*) from source_record where not seed)`,
-    ),
-  );
-}
-
 export function resetProvenance(): void {
-  const owned = ownerRowsHeld();
-  if (owned > 0) {
+  const older = rowsOlderThanThisRun();
+  if (older > 0) {
     throw new Error(
-      `resetProvenance refused: this database holds ${owned} row(s) that are not seed data, and TRUNCATE would take them. ` +
+      `resetProvenance refused: this database holds ${older} row(s) that are not seed data and were here before this run started at ${suiteStartedAt()}. ` +
+        'TRUNCATE would take them and the append-only trigger does not stop it. ' +
         'Run the suite against the scratch instance instead: bash scripts/test-stack.sh reset.',
     );
   }

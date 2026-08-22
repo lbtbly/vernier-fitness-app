@@ -1,0 +1,14 @@
+rendered strings: the population this walk covers
+  0 stored values walked, floor 1
+  0 source records walked, floor 1
+  0 ratings on the one to five scale, floor 1
+  0 sources with a stored value behind them, floor 6
+  source kinds behind a value: none
+
+rendered strings: the walk would cover too little to mean anything, so it did not run.
+  stored values walked: 0, and this needs 1
+  source records walked: 0, and this needs 1
+  ratings on the one to five scale: 0, and this needs 1
+  sources with a stored value behind them: 0, and this needs 6
+  no stored value stands in for: apple_health_shortcut, demo, derived, lab_pdf, manual, withings
+  Bring the stack up with demonstration data: DEMO_MODE=1 is named in .env.example.

@@ -1,0 +1,9 @@
+# Six zones, one rendering. Builder, 2026-08-22, after the C6 closures.
+# TZ=<zone> node scripts/tz-shift.mjs | shasum -a 256 | cut -c1-16
+
+Europe/Paris           34a015c5047e40fd
+America/Los_Angeles    34a015c5047e40fd
+Asia/Tokyo             34a015c5047e40fd
+Pacific/Auckland       34a015c5047e40fd
+UTC                    34a015c5047e40fd
+America/Sao_Paulo      34a015c5047e40fd

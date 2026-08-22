@@ -74,3 +74,4 @@ Triaged by /doc-health. Checked = handled.
 - [ ] 2026-08-22 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `src/lib/strings.ts`
 - [ ] 2026-08-22 🆕 Credential referenced → document access in ACCESS.md? — `scripts/rendered-strings.mjs`
 - [ ] 2026-08-22 🆕 Credential referenced → document access in ACCESS.md? — `scripts/gen-env.mjs`
+- [ ] 2026-08-22 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `playwright.config.ts`

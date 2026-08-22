@@ -14,6 +14,13 @@ const baseURL = (process.env.APP_URL ?? 'https://lamberts-mac-mini.tailda76d6.ts
 
 export default defineConfig({
   testDir: './tests/e2e',
+  // One clock at the start, one sweep at the end. The destructive helper in
+  // tests/e2e/host.ts truncates the owner's live tables, and it may only take
+  // rows this run wrote: the setup stamps when the run began, the teardown
+  // clears what the run added, and anything older than the stamp is the owner's
+  // and is never touched.
+  globalSetup: './tests/e2e/global-setup.ts',
+  globalTeardown: './tests/e2e/global-teardown.ts',
   fullyParallel: false,
   workers: 1,
   forbidOnly: Boolean(process.env.CI),

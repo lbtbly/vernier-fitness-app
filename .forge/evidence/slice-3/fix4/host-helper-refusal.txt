@@ -1,0 +1,2 @@
+REFUSED: resetProvenance refused: this database holds 1 row(s) that are not seed data and were here before this run started at 2026-08-22T06:57:14.000Z. TRUNCATE would take them and the append-only trigger does not stop it. Run the suite against the scratch instance instead: bash scripts/test-stack.sh reset.
+REFUSED: VERNIER_SUITE_STARTED_AT is not set, so this run cannot tell its own writes from the owner's. It is set by tests/e2e/global-setup.ts, which playwright.config.ts names. Run the suite through that config.

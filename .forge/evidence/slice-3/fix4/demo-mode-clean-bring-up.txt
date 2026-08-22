@@ -1,0 +1,29 @@
+# DEMO_MODE, from a clean shell. Builder, 2026-08-22.
+
+The cause: SETUP.html generated the owner's environment file and never wrote a
+DEMO_MODE line, so compose.yaml's ${DEMO_MODE:-0} took its default while its four
+neighbours resolved from that same file. The file was right about everything it
+contained. It did not contain this.
+
+The repair, run by the bring-up itself:
+
+  node scripts/gen-env.mjs --settings
+      gen-env: DEMO_MODE was not in the file, added with the documented default
+
+  docker compose config | grep -i demo
+          DEMO_MODE: "1"
+
+A clean bring-up, nothing exported in the shell:
+
+  printenv DEMO_MODE   -> unset, exit 1
+  bash scripts/up.sh
+      up.sh: db and app are healthy.
+  docker compose exec -T app printenv DEMO_MODE
+      1
+
+Still idempotent, which is F5: two runs of up.sh in a row, exit 0 twice, the app
+container id unchanged across both, and the settings pass printed nothing because
+there was nothing left to add.
+
+Rows on the machine after the bring-up:
+    measurements, seeded, source records, seeded: 6 6 6 6
