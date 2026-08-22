@@ -27,9 +27,15 @@
 // the whole of a defect: sixty-odd refusal sentences lived in the .ts route
 // handlers, one of them naming two JSON fields to a person on screen, and this
 // script exited 0 over all of them. A checker that cannot see a construct
-// cannot claim a complete inventory. So it now walks .ts as well as .tsx, over
-// every tree that renders or answers, and it reads a template literal as the
-// text it is rather than skipping it.
+// cannot claim a complete inventory. So it now walks .ts as well as .tsx, and it
+// reads a template literal as the text it is rather than skipping it.
+//
+// It walks the whole of src/ now, not a list of directories inside it. The list
+// was four trees and the root of src/ was in none of them, which is where the
+// middleware refusal shipped from and where a planted sentence sat at exit 0 a
+// second time. It reads .css as well, because `content:` is a property that
+// paints words on a screen and no text walk on the other side can see them.
+// What is still outside is printed on every run, under "outside this walk".
 import { readFile, readdir } from 'node:fs/promises';
 import { dirname, extname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -86,18 +92,52 @@ if (!process.argv.includes('--check')) process.exit(0);
 //      are rendered verbatim on the value sheet and at the gate.
 //   3. Shape. A prose sentence anywhere in these trees.
 import ts from 'typescript';
-import { LOOKS_LIKE_COPY, NOT_COPY, SPOKEN_ATTRIBUTES } from './lib/vocabulary.mjs';
+import {
+  CSS_CONTENT_DECLARATION,
+  LOOKS_LIKE_COPY,
+  NOT_COPY,
+  SPOKEN_ATTRIBUTES,
+  cssContentStrings,
+} from './lib/vocabulary.mjs';
 
 /**
- * Everything that renders a screen or answers a request. src/lib and src/db are
- * in here because a refusal built in gate.ts or a purpose written in
- * integrations.ts reaches a reader exactly the same way a JSX text node does.
+ * The whole of src/, and it is one entry on purpose.
+ *
+ * It used to be four trees, `src/app`, `src/components`, `src/lib` and
+ * `src/db`, and the root of src/ was in none of them: `src/middleware.ts` and
+ * `src/instrumentation.ts` were outside the walk. That is not a hypothetical
+ * gap. It is where slice 3's second C6 failure shipped from, a plain English
+ * refusal written inline in the middleware and answered to a person, with this
+ * check at exit 0 over it, and a sentence planted there at the fourth verify
+ * left the check at exit 0 again. A named list of directories is a list that
+ * goes stale the first time a file lands beside it rather than under it, so
+ * there is no list: everything under src/ is walked, and a new directory is
+ * covered the day it is created.
  */
-const SCAN_DIRS = [
-  join(projectRoot, 'src', 'app'),
-  join(projectRoot, 'src', 'components'),
-  join(projectRoot, 'src', 'lib'),
-  join(projectRoot, 'src', 'db'),
+const SCAN_ROOT = join(projectRoot, 'src');
+
+/**
+ * What is still outside this walk, printed on every run rather than discovered
+ * at a verification. Two of these reach a person and both are named:
+ *
+ *   - public/sw.js. Hand-written, no import of the catalogue possible, and it
+ *     answers `new Response('Offline', {status: 503})` when a navigation misses
+ *     the cache. That body is copy with no key and it is C3's defect, not a new
+ *     one. The service worker is registered with `serviceWorkers: 'block'` in
+ *     the rendered walk, so neither check sees it today.
+ *   - public/manifest.webmanifest is generated from src/app, and the rendered
+ *     check reads the served manifest's name, short_name and description.
+ *   - drizzle/*.sql, next.config.ts, drizzle.config.ts, playwright.config.ts
+ *     and everything under scripts/ and tests/: tooling and schema, no reader.
+ *   - docs/ and SETUP.html: prose written for the owner as documents, which is
+ *     not the product speaking on a screen.
+ */
+const OUTSIDE_THE_WALK = [
+  'public/sw.js, which cannot import the catalogue and answers its own 503 body',
+  'public/icons and public/favicon.ico, which carry no words',
+  'drizzle/*.sql, and the four config files at the root',
+  'scripts/ and tests/, which speak to an operator and never to a screen',
+  'docs/ and SETUP.html, documents rather than product surfaces',
 ];
 
 /** The catalogue itself, which is where the strings are supposed to be. */
@@ -164,12 +204,15 @@ function readsAsASentence(text) {
   return /^[A-Z]/.test(trimmed) || /[.?!]$/.test(trimmed);
 }
 
+/** Every file under src/ this check knows how to read. */
+const READABLE = new Set(['.ts', '.tsx', '.css']);
+
 async function walk(dir) {
   const found = [];
   for (const entry of await readdir(dir, { withFileTypes: true })) {
     const path = join(dir, entry.name);
     if (entry.isDirectory()) found.push(...(await walk(path)));
-    else if (extname(entry.name) === '.tsx' || extname(entry.name) === '.ts') found.push(path);
+    else if (READABLE.has(extname(entry.name))) found.push(path);
   }
   return found;
 }
@@ -210,79 +253,113 @@ function fromCatalogue(node) {
 
 const violations = [];
 
-for (const dir of SCAN_DIRS) {
-  for (const file of await walk(dir)) {
-    if (file === CATALOGUE) continue;
-    const source = await readFile(file, 'utf8');
-    const name = relative(projectRoot, file);
-    const tree = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
-    const at = (node) => tree.getLineAndCharacterOfPosition(node.getStart(tree)).line + 1;
+const files = (await walk(SCAN_ROOT)).sort();
+let stylesheetsWalked = 0;
+let modulesWalked = 0;
 
-    const visit = (node) => {
-      // 1. JSX.
-      if (ts.isJsxText(node)) {
-        const text = node.text.trim();
-        if (LOOKS_LIKE_COPY.test(text) && !NOT_COPY.has(text)) {
-          violations.push({ file: name, line: at(node), kind: 'jsx text', text });
-        }
-      } else if (ts.isJsxAttribute(node) && SPOKEN.has(node.name.getText(tree))) {
-        const text = literalOf(node.initializer);
-        if (text !== null && LOOKS_LIKE_COPY.test(text)) {
+for (const file of files) {
+  if (file === CATALOGUE) continue;
+  const source = await readFile(file, 'utf8');
+  const name = relative(projectRoot, file);
+
+  // A stylesheet, which is a place a sentence can be written. `content` is the
+  // one CSS property that paints words, it reaches a person on every element
+  // the rule matches, and no text walk on the rendered side can see it: this
+  // check reads none of these files before today and `.chip::after{content:"
+  // Not synced yet"}` painted on every chip with both checks at exit 0. Read
+  // the declarations, and nothing else in the file.
+  if (extname(file) === '.css') {
+    stylesheetsWalked += 1;
+    for (const declaration of source.matchAll(CSS_CONTENT_DECLARATION)) {
+      for (const text of cssContentStrings(declaration[2])) {
+        if (!LOOKS_LIKE_COPY.test(text)) continue;
+        const line = source.slice(0, declaration.index).split('\n').length;
+        violations.push({ file: name, line, kind: 'css content', text });
+      }
+    }
+    continue;
+  }
+
+  modulesWalked += 1;
+  const tree = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const at = (node) => tree.getLineAndCharacterOfPosition(node.getStart(tree)).line + 1;
+
+  const visit = (node) => {
+    // 1. JSX.
+    if (ts.isJsxText(node)) {
+      const text = node.text.trim();
+      if (LOOKS_LIKE_COPY.test(text) && !NOT_COPY.has(text)) {
+        violations.push({ file: name, line: at(node), kind: 'jsx text', text });
+      }
+    } else if (ts.isJsxAttribute(node) && SPOKEN.has(node.name.getText(tree))) {
+      const text = literalOf(node.initializer);
+      if (text !== null && LOOKS_LIKE_COPY.test(text)) {
+        violations.push({
+          file: name,
+          line: at(node),
+          kind: `attribute ${node.name.getText(tree)}`,
+          text,
+        });
+      }
+    } else if (ts.isJsxExpression(node) && node.parent && ts.isJsxElement(node.parent)) {
+      const text = literalOf(node.expression);
+      if (text !== null && LOOKS_LIKE_COPY.test(text)) {
+        violations.push({ file: name, line: at(node), kind: 'jsx child literal', text });
+      }
+    }
+
+    // 2. The refusal sink. refuse(status, error, detail) puts both of its
+    // sentences on a screen: the gate renders `error` under the passkey
+    // button and the value sheet renders both into screen 00's error card.
+    // A literal in either position is copy with no key, whatever it says, so
+    // this rule does not consult the shape at all.
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === 'refuse'
+    ) {
+      for (const [index, argument] of node.arguments.entries()) {
+        if (index === 0 || index > 2) continue;
+        const text = literalOf(argument);
+        if (text !== null && !fromCatalogue(argument)) {
           violations.push({
             file: name,
-            line: at(node),
-            kind: `attribute ${node.name.getText(tree)}`,
+            line: at(argument),
+            kind: index === 1 ? 'refuse() error' : 'refuse() detail',
             text,
           });
         }
-      } else if (ts.isJsxExpression(node) && node.parent && ts.isJsxElement(node.parent)) {
-        const text = literalOf(node.expression);
-        if (text !== null && LOOKS_LIKE_COPY.test(text)) {
-          violations.push({ file: name, line: at(node), kind: 'jsx child literal', text });
-        }
       }
+    }
 
-      // 2. The refusal sink. refuse(status, error, detail) puts both of its
-      // sentences on a screen: the gate renders `error` under the passkey
-      // button and the value sheet renders both into screen 00's error card.
-      // A literal in either position is copy with no key, whatever it says, so
-      // this rule does not consult the shape at all.
-      if (
-        ts.isCallExpression(node) &&
-        ts.isIdentifier(node.expression) &&
-        node.expression.text === 'refuse'
-      ) {
-        for (const [index, argument] of node.arguments.entries()) {
-          if (index === 0 || index > 2) continue;
-          const text = literalOf(argument);
-          if (text !== null && !fromCatalogue(argument)) {
-            violations.push({
-              file: name,
-              line: at(argument),
-              kind: index === 1 ? 'refuse() error' : 'refuse() detail',
-              text,
-            });
+    // 3. Shape, everywhere else. A sentence written for a reader, wherever
+    // it was written.
+    if (
+      ts.isStringLiteral(node) ||
+      ts.isNoSubstitutionTemplateLiteral(node) ||
+      ts.isTemplateExpression(node)
+    ) {
+      const text = literalOf(node);
+      if (text !== null && readsAsASentence(text)) {
+        violations.push({ file: name, line: at(node), kind: 'sentence', text });
+      }
+      // 4. A `content` declaration inside a stylesheet written as a string.
+      // src/lib/offline-css.ts is a whole stylesheet in a template literal, and
+      // a rule that only read .css files would have moved the hole here rather
+      // than closed it.
+      if (text !== null) {
+        for (const declaration of text.matchAll(CSS_CONTENT_DECLARATION)) {
+          for (const painted of cssContentStrings(declaration[2])) {
+            if (!LOOKS_LIKE_COPY.test(painted)) continue;
+            violations.push({ file: name, line: at(node), kind: 'css content', text: painted });
           }
         }
       }
+    }
 
-      // 3. Shape, everywhere else. A sentence written for a reader, wherever
-      // it was written.
-      if (
-        ts.isStringLiteral(node) ||
-        ts.isNoSubstitutionTemplateLiteral(node) ||
-        ts.isTemplateExpression(node)
-      ) {
-        const text = literalOf(node);
-        if (text !== null && readsAsASentence(text)) {
-          violations.push({ file: name, line: at(node), kind: 'sentence', text });
-        }
-      }
-
-      ts.forEachChild(node, visit);
-    };
-    visit(tree);
-  }
+    ts.forEachChild(node, visit);
+  };
+  visit(tree);
 }
 
 // One line per place, so a string caught by two rules is reported once.
@@ -295,10 +372,15 @@ for (const violation of violations) {
   unique.push(violation);
 }
 
+// What was walked, and what was not, on every run. A zero is evidence only
+// beside the population it covered, so the population is printed either way.
+process.stdout.write(
+  `strings: ${files.length} files under src/, ${modulesWalked} module(s) parsed and ${stylesheetsWalked} stylesheet(s) read, against ${inventory.length} keys.\n`,
+);
+for (const outside of OUTSIDE_THE_WALK) process.stdout.write(`  outside this walk  ${outside}\n`);
+
 if (unique.length === 0) {
-  process.stdout.write(
-    `strings: no user-facing string is written inline. ${SCAN_DIRS.length} trees scanned, .ts and .tsx, ${inventory.length} keys.\n`,
-  );
+  process.stdout.write('strings: no user-facing string is written inline.\n');
   process.exit(0);
 }
 

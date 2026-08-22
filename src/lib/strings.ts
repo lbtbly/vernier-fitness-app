@@ -424,8 +424,20 @@ export const strings = {
   },
 
   /**
-   * The demonstration seed's own copy: the refusal it logs when demonstration
-   * mode is off, and the two sentences its records carry as data.
+   * The demonstration seed's own copy.
+   *
+   * Every word the seed writes into a free-text column is here, because the
+   * seed is the product writing and a person reads the result on /source/[id].
+   * `reference: 'page 2, row 7'` and `reference: 'quick-log'` sat in
+   * src/db/demo.ts and painted on that screen with no key, and both string
+   * checks passed over them: the source scanner reads neither as a sentence and
+   * the rendered scanner read them back out of the column as if the owner had
+   * typed them. The column is the same column a real import writes, so the
+   * check now builds its data vocabulary from `where not seed` and the seed's
+   * own words take keys like every other string the product authored.
+   *
+   * The numbers stay numbers. A row count, a page number, a factor and an HTTP
+   * status are read as the value shapes they are and none of them is copy.
    */
   demoSeed: {
     refused: 'DEMO_MODE is not 1, so the demonstration seed refused to run and wrote nothing.',
@@ -433,6 +445,24 @@ export const strings = {
     derivationRule: 'mean of daily readings, no interpolation',
     /** The laboratory on the demonstration blood panel. It prints on the source screen. */
     laboratory: 'Biogroup',
+    /** What each seeded source record carries as its reference. One per source shape. */
+    reference: {
+      weight: '1184',
+      steps: 'batch-3391',
+      waist: 'quick-log',
+      ldl: 'page 2, row 7',
+      average: 'weight-7d',
+      energy: 'seed',
+    },
+    /** The detail rows those records carry, wherever the value is words rather than a number. */
+    field: {
+      endpoint: 'measure?action=getmeas',
+      syncWindow: '24 h',
+      enteredOn: 'iPhone',
+      printedValue: '1.44 g/L',
+      storedValue: '3.72 mmol/L',
+      derivationWindow: '7 d',
+    },
   },
 
   /**

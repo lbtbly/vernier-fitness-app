@@ -54,8 +54,18 @@ export const SVG_TEXT_ELEMENTS = ['title', 'desc', 'text', 'tspan', 'textPath'];
 /** Inside an svg, subtrees that are never rendered where they sit. */
 export const SVG_EXCLUDED_SUBTREES = ['defs', 'clipPath', 'mask', 'pattern', 'marker'];
 
-/** Elements whose text content is machine notation rather than prose. */
-export const MACHINE_TEXT_ELEMENTS = ['code', 'kbd', 'samp', 'pre'];
+/**
+ * THERE IS NO ELEMENT EXEMPTION. `code`, `kbd`, `samp` and `pre` used to be
+ * listed here as "machine notation rather than prose", and every kebab, snake
+ * or dotted run inside one of them tiled as a value. That is position and not
+ * provenance: `<code>{helperNote()}</code>` returning `'sign-in'` rendered at
+ * 45 px and both checks passed. `element.closest('code')` establishes where a
+ * fragment landed, never who wrote it, and A4 refused exactly that shape as an
+ * exclusion. Notation a screen prints on purpose is still copy: it takes a
+ * catalogue key, or it comes out of a column and is read as owner data, or it
+ * is one of the value shapes below. Nothing is excused for the element it sits
+ * in.
+ */
 
 /** Subtrees that never reach a reader at all. */
 export const NEVER_RENDERED = ['script', 'style', 'noscript', 'template'];
@@ -92,14 +102,45 @@ export const TOKENS = [
   ['number', /^[+-]?\d+(?:[.,:]\d+)*/],
 ];
 
-/**
- * Extra shapes allowed only inside a MACHINE_TEXT_ELEMENTS subtree, where the
- * screen has said in markup that what follows is notation and not language.
- */
-export const MACHINE_TOKENS = [['machine identifier', /^[A-Za-z_][A-Za-z0-9]*(?:[-_.][A-Za-z0-9]+)+/]];
-
 /** Two letters in a row is copy. One letter, punctuation or a numeral is glue. */
 export const LOOKS_LIKE_COPY = /[A-Za-z]{2,}/;
+
+/**
+ * A CSS `content` declaration, and the words it paints.
+ *
+ * A stylesheet is a place a sentence can be written, and it was the widest hole
+ * the union of these two checks had: `.chip::after{content:" Not synced yet"}`
+ * painted on every chip on every screen, `getComputedStyle` read it straight
+ * back, and `innerText`, `textContent` and a SHOW_TEXT TreeWalker all missed it
+ * by construction. The source checker read no .css file at all and the rendered
+ * checker read no pseudo-element. Both do now, and both use this.
+ *
+ * `justify-content` is not a match, which is why the property is anchored on
+ * something that is not a name character. The empty string, `none`, `normal`,
+ * `counter()`, `attr()` and the quote keywords carry no words and are left
+ * alone: what is caught is a string literal with letters in it.
+ */
+export const CSS_CONTENT_DECLARATION = /(^|[^-\w])content\s*:\s*([^;}]*)/gi;
+
+/**
+ * A string literal inside a CSS value, as source text.
+ *
+ * It is a source string rather than a regular expression because the rendered
+ * checker's page function is serialised into WebKit and can close over nothing:
+ * it rebuilds this there. One definition, two sides, which is the whole reason
+ * this module exists.
+ */
+export const CSS_STRING_SOURCE = String.raw`"((?:[^"\\]|\\.)*)"|'((?:[^'\\]|\\.)*)'`;
+
+/** Every string literal in one CSS value, unescaped enough to read. */
+export function cssContentStrings(value) {
+  const found = [];
+  for (const match of value.matchAll(new RegExp(CSS_STRING_SOURCE, 'g'))) {
+    const text = (match[1] ?? match[2] ?? '').replace(/\\(?=.)/g, '');
+    if (text.trim() !== '') found.push(text);
+  }
+  return found;
+}
 
 /** Words that are markup, not language. */
 export const NOT_COPY = new Set(['px', 'em', 'rem']);

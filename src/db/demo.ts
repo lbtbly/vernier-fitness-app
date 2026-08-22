@@ -30,6 +30,13 @@ import type { SourceKind } from './measurements';
  * will.
  *
  * Ids are fixed, so a second boot writes nothing new and no timestamp moves.
+ *
+ * Every word below comes out of the catalogue. A reference and a detail row are
+ * free text in the database and they are read on /source/[id], so the seed
+ * writing `'page 2, row 7'` here was the product authoring copy that reached a
+ * person with no key: C6 says wherever in the shipped tree it was written, and
+ * this file is in the shipped tree. The numbers stay literal, because a row
+ * count and an HTTP status are values and not words.
  */
 
 const DEMO_ID_PREFIX = 'demo_';
@@ -74,10 +81,10 @@ const DEMO_ROWS: DemoRow[] = [
     atMinute: 52,
     standsInFor: 'withings',
     kind: 'sync_batch',
-    reference: '1184',
+    reference: strings.demoSeed.reference.weight,
     detail: [
-      { key: 'source.field.endpoint', value: 'measure?action=getmeas' },
-      { key: 'source.field.window', value: '24 h' },
+      { key: 'source.field.endpoint', value: strings.demoSeed.field.endpoint },
+      { key: 'source.field.window', value: strings.demoSeed.field.syncWindow },
       { key: 'source.field.rowsReceived', value: '7' },
       { key: 'source.field.rowsStored', value: '6' },
       { key: 'source.field.result', value: '200' },
@@ -95,7 +102,7 @@ const DEMO_ROWS: DemoRow[] = [
     atMinute: 12,
     standsInFor: 'apple_health_shortcut',
     kind: 'shortcut_payload',
-    reference: 'batch-3391',
+    reference: strings.demoSeed.reference.steps,
     detail: [
       { key: 'source.field.shortcut', value: strings.demoSeed.shortcutName },
       { key: 'source.field.rowsReceived', value: '4' },
@@ -115,9 +122,9 @@ const DEMO_ROWS: DemoRow[] = [
     atMinute: 20,
     standsInFor: 'manual',
     kind: 'manual_entry',
-    reference: 'quick-log',
+    reference: strings.demoSeed.reference.waist,
     detail: [
-      { key: 'source.field.enteredOn', value: 'iPhone' },
+      { key: 'source.field.enteredOn', value: strings.demoSeed.field.enteredOn },
       { key: 'source.field.method', value: strings.quickLog.waistMethod },
     ],
   },
@@ -134,13 +141,13 @@ const DEMO_ROWS: DemoRow[] = [
     atMinute: 5,
     standsInFor: 'lab_pdf',
     kind: 'lab_page',
-    reference: 'page 2, row 7',
+    reference: strings.demoSeed.reference.ldl,
     detail: [
       { key: 'source.field.laboratory', value: strings.demoSeed.laboratory },
       { key: 'source.field.page', value: '2' },
-      { key: 'source.field.printedValue', value: '1.44 g/L' },
+      { key: 'source.field.printedValue', value: strings.demoSeed.field.printedValue },
       { key: 'source.field.factor', value: '2.586' },
-      { key: 'source.field.storedValue', value: '3.72 mmol/L' },
+      { key: 'source.field.storedValue', value: strings.demoSeed.field.storedValue },
     ],
   },
   {
@@ -155,10 +162,10 @@ const DEMO_ROWS: DemoRow[] = [
     atMinute: 54,
     standsInFor: 'derived',
     kind: 'derivation',
-    reference: 'weight-7d',
+    reference: strings.demoSeed.reference.average,
     detail: [
       { key: 'source.field.inputs', value: '7' },
-      { key: 'source.field.window', value: '7 d' },
+      { key: 'source.field.window', value: strings.demoSeed.field.derivationWindow },
       { key: 'source.field.rule', value: strings.demoSeed.derivationRule },
     ],
   },
@@ -174,7 +181,7 @@ const DEMO_ROWS: DemoRow[] = [
     atMinute: 32,
     standsInFor: 'demo',
     kind: 'demo_record',
-    reference: 'seed',
+    reference: strings.demoSeed.reference.energy,
     detail: [
       { key: 'source.field.seed', value: IMPORT_VERSION },
       { key: 'source.field.rowsStored', value: '1' },

@@ -30,17 +30,22 @@
 //   2. Data the owner or a device authored, read back out of this database:
 //      raw values, correction reasons, source references, the rows a source
 //      record carries, an integration scope, a passkey's label. Read from the
-//      free-text columns only. A state column is deliberately NOT data here:
-//      `integration_credential.state` reaching a screen is the defect this
-//      check exists to catch, so its values are not in the vocabulary and a
-//      chip printing one fails.
+//      free-text columns only, and only `where not seed`. A state column is
+//      deliberately NOT data here: `integration_credential.state` reaching a
+//      screen is the defect this check exists to catch, so its values are not
+//      in the vocabulary and a chip printing one fails. Nor is a seeded row:
+//      the demonstration seed is the product writing, and reading its words
+//      back out of a column excused copy Vernier composed in src/db/demo.ts.
 //   3. Shapes that are values rather than words: a number, a time, a UUID, a
 //      prefixed id, a URL, a host, a zone name, and the month and weekday names
 //      the app's own formatters produce in the app's own zone.
 //   4. Text the browser itself wrote, and only where its provenance can be
 //      established twice over: the markup marks it at the branch that knows,
 //      and the string is one WebKit handed this run when a fetch was refused.
-//      A fragment failing either half fails the check.
+//      A fragment failing either half fails the check. And the two halves are
+//      not enough on their own, because a marker plus an echo defeats them, so
+//      the same run reads the shipped tree and fails any literal equal to a
+//      harvested message. The product never writes the browser's words down.
 //
 // Anything else is a defect, reported with the text, the surface and the state.
 //
@@ -48,7 +53,16 @@
 // which are the words a chart says out loud and the words it draws on an axis.
 // It used to exclude every svg wholesale. Also `aria-roledescription`,
 // `aria-valuetext`, `aria-keyshortcuts`, the braille pair, and the `value` of a
-// submit control, which is a label carried as an attribute.
+// submit control, which is a label carried as an attribute. And what the
+// stylesheet paints: `content` on every ::before and ::after, read with
+// getComputedStyle, which is the only reader there is. A text walk cannot see a
+// pseudo-element and `.chip::after{content:" Not synced yet"}` proved it, on
+// every chip, with both checks green.
+//
+// AND IT EXEMPTS NO ELEMENT. `<code>`, `<kbd>`, `<samp>` and `<pre>` used to
+// carry an extra shape that tiled any kebab, snake or dotted run, so
+// `<code>sign-in</code>` from a helper passed. Where a fragment landed is not
+// who wrote it. That exemption is gone from both checkers.
 //
 // WHAT IT CANNOT SEE, stated plainly rather than discovered later:
 //
@@ -68,14 +82,14 @@
 //   - /healthz, which answers a machine and is graded by C1 for saying as
 //     little as possible.
 import { execFileSync } from 'node:child_process';
-import { dirname, join, resolve } from 'node:path';
+import { readFile, readdir } from 'node:fs/promises';
+import { dirname, extname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { webkit } from '@playwright/test';
 import {
+  CSS_STRING_SOURCE,
   GLUE,
   LABEL_ATTRIBUTE_ELEMENTS,
-  MACHINE_TEXT_ELEMENTS,
-  MACHINE_TOKENS,
   NEVER_RENDERED,
   SPOKEN_ATTRIBUTES,
   SVG_EXCLUDED_SUBTREES,
@@ -234,7 +248,8 @@ for (let day = 0; day < 7; day += 1) {
 }
 
 /**
- * Free text this database holds, and only free text.
+ * Free text this database holds, and only free text, and only where the owner
+ * or a device wrote it.
  *
  * A note the owner typed, the reason he gave for a correction, the reference a
  * batch carried, the rows a source record lists, the scope an integration was
@@ -243,17 +258,28 @@ for (let day = 0; day < 7; day += 1) {
  * values are tokens, and a token reaching a screen is the defect this checks
  * for. Leaving them out of the vocabulary is what makes the check able to catch
  * one.
+ *
+ * AND NOT A SEEDED ROW. `where not seed` is the difference between reading a
+ * column and reading owner data. The demonstration seed is the product writing:
+ * `reference: 'page 2, row 7'` and `reference: 'quick-log'` were composed in
+ * src/db/demo.ts, painted on /source/demo_src_ldl and /source/demo_src_waist,
+ * and excused here because they came back out of a free-text column. C6 says
+ * wherever in the shipped tree it was written, and src/db/demo.ts is in the
+ * shipped tree. The seed's own words are catalogue keys now, and this vocabulary
+ * is built only from rows no writer in this repository authored, which is what
+ * `seed` is for: a generated column on the measurement, a set column on the
+ * source record, and a composite foreign key that refuses to mix them.
  */
 const DATA_QUERIES = [
-  ['measurement.raw_value', 'select distinct raw_value from measurement'],
+  ['measurement.raw_value', 'select distinct raw_value from measurement where not seed'],
   [
     'measurement.correction_reason',
-    "select distinct correction_reason from measurement where correction_reason is not null and correction_reason <> ''",
+    "select distinct correction_reason from measurement where not seed and correction_reason is not null and correction_reason <> ''",
   ],
-  ['source_record.reference', 'select distinct reference from source_record'],
+  ['source_record.reference', 'select distinct reference from source_record where not seed'],
   [
     'source_record.detail',
-    "select distinct value->>'value' from source_record, jsonb_array_elements(detail) as value",
+    "select distinct value->>'value' from source_record, jsonb_array_elements(detail) as value where not seed",
   ],
   ['integration_credential.scope', 'select distinct scope from integration_credential'],
   ['webauthn_credential.label', 'select distinct label from webauthn_credential'],
@@ -281,9 +307,16 @@ for (const [column, statement] of DATA_QUERIES) {
 // carry a hyphen, tiled as a value and never read as copy. C6 now says "however
 // few words it is, including one hyphenated word", so a hyphenated word is copy
 // and needs a key. What that shape legitimately covered is covered by name: a
-// value this check sent is an echo anchor, a value out of a column is a data
-// anchor, and notation a screen prints on purpose sits in a <code> and is read
-// under MACHINE_TOKENS, which apply nowhere else.
+// value this check sent is an echo anchor, and a value out of a column is a
+// data anchor.
+//
+// It survived one more verification inside `<code>`, `<kbd>`, `<samp>` and
+// `<pre>`, where the same pattern applied under the name MACHINE_TOKENS. That
+// was position and not provenance: `<code>{helperNote()}</code>` returning
+// 'sign-in' rendered at 45 px and both checks exited 0, which is the shape A4
+// refused. `element.closest('code')` says where a fragment landed, never who
+// wrote it. There is no element exemption now, in either checker. Notation a
+// screen prints on purpose takes a key like anything else.
 
 const byFirstCharacter = new Map();
 
@@ -318,10 +351,9 @@ function anchorAt(text, index) {
   return null;
 }
 
-function tokenAt(text, index, machineText) {
+function tokenAt(text, index) {
   const rest = text.slice(index);
-  const shapes = machineText ? [...TOKENS, ...MACHINE_TOKENS] : TOKENS;
-  for (const [name, pattern] of shapes) {
+  for (const [name, pattern] of TOKENS) {
     const match = pattern.exec(rest);
     if (!match || match[0] === '') continue;
     const after = index + match[0].length;
@@ -336,7 +368,7 @@ function tokenAt(text, index, machineText) {
  * first character none of them can account for is where it fails, and the rest
  * of the line is what is reported, because that is the string somebody read.
  */
-function tile(text, { machineText = false } = {}) {
+function tile(text) {
   const used = [];
   let index = 0;
   while (index < text.length) {
@@ -346,7 +378,7 @@ function tile(text, { machineText = false } = {}) {
       continue;
     }
     const anchor = anchorAt(text, index);
-    const token = tokenAt(text, index, machineText);
+    const token = tokenAt(text, index);
     const anchorLength = anchor ? anchor.text.length : 0;
     const tokenLength = token ? token.length : 0;
     if (anchorLength === 0 && tokenLength === 0) {
@@ -453,6 +485,60 @@ function platformProvenance(fragment, context) {
 }
 
 // --------------------------------------------------------------------------
+// And the product may not write the browser's words down.
+//
+// Two halves of provenance are enough to stop a marker on its own and enough to
+// stop a string the browser never said. They are not enough to stop both at
+// once: mark a node platform AND echo a string WebKit really did produce, and
+// the fragment is excused. The verifier did exactly that. `<span
+// data-authored="platform">Load failed</span>` was excused in three states, one
+// of them a 502 where WebKit said nothing at all, and the product invented the
+// browser's words while dropping the real cause off the card.
+//
+// The residual is the harvested vocabulary itself, and it is small and known:
+// on this machine and this WebKit it is one string. So it is closed from the
+// other side. A literal equal to a harvested platform string, anywhere in the
+// shipped tree, fails. The catalogue is not exempt either: a key holding the
+// browser's words would be the same lie with a key on it. Vernier never writes
+// a sentence that impersonates the platform, and the only way a harvested
+// message may reach a screen is by coming out of the browser in that run.
+const SHIPPED_TREES = [join(projectRoot, 'src'), join(projectRoot, 'public')];
+const SHIPPED_TEXT = new Set(['.ts', '.tsx', '.css', '.js', '.mjs', '.json', '.webmanifest']);
+const impersonations = [];
+let shippedFilesRead = 0;
+
+async function shippedFiles(dir) {
+  const found = [];
+  for (const entry of await readdir(dir, { withFileTypes: true })) {
+    const path = join(dir, entry.name);
+    if (entry.isDirectory()) found.push(...(await shippedFiles(path)));
+    else if (SHIPPED_TEXT.has(extname(entry.name))) found.push(path);
+  }
+  return found;
+}
+
+async function readTheShippedTree() {
+  for (const tree of SHIPPED_TREES) {
+    for (const file of await shippedFiles(tree)) {
+      const source = await readFile(file, 'utf8');
+      shippedFilesRead += 1;
+      for (const [message, provenance] of platformVocabulary) {
+        let at = source.indexOf(message);
+        while (at !== -1) {
+          impersonations.push({
+            file: relative(projectRoot, file),
+            line: source.slice(0, at).split('\n').length,
+            text: message,
+            provenance,
+          });
+          at = source.indexOf(message, at + message.length);
+        }
+      }
+    }
+  }
+}
+
+// --------------------------------------------------------------------------
 // Reading a rendered surface.
 
 /**
@@ -478,7 +564,7 @@ function platformProvenance(fragment, context) {
  * source-side checker uses.
  */
 function readTheScreen(vocabulary) {
-  const { spoken, valueAsLabel, labelElements, svgText, svgExcluded, machineText, neverRendered } =
+  const { spoken, valueAsLabel, labelElements, svgText, svgExcluded, neverRendered, cssString } =
     vocabulary;
   const found = [];
   const describe = (element) => {
@@ -486,14 +572,12 @@ function readTheScreen(vocabulary) {
     const classes = element.getAttribute('class');
     return element.tagName.toLowerCase() + (classes ? '.' + classes.split(/\s+/).join('.') : '');
   };
-  // Who wrote it, if the markup says, and whether the screen has declared this
-  // subtree to be notation rather than language.
+  // Who wrote it, if the markup says. Nothing else about where it sits counts:
+  // the element a fragment landed in is position, and position never excused
+  // anything after the <code> exemption came out.
   const contextOf = (element) => {
     const marked = element.closest('[data-authored]');
-    return {
-      authored: marked ? marked.getAttribute('data-authored') : null,
-      machineText: element.closest(machineText.join(', ')) !== null,
-    };
+    return { authored: marked ? marked.getAttribute('data-authored') : null };
   };
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   while (walker.nextNode()) {
@@ -507,6 +591,31 @@ function readTheScreen(vocabulary) {
     }
     if (!node.data || node.data.trim() === '') continue;
     found.push({ where: describe(element), text: node.data, ...contextOf(element) });
+  }
+  // What the stylesheet paints, which no text walk can reach.
+  //
+  // `content` on ::before and ::after puts words on a screen without putting a
+  // node in the tree. innerText, textContent and a SHOW_TEXT TreeWalker all
+  // miss it by construction, which is how `.chip::after{content:" Not synced
+  // yet"}` painted "Not synced yet" on every chip on every screen with both
+  // checks at exit 0. getComputedStyle is the only reader, so every element is
+  // asked, for both pseudos. `none`, `normal` and the empty string carry no
+  // words; counter() and attr() carry a value the page already holds. What is
+  // judged is the string literals, and they are judged like any other fragment:
+  // a stylesheet cannot mark provenance, so `authored` is null and nothing here
+  // can be excused as the platform's words.
+  const cssStrings = new RegExp(cssString, 'g');
+  for (const element of document.querySelectorAll('*')) {
+    if (element.closest(neverRendered.join(', '))) continue;
+    for (const pseudo of ['::before', '::after']) {
+      const painted = window.getComputedStyle(element, pseudo).content;
+      if (!painted || painted === 'none' || painted === 'normal') continue;
+      for (const match of painted.matchAll(cssStrings)) {
+        const text = (match[1] === undefined ? match[2] : match[1]).replace(/\\(?=.)/g, '');
+        if (text.trim() === '') continue;
+        found.push({ where: describe(element) + pseudo, text, authored: null });
+      }
+    }
   }
   for (const element of document.querySelectorAll('[' + spoken.join('], [') + ']')) {
     for (const name of spoken) {
@@ -531,7 +640,7 @@ function readTheScreen(vocabulary) {
     }
   }
   if (document.title) {
-    found.push({ where: 'title', text: document.title, authored: null, machineText: false });
+    found.push({ where: 'title', text: document.title, authored: null });
   }
   const description = document.querySelector('meta[name="description"]');
   if (description) {
@@ -539,7 +648,6 @@ function readTheScreen(vocabulary) {
       where: 'meta description',
       text: description.getAttribute('content') || '',
       authored: null,
-      machineText: false,
     });
   }
   return found;
@@ -554,7 +662,7 @@ function judge(surface, state, where, text, context = {}) {
   const fragment = normalise(text);
   if (fragment === '') return;
   fragmentsRead += 1;
-  const result = tile(fragment, { machineText: context.machineText === true });
+  const result = tile(fragment);
   if (result.ok) {
     if (VERBOSE) process.stdout.write(`  ok   ${surface} / ${state}  ${JSON.stringify(fragment)}\n`);
     return;
@@ -587,15 +695,12 @@ async function readSurface(page, surface, state) {
     labelElements: LABEL_ATTRIBUTE_ELEMENTS,
     svgText: SVG_TEXT_ELEMENTS,
     svgExcluded: SVG_EXCLUDED_SUBTREES,
-    machineText: MACHINE_TEXT_ELEMENTS,
     neverRendered: NEVER_RENDERED,
+    cssString: CSS_STRING_SOURCE,
   });
   surfacesWalked.push(`${surface} / ${state}`);
   for (const found_ of found) {
-    judge(surface, state, found_.where, found_.text, {
-      authored: found_.authored,
-      machineText: found_.machineText,
-    });
+    judge(surface, state, found_.where, found_.text, { authored: found_.authored });
   }
 }
 
@@ -725,6 +830,12 @@ async function walk() {
   // it is gathered rather than declared: fourteen transport failures, fourteen
   // messages, all of them out of WebKit in this run.
   await harvestPlatformWords(page);
+
+  // With the browser's words in hand, read the shipped tree for anyone writing
+  // them down. This is the other half of the platform exemption and it runs
+  // before a single surface is read, so a forged marker cannot be green here
+  // even for a run.
+  await readTheShippedTree();
 
   await readSurface(page, '/sign-in', 'passkey first');
   await page.getByRole('button', { name: strings.signIn.passwordAction, exact: true }).click();
@@ -1025,7 +1136,13 @@ try {
 // The report.
 
 process.stdout.write(
-  `rendered strings: ${surfacesWalked.length} surface states walked, ${fragmentsRead} fragments read against ${catalogueKeys} catalogue keys, ${dataValues} stored data values, ${TOKENS.length} value shapes and ${platformVocabulary.size} distinct message(s) harvested from WebKit.\n`,
+  `rendered strings: ${surfacesWalked.length} surface states walked, ${fragmentsRead} fragments read against ${catalogueKeys} catalogue keys, ${dataValues} stored data values the owner or a device wrote, ${TOKENS.length} value shapes and ${platformVocabulary.size} distinct message(s) harvested from WebKit.\n`,
+);
+
+process.stdout.write(
+  `  ${shippedFilesRead} file(s) of the shipped tree read for the browser's own words: ${
+    [...platformVocabulary.keys()].map((message) => JSON.stringify(message)).join(', ') || 'none harvested'
+  }\n`,
 );
 
 for (const text of platformText) {
@@ -1038,10 +1155,23 @@ for (const text of platformText) {
 // this list, so the list is printed on every run rather than described once.
 for (const walked of surfacesWalked) process.stdout.write(`  walked  ${walked}\n`);
 
-if (defects.length === 0) {
+if (impersonations.length > 0) {
+  process.stderr.write(
+    `\nrendered strings: ${impersonations.length} literal(s) in the shipped tree impersonate the platform, which C6 does not allow:\n`,
+  );
+  for (const forged of impersonations) {
+    process.stderr.write(
+      `  ${forged.file}:${forged.line}  ${JSON.stringify(forged.text)}\n    why: ${forged.provenance} said this, so the product may not write it down. Say what Vernier knows, in a catalogued sentence.\n`,
+    );
+  }
+}
+
+if (defects.length === 0 && impersonations.length === 0) {
   process.stdout.write('rendered strings: every fragment on every surface resolves to a key.\n');
   process.exit(0);
 }
+
+if (defects.length === 0) process.exit(1);
 
 process.stderr.write(`\nrendered strings: ${defects.length} fragment(s) with no key, which C6 does not allow:\n`);
 for (const defect of defects) {
