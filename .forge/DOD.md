@@ -612,7 +612,7 @@ their interaction detail in `.forge/wireframes/`, and the standards skill.
   with 44 px minimum targets, and the loading, empty, error, offline and stale
   states render with the geometry defined once on screen 00. Evidence: three
   captures plus five state captures overlaid on the screen-00 geometry.
-- [ ] **C6.** Dates render as "21 Aug" or "Friday 21 August" and times as 24-hour
+- [x] **C6.** Dates render as "21 Aug" or "Friday 21 August" and times as 24-hour
   Europe/Paris on every surface; units are kg, cm, km, kcal, g and the printed
   laboratory unit, and any other suffix is a catalogued count noun for a
   dimensionless metric, never a second unit for a metric named here. No string the

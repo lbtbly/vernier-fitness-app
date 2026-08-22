@@ -6,9 +6,9 @@ Owner decisions, taken 2026-08-21, binding:
 - R5 is PARKED by the owner's instruction. The run never reboots this Mac mini on its own. R5 stays in the rubric, unchecked, with "parked, awaiting the owner's chosen moment" as its reason. Parking is not softening: the line and its threshold are untouched.
 - Scope is FULL. All fourteen slices, run to completion across as many sessions as it takes. Nothing dropped.
 
-Last phase: 8 BUILD and 9 VERIFY, iterating on slice 2.
+Last phase: 8 BUILD, slice 4 in flight. Slices 1, 2 and 3 are closed.
 Size: L. Eleven vertical workstreams with five separate external integrations, each carrying its own auth, data flow and failure modes.
-Current slice: 3, the provenance spine and the quick log. Closes F19-F26, C5, C6. Slice 2 is done but for its share of the three owner-blocked lines. Earlier: slice 2, the gate. Closes F8-F18, C4. Slice 1 is done but for three owner-blocked lines: F4, R1, C2.
+Current slice: 4, Today, Health and the trend charts. Closes F27-F35, C7, C8, C9. Slice 2 is done but for its share of the three owner-blocked lines. Earlier: slice 2, the gate. Closes F8-F18, C4. Slice 1 is done but for three owner-blocked lines: F4, R1, C2.
 
 ## Where the run actually stands
 
@@ -114,6 +114,20 @@ The configuration file was repaired in place on 2026-08-21 by a one-shot Node sc
 compose.yaml passes exactly seven variables into the app container: APP_URL, APP_NAME, WEBAUTHN_RP_ID, WEBAUTHN_RP_NAME, TZ, DATABASE_URL, MASTER_KEY. The Withings, Google, Anthropic, mail, VAPID and BACKUP_DIR values sit in the configuration file and are withheld from the app process until the slice that needs them. That is least privilege and it is intended, not an omission.
 
 Playwright WebKit is cached on the host at ~/Library/Caches/ms-playwright, 297 MB. The e2e suite runs on the host against the containerised app, never inside the container, because WebKit on Linux ARM is unreliable and Safari is the only engine this product ever meets.
+
+## Slice 3 closed. C6 took six verifications and the sixth mechanism held.
+
+**PASS on 2026-08-22.** Every slice 3 line is proven except the three owner-blocked ones. 32 of 166 checked.
+
+What finally closed C6 was a change of kind, not of degree. Five mechanisms compared text and each was beaten by a string the previous one could not see. The sixth compares **object identity**: the caught `Error` is carried to the DOM node, the checker wraps `window.fetch` before the app's first script and records each rejection against the object it rejected with, and a fragment is excused only when it **is** that object's message, from a rejection that happened after the state opened. A composed literal fails because it is not that object. A stale rejection fails on the timestamp. A product sentence carrying a real rejection fails because it is not the message. The verifier confirmed the wrap fails closed in both directions: if the app re-wraps fetch the object is absent and the fragment is flagged, never falsely excused.
+
+The verifier also ruled against me on a judgement call and was right. I had instructed no INSERT grants for the suite role; the builder kept two, on `recovery_grant` and `auth_attempt`, and the verifier ruled that correct: SELECT-only would have pushed F9, F13, F15 and F16 off the owner's live install entirely and weakened the proof that the live app protects the owner's real passkey and credentials. Neither table holds health data or a credential and neither can be updated or deleted by the role.
+
+## Carried to the final full-scope verification: the R7 flake surface
+
+`retries: 0`, and two spec files have each failed once on a byte-identical tree: `quick-log.spec.ts:564` and `passkey.spec.ts:101`. Neither reproduced in three consecutive full runs, so both are recorded unverified rather than dropped. R7 is the line that pays for it, at the final run, and a flake there fails the whole thing at the worst possible moment. The verifier named this as the first thing it would fix with another dispatch, and placed it in the final slice rather than slice 3. The fix is a bounded retry on the two read-after-write assertions, or `retries: 1` scoped to those specs. **Not a rubric change.**
+
+Eleven more slices of end-to-end coverage are about to be built on this suite, so the longer it waits the more it costs.
 
 ## Carried to slice 14, the hardening slice
 
