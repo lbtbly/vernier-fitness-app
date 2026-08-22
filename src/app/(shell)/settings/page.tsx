@@ -5,6 +5,7 @@ import { listCredentials } from '@/db/auth';
 import { describeIntegrations } from '@/db/integrations';
 import { getConfig } from '@/lib/config';
 import { readCsrfToken } from '@/lib/csrf';
+import { deviceTypeLabel } from '@/lib/display';
 import { longDate, time24 } from '@/lib/format';
 import { readSession } from '@/lib/session';
 import { strings } from '@/lib/strings';
@@ -64,7 +65,7 @@ export default async function SettingsPage() {
               <div className="grow stack">
                 <div className="head">{passkey.label}</div>
                 <div className="note">
-                  {strings.settings.passkeyDeviceType}: {passkey.deviceType}
+                  {strings.settings.passkeyDeviceType}: {deviceTypeLabel(passkey.deviceType)}
                 </div>
                 <div className="note">
                   {strings.settings.passkeyBackedUp}:{' '}

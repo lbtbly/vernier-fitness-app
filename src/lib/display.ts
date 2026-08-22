@@ -34,6 +34,18 @@ export function valueLine(view: { value: number | null; rawValue: string; unit: 
   return label.unit === '' ? label.number : `${label.number} ${label.unit}`;
 }
 
+const UNIT_NAMES = strings.unitNames as Record<string, string>;
+
+/**
+ * The unit as prose names it. `strings.units` holds the suffix a value prints
+ * beside a number, and the two are not the same word: a rating prints "of 5"
+ * and is asked for in points. Interpolating the suffix put "The number it
+ * should be, in of 5" under every rating on the value sheet.
+ */
+export function unitName(unit: string): string {
+  return UNIT_NAMES[unit] ?? UNITS[unit] ?? unit;
+}
+
 const METRIC_LABELS = strings.metrics as Record<string, string>;
 
 export function metricLabel(metric: string): string {
@@ -56,6 +68,31 @@ const DEDUP_LABELS = strings.provenance.dedupDecisions as Record<string, string>
 
 export function dedupLabel(decision: string): string {
   return DEDUP_LABELS[decision] ?? decision;
+}
+
+const INTEGRATION_STATE_LABELS = strings.settings.integrationStates as Record<string, string>;
+
+/**
+ * The words for an integration's state. `src/db/integrations.ts` returns one of
+ * three tokens and this is the only place they become English, the same way a
+ * source, a confidence and a deduplication decision do above.
+ */
+export function integrationStateLabel(state: string): string {
+  return INTEGRATION_STATE_LABELS[state] ?? state;
+}
+
+const SESSION_METHOD_LABELS = strings.settings.sessionMethods as Record<string, string>;
+
+/** How the live session was opened, in words rather than in the column's token. */
+export function sessionMethodLabel(method: string): string {
+  return SESSION_METHOD_LABELS[method] ?? method;
+}
+
+const DEVICE_TYPE_LABELS = strings.settings.passkeyDeviceTypes as Record<string, string>;
+
+/** What the authenticator reported, in words rather than in its own camel case. */
+export function deviceTypeLabel(deviceType: string): string {
+  return DEVICE_TYPE_LABELS[deviceType] ?? deviceType;
 }
 
 const KIND_LABELS = strings.provenance.sourceKinds as Record<string, string>;

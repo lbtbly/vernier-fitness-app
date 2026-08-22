@@ -61,6 +61,18 @@ export const strings = {
     integrationsNote:
       'A credential entered here is encrypted with the master key on this machine before it is written, and it is never rendered again. This screen shows state, scope and last successful sync, which is everything you need to know whether a source is working.',
     stateLabel: 'State',
+    /**
+     * The chip beside each integration. `integration.state` is a column value
+     * with three settings and it used to be printed straight onto the screen,
+     * so `/settings` carried four chips reading "not connected" from the
+     * database rather than from here. A state is a fact the database keeps; the
+     * words for it are copy and belong in this file.
+     */
+    integrationStates: {
+      connected: 'Connected',
+      disconnected: 'Not connected',
+      error: 'Not working',
+    },
     scopeLabel: 'Scope',
     lastSyncLabel: 'Last successful sync',
     neverSynced: 'No successful sync yet',
@@ -95,6 +107,18 @@ export const strings = {
     signOut: 'Sign out',
     signedInWith: 'Signed in with',
     sessionExpires: 'This session expires',
+    /** How the live session was opened. The column holds a token; these are the words. */
+    sessionMethods: {
+      passkey: 'A passkey on this device',
+      password: 'The backup password',
+      bootstrap: 'The one-time account setup',
+      recovery: 'A recovery link minted on the Mac mini',
+    },
+    /** What the authenticator reported about where the passkey lives. */
+    passkeyDeviceTypes: {
+      singleDevice: 'Bound to one device',
+      multiDevice: 'Usable across your devices',
+    },
 
     /**
      * The four integrations, named and explained. The scope beside each one in
@@ -254,6 +278,15 @@ export const strings = {
       bodyDetail: 'Open the quick log and save again. Nothing was stored.',
       nothingSent: 'Nothing was sent to store.',
       nothingSentDetail: 'Fill at least one field before saving.',
+      /**
+       * Every value in the write was refused, so nothing was stored. One
+       * outcome, one shape: this answers 422 exactly as a refused correction
+       * does, rather than 200 with a list of rejections the caller has to
+       * notice.
+       */
+      allRejected: 'Nothing in that entry could be stored.',
+      allRejectedDetail:
+        'Every value in it was refused and each one carries its reason. Fix them and save again; nothing was written.',
       unknownMetric: (metric: string) => `Vernier stores no metric called ${metric}.`,
       blank: 'A blank field is not stored. Blank stays blank, never zero.',
       notANumber: (raw: string) => `${raw} is not a number, so it was not stored.`,
@@ -626,6 +659,27 @@ export const strings = {
     raisedAt: 'Raised',
     openCount: (count: number) =>
       count === 1 ? '1 import is waiting on you' : `${count} imports are waiting on you`,
+  },
+
+  /**
+   * The unit as a sentence names it, which is not always the suffix a value
+   * prints. A rating prints "4 of 5", and asking for "the number it should be,
+   * in of 5" is what interpolating a display suffix into prose produces. The
+   * symbols stay symbols: DESIGN.md fixes kg, cm, km, kcal and g on every
+   * surface, and prose does not get its own second set.
+   */
+  unitNames: {
+    kg: 'kg',
+    cm: 'cm',
+    km: 'km',
+    kcal: 'kcal',
+    g: 'g',
+    step: 'steps',
+    point: 'points, 1 to 5',
+    'mmol/L': 'mmol/L',
+    'g/L': 'g/L',
+    'µg/L': 'µg/L',
+    text: '',
   },
 
   /** Units, so a number and its unit are never concatenated inside a component. */

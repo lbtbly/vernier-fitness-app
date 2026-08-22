@@ -6,6 +6,7 @@ import {
   SESSION_MAX_AGE_SECONDS,
 } from '@/lib/cookie-names';
 import { classifyRoute, isApiRoute, shouldIssueCsrfCookie } from '@/lib/routes';
+import { strings } from '@/lib/strings';
 
 /**
  * The door.
@@ -43,10 +44,13 @@ export function middleware(request: NextRequest) {
 
   if (routeClass === 'protected' && !hasSessionCookie) {
     if (isApiRoute(pathname)) {
+      // The same refusal the handler gate sends, from the same two keys. One
+      // outcome reads one way wherever it is refused, and the door writing its
+      // own words was how a sentence with no key reached the screen.
       return NextResponse.json(
         {
-          error: 'Sign in first.',
-          detail: 'This endpoint needs the owner session. Tailscale gets you to the door and not through it.',
+          error: strings.api.session.signInFirst,
+          detail: strings.api.session.signInFirstDetail,
         },
         { status: 401, headers: { 'Cache-Control': 'no-store' } },
       );

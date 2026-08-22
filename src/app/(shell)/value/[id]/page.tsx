@@ -207,7 +207,7 @@ export default async function ValueSheetPage({ params }: { params: Promise<{ id:
       <CorrectionForm
         measurementId={current.id}
         currentValue={current.rawValue}
-        unit={valueLabel(current).unit}
+        unit={current.unit}
         csrfToken={csrfToken}
       />
 

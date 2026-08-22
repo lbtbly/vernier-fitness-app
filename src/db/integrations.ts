@@ -47,13 +47,21 @@ export function isIntegrationProvider(value: string): value is IntegrationProvid
   return INTEGRATIONS.some((integration) => integration.provider === value);
 }
 
+/**
+ * The three settings an integration can be in. A token, not a sentence: this
+ * file returns state and `src/lib/display.ts` chooses the words for it. It read
+ * `'not connected'` once and the settings screen printed that straight into a
+ * chip, which is a database value speaking to a person with no key behind it.
+ */
+export type IntegrationState = 'connected' | 'disconnected' | 'error';
+
 /** Exactly what the settings screen is allowed to know. No ciphertext, no length, no shape. */
 export type IntegrationView = {
   provider: string;
   name: string;
   purpose: string;
   scope: string;
-  state: 'connected' | 'not connected' | 'error';
+  state: IntegrationState;
   lastSuccessfulSyncAt: string | null;
   lastError: string | null;
 };
@@ -65,8 +73,8 @@ export async function describeIntegrations(): Promise<IntegrationView[]> {
 
   return INTEGRATIONS.map((integration) => {
     const row = byProvider.get(integration.provider);
-    const state: IntegrationView['state'] =
-      row?.state === 'connected' ? 'connected' : row?.state === 'error' ? 'error' : 'not connected';
+    const state: IntegrationState =
+      row?.state === 'connected' ? 'connected' : row?.state === 'error' ? 'error' : 'disconnected';
     return {
       provider: integration.provider,
       name: integration.name,

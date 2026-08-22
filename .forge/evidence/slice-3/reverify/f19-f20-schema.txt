@@ -1,0 +1,36 @@
+=== F19: every required column NOT NULL after the seed column was added ===
+id | notnull=true
+metric | notnull=true
+raw_value | notnull=true
+raw_unit | notnull=true
+value | notnull=false
+unit | notnull=true
+conversion_factor | notnull=false
+time_zone | notnull=true
+source | notnull=true
+measured_at | notnull=true
+imported_at | notnull=true
+confidence | notnull=true
+import_version | notnull=true
+dedup_decision | notnull=true
+dedup_reason | notnull=true
+source_record_id | notnull=true
+root_id | notnull=true
+corrects_id | notnull=false
+correction_index | notnull=true
+correction_reason | notnull=false
+seed | notnull=true
+
+=== F19 and F20: rejected inserts and the append-only trigger ===
+BEGIN
+psql:<stdin>:4: ERROR:  null value in column "confidence" of relation "measurement" violates not-null constraint
+DETAIL:  Failing row contains (probe_missing_confidence, waist, 98.5, cm, 98.5, cm, null, Europe/Paris, manual, 2026-08-22 05:34:17.235826+02, 2026-08-22 05:34:17.235826+02, null, 2026-08-3, unique, probe, demo_src_waist, probe_missing_confidence, null, 0, null, f).
+ROLLBACK
+BEGIN
+psql:<stdin>:9: ERROR:  new row for relation "measurement" violates check constraint "measurement_source_is_one_of_six"
+DETAIL:  Failing row contains (probe_seventh_source, waist, 98.5, cm, 98.5, cm, null, Europe/Paris, fitbit, 2026-08-22 05:34:17.236909+02, 2026-08-22 05:34:17.236909+02, measured_manual, 2026-08-3, unique, probe, demo_src_waist, probe_seventh_source, null, 0, null, f).
+ROLLBACK
+psql:<stdin>:12: ERROR:  measurement is append only: UPDATE is refused. Correct a value by inserting a new row that names it in corrects_id, and re-import by deciding a dedup outcome or raising an import_question.
+CONTEXT:  PL/pgSQL function measurement_append_only() line 3 at RAISE
+psql:<stdin>:13: ERROR:  measurement is append only: DELETE is refused. Correct a value by inserting a new row that names it in corrects_id, and re-import by deciding a dedup outcome or raising an import_question.
+CONTEXT:  PL/pgSQL function measurement_append_only() line 3 at RAISE

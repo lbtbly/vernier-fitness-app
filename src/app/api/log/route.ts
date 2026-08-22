@@ -271,24 +271,39 @@ async function handle(request: Request) {
       }
     }
 
-    const outcome =
-      questions.length > 0
+    // A write whose every value was refused is a refusal, and it answers like
+    // one: 422, error and detail, the same shape a refused correction sends.
+    // It used to answer 200 with a `rejected` array and no error at all, so
+    // one outcome had two contracts, the queue read it as applied, and the
+    // only sign anything had gone wrong was a field the caller had to think to
+    // look at. The rejections still travel, per value, with their reasons.
+    const refused = saved.length === 0 && questions.length === 0 && rejected.length > 0;
+
+    const outcome = refused
+      ? ('refused' as const)
+      : questions.length > 0
         ? ('held_for_question' as const)
         : saved.length > 0
           ? ('applied' as const)
           : ('deduplicated' as const);
 
+    const body: Record<string, unknown> = {
+      saved,
+      dropped,
+      questions,
+      rejected,
+      snapshot: await readLogSnapshot(timeZone),
+    };
+    if (refused) {
+      body.error = strings.api.log.allRejected;
+      body.detail = strings.api.log.allRejectedDetail;
+    }
+
     return {
       outcome,
       handled: {
-        status: saved.length > 0 ? 201 : 200,
-        body: {
-          saved,
-          dropped,
-          questions,
-          rejected,
-          snapshot: await readLogSnapshot(timeZone),
-        } as Record<string, unknown>,
+        status: refused ? 422 : saved.length > 0 ? 201 : 200,
+        body,
       },
     };
   });

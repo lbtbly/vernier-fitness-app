@@ -109,7 +109,7 @@ viewports means 393x852, 768 and 1280 CSS pixels wide, captured.
   shows a queued marker and the queue count, and replays exactly once when the
   origin returns: one row in the database and one idempotency key in the request
   log. Evidence: the capture, the row count and the request log.
-- [ ] **F25.** Demonstration data loads only when demonstration mode is on and
+- [x] **F25.** Demonstration data loads only when demonstration mode is on and
   stamps every row with source `demo`; with it off the seed refuses to run and the
   tables stay at zero rows. Evidence: both runs and both row counts.
 - [x] **F26.** An import that disagrees with a stored correction raises a question
@@ -587,7 +587,7 @@ their interaction detail in `.forge/wireframes/`, and the standards skill.
   password second, the one-time owner creation, and the host-unreachable state.
   Every interactive element shows a 2 px focus outline at 2 px offset. Evidence:
   three captures plus a keyboard-traversal capture.
-- [ ] **C5.** Quick log matches screen 03 at three viewports, presented as a sheet
+- [x] **C5.** Quick log matches screen 03 at three viewports, presented as a sheet
   with 44 px minimum targets, and the loading, empty, error, offline and stale
   states render with the geometry defined once on screen 00. Evidence: three
   captures plus five state captures overlaid on the screen-00 geometry.

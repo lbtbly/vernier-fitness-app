@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { FaceIcon, InfoIcon, WarnIcon } from '@/components/icons';
 import type { IntegrationView } from '@/db/integrations';
 import { CSRF_HEADER } from '@/lib/cookie-names';
+import { integrationStateLabel, sessionMethodLabel } from '@/lib/display';
 import { strings } from '@/lib/strings';
 
 /**
@@ -138,7 +139,7 @@ export function OperatorPanel(props: Props) {
             </div>
             <div className="stack" style={{ alignItems: 'flex-end', gap: 'var(--s2)' }}>
               <span className={integration.state === 'connected' ? 'chip g' : integration.state === 'error' ? 'chip a' : 'chip'}>
-                {integration.state}
+                {integrationStateLabel(integration.state)}
               </span>
               {integration.state === 'connected' ? (
                 <>
@@ -213,7 +214,7 @@ export function OperatorPanel(props: Props) {
         <dl>
           <div className="field">
             <dt>{strings.settings.signedInWith}</dt>
-            <dd>{props.method}</dd>
+            <dd>{sessionMethodLabel(props.method)}</dd>
           </div>
           <div className="field">
             <dt>{strings.settings.sessionExpires}</dt>

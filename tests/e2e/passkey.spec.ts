@@ -51,7 +51,10 @@ test.describe('the passkey round trip', () => {
       await expect(page.getByText('No passkey is registered yet.')).toBeVisible();
       await page.getByRole('button', { name: 'Add a passkey on this device' }).click();
 
-      await expect(page.getByText('Device type: multiDevice')).toBeVisible();
+      // The screen says what the authenticator reported, in words. The token
+      // itself is asserted against the stored row below, which is where a
+      // token belongs.
+      await expect(page.getByText('Device type: Usable across your devices')).toBeVisible();
       await page.screenshot({ path: `${CAPTURES}f9-settings-passkey-registered.png`, fullPage: true });
 
       const stored = query(

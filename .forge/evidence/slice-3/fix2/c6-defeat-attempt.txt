@@ -1,0 +1,27 @@
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+rendered strings: 48 surface states walked, 1426 fragments read against 416 catalogue keys, 31 stored data values and 8 value shapes.
+
+rendered strings: 4 fragment(s) with no key, which C6 does not allow:
+  /settings  [four integrations, no passkey]  span.chip
+    read: "awaiting setup"
+    unaccounted: "awaiting setup"
+  /settings  [four integrations, no passkey]  span.chip
+    read: "awaiting setup"
+    unaccounted: "awaiting setup"
+  /settings  [four integrations, no passkey]  span.chip
+    read: "awaiting setup"
+    unaccounted: "awaiting setup"
+  /settings  [four integrations, no passkey]  span.chip
+    read: "awaiting setup"
+    unaccounted: "awaiting setup"
+
+--- what was planted, and where ---
+src/db/integrations.ts returned the two-word display string 'awaiting setup'
+instead of the state token 'disconnected'. Two words, inside a scanned tree,
+returned by the database layer and rendered raw by src/components/OperatorPanel.tsx.
+That is the exact shape of the defect the verifier found second, and the shape a
+source-side scanner cannot see: `npm run strings` exited 0 over it, printing
+"no user-facing string is written inline. 4 trees scanned, .ts and .tsx, 416 keys."
+The closed-world check failed on it, four times, once per chip, naming the
+surface, the state and the element.

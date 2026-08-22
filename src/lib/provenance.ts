@@ -184,8 +184,10 @@ export type StoredCandidate = {
   source: string;
   rawValue: string;
   measuredAt: Date;
-  /** True when this row is itself a correction, which is what makes it precious. */
-  isCorrection: boolean;
+  /** The chain this row belongs to. Every row of one value shares it. */
+  rootId: string;
+  /** 0 on the original, 1 on the first correction, and so on. The highest one stands. */
+  correctionIndex: number;
 };
 
 export type IncomingValue = {
@@ -258,7 +260,22 @@ export function decideDedup(incoming: IncomingValue, stored: StoredCandidate[]):
     };
   }
 
-  const correction = sameMetricSameDay.find((row) => row.isCorrection);
+  // The chain head, never the first correction in the list.
+  //
+  // A value corrected twice holds three rows: 92.2, then 99.2, then whatever
+  // stands now. Reading `find(isCorrection)` picked the earliest correction,
+  // so the question card told the owner his stored value was 92.2 while the
+  // chain stood at 99.2. Nothing was written either way and F26 held, but a
+  // card that names the wrong number is the card lying about his own data.
+  // The head of each chain is the row with the highest correction index, and
+  // it is the only row of that chain that describes what is stored today.
+  const heads = new Map<string, StoredCandidate>();
+  for (const row of sameMetricSameDay) {
+    const held = heads.get(row.rootId);
+    if (!held || row.correctionIndex > held.correctionIndex) heads.set(row.rootId, row);
+  }
+
+  const correction = [...heads.values()].find((row) => row.correctionIndex > 0);
   if (correction && correction.rawValue !== incoming.rawValue) {
     return {
       decision: 'held_for_question',

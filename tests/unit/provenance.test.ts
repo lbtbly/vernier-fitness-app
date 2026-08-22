@@ -25,7 +25,8 @@ function stored(overrides: Partial<StoredCandidate> = {}): StoredCandidate {
     source: 'manual',
     rawValue: '98.5',
     measuredAt: new Date('2026-08-21T05:20:00Z'),
-    isCorrection: false,
+    rootId: 'm1',
+    correctionIndex: 0,
     ...overrides,
   };
 }
@@ -154,7 +155,7 @@ describe('a re-import that disagrees with a correction', () => {
         measuredAt: new Date('2026-08-21T06:00:00Z'),
         timeZone: PARIS,
       },
-      [stored({ id: 'corrected-row', rawValue: '99.2', isCorrection: true })],
+      [stored({ id: 'corrected-row', rootId: 'orig', correctionIndex: 1, rawValue: '99.2' })],
     );
 
     expect(outcome.decision).toBe('held_for_question');
@@ -167,6 +168,31 @@ describe('a re-import that disagrees with a correction', () => {
     }
   });
 
+  it('names the value that stands today, not the first correction in the chain', () => {
+    // Corrected twice: 92.2 became 99.2, and 99.2 became 99.4. A question that
+    // quotes 92.2 tells the owner something untrue about his own data.
+    const outcome = decideDedup(
+      {
+        metric: 'waist',
+        source: 'withings',
+        rawValue: '92.2',
+        measuredAt: new Date('2026-08-21T06:00:00Z'),
+        timeZone: PARIS,
+      },
+      [
+        stored({ id: 'original', rootId: 'orig', correctionIndex: 0, rawValue: '92.2' }),
+        stored({ id: 'first', rootId: 'orig', correctionIndex: 1, rawValue: '99.2' }),
+        stored({ id: 'head', rootId: 'orig', correctionIndex: 2, rawValue: '99.4' }),
+      ],
+    );
+
+    expect(outcome.decision).toBe('held_for_question');
+    if (outcome.decision === 'held_for_question') {
+      expect(outcome.conflictsWith).toBe('head');
+      expect(outcome.reason.params.corrected).toBe('99.4');
+    }
+  });
+
   it('leaves a re-import that agrees with the correction alone', () => {
     const outcome = decideDedup(
       {
@@ -176,7 +202,7 @@ describe('a re-import that disagrees with a correction', () => {
         measuredAt: new Date('2026-08-21T06:00:00Z'),
         timeZone: PARIS,
       },
-      [stored({ id: 'corrected-row', rawValue: '99.2', isCorrection: true })],
+      [stored({ id: 'corrected-row', rootId: 'orig', correctionIndex: 1, rawValue: '99.2' })],
     );
     expect(outcome.decision).not.toBe('held_for_question');
   });

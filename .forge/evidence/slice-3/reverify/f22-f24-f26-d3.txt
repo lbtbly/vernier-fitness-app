@@ -1,0 +1,75 @@
+F22, F24, F26 and the D3 defect, re-run by the verifier, 2026-08-22.
+
+=== F22: six sources, two taps, one destination shape ===
+Walked in WebKit at 393 px from /value/<id> through "Open the source":
+  demo_weight  -> /source/demo_src_weight   SOURCE / Device sync batch        10 rows
+  demo_steps   -> /source/demo_src_steps    SOURCE / Phone payload             9 rows
+  demo_waist   -> /source/demo_src_waist    SOURCE / Manual entry              7 rows
+  demo_ldl     -> /source/demo_src_ldl      SOURCE / Laboratory page          10 rows
+  demo_average -> /source/demo_src_average  SOURCE / Derivation                8 rows
+  demo_energy  -> /source/demo_src_energy   SOURCE / Demonstration record      7 rows
+Six kinds, six payloads, one route and one screen. The seed marker did not
+collapse the shapes: source_record.source still reads withings, sync_batch, 1184
+for demo_src_weight, and now also reads seed=true.
+Captures: f22-source-demo_*.png
+
+=== F24: offline commit and exactly-once replay, independent of the suite ===
+  rows before 6, idempotency keys before 5
+  origin taken away, one save:
+    queued marker: Queued
+    Today with the sheet closed: "Saved on this phone 1 entry is waiting to upload..."
+    outbox holds 1 entry, key f1ab2b9d-f21f-4f7c-9511-be376000225a, attempts 1, lastError "Load failed"
+    rows while offline: 6
+  origin returns, one online event, four pageshow events and a reload:
+    outbox after: 0
+    rows after 8, idempotency keys after 6
+    write_request log for that key: applied x1
+    measurement rows on source record src_f1ab2b9d-...: 2  (waist and energy, one save)
+Captures: f24-queued-393.png, f24-replayed-393.png
+
+The suite now guards this rather than the verifier's memory:
+tests/e2e/service-worker.spec.ts runs under a chrome-worker project with
+serviceWorkers: 'allow' and proves the worker's own fetch reaching /healthz
+(HTTP 200), then failing when the origin is taken away, with a host curl
+answering 200 at the same moment.
+
+=== F26: a disagreeing write raises a question and writes nothing ===
+  chain fingerprint before: 07516460c21dd1ab8486fa3e26017c03  total rows 10
+  the disagreeing write: 200, saved 0, questions [{"id":"q_b74c7ddf-...","metric":"waist"}]
+  chain fingerprint after:  07516460c21dd1ab8486fa3e26017c03  total rows 10
+  byte identical: true | no new measurement row: true
+  the question row: waist | stored 92.2 cm from manual | incoming 101.4 cm from manual | open
+
+=== D3's defect: closed ===
+Every value the defect named, sent through the shipped correction path:
+  "ninety-seven" -> 422 "ninety-seven is not a number, so it was not stored."
+  "99"           -> 422 "A rating is a whole number from 1 to 5."
+  "-4.7"         -> 422 "A rating is a whole number from 1 to 5."
+  "3.5"          -> 422 "A rating is a whole number from 1 to 5."
+  "0"            -> 422 "A rating is a whole number from 1 to 5."
+  ""             -> 422 "Type the number it should be and save again. The original is kept either way."
+On screen at 393 px the value sheet draws screen 00's error card, not a status code:
+  CORRECT THIS VALUE / Failed / That correction was not stored. /
+  ninety-seven is not a number, so it was not stored. The value on file has not
+  moved and nothing was written. / Try again
+Captures: d3-correction-word-393.png, d3-correction-blank-393.png
+
+The bare 500 is gone. Three real triggers of an unhandled throw inside handle():
+  correctsId carrying a NUL byte  -> 500 {"error":"That write did not go through.","detail":"Nothing was stored and nothing was changed. Try again; if it keeps failing, the Mac mini is the place to look."}
+  values entry with a non-string rawValue -> same 500 shape
+  values entry with no id                 -> same 500 shape
+No empty body on any path.
+
+=== the append-only table, attacked from every route ===
+Only /api/log inserts into measurement (grep over src/ for storeMeasurement,
+appendCorrection and insert(measurement)). Both its paths run checkValue().
+Values tried against a 1-to-5 rating and against waist's 30-to-250 cm band:
+  refused: ninety-seven, 99, -4.7, 3.5, 0, blank, whitespace, 5.5, Infinity, NaN,
+           1e400, 999999999999999999999, Arabic-Indic digits, abc, 1, 9999,
+           -98.5, 250.0001, 1e3, 40 (ldl), -1 (ldl)
+  accepted, all inside the band: 1e0, +5, 0x5, 4.0, "5 ", 30, 250, 2.5e2
+  unknown metric, __proto__ and constructor: refused by name
+Nothing out of band reached the table. Every row this probe wrote was removed
+afterwards with TRUNCATE, which is the only operation the trigger allows, and
+the seed reloaded on the container restart: 6 measurements, 6 source records,
+6 and 6 marked seed.

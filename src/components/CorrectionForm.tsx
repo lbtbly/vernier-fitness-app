@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { CSRF_HEADER } from '@/lib/cookie-names';
+import { unitName } from '@/lib/display';
 import { strings } from '@/lib/strings';
 
 /**
@@ -32,6 +33,7 @@ export function CorrectionForm({
 }: {
   measurementId: string;
   currentValue: string;
+  /** The stored unit, `kg` or `point`, not the suffix the value prints beside it. */
   unit: string;
   csrfToken: string;
 }) {
@@ -78,7 +80,7 @@ export function CorrectionForm({
     <div className="card tight">
       <span className="lbl">{strings.provenance.correctThisValue}</span>
       <label className="formfield" htmlFor="correction-value" style={{ marginTop: 'var(--s2)' }}>
-        <span className="lbl">{strings.provenance.correctionValueLabel(unit)}</span>
+        <span className="lbl">{strings.provenance.correctionValueLabel(unitName(unit))}</span>
         <input
           id="correction-value"
           className="input num"

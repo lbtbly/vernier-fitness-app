@@ -1,0 +1,56 @@
+C6 re-verify, 2026-08-22. The inventory is still not every user-facing string.
+
+$ node scripts/strings.mjs --check
+  394 keys in src/lib/strings.ts
+  strings: no user-facing string is written inline. 4 trees scanned, .ts and .tsx, 394 keys.
+  exit 0
+
+Two user-facing strings the checker cannot see, both put on screen.
+
+--- 1. src/middleware.ts:48-49, outside every scanned tree ---
+scripts/strings.mjs SCAN_DIRS is src/app, src/components, src/lib, src/db.
+src/middleware.ts sits at the root of src/ and is scanned by none of them.
+
+  error: 'Sign in first.',
+  detail: 'This endpoint needs the owner session. Tailscale gets you to the door and not through it.',
+
+'Sign in first.' is a verbatim duplicate of strings.api.session.signInFirst with
+no reference to it. The detail sentence is in no key at all; the nearest,
+strings.api.session.signInFirstDetail, reads
+'This endpoint needs the owner session, and the cookie on this request names none.'
+
+On screen, WebKit at 393 px. Session cookie removed, quick log sheet reopened:
+  WAIST
+  This screen failed to load
+  Your last measurements did not load
+  This endpoint needs the owner session. Tailscale gets you to the door and not
+  through it. The sheet still saves: a write goes to this phone first and uploads
+  when the Mac mini answers.
+  Try again
+Capture: c6-middleware-string-on-screen-393.png
+
+Also reachable with no browser at all:
+  $ curl -X POST https://lamberts-mac-mini.tailda76d6.ts.net/api/log -H 'content-type: application/json' -d '{}'
+  {"error":"Sign in first.","detail":"This endpoint needs the owner session. Tailscale gets you to the door and not through it."} [401]
+
+--- 2. src/db/integrations.ts:69, inside a scanned tree ---
+  row?.state === 'connected' ? 'connected' : row?.state === 'error' ? 'error' : 'not connected'
+rendered raw at src/components/OperatorPanel.tsx:141 as {integration.state}.
+
+The checker misses it because rule 3 needs three or more alphabetic words before
+a literal reads as a sentence, and these are one and two. Widening SCAN_DIRS
+would not catch this one.
+
+On screen, /settings at 393 px:
+  state chips: ["not connected","not connected","not connected","not connected"]
+Capture: c6-not-connected-chip-393.png
+
+--- what passes ---
+The date, time and unit half of C6 holds. Six timezone-shifted runs, five the
+builder's and one added by the verifier, hash identically:
+  Europe/Paris        34a015c5047e40fdcd351820fd745a6e46d2422e1f70dfbb50d718cdb14b2c0d
+  Pacific/Auckland    34a015c5047e40fdcd351820fd745a6e46d2422e1f70dfbb50d718cdb14b2c0d
+  America/Los_Angeles 34a015c5047e40fdcd351820fd745a6e46d2422e1f70dfbb50d718cdb14b2c0d
+  Asia/Tokyo          34a015c5047e40fdcd351820fd745a6e46d2422e1f70dfbb50d718cdb14b2c0d
+  UTC                 34a015c5047e40fdcd351820fd745a6e46d2422e1f70dfbb50d718cdb14b2c0d
+  Pacific/Kiritimati  34a015c5047e40fdcd351820fd745a6e46d2422e1f70dfbb50d718cdb14b2c0d

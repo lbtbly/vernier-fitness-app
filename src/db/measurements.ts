@@ -106,7 +106,8 @@ async function candidatesFor(metric: string, measuredAt: Date): Promise<StoredCa
     source: row.source,
     rawValue: row.rawValue,
     measuredAt: row.measuredAt,
-    isCorrection: row.correctionIndex > 0,
+    rootId: row.rootId,
+    correctionIndex: row.correctionIndex,
   }));
 }
 

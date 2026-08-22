@@ -422,6 +422,39 @@ test.describe('the quick log', () => {
     const reason = query(`select dedup_reason from measurement where root_id = '${ratingId}' and correction_index = 1`);
     console.log(`the reason stored on the correction: ${reason}`);
     expect(reason).toContain(ratingId);
+
+    // One outcome, one shape. A quick-log write whose every value is refused
+    // answers exactly as a refused correction does: 422, a cause, a next step,
+    // and the per-value reasons beside them. It used to answer 200 with a
+    // `rejected` array and no error field at all, so the same event had two
+    // contracts and the queue read the refusal as applied.
+    const allRefused = await page.request.post('/api/log', {
+      headers: {
+        'content-type': 'application/json',
+        'idempotency-key': crypto.randomUUID(),
+        'x-vernier-csrf': csrf,
+      },
+      data: {
+        timeZone: 'Europe/Paris',
+        values: [
+          { id: crypto.randomUUID(), metric: 'energy', rawValue: '99' },
+          { id: crypto.randomUUID(), metric: 'waist', rawValue: '4' },
+        ],
+      },
+    });
+    const refusedBody = (await allRefused.json()) as {
+      error?: string;
+      detail?: string;
+      saved?: unknown[];
+      rejected?: Array<{ metric: string; detail: string }>;
+    };
+    console.log(`a write whose every value is refused: ${allRefused.status()} ${refusedBody.detail}`);
+    expect(allRefused.status()).toBe(422);
+    expect(String(refusedBody.error).length, 'a refusal names a cause').toBeGreaterThan(0);
+    expect(String(refusedBody.detail).length, 'a refusal names a next step').toBeGreaterThan(0);
+    expect(refusedBody.saved).toEqual([]);
+    expect(refusedBody.rejected).toHaveLength(2);
+    for (const entry of refusedBody.rejected ?? []) expect(entry.detail.length).toBeGreaterThan(0);
   });
 
   /**

@@ -13,6 +13,16 @@
 // src/lib/routes.ts, so the list printed here and the list the app renders are
 // the same list and cannot drift.
 //
+// It is the fast half of C6 and no longer the whole of it. A source scanner
+// answers "does this literal look like copy", and every version of that question
+// has a rule a real string can walk past: this one has walked past a directory
+// it did not scan and a two-word database value inside a directory it did. What
+// rules now is scripts/rendered-strings.mjs, which reads the shipped screens
+// instead of the source and asks the closed-world question, "is every fragment
+// on this screen in the catalogue". This still runs first because it needs no
+// stack and answers in a second, and because the inventory it prints is the
+// other half of C6's evidence.
+//
 // It used to walk only .tsx under src/app and src/components, and that hole was
 // the whole of a defect: sixty-odd refusal sentences lived in the .ts route
 // handlers, one of them naming two JSON fields to a person on screen, and this

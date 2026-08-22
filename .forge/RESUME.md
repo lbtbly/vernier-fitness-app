@@ -26,7 +26,9 @@ Slices 1, 2 and 3 are built and live. Slice 3's defect fixes are at `4a4c3c5`, r
 3. C5. Undo and Edit were drawn in the wireframe and shipped nowhere, and two adjacent cards shared one label.
 4. C6. The string checker walked only `.tsx`, so 45 sentences in `.ts` route handlers were invisible to it. One reached the screen reading "Send correctsId and rawValue".
 
-Escalation ladder: one FAIL each on slices 1, 2 and 3. None reached a second, so no re-plan and no further tier raise. All three slices were built at the raised tier from the start.
+Escalation ladder, and it is at its ceiling. One FAIL each on slices 1 and 2, both cleared. **Slice 3 has now failed twice**, both times on C6 alone. The ladder says raise the builder one tier on a second failure, but slices 1 through 3 were dispatched at the top tier from the start, so there is no rung left to climb. A third failure on slice 3 sends it to the architect.
+
+**If C6 fails a third time, the question for the architect is whether the line is measurable as written, not whether the builder is trying hard enough.** The evidence so far: three source-code scanners shipped, three beaten. A directory not walked, a syntax node not modelled, a word-count rule that cannot see a two-word string. A heuristic over source has a blind spot by construction. The current attempt inverts it into a closed-world check over rendered output, which observes what the owner observes and therefore has no blind spot by construction. That is the strongest form of the line available; if it still fails, the line and not the build is what needs looking at. Softening it stays off the table either way.
 
 **The verifier out-tested the suite twice, and both times it mattered.** On slice 1 it proved the offline path cold, where the builder had proved it warm. On slice 3 it found `serviceWorkers: 'block'` in the Playwright config, meaning the offline test ran with no worker at all; it re-proved the outbox by hand with the worker active, showing the worker's own fetch failing while a host curl answered 200 at the same moment. The suite now carries a project that proves it.
 

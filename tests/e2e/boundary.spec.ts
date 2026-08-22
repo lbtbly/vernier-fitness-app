@@ -166,7 +166,9 @@ test.describe('the credential boundary', () => {
     const withings = page.locator('.row').filter({ hasText: 'Withings' });
     await expect(withings.getByText('Scope: user.metrics')).toBeVisible();
     await expect(withings.getByText('Last successful sync: No successful sync yet')).toBeVisible();
-    await expect(withings.locator('.chip')).toHaveText('connected');
+    // The chip reads words from the catalogue. The column still holds the token
+    // `connected`, asserted on the stored row above; the screen never prints it.
+    await expect(withings.locator('.chip')).toHaveText('Connected');
     await page.screenshot({ path: `${CAPTURES}f15-settings-connected.png`, fullPage: true });
 
     const html = await page.content();

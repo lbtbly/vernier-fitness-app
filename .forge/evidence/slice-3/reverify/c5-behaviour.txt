@@ -1,0 +1,41 @@
+C5 re-verify, 2026-08-22, run by the verifier in WebKit against the live origin.
+
+=== the three grounds the line failed on, re-tested ===
+
+1. Undo and Edit, and the "What happens next" card.
+   Origin taken away, one save:
+     data-just-logged: queued
+     card labels on Today: ["NEEDS LOGGING","JUST LOGGED","WHAT HAPPENS NEXT","ON FILE"]
+     buttons on the just-logged card: Undo, Edit
+     note: "Still on this phone. Undo removes it before it uploads, and Edit reopens the sheet."
+   After Undo:
+     data-just-logged: undone   chip: Removed
+     note: "Removed before it uploaded. Nothing was stored."
+     measurement rows before 16, after 16
+   Once it has uploaded:
+     data-just-logged: applied  chip: Stored
+     buttons: ["Correct it"]    what-happens-next card drawn: no
+
+2. The race. POST /api/log held for six seconds, Undo pressed while it was in the air:
+     state while in flight: queued
+     state right after Undo during flight: tooLate
+     chip: Stored
+     note: "It had already uploaded, so there was nothing to undo. Correct it instead and the original stays readable."
+     measurement rows before 16, after 18   (the write landed; the screen did not claim an undo)
+
+3. The queue count on Today with the sheet closed:
+     "Saved on this phone 1 entry is waiting to upload. It keeps the time you typed it, not the time it arrives."
+   Two adjacent cards, two labels: "Just logged" and "On file".
+
+=== the sheet at three viewports, measured off the rendered page ===
+393px   sheet 393x750 at left 0
+768px   sheet 720x750 at left 24
+1280px  sheet 720x750 at left 280
+All three: sheet radius 22px, grabber 36x5, Save 52px/16px and the only accent
+in the sheet, scale5 buttons 52px radius 12px, stepper 60x60 radius 18px,
+targets under 44px: none, horizontal scroll: false.
+Labels: Waist, Waist, Energy, Fatigue, Hunger, Satiety after eating, Note.
+Anchors: Drained/Strong, None/Wiped out, None/Ravenous, Still empty/Too full.
+
+Captures: c5-sheet-393.png, c5-sheet-768.png, c5-sheet-1280.png,
+c5-queued-393.png, c5-undone-393.png, c5-undo-race-393.png, c5-applied-393.png

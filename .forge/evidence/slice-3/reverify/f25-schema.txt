@@ -1,0 +1,10 @@
+Slice 3 re-verify, 2026-08-22. Every command below was run by the verifier against the shipped container at https://lamberts-mac-mini.tailda76d6.ts.net, commit 4a4c3c5.
+
+=== F25: the seed marker, enforced by the database ===
+$ psql: measurement.seed column definition
+seed | boolean | notnull=true | generated=ALWAYS
+seed | boolean | notnull=true | generated=NEVER
+
+$ psql: the composite foreign key
+source_record_id_seed :: UNIQUE (id, seed)
+measurement_seed_matches_source_record :: FOREIGN KEY (source_record_id, seed) REFERENCES source_record(id, seed)

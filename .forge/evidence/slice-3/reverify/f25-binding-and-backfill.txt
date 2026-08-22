@@ -1,0 +1,40 @@
+=== F25: the binding, tested live in four transactions, all rolled back ===
+BEGIN
+INSERT 0 1
+real source_record seed=false
+psql:<stdin>:7: ERROR:  insert or update on table "measurement" violates foreign key constraint "measurement_seed_matches_source_record"
+DETAIL:  Key (source_record_id, seed)=(probe_real_src, t) is not present in table "source_record".
+ROLLBACK
+BEGIN
+psql:<stdin>:12: ERROR:  cannot insert a non-DEFAULT value into column "seed"
+DETAIL:  Column "seed" is a generated column.
+ROLLBACK
+BEGIN
+psql:<stdin>:16: ERROR:  update or delete on table "source_record" violates foreign key constraint "measurement_seed_matches_source_record" on table "measurement"
+DETAIL:  Key (id, seed)=(demo_src_weight, t) is still referenced from table "measurement".
+ROLLBACK
+BEGIN
+INSERT 0 1
+INSERT 0 1
+psql:<stdin>:24: ERROR:  update or delete on table "source_record" violates foreign key constraint "measurement_seed_matches_source_record" on table "measurement"
+DETAIL:  Key (id, seed)=(probe_src2, f) is still referenced from table "measurement".
+ROLLBACK
+
+=== F25: the backfill reads the data, not the demo_ id prefix ===
+A scratch database at migration 0003. One demo measurement on source record 'zzz_no_prefix_at_all'.
+One real withings measurement on source record 'demo_src_decoy'. Then 0004_demo_marker.sql applied:
+  demo_src_decoy|withings|f          <- the demo_ prefix did NOT mark it
+  zzz_no_prefix_at_all|withings|t    <- the demo measurement pointing at it DID
+  m_demo|demo|t
+  m_real|withings|f
+The migration's own text: UPDATE source_record SET seed = true WHERE id IN (SELECT source_record_id FROM measurement WHERE source = 'demo')
+
+=== F25: DEMO_MODE=0 and DEMO_MODE=1 on fresh databases ===
+DEMO_MODE=0 bash scripts/test-stack.sh reset
+  [vernier] migrations: 5 applied, 5 total
+  [vernier] demo seed: refused, DEMO_MODE is not 1, so the demonstration seed refused to run and wrote nothing. 0 measurement(s) and 0 source record(s) marked seed
+  measurement 0 | source_record 0 | measurement where seed 0 | source_record where seed 0 | import_question 0 | owner 0
+DEMO_MODE=1 bash scripts/test-stack.sh reset
+  [vernier] demo seed: ran, 6 new row(s), 6 measurement(s) and 6 source record(s) marked seed
+  measurement 6/6 seeded | source_record 6/6 seeded | distinct measurement source: demo
+  six shapes: apple_health_shortcut|shortcut_payload, demo|demo_record, derived|derivation, lab_pdf|lab_page, manual|manual_entry, withings|sync_batch, all seed=true
