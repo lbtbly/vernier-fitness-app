@@ -2917,3 +2917,7 @@
 2026-08-22T18:59:17Z | a5be297c45e61a29f | stopped | 52s
 2026-08-22T19:00:09Z | ae6b3f16ff47fbed5 | stopped | 52s
 2026-08-22T19:00:58Z | a8b62101bc5550b2b | stopped | 49s
+2026-08-22T19:01:51Z | ac13c35d82c0566e1 | stopped | 53s
+2026-08-22T19:02:40Z | builder | stopped | 49s
+2026-08-22T19:02:45Z | a8bb48dde02e9b078 | stopped | 5s
+2026-08-22T19:06:05Z | a4b0acdf2b38e84f4 | stopped | 200s

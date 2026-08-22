@@ -88,6 +88,26 @@ It is permanent: `measurement` refuses DELETE, and that refusal is a guarantee t
 
 Two things follow. The row is now a standing test of the guarantee, so every future run must leave it alone. And it is a fabricated measurement in a health record whose whole point is provenance, so it should be removed before the owner logs real waist measurements, by a deliberate operator action rather than by a test. Offered to the owner on 2026-08-22; awaiting his word.
 
+## Architect ruling on slice 4, 2026-08-22. F27 was not measurable, and the rubric guaranteed the loop.
+
+Full text in `.forge/RULING-SLICE-4.md`. Amendments A5 and A6 in `.forge/AMENDMENTS.md`. 166 lines still, 38 checked, no threshold lowered.
+
+**The finding.** F27 fixed a budget over a sum and named five of its addends. Four verifications found four different unnamed ones. Its truth was a property of the demo seed rather than of the product, and the rubric itself keeps the set open: F55 adds a line to Today in slice 6, F133 adds up to three banners in slice 13. Rounds five and six were already written into the plan.
+
+**A5 rewrote F27 tighter.** Kept 715, 393x852, no scrolling and four of the five elements. Added: every data state instead of one, five named states, both engines, a maximum height fixed by construction for every element above the trend, each maximum stated as a number and measured at its extremes, the maxima summing inside 715, and a clause making a fold bought by compressing the cards a FAIL. The adherence clause was removed because DESIGN.md section 3, the screen table and screen 02's own caption all put adherence below the fold, nothing in the brief asks for it, and it could only be met by breaking C7. A third standing rule now binds all 166.
+
+**The conflict I sent it was not the conflict.** The queue count survives whole and DESIGN.md section 4 is untouched. An offline queue is not a notice: notices need action and are unbounded in number, a queue needs none and clears itself. The offline line returns under the title, neutral, one line, count on it. The real conflict was with the adherence clause, which held 182 px above the trend.
+
+**Also ruled.** C7 un-ticked, for two departures its own spec never examined: adherence above the weight card, and `.today` cards at 8px/8px against section 3's 16/12, both bought to pay the old F27. C9 moved from slice 4 to slice 8 since it names the session player. F23's first-entry state is F23's own and un-ticked: screen 03 frame 3 already draws it and the build ignores it. F34 line 167 is a zero over an empty population, which A4's own first standing rule forbids.
+
+## The launch-report hole is closed, at `a617269`
+
+The write route left `PUBLIC_PATHS`, so a session-less caller is refused at the middleware, and the report now carries an HMAC launch ticket minted only by the shell layout, keyed with the master key over the session id. The gate screen and the offline document raise no report at all, which is where the attack minted its anti-forgery pair. The verifier's exact curl now answers 401 with the row unmoved to the millisecond. Declared floor: a driven browser **holding the owner's session cookie** can still report, and that cookie is HttpOnly, Secure, SameSite=Strict.
+
+## The intruder reports are closed, three times over
+
+Every agent that runs a suite sees its own recovery sign-ins and reports an unattributed writer. Three separate idle measurements by the lead with no agent running show zero: 45 s, 60 s, 90 s, and two minutes, all delta zero on `session` and `auth_attempt`. `request_origin` holds one address for its whole life, this Mac. Do not spend another dispatch on it.
+
 ## Slice 4 is with the architect after four failures, all on F27 and its neighbours
 
 40 of 166 checked. The count fell from 42: C5 and F24 went back to unchecked when the fix that bounded the notice region hid the offline queue count behind a disclosure.
