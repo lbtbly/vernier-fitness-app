@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { CSRF_HEADER } from '@/lib/cookie-names';
 import { unitName } from '@/lib/display';
+import { carryTheCaughtObject, messageOf } from '@/lib/platform-cause';
 import { strings } from '@/lib/strings';
 
 /**
@@ -30,13 +31,14 @@ import { strings } from '@/lib/strings';
  * `platform` is the browser's, from a write that never reached the machine.
  * The marker is set at the branch that knows, the same way the quick log sets
  * it, because the check that reads this screen has to tell them apart by
- * provenance and cannot tell them apart by looking. A platform cause names the
- * request that was rejected, so the claim is checkable against what the browser
- * did rather than against what the words happen to say.
+ * provenance and cannot tell them apart by looking. And the platform branch
+ * carries the caught OBJECT rather than its message: a claim about a string is
+ * answered by manufacturing a string, and this run has watched that happen
+ * twice. src/lib/platform-cause.ts holds the reasoning.
  */
 type Failure =
   | { error: string; detail: string; authored: 'vernier' }
-  | { error: string; detail: string; authored: 'platform'; rejected: string };
+  | { error: string; caught: unknown; authored: 'platform' };
 
 /** The one request this form writes through, named once so the marker cannot drift from it. */
 const LOG_ENDPOINT = '/api/log';
@@ -85,14 +87,10 @@ export function CorrectionForm({
       setReason('');
       router.refresh();
     } catch (error) {
-      // The origin went away mid-write. Same card, same shape, and the cause
-      // is what the browser actually said rather than a number.
-      setFailure({
-        error: strings.api.correction.title,
-        detail: (error as Error).message,
-        authored: 'platform',
-        rejected: LOG_ENDPOINT,
-      });
+      // The origin went away mid-write. Same card, same shape, and the cause is
+      // the object the browser rejected with, kept whole so the words on the
+      // screen are read off it at render.
+      setFailure({ error: strings.api.correction.title, caught: error, authored: 'platform' });
     } finally {
       setBusy(false);
     }
@@ -131,12 +129,13 @@ export function CorrectionForm({
           </div>
           <div className="head">{failure.error}</div>
           <p className="sub">
-            <span
-              data-authored={failure.authored}
-              data-platform-request={failure.authored === 'platform' ? failure.rejected : undefined}
-            >
-              {failure.detail}
-            </span>{' '}
+            {failure.authored === 'platform' ? (
+              <span data-authored="platform" ref={carryTheCaughtObject(failure.caught)}>
+                {messageOf(failure.caught)}
+              </span>
+            ) : (
+              <span data-authored="vernier">{failure.detail}</span>
+            )}{' '}
             {strings.api.correction.lead}
           </p>
           <div className="actions">

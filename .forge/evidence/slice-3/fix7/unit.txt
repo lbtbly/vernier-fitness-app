@@ -1,0 +1,93 @@
+
+ RUN  v4.1.11 /Users/lambertbouley/Claude/lbtbly-fitness-app
+
+ ✓ tests/unit/suite-safety.test.ts > the suite against the owner's installation > reaches the owner's database only as the role that cannot write it 2ms
+ ✓ tests/unit/suite-safety.test.ts > the suite against the owner's installation > hands scripts/recovery.sh the same role, in the one place it is called 0ms
+ ✓ tests/unit/suite-safety.test.ts > the suite against the owner's installation > lets no spec open a connection, a container or the recovery script of its own 6ms
+ ✓ tests/unit/suite-safety.test.ts > the suite against the owner's installation > keeps the destructive helper pointed at the scratch database by name 0ms
+ ✓ tests/unit/suite-safety.test.ts > the suite against the owner's installation > grants that role no way to edit or remove anything, anywhere 1ms
+ ✓ tests/unit/recovery-parameters.test.ts > the Argon2id parameters, in both places that hold them > hashes a recovery password at exactly the cost the app hashes at 2ms
+ ✓ tests/unit/recovery-parameters.test.ts > the Argon2id parameters, in both places that hold them > stores on the owner row the same numbers it hashed with 0ms
+ ✓ tests/unit/recovery-parameters.test.ts > the Argon2id parameters, in both places that hold them > tells the operator the cost it actually used 0ms
+ ✓ tests/unit/recovery-parameters.test.ts > the Argon2id parameters, in both places that hold them > holds the app to the floor F10 names, so agreeing on a weaker cost is not a pass 0ms
+ ✓ tests/unit/master-key.test.ts > the master key > refuses to boot when it is absent, with a named error 2ms
+ ✓ tests/unit/master-key.test.ts > the master key > refuses a key that is not 32 bytes, naming what it read 1ms
+ ✓ tests/unit/master-key.test.ts > the master key > passes its own encrypt and decrypt self test at boot 2ms
+ ✓ tests/unit/master-key.test.ts > the master key > round trips a credential 0ms
+ ✓ tests/unit/master-key.test.ts > the master key > stores no plaintext anywhere in the sealed record 1ms
+ ✓ tests/unit/master-key.test.ts > the master key > fails loudly under a different key, and never returns an empty value 0ms
+ ✓ tests/unit/master-key.test.ts > the master key > refuses a ciphertext moved from one integration row into another 0ms
+ ✓ tests/unit/master-key.test.ts > the master key > refuses a tampered ciphertext rather than returning something 0ms
+ ✓ tests/unit/master-key.test.ts > the master key > fingerprints two keys differently, which is how a mismatch is named 1ms
+ ✓ tests/unit/provenance.test.ts > the six sources > is exactly six, and estimate is not one of them 2ms
+ ✓ tests/unit/provenance.test.ts > the six sources > names an import version, so a row read back knows what wrote it 0ms
+ ✓ tests/unit/provenance.test.ts > the six sources > gives the quick log six metrics and every one of them a unit 0ms
+ ✓ tests/unit/provenance.test.ts > the deduplication decision > calls the first reading of a day unique and stores it 1ms
+ ✓ tests/unit/provenance.test.ts > the deduplication decision > drops the same fact arriving twice and names the row that was kept 36ms
+ ✓ tests/unit/provenance.test.ts > the deduplication decision > keeps a device reading over a hand-typed one for the same day and names the loser 1ms
+ ✓ tests/unit/provenance.test.ts > the deduplication decision > does not store a hand-typed reading over a device one for the same day 0ms
+ ✓ tests/unit/provenance.test.ts > the deduplication decision > treats a different day as a different reading, in the zone it was taken in 0ms
+ ✓ tests/unit/provenance.test.ts > the deduplication decision > reads the day boundary in Paris and not in UTC 0ms
+ ✓ tests/unit/provenance.test.ts > a re-import that disagrees with a correction > is a question, not a decision, and it stores nothing 1ms
+ ✓ tests/unit/provenance.test.ts > a re-import that disagrees with a correction > names the value that stands today, not the first correction in the chain 0ms
+ ✓ tests/unit/provenance.test.ts > a re-import that disagrees with a correction > leaves a re-import that agrees with the correction alone 0ms
+ ✓ tests/unit/provenance.test.ts > the correction chain > holds four rows after three edits, and the original is one of them 0ms
+ ✓ tests/unit/provenance.test.ts > the correction chain > gives back the original after three edits, whatever order the rows arrived in 0ms
+ ✓ tests/unit/provenance.test.ts > the correction chain > reads the last correction as the value that stands today 0ms
+ ✓ tests/unit/provenance.test.ts > the correction chain > never loses a row to ordering 0ms
+ ✓ tests/unit/provenance.test.ts > what Vernier will store > takes a rating that is a whole number inside the band 1ms
+ ✓ tests/unit/provenance.test.ts > what Vernier will store > refuses 99 for a rating out of five 0ms
+ ✓ tests/unit/provenance.test.ts > what Vernier will store > refuses a negative rating 0ms
+ ✓ tests/unit/provenance.test.ts > what Vernier will store > refuses a fractional rating 0ms
+ ✓ tests/unit/provenance.test.ts > what Vernier will store > refuses a word where a number belongs 0ms
+ ✓ tests/unit/provenance.test.ts > what Vernier will store > refuses a waist measurement outside the band a tape can produce 0ms
+ ✓ tests/unit/provenance.test.ts > what Vernier will store > takes a waist measurement inside it 0ms
+ ✓ tests/unit/provenance.test.ts > what Vernier will store > stores a free note with no number rather than a zero 0ms
+ ✓ tests/unit/provenance.test.ts > what Vernier will store > refuses a blank field on every metric, and never stores it as zero 1ms
+ ✓ tests/unit/provenance.test.ts > what Vernier will store > refuses a metric it has never heard of 0ms
+ ✓ tests/unit/provenance.test.ts > what Vernier will store > gives every metric a band, so no writer can be the one without a rule 0ms
+ ✓ tests/unit/password.test.ts > the backup password > hashes with Argon2id at the parameters the rubric names 35ms
+ ✓ tests/unit/password.test.ts > the backup password > gives every owner a different nonce, so two identical passwords do not share a tag 73ms
+ ✓ tests/unit/rate-limit.test.ts > the sign-in rate limiter > lets the first five failures through and counts them down 2ms
+ ✓ tests/unit/rate-limit.test.ts > the sign-in rate limiter > locks on the fifth failure inside the window 0ms
+ ✓ tests/unit/rate-limit.test.ts > the sign-in rate limiter > refuses a correct password while the window is open, which is the point 0ms
+ ✓ tests/unit/rate-limit.test.ts > the sign-in rate limiter > opens again exactly when the oldest failure that still counts falls out 0ms
+ ✓ tests/unit/rate-limit.test.ts > the sign-in rate limiter > never returns a pause longer than the window 0ms
+ ✓ tests/unit/tokens.test.ts > session and anti-forgery tokens > mints 32 bytes and never the same value twice 3ms
+ ✓ tests/unit/tokens.test.ts > session and anti-forgery tokens > stores a hash, not the token 1ms
+ ✓ tests/unit/tokens.test.ts > session and anti-forgery tokens > matches only an identical token, and survives a length mismatch 0ms
+ ✓ tests/unit/webauthn-counter.test.ts > the signature counter > accepts a synced passkey reporting zero, over and over 1ms
+ ✓ tests/unit/webauthn-counter.test.ts > the signature counter > stores what the authenticator reported and never synthesises an increment 0ms
+ ✓ tests/unit/webauthn-counter.test.ts > the signature counter > still refuses a replay from an authenticator that does count 0ms
+ ✓ tests/unit/webauthn-counter.test.ts > the signature counter > refuses a counter that goes back to zero after counting 0ms
+ ✓ tests/unit/webauthn-counter.test.ts > the signature counter > accepts the first assertion from a counting authenticator 0ms
+ ✓ tests/unit/routes.test.ts > the route table > opens exactly the five things an unauthenticated visitor may have 1ms
+ ✓ tests/unit/routes.test.ts > the route table > opens the two diagnostics endpoints by name and nothing else in that namespace 0ms
+ ✓ tests/unit/routes.test.ts > the route table > calls the sign-in endpoints the gate, because they cannot need a session 0ms
+ ✓ tests/unit/routes.test.ts > the route table > protects everything else, including a route nobody has written yet 0ms
+ ✓ tests/unit/routes.test.ts > the route table > is not fooled by a trailing slash 0ms
+ ✓ tests/unit/routes.test.ts > the route table > answers an API path with a status and a document with a redirect 0ms
+ ✓ tests/unit/routes.test.ts > the route table > leaves the liveness, offline, worker and diagnostics responses cookie free 0ms
+ ✓ tests/unit/password.test.ts > the backup password > verifies the right password and refuses the wrong one 113ms
+ ✓ tests/unit/password.test.ts > the backup password > reads its parameters from the row and not from the constants 57ms
+ ✓ tests/unit/password.test.ts > the backup password > refuses an algorithm it does not verify, rather than returning false quietly 21ms
+ ✓ tests/unit/password.test.ts > the backup password > states every reason a password is refused 0ms
+ ✓ tests/unit/format.test.ts > dates and times > renders the two shapes DESIGN.md fixes and no third one 25ms
+ ✓ tests/unit/format.test.ts > dates and times > renders times 24 hour, with no meridiem anywhere 1ms
+ ✓ tests/unit/format.test.ts > dates and times > reads Paris, not the instant, when the two disagree about the day 0ms
+ ✓ tests/unit/format.test.ts > dates and times > counts days as calendar days in the app zone 1ms
+ ✓ tests/unit/format.test.ts > units > is metric, with the precision the unit deserves and no more 4ms
+ ✓ tests/unit/format.test.ts > units > names every unit in the catalogue rather than in a component 0ms
+ ✓ tests/unit/format.test.ts > units > renders a rating as a rating and a note as itself, never as a number with a unit 2ms
+ ✓ tests/unit/format.test.ts > a timezone-shifted run renders identical dates > is byte identical from Paris, Auckland and Los Angeles 327ms
+ ✓ tests/unit/idempotency.test.ts > one idempotency key applies once > runs the write once however many times the same key arrives 1ms
+ ✓ tests/unit/idempotency.test.ts > one idempotency key applies once > gives a replay the original answer back, byte for byte 0ms
+ ✓ tests/unit/idempotency.test.ts > one idempotency key applies once > logs one applied and one replayed, which is what the request log is for 0ms
+ ✓ tests/unit/idempotency.test.ts > one idempotency key applies once > answers 409 while the first arrival is still in flight, which the flusher reads as applied 0ms
+ ✓ tests/unit/idempotency.test.ts > one idempotency key applies once > keeps two different keys apart 0ms
+
+ Test Files  11 passed (11)
+      Tests  84 passed (84)
+   Start at  11:57:21
+   Duration  720ms (transform 340ms, setup 0ms, import 1.02s, tests 750ms, environment 3ms)
+

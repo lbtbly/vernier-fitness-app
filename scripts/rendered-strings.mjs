@@ -3,6 +3,16 @@
 //
 //   node scripts/rendered-strings.mjs            walk it, print the report
 //   node scripts/rendered-strings.mjs --verbose  print every fragment it read
+//   node scripts/rendered-strings.mjs --database vernier_scratch --container vernier-scratch
+//                                                walk another instance instead
+//
+// THE INSTANCE IS AN ARGUMENT. This script used to name the owner's container
+// and the owner's database in two helpers, so the empty-database floor it
+// asserts could not be re-proved by anybody: proving a floor means standing on
+// a database with nothing in it, and the only database it could reach was the
+// one with the owner's readings in it. `--database` and `--container` point the
+// same walk at the scratch instance, which scripts/test-stack.sh already
+// provides, with APP_URL naming its origin.
 //
 // C6's second clause is that no user-facing string is written inline. The
 // source-side scanner in scripts/strings.mjs answers that by asking the code
@@ -39,13 +49,18 @@
 //   3. Shapes that are values rather than words: a number, a time, a UUID, a
 //      prefixed id, a URL, a host, a zone name, and the month and weekday names
 //      the app's own formatters produce in the app's own zone.
-//   4. Text the browser itself wrote, and only where its provenance can be
-//      established twice over: the markup marks it at the branch that knows,
-//      and the string is one WebKit handed this run when a fetch was refused.
-//      A fragment failing either half fails the check. And the two halves are
-//      not enough on their own, because a marker plus an echo defeats them, so
-//      the same run reads the shipped tree and fails any literal equal to a
-//      harvested message. The product never writes the browser's words down.
+//   4. Text the browser itself wrote, established by IDENTITY and not by
+//      agreement. The branch that caught the rejection hands the DOM node the
+//      caught object itself, this check asks the page whether that object is one
+//      the browser rejected a fetch with in this document, and it excuses the
+//      fragment only if the fragment IS that object's message and the rejection
+//      happened after the state was opened. A composed literal is not that
+//      object. An Error the product built with the same message is not that
+//      object. A genuine rejection from another screen is that object with the
+//      wrong timestamp. And the same run still reads the shipped tree and fails
+//      any literal equal to a message WebKit hands a rejected fetch, because a
+//      product that writes the browser's words down is lying whether or not a
+//      checker can be made to notice.
 //
 // Anything else is a defect, reported with the text, the surface and the state.
 //
@@ -110,9 +125,30 @@ import {
 const here = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(here, '..');
 const { strings } = await import(join(projectRoot, 'src', 'lib', 'strings.ts'));
+// The one property name the product and this check agree on, imported from the
+// product so it cannot drift.
+const { PLATFORM_CAUSE } = await import(join(projectRoot, 'src', 'lib', 'platform-cause.ts'));
 
 const BASE = (process.env.APP_URL ?? 'https://lamberts-mac-mini.tailda76d6.ts.net').replace(/\/+$/, '');
 const VERBOSE = process.argv.includes('--verbose');
+
+/** A named argument, or nothing. */
+function argument(name) {
+  const at = process.argv.indexOf(name);
+  return at === -1 ? null : process.argv[at + 1];
+}
+
+/**
+ * Which installation this walk is reading.
+ *
+ * The default is the owner's, which is what the gate runs. The scratch instance
+ * is the other one, and naming it is how the population floor below can be
+ * proved rather than asserted: bring up an empty scratch database, point this
+ * at it, and watch the floor refuse to walk.
+ */
+const DATABASE = argument('--database');
+const CONTAINER = argument('--container');
+const DATABASE_ARG = DATABASE ? JSON.stringify(DATABASE) : '"$POSTGRES_DB"';
 
 // --------------------------------------------------------------------------
 // The host, which is where the database and the configuration are.
@@ -128,7 +164,7 @@ function db(statement) {
       'db',
       'sh',
       '-c',
-      `psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -At -c ${JSON.stringify(oneLine)}`,
+      `psql -U "$POSTGRES_USER" -d ${DATABASE_ARG} -At -c ${JSON.stringify(oneLine)}`,
     ],
     { cwd: projectRoot, encoding: 'utf8' },
   )
@@ -138,7 +174,10 @@ function db(statement) {
 }
 
 function appEnv(names) {
-  const out = execFileSync('docker', ['compose', 'exec', '-T', 'app', 'printenv', ...names], {
+  const command = CONTAINER
+    ? ['exec', CONTAINER, 'printenv', ...names]
+    : ['compose', 'exec', '-T', 'app', 'printenv', ...names];
+  const out = execFileSync('docker', command, {
     cwd: projectRoot,
     encoding: 'utf8',
   })
@@ -153,6 +192,7 @@ function mintSignInLink() {
   return execFileSync('bash', ['scripts/recovery.sh', 'link', '10'], {
     cwd: projectRoot,
     encoding: 'utf8',
+    env: CONTAINER ? { ...process.env, RECOVERY_CONTAINER: CONTAINER } : process.env,
   })
     .trim()
     .split('\n')
@@ -411,43 +451,41 @@ function tile(text) {
 // check that excuses such text to establish that by provenance and to fail
 // every fragment whose provenance it cannot establish.
 //
-// WHAT THIS REPLACED, because the difference is the whole defect. There used to
-// be a slot: any fragment containing the literal segments of
-// `quickLog.errorBody` was reported as a platform cause and the run stayed
-// green. That is position, not provenance. It excused whatever landed in the
-// slot, so `HTTP 502 at 14:32.` composed inline in the component walked
-// straight through, and the verifier proved it by planting app copy there and
-// watching the check pass.
+// FIVE ROUNDS OF THIS COMPARED TEXT, AND TEXT IS WHAT A PRODUCT CAN MAKE.
+// First there was a slot: any fragment landing inside `quickLog.errorBody` was
+// reported as a platform cause, so `HTTP 502 at 14:32.` composed inline walked
+// straight through. That was position, not provenance. Then it was a marker
+// plus a harvested word list, and `<span data-authored="platform">Load
+// failed</span>` was excused in a 502 state where WebKit had said nothing.
+// Then the marker named its request and the checker asked the browser whether
+// that request was really rejected in that state, and that fell too, twice in
+// one round: `['L','oad',' fai','led'].join('')` on the marked branch printed
+// words Chrome does not say, and a background outbox retry refused during the
+// undo window excused a span on a different card, because "this state" was a
+// bucket of paths rather than a fact about the string.
 //
-// AND WHAT THAT REPLACED IN ITS TURN, which is the defect this version closes.
-// Provenance used to be a marker plus a word list: mark the node platform, and
-// print a string WebKit says somewhere in this run. Both halves are about the
-// TEXT, and text is the one thing a product can manufacture. `detail: body
-// .detail ?? body.error ?? ('L' + 'oad failed')` marked platform was excused in
-// the 502 state, where the machine answered and the browser had said nothing at
-// all, and the scan of the shipped tree could not see it either because a
-// literal assembled at runtime is not in any file to find. A harvested
-// vocabulary is a run-wide fact and it does not know which branch ran.
+// SO IT DOES NOT COMPARE TEXT AT ALL. The branch that catches the rejection
+// hands the DOM node the caught OBJECT, under a property, which is what
+// src/lib/platform-cause.ts exists for. Before any app code runs, this check
+// wraps `window.fetch` so that every rejection the browser produces is recorded
+// against the object it rejected with, in a WeakMap the page cannot add to: the
+// only writer is the wrapper, and the only thing exposed is a question. Then a
+// fragment marked platform is excused when, and only when, all three hold:
 //
-// So the excusal is tied to the BRANCH, and the branch is checked against what
-// the browser actually did in that state. Three things, and all three must hold:
+//   1. The node carries an object this browser rejected a fetch with, matched
+//      by identity in that WeakMap. Not a message, not a shape: that object.
+//   2. The fragment IS that object's message. The product may not print one
+//      thing and carry another.
+//   3. The rejection happened after this state was opened. A real Error kept in
+//      React state and re-rendered on a later screen is refused where it did
+//      not happen, which is the bucketing hole closed on the object rather than
+//      on a path.
 //
-//   1. The product says so at the branch that knows, and says which failure.
-//      The quick log marks the cause `data-authored="platform"` only where the
-//      string is a caught rejection of a fetch, and it writes the request that
-//      was rejected into `data-platform-request`. Every branch that composes a
-//      catalogued string marks `data-authored="vernier"` and names nothing.
-//   2. The browser agrees that this request really was rejected while this
-//      state was being produced. Playwright's `requestfailed` fires when a
-//      request ends with no response at all, which is the transport failure the
-//      product's catch block is claiming; a 502 is a response and fires
-//      `requestfinished` instead. The failures are collected per state and read
-//      by the judge, so a fragment in a state where nothing was rejected cannot
-//      be excused however it is marked and whatever it says.
-//   3. The words are ones this WebKit hands a page whose fetch was rejected,
-//      harvested in this run. This is the weakest of the three and it is last:
-//      it stops a marked branch printing a sentence of its own beside a genuine
-//      rejection. It never excuses anything on its own.
+// A composed literal fails 1 because a string is not an object the browser
+// threw. An Error the product built with WebKit's wording fails 1 for the same
+// reason. A stale rejection fails 3. And nothing in the product can put an
+// entry in that map, because the wrapper is installed before the first script
+// and the page is handed no way to write to it.
 //
 // A fragment marked platform FAILS when any of the three is missing, and the
 // failure names which one. So does an unaccounted fragment that carries no
@@ -462,7 +500,9 @@ const platformVocabulary = new Map();
  * These are Playwright's abort reasons, which map onto the network errors the
  * browser raises on its own. Running all of them means the recorded vocabulary
  * is the platform's, complete for this engine and this version, and gathered in
- * the same run that reads it rather than pasted into a list here.
+ * the same run that reads it rather than pasted into a list here. It no longer
+ * decides anything: what it is for is the shipped-tree scan below, which fails
+ * the product for writing any of these words down.
  */
 const TRANSPORT_FAILURES = [
   'aborted',
@@ -501,27 +541,58 @@ async function harvestPlatformWords(page) {
 }
 
 /**
- * What the browser refused while the state now being read was produced.
+ * The register of what the browser rejected, installed before the app's first
+ * script and readable only as a question.
  *
- * Filled by a `requestfailed` listener and emptied after every surface, so what
- * it holds is the transport failures that belong to this state and not to the
- * run. Keyed by path, because that is what the markup can name.
+ * The name carries a nonce so that nothing in the page can find it by guessing,
+ * and the object it exposes has no way to add an entry: `ask` answers about an
+ * object, and the only writer is the wrapper around the browser's own fetch. A
+ * plant in the product cannot register a rejection it did not receive.
  */
-const rejectedInThisState = new Map();
+const REGISTER = `__vernier_rejections_${Math.random().toString(36).slice(2)}`;
 
-function pathOf(url) {
-  try {
-    return new URL(url, BASE).pathname;
-  } catch {
-    return url;
-  }
-}
+const REGISTER_SCRIPT = `(() => {
+  const native = window.fetch;
+  const seen = new WeakMap();
+  window.fetch = function (...args) {
+    return native.apply(this, args).catch((error) => {
+      if (error && typeof error === 'object') {
+        const input = args[0];
+        const url = typeof input === 'string' ? input : (input && input.url) || '';
+        let path = url;
+        try { path = new URL(url, location.href).pathname; } catch (ignored) { path = String(url); }
+        seen.set(error, { path, at: Date.now() });
+      }
+      throw error;
+    });
+  };
+  Object.defineProperty(window, ${JSON.stringify(REGISTER)}, {
+    value: Object.freeze({
+      ask: (caught) => {
+        if (!caught || typeof caught !== 'object' || !seen.has(caught)) return null;
+        const record = seen.get(caught);
+        return {
+          path: record.path,
+          at: record.at,
+          message: caught instanceof Error ? caught.message : String(caught),
+        };
+      },
+    }),
+    enumerable: false,
+    configurable: false,
+    writable: false,
+  });
+})()`;
 
-function recordRejection(request) {
-  const failure = request.failure();
-  if (!failure) return;
-  rejectedInThisState.set(pathOf(request.url()), failure.errorText);
-}
+/**
+ * When the state now being read was opened.
+ *
+ * Wall clock on this machine, read here and compared with the wall clock the
+ * page stamped the rejection with. A rejection older than this belongs to a
+ * screen that has already been read, and excusing a fragment with it is exactly
+ * what let a background outbox retry stand in for a card it never touched.
+ */
+let stateOpenedAt = Date.now();
 
 /**
  * Can this fragment's provenance be established as platform-authored. Returns
@@ -530,28 +601,30 @@ function recordRejection(request) {
  */
 function platformProvenance(fragment, context) {
   if (context.authored !== 'platform') return { ok: false, why: null };
-  if (!context.rejected) {
+  const carried = context.carried;
+  if (!carried) {
     return {
       ok: false,
-      why: 'marked platform, but the markup names no request whose rejection produced it',
+      why:
+        'marked platform, but the node carries no object this browser rejected a fetch with: either nothing was caught here, or what it is printing was made in the product',
     };
   }
-  const named = pathOf(context.rejected);
-  const errorText = rejectedInThisState.get(named);
-  if (errorText === undefined) {
+  if (normalise(carried.message) !== fragment) {
     return {
       ok: false,
-      why: `marked platform on ${named}, but no request to ${named} was rejected while this state was produced, so the browser wrote nothing here`,
+      why: `marked platform and carrying a real rejection of ${carried.path}, but the fragment is not that object's message, which reads ${JSON.stringify(carried.message)}`,
     };
   }
-  const harvested = platformVocabulary.get(fragment);
-  if (!harvested) {
+  if (carried.at < stateOpenedAt) {
     return {
       ok: false,
-      why: `marked platform on ${named}, which really was rejected, but this is not a string WebKit hands a page whose fetch was rejected in this run`,
+      why: `marked platform, and the object it carries is a real rejection of ${carried.path} from before this state was opened, so the browser wrote nothing here`,
     };
   }
-  return { ok: true, provenance: `${harvested}; ${named} rejected in this state: ${errorText}` };
+  return {
+    ok: true,
+    provenance: `the message of the object WebKit rejected ${carried.path} with, identified in the page and rejected ${carried.at - stateOpenedAt} ms after this state opened`,
+  };
 }
 
 // --------------------------------------------------------------------------
@@ -644,6 +717,8 @@ function readTheScreen(vocabulary) {
     svgForeignHtml,
     neverRendered,
     cssString,
+    register,
+    causeProperty,
   } = vocabulary;
   const found = [];
   const describe = (element) => {
@@ -654,14 +729,18 @@ function readTheScreen(vocabulary) {
   // Who wrote it, if the markup says. Nothing else about where it sits counts:
   // the element a fragment landed in is position, and position never excused
   // anything after the <code> exemption came out.
+  //
+  // And a platform claim is not read as a claim. The branch that caught the
+  // rejection put the caught object on the node, and this asks the register
+  // whether the browser is what rejected with it. What comes back is a fact
+  // about an object, or null.
+  const ask = window[register] ? window[register].ask : () => null;
   const contextOf = (element) => {
     const marked = element.closest('[data-authored]');
-    if (!marked) return { authored: null, rejected: null };
+    if (!marked) return { authored: null, carried: null };
     return {
       authored: marked.getAttribute('data-authored'),
-      // Which failure the branch says produced these words. A claim the checker
-      // takes to the browser, not a claim it takes on trust.
-      rejected: marked.getAttribute('data-platform-request'),
+      carried: ask(marked[causeProperty]),
     };
   };
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
@@ -700,7 +779,7 @@ function readTheScreen(vocabulary) {
       for (const match of painted.matchAll(cssStrings)) {
         const text = (match[1] === undefined ? match[2] : match[1]).replace(/\\(?=.)/g, '');
         if (text.trim() === '') continue;
-        found.push({ where: describe(element) + pseudo, text, authored: null, rejected: null });
+        found.push({ where: describe(element) + pseudo, text, authored: null, carried: null });
       }
     }
   }
@@ -736,7 +815,7 @@ function readTheScreen(vocabulary) {
     }
   }
   if (document.title) {
-    found.push({ where: 'title', text: document.title, authored: null, rejected: null });
+    found.push({ where: 'title', text: document.title, authored: null, carried: null });
   }
   const description = document.querySelector('meta[name="description"]');
   if (description) {
@@ -744,7 +823,7 @@ function readTheScreen(vocabulary) {
       where: 'meta description',
       text: description.getAttribute('content') || '',
       authored: null,
-      rejected: null,
+      carried: null,
     });
   }
   return found;
@@ -775,9 +854,9 @@ function judge(surface, state, where, text, context = {}) {
     where,
     text: fragment,
     unaccounted: result.rest,
-    // A fragment the markup calls platform text, in a state where the browser
-    // refused nothing, is the exact shape the harvested vocabulary let through.
-    // It fails, and it fails naming which half of provenance is missing.
+    // A fragment the markup calls platform text, carrying nothing the browser
+    // rejected with, is the shape every text comparison let through. It fails,
+    // and it fails naming which of the three facts is missing.
     why: excusal.why ?? 'no catalogue key accounts for it',
   });
 }
@@ -793,18 +872,20 @@ async function readSurface(page, surface, state) {
     svgForeignHtml: SVG_FOREIGN_HTML,
     neverRendered: NEVER_RENDERED,
     cssString: CSS_STRING_SOURCE,
+    register: REGISTER,
+    causeProperty: PLATFORM_CAUSE,
   });
   surfacesWalked.push(`${surface} / ${state}`);
   for (const found_ of found) {
     judge(surface, state, found_.where, found_.text, {
       authored: found_.authored,
-      rejected: found_.rejected ?? null,
+      carried: found_.carried ?? null,
     });
   }
-  // What the browser refused belongs to the state it was refused in. The next
-  // state starts with an empty hand, so a rejection in one screen can never
-  // excuse a sentence on another.
-  rejectedInThisState.clear();
+  // The next state opens now. A rejection the browser produced before this line
+  // belongs to a screen that has already been read, and no fragment on the next
+  // one may be excused with it.
+  stateOpenedAt = Date.now();
 }
 
 /** The strings an API answer puts on a screen. Machine fields are not read. */
@@ -951,32 +1032,31 @@ const context = await browser.newContext({
   deviceScaleFactor: 3,
   serviceWorkers: 'block',
 });
+// Before the app's first script, on every document: the wrapper that records
+// what the browser rejected, against the object it rejected with.
+await context.addInitScript(REGISTER_SCRIPT);
 const page = await context.newPage();
 
-// What the browser refused, as it refuses it. `requestfailed` fires only when a
-// request ended with no response at all, which is the one thing a caught fetch
-// rejection can be: a 502 is a response and never appears here. This is the
-// fact the markup's platform claim is checked against.
-page.on('requestfailed', recordRejection);
 
 async function walk() {
   // The visitor at the gate, before any session exists on this context.
   await page.goto('/sign-in');
 
   // Ask the browser what it says when it cannot reach the machine, before
-  // reading a single surface. This is the whole of the platform exemption and
-  // it is gathered rather than declared: fourteen transport failures, fourteen
-  // messages, all of them out of WebKit in this run.
+  // reading a single surface: fourteen transport failures, fourteen messages,
+  // all of them out of WebKit in this run. Nothing is excused by this list any
+  // more. What it is for is the scan below.
   await harvestPlatformWords(page);
-  // Those fourteen rejections belong to the harvest and to no state on the
-  // walk. The first surface starts with an empty hand.
-  rejectedInThisState.clear();
 
   // With the browser's words in hand, read the shipped tree for anyone writing
-  // them down. This is the other half of the platform exemption and it runs
-  // before a single surface is read, so a forged marker cannot be green here
-  // even for a run.
+  // them down. A product that keeps a copy of the browser's wording is lying
+  // about who is speaking whether or not a checker can be made to notice, so
+  // this runs before a single surface is read.
   await readTheShippedTree();
+
+  // Every state from here is judged against the clock, and the first one opens
+  // after the harvest rather than before it.
+  stateOpenedAt = Date.now();
 
   await readSurface(page, '/sign-in', 'passkey first');
   await page.getByRole('button', { name: strings.signIn.passwordAction, exact: true }).click();

@@ -7,6 +7,7 @@ import { ChevronIcon, CloseIcon, MinusIcon, PlusIcon, UndoIcon, WarnIcon } from 
 import { metricLabel, valueLabel } from '@/lib/display';
 import { daysBetween, longDate, shortDate, time24 } from '@/lib/format';
 import type { LogSnapshot, MeasurementView } from '@/lib/measurement-view';
+import { carryTheCaughtObject, messageOf } from '@/lib/platform-cause';
 import {
   connectivityProved,
   depth,
@@ -78,18 +79,19 @@ const WAIST_STALE_DAYS = 3;
  * looking at the words, and one that guesses from position excuses whatever
  * lands in the slot, which is how an inline string shipped three times.
  *
- * AND THE PLATFORM CLAIM NAMES ITS REQUEST. `data-authored="platform"` alone is
- * a claim about a string, and a claim about a string is answered by echoing a
- * string: `('L' + 'oad failed')` marked platform was excused in a 502 state
- * where the browser had said nothing at all, because the check only asked
- * whether the words matched something WebKit says somewhere. So the marker
- * carries the request whose rejection produced it, the checker asks the browser
- * whether that request really was rejected in that state, and a branch where
- * the machine answered has nothing to point at.
+ * AND THE PLATFORM BRANCH CARRIES THE OBJECT, NOT THE WORDS. Every version of
+ * this that compared text was beaten by text: a marker plus a word list fell to
+ * a branch that echoed the browser's own wording, and a marker plus a named
+ * request fell to that same wording assembled from four pieces at run time,
+ * which printed on the card words Chrome does not say. So the catch block keeps the caught object, the markup
+ * carries that object to the node with `carryTheCaughtObject`, and the message
+ * is read off it at render. The check then asks the page whether that object is
+ * one the browser itself rejected a fetch with, by identity, and nothing the
+ * product can compose satisfies that.
  */
 type Cause =
   | { detail: string; authored: 'vernier' }
-  | { detail: string; authored: 'platform'; rejected: string };
+  | { caught: unknown; authored: 'platform' };
 
 type Load =
   | { state: 'loading' }
@@ -192,17 +194,13 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
       // a proven route home.
       connectivityProved();
     } catch (error) {
-      // The fetch never reached the machine, so this string is the browser's,
-      // not Vernier's. No key exists for it and none can be written: the wording
-      // and the locale belong to WebKit. It is marked at the branch that knows,
-      // and it names the request that was rejected, which is the fact a checker
-      // can verify against the browser rather than take on trust.
-      setLoad({
-        state: 'error',
-        detail: (error as Error).message,
-        authored: 'platform',
-        rejected: LOG_ENDPOINT,
-      });
+      // The fetch never reached the machine, so the cause is the browser's, not
+      // Vernier's. No key exists for it and none can be written: the wording and
+      // the locale belong to WebKit. What goes into state is the object itself
+      // rather than a copy of its message, so the branch that knows hands the
+      // markup a thing a checker can identify instead of a claim it has to
+      // believe.
+      setLoad({ state: 'error', caught: error, authored: 'platform' });
     }
   }, [timeZone]);
 
@@ -478,12 +476,13 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
                   </div>
                   <div className="head">{strings.quickLog.errorTitle}</div>
                   <p className="sub">
-                    <span
-                      data-authored={load.authored}
-                      data-platform-request={load.authored === 'platform' ? load.rejected : undefined}
-                    >
-                      {load.detail}
-                    </span>{' '}
+                    {load.authored === 'platform' ? (
+                      <span data-authored="platform" ref={carryTheCaughtObject(load.caught)}>
+                        {messageOf(load.caught)}
+                      </span>
+                    ) : (
+                      <span data-authored="vernier">{load.detail}</span>
+                    )}{' '}
                     {strings.quickLog.errorBody}
                   </p>
                   <div className="actions">

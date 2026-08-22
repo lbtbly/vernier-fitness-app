@@ -20,6 +20,16 @@
 # of the test suite is what it is for: those specs run against the scratch
 # instance now, and a spec that signs in has to mint its link on the instance it
 # is signing in to. The default is the owner's app and nothing about it moves.
+#
+# RECOVERY_ROLE names a Postgres role to run as, and the test suite is what that
+# is for too. This script drives a read-write connection into the owner's
+# database, and the suite used it to UPDATE the owner row and DELETE a
+# credential. Now every connection below is opened in one place, and when the
+# suite sets RECOVERY_ROLE=vernier_suite every statement runs with that role's
+# grants: SELECT, an INSERT on the sign-in grants and on the append-only auth
+# log, and nothing else. `password` and `forget-passkey` are refused by Postgres
+# on that role, by name, which is the point. The owner sets nothing and gets the
+# full connection, as always.
 set -euo pipefail
 
 cd "${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
@@ -36,13 +46,20 @@ elif ! docker compose ps --status running --services 2>/dev/null | grep -qx app;
   exit 1
 fi
 
+# The role travels with the script, or nothing does. One place, so a command
+# added later cannot forget it.
+ROLE_ARGS=()
+if [ -n "${RECOVERY_ROLE:-}" ]; then
+  ROLE_ARGS=(-e "RECOVERY_ROLE=${RECOVERY_ROLE}")
+fi
+
 run_in_app() {
   # The app container already holds DATABASE_URL and the master key. Nothing is
   # printed here that the container does not print itself.
   if [ -n "$TARGET" ]; then
-    docker exec -i "$TARGET" node --input-type=module --eval "$1"
+    docker exec -i ${ROLE_ARGS[@]+"${ROLE_ARGS[@]}"} "$TARGET" node --input-type=module --eval "${CONNECT_SCRIPT}$1"
   else
-    docker compose exec -T app node --input-type=module --eval "$1"
+    docker compose exec -T ${ROLE_ARGS[@]+"${ROLE_ARGS[@]}"} app node --input-type=module --eval "${CONNECT_SCRIPT}$1"
   fi
 }
 
@@ -51,16 +68,26 @@ run_in_app_with() {
   local assignment=$1
   shift
   if [ -n "$TARGET" ]; then
-    docker exec -i -e "$assignment" "$TARGET" node --input-type=module --eval "$1"
+    docker exec -i -e "$assignment" ${ROLE_ARGS[@]+"${ROLE_ARGS[@]}"} "$TARGET" node --input-type=module --eval "${CONNECT_SCRIPT}$1"
   else
-    docker compose exec -T -e "$assignment" app node --input-type=module --eval "$1"
+    docker compose exec -T -e "$assignment" ${ROLE_ARGS[@]+"${ROLE_ARGS[@]}"} app node --input-type=module --eval "${CONNECT_SCRIPT}$1"
   fi
 }
 
-STATUS_SCRIPT='
+# One connection, opened in one place. Every script below starts from here and
+# none of them builds a client of its own, so a command added later inherits
+# whatever RECOVERY_ROLE is set rather than escaping it.
+CONNECT_SCRIPT='
 const pg = await import("pg");
-const client = new pg.default.Client({ connectionString: process.env.DATABASE_URL });
+const settings = { connectionString: process.env.DATABASE_URL };
+// A role switch in the startup packet, which Postgres applies before the first
+// statement and which nothing in these scripts undoes.
+if (process.env.RECOVERY_ROLE) settings.options = "-c role=" + process.env.RECOVERY_ROLE;
+const client = new pg.default.Client(settings);
 await client.connect();
+'
+
+STATUS_SCRIPT='
 const owner = await client.query("select id, display_name, created_at, password_algorithm, password_memory, password_passes, password_parallelism, password_tag_length, password_updated_at from owner");
 const passkeys = await client.query("select id, label, device_type, backed_up, counter, last_used_at from webauthn_credential order by created_at");
 // The same rule the limiter applies: failures inside the window, and only
@@ -84,7 +111,6 @@ await client.end();
 
 PASSWORD_SCRIPT='
 const crypto = await import("node:crypto");
-const pg = await import("pg");
 const chunks = [];
 for await (const chunk of process.stdin) chunks.push(chunk);
 const password = Buffer.concat(chunks).toString("utf8").replace(/\r?\n$/, "");
@@ -105,8 +131,6 @@ const tag = crypto.argon2Sync("argon2id", {
   memory: 19456,
   passes: 2,
 });
-const client = new pg.default.Client({ connectionString: process.env.DATABASE_URL });
-await client.connect();
 const owner = await client.query("select id from owner");
 if (owner.rowCount === 0) {
   console.error("recovery: no owner account exists yet, so there is nothing to recover.");
@@ -127,12 +151,9 @@ await client.end();
 
 LINK_SCRIPT='
 const crypto = await import("node:crypto");
-const pg = await import("pg");
 const minutes = Number(process.env.RECOVERY_MINUTES || "10");
 const token = crypto.randomBytes(32).toString("base64url");
 const id = crypto.createHash("sha256").update(token).digest("base64url");
-const client = new pg.default.Client({ connectionString: process.env.DATABASE_URL });
-await client.connect();
 const owner = await client.query("select id from owner");
 if (owner.rowCount === 0) {
   console.error("recovery: no owner account exists yet, so there is nothing to sign in to.");
@@ -149,9 +170,6 @@ await client.end();
 '
 
 PASSKEYS_SCRIPT='
-const pg = await import("pg");
-const client = new pg.default.Client({ connectionString: process.env.DATABASE_URL });
-await client.connect();
 const rows = await client.query("select id, label, device_type, backed_up, counter, created_at, last_used_at from webauthn_credential order by created_at");
 console.log(rows.rowCount + " passkey(s)");
 for (const row of rows.rows) {
@@ -163,9 +181,6 @@ await client.end();
 '
 
 FORGET_SCRIPT='
-const pg = await import("pg");
-const client = new pg.default.Client({ connectionString: process.env.DATABASE_URL });
-await client.connect();
 const result = await client.query("delete from webauthn_credential where id = $1 returning id", [process.env.PASSKEY_ID]);
 console.log(result.rowCount === 1 ? "recovery: removed passkey " + process.env.PASSKEY_ID : "recovery: no passkey has that identifier");
 // The diagnostics signal says a passkey has been registered on this
@@ -182,9 +197,6 @@ process.exit(result.rowCount === 1 ? 0 : 4);
 '
 
 UNLOCK_SCRIPT='
-const pg = await import("pg");
-const client = new pg.default.Client({ connectionString: process.env.DATABASE_URL });
-await client.connect();
 // Nothing is edited and nothing is deleted. The limiter ignores failures older
 // than the most recent unlock row, so appending one row starts the window
 // again, and the log still holds every failure that led here.

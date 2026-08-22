@@ -1,0 +1,31 @@
+The third residual: a second copy of the copy, in public/sw.js, outside the
+generated block. sw:check compared only the block, so the file could hold
+anything. It now reads every string in the file. Recorded 2026-08-22T09:55:35Z.
+
+### the file as shipped
+build-sw: public/sw.js carries the catalogue's offline copy, 4 key(s), and is current.
+  45 string(s) read across the whole file; every one outside the block is a declared machine token or markup with no text of its own.
+### exit code: 0
+
+### plant: a sentence in the last-resort Response, which is what the verifier read off a 503
+
+build-sw: 1 string(s) outside the generated block that a person could read, which C6 does not allow:
+  public/sw.js:113  "Vernier is offline and the Mac mini is asleep."
+    reads as: Vernier is offline and the Mac mini is asleep.
+  A worker cannot import the catalogue, so copy it says belongs in strings.offline and comes
+  through the generated block. A machine token belongs in MACHINE in scripts/build-sw.mjs,
+  named as what it is.
+### exit code: 
+plant exit: 1
+
+### plant: one word, which is the shape that shipped and was read off a 503 as text/plain
+
+build-sw: 2 string(s) outside the generated block that a person could read, which C6 does not allow:
+  public/sw.js:101  "/eat"
+    reads as: /eat
+  public/sw.js:101  "Offline"
+    reads as: Offline
+  A worker cannot import the catalogue, so copy it says belongs in strings.offline and comes
+  through the generated block. A machine token belongs in MACHINE in scripts/build-sw.mjs,
+  named as what it is.
+### exit code: 1

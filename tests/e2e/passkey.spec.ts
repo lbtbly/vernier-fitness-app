@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { mintSignInLink, query, recovery } from './host';
+import { forgetSuitePasskey, mintSignInLink, query } from './host';
 import { authenticatorInitScript, makeAuthenticatorSeed } from './software-authenticator';
 
 /**
@@ -18,6 +18,20 @@ import { authenticatorInitScript, makeAuthenticatorSeed } from './software-authe
  * counter of 0 that never moves. So this test signs in twice, and the second
  * time is the one that matters: a naive replay check passes the first and
  * bricks the second.
+ *
+ * AND IT HOLDS WHETHER THE OWNER HAS REGISTERED ONE OR NOT. This spec used to
+ * assert that the settings screen reads "No passkey is registered yet", which
+ * renders only while the list is empty. The whole run has been parked on the
+ * owner registering a passkey from his iPhone, so the spec was set to fail at
+ * the exact moment the thing it is about finally happened, and R7 with it. What
+ * it asserts now is the truth for either state: the empty note when the owner
+ * has none, a row per credential when he has, and its own credential added to
+ * whatever was already there.
+ *
+ * It cleans up through `suite_forget_passkey`, which removes a credential whose
+ * identifier carries the suite's marker and refuses every other identifier. The
+ * suite has no DELETE on that table, so the owner's own passkey is out of reach
+ * of this file however it is edited later.
  */
 
 const CAPTURES = new URL('../../.forge/evidence/slice-2/captures/', import.meta.url).pathname;
@@ -34,6 +48,9 @@ test.describe('the passkey round trip', () => {
     const signalBefore = query(
       "select coalesce((select observed::text from device_observation where signal = 'passkey_registered'), 'absent')",
     );
+    // What the owner already has. Zero on this machine today; one the moment he
+    // registers from the iPhone, which is what C2 and F4 are waiting for.
+    const alreadyRegistered = Number(query('select count(*) from webauthn_credential'));
 
     const seed = await makeAuthenticatorSeed();
     const context = await browser.newContext({ viewport: { width: 393, height: 852 } });
@@ -50,7 +67,19 @@ test.describe('the passkey round trip', () => {
 
       /* ---------------------------------------------------- registration */
       await page.goto('/settings');
-      await expect(page.getByText('No passkey is registered yet.')).toBeVisible();
+      const empty = page.getByText('No passkey is registered yet.');
+      if (alreadyRegistered === 0) {
+        await expect(empty).toBeVisible();
+      } else {
+        // The owner has one. The empty note is gone and a row stands in its
+        // place for each credential, which is the same screen asserted from the
+        // other side rather than a skipped assertion.
+        await expect(empty).toHaveCount(0);
+        await expect(page.locator('.card').filter({ hasText: 'Passkeys' }).locator('.row')).toHaveCount(
+          alreadyRegistered,
+        );
+      }
+      console.log(`the settings screen was read with ${alreadyRegistered} passkey(s) already registered`);
       await page.getByRole('button', { name: 'Add a passkey on this device' }).click();
 
       // The screen says what the authenticator reported, in words. The token
@@ -122,17 +151,21 @@ test.describe('the passkey round trip', () => {
       // length of the test. Leaving it behind would leave the owner's account
       // trusting an authenticator that no longer exists.
       try {
-        console.log(recovery('forget-passkey', seed.credentialId));
-      } catch {
-        console.log(`no credential ${seed.credentialId} to remove, the ceremony did not get that far`);
+        console.log(forgetSuitePasskey(seed.credentialId));
+      } catch (error) {
+        console.log(`could not remove ${seed.credentialId}: ${(error as Error).message}`);
       }
+      expect(
+        Number(query('select count(*) from webauthn_credential')),
+        'the run leaves the owner with exactly the passkeys it found',
+      ).toBe(alreadyRegistered);
       const signalAfter = query(
         "select coalesce((select observed::text from device_observation where signal = 'passkey_registered'), 'absent')",
       );
       console.log(
         `device_observation: passkey_registered was ${signalBefore} before this test and is ${signalAfter} after it`,
       );
-      if (signalBefore === 'absent') {
+      if (signalBefore === 'absent' && alreadyRegistered === 0) {
         expect(signalAfter, 'forgetting the last passkey clears the signal that said one was registered').toBe(
           'absent',
         );

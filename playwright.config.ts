@@ -14,10 +14,10 @@ const baseURL = (process.env.APP_URL ?? 'https://lamberts-mac-mini.tailda76d6.ts
 
 export default defineConfig({
   testDir: './tests/e2e',
-  // One reading of the owner's database at the start, the same reading at the
-  // end. Nothing in this suite writes those tables and `query` in
-  // tests/e2e/host.ts cannot write at all, so the teardown is a check rather
-  // than a sweep: a count that fell is a fault and fails the run.
+  // The grants first, then one reading of the owner's database at the start and
+  // the same reading at the end. Every path this suite has to that database runs
+  // as `vernier_suite`, which Postgres refuses every write to, so the teardown is
+  // a check rather than a sweep: a count that fell is a fault.
   globalSetup: './tests/e2e/global-setup.ts',
   globalTeardown: './tests/e2e/global-teardown.ts',
   fullyParallel: false,
@@ -48,7 +48,7 @@ export default defineConfig({
   projects: [
     {
       name: 'webkit-iphone',
-      testIgnore: /focus\.spec\.ts|service-worker\.spec\.ts|quick-log\.spec\.ts/,
+      testIgnore: /focus\.spec\.ts|service-worker\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts/,
       use: { ...devices['Desktop Safari'], viewport: { width: 393, height: 852 }, deviceScaleFactor: 3 },
     },
     {
@@ -73,6 +73,13 @@ export default defineConfig({
       // in it. It runs against the scratch instance now: the same image, its
       // own database, its own container, nothing in it anybody would miss.
       //
+      // recovery.spec.ts joined it for the same reason with a different write:
+      // proving the recovery procedure means setting a backup password, and the
+      // one it was setting was the owner's, on every run, to twelve random bytes
+      // nobody kept. The suite has no UPDATE on that row any more, so the spec
+      // sets the scratch instance's password instead and F18 is proven on an
+      // account this suite created.
+      //
       // Chrome, because that instance answers on plain loopback HTTP and the
       // session cookie is Secure. WebKit refuses a Secure cookie from an http
       // origin, 127.0.0.1 and localhost alike, so a WebKit run of this file
@@ -81,7 +88,7 @@ export default defineConfig({
       // tailnet behind a second HTTPS proxy, and it is written down rather than
       // discovered: what this file proves, it proves in Chrome.
       name: 'chrome-scratch',
-      testMatch: /quick-log\.spec\.ts/,
+      testMatch: /quick-log\.spec\.ts|recovery\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         channel: 'chrome',

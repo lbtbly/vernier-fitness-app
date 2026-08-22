@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -6,85 +6,132 @@ import { describe, expect, it } from 'vitest';
 /**
  * The suite cannot destroy the owner's data, read off the suite.
  *
- * This is a static check and it is deliberately not a clever one. The e2e suite
- * ran a TRUNCATE against the owner's live database behind a guard that counted
- * rows older than the run, and a waist reading logged through the shipped quick
- * log after the run started was not older than the run: the count stayed at 0,
- * the TRUNCATE went ahead, and the row died. Slice 5 imports the owner's real
- * Withings history, so a run's timing must never again be the thing standing
- * between an import and a TRUNCATE.
+ * WHAT THIS USED TO ASSERT AND WHY IT WAS NOT ENOUGH. It read one helper in
+ * host.ts, checked it set `default_transaction_read_only`, and then greped every
+ * spec for TRUNCATE, DELETE, INSERT and UPDATE, attributing each to the nearest
+ * helper call above it. Postgres really did refuse everything that helper
+ * carried. The check was still holding one door in a building with several: a
+ * spec that opened its own `docker compose exec db psql -d "$POSTGRES_DB"` and
+ * handed it a TRUNCATE passed all four assertions and all 83 unit tests, because
+ * a statement with no `query(` before it was skipped as prose. And
+ * `scripts/recovery.sh` was a second read-write connection into the same
+ * database that this file did not model at all.
  *
- * Two properties, both structural:
+ * SO THE LINE IS NOT HELD HERE ANY MORE. It is held by a missing grant:
+ * `vernier_suite` has SELECT, an INSERT on the one-time sign-in grants, an
+ * INSERT on the append-only auth log, and nothing else, and
+ * tests/e2e/suite-privilege.spec.ts proves that by asking Postgres. A helper
+ * nobody has written yet inherits that refusal without knowing either file
+ * exists, which is the property a grep can never have.
  *
- *   1. The helper that reaches the owner's database connects with
- *      `default_transaction_read_only` on, so Postgres refuses every write it
- *      is handed, whatever the statement says and whoever wrote it.
- *   2. No TRUNCATE, DELETE, INSERT or UPDATE in the suite is handed to that
- *      helper. Every one of them goes to `scratchQuery`, which names the
- *      scratch database.
- *
- * A grep is the right shape here. The property being asserted is about what the
- * source says, and a test that ran the statements to find out would be the very
- * thing it is checking for.
+ * What is left for a static check is the one thing a grant cannot cover: the
+ * database container's bootstrap role is a superuser, and anyone who can run
+ * `docker compose exec db` can become it. No privilege closes that; it is the
+ * same access the owner has. So this file asserts SHAPE rather than statements:
+ * one file in the suite may reach for docker, psql or recovery.sh, and it is
+ * host.ts, where every connection is written down and every one of them names
+ * the role. A spec that opens its own is a failing unit test whatever it then
+ * does, and the plant that walked past the old version fails on its first line.
  */
 const e2e = fileURLToPath(new URL('../e2e/', import.meta.url));
+const scripts = fileURLToPath(new URL('../../scripts/', import.meta.url));
+const SUITE_ROLE = 'vernier_suite';
 
-function sources(): Array<[string, string]> {
+function specs(): Array<[string, string]> {
   return readdirSync(e2e)
-    .filter((name) => name.endsWith('.ts'))
+    .filter((name) => name.endsWith('.ts') && name !== 'host.ts')
     .map((name) => [name, readFileSync(join(e2e, name), 'utf8')]);
 }
 
-const WRITES = /\b(truncate|delete\s+from|insert\s+into|update\s+\w+\s+set)\b/i;
+const host = readFileSync(join(e2e, 'host.ts'), 'utf8');
+const roleScript = readFileSync(join(scripts, 'suite-role.sh'), 'utf8');
+const recoveryScript = readFileSync(join(scripts, 'recovery.sh'), 'utf8');
 
 describe('the suite against the owner\'s installation', () => {
-  it('reaches the live database through a read-only transaction and no other way', () => {
-    const host = readFileSync(join(e2e, 'host.ts'), 'utf8');
-    const live = host.slice(host.indexOf('export function query('), host.indexOf('export function recovery('));
-    expect(live).toContain("PGOPTIONS='-c default_transaction_read_only=on'");
-    expect(live).toContain('$POSTGRES_DB');
-
-    // And exactly one function in the suite connects to the live database.
-    const connections = [...host.matchAll(/-d "\$POSTGRES_DB"/g)];
-    expect(connections.length).toBe(1);
+  it('reaches the owner\'s database only as the role that cannot write it', () => {
+    // Every psql invocation in the suite, and each one names the suite role. A
+    // connection as $POSTGRES_USER is the bootstrap superuser and would be
+    // refused by nothing at all.
+    const connections = [...host.matchAll(/psql -U (\S+) -d ([^\s]+)/g)].map(
+      (match) => `${match[1]} ${match[2]}`,
+    );
+    expect(connections.length).toBeGreaterThan(0);
+    const live = connections.filter((line) => line.includes('$POSTGRES_DB'));
+    expect(live.length).toBeGreaterThan(0);
+    for (const connection of live) {
+      expect(connection, 'a live connection opened as something other than the suite role').toContain(
+        `\${SUITE_ROLE}`,
+      );
+    }
+    // The bootstrap superuser is still how the SCRATCH database is written, and
+    // that is the point of the scratch database. What it may never be is a
+    // connection to the owner's.
+    expect(host).not.toMatch(/psql -U "\$POSTGRES_USER" -d "\$POSTGRES_DB"/);
   });
 
-  it('hands every write statement to the scratch database and never to the live one', () => {
+  it('hands scripts/recovery.sh the same role, in the one place it is called', () => {
+    // recovery.sh drives its own connection into the app container. Without the
+    // role it connects as the database owner, which is how `password` came to
+    // overwrite the owner's backup password on every run.
+    const call = host.slice(host.indexOf('export function recovery('), host.indexOf('export function scratchRecovery('));
+    expect(call).toContain('RECOVERY_ROLE: SUITE_ROLE');
+    // And the script carries it into the container from one place, so a command
+    // added to it later cannot arrive without one.
+    expect(recoveryScript).toContain('RECOVERY_ROLE=${RECOVERY_ROLE}');
+    expect(recoveryScript).toContain('CONNECT_SCRIPT');
+    const connections = [...recoveryScript.matchAll(/new pg\.default\.Client\(/g)];
+    expect(connections.length, 'every command in recovery.sh connects through the one prelude').toBe(1);
+  });
+
+  it('lets no spec open a connection, a container or the recovery script of its own', () => {
+    // The shape the plant took: `docker compose exec db psql -d "$POSTGRES_DB"`
+    // with a TRUNCATE, written straight into a spec. It is refused here by
+    // shape, before anyone asks what statement it carried, because the
+    // bootstrap superuser inside that container is refused by no grant. The
+    // driver is named too: a spec that opened its own pg client would be past
+    // the role the same way, and past docker as well.
+    const reaches =
+      /\b(docker|psql|recovery\.sh|pg_dump|pg_restore)\b|from 'pg'|require\('pg'\)|new (pg\.default\.|pg\.)?Client\(/;
     const offenders: string[] = [];
-    const helpers = ['scratchQuery(', 'scratchAttempt(', 'query('];
-    for (const [name, source] of sources()) {
-      for (const match of source.matchAll(new RegExp(WRITES, 'gi'))) {
-        // Which helper is carrying this statement. A statement written across
-        // several lines reaches its call on an earlier line, so what is read is
-        // the nearest call before it rather than the line it sits on.
-        const before = source.slice(0, match.index);
-        const nearest = helpers
-          .map((helper) => [helper, before.lastIndexOf(helper)] as const)
-          .filter(([, at]) => at !== -1)
-          .sort((left, right) => right[1] - left[1])[0];
-        // No call before it at all is prose: a comment, or a sentence in a
-        // message about what may not be done.
-        if (!nearest) continue;
-        if (nearest[0] !== 'query(') continue;
-        const line = source.slice(0, match.index).split('\n').length;
-        offenders.push(`${name}:${line}  ${match[0]}`);
-      }
+    for (const [name, source] of specs()) {
+      source.split('\n').forEach((line, index) => {
+        if (line.trim().startsWith('*') || line.trim().startsWith('//')) return;
+        if (reaches.test(line)) offenders.push(`${name}:${index + 1}  ${line.trim()}`);
+      });
     }
-    expect(offenders, 'a write statement in the e2e suite that is not aimed at the scratch database').toEqual([]);
+    expect(offenders, 'a spec reaching past tests/e2e/host.ts for a database or a container').toEqual([]);
   });
 
   it('keeps the destructive helper pointed at the scratch database by name', () => {
-    const host = readFileSync(join(e2e, 'host.ts'), 'utf8');
     expect(host).toContain('export function resetScratchProvenance()');
     expect(host).not.toContain('export function resetProvenance(');
     const reset = host.slice(host.indexOf('export function resetScratchProvenance()'));
     expect(reset).toContain('scratchQuery(');
     expect(reset).toContain('SCRATCH_CONTAINER');
+    expect([...host.matchAll(/-d vernier_scratch/g)].length).toBeGreaterThan(0);
   });
 
-  it('names the scratch database in the only place a connection string is built for it', () => {
-    const host = readFileSync(join(e2e, 'host.ts'), 'utf8');
-    const scratchReads = [...host.matchAll(/-d vernier_scratch/g)];
-    expect(scratchReads.length).toBeGreaterThan(0);
+  it('grants that role no way to edit or remove anything, anywhere', () => {
+    // Read off the script that writes the grants. What the database actually
+    // holds is asserted in tests/e2e/suite-privilege.spec.ts, which asks it.
+    const grants = [...roleScript.matchAll(/^grant (\w+)(?: on all tables in schema public| on ([\w, ]+)) to/gim)].map(
+      (match) => [match[1].toLowerCase(), (match[2] ?? 'all tables').trim()] as const,
+    );
+    expect(grants.length).toBeGreaterThan(0);
+    for (const [privilege, on] of grants) {
+      expect(
+        ['select', 'insert', 'usage', 'connect'],
+        `${privilege} on ${on} is more than this role may hold`,
+      ).toContain(privilege);
+      if (privilege === 'insert') {
+        expect(['recovery_grant', 'auth_attempt'], `an INSERT granted on ${on}`).toContain(on);
+      }
+    }
+    expect(roleScript).toMatch(/revoke all on all tables in schema public from/i);
+    expect(roleScript).not.toMatch(/^grant (update|delete|truncate|all)/im);
+    // The one function it may execute, and the prefix that bounds it.
+    expect(roleScript).toContain('grant execute on function suite_forget_passkey(text)');
+    expect(roleScript).toContain("not like '${CREDENTIAL_MARKER}%'");
+    expect(roleScript).toContain('CREDENTIAL_MARKER=vernierSuite');
   });
 });

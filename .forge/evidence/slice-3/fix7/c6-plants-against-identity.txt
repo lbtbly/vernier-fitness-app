@@ -1,0 +1,113 @@
+The three residuals the sixth verification proved live, plus two neighbours,
+run again against the identity check. Each plant is applied to the shipped
+component, the image is rebuilt, the stack is replaced, and the check is run.
+Recorded 2026-08-22T09:52:38Z.
+
+### plant a, applied to src/components/QuickLog.tsx
+diff --git a/src/components/QuickLog.tsx b/src/components/QuickLog.tsx
+index 7ffd30e..5f75633 100644
+--- a/src/components/QuickLog.tsx
++++ b/src/components/QuickLog.tsx
+@@ -201,5 +201,5 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
+       // markup a thing a checker can identify instead of a claim it has to
+       // believe.
+-      setLoad({ state: 'error', caught: error, authored: 'platform' });
++      setLoad({ state: 'error', caught: ['L', 'oad', ' fai', 'led'].join(''), authored: 'platform' });
+     }
+   }, [timeZone]);
+
+### npm run strings:rendered
+  not walked  a screen behind a registered passkey: 0 on this machine, so a string that renders only there is invisible to both checks
+  not walked  a screen behind an open import question: 0 on this machine, so a string that renders only there is invisible to both checks
+
+rendered strings: 1 fragment(s) with no key, which C6 does not allow:
+  / quick log  [the fetch never reached the machine]  span
+    read: "Load failed"
+    unaccounted: "Load failed"
+    why: marked platform, but the node carries no object this browser rejected a fetch with: either nothing was caught here, or what it is printing was made in the product
+### exit code: 1
+### plant a2, applied to src/components/QuickLog.tsx
+diff --git a/src/components/QuickLog.tsx b/src/components/QuickLog.tsx
+index 7ffd30e..0c0f2c8 100644
+--- a/src/components/QuickLog.tsx
++++ b/src/components/QuickLog.tsx
+@@ -201,5 +201,5 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
+       // markup a thing a checker can identify instead of a claim it has to
+       // believe.
+-      setLoad({ state: 'error', caught: error, authored: 'platform' });
++      setLoad({ state: 'error', caught: new Error(['L', 'oad', ' fai', 'led'].join('')), authored: 'platform' });
+     }
+   }, [timeZone]);
+
+### npm run strings:rendered
+  not walked  a screen behind a registered passkey: 0 on this machine, so a string that renders only there is invisible to both checks
+  not walked  a screen behind an open import question: 0 on this machine, so a string that renders only there is invisible to both checks
+
+rendered strings: 1 fragment(s) with no key, which C6 does not allow:
+  / quick log  [the fetch never reached the machine]  span
+    read: "Load failed"
+    unaccounted: "Load failed"
+    why: marked platform, but the node carries no object this browser rejected a fetch with: either nothing was caught here, or what it is printing was made in the product
+### exit code: 1
+### plant b, applied to src/components/QuickLog.tsx
+diff --git a/src/components/QuickLog.tsx b/src/components/QuickLog.tsx
+index 7ffd30e..e61e14e 100644
+--- a/src/components/QuickLog.tsx
++++ b/src/components/QuickLog.tsx
+@@ -59,4 +59,6 @@ const RATING_FIELDS = [
+ const LOG_ENDPOINT = '/api/log';
+ 
++let plantedLastCaught: unknown = null;
++
+ const SCALE = [1, 2, 3, 4, 5];
+ const WAIST_STEP = 0.5;
+@@ -201,4 +203,5 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
+       // markup a thing a checker can identify instead of a claim it has to
+       // believe.
++      plantedLastCaught = error;
+       setLoad({ state: 'error', caught: error, authored: 'platform' });
+     }
+@@ -323,4 +326,9 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
+           >
+             <span className="lbl">{strings.todayLog.justLogged}</span>
++            {plantedLastCaught ? (
++              <span data-authored="platform" ref={carryTheCaughtObject(plantedLastCaught)}>
++                {messageOf(plantedLastCaught)}
++              </span>
++            ) : null}
+             {justLogged.values.map((entry) => (
+               <div className="row" key={entry.id}>
+
+### npm run strings:rendered
+  /  [a write queued on this phone]  span
+    read: "Load failed"
+    unaccounted: "Load failed"
+    why: marked platform, and the object it carries is a real rejection of /api/log from before this state was opened, so the browser wrote nothing here
+  /  [the queued write undone]  span
+    read: "Load failed"
+    unaccounted: "Load failed"
+    why: marked platform, and the object it carries is a real rejection of /api/log from before this state was opened, so the browser wrote nothing here
+### exit code: 1
+### plant d, applied to src/components/QuickLog.tsx
+diff --git a/src/components/QuickLog.tsx b/src/components/QuickLog.tsx
+index 7ffd30e..69695c1 100644
+--- a/src/components/QuickLog.tsx
++++ b/src/components/QuickLog.tsx
+@@ -479,5 +479,5 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
+                     {load.authored === 'platform' ? (
+                       <span data-authored="platform" ref={carryTheCaughtObject(load.caught)}>
+-                        {messageOf(load.caught)}
++                        Vernier could not reach the Mac mini just then.
+                       </span>
+                     ) : (
+
+### npm run strings:rendered
+  not walked  a screen behind a registered passkey: 0 on this machine, so a string that renders only there is invisible to both checks
+  not walked  a screen behind an open import question: 0 on this machine, so a string that renders only there is invisible to both checks
+
+rendered strings: 1 fragment(s) with no key, which C6 does not allow:
+  / quick log  [the fetch never reached the machine]  span
+    read: "Vernier could not reach the Mac mini just then."
+    unaccounted: "could not reach the Mac mini just then."
+    why: marked platform and carrying a real rejection of /api/log, but the fragment is not that object's message, which reads "Load failed"
+### exit code: 1

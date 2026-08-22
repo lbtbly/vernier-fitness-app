@@ -1,0 +1,47 @@
+The suite's reach into the owner's database, after the grant. Recorded 2026-08-22T09:55:54Z.
+
+### scripts/suite-role.sh, what the role holds
+suite-role: vernier_suite is current on the owner's database.
+  role vernier_suite: superuser false, createdb false, createrole false, bypassrls false
+  grant app_meta SELECT
+  grant auth_attempt INSERT,SELECT
+  grant device_observation SELECT
+  grant idempotency_key SELECT
+  grant import_question SELECT
+  grant integration_credential SELECT
+  grant measurement SELECT
+  grant owner SELECT
+  grant recovery_grant INSERT,SELECT
+  grant request_origin SELECT
+  grant session SELECT
+  grant source_record SELECT
+  grant webauthn_challenge SELECT
+  grant webauthn_credential SELECT
+  grant write_request SELECT
+  execute suite_forget_passkey(credential text)
+
+### the four writes the verifier tried, as the role every path now uses
+  truncate measurement, source_record cascade
+    -> ERROR:  permission denied for table measurement
+  delete from measurement
+    -> ERROR:  permission denied for table measurement
+  update owner set display_name = 1
+    -> ERROR:  permission denied for table owner
+  delete from webauthn_credential
+    -> ERROR:  permission denied for table webauthn_credential
+
+### scripts/recovery.sh under the same role: the reads work, the writes are refused
+  status  -> owner rows: 1
+  link    -> recovery: one use, valid for 1 minutes. Open it on the device you want signed in.
+  unlock  -> recovery: the lockout window is clear. 0 failure(s) inside it are now ignored and still on the record.
+  password -> error: permission denied for table owner
+  forget-passkey -> error: permission denied for table webauthn_credential
+
+### and the owner's own recovery, unchanged: no role, full connection
+  status  -> owner rows: 1
+
+### the owner's backup password was last set at, before and after a full suite run
+  password: argon2id m=19456 t=2 p=1 tag=32 set: 2026-08-22T09:01:45.821Z
+
+### the standing proof row
+f636c7bf-aee7-4127-b3b1-26b178ab378e|waist|99.0|2026-08-22

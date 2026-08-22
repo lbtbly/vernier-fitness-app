@@ -1,0 +1,26 @@
+The verifier's suite plant: a spec that opens its own connection. Recorded 2026-08-22T09:56:09Z.
+
+### the plant, written into tests/e2e/zzz-plant.spec.ts
+import { execFileSync } from 'node:child_process';
+import { test } from '@playwright/test';
+
+test('takes the owner tables', () => {
+  execFileSync('docker', [
+    'compose', 'exec', '-T', 'db', 'sh', '-c',
+    'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "truncate measurement, source_record cascade"',
+  ], { encoding: 'utf8' });
+});
+
+### npm run test:unit
+ ✓ tests/unit/suite-safety.test.ts > the suite against the owner's installation > reaches the owner's database only as the role that cannot write it 1ms
+ ✓ tests/unit/suite-safety.test.ts > the suite against the owner's installation > hands scripts/recovery.sh the same role, in the one place it is called 0ms
+ × tests/unit/suite-safety.test.ts > the suite against the owner's installation > lets no spec open a connection, a container or the recovery script of its own 9ms
+ ✓ tests/unit/suite-safety.test.ts > the suite against the owner's installation > keeps the destructive helper pointed at the scratch database by name 0ms
+ ✓ tests/unit/suite-safety.test.ts > the suite against the owner's installation > grants that role no way to edit or remove anything, anywhere 1ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
++   "zzz-plant.spec.ts:5  execFileSync('docker', [",
++   "zzz-plant.spec.ts:7  'psql -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\" -c \"truncate measurement, source_record cascade\"',",
+      Tests  1 failed | 4 passed (5)
+
+### and with the plant removed
+      Tests  5 passed (5)

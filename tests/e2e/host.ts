@@ -10,24 +10,46 @@ import { fileURLToPath } from 'node:url';
  * the machine itself. That keeps the suite repeatable, keeps it from changing a
  * password the owner may have set, and exercises F18 on every run.
  *
- * AND THE OWNER'S DATABASE IS READ-ONLY FROM HERE. This file used to hold a
- * helper that truncated the owner's live tables between tests, guarded by a
- * count of rows that predated the run. The guard had a hole with the shape of
+ * AND THE OWNER'S DATABASE REFUSES THIS SUITE BY PRIVILEGE. This file used to
+ * hold a helper that truncated the owner's live tables between tests, guarded by
+ * a count of rows that predated the run. The guard had a hole with the shape of
  * the product in it: a waist reading logged through the shipped quick log AFTER
  * the run's stamp is not older than the run, the count stays at 0, and the
  * TRUNCATE takes it. That was watched happening, once, with a real row. Slice 5
  * imports the owner's Withings history next, and an import landing mid-suite is
  * exactly that row.
  *
- * So there is no guard any more, because there is nothing left to guard: the
- * destructive helper truncates the SCRATCH database and restarts the SCRATCH
- * container, `query` runs every statement it is given inside a read-only
- * transaction on the live install, and Postgres refuses the rest. A spec that
- * needs the owner's installation reads it. A spec that needs to write goes to
- * the scratch instance, which holds nothing anybody would miss.
+ * The guard became a read-only connection, and that was still one path among
+ * several: `scripts/recovery.sh` drove a second connection into the same
+ * database with writes on, and two specs used it to UPDATE the owner row and
+ * DELETE a credential. So the refusal is a grant now. `scripts/suite-role.sh`
+ * creates `vernier_suite`, which holds SELECT, an INSERT on the one-time sign-in
+ * grants, an INSERT on the append-only auth log, and nothing else, and every
+ * path in this file runs as it: the psql helper connects as it, and
+ * `scripts/recovery.sh` is handed it in RECOVERY_ROLE. A path nobody modelled
+ * inherits the refusal rather than escaping it. A spec that needs to write goes
+ * to the scratch instance, which holds nothing anybody would miss.
  */
 
 export const projectRoot = fileURLToPath(new URL('../..', import.meta.url));
+
+/**
+ * The role every path in this suite reaches the owner's database through.
+ *
+ * Not a convention: `scripts/suite-role.sh` writes the grants and
+ * tests/e2e/suite-privilege.spec.ts reads back, off the running database, what
+ * this role is refused. The name is here once so a new helper cannot connect as
+ * anything else by accident.
+ */
+export const SUITE_ROLE = 'vernier_suite';
+
+/** The grants, refreshed before the first spec. Idempotent, and it prints them. */
+export function ensureSuiteRole(): string {
+  return execFileSync('bash', ['scripts/suite-role.sh'], {
+    cwd: projectRoot,
+    encoding: 'utf8',
+  }).trim();
+}
 
 export function baseUrl(): string {
   return (process.env.APP_URL ?? 'https://lamberts-mac-mini.tailda76d6.ts.net').replace(/\/+$/, '');
@@ -36,12 +58,14 @@ export function baseUrl(): string {
 /**
  * A read of the owner's database, and only a read.
  *
- * `default_transaction_read_only` is set on the connection through PGOPTIONS,
- * so every statement this function carries runs in a read-only transaction and
- * Postgres itself refuses a TRUNCATE, a DELETE, an UPDATE or an INSERT with
- * "cannot execute ... in a read-only transaction". Not a naming convention, not
- * a review rule, not a count of rows: the database says no. A test that needs
- * to write has the scratch instance for it.
+ * Two refusals, and the second is the one that holds. `default_transaction_read_only`
+ * is set through PGOPTIONS, so every statement runs in a read-only transaction.
+ * And the connection is opened as `vernier_suite`, which has no INSERT, UPDATE,
+ * DELETE or TRUNCATE grant on any table this reads, so a statement that got past
+ * the transaction setting still meets "permission denied for table measurement".
+ * Not a naming convention, not a review rule, not a count of rows: the database
+ * says no, and it says no to a helper written next year the same way it says no
+ * to this one. A test that needs to write has the scratch instance for it.
  */
 export function query(statement: string): string {
   // One line, always. A statement written across several lines in a test would
@@ -56,17 +80,113 @@ export function query(statement: string): string {
       'db',
       'sh',
       '-c',
-      `PGOPTIONS='-c default_transaction_read_only=on' psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -At -c ${JSON.stringify(oneLine)}`,
+      `PGOPTIONS='-c default_transaction_read_only=on' psql -U ${SUITE_ROLE} -d "$POSTGRES_DB" -At -c ${JSON.stringify(oneLine)}`,
     ],
     { cwd: projectRoot, encoding: 'utf8' },
   ).trim();
 }
 
+/**
+ * The owner's own recovery script, run against the owner's install with the
+ * suite's grants and no others.
+ *
+ * RECOVERY_ROLE is what makes this safe to call at all. Without it the script
+ * connects as the database owner, which is how `password` came to overwrite the
+ * owner's backup password on every run and how `forget-passkey` had DELETE on
+ * the table holding his real credential. With it, `status`, `passkeys`, `link`
+ * and `unlock` work and the two destructive commands are refused by Postgres
+ * with "permission denied for table owner" and "for table webauthn_credential".
+ * The specs that need those two run against the scratch instance.
+ */
 export function recovery(...args: string[]): string {
   return execFileSync('bash', ['scripts/recovery.sh', ...args], {
     cwd: projectRoot,
     encoding: 'utf8',
+    env: { ...process.env, RECOVERY_ROLE: SUITE_ROLE },
   }).trim();
+}
+
+/**
+ * The same script against the scratch instance, with its full connection.
+ *
+ * The scratch database holds an owner this suite created and rows nobody would
+ * miss, so the commands that write are run there rather than aimed at the
+ * owner's install with a bigger grant.
+ */
+export function scratchRecovery(args: string[], input?: string): string {
+  return execFileSync('bash', ['scripts/recovery.sh', ...args], {
+    cwd: projectRoot,
+    encoding: 'utf8',
+    input,
+    env: { ...process.env, RECOVERY_CONTAINER: SCRATCH_CONTAINER },
+  }).trim();
+}
+
+/**
+ * The one write this suite has on the owner's credential table, and it is not a
+ * grant on the table.
+ *
+ * `suite_forget_passkey` runs as its owner and refuses any identifier that does
+ * not carry the prefix the suite's software authenticator mints, so the passkey
+ * round trip can remove the credential it registered and cannot touch the
+ * owner's. The function is created by scripts/suite-role.sh beside the grants,
+ * where the rest of this role's reach is written down.
+ */
+export function forgetSuitePasskey(credentialId: string): string {
+  return execFileSync(
+    'docker',
+    [
+      'compose',
+      'exec',
+      '-T',
+      'db',
+      'sh',
+      '-c',
+      `psql -U ${SUITE_ROLE} -d "$POSTGRES_DB" -At -c ${JSON.stringify(
+        `select suite_forget_passkey('${credentialId.replace(/'/g, "''")}')`,
+      )} 2>&1`,
+    ],
+    { cwd: projectRoot, encoding: 'utf8' },
+  ).trim();
+}
+
+/**
+ * A statement run as the suite's role with its refusal kept rather than thrown.
+ *
+ * tests/e2e/suite-privilege.spec.ts hands this the writes the suite must not be
+ * able to make and reads back what Postgres said. Both streams are merged and
+ * the exit code swallowed, because the refusal is the result.
+ */
+export function suiteAttempt(statement: string): string {
+  const oneLine = statement.replace(/\s+/g, ' ').trim();
+  return execFileSync(
+    'docker',
+    [
+      'compose',
+      'exec',
+      '-T',
+      'db',
+      'sh',
+      '-c',
+      `psql -U ${SUITE_ROLE} -d "$POSTGRES_DB" -At -c ${JSON.stringify(oneLine)} 2>&1 || true`,
+    ],
+    { cwd: projectRoot, encoding: 'utf8' },
+  ).trim();
+}
+
+/**
+ * What the app container has written to its log, for the specs that grade what
+ * a refusal did NOT print.
+ *
+ * It lives here rather than in the spec that wants it for the same reason every
+ * other command does: one file in this suite reaches for docker, and a spec
+ * that spawns its own is a failing unit test before anyone reads the arguments.
+ */
+export function appLogs(lines = 400): string {
+  return execFileSync('docker', ['compose', 'logs', 'app', '--tail', String(lines)], {
+    cwd: projectRoot,
+    encoding: 'utf8',
+  });
 }
 
 /** One use, ten minutes, minted on this machine. */
@@ -88,15 +208,7 @@ export const SCRATCH_CONTAINER = 'vernier-scratch';
  * the link that comes back is for the origin the spec is driving.
  */
 export function scratchSignInLink(): string {
-  return execFileSync('bash', ['scripts/recovery.sh', 'link', '10'], {
-    cwd: projectRoot,
-    encoding: 'utf8',
-    env: { ...process.env, RECOVERY_CONTAINER: SCRATCH_CONTAINER },
-  })
-    .trim()
-    .split('\n')
-    .at(-1)!
-    .trim();
+  return scratchRecovery(['link', '10']).split('\n').at(-1)!.trim();
 }
 
 export function testStack(...args: string[]): string {

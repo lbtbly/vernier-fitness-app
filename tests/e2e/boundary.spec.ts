@@ -1,7 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import { expect, test } from '@playwright/test';
 import { apiClient } from './api-client';
-import { baseUrl, mintSignInLink, projectRoot, query } from './host';
+import { appLogs, baseUrl, mintSignInLink, projectRoot, query } from './host';
 
 /**
  * The boundary, which is the point of this slice: nothing reaches the app
@@ -192,10 +192,6 @@ test.describe('the credential boundary', () => {
     expect(query('select count(*) from integration_credential')).toBe(before);
 
     // And nothing the app logged along the way holds it either.
-    const logs = execFileSync('docker', ['compose', 'logs', 'app', '--tail', '400'], {
-      cwd: projectRoot,
-      encoding: 'utf8',
-    });
-    expect(logs).not.toContain(secret);
+    expect(appLogs()).not.toContain(secret);
   });
 });

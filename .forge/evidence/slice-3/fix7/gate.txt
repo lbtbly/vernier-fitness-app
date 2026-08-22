@@ -1,0 +1,30 @@
+The gate, unthrottled, after the three fixes. Recorded 2026-08-22T09:56:44Z.
+
+### FORGE_CHECKS_FULL=1 bash scripts/checks.sh
+### exit code: 0
+
+### npm run strings
+  outside this walk  public/sw.js, whose one answer to a person is generated from the catalogue by scripts/build-sw.mjs
+  outside this walk  public/icons and public/favicon.ico, which carry no words
+  outside this walk  drizzle/*.sql, and the four config files at the root
+  outside this walk  scripts/ and tests/, which speak to an operator and never to a screen
+  outside this walk  docs/ and SETUP.html, documents rather than product surfaces
+strings: no user-facing string is written inline.
+
+### npm run sw:check
+build-sw: public/sw.js carries the catalogue's offline copy, 4 key(s), and is current.
+  45 string(s) read across the whole file; every one outside the block is a declared machine token or markup with no text of its own.
+
+### npm run strings:rendered (head and the platform line)
+rendered strings: the population this walk covers
+  7 stored values walked, floor 1
+  7 source records walked, floor 1
+  1 ratings on the one to five scale, floor 1
+  6 sources with a stored value behind them, floor 6
+  source kinds behind a value: demo_record, derivation, lab_page, manual_entry, shortcut_payload, sync_batch
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+rendered strings: 52 surface states walked, 1802 fragments read against 433 catalogue keys, 4 stored data values the owner or a device wrote, 7 value shapes and 1 distinct message(s) harvested from WebKit.
+  74 file(s) of the shipped tree read for the browser's own words: "Load failed"
+  platform text  / quick log / the fetch never reached the machine  "Load failed"  provenance: the message of the object WebKit rejected /api/log with, identified in the page and rejected 282 ms after this state opened
+  walked  /sign-in / passkey first

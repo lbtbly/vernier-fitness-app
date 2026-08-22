@@ -22,6 +22,20 @@ import { webcrypto } from 'node:crypto';
  * The counter is the case that breaks a naive replay check on the second use.
  */
 
+/**
+ * The mark on every credential this authenticator mints, and the whole of what
+ * lets the suite clean up after itself.
+ *
+ * The suite has no DELETE on `webauthn_credential`: that is where the owner's
+ * real passkey lives. It has EXECUTE on one function that removes a credential
+ * whose identifier opens with these twelve characters and refuses everything
+ * else. A WebAuthn credential identifier is base64url over random bytes, so an
+ * authenticator that is not this one carries this prefix with probability
+ * 2^-72, and the owner's iPhone is outside the function's reach by arithmetic
+ * rather than by care.
+ */
+export const SUITE_CREDENTIAL_MARKER = 'vernierSuite';
+
 export type AuthenticatorSeed = {
   privateKeyJwk: JsonWebKey;
   publicKeyJwk: JsonWebKey;
@@ -34,7 +48,15 @@ export async function makeAuthenticatorSeed(): Promise<AuthenticatorSeed> {
     true,
     ['sign', 'verify'],
   );
-  const credentialId = Buffer.from(webcrypto.getRandomValues(new Uint8Array(32))).toString('base64url');
+  // Nine bytes that spell the marker in base64url, then twenty-one random ones.
+  // Thirty bytes is exactly forty base64url characters with no padding, so the
+  // string the browser sends and the string the server stores are the same one
+  // and the prefix survives every re-encoding on the way.
+  const marked = Buffer.concat([
+    Buffer.from(SUITE_CREDENTIAL_MARKER, 'base64url'),
+    Buffer.from(webcrypto.getRandomValues(new Uint8Array(21))),
+  ]);
+  const credentialId = marked.toString('base64url');
   return {
     privateKeyJwk: await webcrypto.subtle.exportKey('jwk', pair.privateKey),
     publicKeyJwk: await webcrypto.subtle.exportKey('jwk', pair.publicKey),

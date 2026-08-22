@@ -821,22 +821,42 @@ test.describe('the quick log against screen 03', () => {
     resetScratchProvenance();
     await signIn(page);
 
-    // Loaded first, because every other state is measured against its geometry.
+    // Stale first, because that is the state the seed leaves the instance in:
+    // the waist reading it writes is three days old, so the sheet says so with a
+    // --warn source chip naming the age, exactly as screen 00 state 6.
+    //
+    // AND LOADED IS NOT THE SAME SCREEN. It used to be captured here, one line
+    // above this assertion, off the same open sheet: two files, byte identical,
+    // and a comparison between them proved nothing at all. So the reading is
+    // made fresh below, through the sheet, and the loaded capture is taken after
+    // the product has stopped calling it stale.
     await page.goto('/');
     await page.getByRole('button', { name: 'Quick log', exact: true }).click();
     await expect(page.getByRole('button', { name: 'Energy, 4 of 5' })).toBeVisible();
-    const loadedBox = await page.locator('.sheet').boundingBox();
-    await settle(page);
-    await page.screenshot({ path: `${CAPTURES}c5-state-loaded.png` });
-
-    // Stale: the seeded waist reading is three days old, so the sheet says so
-    // with a --warn source chip naming the age, exactly as screen 00 state 6.
     await expect(page.locator('[data-state="stale"]')).toBeVisible();
     const staleChip = await page.locator('[data-state="stale"] .src').textContent();
     console.log(`stale chip reads: ${staleChip}`);
     expect(staleChip).toMatch(/\d+ days old$/);
     await settle(page);
     await page.screenshot({ path: `${CAPTURES}c5-state-stale.png` });
+
+    // Loaded: a waist reading taken today, logged through the sheet that is
+    // already open, so the next open finds a reading with no age on it.
+    await page.getByRole('button', { name: 'Up half a centimetre', exact: true }).click();
+    await page.getByRole('button', { name: 'Save', exact: true }).click();
+    await expect(page.locator('[data-just-logged]')).toBeVisible();
+    await page.getByRole('button', { name: 'Quick log', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Energy, 4 of 5' })).toBeVisible();
+    await expect(page.locator('[data-state="stale"]')).toHaveCount(0);
+    // No age chip at all, which is the difference between this capture and the
+    // one above: the sheet only names an age when there is one worth naming.
+    console.log(
+      `loaded sheet reads: ${(await page.locator('.sheet .metric').first().textContent())?.trim()}, ` +
+        `${await page.locator('.sheet .src').count()} age chip(s)`,
+    );
+    const loadedBox = await page.locator('.sheet').boundingBox();
+    await settle(page);
+    await page.screenshot({ path: `${CAPTURES}c5-state-loaded.png` });
     await page.locator('.sheet').getByRole('button', { name: 'Close the quick log' }).click();
 
     // Loading: the snapshot held in flight, which is the state a slow tailnet
