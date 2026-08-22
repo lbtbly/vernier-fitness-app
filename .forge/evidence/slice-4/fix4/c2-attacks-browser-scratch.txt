@@ -1,0 +1,40 @@
+bootstrap: 201
+
+=== a driven WebKit whose context sets an iPhone user agent, and a made-up session cookie ===
+device_observation before: none
+a driven WebKit with an iPhone user agent, no session
+  navigator.webdriver: false
+  display-mode standalone: true
+  user agent: iPhone
+  launch reports raised: 0
+  device_observation: none
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+the same browser holding the owner session
+  navigator.webdriver: false
+  display-mode standalone: true
+  user agent: iPhone
+  launch reports raised: 0
+  device_observation: none
+a made-up session cookie, which is enough to pass the door
+  landed on: /sign-in
+  a launch ticket in the document: no
+  launch reports raised: 0
+  device_observation: none
+
+=== the residual: a driven Chrome that lies about everything AND holds the owner session ===
+device_observation before: none
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+a driven Chrome, iPhone user agent, webdriver overwritten, standalone claimed, session held
+  landed on: /
+  navigator.webdriver: false
+  display-mode standalone: true
+  launch reports raised: 1
+  the server answered: 200 {"recorded":true,"signals":{"standalone_seen":true,"wake_lock_available":true},"reportedFrom":null}
+device_observation after: standalone_seen=true, wake_lock_available=true
+
+Read the WebKit walk with its one limitation in view. The scratch instance
+answers on plain loopback http and the session cookie is Secure, so WebKit
+refuses to carry it and that walk never gets past the gate, which is the same
+reason playwright.config.ts runs the scratch project in Chrome. Its first line
+is the honest result for a caller with no session; its second line proves
+nothing about a caller with one, and the Chrome walk below is that test.

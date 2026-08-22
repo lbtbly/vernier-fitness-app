@@ -1,0 +1,4 @@
+=== .forge/PREFLIGHT.md line 142, exactly as written, with no session ===
+exit 0
+=== what the read side answered that shell ===
+{"standaloneSeen":true,"wakeLockAvailable":true,"passkeyRegistered":false,"pushSubscription":false,"firstObservedAt":{"standaloneSeen":"2026-08-22T14:13:55.795Z","wakeLockAvailable":"2026-08-22T14:13:55.804Z","passkeyRegistered":null,"pushSubscription":null},"lastReportedAt":{"standaloneSeen":"2026-08-22T18:28:20.543Z","wakeLockAvailable":"2026-08-22T14:13:55.804Z","passkeyRegistered":null,"pushSubscription":null},"reportedFrom":{"standaloneSeen":null,"wakeLockAvailable":null,"passkeyRegistered":null,"pushSubscription":null},"tailscaleProxySeen":true,"recentPeers":[{"address":"100.65.127.62","viaTailscale":true,"lastSeenAt":"2026-08-22T18:57:49.233Z"}]}

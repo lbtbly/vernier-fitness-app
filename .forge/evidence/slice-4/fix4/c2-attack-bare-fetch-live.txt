@@ -1,0 +1,7 @@
+the owner's install before: {"standaloneSeen": true, "wakeLockAvailable": true, "firstObservedAt": "2026-08-22T14:13:55.795Z", "lastReportedAt": {"standaloneSeen": "2026-08-22T18:28:20.543Z", "wakeLockAvailable": "2026-08-22T14:13:55.804Z", "passkeyRegistered": null, "pushSubscription": null}}
+anti-forgery pair minted by one unauthenticated GET of /sign-in: yes
+POST /api/diagnostics/launch, iPhone user agent, no session: HTTP 401 {"error":"Sign in first.","detail":"This endpoint needs the owner session, and the cookie on this request names none."}
+the same with a ticket it made up: HTTP 401 {"error":"Sign in first.","detail":"This endpoint needs the owner session, and the cookie on this request names none."}
+the same with a Mac Safari user agent: HTTP 401 {"error":"Sign in first.","detail":"This endpoint needs the owner session, and the cookie on this request names none."}
+the same claiming nothing, which used to be recorded: HTTP 401 {"error":"Sign in first.","detail":"This endpoint needs the owner session, and the cookie on this request names none."}
+the owner's install after:  {"standaloneSeen": true, "wakeLockAvailable": true, "firstObservedAt": "2026-08-22T14:13:55.795Z", "lastReportedAt": {"standaloneSeen": "2026-08-22T18:28:20.543Z", "wakeLockAvailable": "2026-08-22T14:13:55.804Z", "passkeyRegistered": null, "pushSubscription": null}}

@@ -1,0 +1,20 @@
+bootstrap: 201
+
+=== the exact attack from .forge/evidence/slice-4/verify4/c2-limit-no-browser-scratch.txt ===
+scratch device_observation before: "none"
+anti-forgery pair minted by one unauthenticated GET of /sign-in: yes
+POST /api/diagnostics/launch, iPhone user agent, no session: HTTP 401 {"error":"Sign in first.","detail":"This endpoint needs the owner session, and the cookie on this request names none."}
+the same with a ticket it made up: HTTP 401 {"error":"Sign in first.","detail":"This endpoint needs the owner session, and the cookie on this request names none."}
+the same with a Mac Safari user agent: HTTP 401 {"error":"Sign in first.","detail":"This endpoint needs the owner session, and the cookie on this request names none."}
+the same with no user agent at all: HTTP 401 {"error":"Sign in first.","detail":"This endpoint needs the owner session, and the cookie on this request names none."}
+scratch device_observation after: "none"
+
+=== the same caller once it holds the owner session ===
+scratch device_observation before: "none"
+anti-forgery pair minted by one unauthenticated GET of /sign-in: yes
+session held: yes
+a session, an iPhone user agent, and no ticket: HTTP 400 {"error":"That is not a launch report.","detail":"This endpoint records two things the browser reports at launch: whether Vernier opened from the Home Screen, and whether this device can keep the screen awake. A report carries those two answers, whether the browser is being driven, and the ticket the page it came from was served with. Nothing else is stored here."}
+a session and a ticket it made up: HTTP 200 {"recorded":false,"reason":"That launch report did not come from a launch of Vernier.","detail":"Every page Vernier renders for a signed-in session carries a ticket, and the launch report sends it back. This report carried one this server did not mint, or one minted for another session, or one older than a quarter of an hour. Nothing was stored."}
+launch ticket scraped off the served page: yes
+a session and the ticket off its own page: HTTP 200 {"recorded":true,"signals":{"standalone_seen":true,"wake_lock_available":true},"reportedFrom":null}
+scratch device_observation after: "standalone_seen=true, wake_lock_available=true"

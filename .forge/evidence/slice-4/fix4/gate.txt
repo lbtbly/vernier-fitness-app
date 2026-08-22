@@ -1,0 +1,19 @@
+=== FORGE_CHECKS_FULL=1 scripts/checks.sh, the four-check gate ===
+2026-08-22T18:59:23Z
+--- typecheck ---
+tsc --noEmit: clean
+--- strings ---
+  outside this walk  scripts/ and tests/, which speak to an operator and never to a screen
+  outside this walk  docs/ and SETUP.html, documents rather than product surfaces
+strings: no user-facing string is written inline.
+--- sw:check ---
+build-sw: public/sw.js carries the catalogue's offline copy, 4 key(s), and is current.
+  45 string(s) read across the whole file; every one outside the block is a declared machine token or markup with no text of its own.
+--- strings:rendered ---
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+  not walked  a screen behind a registered passkey: 0 on this machine, so a string that renders only there is invisible to both checks
+  not walked  a screen behind an open import question: 0 on this machine, so a string that renders only there is invisible to both checks
+rendered strings: every fragment on every surface resolves to a key.
+--- the gate itself ---
+checks.sh exit: 0

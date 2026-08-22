@@ -1,0 +1,70 @@
+suite-role: vernier_suite is current on the owner's database.
+  role vernier_suite: superuser false, createdb false, createrole false, bypassrls false
+  grant app_meta SELECT
+  grant auth_attempt INSERT,SELECT
+  grant device_observation SELECT
+  grant goal SELECT
+  grant idempotency_key SELECT
+  grant import_question SELECT
+  grant integration_credential SELECT
+  grant measurement SELECT
+  grant owner SELECT
+  grant planned_session SELECT
+  grant recovery_grant INSERT,SELECT
+  grant request_origin SELECT
+  grant session SELECT
+  grant source_record SELECT
+  grant webauthn_challenge SELECT
+  grant webauthn_credential SELECT
+  grant write_request SELECT
+  execute suite_forget_passkey(credential text)
+setup: the owner's database holds 90 measurement, 38 source_record, 1 measurement not seeded. Nothing in this run may lower it.
+setup: its device signals read standalone_seen=true@2026-08-22 16:13:55.795+02/2026-08-22 20:28:20.543872+02/unattributed, wake_lock_available=true@2026-08-22 16:13:55.804+02/2026-08-22 16:13:55.804748+02/unattributed. Nothing in this run may write them.
+
+Running 9 tests using 1 worker
+
+signals before: none
+an iPhone user agent, no browser, no session: 401 {"error":"Sign in first.","detail":"This endpoint needs the owner session, and the cookie on this request names none."}
+the same with a ticket it made up: 401 {"error":"Sign in first.","detail":"This endpoint needs the owner session, and the cookie on this request names none."}
+the same with no user agent at all: 401 {"error":"Sign in first.","detail":"This endpoint needs the owner session, and the cookie on this request names none."}
+  ✓  1 [chrome-scratch] › tests/e2e/launch-report.spec.ts:113:3 › the launch report › refuses a bare fetch with no session, whatever it puts in a header (238ms)
+last_reported_at before: never
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+a session, a real ticket, and no anti-forgery header: 403 {"error":"Anti-forgery check failed.","detail":"This request carried no x-vernier-csrf header. Nothing was written."}
+a token that does not match: 403 {"error":"Anti-forgery check failed.","detail":"The anti-forgery token does not match the one issued to this browser. Nothing was written."}
+  ✓  2 [chrome-scratch] › tests/e2e/launch-report.spec.ts:144:3 › the launch report › refuses a post with no anti-forgery token and writes nothing (595ms)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+two booleans and nothing else: 400 {"error":"That is not a launch report.","detail":"This endpoint records two things the browser reports at launch: whether Vernier opened from the Home Screen, and whether this device can keep the screen awake. A report carries those two answers, whether the browser is being driven, and the ticket the page it came from was served with. Nothing else is stored here."}
+three booleans and no ticket: 400 {"error":"That is not a launch report.","detail":"This endpoint records two things the browser reports at launch: whether Vernier opened from the Home Screen, and whether this device can keep the screen awake. A report carries those two answers, whether the browser is being driven, and the ticket the page it came from was served with. Nothing else is stored here."}
+  ✓  3 [chrome-scratch] › tests/e2e/launch-report.spec.ts:173:3 › the launch report › refuses a report that is not the shape the shipped client sends (450ms)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+a ticket of the right shape that nobody minted: 200 {"recorded":false,"reason":"That launch report did not come from a launch of Vernier.","detail":"Every page Vernier renders for a signed-in session carries a ticket, and the launch report sends it back. This report carried one this server did not mint, or one minted for another session, or one older than a quarter of an hour. Nothing was stored."}
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+another session's ticket: 200 {"recorded":false,"reason":"That launch report did not come from a launch of Vernier.","detail":"Every page Vernier renders for a signed-in session carries a ticket, and the launch report sends it back. This report carried one this server did not mint, or one minted for another session, or one older than a quarter of an hour. Nothing was stored."}
+  ✓  4 [chrome-scratch] › tests/e2e/launch-report.spec.ts:201:3 › the launch report › refuses a ticket this server did not mint, and one minted for another session (549ms)
+signals before: none
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+the launch this suite's browser raised: 200 {"recorded":false,"reason":"A driven browser cannot report a launch.","detail":"This row is read back as evidence that Vernier opened from the Home Screen on the owner's phone, so it is only written by a browser a person is holding. Nothing was stored. Point the run at the scratch instance on 127.0.0.1:3101 instead."}
+navigator.webdriver in this browser: true
+  ✓  5 [chrome-scratch] › tests/e2e/launch-report.spec.ts:231:3 › the launch report › refuses this suite's own browser and leaves the signals where they were (856ms)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+a headless agent claiming it is not driven: 200 {"recorded":false,"reason":"A driven browser cannot report a launch.","detail":"This row is read back as evidence that Vernier opened from the Home Screen on the owner's phone, so it is only written by a browser a person is holding. Nothing was stored. Point the run at the scratch instance on 127.0.0.1:3101 instead."}
+  ✓  6 [chrome-scratch] › tests/e2e/launch-report.spec.ts:262:3 › the launch report › refuses a headless user agent even when the body claims otherwise (623ms)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+a Safari user agent claiming a Home Screen launch: 200 {"recorded":false,"reason":"A Home Screen launch cannot be reported from a desktop.","detail":"This row is read back as evidence that Vernier opened from the Home Screen icon on the owner's iPhone, and the browser reporting this launch says it is running on a desktop. Nothing was stored. A launch that reports no Home Screen is recorded as usual."}
+  ✓  7 [chrome-scratch] › tests/e2e/launch-report.spec.ts:288:3 › the launch report › refuses a Home Screen launch reported from a desktop, Safari user agent and all (445ms)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+navigator.webdriver in this browser: false
+the launch it raised: 200 {"recorded":false,"reason":"A Home Screen launch cannot be reported from a desktop.","detail":"This row is read back as evidence that Vernier opened from the Home Screen icon on the owner's iPhone, and the browser reporting this launch says it is running on a desktop. Nothing was stored. A launch that reports no Home Screen is recorded as usual."}
+  ✓  8 [chrome-scratch] › tests/e2e/launch-report.spec.ts:315:3 › the launch report › refuses a driven browser that has overwritten the flag it tells on itself with (758ms)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+an honest report: 200 {"recorded":true,"signals":{"standalone_seen":false},"reportedFrom":null}
+what the endpoint says it stored: {"standalone_seen":false}
+signals after: standalone_seen=false@unattributed
+  ✓  9 [chrome-scratch] › tests/e2e/launch-report.spec.ts:353:3 › the launch report › writes an honest report and says what the row reads afterwards (369ms)
+teardown: the owner's database holds 90 measurement, 38 source_record, 1 measurement not seeded.
+teardown: its device signals read standalone_seen=true@2026-08-22 16:13:55.795+02/2026-08-22 20:28:20.543872+02/unattributed, wake_lock_available=true@2026-08-22 16:13:55.804+02/2026-08-22 16:13:55.804748+02/unattributed.
+teardown: test-stack: stopped
+teardown: it held 90 measurement, 38 source_record, 1 measurement not seeded before the run, so nothing of the owner's was taken.
+
+  9 passed (9.5s)
