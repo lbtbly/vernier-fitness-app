@@ -41,11 +41,12 @@ export const dynamic = 'force-dynamic';
  * database whether that cookie names a live session rather than trusting the
  * door.
  *
- * A ticket. The root layout mints one into every document it renders for a live
- * session, keyed with MASTER_KEY over that session's id, and the report sends it
- * back. It cannot be computed off the machine and it cannot be lifted off
- * /sign-in, because a page rendered for no session carries none. See
- * src/lib/launch-ticket.ts for what that closes and what it does not.
+ * A ticket. The shell layout mints one into every screen it renders behind the
+ * gate, keyed with MASTER_KEY over the id of the session it has just read back,
+ * and the report sends it back here. It cannot be computed off the machine and
+ * it cannot be lifted off /sign-in, because the gate screen raises no report and
+ * carries no ticket. See src/lib/launch-ticket.ts for what that closes and what
+ * it does not.
  *
  * THE THREE WITNESSES BELOW ARE UNCHANGED AND ARE STILL NOT IDENTIFICATION. No
  * server-side witness tells a driven WebKit from Safari, and this route does not
@@ -58,9 +59,9 @@ export const dynamic = 'force-dynamic';
  * had just moved. Now a report that was believed is answered with the signals as
  * the rows read after the write, and a report that was not is answered with the
  * reason it was not. Both are 200, deliberately: the report is raised from the
- * root layout, so every page raises one, and a refusal status would put a failed
- * request and a console error on every screen the suite walks. C9 counts exactly
- * those.
+ * shell layout, so every screen behind the gate raises one, and a refusal status
+ * would put a failed request and a console error on every screen the suite
+ * walks. C9 counts exactly those.
  */
 export async function POST(request: Request) {
   const csrf = await csrfFailure(request);

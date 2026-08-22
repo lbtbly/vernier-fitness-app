@@ -21,11 +21,12 @@ import { CSRF_HEADER } from '@/lib/cookie-names';
  * with four lines of curl, no browser and no session, using a pair minted by
  * one unauthenticated GET of /sign-in.
  *
- * SO THE POST CARRIES A TICKET AS WELL, AND THIS COMPONENT ONLY EXISTS WHEN
- * THERE IS ONE. The layout mints it for the session the document was rendered
- * for and renders nothing here without one, so the sign-in screen raises no
- * report at all. A caller that never held a page of this app cannot produce the
- * value, and the route refuses the report without it.
+ * SO THE POST CARRIES A TICKET AS WELL, AND THIS COMPONENT ONLY RENDERS WHERE
+ * THERE IS ONE. It hangs off the shell layout, which has already read the
+ * session back from the database, and the ticket is minted for that session, so
+ * the sign-in screen and the offline document raise no report at all. A caller
+ * that never held a page of this app cannot produce the value, and the route
+ * refuses the report without it.
  *
  * The third boolean stays: whether something is driving this browser. The
  * platform answers that itself in `navigator.webdriver`, the server stores

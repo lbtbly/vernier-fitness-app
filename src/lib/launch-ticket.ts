@@ -22,14 +22,14 @@ import { readMasterKey } from '@/lib/master-key';
  * in the last fix and it is still true.
  *
  * SO THIS ONE ASKS A DIFFERENT QUESTION: WAS THIS PAGE SERVED. A ticket is
- * minted by the root layout, into the document, for the session that document
- * was rendered for, and it is a keyed hash of that session's id and the minute
- * it was issued. A caller cannot compute one: the key is MASTER_KEY, which
- * never leaves the container. A caller cannot guess one: it is 32 bytes of
- * SHA-256. A caller cannot lift one out of a public page, because the layout
- * mints a ticket only when the request already carries a live session cookie,
- * and /sign-in carries none. The pair the old attack minted with one
- * unauthenticated GET buys nothing here.
+ * minted by the shell layout, into the document, for the session that layout
+ * has just read back from the database, and it is a keyed hash of that
+ * session's id and the minute it was issued. A caller cannot compute one: the
+ * key is MASTER_KEY, which never leaves the container. A caller cannot guess
+ * one: it is 32 bytes of SHA-256. A caller cannot lift one off a public page,
+ * because only the screens behind the gate carry one, and /sign-in is not one
+ * of them. The pair the old attack minted with one unauthenticated GET of that
+ * screen buys nothing here.
  *
  * WHAT IS LEFT, WRITTEN DOWN RATHER THAN IMPLIED. Anything holding the owner's
  * session cookie can load a page and read the ticket out of it. That is true,
@@ -74,8 +74,8 @@ function sign(sessionId: string, issuedAt: number): string {
 }
 
 /**
- * Mints the ticket the root layout hands to the launch report, for the session
- * the document is being rendered for.
+ * Mints the ticket the shell layout hands to the launch report, for the session
+ * that layout has just read back.
  */
 export function mintLaunchTicket(sessionId: string, now: number = Date.now()): string {
   const issuedAt = Math.floor(now / 1000);

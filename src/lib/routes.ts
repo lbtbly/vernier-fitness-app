@@ -27,9 +27,10 @@ export type RouteClass = 'public' | 'gate' | 'protected';
  * by anything that could reach the port: the verifier set both signals with four
  * lines of curl, no browser and no session, using an anti-forgery pair minted by
  * one unauthenticated GET of /sign-in. Only the owner launches the owner's app,
- * so the write needs his session and the layout raises no report without one.
- * The read stays open, because a preflight script curls it and it says nothing
- * a stranger on the tailnet could not already read off `tailscale status`.
+ * so the write needs his session, and the report is raised from the shell layout
+ * where the session has already been proven live. The read stays open, because a
+ * preflight script curls it and it says nothing a stranger on the tailnet could
+ * not already read off `tailscale status`.
  */
 export const PUBLIC_PATHS: string[] = [
   '/sign-in',
