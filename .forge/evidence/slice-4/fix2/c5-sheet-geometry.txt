@@ -1,0 +1,23 @@
+C5. The quick-log sheet's card states, driven through the product on the scratch
+instance at 393x852, with the geometry the stylesheet computes for every card and
+banner inside div.today. Screen 00 defines it once: 16 px padding, 12 px between.
+
+state     where         class                 data-state  padding                   margin-bottom
+loading   sheet         card                  loading     16px 16px 16px 16px       12px
+error     sheet         card error            error       16px 16px 16px 16px       12px
+stale     sheet         card                  stale       16px 16px 16px 16px       12px
+offline   sheet         banner                offline     11px 12px 11px 12px       12px
+offline   sheet         card error            error       16px 16px 16px 16px       12px
+empty     sheet         card empty            empty       16px 16px 16px 16px       12px
+
+And Today's own column, which keeps the compression F27 bought:
+stale     today column  banner w              1           0px 0px 0px 0px           8px
+stale     today column  card day              None        8px 16px 8px 16px         8px
+stale     today column  card adherence        None        8px 16px 8px 16px         8px
+stale     today column  card                  weight      8px 16px 8px 16px         8px
+stale     today column  card                  waist       8px 16px 8px 16px         8px
+stale     today column  card                  signals     8px 16px 8px 16px         8px
+stale     today column  card                  panel       8px 16px 8px 16px         8px
+stale     today column  card                  None        8px 16px 8px 16px         8px
+
+The stale banner's disclosure, as a control: {"focusRing": "2px solid rgb(143, 196, 255) at 2px", "target": {"w": 359, "h": 44}, "text": "One source has gone quiet.", "focused": true}

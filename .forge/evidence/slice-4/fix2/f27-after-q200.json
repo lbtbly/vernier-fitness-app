@@ -4,63 +4,67 @@
  "docClientWidth": 393,
  "staleBanner": {
   "top": 65,
-  "bottom": 104,
-  "h": 39
+  "bottom": 111,
+  "h": 46
  },
  "staleBannerCount": "2",
  "staleBannerText": "2 sources have gone quiet.",
  "staleSummary": {
   "top": 66,
-  "bottom": 103,
-  "h": 37
+  "bottom": 110,
+  "h": 44
+ },
+ "staleSummaryTarget": {
+  "w": 359,
+  "h": 44
  },
  "sessionRow": {
-  "top": 135,
-  "bottom": 201,
+  "top": 142,
+  "bottom": 208,
   "h": 66
  },
  "meals": {
-  "top": 201,
-  "bottom": 226,
+  "top": 208,
+  "bottom": 233,
   "h": 25
  },
  "due": {
-  "top": 226,
-  "bottom": 272,
+  "top": 233,
+  "bottom": 279,
   "h": 46
  },
  "adherence": {
-  "top": 343,
-  "bottom": 517,
+  "top": 350,
+  "bottom": 524,
   "h": 174
  },
  "weightCard": {
-  "top": 525,
-  "bottom": 918,
+  "top": 532,
+  "bottom": 925,
   "h": 393
  },
  "weightChart": {
-  "top": 602,
-  "bottom": 682,
+  "top": 609,
+  "bottom": 689,
   "h": 80
  },
  "weightChartTitle": "Weight, the last 30 days",
  "weightHeadline": "71.0 kg",
- "trendBottom": 682,
+ "trendBottom": 689,
  "summaryHeightByCount": {
-  "1": 39,
-  "2": 39,
-  "3": 39,
-  "5": 39,
-  "9": 39,
-  "42": 39
+  "1": 46,
+  "2": 46,
+  "3": 46,
+  "5": 46,
+  "9": 46,
+  "42": 46
  },
  "opened": {
   "lines": [
    "Withings, 4 days old. The scale last synced on 18 Aug, 06:52.",
    "Health, 4 days old. The iPhone shortcut last sent a batch on 18 Aug, 07:20."
   ],
-  "height": 127
+  "height": 134
  },
  "tag": "q200",
  "errors": [],

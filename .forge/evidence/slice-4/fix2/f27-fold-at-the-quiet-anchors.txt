@@ -1,0 +1,19 @@
+F27, Today's fold at 393x852. The 715 px line, and where the weight trend ends.
+Measured on the shipped build in Chrome, the scratch instance for the anchors and
+the live install for the last row.
+
+file                              anchor  quiet banner  trend ends  adherence ends  holds
+f27-after-live.json               live    1     46      689         524             True
+f27-after-q196.json               q196    1     46      689         524             True
+f27-after-q198.json               q198    2     46      689         524             True
+f27-after-q199.json               q199    2     46      688         523             True
+f27-after-q200.json               q200    2     46      689         524             True
+f27-before-q200.json              q200    2     99      742         577             False
+
+The banner's height against the number of quiet sources, read off the shipped
+element with the copy the shipped function produces for each count:
+  live    {'1': 46, '2': 46, '3': 46, '5': 46, '9': 46, '42': 46}
+  q196    {'1': 46, '2': 46, '3': 46, '5': 46, '9': 46, '42': 46}
+  q198    {'1': 46, '2': 46, '3': 46, '5': 46, '9': 46, '42': 46}
+  q199    {'1': 46, '2': 46, '3': 46, '5': 46, '9': 46, '42': 46}
+  q200    {'1': 46, '2': 46, '3': 46, '5': 46, '9': 46, '42': 46}

@@ -1,0 +1,43 @@
+device_observation on the owner's live install, read as vernier_suite, after two full e2e runs on the fixed build.
+Recorded 2026-08-22T15:46:30Z.
+
+       signal        | observed |     first_observed_at      |       last_reported_at        | reported_from 
+---------------------+----------+----------------------------+-------------------------------+---------------
+ standalone_seen     | t        | 2026-08-22 16:13:55.795+02 | 2026-08-22 17:13:57.479182+02 | 
+ wake_lock_available | t        | 2026-08-22 16:13:55.804+02 | 2026-08-22 16:13:55.804748+02 | 
+(2 rows)
+
+
+GET /api/diagnostics/device:
+{
+    "standaloneSeen": true,
+    "wakeLockAvailable": true,
+    "passkeyRegistered": false,
+    "pushSubscription": false,
+    "firstObservedAt": {
+        "standaloneSeen": "2026-08-22T14:13:55.795Z",
+        "wakeLockAvailable": "2026-08-22T14:13:55.804Z",
+        "passkeyRegistered": null,
+        "pushSubscription": null
+    },
+    "lastReportedAt": {
+        "standaloneSeen": "2026-08-22T15:13:57.479Z",
+        "wakeLockAvailable": "2026-08-22T14:13:55.804Z",
+        "passkeyRegistered": null,
+        "pushSubscription": null
+    },
+    "reportedFrom": {
+        "standaloneSeen": null,
+        "wakeLockAvailable": null,
+        "passkeyRegistered": null,
+        "pushSubscription": null
+    },
+    "tailscaleProxySeen": true,
+    "recentPeers": [
+        {
+            "address": "100.65.127.62",
+            "viaTailscale": true,
+            "lastSeenAt": "2026-08-22T15:46:28.813Z"
+        }
+    ]
+}

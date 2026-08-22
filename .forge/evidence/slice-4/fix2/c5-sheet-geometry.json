@@ -240,8 +240,8 @@
    },
    {
     "where": "sheet",
-    "what": "card",
-    "state": "loading",
+    "what": "card error",
+    "state": "error",
     "padding": "16px 16px 16px 16px",
     "marginBottom": "12px"
    },
@@ -287,7 +287,16 @@
     "padding": "8px 16px 8px 16px",
     "marginBottom": "8px"
    }
-  ]
+  ],
+  "disclosure": {
+   "focusRing": "2px solid rgb(143, 196, 255) at 2px",
+   "target": {
+    "w": 359,
+    "h": 44
+   },
+   "text": "One source has gone quiet.",
+   "focused": true
+  }
  },
  "errors": [
   "CONSOLE Failed to load resource: net::ERR_CONNECTION_FAILED",

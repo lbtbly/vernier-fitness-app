@@ -1,0 +1,47 @@
+The launch report, on the scratch instance. Recorded 2026-08-22T15:46:06Z.
+
+suite-role: vernier_suite is current on the owner's database.
+  role vernier_suite: superuser false, createdb false, createrole false, bypassrls false
+  grant app_meta SELECT
+  grant auth_attempt INSERT,SELECT
+  grant device_observation SELECT
+  grant goal SELECT
+  grant idempotency_key SELECT
+  grant import_question SELECT
+  grant integration_credential SELECT
+  grant measurement SELECT
+  grant owner SELECT
+  grant planned_session SELECT
+  grant recovery_grant INSERT,SELECT
+  grant request_origin SELECT
+  grant session SELECT
+  grant source_record SELECT
+  grant webauthn_challenge SELECT
+  grant webauthn_credential SELECT
+  grant write_request SELECT
+  execute suite_forget_passkey(credential text)
+setup: the owner's database holds 90 measurement, 38 source_record, 1 measurement not seeded. Nothing in this run may lower it.
+
+Running 5 tests using 1 worker
+
+last_reported_at before: never
+no cookie and no header: 403 {"error":"Anti-forgery check failed.","detail":"This request carried no x-vernier-csrf header. Nothing was written."}
+cookie but no header: 403 {"error":"Anti-forgery check failed.","detail":"This request carried no x-vernier-csrf header. Nothing was written."}
+a token that does not match: 403 {"error":"Anti-forgery check failed.","detail":"The anti-forgery token does not match the one issued to this browser. Nothing was written."}
+  ✓  1 [chrome-scratch] › tests/e2e/launch-report.spec.ts:51:3 › the launch report › refuses a post with no anti-forgery token and writes nothing (430ms)
+two booleans and no third: 400 {"error":"That is not a launch report.","detail":"This endpoint records two things the browser reports at launch: whether Vernier opened from the Home Screen, and whether this device can keep the screen awake. Nothing else is stored here."}
+  ✓  2 [chrome-scratch] › tests/e2e/launch-report.spec.ts:93:3 › the launch report › refuses a report that omits whether the browser is being driven (221ms)
+signals before: none
+the launch this suite's browser raised: 200 {"recorded":false,"reason":"A driven browser cannot report a launch.","detail":"This row is read back as evidence that Vernier opened from the Home Screen on the owner's phone, so it is only written by a browser a person is holding. Nothing was stored. Point the run at the scratch instance on 127.0.0.1:3101 instead."}
+navigator.webdriver in this browser: true
+  ✓  3 [chrome-scratch] › tests/e2e/launch-report.spec.ts:111:3 › the launch report › refuses this suite's own browser and leaves the signals where they were (672ms)
+a headless agent claiming it is not driven: 200 {"recorded":false,"reason":"A driven browser cannot report a launch.","detail":"This row is read back as evidence that Vernier opened from the Home Screen on the owner's phone, so it is only written by a browser a person is holding. Nothing was stored. Point the run at the scratch instance on 127.0.0.1:3101 instead."}
+  ✓  4 [chrome-scratch] › tests/e2e/launch-report.spec.ts:143:3 › the launch report › refuses a headless user agent even when the body claims otherwise (225ms)
+an honest report: 204
+signals after: standalone_seen=false@unattributed
+  ✓  5 [chrome-scratch] › tests/e2e/launch-report.spec.ts:160:3 › the launch report › writes an honest report and records the address it arrived from (128ms)
+teardown: the owner's database holds 90 measurement, 38 source_record, 1 measurement not seeded.
+teardown: test-stack: stopped
+teardown: it held 90 measurement, 38 source_record, 1 measurement not seeded before the run, so nothing of the owner's was taken.
+
+  5 passed (6.0s)
