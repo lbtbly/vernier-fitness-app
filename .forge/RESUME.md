@@ -70,6 +70,14 @@ Five builder dispatches, four verifications, one architect ruling, one rubric am
 
 **Two hazards found in slice 3 that belong to slice 5, and must not be lost.** `tests/e2e/host.ts` truncates the live database and restarts the app: harmless while every row is seed data, destructive the moment Withings imports a real reading, and the append-only trigger does not help because TRUNCATE walks past it. And the checkpoint hook has committed red trees at least twice, titled "checks red", against `scripts/checks.sh`'s own header.
 
+## A fabricated reading sits in the owner's live history
+
+`f636c7bf-aee7-4127-b3b1-26b178ab378e`, waist 99.0 cm, source `manual`, not seed, written 2026-08-22 10:04:42+02. The builder wrote it through the shipped quick log to prove the suite can no longer truncate the owner's data, and it survived a full 36-test run, which is exactly the proof that was needed.
+
+It is permanent: `measurement` refuses DELETE, and that refusal is a guarantee this run deliberately built. Removing it means a truncate and re-seed at a psql prompt, which is the one capability slice 3 removed from the test suite and should not be casually restored.
+
+Two things follow. The row is now a standing test of the guarantee, so every future run must leave it alone. And it is a fabricated measurement in a health record whose whole point is provenance, so it should be removed before the owner logs real waist measurements, by a deliberate operator action rather than by a test. Offered to the owner on 2026-08-22; awaiting his word.
+
 ## What needs the owner, and only the owner
 
 Two actions on the iPhone, and together they close five lines:
