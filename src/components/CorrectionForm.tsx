@@ -30,9 +30,16 @@ import { strings } from '@/lib/strings';
  * `platform` is the browser's, from a write that never reached the machine.
  * The marker is set at the branch that knows, the same way the quick log sets
  * it, because the check that reads this screen has to tell them apart by
- * provenance and cannot tell them apart by looking.
+ * provenance and cannot tell them apart by looking. A platform cause names the
+ * request that was rejected, so the claim is checkable against what the browser
+ * did rather than against what the words happen to say.
  */
-type Failure = { error: string; detail: string; authored: 'vernier' | 'platform' };
+type Failure =
+  | { error: string; detail: string; authored: 'vernier' }
+  | { error: string; detail: string; authored: 'platform'; rejected: string };
+
+/** The one request this form writes through, named once so the marker cannot drift from it. */
+const LOG_ENDPOINT = '/api/log';
 
 export function CorrectionForm({
   measurementId,
@@ -56,7 +63,7 @@ export function CorrectionForm({
     setBusy(true);
     setFailure(null);
     try {
-      const response = await fetch('/api/log', {
+      const response = await fetch(LOG_ENDPOINT, {
         method: 'POST',
         headers: {
           'content-type': 'application/json',
@@ -84,6 +91,7 @@ export function CorrectionForm({
         error: strings.api.correction.title,
         detail: (error as Error).message,
         authored: 'platform',
+        rejected: LOG_ENDPOINT,
       });
     } finally {
       setBusy(false);
@@ -123,7 +131,12 @@ export function CorrectionForm({
           </div>
           <div className="head">{failure.error}</div>
           <p className="sub">
-            <span data-authored={failure.authored}>{failure.detail}</span>{' '}
+            <span
+              data-authored={failure.authored}
+              data-platform-request={failure.authored === 'platform' ? failure.rejected : undefined}
+            >
+              {failure.detail}
+            </span>{' '}
             {strings.api.correction.lead}
           </p>
           <div className="actions">

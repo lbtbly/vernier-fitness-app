@@ -14,11 +14,10 @@ const baseURL = (process.env.APP_URL ?? 'https://lamberts-mac-mini.tailda76d6.ts
 
 export default defineConfig({
   testDir: './tests/e2e',
-  // One clock at the start, one sweep at the end. The destructive helper in
-  // tests/e2e/host.ts truncates the owner's live tables, and it may only take
-  // rows this run wrote: the setup stamps when the run began, the teardown
-  // clears what the run added, and anything older than the stamp is the owner's
-  // and is never touched.
+  // One reading of the owner's database at the start, the same reading at the
+  // end. Nothing in this suite writes those tables and `query` in
+  // tests/e2e/host.ts cannot write at all, so the teardown is a check rather
+  // than a sweep: a count that fell is a fault and fails the run.
   globalSetup: './tests/e2e/global-setup.ts',
   globalTeardown: './tests/e2e/global-teardown.ts',
   fullyParallel: false,
@@ -49,7 +48,7 @@ export default defineConfig({
   projects: [
     {
       name: 'webkit-iphone',
-      testIgnore: /focus\.spec\.ts|service-worker\.spec\.ts/,
+      testIgnore: /focus\.spec\.ts|service-worker\.spec\.ts|quick-log\.spec\.ts/,
       use: { ...devices['Desktop Safari'], viewport: { width: 393, height: 852 }, deviceScaleFactor: 3 },
     },
     {
@@ -64,6 +63,31 @@ export default defineConfig({
         channel: 'chrome',
         viewport: { width: 393, height: 852 },
         serviceWorkers: 'allow',
+      },
+    },
+    {
+      // The destructive end of the suite, against the scratch instance.
+      //
+      // quick-log.spec.ts truncates the provenance tables between tests, and it
+      // used to do that to the owner's live install behind a guard with a hole
+      // in it. It runs against the scratch instance now: the same image, its
+      // own database, its own container, nothing in it anybody would miss.
+      //
+      // Chrome, because that instance answers on plain loopback HTTP and the
+      // session cookie is Secure. WebKit refuses a Secure cookie from an http
+      // origin, 127.0.0.1 and localhost alike, so a WebKit run of this file
+      // never gets past the sign-in screen. Chrome accepts one from a loopback
+      // origin. The engine is the price of not putting a test instance on the
+      // tailnet behind a second HTTPS proxy, and it is written down rather than
+      // discovered: what this file proves, it proves in Chrome.
+      name: 'chrome-scratch',
+      testMatch: /quick-log\.spec\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        channel: 'chrome',
+        baseURL: process.env.SCRATCH_URL ?? 'http://127.0.0.1:3101',
+        viewport: { width: 393, height: 852 },
+        deviceScaleFactor: 3,
       },
     },
     {

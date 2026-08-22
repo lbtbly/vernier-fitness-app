@@ -1,8 +1,35 @@
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
-import { mintSignInLink, query, resetProvenance } from './host';
+import {
+  ensureScratchOwner,
+  resetScratchProvenance,
+  scratchQuery,
+  scratchSignInLink,
+  testStackWithDemoMode,
+  waitForScratch,
+} from './host';
 
 /**
- * The quick log and the provenance spine, end to end, in WebKit at 393x852.
+ * The quick log and the provenance spine, end to end, at 393x852.
+ *
+ * ON THE SCRATCH INSTANCE, IN CHROME, and both halves of that are the same
+ * decision. This file is the destructive end of the suite: it truncates the
+ * provenance tables between tests, because what it grades is a chain of
+ * corrections and a chain means nothing on top of yesterday's rows. It used to
+ * do that to the owner's live install behind a guard that counted rows older
+ * than the run, and a row logged through the shipped quick log a second after
+ * the run started counted as the run's own. One real reading died that way.
+ *
+ * So it runs against the instance that holds nothing anybody would miss. That
+ * instance answers on plain loopback HTTP, the session cookie is Secure as F11
+ * requires, and WebKit refuses a Secure cookie from an http origin however
+ * local it is: probed on 127.0.0.1 and on localhost, and in both the cookie jar
+ * came back empty and the browser sat on the sign-in screen. Chrome accepts one
+ * from a loopback origin, so Chrome drives this file. What that costs is
+ * honest: the behaviour below is proven in Chrome and not in WebKit, and every
+ * other spec in this suite still runs in WebKit against the real HTTPS origin.
+ * The alternative was a second HTTPS proxy on the tailnet in front of a test
+ * instance, which would have put a second entry in the serve configuration that
+ * F4 counts and a test account on the tailnet, to keep an engine.
  *
  * F20, F21, F22, F23, F24, F26 and C5. Everything here goes through the shipped
  * screens: no test-only route, no seeded session, no back door into the write
@@ -78,14 +105,34 @@ async function settle(page: Page): Promise<void> {
 }
 
 async function signIn(page: Page): Promise<void> {
-  await page.goto(mintSignInLink());
+  await page.goto(scratchSignInLink());
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Today' })).toBeVisible();
 }
 
+/**
+ * The instance these tests run against, brought up before they do.
+ *
+ * The same image, the same boot path, the same demonstration seed, its own
+ * database, its own container. It is reset here rather than assumed, because
+ * the specs that ran before this one use the scratch instance for a first run
+ * and a wrong master key and leave it holding whatever those needed.
+ *
+ * The owner account is created through the shipped bootstrap route, and every
+ * sign-in below mints a one-time link on this container. Nothing in this file
+ * can reach the owner's installation.
+ */
+async function bringUpTheScratchInstance(): Promise<void> {
+  testStackWithDemoMode('1', 'reset');
+  await waitForScratch();
+  await ensureScratchOwner();
+}
+
 test.describe('the quick log', () => {
   test.describe.configure({ mode: 'serial' });
-  test.skip(Number(query('select count(*) from owner')) === 0, 'no owner account on this installation yet');
+  test.beforeAll(async () => {
+    await bringUpTheScratchInstance();
+  });
 
   /**
    * F23. Six taps or fewer from Today, for each of the six things the sheet
@@ -93,7 +140,7 @@ test.describe('the quick log', () => {
    * click below is one finger on one target.
    */
   test('commits each of the six in six taps or fewer from Today', async ({ page }) => {
-    resetProvenance();
+    resetScratchProvenance();
     await signIn(page);
 
     const counts: Array<[string, number]> = [];
@@ -142,7 +189,7 @@ test.describe('the quick log', () => {
         .poll(
           () =>
             Number(
-              query(`select count(*) from measurement where metric = '${field.metric}' and source = 'manual'`),
+              scratchQuery(`select count(*) from measurement where metric = '${field.metric}' and source = 'manual'`),
             ),
           { timeout: 20_000 },
         )
@@ -153,7 +200,7 @@ test.describe('the quick log', () => {
     expect(counts).toHaveLength(6);
     expect(Math.max(...counts.map(([, taps]) => taps))).toBeLessThanOrEqual(6);
 
-    const stored = query(
+    const stored = scratchQuery(
       `select metric || ' ' || raw_value || ' ' || unit || ' ' || source || ' ' || confidence
        from measurement where source = 'manual' order by metric`,
     );
@@ -167,7 +214,7 @@ test.describe('the quick log', () => {
    * Idempotency-Key, and when the origin comes back it replays exactly once.
    */
   test('commits offline, shows the queue, and replays exactly once', async ({ page, context }) => {
-    resetProvenance();
+    resetScratchProvenance();
     await signIn(page);
 
     await page.getByRole('button', { name: 'Quick log', exact: true }).click();
@@ -205,7 +252,7 @@ test.describe('the quick log', () => {
     expect(queuedKey.id).toMatch(/^[0-9a-f-]{36}$/);
 
     // Nothing reached the database while the origin was gone.
-    expect(query("select count(*) from measurement where metric = 'energy' and source = 'manual'")).toBe('0');
+    expect(scratchQuery("select count(*) from measurement where metric = 'energy' and source = 'manual'")).toBe('0');
 
     // The queue count is on Today, with the sheet closed, which is where
     // screen 03 frame 2 draws it. save() closes the sheet, so this is the state
@@ -252,7 +299,7 @@ test.describe('the quick log', () => {
     await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
 
     await expect
-      .poll(() => query("select count(*) from measurement where metric = 'energy' and source = 'manual'"), {
+      .poll(() => scratchQuery("select count(*) from measurement where metric = 'energy' and source = 'manual'"), {
         timeout: 20_000,
       })
       .toBe('1');
@@ -269,10 +316,10 @@ test.describe('the quick log', () => {
     });
     console.log(`replay answered ${replay.status()}`);
 
-    expect(query("select count(*) from measurement where metric = 'energy' and source = 'manual'")).toBe('1');
-    expect(query(`select count(*) from idempotency_key where key = '${queuedKey.id}'`)).toBe('1');
+    expect(scratchQuery("select count(*) from measurement where metric = 'energy' and source = 'manual'")).toBe('1');
+    expect(scratchQuery(`select count(*) from idempotency_key where key = '${queuedKey.id}'`)).toBe('1');
 
-    const log = query(`select outcome from write_request where key = '${queuedKey.id}' order by at`);
+    const log = scratchQuery(`select outcome from write_request where key = '${queuedKey.id}' order by at`);
     console.log(`request log for ${queuedKey.id}:\n${log}`);
     expect(log.split('\n').filter((row) => row === 'applied')).toHaveLength(1);
     expect(log).toContain('replayed');
@@ -299,20 +346,20 @@ test.describe('the quick log', () => {
   test('appends three corrections through the value screen and keeps the original readable', async ({
     page,
   }) => {
-    resetProvenance();
+    resetScratchProvenance();
     await signIn(page);
 
     await page.getByRole('button', { name: 'Quick log', exact: true }).click();
     await page.getByRole('button', { name: 'Up half a centimetre' }).click();
     await page.getByRole('button', { name: 'Save', exact: true }).click();
     await expect
-      .poll(() => query("select count(*) from measurement where metric = 'waist' and source = 'manual'"), {
+      .poll(() => scratchQuery("select count(*) from measurement where metric = 'waist' and source = 'manual'"), {
         timeout: 20_000,
       })
       .toBe('1');
 
-    const originalId = query("select id from measurement where metric = 'waist' and source = 'manual'");
-    const originalValue = query(`select raw_value from measurement where id = '${originalId}'`);
+    const originalId = scratchQuery("select id from measurement where metric = 'waist' and source = 'manual'");
+    const originalValue = scratchQuery(`select raw_value from measurement where id = '${originalId}'`);
     console.log(`original ${originalId} = ${originalValue}`);
 
     await page.goto(`/value/${originalId}`);
@@ -324,7 +371,7 @@ test.describe('the quick log', () => {
       await page.locator('#correction-reason').fill(`Edit ${index + 1}`);
       await page.getByRole('button', { name: 'Save the correction' }).click();
       await expect
-        .poll(() => query(`select count(*) from measurement where root_id = '${originalId}'`), {
+        .poll(() => scratchQuery(`select count(*) from measurement where root_id = '${originalId}'`), {
           timeout: 20_000,
         })
         .toBe(String(index + 2));
@@ -334,7 +381,7 @@ test.describe('the quick log', () => {
       console.log(`edit ${index + 1} through the screen: ${sending} corrected to ${value}`);
     }
 
-    const chain = query(
+    const chain = scratchQuery(
       `select correction_index || ' | ' || raw_value || ' | ' || coalesce(correction_reason, 'original')
        from measurement where root_id = '${originalId}' order by correction_index`,
     );
@@ -347,7 +394,7 @@ test.describe('the quick log', () => {
 
     // Each correction names the row it corrected, and no two name the same one,
     // which is what a chain is and what a fork would not be.
-    const links = query(
+    const links = scratchQuery(
       `select correction_index || ' corrects ' || coalesce(corrects_id, 'nothing')
        from measurement where root_id = '${originalId}' order by correction_index`,
     );
@@ -355,7 +402,7 @@ test.describe('the quick log', () => {
     expect(new Set(links.split('\n')).size).toBe(4);
 
     // The original is still exactly what it was, byte for byte.
-    expect(query(`select raw_value from measurement where id = '${originalId}'`)).toBe(originalValue);
+    expect(scratchQuery(`select raw_value from measurement where id = '${originalId}'`)).toBe(originalValue);
 
     // And all four rows are readable on the screen: three correction cards and
     // the original struck through.
@@ -382,11 +429,11 @@ test.describe('the quick log', () => {
     page,
     context,
   }) => {
-    resetProvenance();
+    resetScratchProvenance();
     await signIn(page);
 
-    const ratingId = query("select id from measurement where metric = 'energy' and seed");
-    const before = query(`select count(*) from measurement where root_id = '${ratingId}'`);
+    const ratingId = scratchQuery("select id from measurement where metric = 'energy' and seed");
+    const before = scratchQuery(`select count(*) from measurement where root_id = '${ratingId}'`);
     expect(before).toBe('1');
 
     // On screen, through the shipped form, which is where the bare status code
@@ -436,8 +483,8 @@ test.describe('the quick log', () => {
 
     // Nothing was written, which is the only outcome that can be relied on in a
     // table that refuses DELETE.
-    expect(query(`select count(*) from measurement where root_id = '${ratingId}'`)).toBe('1');
-    expect(query(`select raw_value from measurement where id = '${ratingId}'`)).toBe('4');
+    expect(scratchQuery(`select count(*) from measurement where root_id = '${ratingId}'`)).toBe('1');
+    expect(scratchQuery(`select raw_value from measurement where id = '${ratingId}'`)).toBe('4');
 
     // A correction the range does allow still goes through, so the gate is a
     // gate and not a wall.
@@ -450,11 +497,11 @@ test.describe('the quick log', () => {
       data: { action: 'correct', correctsId: ratingId, rawValue: '2', reason: 'Felt worse than I said' },
     });
     expect(good.status()).toBe(201);
-    expect(query(`select count(*) from measurement where root_id = '${ratingId}'`)).toBe('2');
+    expect(scratchQuery(`select count(*) from measurement where root_id = '${ratingId}'`)).toBe('2');
 
     // And the reason stored on it names the whole id rather than eight
     // characters of one, which read as a mangled word.
-    const reason = query(`select dedup_reason from measurement where root_id = '${ratingId}' and correction_index = 1`);
+    const reason = scratchQuery(`select dedup_reason from measurement where root_id = '${ratingId}' and correction_index = 1`);
     console.log(`the reason stored on the correction: ${reason}`);
     expect(reason).toContain(ratingId);
 
@@ -505,7 +552,7 @@ test.describe('the quick log', () => {
     page,
     context,
   }) => {
-    resetProvenance();
+    resetScratchProvenance();
     await signIn(page);
 
     // Queued, and therefore genuinely reversible.
@@ -550,7 +597,7 @@ test.describe('the quick log', () => {
 
     await goOnline(context, page);
     // Nothing ever reached the Mac mini, which is what makes it an undo.
-    expect(query("select count(*) from measurement where metric = 'fatigue' and source = 'manual'")).toBe('0');
+    expect(scratchQuery("select count(*) from measurement where metric = 'fatigue' and source = 'manual'")).toBe('0');
 
     // Applied, and therefore not reversible by deletion. The card says so and
     // offers the correction instead.
@@ -608,7 +655,7 @@ test.describe('the quick log', () => {
     await expect(page.getByText('Rows from this record')).toBeVisible();
 
     // And now every source, one capture each, all through the same file.
-    const records = query('select id, source, kind from source_record order by source').split('\n');
+    const records = scratchQuery('select id, source, kind from source_record order by source').split('\n');
     console.log(records.join('\n'));
     const seen = new Set<string>();
     for (const line of records) {
@@ -631,19 +678,19 @@ test.describe('the quick log', () => {
    * writes nothing. The stored value is byte identical before and after.
    */
   test('raises a question rather than overwriting a correction', async ({ page, context }) => {
-    resetProvenance();
+    resetScratchProvenance();
     await signIn(page);
 
     await page.getByRole('button', { name: 'Quick log', exact: true }).click();
     await page.getByRole('button', { name: 'Up half a centimetre' }).click();
     await page.getByRole('button', { name: 'Save', exact: true }).click();
     await expect
-      .poll(() => query("select count(*) from measurement where metric = 'waist' and source = 'manual'"), {
+      .poll(() => scratchQuery("select count(*) from measurement where metric = 'waist' and source = 'manual'"), {
         timeout: 20_000,
       })
       .toBe('1');
 
-    const originalId = query("select id from measurement where metric = 'waist' and source = 'manual'");
+    const originalId = scratchQuery("select id from measurement where metric = 'waist' and source = 'manual'");
     const csrf = (await context.cookies()).find((cookie) => cookie.name === 'vernier_csrf')!.value;
 
     await page.request.post('/api/log', {
@@ -651,10 +698,10 @@ test.describe('the quick log', () => {
       data: { action: 'correct', correctsId: originalId, rawValue: '99.2', reason: 'Typed a 2 for a 9.' },
     });
 
-    const before = query(
+    const before = scratchQuery(
       "select id || '|' || raw_value || '|' || source || '|' || correction_index from measurement order by id",
     );
-    const beforeCount = query('select count(*) from measurement');
+    const beforeCount = scratchQuery('select count(*) from measurement');
     console.log(`before the disagreeing write:\n${before}`);
 
     const conflicting = await page.request.post('/api/log', {
@@ -670,14 +717,14 @@ test.describe('the quick log', () => {
     expect(body.questions).toHaveLength(1);
     expect(body.saved).toHaveLength(0);
 
-    const after = query(
+    const after = scratchQuery(
       "select id || '|' || raw_value || '|' || source || '|' || correction_index from measurement order by id",
     );
     console.log(`after:\n${after}`);
     expect(after).toBe(before);
-    expect(query('select count(*) from measurement')).toBe(beforeCount);
+    expect(scratchQuery('select count(*) from measurement')).toBe(beforeCount);
 
-    const question = query(
+    const question = scratchQuery(
       "select stored_raw_value || ' vs ' || incoming_raw_value || ' | ' || state from import_question",
     );
     console.log(`the question that was raised instead: ${question}`);
@@ -704,7 +751,9 @@ test.describe('the quick log', () => {
  */
 test.describe('the quick log against screen 03', () => {
   test.describe.configure({ mode: 'serial' });
-  test.skip(Number(query('select count(*) from owner')) === 0, 'no owner account on this installation yet');
+  test.beforeAll(async () => {
+    await bringUpTheScratchInstance();
+  });
 
   const VIEWPORTS: Array<[string, number, number]> = [
     ['393', 393, 852],
@@ -713,7 +762,7 @@ test.describe('the quick log against screen 03', () => {
   ];
 
   test('matches screen 03 at three viewports, with 44 px targets or better', async ({ page }) => {
-    resetProvenance();
+    resetScratchProvenance();
     await signIn(page);
 
     for (const [name, width, height] of VIEWPORTS) {
@@ -757,7 +806,7 @@ test.describe('the quick log against screen 03', () => {
   });
 
   test('draws loading, empty, error, offline and stale on screen 00 geometry', async ({ page, context }) => {
-    resetProvenance();
+    resetScratchProvenance();
     await signIn(page);
 
     // Loaded first, because every other state is measured against its geometry.
@@ -837,7 +886,7 @@ test.describe('the quick log against screen 03', () => {
 
     // Empty: a database holding no waist reading at all. Truncated without the
     // re-seed, so the absence is real rather than routed around.
-    query('truncate measurement, source_record, import_question, idempotency_key, write_request');
+    scratchQuery('truncate measurement, source_record, import_question, idempotency_key, write_request');
     await page.goto('/');
     await page.getByRole('button', { name: 'Quick log', exact: true }).click();
     await expect(page.locator('[data-state="empty"]')).toBeVisible({ timeout: 20_000 });
@@ -848,6 +897,6 @@ test.describe('the quick log against screen 03', () => {
     await page.screenshot({ path: `${CAPTURES}c5-state-empty.png` });
     await expect(page.locator('.metric.mut')).toHaveText(/--/);
 
-    resetProvenance();
+    resetScratchProvenance();
   });
 });

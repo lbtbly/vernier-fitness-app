@@ -27,8 +27,10 @@ test.describe('the passkey round trip', () => {
     test.skip(Number(query('select count(*) from owner')) === 0, 'no owner account on this installation yet');
 
     // What the diagnostics signal said before this test touched anything. The
-    // signal is sticky true by design, and this test is not the owner's iPhone,
-    // so it puts the row back the way it found it on the way out.
+    // signal is sticky true by design and this test is not the owner's iPhone,
+    // so it is read here and read again after the credential is forgotten:
+    // scripts/recovery.sh clears the signal when it removes the last passkey,
+    // which is where that belongs. Nothing in this file writes the database.
     const signalBefore = query(
       "select coalesce((select observed::text from device_observation where signal = 'passkey_registered'), 'absent')",
     );
@@ -124,9 +126,16 @@ test.describe('the passkey round trip', () => {
       } catch {
         console.log(`no credential ${seed.credentialId} to remove, the ceremony did not get that far`);
       }
+      const signalAfter = query(
+        "select coalesce((select observed::text from device_observation where signal = 'passkey_registered'), 'absent')",
+      );
+      console.log(
+        `device_observation: passkey_registered was ${signalBefore} before this test and is ${signalAfter} after it`,
+      );
       if (signalBefore === 'absent') {
-        query("delete from device_observation where signal = 'passkey_registered'");
-        console.log('device_observation: passkey_registered put back to absent, which is what it was');
+        expect(signalAfter, 'forgetting the last passkey clears the signal that said one was registered').toBe(
+          'absent',
+        );
       }
       await context.close();
     }

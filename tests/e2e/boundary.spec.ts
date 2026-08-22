@@ -128,10 +128,16 @@ test.describe('the credential boundary', () => {
     await page.goto(mintSignInLink());
     await page.goto('/settings');
 
-    // Start from a known state: whatever a previous run or the owner left
-    // connected for Withings is removed first, so the counts below mean what
-    // they say.
-    query("delete from integration_credential where provider = 'withings'");
+    // Start from a known state, and refuse to make one. This used to delete
+    // whatever was stored for Withings, which is fine while every credential in
+    // this database belongs to a test and destroys the owner's connection the
+    // day he has one. Nothing here writes the owner's database now: if a
+    // credential is already stored, this test says so and stops, and the
+    // instance for a run that needs to write is the scratch one.
+    expect(
+      query("select count(*) from integration_credential where provider = 'withings'"),
+      'a Withings credential is already stored on this installation and it is the owner\'s. This test writes its own and disconnects it; run it against a scratch instance instead of taking that row.',
+    ).toBe('0');
     await page.reload();
     const before = query('select count(*) from integration_credential');
 

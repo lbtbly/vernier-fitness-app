@@ -80,6 +80,12 @@ run lint "$LINT_ARGS" || exit 2
 # alone; the union is what closes the line.
 run strings || exit 2
 
+# And the copy the service worker answers with, which no import can reach.
+# public/sw.js is generated from the catalogue by scripts/build-sw.mjs, so a
+# string edited in strings.ts and not written through leaves the worker saying
+# yesterday's words to a phone with no signal. Cheap, no stack, runs per edit.
+run sw:check || exit 2
+
 if [ "${FORGE_CHECKS_FULL:-0}" = "1" ]; then
   # A missing stack FAILS here, and does not stand down.
   #

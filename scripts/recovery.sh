@@ -15,11 +15,23 @@
 #
 # The new password is read from the terminal or from a pipe, never from an
 # argument, because arguments are visible in the process table.
+#
+# RECOVERY_CONTAINER names another container to run in, and the destructive end
+# of the test suite is what it is for: those specs run against the scratch
+# instance now, and a spec that signs in has to mint its link on the instance it
+# is signing in to. The default is the owner's app and nothing about it moves.
 set -euo pipefail
 
 cd "${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
 
-if ! docker compose ps --status running --services 2>/dev/null | grep -qx app; then
+TARGET="${RECOVERY_CONTAINER:-}"
+
+if [ -n "$TARGET" ]; then
+  if ! docker inspect -f '{{.State.Running}}' "$TARGET" 2>/dev/null | grep -qx true; then
+    echo "recovery: the container $TARGET is not running." >&2
+    exit 1
+  fi
+elif ! docker compose ps --status running --services 2>/dev/null | grep -qx app; then
   echo "recovery: the app container is not running. Start the stack with scripts/up.sh first." >&2
   exit 1
 fi
@@ -27,7 +39,22 @@ fi
 run_in_app() {
   # The app container already holds DATABASE_URL and the master key. Nothing is
   # printed here that the container does not print itself.
-  docker compose exec -T app node --input-type=module --eval "$1"
+  if [ -n "$TARGET" ]; then
+    docker exec -i "$TARGET" node --input-type=module --eval "$1"
+  else
+    docker compose exec -T app node --input-type=module --eval "$1"
+  fi
+}
+
+run_in_app_with() {
+  # One environment variable, then the script. Same target rule.
+  local assignment=$1
+  shift
+  if [ -n "$TARGET" ]; then
+    docker exec -i -e "$assignment" "$TARGET" node --input-type=module --eval "$1"
+  else
+    docker compose exec -T -e "$assignment" app node --input-type=module --eval "$1"
+  fi
 }
 
 STATUS_SCRIPT='
@@ -141,6 +168,15 @@ const client = new pg.default.Client({ connectionString: process.env.DATABASE_UR
 await client.connect();
 const result = await client.query("delete from webauthn_credential where id = $1 returning id", [process.env.PASSKEY_ID]);
 console.log(result.rowCount === 1 ? "recovery: removed passkey " + process.env.PASSKEY_ID : "recovery: no passkey has that identifier");
+// The diagnostics signal says a passkey has been registered on this
+// installation. With the last one removed it would be saying that about
+// nothing, and the report the owner reads would be wrong in the one direction
+// that matters. So it goes with the last passkey, here, where the removal is.
+const left = await client.query("select count(*)::int as n from webauthn_credential");
+if (left.rows[0].n === 0) {
+  const cleared = await client.query("delete from device_observation where signal = $1", ["passkey_registered"]);
+  if (cleared.rowCount > 0) console.log("recovery: no passkey is registered now, so the passkey_registered signal was cleared with it.");
+}
 await client.end();
 process.exit(result.rowCount === 1 ? 0 : 4);
 '
@@ -185,8 +221,7 @@ case "$command" in
     fi
     ;;
   link)
-    docker compose exec -T -e RECOVERY_MINUTES="${2:-10}" app \
-      node --input-type=module --eval "$LINK_SCRIPT"
+    run_in_app_with "RECOVERY_MINUTES=${2:-10}" "$LINK_SCRIPT"
     ;;
   passkeys)
     run_in_app "$PASSKEYS_SCRIPT"
@@ -196,7 +231,7 @@ case "$command" in
       echo "recovery: name the passkey identifier. scripts/recovery.sh passkeys lists them." >&2
       exit 1
     fi
-    docker compose exec -T -e PASSKEY_ID="$2" app node --input-type=module --eval "$FORGET_SCRIPT"
+    run_in_app_with "PASSKEY_ID=$2" "$FORGET_SCRIPT"
     ;;
   unlock)
     run_in_app "$UNLOCK_SCRIPT"

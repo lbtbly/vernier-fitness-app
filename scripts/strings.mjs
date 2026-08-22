@@ -120,11 +120,13 @@ const SCAN_ROOT = join(projectRoot, 'src');
  * What is still outside this walk, printed on every run rather than discovered
  * at a verification. Two of these reach a person and both are named:
  *
- *   - public/sw.js. Hand-written, no import of the catalogue possible, and it
- *     answers `new Response('Offline', {status: 503})` when a navigation misses
- *     the cache. That body is copy with no key and it is C3's defect, not a new
- *     one. The service worker is registered with `serviceWorkers: 'block'` in
- *     the rendered walk, so neither check sees it today.
+ *   - public/sw.js, for its logic. Its COPY block is not outside anything: the
+ *     worker cannot import the catalogue, so scripts/build-sw.mjs writes the
+ *     catalogue's offline copy into it and `npm run sw:check` fails in the gate
+ *     when the two disagree. That closes the one string it answered on its own,
+ *     `new Response('Offline', {status: 503})` on a navigation that missed
+ *     every cache, which reached a screen with the Cache Storage entries
+ *     evicted. Nothing else in the worker speaks to a person.
  *   - public/manifest.webmanifest is generated from src/app, and the rendered
  *     check reads the served manifest's name, short_name and description.
  *   - drizzle/*.sql, next.config.ts, drizzle.config.ts, playwright.config.ts
@@ -133,7 +135,7 @@ const SCAN_ROOT = join(projectRoot, 'src');
  *     not the product speaking on a screen.
  */
 const OUTSIDE_THE_WALK = [
-  'public/sw.js, which cannot import the catalogue and answers its own 503 body',
+  'public/sw.js, whose one answer to a person is generated from the catalogue by scripts/build-sw.mjs',
   'public/icons and public/favicon.ico, which carry no words',
   'drizzle/*.sql, and the four config files at the root',
   'scripts/ and tests/, which speak to an operator and never to a screen',
@@ -240,6 +242,21 @@ function literalOf(node) {
   return null;
 }
 
+/**
+ * Elements whose `value` is text the owner reads inside the control.
+ *
+ * An `<option>` is not one: its value is submitted and its child text is what
+ * is drawn, and the child text is read by the JSX text rule already.
+ */
+const HOLDS_ITS_TEXT = new Set(['input', 'textarea']);
+
+/** The element an attribute was written on, lower case, or the empty string. */
+function holdsItsText(attribute) {
+  const opening = attribute.parent?.parent;
+  if (!opening || !('tagName' in opening)) return false;
+  return HOLDS_ITS_TEXT.has(String(opening.tagName.getText()).toLowerCase());
+}
+
 /** Is this argument a reference into the catalogue rather than a written string. */
 function fromCatalogue(node) {
   if (!node) return false;
@@ -290,6 +307,18 @@ for (const file of files) {
       const text = node.text.trim();
       if (LOOKS_LIKE_COPY.test(text) && !NOT_COPY.has(text)) {
         violations.push({ file: name, line: at(node), kind: 'jsx text', text });
+      }
+    } else if (ts.isJsxAttribute(node) && node.name.getText(tree) === 'value' && holdsItsText(node)) {
+      // What a field is holding is drawn inside it, at the size of any other
+      // text, and neither checker read a word of it: the rendered walk read
+      // `value` on submit, button and reset only, and this one held it among no
+      // attributes at all. `<input type="text" value="waist due at the
+      // weekend">` rendered 200 by 20 pixels on a walked screen with both
+      // checks green. A machine shape is still a machine shape here, so a
+      // token default is left alone and a phrase is not.
+      const text = literalOf(node.initializer);
+      if (text !== null && LOOKS_LIKE_COPY.test(text) && !MACHINE_SHAPES.some((shape) => shape.test(text))) {
+        violations.push({ file: name, line: at(node), kind: 'value drawn in a field', text });
       }
     } else if (ts.isJsxAttribute(node) && SPOKEN.has(node.name.getText(tree))) {
       const text = literalOf(node.initializer);

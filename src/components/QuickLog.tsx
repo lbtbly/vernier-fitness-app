@@ -49,6 +49,14 @@ const RATING_FIELDS = [
   { metric: 'satiety', label: strings.quickLog.satiety, low: strings.quickLog.satietyLow, high: strings.quickLog.satietyHigh },
 ] as const;
 
+/**
+ * The one request this screen reads its snapshot from. Written once, because
+ * the error card names it back to the checker that reads the screen, and a
+ * marker naming a request the component does not call is a marker that means
+ * nothing.
+ */
+const LOG_ENDPOINT = '/api/log';
+
 const SCALE = [1, 2, 3, 4, 5];
 const WAIST_STEP = 0.5;
 
@@ -56,7 +64,8 @@ const WAIST_STEP = 0.5;
 const WAIST_STALE_DAYS = 3;
 
 /**
- * Who wrote the cause the error card prints.
+ * Who wrote the cause the error card prints, and what happened to make them
+ * write it.
  *
  * `vernier` is a catalogued string: a refusal the route sent, or the status
  * line this component builds from a key. `platform` is the browser's own words,
@@ -68,13 +77,24 @@ const WAIST_STALE_DAYS = 3;
  * downstream. A check that reads the screen cannot tell the two apart by
  * looking at the words, and one that guesses from position excuses whatever
  * lands in the slot, which is how an inline string shipped three times.
+ *
+ * AND THE PLATFORM CLAIM NAMES ITS REQUEST. `data-authored="platform"` alone is
+ * a claim about a string, and a claim about a string is answered by echoing a
+ * string: `('L' + 'oad failed')` marked platform was excused in a 502 state
+ * where the browser had said nothing at all, because the check only asked
+ * whether the words matched something WebKit says somewhere. So the marker
+ * carries the request whose rejection produced it, the checker asks the browser
+ * whether that request really was rejected in that state, and a branch where
+ * the machine answered has nothing to point at.
  */
-type Authored = 'vernier' | 'platform';
+type Cause =
+  | { detail: string; authored: 'vernier' }
+  | { detail: string; authored: 'platform'; rejected: string };
 
 type Load =
   | { state: 'loading' }
   | { state: 'ready'; snapshot: LogSnapshot }
-  | { state: 'error'; detail: string; authored: Authored };
+  | ({ state: 'error' } & Cause);
 
 type LoggedValue = { id: string; metric: string; rawValue: string; unit: string };
 
@@ -147,7 +167,7 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
   const read = useCallback(async () => {
     setLoad({ state: 'loading' });
     try {
-      const response = await fetch('/api/log', { headers: { accept: 'application/json' } });
+      const response = await fetch(LOG_ENDPOINT, { headers: { accept: 'application/json' } });
       if (!response.ok) {
         const body = (await response.json().catch(() => ({}))) as { detail?: string; error?: string };
         // Every branch here is Vernier's copy. The first two are refusals the
@@ -174,8 +194,15 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
     } catch (error) {
       // The fetch never reached the machine, so this string is the browser's,
       // not Vernier's. No key exists for it and none can be written: the wording
-      // and the locale belong to WebKit. It is marked at the branch that knows.
-      setLoad({ state: 'error', detail: (error as Error).message, authored: 'platform' });
+      // and the locale belong to WebKit. It is marked at the branch that knows,
+      // and it names the request that was rejected, which is the fact a checker
+      // can verify against the browser rather than take on trust.
+      setLoad({
+        state: 'error',
+        detail: (error as Error).message,
+        authored: 'platform',
+        rejected: LOG_ENDPOINT,
+      });
     }
   }, [timeZone]);
 
@@ -451,7 +478,12 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
                   </div>
                   <div className="head">{strings.quickLog.errorTitle}</div>
                   <p className="sub">
-                    <span data-authored={load.authored}>{load.detail}</span>{' '}
+                    <span
+                      data-authored={load.authored}
+                      data-platform-request={load.authored === 'platform' ? load.rejected : undefined}
+                    >
+                      {load.detail}
+                    </span>{' '}
                     {strings.quickLog.errorBody}
                   </p>
                   <div className="actions">

@@ -1,8 +1,53 @@
 // Vernier's service worker. Hand written, no next-pwa, which last shipped in
 // 2022. Serve it with Cache-Control: no-cache; next.config.ts does that.
-const VERSION = 'v3';
+const VERSION = 'v4';
 const SHELL = `vernier-shell-${VERSION}`;
 const OFFLINE = '/offline';
+
+// --- generated from src/lib/strings.ts by scripts/build-sw.mjs. Do not edit by hand.
+// Run `npm run sw` after changing strings.offline in the catalogue.
+const COPY = {
+  title: 'Offline',
+  cardTitle: 'This phone cannot reach the Mac mini',
+  causePrefix: 'The app shell is stored on this device, so it opened. Everything else waits for',
+  causeSuffix: 'Either this device has left the tailnet, or the Mac mini is asleep or stopped.',
+};
+// --- end generated ---
+
+/**
+ * The last resort, and it says what /offline says.
+ *
+ * This answers only when the navigation failed, the document is not in the
+ * cache and the precached /offline is not either, which happens when the
+ * browser evicts Cache Storage under storage pressure. It used to answer the
+ * bare word "Offline" as text/plain: a sentence on a screen with no catalogue
+ * key, duplicating strings.offline.title with no reference to it. A worker
+ * cannot import the catalogue, so the copy is written in above at build time
+ * and scripts/build-sw.mjs keeps it equal to the catalogue.
+ *
+ * The host is not copy. It is read from the origin this worker was installed
+ * on, which is the same value the served /offline document prints.
+ */
+function offlineDocument() {
+  const escape = (value) =>
+    String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return `<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0A0A0B">
+<meta name="robots" content="noindex">
+<title>${escape(COPY.title)}</title>
+<style>html{background:#0A0A0B;color:#F4F4F5;font:16px/1.5 -apple-system,system-ui,sans-serif}body{margin:0;padding:24px}h1{font-size:22px;margin:0 0 12px}p{margin:0;color:#A1A1AA}</style>
+</head>
+<body>
+<h1>${escape(COPY.cardTitle)}</h1>
+<p>${escape(COPY.causePrefix)} <b>${escape(self.location.host)}</b>. ${escape(COPY.causeSuffix)}</p>
+</body>
+</html>
+`;
+}
 
 // Only what renders with nothing else in the cache.
 //
@@ -65,7 +110,10 @@ self.addEventListener('fetch', (event) => {
         // offline document, which needs nothing at all.
         return (await caches.match(request, { ignoreSearch: true }))
           || (await caches.match(OFFLINE))
-          || new Response('Offline', { status: 503, headers: { 'Content-Type': 'text/plain' } });
+          || new Response(offlineDocument(), {
+            status: 503,
+            headers: { 'Content-Type': 'text/html; charset=utf-8' },
+          });
       }
     })());
     return;

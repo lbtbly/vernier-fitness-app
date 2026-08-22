@@ -49,7 +49,10 @@
 //
 // Anything else is a defect, reported with the text, the surface and the state.
 //
-// WHAT IT READS THAT IT DID NOT. Inside the svg: `title`, `desc` and `text`,
+// WHAT IT READS THAT IT DID NOT. A text field's value, which is words drawn at
+// the size of any other words and was invisible to both checkers. Inside a
+// `<foreignObject>`, which is ordinary HTML that an svg draws where it sits and
+// which the svg rule skipped wholesale. Inside the svg: `title`, `desc` and `text`,
 // which are the words a chart says out loud and the words it draws on an axis.
 // It used to exclude every svg wholesale. Also `aria-roledescription`,
 // `aria-valuetext`, `aria-keyshortcuts`, the braille pair, and the `value` of a
@@ -71,7 +74,11 @@
 //     seed loaded. A screen that needs a registered passkey, a connected
 //     integration or an open import question is not walked, because none of the
 //     three exists here. Every surface it does walk is named in walk() below
-//     and printed on every run, so the gap is a list and not a guess.
+//     and printed on every run, so the gap is a list and not a guess, and the
+//     three branches it cannot reach are counted out of the database and
+//     printed beside that list under "not walked". A helper returning copy
+//     inside the connected branch passes both checks today; it closes in the
+//     slice that connects an integration, and until then it is stated.
 //   - Two catalogued strings written next to each other. Fragments are tiled
 //     from catalogue anchors, so a sentence assembled entirely out of words that
 //     are already copy somewhere else would tile. Every fragment it accepts is
@@ -93,8 +100,10 @@ import {
   NEVER_RENDERED,
   SPOKEN_ATTRIBUTES,
   SVG_EXCLUDED_SUBTREES,
+  SVG_FOREIGN_HTML,
   SVG_TEXT_ELEMENTS,
   TOKENS,
+  VALUE_AS_CONTENT,
   VALUE_AS_LABEL,
 } from './lib/vocabulary.mjs';
 
@@ -410,23 +419,39 @@ function tile(text) {
 // straight through, and the verifier proved it by planting app copy there and
 // watching the check pass.
 //
-// Provenance is established two ways at once, and BOTH must hold:
+// AND WHAT THAT REPLACED IN ITS TURN, which is the defect this version closes.
+// Provenance used to be a marker plus a word list: mark the node platform, and
+// print a string WebKit says somewhere in this run. Both halves are about the
+// TEXT, and text is the one thing a product can manufacture. `detail: body
+// .detail ?? body.error ?? ('L' + 'oad failed')` marked platform was excused in
+// the 502 state, where the machine answered and the browser had said nothing at
+// all, and the scan of the shipped tree could not see it either because a
+// literal assembled at runtime is not in any file to find. A harvested
+// vocabulary is a run-wide fact and it does not know which branch ran.
 //
-//   1. The product says so at the branch that knows. The quick log marks the
-//      cause `data-authored="platform"` only where the string is a caught
-//      Error from a fetch that never reached the machine, and
-//      `data-authored="vernier"` on every branch that composes a catalogued
-//      string. A marker alone is not enough, because a marker is a claim.
-//   2. The browser says so, in this run. Before the walk starts, this check
-//      provokes fourteen transport failures through WebKit and records the
-//      message WebKit hands back for each. A fragment is excused only when its
-//      text is exactly one of those recorded messages. Nothing the product
-//      wrote can be one of them, because they came out of the browser and not
-//      out of the repository.
+// So the excusal is tied to the BRANCH, and the branch is checked against what
+// the browser actually did in that state. Three things, and all three must hold:
 //
-// A fragment marked platform whose text was never harvested FAILS, and it fails
-// naming what could not be established. So does an unaccounted fragment that
-// carries no marker, wherever it sits. There is no third path.
+//   1. The product says so at the branch that knows, and says which failure.
+//      The quick log marks the cause `data-authored="platform"` only where the
+//      string is a caught rejection of a fetch, and it writes the request that
+//      was rejected into `data-platform-request`. Every branch that composes a
+//      catalogued string marks `data-authored="vernier"` and names nothing.
+//   2. The browser agrees that this request really was rejected while this
+//      state was being produced. Playwright's `requestfailed` fires when a
+//      request ends with no response at all, which is the transport failure the
+//      product's catch block is claiming; a 502 is a response and fires
+//      `requestfinished` instead. The failures are collected per state and read
+//      by the judge, so a fragment in a state where nothing was rejected cannot
+//      be excused however it is marked and whatever it says.
+//   3. The words are ones this WebKit hands a page whose fetch was rejected,
+//      harvested in this run. This is the weakest of the three and it is last:
+//      it stops a marked branch printing a sentence of its own beside a genuine
+//      rejection. It never excuses anything on its own.
+//
+// A fragment marked platform FAILS when any of the three is missing, and the
+// failure names which one. So does an unaccounted fragment that carries no
+// marker, wherever it sits. There is no fourth path.
 
 /** message -> how it was provoked. Filled by harvestPlatformWords, once, first. */
 const platformVocabulary = new Map();
@@ -476,12 +501,57 @@ async function harvestPlatformWords(page) {
 }
 
 /**
+ * What the browser refused while the state now being read was produced.
+ *
+ * Filled by a `requestfailed` listener and emptied after every surface, so what
+ * it holds is the transport failures that belong to this state and not to the
+ * run. Keyed by path, because that is what the markup can name.
+ */
+const rejectedInThisState = new Map();
+
+function pathOf(url) {
+  try {
+    return new URL(url, BASE).pathname;
+  } catch {
+    return url;
+  }
+}
+
+function recordRejection(request) {
+  const failure = request.failure();
+  if (!failure) return;
+  rejectedInThisState.set(pathOf(request.url()), failure.errorText);
+}
+
+/**
  * Can this fragment's provenance be established as platform-authored. Returns
- * how, or null, and null means the fragment fails.
+ * how, or the half that could not be established, which is what the report
+ * prints.
  */
 function platformProvenance(fragment, context) {
-  if (context.authored !== 'platform') return null;
-  return platformVocabulary.get(fragment) ?? null;
+  if (context.authored !== 'platform') return { ok: false, why: null };
+  if (!context.rejected) {
+    return {
+      ok: false,
+      why: 'marked platform, but the markup names no request whose rejection produced it',
+    };
+  }
+  const named = pathOf(context.rejected);
+  const errorText = rejectedInThisState.get(named);
+  if (errorText === undefined) {
+    return {
+      ok: false,
+      why: `marked platform on ${named}, but no request to ${named} was rejected while this state was produced, so the browser wrote nothing here`,
+    };
+  }
+  const harvested = platformVocabulary.get(fragment);
+  if (!harvested) {
+    return {
+      ok: false,
+      why: `marked platform on ${named}, which really was rejected, but this is not a string WebKit hands a page whose fetch was rejected in this run`,
+    };
+  }
+  return { ok: true, provenance: `${harvested}; ${named} rejected in this state: ${errorText}` };
 }
 
 // --------------------------------------------------------------------------
@@ -564,8 +634,17 @@ async function readTheShippedTree() {
  * source-side checker uses.
  */
 function readTheScreen(vocabulary) {
-  const { spoken, valueAsLabel, labelElements, svgText, svgExcluded, neverRendered, cssString } =
-    vocabulary;
+  const {
+    spoken,
+    valueAsLabel,
+    valueAsContent,
+    labelElements,
+    svgText,
+    svgExcluded,
+    svgForeignHtml,
+    neverRendered,
+    cssString,
+  } = vocabulary;
   const found = [];
   const describe = (element) => {
     if (!element) return 'body';
@@ -577,7 +656,13 @@ function readTheScreen(vocabulary) {
   // anything after the <code> exemption came out.
   const contextOf = (element) => {
     const marked = element.closest('[data-authored]');
-    return { authored: marked ? marked.getAttribute('data-authored') : null };
+    if (!marked) return { authored: null, rejected: null };
+    return {
+      authored: marked.getAttribute('data-authored'),
+      // Which failure the branch says produced these words. A claim the checker
+      // takes to the browser, not a claim it takes on trust.
+      rejected: marked.getAttribute('data-platform-request'),
+    };
   };
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   while (walker.nextNode()) {
@@ -587,7 +672,9 @@ function readTheScreen(vocabulary) {
     if (element.closest(neverRendered.join(', '))) continue;
     if (element.closest('svg')) {
       if (element.closest(svgExcluded.join(', '))) continue;
-      if (!element.closest(svgText.join(', '))) continue;
+      // A foreignObject holds ordinary HTML and draws it where it sits, so
+      // inside one the svg rule does not apply and the ordinary one does.
+      if (!element.closest(svgForeignHtml) && !element.closest(svgText.join(', '))) continue;
     }
     if (!node.data || node.data.trim() === '') continue;
     found.push({ where: describe(element), text: node.data, ...contextOf(element) });
@@ -613,7 +700,7 @@ function readTheScreen(vocabulary) {
       for (const match of painted.matchAll(cssStrings)) {
         const text = (match[1] === undefined ? match[2] : match[1]).replace(/\\(?=.)/g, '');
         if (text.trim() === '') continue;
-        found.push({ where: describe(element) + pseudo, text, authored: null });
+        found.push({ where: describe(element) + pseudo, text, authored: null, rejected: null });
       }
     }
   }
@@ -633,6 +720,15 @@ function readTheScreen(vocabulary) {
       found.push({ where: describe(element) + '@value', text: value, ...contextOf(element) });
     }
   }
+  // And what a field is holding, which is text drawn on the screen at the size
+  // of any other text. The walk above cannot reach it: an input has no child
+  // text node, and the live value is a property rather than the attribute.
+  for (const element of document.querySelectorAll(valueAsContent.join(', '))) {
+    const value = element.value;
+    if (typeof value === 'string' && value.trim() !== '') {
+      found.push({ where: describe(element) + '@value', text: value, ...contextOf(element) });
+    }
+  }
   for (const element of document.querySelectorAll(labelElements.join(', '))) {
     const value = element.getAttribute('label');
     if (value && value.trim() !== '') {
@@ -640,7 +736,7 @@ function readTheScreen(vocabulary) {
     }
   }
   if (document.title) {
-    found.push({ where: 'title', text: document.title, authored: null });
+    found.push({ where: 'title', text: document.title, authored: null, rejected: null });
   }
   const description = document.querySelector('meta[name="description"]');
   if (description) {
@@ -648,6 +744,7 @@ function readTheScreen(vocabulary) {
       where: 'meta description',
       text: description.getAttribute('content') || '',
       authored: null,
+      rejected: null,
     });
   }
   return found;
@@ -667,9 +764,9 @@ function judge(surface, state, where, text, context = {}) {
     if (VERBOSE) process.stdout.write(`  ok   ${surface} / ${state}  ${JSON.stringify(fragment)}\n`);
     return;
   }
-  const provenance = platformProvenance(fragment, context);
-  if (provenance) {
-    platformText.push({ surface, state, where, text: fragment, provenance });
+  const excusal = platformProvenance(fragment, context);
+  if (excusal.ok) {
+    platformText.push({ surface, state, where, text: fragment, provenance: excusal.provenance });
     return;
   }
   defects.push({
@@ -678,13 +775,10 @@ function judge(surface, state, where, text, context = {}) {
     where,
     text: fragment,
     unaccounted: result.rest,
-    // A fragment the markup calls platform text but the browser never said is
-    // the exact shape the old slot exemption let through. It fails, and it
-    // fails saying which of the two halves of provenance was missing.
-    why:
-      context.authored === 'platform'
-        ? 'marked platform, but WebKit never produced this string in this run'
-        : 'no catalogue key accounts for it',
+    // A fragment the markup calls platform text, in a state where the browser
+    // refused nothing, is the exact shape the harvested vocabulary let through.
+    // It fails, and it fails naming which half of provenance is missing.
+    why: excusal.why ?? 'no catalogue key accounts for it',
   });
 }
 
@@ -692,16 +786,25 @@ async function readSurface(page, surface, state) {
   const found = await page.evaluate(readTheScreen, {
     spoken: SPOKEN_ATTRIBUTES,
     valueAsLabel: VALUE_AS_LABEL,
+    valueAsContent: VALUE_AS_CONTENT,
     labelElements: LABEL_ATTRIBUTE_ELEMENTS,
     svgText: SVG_TEXT_ELEMENTS,
     svgExcluded: SVG_EXCLUDED_SUBTREES,
+    svgForeignHtml: SVG_FOREIGN_HTML,
     neverRendered: NEVER_RENDERED,
     cssString: CSS_STRING_SOURCE,
   });
   surfacesWalked.push(`${surface} / ${state}`);
   for (const found_ of found) {
-    judge(surface, state, found_.where, found_.text, { authored: found_.authored });
+    judge(surface, state, found_.where, found_.text, {
+      authored: found_.authored,
+      rejected: found_.rejected ?? null,
+    });
   }
+  // What the browser refused belongs to the state it was refused in. The next
+  // state starts with an empty hand, so a rejection in one screen can never
+  // excuse a sentence on another.
+  rejectedInThisState.clear();
 }
 
 /** The strings an API answer puts on a screen. Machine fields are not read. */
@@ -762,6 +865,31 @@ const sourcesBehindAValue = db(
   `select distinct record.source from measurement value
    join source_record record on record.id = value.source_record_id`,
 );
+/**
+ * The branches this walk cannot reach on this machine, counted rather than
+ * described.
+ *
+ * The surfaces below are read out of the database, so the walk covers the
+ * states this installation is actually in. Three states it is not in: no
+ * integration is connected, no passkey is registered, no import question is
+ * open. Copy that renders only inside one of those branches is invisible to
+ * this check and to the source scanner both, and the verifier proved it: a
+ * helper returning "page 4, row 11" inside OperatorPanel's `connected` branch
+ * left both checks at exit 0, and it renders the moment a credential is saved
+ * through the shipped form.
+ *
+ * That is not closed here. It closes in the slice that ships the integration,
+ * where the branch exists to be walked. What slice 3 owes is the honest
+ * statement, so the count is printed on every run, named as a class, beside the
+ * list of what was walked. A zero here is the reason a green means less than it
+ * looks, and it says so out loud.
+ */
+const unreachableBranches = [
+  ['a screen behind a connected integration', "select count(*) from integration_credential where state = 'connected'"],
+  ['a screen behind a registered passkey', 'select count(*) from webauthn_credential'],
+  ['a screen behind an open import question', "select count(*) from import_question where state = 'open'"],
+];
+
 const kindsBehindAValue = db(
   `select distinct record.kind from measurement value
    join source_record record on record.id = value.source_record_id`,
@@ -825,6 +953,12 @@ const context = await browser.newContext({
 });
 const page = await context.newPage();
 
+// What the browser refused, as it refuses it. `requestfailed` fires only when a
+// request ended with no response at all, which is the one thing a caught fetch
+// rejection can be: a 502 is a response and never appears here. This is the
+// fact the markup's platform claim is checked against.
+page.on('requestfailed', recordRejection);
+
 async function walk() {
   // The visitor at the gate, before any session exists on this context.
   await page.goto('/sign-in');
@@ -834,6 +968,9 @@ async function walk() {
   // it is gathered rather than declared: fourteen transport failures, fourteen
   // messages, all of them out of WebKit in this run.
   await harvestPlatformWords(page);
+  // Those fourteen rejections belong to the harvest and to no state on the
+  // walk. The first surface starts with an empty hand.
+  rejectedInThisState.clear();
 
   // With the browser's words in hand, read the shipped tree for anyone writing
   // them down. This is the other half of the platform exemption and it runs
@@ -1158,6 +1295,17 @@ for (const text of platformText) {
 // The walk itself, named. What this check cannot see is whatever is not on
 // this list, so the list is printed on every run rather than described once.
 for (const walked of surfacesWalked) process.stdout.write(`  walked  ${walked}\n`);
+
+// And the branches that were not walked because this installation is not in
+// them. Counted from the database, printed whether the count is zero or not.
+for (const [what, statement] of unreachableBranches) {
+  const count = Number(db(statement)[0] ?? '0');
+  process.stdout.write(
+    `  not walked  ${what}: ${count} on this machine${
+      count === 0 ? ', so a string that renders only there is invisible to both checks' : ''
+    }\n`,
+  );
+}
 
 if (impersonations.length > 0) {
   process.stderr.write(

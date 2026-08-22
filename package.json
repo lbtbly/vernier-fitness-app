@@ -19,7 +19,9 @@
     "test:e2e": "playwright test",
     "routes": "node scripts/route-table.mjs",
     "strings": "node scripts/strings.mjs --check",
-    "strings:rendered": "node scripts/rendered-strings.mjs"
+    "strings:rendered": "node scripts/rendered-strings.mjs",
+    "sw": "node scripts/build-sw.mjs",
+    "sw:check": "node scripts/build-sw.mjs --check"
   },
   "dependencies": {
     "@simplewebauthn/browser": "13.3.0",

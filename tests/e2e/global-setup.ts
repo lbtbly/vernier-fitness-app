@@ -1,18 +1,20 @@
-import { RUN_STAMP } from './host';
+import { liveProvenanceCensus } from './host';
+
+/** What the run must find again at the end. Read once, before a spec runs. */
+export const LIVE_CENSUS = 'VERNIER_LIVE_CENSUS_AT_START';
 
 /**
- * One clock for the whole run.
+ * One reading of the owner's database, taken before anything runs.
  *
- * The destructive helper in host.ts truncates the owner's live tables, and the
- * only thing that tells a row this run wrote from a row the owner owns is when
- * it arrived. So the moment is taken once, here, in the process that spawns the
- * workers, and the workers inherit it. A per-worker stamp would move every time
- * Playwright replaced a worker, and the answer to "was this row already here"
- * would move with it.
- *
- * It is never overwritten. A caller that sets it deliberately, to sweep residue
- * from an interrupted run, keeps the value it chose.
+ * There used to be a clock here instead, stamping when the run began, because
+ * the destructive helper truncated the owner's live tables and the only thing
+ * telling a row this run wrote from a row the owner owns was when it arrived.
+ * That is gone. Nothing in this suite writes the live provenance tables and
+ * `query` cannot write at all, so what is taken here is not a licence to delete
+ * anything: it is the number the teardown checks the owner still has.
  */
 export default function globalSetup(): void {
-  process.env[RUN_STAMP] = process.env[RUN_STAMP] ?? new Date().toISOString();
+  const census = liveProvenanceCensus();
+  process.env[LIVE_CENSUS] = census;
+  console.log(`setup: the owner's database holds ${census}. Nothing in this run may lower it.`);
 }
