@@ -760,26 +760,37 @@ a.value-link:active{opacity:.7}
 .pills li[data-day=planned]{background:transparent;border:1.5px dashed var(--text-3)}
 
 /*
- * The quiet sources, one line whatever the count is.
+ * THE NOTICE REGION UNDER TODAY'S TITLE, AND ITS HEIGHT IS NOT DATA.
  *
- * Tighter than the shell banner because this one is above the fold on Today and
- * F27 counts the pixels there. And it is a disclosure rather than a list for
- * the same reason: a line per source made the banner's height a function of the
- * data, and two quiet sources pushed the weight trend 27 px under the fold. The
- * summary row is the constant; what opens under it is every age and every
- * cause, unabridged.
+ * F27 counts pixels above the fold and everything this region carries is data:
+ * how many sources have gone quiet, how many imports are waiting, how many
+ * entries are still on the phone. A banner each grew the region with the
+ * trouble, so two quiet sources put the weight trend 27 px under the 715 px
+ * fold and an open question beside them put it 43 px under. The first was fixed
+ * one element at a time and the second element proved that wrong.
+ *
+ * So the bound is here, on the region, and it is structural rather than a
+ * property of any string. The row is `--touch` tall, its icon and its chevron
+ * are fixed, and its one line of text is clamped with `nowrap` and an ellipsis:
+ * the region computes 46 px with one notice in it and 46 px with nine, whatever
+ * anybody writes into the copy afterwards. Add a fourth notice in slice 7 and
+ * the fold does not move.
+ *
+ * Nothing is hidden by it. What opens under the line is every notice in full,
+ * and each one still ships its own chip, its own cause sentence and its own
+ * hatched range in the card it belongs to.
  */
-details.banner[data-stale-banner]{display:block;padding:0}
-details.banner > summary{
+details.notices{display:block;padding:0}
+details.notices > summary{
   display:flex;
   gap:10px;
-  /* One line, so it centres. The lines that open sit under it, indented. */
+  /* One line, so it centres. What opens under it sits below, indented. */
   align-items:center;
   /*
    * A control, so the 44 px floor applies to it. DESIGN.md section 2b is
    * explicit that 44 is a floor and never a target, and this is one of the two
    * places the floor is the right number: the row is 361 px wide and carries
-   * one word of state.
+   * one line of state.
    */
   min-height:var(--touch);
   padding:9px 12px;
@@ -787,15 +798,29 @@ details.banner > summary{
   list-style:none;
   cursor:pointer;
 }
-details.banner > summary::-webkit-details-marker{display:none}
-details.banner > summary::marker{content:''}
-details.banner > summary .ch{transition:transform var(--dur) var(--ease)}
-details.banner[open] > summary .ch{transform:rotate(90deg)}
-@media (prefers-reduced-motion: reduce){details.banner > summary .ch{transition:none}}
-/* Indented to the summary's text, so age and cause read under the line they explain. */
-.stalelines{padding:0 12px 9px 40px}
-.staleline{display:block}
-.staleline + .staleline{margin-top:4px}
+details.notices > summary::-webkit-details-marker{display:none}
+details.notices > summary::marker{content:''}
+/*
+ * The clamp that makes the bound structural. A flex child's minimum size is its
+ * content unless it is told otherwise, so `min-width:0` is what actually lets
+ * the ellipsis happen; without it a long line pushes the row wider and wraps.
+ */
+details.notices > summary > .grow{
+  min-width:0;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+details.notices > summary .ch{transition:transform var(--dur) var(--ease)}
+details.notices[open] > summary .ch{transform:rotate(90deg)}
+@media (prefers-reduced-motion: reduce){details.notices > summary .ch{transition:none}}
+/* Indented to the summary's text, so every line reads under the line it explains. */
+.noticelines{padding:0 12px 9px 40px}
+.noticeline{display:flex;gap:10px;align-items:center;color:var(--text);text-decoration:none}
+.noticeline + .noticeline{margin-top:6px}
+a.noticeline{min-height:var(--touch)}
+.noticedetail{display:block}
+.noticedetail + .noticedetail{margin-top:4px}
 
 /*
  * The chart's data table. Hidden from the eye and not from a screen reader,

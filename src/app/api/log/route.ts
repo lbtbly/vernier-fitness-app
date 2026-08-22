@@ -10,8 +10,9 @@ import {
 import { getConfig } from '@/lib/config';
 import { csrfFailure } from '@/lib/csrf';
 import { ok, refuse, sessionOrRefusal } from '@/lib/gate';
-import { METRICS, checkValue } from '@/lib/provenance';
+import { METRICS } from '@/lib/provenance';
 import { strings } from '@/lib/strings';
+import { validateValue } from '@/lib/value-refusal';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,34 +46,13 @@ type Incoming = { id: string; metric: string; rawValue: string };
  * DELETE at the database and it is right to, so a value this function lets
  * past is permanent. A validation gap in an append-only store is not a bug you
  * can clean up afterwards.
+ *
+ * The rendering of a refusal moved to `src/lib/value-refusal.ts` so the quick
+ * log's outbox can ask the same question before it accepts a write and give the
+ * same answer. It used to accept anything and let this route refuse it later,
+ * which told the owner an entry was safe when it was certain to be rejected.
  */
-function validate(entry: { metric: string; rawValue: string }):
-  | { ok: true; value: number | null }
-  | { ok: false; detail: string } {
-  const checked = checkValue(entry.metric, entry.rawValue);
-  if (checked.ok) return { ok: true, value: checked.value };
-  const line = strings.api.log;
-  switch (checked.problem) {
-    case 'unknownMetric':
-      return { ok: false, detail: line.unknownMetric(entry.metric) };
-    case 'blank':
-      return { ok: false, detail: line.blank };
-    case 'notANumber':
-      return { ok: false, detail: line.notANumber(entry.rawValue.trim()) };
-    case 'rating':
-      return { ok: false, detail: line.outOfRange(checked.low, checked.high) };
-    case 'range':
-      return {
-        ok: false,
-        detail: line.outOfBand(
-          strings.metrics[entry.metric as keyof typeof strings.metrics],
-          String(checked.low),
-          String(checked.high),
-          strings.units[METRICS[entry.metric as keyof typeof METRICS].unit],
-        ),
-      };
-  }
-}
+const validate = validateValue;
 
 function usableTimeZone(candidate: unknown, fallback: string): string {
   if (typeof candidate !== 'string' || candidate === '') return fallback;

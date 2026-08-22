@@ -610,6 +610,13 @@ export const strings = {
       queued === 1
         ? '1 entry is waiting to upload. It keeps the time you typed it, not the time it arrives.'
         : `${queued} entries are waiting to upload. Each keeps the time you typed it, not the time it arrives.`,
+    /**
+     * The same count on one line, for the notice region under Today's title,
+     * where the height is fixed and the sentence above it would wrap. The
+     * sentence itself is one tap under it and says the rest.
+     */
+    offlineSummary: (queued: number) =>
+      queued === 1 ? '1 entry is waiting to upload' : `${queued} entries are waiting to upload`,
   },
 
   /**
@@ -1046,6 +1053,27 @@ export const strings = {
   panel: {
     label: (when: string) => `Blood panel, ${when}`,
     note: 'Reference intervals come from the laboratory sheet. This app explains what an analyte measures and never tells you what your result means for you. Take questions to your doctor.',
+  },
+
+  /**
+   * The one region under Today's title, and the only thing that may sit between
+   * the title and the day card.
+   *
+   * F27 counts pixels above the fold, and every notice Today can raise is data:
+   * how many sources have gone quiet, how many imports are waiting, how many
+   * entries are on the phone. A line each made the region's height a function of
+   * how much is wrong, so two of them put the weight trend 43 px under the fold
+   * and five would have put it 200 px under. Silence is the failure mode, so the
+   * answer is never to draw fewer warnings: the answer is one line whose wording
+   * changes and whose height does not, with everything one tap under it.
+   *
+   * When there is one notice the line is that notice's own summary, because a
+   * count of one tells the owner less than the thing itself does. Past one it is
+   * the count, and the disclosure carries every line unabridged.
+   */
+  notices: {
+    summary: (count: number) =>
+      count === 1 ? '1 thing is waiting on you' : `${count} things are waiting on you`,
   },
 
   /** The re-import question, which holds both values and writes nothing. */

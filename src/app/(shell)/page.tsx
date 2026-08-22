@@ -3,11 +3,11 @@ import { headers } from 'next/headers';
 import { after } from 'next/server';
 import { ChartLegend } from '@/components/Chart';
 import { EmptyState } from '@/components/EmptyState';
-import { OutboxBanner } from '@/components/OutboxBanner';
+import { type Notice, NoticeRegion } from '@/components/Notices';
 import { QuickLog, QuickLogTrigger } from '@/components/QuickLog';
 import { ScreenTitle } from '@/components/ScreenTitle';
 import { SourceChip } from '@/components/SourceChip';
-import { StaleBanner, StaleCause, StaleChip } from '@/components/StaleNotice';
+import { StaleCause, StaleChip, staleNotice } from '@/components/StaleNotice';
 import { WaistChart, WeightChart } from '@/components/WeightChart';
 import { ChevronIcon, SyncIcon } from '@/components/icons';
 import { recordRequestOrigin } from '@/db/diagnostics';
@@ -154,26 +154,36 @@ export default async function TodayPage() {
   const phone = body.freshness.find((source) => source.source === 'apple_health_shortcut');
   const scale = body.freshness.find((source) => source.source === 'withings');
 
+  // What Today has to raise above its first card. The region bounds the room
+  // they take; each notice decides what it says.
+  const questionNotice: Notice | null =
+    questions.length === 0
+      ? null
+      : {
+          id: 'question',
+          tone: 'warn',
+          summary: strings.question.openCount(questions.length),
+          lines: [strings.question.title],
+          href: `/value/${questions[0].measurementId}`,
+        };
+  const notices = [staleNotice(body.freshness, timeZone), questionNotice].filter(
+    (notice): notice is Notice => notice !== null,
+  );
+
   return (
     <div className="today">
       <ScreenTitle label={longDate(now, timeZone)} title={strings.today.title} />
 
       {/*
-        * Screen 03 frame 2 puts the queue count here, on Today, with the sheet
-        * closed. Nothing is drawn when the queue is empty.
+        * Everything between the title and the first card, in one region that is
+        * one line tall whatever it holds. The queue count screen 03 frame 2 puts
+        * here is added by the region itself, because only this phone knows it.
+        *
+        * Three notices go in today and slices 5 to 14 add more. Nothing about
+        * the fold changes when they do: the region's height is fixed by
+        * `.notices > summary` and not by how much is wrong.
         */}
-      <OutboxBanner />
-
-      <StaleBanner freshness={body.freshness} timeZone={timeZone} />
-
-      {questions.length > 0 ? (
-        <Link className="banner w" href={`/value/${questions[0].measurementId}`}>
-          <span className="grow">
-            <b>{strings.question.title}</b> {strings.question.openCount(questions.length)}
-          </span>
-          <ChevronIcon className="ch" />
-        </Link>
-      ) : null}
+      <NoticeRegion notices={notices} />
 
       {/* ---------- what do I do today ---------- */}
       <section className="card day">
