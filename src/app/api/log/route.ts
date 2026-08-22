@@ -127,7 +127,7 @@ async function handle(request: Request) {
   try {
     body = (await request.json()) as typeof body;
   } catch {
-    return refuse(400, strings.api.jsonBody, strings.api.log.bodyDetail);
+    return refuse(400, strings.api.jsonBody, 'The body was not readable, try once more.');
   }
 
   const config = getConfig();

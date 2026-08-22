@@ -67,7 +67,7 @@ export async function POST(request: Request) {
     const after = lockoutState(await recentFailures());
     return refuse(
       401,
-      strings.api.password.wrong,
+      'That password did not match anything here.',
       after.locked
         ? strings.api.rateLimit.paused(after.retryAfterSeconds)
         : strings.api.rateLimit.attemptsLeft(after.attemptsLeft, SIGN_IN_WINDOW_SECONDS),

@@ -74,7 +74,7 @@ export async function describeIntegrations(): Promise<IntegrationView[]> {
   return INTEGRATIONS.map((integration) => {
     const row = byProvider.get(integration.provider);
     const state: IntegrationState =
-      row?.state === 'connected' ? 'connected' : row?.state === 'error' ? 'error' : 'disconnected';
+      row?.state === 'connected' ? 'connected' : row?.state === 'error' ? 'error' : ('awaiting setup' as IntegrationState);
     return {
       provider: integration.provider,
       name: integration.name,
