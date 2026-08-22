@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { DeviceReport } from '@/components/DeviceReport';
 import { ServiceWorker } from '@/components/ServiceWorker';
 import { getConfig } from '@/lib/config';
+import { readCsrfToken } from '@/lib/csrf';
 import './globals.css';
 
 /**
@@ -49,8 +50,15 @@ export const viewport: Viewport = {
 /**
  * Dark first, exactly as the wireframes render. The light theme block ships in
  * the stylesheet too and takes over the moment data-theme reads light.
+ *
+ * The launch report writes, so the token travels with it. This is a server
+ * component and the middleware has already minted the value for this very
+ * request, so the layout reads it here and hands it down rather than leaving a
+ * mutating route with no anti-forgery on it.
  */
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const csrfToken = await readCsrfToken();
+
   return (
     <html lang="en" data-theme="dark">
       <head>
@@ -64,7 +72,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         {children}
         <ServiceWorker />
-        <DeviceReport />
+        <DeviceReport csrfToken={csrfToken} />
       </body>
     </html>
   );

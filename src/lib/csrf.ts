@@ -23,9 +23,12 @@ import {
  * A refused request writes nothing at all, not even an audit row. F12 counts
  * rows before and after and expects the number not to move, and a rejection
  * this early is not an attempt on a credential: it never reached one.
+ *
+ * There is no exemption list. The launch report used to hold one, because the
+ * root layout posted without a token, and that made the row C2's evidence
+ * rests on writable by anything on the tailnet with a curl. The layout is a
+ * server component, so it mints the token and hands it to the client instead.
  */
-
-export const CSRF_EXEMPT_PATHS = ['/api/diagnostics/launch'];
 
 export async function readCsrfToken(): Promise<string> {
   const [jar, headerBag] = await Promise.all([cookies(), headers()]);
@@ -42,9 +45,6 @@ export type CsrfFailure = { response: NextResponse };
  * this way so a handler reads as: refuse, then act.
  */
 export async function csrfFailure(request: Request): Promise<CsrfFailure | null> {
-  const url = new URL(request.url);
-  if (CSRF_EXEMPT_PATHS.includes(url.pathname)) return null;
-
   const jar = await cookies();
   const cookieToken = jar.get(CSRF_COOKIE)?.value;
   const headerToken = request.headers.get(CSRF_HEADER);

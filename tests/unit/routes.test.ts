@@ -18,6 +18,25 @@ describe('the route table', () => {
     }
   });
 
+  it('opens the two diagnostics endpoints by name and nothing else in that namespace', () => {
+    // These two are public because four lines of .forge/PREFLIGHT.md curl them
+    // from a shell with no session. That was a decision about two endpoints,
+    // not about a namespace: a prefix here would hand the same opening to
+    // /api/diagnostics/ingest, which slice 12 has yet to write and which nobody
+    // has reviewed.
+    expect(classifyRoute('/api/diagnostics/device')).toBe('public');
+    expect(classifyRoute('/api/diagnostics/launch')).toBe('public');
+    for (const path of [
+      '/api/diagnostics/anything-else',
+      '/api/diagnostics/ingest',
+      '/api/diagnostics',
+      '/api/diagnostics/device/detail',
+    ]) {
+      expect(classifyRoute(path)).toBe('protected');
+      expect(isOpenRoute(path)).toBe(false);
+    }
+  });
+
   it('calls the sign-in endpoints the gate, because they cannot need a session', () => {
     for (const path of [
       '/api/auth/bootstrap',

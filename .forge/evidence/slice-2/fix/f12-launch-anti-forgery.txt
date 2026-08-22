@@ -1,0 +1,21 @@
+== the row before anything ==
+standalone_seen | observed false | last_reported_at 2026-08-22 02:22:25.146994+02
+
+== 1. a bare curl: no cookie, no x-vernier-csrf header ==
+{"error":"Anti-forgery check failed.","detail":"This request carried no x-vernier-csrf header. Nothing was written."}status 403
+
+-- the row after the refused post --
+standalone_seen | observed false | last_reported_at 2026-08-22 02:22:25.146994+02
+
+== 2. the same post carrying the anti-forgery value the middleware issued ==
+GET /sign-in status 200
+a vernier_csrf cookie was issued: yes
+status 204
+-- the row after the accepted post --
+standalone_seen | observed false | last_reported_at 2026-08-22 02:34:43.114864+02
+
+== 3. a value that does not match the cookie ==
+{"error":"Anti-forgery check failed.","detail":"The anti-forgery token does not match the one issued to this browser. Nothing was written."}status 403
+
+-- the row after the mismatched post --
+standalone_seen | observed false | last_reported_at 2026-08-22 02:34:43.114864+02

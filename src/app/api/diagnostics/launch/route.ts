@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { recordDeviceLaunch } from '@/db/diagnostics';
+import { csrfFailure } from '@/lib/csrf';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,8 +13,17 @@ export const dynamic = 'force-dynamic';
  * Two booleans in, nothing out. Anything else in the body is ignored rather
  * than stored, and a body that is not two booleans is refused, so this endpoint
  * can never become a place to put data.
+ *
+ * It writes, so it carries the anti-forgery token like every other mutating
+ * route. C2 reads this row back as proof the owner opened the app from his
+ * Home Screen, and evidence anything on the tailnet can author with a curl is
+ * not evidence. The report is raised from the root layout, which is a server
+ * component and mints the token it hands to the client.
  */
 export async function POST(request: Request) {
+  const csrf = await csrfFailure(request);
+  if (csrf) return csrf.response;
+
   let body: unknown;
   try {
     body = await request.json();

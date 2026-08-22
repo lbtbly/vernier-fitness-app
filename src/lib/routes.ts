@@ -33,8 +33,15 @@ export const PUBLIC_PATHS: string[] = [
   '/api/diagnostics/launch',
 ];
 
-/** The static shell, plus anything under the diagnostics report. */
-export const PUBLIC_PREFIXES: string[] = ['/_next/', '/icons/', '/api/diagnostics/'];
+/**
+ * The static shell, and only the static shell.
+ *
+ * A prefix is right for build output and icons, where the names are generated
+ * and there is nothing to review one by one. An API namespace is not that. The
+ * two public diagnostics endpoints are named above, so a third one written in a
+ * later slice is protected until somebody decides otherwise and says so here.
+ */
+export const PUBLIC_PREFIXES: string[] = ['/_next/', '/icons/'];
 
 /**
  * The gate itself. These cannot require a session, because they are what

@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
 import { projectRoot } from './host';
 
 /**
@@ -22,6 +22,22 @@ const VIEWPORTS = [
   { name: '768x1024', width: 768, height: 1024 },
   { name: '1280x800', width: 1280, height: 800 },
 ];
+
+/** Dark theme --accent and a colour that is not painted at all. */
+const ACCENT = 'rgb(90, 169, 255)';
+const NOTHING = 'rgba(0, 0, 0, 0)';
+
+/** What a button actually paints, which is the only thing a screen is judged on. */
+async function paint(button: Locator) {
+  return button.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      color: style.color,
+      background: style.backgroundColor,
+      border: style.borderTopColor,
+    };
+  });
+}
 
 test.beforeAll(() => {
   mkdirSync(CAPTURES, { recursive: true });
@@ -52,6 +68,18 @@ test.describe('screen 01, the gate', () => {
       const accented = await page.locator('.btn.primary').count();
       expect(accented).toBe(1);
 
+      // One box, and one line of text under it. Counting .btn.primary was not
+      // enough: the password action shipped as a bordered white button, the
+      // same size and shape as the passkey, because .btn.quiet lost the
+      // wireframe's border-color and colour. So measure what is painted.
+      const primary = await paint(passkey);
+      const quiet = await paint(password);
+      expect(primary.background).toBe(ACCENT);
+      expect(quiet.background).toBe(NOTHING);
+      expect(quiet.border).toBe(NOTHING);
+      expect(quiet.color).toBe(ACCENT);
+      expect(quiet.color).not.toBe(primary.color);
+
       // 52 px of button, which is what the wireframe measures.
       expect(Math.round(passkeyBox.height)).toBeGreaterThanOrEqual(52);
 
@@ -72,6 +100,13 @@ test.describe('screen 01, the gate', () => {
     await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Try the passkey again' })).toBeVisible();
     expect(Math.round((await field.boundingBox())!.height)).toBeGreaterThanOrEqual(52);
+
+    // The way back to the passkey is the quiet one here too.
+    const retry = await paint(page.getByRole('button', { name: 'Try the passkey again' }));
+    expect(retry.background).toBe(NOTHING);
+    expect(retry.border).toBe(NOTHING);
+    expect(retry.color).toBe(ACCENT);
+
     await capture(page, 'c4-password-second-393x852');
   });
 
