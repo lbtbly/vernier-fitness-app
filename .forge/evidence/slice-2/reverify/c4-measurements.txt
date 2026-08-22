@@ -1,0 +1,74 @@
+C4 re-verify, WebKit against the live origin, 2026-08-22T00:56:48Z
+
+
+================ 393x852 : /sign-in default (passkey first) ================
+.btn total=2  .btn.primary=1  .btn.quiet=1
+primary : {"text":"Sign in with passkey","color":"rgb(8, 8, 10)","background":"rgb(90, 169, 255)","borderTopColor":"rgb(90, 169, 255)","borderTopWidth":"1px","minHeight":"52px","fontSize":"16px","fontWeight":"600","height":52,"width":361,"y":357}
+quiet   : {"text":"Use the backup password","color":"rgb(90, 169, 255)","background":"rgba(0, 0, 0, 0)","borderTopColor":"rgba(0, 0, 0, 0)","borderTopWidth":"1px","minHeight":"52px","fontSize":"16px","fontWeight":"500","height":52,"width":361,"y":419}
+horizontal overflow px: 0
+gate class present
+
+================ 768x1024 : /sign-in default (passkey first) ================
+.btn total=2  .btn.primary=1  .btn.quiet=1
+primary : {"text":"Sign in with passkey","color":"rgb(8, 8, 10)","background":"rgb(90, 169, 255)","borderTopColor":"rgb(90, 169, 255)","borderTopWidth":"1px","minHeight":"52px","fontSize":"16px","fontWeight":"600","height":52,"width":688,"y":469}
+quiet   : {"text":"Use the backup password","color":"rgb(90, 169, 255)","background":"rgba(0, 0, 0, 0)","borderTopColor":"rgba(0, 0, 0, 0)","borderTopWidth":"1px","minHeight":"52px","fontSize":"16px","fontWeight":"500","height":52,"width":688,"y":531}
+horizontal overflow px: 0
+gate class present
+
+================ 1280x800 : /sign-in default (passkey first) ================
+.btn total=2  .btn.primary=1  .btn.quiet=1
+primary : {"text":"Sign in with passkey","color":"rgb(8, 8, 10)","background":"rgb(90, 169, 255)","borderTopColor":"rgb(90, 169, 255)","borderTopWidth":"1px","minHeight":"52px","fontSize":"16px","fontWeight":"600","height":52,"width":688,"y":357}
+quiet   : {"text":"Use the backup password","color":"rgb(90, 169, 255)","background":"rgba(0, 0, 0, 0)","borderTopColor":"rgba(0, 0, 0, 0)","borderTopWidth":"1px","minHeight":"52px","fontSize":"16px","fontWeight":"500","height":52,"width":688,"y":419}
+horizontal overflow px: 0
+gate class present
+
+================ 393x852 : password second ================
+.btn.primary count: 1
+primary : {"text":"Sign in","color":"rgb(8, 8, 10)","background":"rgb(90, 169, 255)","borderTopColor":"rgb(90, 169, 255)","borderTopWidth":"1px","minHeight":"52px","fontSize":"16px","fontWeight":"600","height":52,"width":361,"y":400}
+quiet   : {"text":"Try the passkey again","color":"rgb(90, 169, 255)","background":"rgba(0, 0, 0, 0)","borderTopColor":"rgba(0, 0, 0, 0)","borderTopWidth":"1px","minHeight":"52px","fontSize":"16px","fontWeight":"500","height":52,"width":361,"y":462}
+field   : {"minHeight":"52px","height":52,"labelled":true}
+
+================ 393x852 : host unreachable ================
+banner text: The Mac mini is not answering.This device cannot reach the origin. Either it has left the tailnet, or the Mac mini is asleep or stopped. Sign-in needs the machine; nothing here works from the cache.
+try again btn: {"text":"Sign in with passkey","color":"rgb(8, 8, 10)","background":"rgb(90, 169, 255)","borderTopColor":"rgb(90, 169, 255)","borderTopWidth":"1px","minHeight":"52px","fontSize":"16px","fontWeight":"600","height":52,"width":361,"y":386}
+
+================ diagnostics ================
+launch posts observed: ["POST 204"]
+console errors: []
+failed requests: ["POST https://lamberts-mac-mini.tailda76d6.ts.net/api/auth/passkey/authentication/options Blocked by Web Inspector"]
+
+======== owner creation, scratch instance on the same image ========
+
+=== 393x852 owner creation === heading="Create the owner account" overflow=0
+   {"text":"Create account and add a passkey","cls":"btn primary block","color":"rgb(8, 8, 10)","bg":"rgb(90, 169, 255)","border":"rgb(90, 169, 255)","minHeight":"52px","fontSize":"16px","h":52}
+
+=== 768x1024 owner creation === heading="Create the owner account" overflow=0
+   {"text":"Create account and add a passkey","cls":"btn primary block","color":"rgb(8, 8, 10)","bg":"rgb(90, 169, 255)","border":"rgb(90, 169, 255)","minHeight":"52px","fontSize":"16px","h":52}
+
+=== 1280x800 owner creation === heading="Create the owner account" overflow=0
+   {"text":"Create account and add a passkey","cls":"btn primary block","color":"rgb(8, 8, 10)","bg":"rgb(90, 169, 255)","border":"rgb(90, 169, 255)","minHeight":"52px","fontSize":"16px","h":52}
+
+console errors: ["Failed to load resource: the server responded with a status of 403 (Forbidden)","Failed to load resource: the server responded with a status of 403 (Forbidden)","Failed to load resource: the server responded with a status of 403 (Forbidden)"]
+
+======== keyboard traversal, Chrome, all three gate states ========
+
+=== default, passkey first === interactive=2 stops=2
+   {"el":"button.btn primary block","outline":"2px solid rgb(143, 196, 255)","offset":"2px"}
+   {"el":"button.btn quiet block","outline":"2px solid rgb(143, 196, 255)","offset":"2px"}
+  stops NOT at 2px solid --focus / 2px offset: 0 []
+
+=== password second === interactive=3 stops=3
+   {"el":"input.input","outline":"2px solid rgb(143, 196, 255)","offset":"2px"}
+   {"el":"button.btn primary block","outline":"2px solid rgb(143, 196, 255)","offset":"2px"}
+   {"el":"button.btn quiet block","outline":"2px solid rgb(143, 196, 255)","offset":"2px"}
+  stops NOT at 2px solid --focus / 2px offset: 0 []
+
+=== host unreachable === interactive=3 stops=3
+   {"el":"button.btn quiet block","outline":"2px solid rgb(143, 196, 255)","offset":"2px"}
+   {"el":"button.btn block","outline":"2px solid rgb(143, 196, 255)","offset":"2px"}
+   {"el":"button.btn primary block","outline":"2px solid rgb(143, 196, 255)","offset":"2px"}
+  stops NOT at 2px solid --focus / 2px offset: 0 []
+
+======== the rule as the live origin serves it ========
+.btn.quiet{color:var(--accent);background:0 0;border-color:#0000}
+.gate .btn{min-height:52px;font-size:16px}

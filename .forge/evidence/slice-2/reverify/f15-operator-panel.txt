@@ -1,0 +1,29 @@
+F15 re-verify, live origin, 393x852 WebKit, 2026-08-22T00:57:33Z
+A throwaway opaque value is stored, read back, and deleted. It is never printed.
+
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+signed in, at: https://lamberts-mac-mini.tailda76d6.ts.net/settings
+integration_credential before: 0
+stored row: withings | connected | user.metrics | J6fmT8vYVq3OOwVkOerDSxdnGowK0AqNS6TSsA9O
+row holds the plaintext? false
+.btn.quiet on the operator panel: 3
+   {"text":"Check it still opens","color":"rgb(90, 169, 255)","bg":"rgba(0, 0, 0, 0)","border":"rgba(0, 0, 0, 0)","minHeight":"44px","fontSize":"15px","h":44}
+   {"text":"Disconnect","color":"rgb(90, 169, 255)","bg":"rgba(0, 0, 0, 0)","border":"rgba(0, 0, 0, 0)","minHeight":"44px","fontSize":"15px","h":44}
+   {"text":"Sign out","color":"rgb(90, 169, 255)","bg":"rgba(0, 0, 0, 0)","border":"rgba(0, 0, 0, 0)","minHeight":"44px","fontSize":"15px","h":44}
+.btn.primary count: 1
+horizontal overflow px: 0
+--- the Withings row as rendered ---
+Withings
+Weight, fat mass and heart rate from the Body Smart scale.
+Scope: user.metrics
+Last successful sync: No successful sync yet
+connected
+Check it still opens
+Disconnect
+---
+rendered HTML holds the plaintext? false
+any API response body holds the plaintext? false
+integration_credential after cleanup: 0
+container logs hold the plaintext? false
+console errors: []
+after sign out, at: https://lamberts-mac-mini.tailda76d6.ts.net/sign-in

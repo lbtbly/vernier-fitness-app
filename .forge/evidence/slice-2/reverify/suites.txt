@@ -1,0 +1,21 @@
+Full suites after the fix, 2026-08-22T00:58:08Z
+
+======== unit ========
+ ✓ tests/unit/password.test.ts > the backup password > refuses an algorithm it does not verify, rather than returning false quietly 19ms
+ ✓ tests/unit/password.test.ts > the backup password > states every reason a password is refused 0ms
+
+ Test Files  7 passed (7)
+      Tests  39 passed (39)
+   Start at  02:58:09
+   Duration  435ms (transform 193ms, setup 0ms, import 457ms, tests 249ms, environment 0ms)
+
+
+======== end to end ========
+  ✓  18 [webkit-iphone] › tests/e2e/zz-rate-limit.spec.ts:68:3 › the rate limiter › clears from the host shell, appending a row rather than editing one (701ms)
+focus traversal: 3 stops of 3 interactive elements
+  input.input: 2px solid rgb(143, 196, 255) at 2px
+  button.btn primary block: 2px solid rgb(143, 196, 255) at 2px
+  button.btn quiet block: 2px solid rgb(143, 196, 255) at 2px
+  ✓  19 [chrome-keyboard] › tests/e2e/focus.spec.ts:32:1 › every interactive element on the gate carries a 2 px focus outline at 2 px offset (796ms)
+
+  19 passed (34.5s)

@@ -1,0 +1,88 @@
+F10 re-verify, 2026-08-22T00:57:23Z
+
+======== the stored parameter columns on the shipped install ========
+ password_algorithm | password_memory | password_passes | password_parallelism | password_tag_length | nonce_bytes | tag_bytes 
+--------------------+-----------------+-----------------+----------------------+---------------------+-------------+-----------
+ argon2id           |           19456 |               2 |                    1 |                  32 |          16 |        32
+(1 row)
+
+======== scripts/recovery.sh restored byte for byte ========
+working copy : 6b92a0b2943cbf5d5ba1f4ae023f77fedd2d8c24ba1597ca836e34de6c3000ec
+HEAD f64a222 : 6b92a0b2943cbf5d5ba1f4ae023f77fedd2d8c24ba1597ca836e34de6c3000ec
+slice 2 0c66771: 6b92a0b2943cbf5d5ba1f4ae023f77fedd2d8c24ba1597ca836e34de6c3000ec
+(no diff line above means identical)
+
+======== the new test bites, and cannot pass on a missing match ========
+
+--- shipped scripts/recovery.sh ---
+PASSWORD_SCRIPT block length: 1900 chars; contains randomBytes(32)? false
+ memory      : 19456
+ passes      : 2
+ parallelism : 1
+ tagLength   : 32
+ nonceBytes  : 16
+ columns     : 19456,2,1,32
+ printed     : 19456,2,1,16
+
+--- mutated: hash memory -> 15000 ---
+PASSWORD_SCRIPT block length: 1900 chars; contains randomBytes(32)? false
+ memory      : 15000
+ passes      : 2
+ parallelism : 1
+ tagLength   : 32
+ nonceBytes  : 16
+ columns     : 19456,2,1,32
+ printed     : 19456,2,1,16
+
+--- mutated: stored columns -> 15000 ---
+PASSWORD_SCRIPT block length: 1900 chars; contains randomBytes(32)? false
+ memory      : 19456
+ passes      : 2
+ parallelism : 1
+ tagLength   : 32
+ nonceBytes  : 16
+ columns     : 15000,2,1,32
+ printed     : 19456,2,1,16
+
+--- mutated: printed line -> 15000 ---
+PASSWORD_SCRIPT block length: 1900 chars; contains randomBytes(32)? false
+ memory      : 19456
+ passes      : 2
+ parallelism : 1
+ tagLength   : 32
+ nonceBytes  : 16
+ columns     : 19456,2,1,32
+ printed     : 15000,2,1,16
+
+--- mutated: memory line deleted ---
+PASSWORD_SCRIPT block length: 1883 chars; contains randomBytes(32)? false
+ memory      : NULL MATCH -> digits() throws
+ passes      : 2
+ parallelism : 1
+ tagLength   : 32
+ nonceBytes  : 16
+ columns     : 19456,2,1,32
+ printed     : 19456,2,1,16
+
+--- mutated: block renamed ---
+PASSWORD_SCRIPT block: NO MATCH -> block() would throw
+
+======== the suite ========
+ RUN  v4.1.11 /Users/lambertbouley/Claude/lbtbly-fitness-app
+
+ ✓ tests/unit/recovery-parameters.test.ts > the Argon2id parameters, in both places that hold them > hashes a recovery password at exactly the cost the app hashes at 1ms
+ ✓ tests/unit/recovery-parameters.test.ts > the Argon2id parameters, in both places that hold them > stores on the owner row the same numbers it hashed with 0ms
+ ✓ tests/unit/recovery-parameters.test.ts > the Argon2id parameters, in both places that hold them > tells the operator the cost it actually used 0ms
+ ✓ tests/unit/recovery-parameters.test.ts > the Argon2id parameters, in both places that hold them > holds the app to the floor F10 names, so agreeing on a weaker cost is not a pass 0ms
+ ✓ tests/unit/password.test.ts > the backup password > hashes with Argon2id at the parameters the rubric names 22ms
+ ✓ tests/unit/password.test.ts > the backup password > gives every owner a different nonce, so two identical passwords do not share a tag 38ms
+ ✓ tests/unit/password.test.ts > the backup password > verifies the right password and refuses the wrong one 75ms
+ ✓ tests/unit/password.test.ts > the backup password > reads its parameters from the row and not from the constants 57ms
+ ✓ tests/unit/password.test.ts > the backup password > refuses an algorithm it does not verify, rather than returning false quietly 19ms
+ ✓ tests/unit/password.test.ts > the backup password > states every reason a password is refused 0ms
+
+ Test Files  2 passed (2)
+      Tests  10 passed (10)
+   Start at  02:57:24
+   Duration  333ms (transform 37ms, setup 0ms, import 56ms, tests 215ms, environment 0ms)
+

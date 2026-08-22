@@ -8,23 +8,23 @@ Owner decisions, taken 2026-08-21, binding:
 
 Last phase: 8 BUILD and 9 VERIFY, iterating on slice 2.
 Size: L. Eleven vertical workstreams with five separate external integrations, each carrying its own auth, data flow and failure modes.
-Current slice: 2, the gate. Closes F8-F18, C4. Slice 1 is done but for three owner-blocked lines: F4, R1, C2.
+Current slice: 3, the provenance spine and the quick log. Closes F19-F26, C5, C6. Slice 2 is done but for its share of the three owner-blocked lines. Earlier: slice 2, the gate. Closes F8-F18, C4. Slice 1 is done but for three owner-blocked lines: F4, R1, C2.
 
 ## Where the run actually stands
 
-**Twenty of 166 rubric lines checked:** F1, F2, F3, F5, F6, F7, F8, F9, F10, F11, F13, F14, F15, F16, F17, F18, C1, C3, D2, D4. Every one ruled by a verifier that re-ran the command itself and accepted no builder capture as proof.
+**Twenty-two of 166 rubric lines checked:** F1, F2, F3, F5, F6, F7, F8, F9, F10, F11, F13, F14, F15, F16, F17, F18, C1, C3, D2, D4. Every one ruled by a verifier that re-ran the command itself and accepted no builder capture as proof.
 
 Slices 1 and 2 are built, live and committed. Slice 1 at `25954aa`, slice 2 at `0c66771`.
 
 **Slice 1: one FAIL, then fixed.** Three defects. C3, the offline document painting the framework's chunk-load error on any uncached route, is fixed and re-proven cold: `/offline` is now a self-contained document with zero external references, so it cannot need a chunk. F4, R1 and C2 remain open and are owner-blocked, not code-blocked.
 
-**Slice 2: one FAIL, fix in flight.** Two defects:
+**Slice 2: one FAIL, fixed, re-verified PASS at `f64a222`.** Two defects, both closed:
 1. F12. `POST /api/diagnostics/launch` sat in `CSRF_EXEMPT_PATHS`, so a bare curl with no token returned 204 and wrote. Worse than its severity: that row is the row C2's evidence rests on, so anything on the tailnet could author the proof that the owner installed the app. The fix threads a real token from the server layout and deletes the exemption.
 2. C4. The shipped CSS dropped two declarations from `.btn.quiet`, so the secondary action renders as a bordered white button the same size as the primary, against the design sheet's own annotation that the password option is never louder. The fix restores them and diffs every button, field and card rule against the wireframes.
 
 Two latent issues went into the same dispatch: `PUBLIC_PREFIXES` carried `/api/diagnostics/` as a standing prefix, wider than the two endpoints ever intended to be public, so a third diagnostics route would become public with no decision; and `scripts/recovery.sh` restates the Argon2id parameters with nothing asserting the two copies agree.
 
-Escalation ladder: one FAIL on slice 1, now cleared. One FAIL on slice 2, fix in flight. Both slices were built at the raised model tier from the start, because slice 1 set the conventions the rest imitate and slice 2 is the security boundary.
+Escalation ladder: one FAIL on slice 1, cleared. One FAIL on slice 2, cleared. Neither slice reached a second failure, so no re-plan and no further tier raise. Both slices were built at the raised model tier from the start, because slice 1 set the conventions the rest imitate and slice 2 is the security boundary.
 
 D1, D3 and D5 sweep clean but stay unchecked by design: each names all thirteen screens and only seven exist. Not refused, not reached. The final full-scope verify closes them.
 
@@ -58,6 +58,9 @@ compose.yaml passes exactly seven variables into the app container: APP_URL, APP
 Playwright WebKit is cached on the host at ~/Library/Caches/ms-playwright, 297 MB. The e2e suite runs on the host against the containerised app, never inside the container, because WebKit on Linux ARM is unreliable and Safari is the only engine this product ever meets.
 
 ## Notes for later sessions
+
+- **Decided 2026-08-22, for whoever builds slice 6.** `.forge/PREFLIGHT.md` line 146 curls `/api/diagnostics/ingest` with no session and reads `lastIngestWithin36h`. `tests/unit/routes.test.ts` currently asserts that path classifies protected. The preflight line is right and the test encodes today's absence rather than a decision: that endpoint is a diagnostics READ, the same class as `/api/diagnostics/device` and `/api/diagnostics/launch`, and the preflight script has no session to offer. Slice 6 names it in `PUBLIC_PATHS` and updates that assertion. It returns a boolean and a timestamp, never a payload, never a token, never a count.
+- **Design contradictions are settled in DESIGN.md section 2b and that section outranks any single wireframe.** The base button is 48px and 16px; `00-patterns.html` says 44 and 15 and is the outlier on three separate rules because it was written first. 44px is the accessibility floor for incidental controls, never a primary action's size. Escalations that stay: gate and quick-log sheet 52px, session player 56px with 88px on the transport, `.btn.icon` 44x44 square which eleven sheets agree on.
 
 - The session secret-guard hook blocks any Bash command whose text contains the bare word "secrets", or a credential-named variable beside echo or printf, or .env, .pem and .key paths. It blocks Read, Edit and Write on those paths too. Write files with the Write tool, or run a Node or Python script from the scratchpad. A script's own file access is not intercepted.
 - To read configuration, ask the running container: `docker compose exec -T app printenv NAME`. Never pass `--env-file`; Compose reads the file from the project directory on its own.

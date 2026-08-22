@@ -1,0 +1,47 @@
+Regression sweep after the slice 2 fix, 2026-08-22T00:57:53Z
+
+======== containers ========
+NAME            IMAGE                                                                     COMMAND                  SERVICE   CREATED          STATUS                    PORTS
+vernier-app-1   sha256:675da059608395afbebdb4becea9a6f89d83190b2128c0c5839f69d116becdb3   "docker-entrypoint.s…"   app       24 minutes ago   Up 24 minutes (healthy)   127.0.0.1:3000->3000/tcp
+vernier-db-1    postgres:18-alpine                                                        "docker-entrypoint.s…"   db        3 hours ago      Up 3 hours (healthy)      5432/tcp
+
+======== /healthz ========
+HTTP/2 200 
+cache-control: no-store
+content-type: application/json
+date: Sat, 22 Aug 2026 00:57:53 GMT
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch
+x-robots-tag: noindex
+
+{"status":"ok"}
+
+======== /offline, self contained ========
+status=200 bytes=7347
+references to _next: 0
+script/link/img srcs: 1
+hrefs present:
+href="/"
+href="/eat"
+href="/health"
+href="/settings"
+href="/train"
+
+======== port binding ========
+COMMAND    PID          USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+com.docke 1387 lambertbouley  133u  IPv4 0xa007413a0e803306      0t0  TCP 127.0.0.1:3000 (LISTEN)
+LAN address: 192.168.1.97
+curl to the LAN address on 3000 -> 000 (000 is a refused connection)
+curl to the LAN address on 3000 -> connection failed inside 3 seconds
+
+======== typecheck ========
+> vernier@0.1.0 typecheck
+> tsc --noEmit
+
+
+======== D1 and D4 sweeps ========
+TODO/FIXME/XXX/HACK in src, scripts, tests, public: 0
+lorem/TBD/coming soon/example.com in src and public: 0
+
+======== install state, as found ========
+owner=1 webauthn_credential=0 integration_credential=0
+{"standaloneSeen":false,"wakeLockAvailable":false,"passkeyRegistered":false,"pushSubscription":false,"firstObservedAt":{"standaloneSeen":null,"wakeLockAvailable":null,"passkeyRegistered":null,"pushSubscription":null},"lastReportedAt":{"standaloneSeen":"2026-08-22T00:57:36.061Z","wakeLockAvailable":null,"passkeyRegistered":null,"pushSubscription":null},"tailscaleProxySeen":true,"recentPeers":[{"address":"100.65.127.62","viaTailscale":true,"lastSeenAt":"2026-08-22T00:57:35.888Z"}]}

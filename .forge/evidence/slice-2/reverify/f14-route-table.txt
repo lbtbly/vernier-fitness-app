@@ -1,0 +1,43 @@
+F14 re-verify against the new route table, 2026-08-22T00:57:13Z
+
+route table against https://lamberts-mac-mini.tailda76d6.ts.net, 20 routes on disk
+
+GET  /                                            protected 307  refused  redirected to sign-in (307)
+POST /api/auth/bootstrap                          gate      403  refused  refuses an unauthenticated request
+POST /api/auth/passkey/authentication/options     gate      403  refused  refuses an unauthenticated request
+POST /api/auth/passkey/authentication/verify      gate      403  refused  refuses an unauthenticated request
+POST /api/auth/passkey/registration/options       protected 401  refused  401 with no session
+POST /api/auth/passkey/registration/verify        protected 401  refused  401 with no session
+POST /api/auth/password                           gate      403  refused  refuses an unauthenticated request
+POST /api/auth/sign-out                           protected 401  refused  401 with no session
+GET  /api/diagnostics/device                      public    200  open     answers without a session, as it must
+POST /api/diagnostics/launch                      public    403  open     answers without a session, as it must
+GET  /api/settings/integrations                   protected 401  refused  401 with no session
+POST /api/settings/integrations                   protected 401  refused  401 with no session
+GET  /eat                                         protected 307  refused  redirected to sign-in (307)
+GET  /health                                      protected 307  refused  redirected to sign-in (307)
+GET  /healthz                                     public    200  open     answers without a session, as it must
+GET  /manifest.webmanifest                        public    200  open     answers without a session, as it must
+GET  /offline                                     public    200  open     answers without a session, as it must
+GET  /settings                                    protected 307  refused  redirected to sign-in (307)
+GET  /sign-in                                     public    200  open     answers without a session, as it must
+GET  /sign-in/recover                             gate      401  refused  refuses an unauthenticated request
+GET  /train                                       protected 307  refused  redirected to sign-in (307)
+
+GET  /favicon.ico                                 shell     200  open     static shell
+GET  /icons/apple-touch-icon-180.png              shell     200  open     static shell
+GET  /icons/favicon-32.png                        shell     200  open     static shell
+GET  /icons/icon-192.png                          shell     200  open     static shell
+GET  /icons/icon-512.png                          shell     200  open     static shell
+GET  /icons/vernier-mark.svg                      shell     200  open     static shell
+GET  /sw.js                                       shell     200  open     static shell
+
+28 requests, 0 failing. Public routes answer, gate routes refuse, everything else needs a session.
+exit=0
+
+======== PUBLIC_PATHS is byte identical to slice 2 at 0c66771 ========
+no difference: nothing that was open closed, nothing that was closed opened
+
+======== the only change: the prefix list ========
+-export const PUBLIC_PREFIXES: string[] = ['/_next/', '/icons/', '/api/diagnostics/'];
++export const PUBLIC_PREFIXES: string[] = ['/_next/', '/icons/'];

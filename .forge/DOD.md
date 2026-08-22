@@ -58,7 +58,7 @@ viewports means 393x852, 768 and 1280 CSS pixels wide, captured.
 - [x] **F11.** The session cookie carries HttpOnly, Secure and SameSite=Strict
   with a maximum age under 24 hours, and its value differs before and after
   sign-in. Evidence: two `Set-Cookie` captures.
-- [ ] **F12.** A state-changing request without the anti-forgery token returns
+- [x] **F12.** A state-changing request without the anti-forgery token returns
   403 and writes nothing; the same request with the token succeeds. Evidence: both
   responses and a row count before and after the rejected request.
 - [x] **F13.** Six failed sign-in attempts within 60 seconds return 429, and a
@@ -583,7 +583,7 @@ their interaction detail in `.forge/wireframes/`, and the standards skill.
   no-cache directive, and with the network disabled the shell renders an offline
   screen naming the cause and offering one action, not a browser error page.
   Evidence: the registration state, the response headers, and the offline capture.
-- [ ] **C4.** Sign-in matches screen 01 at three viewports: passkey first,
+- [x] **C4.** Sign-in matches screen 01 at three viewports: passkey first,
   password second, the one-time owner creation, and the host-unreachable state.
   Every interactive element shows a 2 px focus outline at 2 px offset. Evidence:
   three captures plus a keyboard-traversal capture.

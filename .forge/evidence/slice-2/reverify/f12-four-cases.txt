@@ -1,0 +1,32 @@
+F12 re-verify against the shipped product at https://lamberts-mac-mini.tailda76d6.ts.net
+date: 2026-08-22T00:56:37Z
+
+-- fetch /sign-in to obtain the anti-forgery cookie --
+GET /sign-in -> 200
+cookie vernier_csrf stored, value length 43
+
+== case 1: bare curl, no cookie, no header ==
+before: standalone_seen observed=false first=null last=2026-08-22 02:53:33.018106+02 rows=1
+POST /api/diagnostics/launch -> 403
+{"error":"Anti-forgery check failed.","detail":"This request carried no x-vernier-csrf header. Nothing was written."}
+after : standalone_seen observed=false first=null last=2026-08-22 02:53:33.018106+02 rows=1
+
+== case 2: cookie + matching header, standalone:false so no signal flips ==
+before: standalone_seen observed=false first=null last=2026-08-22 02:53:33.018106+02 rows=1
+POST /api/diagnostics/launch -> 204
+after : standalone_seen observed=false first=null last=2026-08-22 02:56:38.606975+02 rows=1
+
+== case 3: cookie + wrong header ==
+before: standalone_seen observed=false first=null last=2026-08-22 02:56:38.606975+02 rows=1
+POST /api/diagnostics/launch -> 403
+{"error":"Anti-forgery check failed.","detail":"The anti-forgery token does not match the one issued to this browser. Nothing was written."}
+after : standalone_seen observed=false first=null last=2026-08-22 02:56:38.606975+02 rows=1
+
+== case 3b: matching header but no cookie ==
+before: standalone_seen observed=false first=null last=2026-08-22 02:56:38.606975+02 rows=1
+POST /api/diagnostics/launch -> 403
+{"error":"Anti-forgery check failed.","detail":"This request carried no anti-forgery cookie. Reload the sign-in screen and try again."}
+after : standalone_seen observed=false first=null last=2026-08-22 02:56:38.606975+02 rows=1
+
+== CSRF_EXEMPT_PATHS is gone from the tree ==
+no match in src/
