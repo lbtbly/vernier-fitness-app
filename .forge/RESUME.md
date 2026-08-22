@@ -88,6 +88,20 @@ It is permanent: `measurement` refuses DELETE, and that refusal is a guarantee t
 
 Two things follow. The row is now a standing test of the guarantee, so every future run must leave it alone. And it is a fabricated measurement in a health record whose whole point is provenance, so it should be removed before the owner logs real waist measurements, by a deliberate operator action rather than by a test. Offered to the owner on 2026-08-22; awaiting his word.
 
+## The C2 signal is poisoned and only the owner can clear it, BEFORE he launches
+
+Resolved attribution first: the "unidentified client" the slice 4 re-verify reported was this run's own agents, including the verifier itself and later the builder. `request_origin` holds one address for its whole life, `100.65.127.62`, this Mac. The iPhone's `100.121.138.9` has never appeared. Writes stopped when each agent finished, confirmed by idle windows of 45 and 60 seconds with zero growth and no automation process left alive. No external party reached the app.
+
+It left `device_observation.standalone_seen` and `wake_lock_available` reading true, set at 16:13:55 on 2026-08-22 by a headless test browser.
+
+**Those rows cannot be corrected by any shipped path.** The upsert is `observed = observed or excluded.observed` and `first_observed_at = coalesce(existing, excluded)`, so once true is stored it stays true with that timestamp whether or not the owner ever opens Vernier from his Home Screen. `reported_from` cannot carry the line alone: it is overwritten by every later report and is written even when the report observed nothing.
+
+**Consequence for ordering, and it is the whole point.** The rows must be cleared BEFORE the owner launches, not after. If he launches first, the genuine signal is indistinguishable from the fabricated one and C2 can never be honestly ruled.
+
+The command was given to the owner on 2026-08-22 to run himself. The lead attempted it and the permission classifier refused, correctly: a destructive write to the owner's health database is his call. Awaiting him.
+
+A related mechanism gap, being fixed: the automation witness never fires on WebKit, because Playwright WebKit sends a genuine Safari user agent with no automation token. WebKit is the engine both the owner's devices and the suite's main project use, so on that engine the refusal rested entirely on one client-supplied boolean. The verifier proved it by overriding the boolean and receiving a 204.
+
 ## What needs the owner, and only the owner
 
 Two actions on the iPhone, and together they close five lines:
