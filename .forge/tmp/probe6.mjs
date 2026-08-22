@@ -1,0 +1,23 @@
+import { execFileSync } from 'node:child_process';
+import { chromium } from '@playwright/test';
+const SCRATCH = 'http://127.0.0.1:3101';
+const LINK = execFileSync('docker', ['exec', '-i', 'vernier-scratch', 'node', '--input-type=module', '--eval', `
+const crypto = await import("node:crypto");
+const pg = await import("pg");
+const token = crypto.randomBytes(32).toString("base64url");
+const id = crypto.createHash("sha256").update(token).digest("base64url");
+const client = new pg.default.Client({ connectionString: process.env.DATABASE_URL });
+await client.connect();
+await client.query("insert into recovery_grant (id, expires_at) values ($1, now() + make_interval(mins => 10))", [id]);
+console.log("http://127.0.0.1:3101/sign-in/recover?token=" + token);
+await client.end();
+`], { encoding: 'utf8' }).trim().split('\n').at(-1);
+const browser = await chromium.launch({ channel: 'chrome' });
+const ctx = await browser.newContext({ baseURL: SCRATCH, viewport: { width: 393, height: 852 } });
+const page = await ctx.newPage();
+await page.goto(LINK);
+await page.goto('/');
+console.log('url:', page.url());
+console.log('cookies:', (await ctx.cookies()).map((c) => c.name));
+console.log('h1:', await page.locator('h1').allInnerTexts());
+await browser.close();
