@@ -74,37 +74,71 @@ async function markTheFold(page: Page) {
 }
 
 test.describe('screen 02, Today', () => {
-  test('F27. the five things fit above the fold at 393x852', async ({ page }) => {
+  /**
+   * F27 on the owner's own installation, at the state his own data is in.
+   *
+   * The amended line's five states, its per-element maxima and its sum are
+   * graded in tests/e2e/notices.spec.ts, on the scratch instance, because two of
+   * the five cannot be reached here on demand and one of them means writing rows
+   * into a table that refuses DELETE. What this test holds is the same line
+   * against the install that matters: the four things it names inside 715 px
+   * with nothing scrolled, adherence below the trend, and the fold met at
+   * section 3's card geometry rather than bought by squeezing it.
+   */
+  test('F27. the four things fit above the fold at 393x852, with adherence below the trend', async ({ page }) => {
     await page.setViewportSize({ width: 393, height: 852 });
     await signIn(page);
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
     const measured = await page.evaluate(() => {
-      const bottomOf = (selector: string) => {
+      const boxOf = (selector: string) => {
         const element = document.querySelector(selector);
         if (!element) return null;
         const box = element.getBoundingClientRect();
-        return Math.round(box.bottom + window.scrollY);
+        return { top: Math.round(box.top + window.scrollY), bottom: Math.round(box.bottom + window.scrollY) };
       };
+      const day = document.querySelector('.card.day')!;
+      const style = getComputedStyle(day);
       return {
-        session: bottomOf('[data-session]'),
-        meals: bottomOf('[data-meals]'),
-        needsLogging: bottomOf('[data-due]'),
-        weightTrend: bottomOf('[data-chart="today-weight"]'),
-        adherence: bottomOf('[data-adherence]'),
+        session: boxOf('[data-session]'),
+        meals: boxOf('[data-meals]'),
+        needsLogging: boxOf('[data-due]'),
+        weightTrend: boxOf('[data-chart="today-weight"]'),
+        adherence: boxOf('[data-adherence]'),
+        cardPadding: Number.parseFloat(style.paddingTop),
+        cardGap: Number.parseFloat(style.marginBottom),
         scrolled: window.scrollY,
       };
     });
 
-    for (const [what, bottom] of Object.entries(measured)) {
-      if (what === 'scrolled') continue;
-      console.log(`F27  ${what.padEnd(13)} bottom ${bottom} px, fold ${FOLD}`);
-      expect(bottom, `${what} is not above the fold`).not.toBeNull();
-      expect(bottom!).toBeLessThanOrEqual(FOLD);
+    // The four the line names. Adherence is not one of them any more: A5 struck
+    // that clause because three approved artifacts put adherence below the fold
+    // and the rubric line that put it above was the odd one out.
+    for (const what of ['session', 'meals', 'needsLogging', 'weightTrend'] as const) {
+      const box = measured[what];
+      console.log(`F27  ${what.padEnd(13)} bottom ${box?.bottom} px, fold ${FOLD}`);
+      expect(box, `${what} is not drawn at all`).not.toBeNull();
+      expect(box!.bottom, `${what} is not above the fold`).toBeLessThanOrEqual(FOLD);
     }
     // And nothing was scrolled to get there, which is the other half of the line.
     expect(measured.scrolled).toBe(0);
+
+    // "Adherence is never drawn above the weight trend." Screen 02's own order,
+    // and the move the old wording made cheapest is a FAIL under the new one.
+    console.log(
+      `F27  adherence opens at ${measured.adherence?.top} px, the trend ends at ${measured.weightTrend?.bottom} px`,
+    );
+    expect(measured.adherence, 'adherence is not drawn').not.toBeNull();
+    expect(measured.adherence!.top, 'adherence is drawn above the weight trend').toBeGreaterThan(
+      measured.weightTrend!.bottom,
+    );
+
+    // "The 715 is met at the card padding and the card gap DESIGN.md section 3
+    // fixes, measured on the shipped screen."
+    console.log(`F27  Today's card padding ${measured.cardPadding} px, card gap ${measured.cardGap} px`);
+    expect(measured.cardPadding).toBe(16);
+    expect(measured.cardGap).toBe(12);
 
     await markTheFold(page);
     await page.screenshot({ path: `${CAPTURES}/f27-today-fold-393x852.png`, fullPage: true });

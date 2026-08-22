@@ -1,0 +1,161 @@
+suite-role: vernier_suite is current on the owner's database.
+  role vernier_suite: superuser false, createdb false, createrole false, bypassrls false
+  grant app_meta SELECT
+  grant auth_attempt INSERT,SELECT
+  grant device_observation SELECT
+  grant goal SELECT
+  grant idempotency_key SELECT
+  grant import_question SELECT
+  grant integration_credential SELECT
+  grant measurement SELECT
+  grant owner SELECT
+  grant planned_session SELECT
+  grant recovery_grant INSERT,SELECT
+  grant request_origin SELECT
+  grant session SELECT
+  grant source_record SELECT
+  grant webauthn_challenge SELECT
+  grant webauthn_credential SELECT
+  grant write_request SELECT
+  execute suite_forget_passkey(credential text)
+setup: the owner's database holds 90 measurement, 38 source_record, 1 measurement not seeded. Nothing in this run may lower it.
+setup: its device signals read standalone_seen=true@2026-08-22 16:13:55.795+02/2026-08-22 20:28:20.543872+02/unattributed, wake_lock_available=true@2026-08-22 16:13:55.804+02/2026-08-22 16:13:55.804748+02/unattributed. Nothing in this run may write them.
+
+Running 3 tests using 1 worker
+
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+
+F27  state nothing-raised: 0 quiet source(s), 0 open question(s)
+F27  nothing-raised               chrome trend ends  542 px, fold 715, scrollY 0
+F27    above the trend     8..  71  h   63  header.title
+F27    above the trend    71.. 365  h  294  section.card.day
+F27    above the trend   377.. 722  h  345  section.card
+F27    title 63  offline line -  notice region - (0)  day card 294  card padding 16  card gap 12
+F27  nothing-raised               webkit trend ends  542 px, fold 715, scrollY 0
+F27    above the trend     8..  71  h   63  header.title
+F27    above the trend    71.. 365  h  294  section.card.day
+F27    above the trend   377.. 722  h  345  section.card
+F27    title 63  offline line -  notice region - (0)  day card 294  card padding 16  card gap 12
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+
+F27  state every-source-quiet: 2 quiet source(s), 0 open question(s)
+F27  every-source-quiet           chrome trend ends  600 px, fold 715, scrollY 0
+F27    above the trend     8..  71  h   63  header.title
+F27    above the trend    71.. 117  h   46  details.notices.banner.w
+F27    above the trend   129.. 423  h  294  section.card.day
+F27    above the trend   435.. 844  h  409  section.card
+F27    title 63  offline line -  notice region 46 (1)  day card 294  card padding 16  card gap 12
+F27  every-source-quiet           webkit trend ends  600 px, fold 715, scrollY 0
+F27    above the trend     8..  71  h   63  header.title
+F27    above the trend    71.. 117  h   46  details.notices.banner.w
+F27    above the trend   129.. 423  h  294  section.card.day
+F27    above the trend   435.. 844  h  409  section.card
+F27    title 63  offline line -  notice region 46 (1)  day card 294  card padding 16  card gap 12
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+
+F27  state open-import-question: 2 quiet source(s), 1 open question(s)
+F27  open-import-question         chrome trend ends  600 px, fold 715, scrollY 0
+F27    above the trend     8..  71  h   63  header.title
+F27    above the trend    71.. 117  h   46  details.notices.banner.w
+F27    above the trend   129.. 423  h  294  section.card.day
+F27    above the trend   435.. 844  h  409  section.card
+F27    title 63  offline line -  notice region 46 (2)  day card 294  card padding 16  card gap 12
+F27  open-import-question         webkit trend ends  600 px, fold 715, scrollY 0
+F27    above the trend     8..  71  h   63  header.title
+F27    above the trend    71.. 117  h   46  details.notices.banner.w
+F27    above the trend   129.. 423  h  294  section.card.day
+F27    above the trend   435.. 844  h  409  section.card
+F27    title 63  offline line -  notice region 46 (2)  day card 294  card padding 16  card gap 12
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+
+F27  state offline-with-entries-queued: 2 quiet source(s), 1 open question(s)
+F27  offline-with-entries-queued  chrome trend ends  651 px, fold 715, scrollY 0
+F27    above the trend     8..  71  h   63  header.title
+F27    above the trend    71.. 110  h   39  div.banner.queue
+F27    above the trend   122.. 168  h   46  details.notices.banner.w
+F27    above the trend   180.. 474  h  294  section.card.day
+F27    above the trend   486.. 895  h  409  section.card
+F27    title 63  offline line 39  notice region 46 (2)  day card 294  card padding 16  card gap 12
+F27    the offline line reads: Offline. 1 entry saved on this phone.
+F27  offline-with-entries-queued  webkit trend ends  651 px, fold 715, scrollY 0
+F27    above the trend     8..  71  h   63  header.title
+F27    above the trend    71.. 110  h   39  div.banner.queue
+F27    above the trend   122.. 168  h   46  details.notices.banner.w
+F27    above the trend   180.. 474  h  294  section.card.day
+F27    above the trend   486.. 895  h  409  section.card
+F27    title 63  offline line 39  notice region 46 (2)  day card 294  card padding 16  card gap 12
+F27    the offline line reads: Offline. 1 entry saved on this phone.
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+
+F27  state after-one-quick-log-all-six: 2 quiet source(s), 1 open question(s)
+F27  after-one-quick-log-all-six  chrome trend ends  679 px, fold 715, scrollY 0
+F27    above the trend     8..  71  h   63  header.title
+F27    above the trend    71.. 110  h   39  div.banner.queue
+F27    above the trend   122.. 168  h   46  details.notices.banner.w
+F27    above the trend   180.. 502  h  322  section.card.day
+F27    above the trend   514.. 923  h  409  section.card
+F27    title 63  offline line 39  notice region 46 (2)  day card 322  card padding 16  card gap 12
+F27    the offline line reads: Offline. 1 entry saved on this phone.
+F27  after-one-quick-log-all-six  webkit trend ends  679 px, fold 715, scrollY 0
+F27    above the trend     8..  71  h   63  header.title
+F27    above the trend    71.. 110  h   39  div.banner.queue
+F27    above the trend   122.. 168  h   46  details.notices.banner.w
+F27    above the trend   180.. 502  h  322  section.card.day
+F27    above the trend   514.. 923  h  409  section.card
+F27    title 63  offline line 39  notice region 46 (2)  day card 322  card padding 16  card gap 12
+F27    the offline line reads: Offline. 1 entry saved on this phone.
+
+F27  readings: 10
+F27  card padding 16 px and card gap 12 px on every reading, measured on the shipped screen
+F27  notice region, every height measured at counts 1, 2, 3, 5, 9, 42, 999999: 46
+F27  offline line, every height measured at queue depths 1, 2, 3, 5, 9, 42, 999999: 39
+F27  title header, every height measured: 63
+F27  day card in nothing-raised: 294, 294 px
+F27  day card in every-source-quiet: 294, 294 px
+F27  day card in open-import-question: 294, 294 px
+F27  day card in offline-with-entries-queued: 294, 294 px
+F27  day card in after-one-quick-log-all-six: 322, 322 px
+F27  day card measured from 294 px at its smallest to 322 px at its largest
+
+F27  the maxima, and their sum
+F27    scroll padding above the title         8 px
+F27    header.title                          63 px  fixed type, fixed padding
+F27    .banner.queue                         39 px  one clamped line at any queue depth
+F27    details.notices                       46 px  one clamped summary row whatever it holds
+F27    section.card.day                     322 px  the session row plus the pair a write replaces
+F27    the weight card above its chart      177 px  label, headline and the chart's own margin
+F27    three card gaps at 12 px             36 px
+F27    sum                                  691 px  against a fold of 715 px
+F27  the deepest the trend reached in any state or engine: 679 px
+
+  ✓  1 [chrome-scratch] › tests/e2e/notices.spec.ts:450:1 › F27. every element above the trend is bounded, the maxima sum inside 715, and the trend clears the fold in five states and both engines (44.3s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+F24  chrome the line reads: Offline. 1 entry saved on this phone.
+F24  chrome colour rgb(245, 245, 247), background rgb(28, 28, 31), warn class false, inside the notice region false, under the title true
+F24  webkit the line reads: Offline. 1 entry saved on this phone.
+F24  webkit colour rgb(245, 245, 247), background rgb(28, 28, 31), warn class false, inside the notice region false, under the title true
+  ✓  2 [chrome-scratch] › tests/e2e/notices.spec.ts:683:1 › F24 and C5. the offline line is neutral, one line, under the title, with the count on it (6.0s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+F23  chrome the empty card reads: No waist measurement yetTape at the navel, standing, breathing out. Same spot each time matters more than the exact number.
+F23  chrome the value reads "--" and holds "", which is blank and not zero
+F23  chrome both stepper controls are refused while the field is blank
+F23  chrome a first-ever waist committed in 3 taps from Today
+F23  chrome stored: 99.0 cm
+F23  chrome with a measurement on file one tap moves it to 99.5
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+F23  webkit the empty card reads: No waist measurement yetTape at the navel, standing, breathing out. Same spot each time matters more than the exact number.
+F23  webkit the value reads "--" and holds "", which is blank and not zero
+F23  webkit both stepper controls are refused while the field is blank
+F23  webkit a first-ever waist committed in 3 taps from Today
+F23  webkit stored: 99.0 cm
+F23  webkit with a measurement on file one tap moves it to 99.5
+  ✓  3 [chrome-scratch] › tests/e2e/notices.spec.ts:755:1 › F23 and C5. a first-ever waist commits in six taps or fewer, from a blank field and not from zero (13.6s)
+teardown: the owner's database holds 90 measurement, 38 source_record, 1 measurement not seeded.
+teardown: its device signals read standalone_seen=true@2026-08-22 16:13:55.795+02/2026-08-22 20:28:20.543872+02/unattributed, wake_lock_available=true@2026-08-22 16:13:55.804+02/2026-08-22 16:13:55.804748+02/unattributed.
+teardown: test-stack: stopped
+teardown: it held 90 measurement, 38 source_record, 1 measurement not seeded before the run, so nothing of the owner's was taken.
+
+  3 passed (1.1m)

@@ -58,6 +58,11 @@ async function openHealth(page: Page) {
   await page.waitForLoadState('networkidle');
 }
 
+async function openToday(page: Page) {
+  await page.goto('/');
+  await page.waitForLoadState('networkidle');
+}
+
 /**
  * One phone payload and one reading in it, landed at a chosen age.
  *
@@ -162,9 +167,26 @@ test('F34. a source is stale past thirty-six hours, and the chip clears when a f
   await openHealth(page);
   console.log(`F34  at 35 hours the warn chip count is ${await page.locator('.src.stale').count()}`);
   expect(await page.locator('.src.stale').count()).toBe(0);
-  // The notice region under Today's title, which is where the quiet sources
-  // are named. Health draws none of its own and draws none of this either.
-  expect(await page.locator('[data-notices]').count()).toBe(0);
+  /*
+   * The notice region, on the screen that draws one.
+   *
+   * This assertion used to sit on the line above, counting `[data-notices]` on
+   * `/health`. `NoticeRegion` is rendered by `src/app/(shell)/page.tsx` and by
+   * nothing else, so that count was 0 whatever the staleness was and the
+   * assertion could not fail. It read exactly like a real check, which is what
+   * made it worth moving rather than deleting: A4's first standing rule says a
+   * zero is evidence only beside the population it covered, and the population
+   * here is Today.
+   *
+   * So it is asked on Today, where the region does render, where it renders one
+   * line per quiet source, and where it can fail. The population is printed
+   * beside the zero, which is the other half of the same rule.
+   */
+  await openToday(page);
+  const raised = await page.locator('[data-notices]').count();
+  const quiet = await page.locator('[data-notice="stale"]').count();
+  console.log(`F34  on Today at 35 hours: ${raised} notice region(s), ${quiet} quiet-source notice(s)`);
+  expect(raised).toBe(0);
   // Absence is still drawn: thirty-five hours with no sample is still a hole in
   // the chart, it is simply not old enough to be worth a warning.
   console.log(

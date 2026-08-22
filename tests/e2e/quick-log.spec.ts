@@ -282,11 +282,18 @@ test.describe('the quick log', () => {
     // screen 03 frame 2 draws it. save() closes the sheet, so this is the state
     // the owner is actually looking at a second after he presses Save, and it
     // used to show a marker with no number in it.
-    const todayBanner = page.locator('main [data-state="offline"]').first();
+    //
+    // It is its own neutral line under the title now, not a notice folded into
+    // the warn region: an offline queue needs no action and clears itself, and
+    // `.forge/RULING-SLICE-4.md` question 2 refused the merge on the colour, on
+    // the hidden number and on the copy. The count is on the line, with no tap.
+    const todayBanner = page.locator('main .banner.queue[data-state="offline"]');
     await expect(todayBanner).toBeVisible();
     const todayCount = await todayBanner.textContent();
     console.log(`Today with the sheet closed reads: ${todayCount}`);
-    expect(todayCount).toMatch(/entr(y|ies) (is|are) waiting to upload/);
+    expect(todayCount).toMatch(/\d+ entr(y|ies) saved on this phone|1 entry saved on this phone/);
+    expect(await todayBanner.evaluate((node) => node.closest('[data-notices]') !== null)).toBe(false);
+    expect(await todayBanner.evaluate((node) => node.classList.contains('w'))).toBe(false);
     await settle(page);
     await page.screenshot({ path: `${CAPTURES}c5-offline-today-count-393.png`, fullPage: true });
 
@@ -586,7 +593,7 @@ test.describe('the quick log', () => {
 
     await page.getByRole('button', { name: 'Undo' }).click();
     await expect(card).toHaveAttribute('data-just-logged', 'undone');
-    await expect(page.getByText('Removed before it uploaded. Nothing was stored.')).toBeVisible();
+    await expect(card.locator('.chip')).toHaveText('Removed');
     await expect(page.getByRole('button', { name: 'Undo' })).toBeHidden();
 
     const left = await page.evaluate(async () => {
@@ -624,18 +631,30 @@ test.describe('the quick log', () => {
     console.log(`the just-logged card once it has uploaded:\n${await card.textContent()}`);
     await expect(page.getByRole('button', { name: 'Undo' })).toBeHidden();
     await expect(page.getByRole('link', { name: 'Correct it' })).toBeVisible();
-    await expect(page.getByText('Vernier never deletes a value')).toBeVisible();
+    // The chip carries the state, in one word, on the row. The paragraph that
+    // used to repeat it under the pair is gone: every line above the weight
+    // trend is spent out of F27's 715 px, and "Stored" beside "Correct it"
+    // already says what the sentence said.
+    await expect(card.locator('.chip')).toHaveText('Stored');
     await settle(page);
     await page.screenshot({ path: `${CAPTURES}c5-just-logged-applied-393.png`, fullPage: true });
 
-    // Two cards, two things, two labels. Today used to draw the write that was
-    // just made and the values that stand today side by side, both headed
-    // JUST LOGGED, from one key used for two different meanings.
+    // No two cards on Today wear the same label. Today used to draw the write
+    // that was just made and the values that stand today side by side, both
+    // headed JUST LOGGED, from one key used for two different meanings. A6
+    // settled it the other way: the write is a ROW in the day card, under that
+    // card's own label, and "On file" is the only card of the two left.
     const labels = await page.locator('main .card > .lbl').allTextContents();
     console.log(`the card labels on Today: ${JSON.stringify(labels)}`);
     expect(new Set(labels).size, 'no two cards on Today wear the same label').toBe(labels.length);
-    expect(labels).toContain('Just logged');
+    expect(labels).not.toContain('Just logged');
     expect(labels).toContain('On file');
+    // And the write is inside the day card, which is where screen 02 frame 3
+    // draws it, rather than in a card of its own below it.
+    expect(
+      await card.evaluate((node) => node.closest('.card.day') !== null),
+      'the just-logged entry is not a row in the day card',
+    ).toBe(true);
 
     // The action really does reach the value's own sheet, where a correction
     // appends beside the original.
@@ -851,7 +870,7 @@ test.describe('the quick log against screen 03', () => {
     // No age chip at all, which is the difference between this capture and the
     // one above: the sheet only names an age when there is one worth naming.
     console.log(
-      `loaded sheet reads: ${(await page.locator('.sheet .metric').first().textContent())?.trim()}, ` +
+      `loaded sheet reads: ${await page.locator('#quick-log-waist').inputValue()} cm, ` +
         `${await page.locator('.sheet .src').count()} age chip(s)`,
     );
     const loadedBox = await page.locator('.sheet').boundingBox();
@@ -927,7 +946,11 @@ test.describe('the quick log against screen 03', () => {
     expect(emptyText).toContain('No waist measurement yet');
     await settle(page);
     await page.screenshot({ path: `${CAPTURES}c5-state-empty.png` });
-    await expect(page.locator('.metric.mut')).toHaveText(/--/);
+    // The value is `--` and it is a placeholder, not a number: screen 03 frame 3
+    // draws it muted and the footer says blank fields stay blank. A field
+    // holding "" sends nothing; a field holding 0 would store a zero.
+    await expect(page.locator('#quick-log-waist')).toHaveValue('');
+    await expect(page.locator('#quick-log-waist')).toHaveAttribute('placeholder', '--');
 
     resetScratchProvenance();
   });
@@ -976,12 +999,12 @@ test.describe('the quick log tells the truth about what it queued', () => {
 
     const why = (await page.locator('[data-waist="no-base"]').textContent())!.trim();
     console.log(`and it says: ${why}`);
-    expect(why).toContain('No last measurement to step from');
-    await expect(page.locator('.metric.mut')).toHaveText(/--/);
+    expect(why).toContain('there is nothing to step from');
+    await expect(page.locator('#quick-log-waist')).toHaveValue('');
 
     // A tap on the plus lands on nothing, so the reading is still absent.
     await up.click({ force: true });
-    await expect(page.locator('.metric.mut')).toHaveText(/--/);
+    await expect(page.locator('#quick-log-waist')).toHaveValue('');
 
     // The viewport rather than the page: the sheet is fixed over it, and a
     // full-page stitch draws it once at the top with its own scroll offset
@@ -1022,15 +1045,20 @@ test.describe('the quick log tells the truth about what it queued', () => {
     await signIn(page);
 
     // A database with no waist reading in it at all, truncated without the
-    // re-seed so the absence is real. The stepper counts up from nothing here
-    // because the absence is a fact rather than an unknown, and one tap lands
-    // on 0.5 cm, which the band refuses at 30.
+    // re-seed so the absence is real, and a number typed into the field that the
+    // band refuses at 30 cm.
+    //
+    // The stepper used to produce this on its own: with nothing to step from it
+    // counted up from zero, so one tap queued 0.5 cm and the screen reported it
+    // as saved. It cannot any more, which is defect 60 closed at the other end,
+    // so the value is typed. The refusal being graded is the same one: an entry
+    // the flush is certain to reject must never be accepted here and called safe.
     scratchQuery('truncate measurement, source_record, import_question, idempotency_key, write_request');
     await page.goto('/');
     await page.getByRole('button', { name: 'Quick log', exact: true }).click();
     await expect(page.locator('[data-state="empty"]')).toBeVisible({ timeout: 20_000 });
-    await page.getByRole('button', { name: 'Up half a centimetre' }).click();
-    await expect(page.locator('.sheet .metric')).toHaveText(/0\.5/);
+    await page.locator('#quick-log-waist').fill('0.5');
+    await expect(page.locator('#quick-log-waist')).toHaveValue('0.5');
 
     await page.getByRole('button', { name: 'Save', exact: true }).click();
 

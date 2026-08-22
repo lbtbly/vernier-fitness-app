@@ -1,9 +1,5 @@
-'use client';
-
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ChevronIcon, CloudOffIcon, WarnIcon } from '@/components/icons';
-import { depth, subscribe } from '@/lib/outbox';
+import { ChevronIcon, WarnIcon } from '@/components/icons';
 import { strings } from '@/lib/strings';
 
 /**
@@ -35,9 +31,18 @@ import { strings } from '@/lib/strings';
  * ships its own chip, cause sentence and hatched range in the card it belongs
  * to. What the region bounds is the room, not the information.
  *
- * The three it carries today: the outbox count, which is screen 03 frame 2 and
- * DESIGN.md section 4's one-line banner with the queue count; the sources that
- * have gone quiet; and the imports waiting on an answer.
+ * AND AN OFFLINE QUEUE IS NOT A NOTICE. It was one here for a while, folded in
+ * to bound its height, and `.forge/RULING-SLICE-4.md` question 2 refused that on
+ * three grounds: the warn colour on a queue that needs no attention, a count
+ * that could only be read after a tap when DESIGN.md section 4 and F24 both put
+ * it on the line, and "2 things are waiting on you" said of entries that are
+ * waiting on the network. A notice is something the owner must act on and their
+ * number is unbounded; a queue clears itself. It ships as its own neutral line
+ * in `Queue.tsx`, bounded there the same structural way this is bounded here.
+ *
+ * The two this carries today: the sources that have gone quiet, and the imports
+ * waiting on an answer. Server-rendered, because both are facts the Mac mini
+ * holds; the queue is the one thing on this screen only the phone knows.
  */
 
 export type NoticeTone = 'warn' | 'plain';
@@ -54,53 +59,25 @@ export type Notice = {
   href?: string;
 };
 
-/** The outbox count, as a notice. Client-side, because only this phone knows it. */
-function queueNotice(queued: number): Notice | null {
-  if (queued === 0) return null;
-  return {
-    id: 'queue',
-    tone: 'plain',
-    summary: strings.quickLog.offlineSummary(queued),
-    lines: [`${strings.quickLog.offlineTitle}. ${strings.quickLog.offlineBody(queued)}`],
-  };
-}
-
 export function NoticeRegion({ notices }: { notices: Notice[] }) {
-  const [queued, setQueued] = useState(0);
+  if (notices.length === 0) return null;
 
-  useEffect(() => {
-    const refresh = () => {
-      void depth().then(setQueued);
-    };
-    const unsubscribe = subscribe(refresh);
-    refresh();
-    return unsubscribe;
-  }, []);
-
-  // The queue first: it is the owner's own writing, and it is the one notice
-  // that appears in the second after he presses Save.
-  const queue = queueNotice(queued);
-  const all = queue ? [queue, ...notices] : notices;
-  if (all.length === 0) return null;
-
-  const warn = all.some((notice) => notice.tone === 'warn');
-  const Icon = all.length === 1 && !warn ? CloudOffIcon : WarnIcon;
-  const line = all.length === 1 ? all[0].summary : strings.notices.summary(all.length);
+  const warn = notices.some((notice) => notice.tone === 'warn');
+  const line = notices.length === 1 ? notices[0].summary : strings.notices.summary(notices.length);
 
   return (
     <details
       className={warn ? 'notices banner w' : 'notices banner'}
-      data-notices={all.length}
-      data-state={queue ? 'offline' : undefined}
+      data-notices={notices.length}
       aria-live="polite"
     >
-      <summary data-notice-summary={all.length}>
-        <Icon />
+      <summary data-notice-summary={notices.length}>
+        <WarnIcon />
         <b className="grow">{line}</b>
         <ChevronIcon className="ch" />
       </summary>
       <div className="noticelines">
-        {all.map((notice) =>
+        {notices.map((notice) =>
           notice.href ? (
             <Link className="noticeline" key={notice.id} data-notice={notice.id} href={notice.href}>
               <span className="grow">{notice.lines.join(' ')}</span>

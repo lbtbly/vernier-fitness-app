@@ -148,6 +148,27 @@ let inFlight: string | null = null;
 /** Is this write still in the queue, and therefore still genuinely reversible. */
 export async function pending(id: string): Promise<boolean> {
   if (inFlight === id) return false;
+  return stillQueued(id);
+}
+
+/**
+ * Is this write still on this phone, whether or not a send is in the air.
+ *
+ * A different question from `pending`, and the difference is what the screen
+ * says versus what Undo may do. `pending` is about REVERSIBILITY and excludes
+ * the entry whose request is in flight, because removing that one could delete
+ * the queue record while the Mac mini goes on to store the row. This one is
+ * about WHERE THE WRITE IS, and a request in the air has not landed.
+ *
+ * They were the same function for a while and the row read `Stored` the moment
+ * the flusher picked the entry up, for as long as the send took: milliseconds on
+ * a good tailnet, and up to the ten-second timeout on a captive-portal wifi,
+ * which is exactly the case the queue exists for. Measured on the scratch
+ * instance with the origin taken away: the row said Stored beside an offline
+ * line reading "1 entry saved on this phone", which is the app contradicting
+ * itself about the owner's own data in two places on one screen.
+ */
+export async function stillQueued(id: string): Promise<boolean> {
   const rows = await allEntries();
   return rows.some((entry) => entry.id === id && !entry.parked);
 }
@@ -161,6 +182,16 @@ export async function pending(id: string): Promise<boolean> {
  * correction, which is a different act with a different word on the button.
  */
 export async function discard(id: string): Promise<boolean> {
+  // A send that is in the air is not a send that landed, and Undo waits for it
+  // to settle rather than answering while it cannot know. The wait is bounded by
+  // the flusher's own ten-second timeout on the request: when it clears, the
+  // entry is either gone, because it really did upload, or back in the queue,
+  // because it did not, and the answer is the truth in both cases. Refusing
+  // during the flight reported "it had already uploaded" for writes that were
+  // still sitting on the phone and came back to the queue a second later.
+  for (let waited = 0; inFlight === id && waited < 11_000; waited += 100) {
+    await new Promise((settle) => setTimeout(settle, 100));
+  }
   if (!(await pending(id))) return false;
   await remove(id);
   notify();

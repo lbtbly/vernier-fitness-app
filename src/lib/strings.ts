@@ -584,7 +584,7 @@ export const strings = {
      * up from zero: one tap used to queue 0.5 cm and report it as saved, and the
      * band this product stores a waist in starts at 30.
      */
-    waistNoBase: 'No last measurement to step from. The feelings and the note still save.',
+    waistNoBase: 'Your last measurement did not load, so there is nothing to step from. Type the number.',
     /** A write the queue would not take. Screen 00's error card, in the sheet. */
     refusedTitle: 'That entry was not saved',
     refusedBody:
@@ -642,12 +642,15 @@ export const strings = {
         ? '1 entry is waiting to upload. It keeps the time you typed it, not the time it arrives.'
         : `${queued} entries are waiting to upload. Each keeps the time you typed it, not the time it arrives.`,
     /**
-     * The same count on one line, for the notice region under Today's title,
-     * where the height is fixed and the sentence above it would wrap. The
-     * sentence itself is one tap under it and says the rest.
+     * The stepper moves the last measurement by half a centimetre, so it needs
+     * a last measurement. With none it says so and the number is typed instead,
+     * which is the whole of F23's tap count on a first-ever waist: stepping up
+     * from nothing took sixty taps to reach the bottom of the stored band.
      */
-    offlineSummary: (queued: number) =>
-      queued === 1 ? '1 entry is waiting to upload' : `${queued} entries are waiting to upload`,
+    waistTypeIt: 'Type the first one. The buttons move it half a centimetre at a time after that.',
+    /** The muted placeholder `03-quick-log.html` frame 3 draws. Not a number, and not zero. */
+    waistBlank: '--',
+    waistFieldLabel: 'Waist in centimetres',
   },
 
   /**
@@ -660,8 +663,6 @@ export const strings = {
    * both headed JUST LOGGED, which is two different things wearing one label.
    */
   todayLog: {
-    justLogged: 'Just logged',
-    justLoggedEmpty: 'Nothing logged today yet.',
     onFile: 'On file',
     queued: 'Queued',
     /**
@@ -688,15 +689,51 @@ export const strings = {
     undo: 'Undo',
     edit: 'Edit',
     correct: 'Correct it',
-    undoable: 'Still on this phone. Undo removes it before it uploads, and Edit reopens the sheet.',
-    undone: 'Removed before it uploaded. Nothing was stored.',
-    uploaded:
-      'Uploaded to the Mac mini. Vernier never deletes a value, so a change from here is a correction kept beside the original.',
-    undoTooLate:
-      'It had already uploaded, so there was nothing to undo. Correct it instead and the original stays readable.',
     whatHappensNextLabel: 'What happens next',
     whatHappensNext:
       'On the next connection the queue uploads in order and each entry keeps the time you typed it, not the time it arrived. If the Mac mini already holds a value for today, the app asks which one is right. It does not choose for you.',
+
+    /**
+     * THE OFFLINE LINE UNDER TODAY'S TITLE, WHICH IS NOT A NOTICE.
+     *
+     * DESIGN.md section 4 defines the offline state as "a one-line banner under
+     * the title with the queue count", `02-today.html` frame 3 and
+     * `03-quick-log.html` frame 2 both draw it neutral, and the ruling in
+     * `.forge/RULING-SLICE-4.md` question 2 puts it back there after the build
+     * folded it into the warn notice region: a queue needs no action, clears
+     * itself, and "2 things are waiting on you" was not true, because they are
+     * waiting on the network. The count is on the line, where F24 needs it.
+     *
+     * The words are screen 02 frame 3's own.
+     */
+    queueTitle: 'Offline.',
+    queueBody: (queued: number) =>
+      queued === 1 ? '1 entry saved on this phone.' : `${queued} entries saved on this phone.`,
+
+    /**
+     * A just-logged entry, as rows in the day card. `.forge/AMENDMENTS.md` A6
+     * settles the two sheets: screen 02 frame 3 for where it sits, screen 03
+     * frame 2 for what it carries, and the four feelings on one line, never
+     * four. `entryPart` and `entryLine` are how that line is composed, so the
+     * running-on names below are catalogued rather than lower-cased at render.
+     */
+    feelingName: {
+      energy: 'Energy',
+      fatigue: 'Fatigue',
+      hunger: 'Hunger',
+      satiety: 'Satiety',
+    },
+    feelingRunOn: {
+      energy: 'energy',
+      fatigue: 'fatigue',
+      hunger: 'hunger',
+      satiety: 'satiety',
+    },
+    entryPart: (name: string, value: string) => `${name} ${value}`,
+    entryLine: (parts: string[]) => parts.join(', '),
+    entryNote: 'Note',
+    entrySavedQueued: (time: string) => `Saved ${time}, on this phone`,
+    entrySaved: (time: string) => `Saved ${time}`,
   },
 
   /**

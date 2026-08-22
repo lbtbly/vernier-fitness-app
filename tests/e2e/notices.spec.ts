@@ -4,6 +4,7 @@ import { ENGINES, expect, inEngine, test, type Engine } from './fixtures';
 import {
   anchorScratchDemo,
   ensureScratchOwner,
+  landScratchSample,
   projectRoot,
   scratchQuery,
   scratchQuietSources,
@@ -15,67 +16,96 @@ import {
 import { strings } from '../../src/lib/strings';
 
 /**
- * F27, and the class of defect it turned out to be.
+ * F27, amended, and the class of defect it turned out to be.
  *
- * Today puts five things inside 715 px at 393x852 with nothing scrolled, and
- * everything it raises between the title and the first card is data: how many
- * sources have gone quiet, how many imports are waiting on an answer, how many
- * entries are still on the phone. Each of those shipped as a banner of its own,
- * so the room they took grew with the trouble. Two quiet sources put the weight
- * trend 27 px under the fold. That was fixed on the stale banner, and an open
- * import question then put it 43 px under, in Chrome and in WebKit alike: the
- * same defect in a second element.
+ * WHAT THE LINE NOW ASKS. Today puts the session row, the meals, what needs
+ * logging and the weight trend inside 715 px at 393x852 with nothing scrolled,
+ * in every state the owner's data can produce and not in one. Adherence is never
+ * drawn above the trend. Every element that CAN draw above the trend carries a
+ * maximum height fixed by construction rather than by a count of rows, each
+ * maximum stated as a number, measured at its smallest and its largest count,
+ * and the maxima sum inside 715. The 715 is met at DESIGN.md section 3's card
+ * padding and card gap, measured on the shipped screen.
  *
- * So what is graded here is the REGION rather than any banner in it. One line,
- * whatever it holds, at every anchor and in both engines.
+ * WHY IT ASKS THAT. Four verifications found four different elements growing
+ * above the trend: a second stale line at 742 px, an open import question at
+ * 758 px, and the just-logged card at 1147 px. Each fix bounded the element in
+ * front of it and the next one grew, because the set was never closed. Amendment
+ * A5 closed it, and A4's third standing rule now binds every line that fixes a
+ * budget: a fixed budget binds only over a closed set.
+ *
+ * SO WHAT IS GRADED HERE IS THE SUM OF MAXIMA, not one capture of one seed.
+ * There are four elements above the trend and each states its number where it is
+ * built:
+ *
+ *   header.title      63 px   fixed type on a fixed padding
+ *   .banner.queue     one line, clamped in the stylesheet, at any queue depth
+ *   details.notices   one summary row, clamped, whatever it holds
+ *   section.card.day  the session row plus the pair a write replaces
+ *
+ * Each is measured below at both extremes of whatever count can move it, and the
+ * five states F27 names are walked in both engines against one database.
  *
  * WHERE THE STATE COMES FROM. The scale in the demonstration series goes quiet
- * four days in every twenty-one and the phone is permanently four days silent,
- * so two sources are quiet at once about one day in six and there is no shipped
- * path that makes that today. The seed is a pure function of `demo.anchor_day`,
- * so the anchor is moved and the container restarted: 198, 199 and 200 days back
- * are the three consecutive days the verifier measured 742, 741 and 742 px at,
- * and 196 is the neighbouring day with one source quiet. The question is raised
- * through the shipped `/api/log` path, as a real import disagreeing with a real
- * correction, and it stands until it is answered.
+ * four days in every twenty-one and the phone is permanently four days silent, so
+ * two sources are quiet at once about one day in six and there is no shipped path
+ * that makes that today. The seed is a pure function of `demo.anchor_day`, so the
+ * anchor is moved and the container restarted. "Nothing raised" is the state the
+ * anchors cannot reach at all, because the demonstration phone never sends: it is
+ * built by landing one fresh sample per source, the way trend-scratch.spec.ts
+ * does, which is the same door and the same reason.
  *
  * BOTH ENGINES, AGAINST ONE DATABASE. Chrome only is what let this through the
  * first time. The two browsers are launched inside the test rather than as two
  * projects so that they measure the same rows: the anchored seed costs a
  * container restart to build, and two projects would build two of them.
  *
- * THE SESSION IS INJECTED, AND THAT IS WRITTEN DOWN. The scratch instance
- * answers on plain loopback HTTP and the session cookie is Secure, as F11
- * requires, so WebKit stores it and never sends it back: probed on 127.0.0.1 and
- * on localhost, both empty jars. The token itself is minted by the shipped
- * recovery route through the procedure docs/security.md gives the owner; the
- * only thing relaxed is the client-side Secure attribute, so the browser will
- * carry it over loopback. Nothing about the app changes, and nothing here is a
- * back door into a write path: every write below goes through `/api/log`.
+ * THE SESSION IS INJECTED, AND THAT IS WRITTEN DOWN. The scratch instance answers
+ * on plain loopback HTTP and the session cookie is Secure, as F11 requires, so
+ * WebKit stores it and never sends it back: probed on 127.0.0.1 and on localhost,
+ * both empty jars. The token itself is minted by the shipped recovery route
+ * through the procedure docs/security.md gives the owner; the only thing relaxed
+ * is the client-side Secure attribute, so the browser will carry it over
+ * loopback. Nothing about the app changes, and nothing here is a back door into a
+ * write path: every write below goes through `/api/log` or through the sheet.
  */
 
-const CAPTURES = `${projectRoot}.forge/evidence/slice-4/fix3/`;
+const CAPTURES = `${projectRoot}.forge/evidence/slice-4/fix4/`;
 
-/** DESIGN.md: 852 minus a 54 px status bar and an 83 px tab bar. */
+/** DESIGN.md section 3: 852 minus a 54 px status bar and an 83 px tab bar. */
 const FOLD = 715;
 
-/** Two quiet sources at 198, 199 and 200. One at 196. */
-const ANCHORS = [196, 198, 199, 200];
+/** DESIGN.md section 3, the two values the fold has to be met at. */
+const CARD_PADDING = 16;
+const CARD_GAP = 12;
 
-/** Counts the copy has to hold at, read through the shipped summary function. */
+/** Two quiet sources at 200. One at 196. */
+const QUIET_ANCHOR = 200;
+const ONE_QUIET_ANCHOR = 196;
+
+/** Counts the notice copy has to hold at, read through the shipped function. */
 const COUNTS = [1, 2, 3, 5, 9, 42, 999_999];
 
-type Reading = {
-  anchor: string;
+type Measured = {
+  state: string;
   engine: Engine;
-  quiet: number;
-  notices: number;
-  summary: string;
-  regionHeight: number;
-  trendBottom: number;
   scrollY: number;
-  banners: number;
-  heightByCount: Record<string, number>;
+  trendBottom: number;
+  adherenceTop: number | null;
+  /** Every element the page drew above the weight trend, with its height. */
+  above: Array<{ what: string; top: number; bottom: number; height: number }>;
+  title: number;
+  queue: number | null;
+  queueText: string | null;
+  region: number | null;
+  regionNotices: number;
+  day: number;
+  cardPadding: number;
+  cardGap: number;
+  /** The region's height at every count its copy can take. */
+  regionByCount: Record<string, number>;
+  /** The offline line's height at 1 and at 999999 queued entries. */
+  queueByCount: Record<string, number>;
 };
 
 test.describe.configure({ mode: 'serial' });
@@ -90,10 +120,10 @@ test.beforeAll(async () => {
 /**
  * A session on the scratch instance, minted by the shipped recovery route.
  *
- * Retried, because this runs seconds after a container restart: the port
- * answers `/healthz` before the route that mints the link has been compiled,
- * and the first request through can come back as a reset connection. A retry is
- * honest here; what is being graded is a fold, not a cold start.
+ * Retried, because this runs seconds after a container restart: the port answers
+ * `/healthz` before the route that mints the link has been compiled, and the
+ * first request through can come back as a reset connection. A retry is honest
+ * here; what is being graded is a fold, not a cold start.
  */
 async function scratchSession(): Promise<Map<string, string>> {
   let lastError: unknown = null;
@@ -184,232 +214,634 @@ function cookiesFor(jar: Map<string, string>) {
   }));
 }
 
-/** Everything the fold turns on, read off the rendered page. */
-async function measure(page: import('@playwright/test').Page, counts: number[], copy: string[]) {
+/** The fold, drawn on the page, so a capture shows where 715 pixels ends. */
+async function markTheFold(page: import('@playwright/test').Page) {
+  await page.evaluate((fold) => {
+    if (document.querySelector('[data-fold-marker]')) return;
+    const rule = document.createElement('div');
+    rule.setAttribute('data-fold-marker', String(fold));
+    Object.assign(rule.style, {
+      position: 'absolute',
+      left: '0',
+      right: '0',
+      top: `${fold}px`,
+      height: '0',
+      borderTop: '2px dashed #F07A6A',
+      zIndex: '99',
+      pointerEvents: 'none',
+    });
+    const label = document.createElement('span');
+    label.textContent = `fold, ${fold} px`;
+    Object.assign(label.style, {
+      position: 'absolute',
+      right: '4px',
+      top: '2px',
+      font: '11px -apple-system, system-ui',
+      color: '#F07A6A',
+    });
+    rule.append(label);
+    document.body.append(rule);
+  }, FOLD);
+}
+
+/**
+ * Everything the fold turns on, read off the rendered page.
+ *
+ * The two by-count maps are the boundedness clause itself: the shipped copy
+ * function is called for each count, its answer is written into the shipped
+ * element, and the element is re-measured. The point is not that the copy is
+ * short today, it is that no wording can grow the row.
+ */
+async function measure(
+  page: import('@playwright/test').Page,
+  noticeCopy: string[],
+  queueCopy: string[],
+): Promise<Omit<Measured, 'state' | 'engine'>> {
   return page.evaluate(
-    ({ counts: forCounts, copy: lines }) => {
+    ({ counts, notices, queues }) => {
+      const round = (value: number) => Math.round(value);
+      const trend = document.querySelector('[data-chart="today-weight"]')!.getBoundingClientRect();
+      const trendBottom = round(trend.bottom + window.scrollY);
+
+      // Everything the page drew above the trend, whatever it is. Not a list of
+      // five names: whatever is there, so a sixth element in slice 6 or slice 13
+      // shows up in this evidence without anybody remembering to add it.
+      const above: Array<{ what: string; top: number; bottom: number; height: number }> = [];
+      const scroll = document.querySelector('.app-scroll')!;
+      const walk = (parent: Element) => {
+        for (const node of parent.children) {
+          const box = node.getBoundingClientRect();
+          if (box.top + window.scrollY >= trend.top + window.scrollY) continue;
+          const name = `${node.tagName.toLowerCase()}${node.className ? `.${String(node.className).split(' ').join('.')}` : ''}`;
+          above.push({
+            what: name,
+            top: round(box.top + window.scrollY),
+            bottom: round(box.bottom + window.scrollY),
+            height: round(box.height),
+          });
+        }
+      };
+      walk(scroll.firstElementChild ?? scroll);
+
       const region = document.querySelector('[data-notices]') as HTMLDetailsElement | null;
-      const box = region?.getBoundingClientRect();
-      const trend = document.querySelector('[data-chart="today-weight"]')?.getBoundingClientRect();
-      const day = document.querySelector('.card.day');
+      const queue = document.querySelector('.banner.queue') as HTMLElement | null;
+      const title = document.querySelector('header.title')!.getBoundingClientRect();
+      const day = document.querySelector('.card.day')!;
+      const dayStyle = getComputedStyle(day);
+      const adherence = document.querySelector('.card.adherence')?.getBoundingClientRect() ?? null;
 
-      // Every banner drawn above the first card, which is the region this line
-      // is about. One element, or the class of defect is back.
-      const banners = [...document.querySelectorAll('.banner')].filter(
-        (node) => day !== null && node.compareDocumentPosition(day) & Node.DOCUMENT_POSITION_FOLLOWING,
-      ).length;
-
-      // The height against the copy the shipped function produces for each
-      // count, fed through the shipped element and re-measured. The point is
-      // that no wording can grow the row.
-      const heightByCount: Record<string, number> = {};
-      const label = region?.querySelector('summary > b') ?? null;
-      const was = label?.textContent ?? '';
-      for (let index = 0; index < forCounts.length; index += 1) {
-        if (!label || !region) break;
-        label.textContent = lines[index];
-        heightByCount[String(forCounts[index])] = Math.round(region.getBoundingClientRect().height);
+      // The region's height against every count its own copy can produce.
+      const regionByCount: Record<string, number> = {};
+      const regionLabel = region?.querySelector('summary > b') ?? null;
+      const regionWas = regionLabel?.textContent ?? '';
+      if (region && regionLabel) {
+        for (let index = 0; index < counts.length; index += 1) {
+          regionLabel.textContent = notices[index];
+          regionByCount[String(counts[index])] = round(region.getBoundingClientRect().height);
+        }
+        regionLabel.textContent = regionWas;
       }
-      if (label) label.textContent = was;
+
+      // The offline line's height against every count of queued entries.
+      const queueByCount: Record<string, number> = {};
+      const queueLine = queue?.querySelector('.queue-line') ?? null;
+      const queueWas = queueLine?.innerHTML ?? '';
+      if (queue && queueLine) {
+        for (let index = 0; index < counts.length; index += 1) {
+          queueLine.textContent = queues[index];
+          queueByCount[String(counts[index])] = round(queue.getBoundingClientRect().height);
+        }
+        queueLine.innerHTML = queueWas;
+      }
 
       return {
-        notices: Number(region?.getAttribute('data-notices') ?? 0),
-        // One line per quiet source, under the count. Nothing is dropped when
-        // the region collapses; what collapses is the room, not the reading.
-        staleLines: document.querySelectorAll('[data-notice="stale"] .noticedetail').length,
-        summary: region?.querySelector('summary')?.textContent?.trim() ?? '',
-        detail: region?.textContent?.trim() ?? '',
-        regionHeight: box ? Math.round(box.height) : 0,
-        trendBottom: trend ? Math.round(trend.bottom + window.scrollY) : 0,
         scrollY: window.scrollY,
-        banners,
-        heightByCount,
+        trendBottom,
+        adherenceTop: adherence ? round(adherence.top + window.scrollY) : null,
+        above,
+        title: round(title.height),
+        queue: queue ? round(queue.getBoundingClientRect().height) : null,
+        queueText: queue?.textContent?.trim() ?? null,
+        region: region ? round(region.getBoundingClientRect().height) : null,
+        regionNotices: Number(region?.getAttribute('data-notices') ?? 0),
+        day: round(day.getBoundingClientRect().height),
+        cardPadding: Number.parseFloat(dayStyle.paddingTop),
+        cardGap: Number.parseFloat(dayStyle.marginBottom),
+        regionByCount,
+        queueByCount,
       };
     },
-    { counts, copy },
+    { counts: COUNTS, notices: noticeCopy, queues: queueCopy },
   );
 }
 
-test('F27. the notice region is one line, and the trend clears the fold, at every quiet anchor in both engines', async () => {
-  const readings: Reading[] = [];
-  const copy = COUNTS.map((count) => strings.notices.summary(count));
+/** One entry in the outbox, in the store the shipped flusher reads. */
+async function queueOneEntry(page: import('@playwright/test').Page) {
+  await expect
+    .poll(
+      () =>
+        page.evaluate(async () => {
+          const names = await indexedDB.databases();
+          if (!names.some((entry) => entry.name === 'vernier')) return false;
+          return new Promise<boolean>((resolve) => {
+            const request = indexedDB.open('vernier', 1);
+            request.onsuccess = () => {
+              const has = request.result.objectStoreNames.contains('outbox');
+              request.result.close();
+              resolve(has);
+            };
+            request.onerror = () => resolve(false);
+          });
+        }),
+      { timeout: 20_000 },
+    )
+    .toBe(true);
 
-  for (const daysAgo of ANCHORS) {
-    const anchor = anchorScratchDemo(daysAgo);
-    await waitForScratch();
-    await ensureScratchOwner();
+  await page.evaluate(async () => {
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open('vernier', 1);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction('outbox', 'readwrite');
+      tx.objectStore('outbox').put({
+        id: crypto.randomUUID(),
+        url: '/api/log',
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          measuredAt: new Date().toISOString(),
+          timeZone: 'Europe/Paris',
+          values: [{ id: crypto.randomUUID(), metric: 'fatigue', rawValue: '2' }],
+        }),
+        createdAt: Date.now(),
+        attempts: 0,
+        nextAttemptAt: 0,
+        lastError: null,
+        parked: false,
+      });
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+    db.close();
+  });
+}
+
+/**
+ * One quick log writing all six values F23 names, through the shipped sheet.
+ *
+ * The waist is typed rather than stepped, which is what screen 03 frame 3 draws
+ * and what F23's tap count now rests on. The origin is taken away first, so the
+ * entry sits in the queue and the row keeps its Undo and Edit: that is the tallest
+ * the day card ever gets, and it is the state this measurement is for.
+ */
+async function writeAllSix(page: import('@playwright/test').Page, context: import('@playwright/test').BrowserContext) {
+  await page.getByRole('button', { name: 'Quick log', exact: true }).click();
+  await expect(page.getByRole('dialog', { name: 'Quick log' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Energy, 4 of 5' })).toBeEnabled();
+
+  await page.locator('#quick-log-waist').fill('99.0');
+  await page.getByRole('button', { name: 'Energy, 4 of 5' }).click();
+  await page.getByRole('button', { name: 'Fatigue, 2 of 5' }).click();
+  await page.getByRole('button', { name: 'Hunger, 3 of 5' }).click();
+  await page.getByRole('button', { name: 'Satiety after eating, 4 of 5' }).click();
+  await page
+    .getByLabel('Note')
+    .fill(
+      'Slept badly. Left knee fine. And this note runs on well past the width of the row, because a row whose height is the length of what somebody typed is not a bounded row.',
+    );
+
+  // The origin, taken away properly.
+  //
+  // A page-level route is invisible to a service worker's own fetches, and these
+  // contexts are opened by `inEngine` rather than by the project, so the worker
+  // is allowed to install in them. A route alone let the flush through: the
+  // entry uploaded, the row went from Queued to Stored between two assertions,
+  // and the offline line never appeared at all. Both doors are shut.
+  await context.setOffline(true).catch(() => undefined);
+  await context.route('**/*', (route) => route.abort('connectionfailed'));
+  const reachable = await page.evaluate(async () => {
+    try {
+      return (await fetch('/healthz', { method: 'HEAD', cache: 'no-store' })).ok;
+    } catch {
+      return false;
+    }
+  });
+  expect(reachable, 'the origin must really be unreachable before an offline write means anything').toBe(false);
+
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+
+  // Queued, and staying queued, which is what makes this the tallest the day
+  // card gets: the row keeps its Undo and Edit and the offline line is up.
+  // The sheet closes on save, because the write is committed the moment the
+  // entry is in IndexedDB. Waited for rather than assumed: while it is up it is
+  // `aria-modal`, so everything behind it is out of the accessibility tree and
+  // Undo and Edit cannot be found by role however plainly they are drawn. WebKit
+  // takes a beat longer over it than Chrome does, and a fold measured with the
+  // sheet still over it is a measurement of the sheet.
+  await expect(page.locator('.sheet')).toHaveCount(0);
+  await expect(page.locator('[data-just-logged="queued"]')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Undo' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Edit' })).toBeVisible();
+  await expect(page.locator('.banner.queue')).toBeVisible();
+}
+
+test('F27. every element above the trend is bounded, the maxima sum inside 715, and the trend clears the fold in five states and both engines', async () => {
+  const readings: Measured[] = [];
+  const noticeCopy = COUNTS.map((count) => strings.notices.summary(count));
+  const queueCopy = COUNTS.map((count) => `${strings.todayLog.queueTitle} ${strings.todayLog.queueBody(count)}`);
+
+  /**
+   * The five states F27 names, in the order they are cheapest to build. Each
+   * one says what it costs to reach, because two of them cannot be reached on
+   * the owner's install at all.
+   */
+  const states: Array<{
+    name: string;
+    build: () => Promise<void>;
+    /** What the page has to be put through inside the browser, per engine. */
+    inPage?: (page: import('@playwright/test').Page, context: import('@playwright/test').BrowserContext) => Promise<void>;
+  }> = [
+    {
+      name: 'nothing-raised',
+      build: async () => {
+        anchorScratchDemo(ONE_QUIET_ANCHOR);
+        await waitForScratch();
+        await ensureScratchOwner();
+        // Both syncing sources sending inside the last thirty-six hours, which
+        // the demonstration seed never produces on its own: its phone is
+        // permanently four days silent. Same door trend-scratch.spec.ts uses.
+        landScratchSample('fold-fresh-phone', 'apple_health_shortcut', 'steps', 9412, 'step', 1);
+        landScratchSample('fold-fresh-scale', 'withings', 'weight', 85.9, 'kg', 1);
+      },
+    },
+    {
+      name: 'every-source-quiet',
+      build: async () => {
+        anchorScratchDemo(QUIET_ANCHOR);
+        await waitForScratch();
+        await ensureScratchOwner();
+      },
+    },
+    {
+      name: 'open-import-question',
+      build: async () => {
+        anchorScratchDemo(QUIET_ANCHOR);
+        await waitForScratch();
+        await ensureScratchOwner();
+        await raiseAQuestion(await scratchSession());
+      },
+    },
+    {
+      name: 'offline-with-entries-queued',
+      build: async () => {
+        anchorScratchDemo(QUIET_ANCHOR);
+        await waitForScratch();
+        await ensureScratchOwner();
+        await raiseAQuestion(await scratchSession());
+      },
+      inPage: async (page, context) => {
+        // The queue cannot drain while the origin refuses the write, which is
+        // the only state in which an entry sits in it. Only /api/log is taken
+        // away; the screen itself still loads.
+        await context.route('**/api/log', (route) => route.abort('connectionfailed'));
+        await page.reload();
+        await page.waitForLoadState('load');
+        await queueOneEntry(page);
+        await page.reload();
+        await page.waitForLoadState('domcontentloaded');
+        await expect(page.locator('.banner.queue')).toBeVisible();
+      },
+    },
+    {
+      name: 'after-one-quick-log-all-six',
+      build: async () => {
+        anchorScratchDemo(QUIET_ANCHOR);
+        await waitForScratch();
+        await ensureScratchOwner();
+        await raiseAQuestion(await scratchSession());
+      },
+      inPage: writeAllSix,
+    },
+  ];
+
+  for (const state of states) {
+    await state.build();
     const jar = await scratchSession();
-    await raiseAQuestion(jar);
     const quiet = scratchQuietSources();
-    console.log(`q${daysAgo}  anchor ${anchor}, ${quiet} quiet source(s), 1 open question`);
+    const open = scratchQuery("select count(*) from import_question where state = 'open'");
+    console.log(`\nF27  state ${state.name}: ${quiet} quiet source(s), ${open} open question(s)`);
 
     for (const engine of ENGINES) {
       await inEngine(
         engine,
-        { viewport: { width: 393, height: 852 }, deviceScaleFactor: 3 },
+        { viewport: { width: 393, height: 852 }, deviceScaleFactor: 3, serviceWorkers: 'block' },
         async (page, context) => {
           await context.addCookies(cookiesFor(jar));
           await page.goto(`${scratchUrl}/`);
           await page.waitForLoadState('networkidle');
-          const read = await measure(page, COUNTS, copy);
-          readings.push({ anchor: `q${daysAgo}`, engine, quiet, ...read });
+          if (state.inPage) await state.inPage(page, context);
+
+          const read = await measure(page, noticeCopy, queueCopy);
+          readings.push({ state: state.name, engine, ...read });
+
           console.log(
-            `q${daysAgo}  ${engine.padEnd(6)} region ${read.regionHeight} px, ${read.notices} notice(s), ` +
-              `trend ends ${read.trendBottom} px, fold ${FOLD}, scrollY ${read.scrollY}`,
+            `F27  ${state.name.padEnd(28)} ${engine.padEnd(6)} trend ends ${String(read.trendBottom).padStart(4)} px, ` +
+              `fold ${FOLD}, scrollY ${read.scrollY}`,
           );
-          console.log(`q${daysAgo}  ${engine.padEnd(6)} the one line reads: ${read.summary}`);
-          if (daysAgo === 200) {
-            await page.screenshot({
-              path: `${CAPTURES}f27-q${daysAgo}-${engine}-393.png`,
-              fullPage: true,
-            });
+          for (const element of read.above) {
+            console.log(
+              `F27    above the trend  ${String(element.top).padStart(4)}..${String(element.bottom).padStart(4)}  ` +
+                `h ${String(element.height).padStart(4)}  ${element.what}`,
+            );
           }
+          console.log(
+            `F27    title ${read.title}  offline line ${read.queue ?? '-'}  notice region ${read.region ?? '-'} ` +
+              `(${read.regionNotices})  day card ${read.day}  card padding ${read.cardPadding}  card gap ${read.cardGap}`,
+          );
+          if (read.queueText) console.log(`F27    the offline line reads: ${read.queueText}`);
+
+          await markTheFold(page);
+          await page.screenshot({
+            path: `${CAPTURES}f27-${state.name}-${engine}-393x852.png`,
+            fullPage: true,
+          });
         },
       );
     }
   }
 
-  // Two sources quiet AND a question open is the state the defect was found in,
-  // and it is reached at three of the four anchors.
-  const bothQuiet = readings.filter((reading) => reading.quiet === 2);
-  expect(bothQuiet.length, 'no anchor reached two quiet sources at once').toBe(6);
+  // Ten readings: five states, two engines.
+  console.log(`\nF27  readings: ${readings.length}`);
+  expect(readings).toHaveLength(states.length * ENGINES.length);
+
+  /* ---------------------------------------------------- the line, clause by clause */
 
   for (const reading of readings) {
-    expect(reading.notices, `${reading.anchor} ${reading.engine} raised no question`).toBe(2);
-    expect(reading.banners, `${reading.anchor} ${reading.engine} drew more than one banner`).toBe(1);
-    expect(reading.scrollY, `${reading.anchor} ${reading.engine} had to scroll`).toBe(0);
-    expect(
-      reading.trendBottom,
-      `${reading.anchor} ${reading.engine}: the weight trend is under the fold`,
-    ).toBeLessThanOrEqual(FOLD);
-  }
+    const where = `${reading.state} ${reading.engine}`;
+    expect(reading.scrollY, `${where} had to scroll`).toBe(0);
+    expect(reading.trendBottom, `${where}: the weight trend is under the fold`).toBeLessThanOrEqual(FOLD);
 
-  // The height is one number across every anchor, both engines and every count
-  // the copy can produce. This is the line: the region does not grow with the
-  // data, and no string anybody writes later can grow it either.
-  const heights = new Set<number>();
-  for (const reading of readings) {
-    heights.add(reading.regionHeight);
-    for (const count of COUNTS) heights.add(reading.heightByCount[String(count)]);
+    // "Adherence is never drawn above the weight trend."
+    if (reading.adherenceTop !== null) {
+      expect(reading.adherenceTop, `${where}: adherence is drawn above the trend`).toBeGreaterThan(
+        reading.trendBottom,
+      );
+    }
+
+    // "The 715 is met at the card padding and the card gap DESIGN.md section 3
+    // fixes, measured on the shipped screen: a fold bought by compressing them
+    // is a FAIL."
+    expect(reading.cardPadding, `${where}: Today's card padding is not section 3's`).toBe(CARD_PADDING);
+    expect(reading.cardGap, `${where}: Today's card gap is not section 3's`).toBe(CARD_GAP);
   }
-  console.log(`F27  every region height measured, across ${readings.length} readings: ${[...heights].join(', ')}`);
-  expect([...heights], 'the region height depends on something').toHaveLength(1);
+  console.log(
+    `F27  card padding ${CARD_PADDING} px and card gap ${CARD_GAP} px on every reading, measured on the shipped screen`,
+  );
+
+  /* -------------------------------- each element's maximum, at its extreme count */
+
+  // The notice region, at 1 notice and at 999,999, in both engines and in every
+  // state that raises one. One number or the region depends on something.
+  const regionHeights = new Set<number>();
+  for (const reading of readings) {
+    if (reading.region === null) continue;
+    regionHeights.add(reading.region);
+    for (const count of COUNTS) regionHeights.add(reading.regionByCount[String(count)]);
+  }
+  console.log(`F27  notice region, every height measured at counts ${COUNTS.join(', ')}: ${[...regionHeights].join(', ')}`);
+  expect([...regionHeights], 'the notice region height depends on something').toHaveLength(1);
+
+  // The offline line, at 1 queued entry and at 999,999.
+  const queueHeights = new Set<number>();
+  for (const reading of readings) {
+    if (reading.queue === null) continue;
+    queueHeights.add(reading.queue);
+    for (const count of COUNTS) queueHeights.add(reading.queueByCount[String(count)]);
+  }
+  console.log(`F27  offline line, every height measured at queue depths ${COUNTS.join(', ')}: ${[...queueHeights].join(', ')}`);
+  expect([...queueHeights], 'the offline line height depends on the queue depth').toHaveLength(1);
+
+  // The title, which takes its height from fixed type on fixed padding.
+  const titles = new Set(readings.map((reading) => reading.title));
+  console.log(`F27  title header, every height measured: ${[...titles].join(', ')}`);
+  expect([...titles], 'the title height depends on something').toHaveLength(1);
+
+  // The day card, at its smallest count of rows and at its largest: the plan's
+  // three rows, and the session row beside a write carrying all six values with
+  // a note long enough to wrap three times.
+  const dayByState = new Map<string, number[]>();
+  for (const reading of readings) {
+    dayByState.set(reading.state, [...(dayByState.get(reading.state) ?? []), reading.day]);
+  }
+  for (const [state, heights] of dayByState) {
+    console.log(`F27  day card in ${state}: ${heights.join(', ')} px`);
+    expect(new Set(heights).size, `the day card differs between engines in ${state}`).toBe(1);
+  }
+  const dayMax = Math.max(...readings.map((reading) => reading.day));
+  const dayMin = Math.min(...readings.map((reading) => reading.day));
+  console.log(`F27  day card measured from ${dayMin} px at its smallest to ${dayMax} px at its largest`);
+
+  /* ------------------------------------------------- and the maxima, summed */
+
+  const titleMax = Math.max(...readings.map((reading) => reading.title));
+  const queueMax = Math.max(...queueHeights);
+  const regionMax = Math.max(...regionHeights);
+  // What the weight card spends above its own chart, which is the last thing
+  // between the day card and the trend. Measured rather than assumed.
+  const weightAbove = Math.max(
+    ...readings.map((reading) => {
+      const day = reading.above.find((element) => element.what.includes('card.day'))!;
+      return reading.trendBottom - day.bottom;
+    }),
+  );
+  const chrome = Math.min(...readings.map((reading) => reading.above[0].top));
+  const sum = chrome + titleMax + CARD_GAP + queueMax + CARD_GAP + regionMax + CARD_GAP + dayMax + weightAbove;
+
+  console.log('\nF27  the maxima, and their sum');
+  console.log(`F27    scroll padding above the title      ${String(chrome).padStart(4)} px`);
+  console.log(`F27    header.title                        ${String(titleMax).padStart(4)} px  fixed type, fixed padding`);
+  console.log(`F27    .banner.queue                       ${String(queueMax).padStart(4)} px  one clamped line at any queue depth`);
+  console.log(`F27    details.notices                     ${String(regionMax).padStart(4)} px  one clamped summary row whatever it holds`);
+  console.log(`F27    section.card.day                    ${String(dayMax).padStart(4)} px  the session row plus the pair a write replaces`);
+  console.log(`F27    the weight card above its chart     ${String(weightAbove).padStart(4)} px  label, headline and the chart's own margin`);
+  console.log(`F27    three card gaps at ${CARD_GAP} px           ${String(CARD_GAP * 3).padStart(4)} px`);
+  console.log(`F27    sum                                 ${String(sum).padStart(4)} px  against a fold of ${FOLD} px`);
+  expect(sum, 'the maxima do not sum inside the fold').toBeLessThanOrEqual(FOLD);
+
+  // The worst reading actually taken, beside the sum, so the two can be compared.
+  const worst = Math.max(...readings.map((reading) => reading.trendBottom));
+  console.log(`F27  the deepest the trend reached in any state or engine: ${worst} px\n`);
+  expect(worst).toBeLessThanOrEqual(sum);
 });
 
 /**
- * The third notice, which is the queue, and the state slices 5 to 14 will keep
- * adding to. Three things wrong at once on one line.
+ * The states named in the line, read back for what they SAY rather than for
+ * where they end. F24's queue count and the ruling on where it lives.
  */
-test('F27. a third notice does not move the fold either', async () => {
-  const anchor = anchorScratchDemo(200);
+test('F24 and C5. the offline line is neutral, one line, under the title, with the count on it', async () => {
+  anchorScratchDemo(QUIET_ANCHOR);
   await waitForScratch();
   await ensureScratchOwner();
   const jar = await scratchSession();
-  await raiseAQuestion(jar);
-  console.log(`queue  anchor ${anchor}, ${scratchQuietSources()} quiet source(s), 1 open question`);
-
-  const copy = COUNTS.map((count) => strings.notices.summary(count));
-  const heights = new Set<number>();
 
   for (const engine of ENGINES) {
     await inEngine(
       engine,
-      { viewport: { width: 393, height: 852 }, deviceScaleFactor: 3 },
+      { viewport: { width: 393, height: 852 }, deviceScaleFactor: 3, serviceWorkers: 'block' },
       async (page, context) => {
         await context.addCookies(cookiesFor(jar));
-        // The queue cannot drain while the origin refuses the write, which is
-        // the only state in which an entry sits in it. Only /api/log is taken
-        // away; the screen itself still loads.
         await context.route('**/api/log', (route) => route.abort('connectionfailed'));
         await page.goto(`${scratchUrl}/`);
         await page.waitForLoadState('load');
-
-        // One entry in the outbox, in the store the shipped flusher reads. The
-        // component opens that database on mount to read the queue depth, so
-        // this waits for it rather than creating a database of its own at the
-        // same version with different stores in it.
-        await expect
-          .poll(
-            () =>
-              page.evaluate(async () => {
-                const names = await indexedDB.databases();
-                if (!names.some((entry) => entry.name === 'vernier')) return false;
-                return new Promise<boolean>((resolve) => {
-                  const request = indexedDB.open('vernier', 1);
-                  request.onsuccess = () => {
-                    const has = request.result.objectStoreNames.contains('outbox');
-                    request.result.close();
-                    resolve(has);
-                  };
-                  request.onerror = () => resolve(false);
-                });
-              }),
-            { timeout: 20_000 },
-          )
-          .toBe(true);
-
-        await page.evaluate(async () => {
-          const db = await new Promise<IDBDatabase>((resolve, reject) => {
-            const request = indexedDB.open('vernier', 1);
-            request.onsuccess = () => resolve(request.result);
-            request.onerror = () => reject(request.error);
-          });
-          await new Promise<void>((resolve, reject) => {
-            const tx = db.transaction('outbox', 'readwrite');
-            tx.objectStore('outbox').put({
-              id: crypto.randomUUID(),
-              url: '/api/log',
-              method: 'POST',
-              headers: { 'content-type': 'application/json' },
-              body: JSON.stringify({
-                measuredAt: new Date().toISOString(),
-                timeZone: 'Europe/Paris',
-                values: [{ id: crypto.randomUUID(), metric: 'fatigue', rawValue: '2' }],
-              }),
-              createdAt: Date.now(),
-              attempts: 0,
-              nextAttemptAt: 0,
-              lastError: null,
-              parked: false,
-            });
-            tx.oncomplete = () => resolve();
-            tx.onerror = () => reject(tx.error);
-          });
-          db.close();
-        });
-
+        await queueOneEntry(page);
         await page.reload();
         await page.waitForLoadState('domcontentloaded');
-        await expect(page.locator('[data-notices="3"]')).toBeVisible();
 
-        const read = await measure(page, COUNTS, copy);
-        heights.add(read.regionHeight);
-        for (const count of COUNTS) heights.add(read.heightByCount[String(count)]);
+        const line = page.locator('.banner.queue');
+        await expect(line).toBeVisible();
+        const read = await line.evaluate((node) => {
+          const style = getComputedStyle(node);
+          const title = document.querySelector('header.title')!.getBoundingClientRect();
+          const firstCard = document.querySelector('.card')!.getBoundingClientRect();
+          const box = node.getBoundingClientRect();
+          return {
+            text: node.textContent?.trim() ?? '',
+            colour: style.color,
+            background: style.backgroundColor,
+            border: style.borderColor,
+            warn: node.classList.contains('w'),
+            insideTheNoticeRegion: node.closest('[data-notices]') !== null,
+            underTheTitle: box.top >= title.bottom,
+            aboveTheFirstCard: box.bottom <= firstCard.top,
+            lines: Math.round(box.height / Number.parseFloat(style.lineHeight)),
+            warnToken: getComputedStyle(document.documentElement).getPropertyValue('--warn').trim(),
+          };
+        });
+
+        console.log(`F24  ${engine.padEnd(6)} the line reads: ${read.text}`);
         console.log(
-          `queue  ${engine.padEnd(6)} region ${read.regionHeight} px, ${read.notices} notice(s), ` +
-            `trend ends ${read.trendBottom} px, fold ${FOLD}, scrollY ${read.scrollY}`,
+          `F24  ${engine.padEnd(6)} colour ${read.colour}, background ${read.background}, warn class ${read.warn}, ` +
+            `inside the notice region ${read.insideTheNoticeRegion}, under the title ${read.underTheTitle}`,
         );
-        console.log(`queue  ${engine.padEnd(6)} the one line reads: ${read.summary}`);
-        console.log(`queue  ${engine.padEnd(6)} one tap under it: ${read.detail.replace(/\s+/g, ' ')}`);
 
-        expect(read.notices).toBe(3);
-        expect(read.banners, 'a third notice drew a second banner').toBe(1);
-        expect(read.scrollY).toBe(0);
-        expect(read.trendBottom).toBeLessThanOrEqual(FOLD);
-        // Nothing is hidden: the queue count, the quiet sources and the
-        // question are all one tap under the line, in full.
-        expect(read.detail).toContain('entry is waiting to upload');
-        expect(read.staleLines, 'a quiet source lost its line').toBe(2);
-        expect(read.detail).toContain('days old');
-        expect(read.detail).toContain(strings.question.title);
+        // The count is on the line, unabridged, with no tap.
+        expect(read.text).toContain(strings.todayLog.queueTitle);
+        expect(read.text).toContain(strings.todayLog.queueBody(1));
+        expect(read.text).toMatch(/\d/);
+        // Where DESIGN.md section 4 puts it.
+        expect(read.underTheTitle, 'the offline line is not under the title').toBe(true);
+        expect(read.aboveTheFirstCard, 'the offline line is not above the first card').toBe(true);
+        // And what it is not: a notice, and never --warn.
+        expect(read.insideTheNoticeRegion, 'the offline line is inside the notice region').toBe(false);
+        expect(read.warn, 'the offline line carries the warn treatment').toBe(false);
+        expect(read.background, 'the offline line is painted in the warn colour').not.toContain(read.warnToken);
 
-        await page.screenshot({ path: `${CAPTURES}f27-three-notices-${engine}-393.png`, fullPage: true });
-        await page.locator('[data-notices] summary').click();
-        await page.screenshot({ path: `${CAPTURES}f27-three-notices-open-${engine}-393.png`, fullPage: true });
+        await page.screenshot({ path: `${CAPTURES}f24-offline-line-${engine}-393x852.png`, fullPage: true });
+      },
+    );
+  }
+});
+
+/**
+ * F23's first-ever waist, on an installation that has never held one, and the
+ * two things screen 03 frame 3 draws for it.
+ *
+ * This is the state that un-ticked F23: the stepper is relative, it had nothing
+ * to be relative to, and it stepped from zero. Sixty taps to the bottom of the
+ * stored band, a hundred and ninety-seven to 99.0, against a line that says six.
+ */
+test('F23 and C5. a first-ever waist commits in six taps or fewer, from a blank field and not from zero', async () => {
+  for (const engine of ENGINES) {
+    // Rebuilt per engine, because the first pass stores a waist and the state
+    // being graded is an installation that has never held one. Sharing the
+    // database between the two would have measured the first-ever screen once
+    // and the ordinary one after it, which is the shape of evidence that proves
+    // less than it says.
+    testStackWithDemoMode('0', 'reset');
+    await waitForScratch();
+    await ensureScratchOwner();
+    expect(scratchQuery("select count(*) from measurement where metric = 'waist'")).toBe('0');
+    const jar = await scratchSession();
+
+    await inEngine(
+      engine,
+      { viewport: { width: 393, height: 852 }, deviceScaleFactor: 3, serviceWorkers: 'block' },
+      async (page, context) => {
+        await context.addCookies(cookiesFor(jar));
+        await page.goto(`${scratchUrl}/`);
+        await page.waitForLoadState('networkidle');
+
+        let taps = 0;
+        await page.getByRole('button', { name: 'Quick log', exact: true }).click();
+        taps += 1;
+        await expect(page.getByRole('dialog', { name: 'Quick log' })).toBeVisible();
+
+        // Screen 03 frame 3, drawn: the dashed card, the sentence, and a value
+        // that is `--` and not a number.
+        const empty = page.locator('.sheet .card.empty[data-state="empty"]');
+        await expect(empty).toBeVisible();
+        console.log(`F23  ${engine.padEnd(6)} the empty card reads: ${(await empty.textContent())?.trim()}`);
+        expect(await empty.textContent()).toContain(strings.quickLog.waistEmptyTitle);
+        expect(await empty.textContent()).toContain(strings.quickLog.waistEmptyBody);
+
+        const field = page.locator('#quick-log-waist');
+        expect(await field.inputValue(), 'the first-ever waist starts at a number').toBe('');
+        expect(await field.getAttribute('placeholder')).toBe(strings.quickLog.waistBlank);
+        console.log(
+          `F23  ${engine.padEnd(6)} the value reads "${await field.getAttribute('placeholder')}" and holds ` +
+            `"${await field.inputValue()}", which is blank and not zero`,
+        );
+
+        // Neither hand of the stepper offers to move a value that is not there,
+        // which is the whole of defect 60: one tap used to queue 0.5 cm and the
+        // screen reported it as saved, for a value the band refuses under 30.
+        await expect(page.getByRole('button', { name: 'Up half a centimetre' })).toBeDisabled();
+        await expect(page.getByRole('button', { name: 'Down half a centimetre' })).toBeDisabled();
+        console.log(`F23  ${engine.padEnd(6)} both stepper controls are refused while the field is blank`);
+
+        // And the footer says so in the sheet's own words.
+        const footer = page.locator('.sheetfoot .note');
+        expect(await footer.textContent()).toContain(strings.quickLog.blankNote);
+
+        await page.screenshot({ path: `${CAPTURES}f23-first-ever-waist-${engine}-393x852.png`, fullPage: true });
+
+        // Tap two: the field. Then the number, then Save.
+        await field.click();
+        taps += 1;
+        await field.fill('99.0');
+        await page.getByRole('button', { name: 'Save', exact: true }).click();
+        taps += 1;
+
+        console.log(`F23  ${engine.padEnd(6)} a first-ever waist committed in ${taps} taps from Today`);
+        expect(taps).toBeLessThanOrEqual(6);
+
+        await expect
+          .poll(() => scratchQuery("select count(*) from measurement where metric = 'waist' and source = 'manual'"), {
+            timeout: 20_000,
+          })
+          .toBe('1');
+
+        const stored = scratchQuery(
+          "select raw_value || ' ' || unit from measurement where metric = 'waist' order by measured_at desc limit 1",
+        );
+        console.log(`F23  ${engine.padEnd(6)} stored: ${stored}`);
+        expect(stored).toBe('99.0 cm');
+
+        // The stepper works from there, which is the other half of the design:
+        // the first number is typed and every one after it is stepped.
+        await page.getByRole('button', { name: 'Quick log', exact: true }).click();
+        await expect(page.getByRole('button', { name: 'Up half a centimetre' })).toBeEnabled();
+        await page.getByRole('button', { name: 'Up half a centimetre' }).click();
+        expect(await page.locator('#quick-log-waist').inputValue()).toBe('99.5');
+        console.log(`F23  ${engine.padEnd(6)} with a measurement on file one tap moves it to 99.5`);
+        await page.locator('.sheet').getByRole('button', { name: 'Close the quick log' }).click();
       },
     );
   }
 
-  console.log(`F27  region heights with three notices in it: ${[...heights].join(', ')}`);
-  expect([...heights]).toHaveLength(1);
+  // Put the instance back the way the rest of the suite expects it.
+  testStackWithDemoMode('1', 'reset');
+  await waitForScratch();
 });

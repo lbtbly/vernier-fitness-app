@@ -357,6 +357,50 @@ export function resetScratchProvenance(): void {
 }
 
 /**
+ * One reading from one source, landed on the scratch instance at a chosen age.
+ *
+ * Two specs need a state the demonstration seed cannot produce: a source that
+ * stopped sending exactly thirty-five hours ago, and both syncing sources
+ * sending inside the last thirty-six, which is the "nothing raised" state F27
+ * names and which the seed never reaches because its phone is permanently four
+ * days silent.
+ *
+ * The rows go in by SQL because the shortcut ingest is slice 6 and the Withings
+ * sync is slice 5, so there is no shipped route that delivers one yet, and that
+ * is stated here rather than left for somebody to notice. The `seed` column is
+ * generated from the source, so nothing landed this way can pretend to be
+ * demonstration data or the reverse: the composite foreign key refuses both.
+ *
+ * Scratch only, by name, like every other write in this file.
+ */
+export function landScratchSample(
+  slug: string,
+  source: 'apple_health_shortcut' | 'withings',
+  metric: string,
+  value: number,
+  unit: string,
+  hoursAgo: number,
+): void {
+  const kind = source === 'withings' ? 'device_sync_batch' : 'shortcut_payload';
+  scratchQuery(`
+    insert into source_record (id, source, kind, reference, occurred_at, import_version, detail, seed)
+    values ('${slug}-src', '${source}', '${kind}', '${slug}',
+            now() - interval '${Number(hoursAgo)} hours', '2026-08-3', '[]'::jsonb, false)
+    on conflict (id) do nothing
+  `);
+  scratchQuery(`
+    insert into measurement (
+      id, metric, raw_value, raw_unit, value, unit, time_zone, source, measured_at,
+      confidence, import_version, dedup_decision, dedup_reason, source_record_id, root_id
+    ) values (
+      '${slug}', '${metric}', '${value}', '${unit}', ${Number(value)}, '${unit}', 'Europe/Paris',
+      '${source}', now() - interval '${Number(hoursAgo)} hours', 'measured_device',
+      '2026-08-3', 'unique', 'The first reading of this metric on this day.', '${slug}-src', '${slug}'
+    ) on conflict (id) do nothing
+  `);
+}
+
+/**
  * The signals C2 reads back as proof the owner opened Vernier from his iPhone
  * Home Screen, in one line, for the run to compare against.
  *

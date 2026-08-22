@@ -221,4 +221,107 @@ describe('the suite against the owner\'s installation', () => {
     expect(roleScript).toContain("not like '${CREDENTIAL_MARKER}%'");
     expect(roleScript).toContain('CREDENTIAL_MARKER=vernierSuite');
   });
+  /**
+   * THE HOLLOW ASSERTION, SWEPT AND HELD SWEPT.
+   *
+   * `trend-scratch.spec.ts:167` read `expect(page.locator('[data-notices]')
+   * .count()).toBe(0)` on `/health`. `NoticeRegion` is rendered by
+   * `src/app/(shell)/page.tsx` and by nothing else, so the count was 0 whatever
+   * the staleness was: a zero over an empty population, which A4's first
+   * standing rule forbids, and it reads identically to a real check. That is the
+   * property that makes it dangerous and it is why the ruling asked for a sweep
+   * rather than a deletion.
+   *
+   * The whole class is inventoried below and each one carries a verdict. Every
+   * assertion of a zero count, a not-visible or an empty array was read against
+   * one question: can the surface it is asked on render the subject at all? A
+   * new one arriving in slice 5 or slice 13 fails this test until somebody
+   * writes down which kind it is, which is the only version of a sweep that
+   * survives eleven more slices of coverage.
+   *
+   *   quick-log:413           REAL. `.card.error[data-state="error"]` is drawn by
+   *                           the correction screen itself on a 404 from the
+   *                           route, on the very screen being walked, and its
+   *                           absence is the difference between one edit landing
+   *                           and three.
+   *   quick-log:557, 749      REAL. `saved` is a field of the route's own JSON
+   *                           answer, and the same answer's `questions` array is
+   *                           asserted non-empty beside it.
+   *   quick-log:597, 632      REAL. Undo is drawn by the just-logged row while
+   *                           the entry is queued, and the same locator is
+   *                           asserted visible earlier in the same test.
+   *   quick-log:614, 1091     REAL. The outbox depth, read out of IndexedDB
+   *                           after a replay the same test proved happened.
+   *   quick-log:869           REAL. `[data-state="stale"]` is drawn by the sheet
+   *                           and was asserted visible fifteen lines above.
+   *   quick-log:898           REAL. The loading card is drawn by the sheet and
+   *                           the same test held it open to see it.
+   *   quick-log:1092          REAL. `[data-just-logged]` is drawn by the day
+   *                           card and the same test watched it appear.
+   *   passkey.spec.ts:77      REAL. "No passkey is registered yet." is drawn by
+   *                           `/settings`, and the branch that asserts its
+   *                           absence asserts one credential row in its place,
+   *                           so the population is printed either way.
+   *   trend-scratch:137       REAL. Figures reading zero anywhere on a screen
+   *                           whose five absent signals are each printed first.
+   *   trend-scratch:169,204   REAL. `.src.stale` on /health, which renders source
+   *                           chips, and the same locator carries the age two
+   *                           states earlier in the same test.
+   *   trend-scratch:189       MOVED. The one hollow member. It counted
+   *                           `[data-notices]` on /health, where `NoticeRegion`
+   *                           is never rendered, so it could not fail. It is
+   *                           asked on Today now, with the quiet-source count
+   *                           printed beside it.
+   *   trend-scratch:201       REAL. The age of the newest sample, read back out
+   *                           of the database after landing it.
+   *   today.spec.ts:125       REAL. The scroll offset, on a page that scrolls.
+   *   today.spec.ts:158       REAL. The dots group exists on the chart and the
+   *                           line being defended is that no path joins them.
+   *   today.spec.ts:225,281   REAL. Both filter a list the same run printed.
+   *   today.spec.ts:374-375   REAL. Console errors and failed requests, over a
+   *                           walk whose surfaces are counted and printed.
+   *   notices.spec.ts:198     REAL. The route's own answer, whose `questions`
+   *                           array is asserted non-empty one line away.
+   *   notices.spec.ts:443     REAL. The sheet is drawn by the very click three
+   *                           lines above, and it closing is what puts Undo and
+   *                           Edit back in the accessibility tree.
+   *   notices.spec.ts:583     REAL. The scroll offset again, and F27 turns on it.
+   *   suite-privilege:67      REAL. Every refused statement is printed with the
+   *                           answer Postgres gave it.
+   *   this file               REAL. Both offender lists print what they walked.
+   */
+  it('lets no assertion claim a zero over a population the surface cannot render', () => {
+    // The one that was hollow. It is gone from /health and present on Today.
+    const trend = readFileSync(join(e2e, 'trend-scratch.spec.ts'), 'utf8');
+    const onHealth = trend.slice(0, trend.indexOf("await openToday(page)"));
+    expect(
+      onHealth,
+      'the notice region is counted on a page that cannot render it',
+    ).not.toContain("locator('[data-notices]')");
+    expect(trend).toContain("await openToday(page)");
+
+    // And the inventory, held. A member the sweep has not read is a failure.
+    const known = new Map<string, number>([
+      ['quick-log.spec.ts', 10],
+      ['passkey.spec.ts', 1],
+      ['trend-scratch.spec.ts', 5],
+      ['today.spec.ts', 6],
+      ['notices.spec.ts', 3],
+      ['suite-privilege.spec.ts', 1],
+    ]);
+    const zeroish = /toHaveCount\(0\)|\.toBe\(0\)|toEqual\(\[\]\)|toHaveLength\(0\)|not\.toBeVisible\(|toBeHidden\(/;
+    const counted: string[] = [];
+    for (const [name, source] of specs()) {
+      if (!name.endsWith('.spec.ts')) continue;
+      const found = source.split('\n').filter((line) => zeroish.test(line)).length;
+      if (found === 0) continue;
+      counted.push(`${name} ${found}`);
+      expect(
+        known.get(name),
+        `${name} carries ${found} assertions of the hollow-assertion class and the sweep recorded ${known.get(name) ?? 'none'}. Read each one, write down whether the surface can render the subject, and update the inventory above.`,
+      ).toBe(found);
+    }
+    // The population this walk covered, printed beside its own zero.
+    expect(counted.length, `the sweep found nothing to read, which is not a pass: ${counted.join(', ')}`).toBeGreaterThan(0);
+  });
 });

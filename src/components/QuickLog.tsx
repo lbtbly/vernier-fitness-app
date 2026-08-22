@@ -2,10 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useJustLogged } from '@/components/Queue';
 import { SourceChip } from '@/components/SourceChip';
 import { ChevronIcon, CloseIcon, MinusIcon, PlusIcon, UndoIcon, WarnIcon } from '@/components/icons';
-import { metricLabel, valueLabel } from '@/lib/display';
+import { valueLabel } from '@/lib/display';
 import { daysBetween, longDate, shortDate, time24 } from '@/lib/format';
+import { type JustLogged, type LoggedValue, setJustLogged } from '@/lib/just-logged';
 import type { LogSnapshot, MeasurementView } from '@/lib/measurement-view';
 import { carryTheCaughtObject, messageOf } from '@/lib/platform-cause';
 import {
@@ -14,9 +16,9 @@ import {
   discard,
   enqueue,
   flushOutbox,
-  pending,
   rememberCsrfToken,
   startFlushTriggers,
+  stillQueued,
   subscribe,
 } from '@/lib/outbox';
 import { RATING_MAX, RATING_MIN } from '@/lib/provenance';
@@ -126,29 +128,91 @@ type Load =
   | { state: 'ready'; snapshot: LogSnapshot }
   | ({ state: 'error' } & Cause);
 
-type LoggedValue = { id: string; metric: string; rawValue: string; unit: string };
-
 /**
- * What just happened, and which reversal is honest for it.
+ * The rows a just-logged entry draws, and where it draws them.
  *
- * `queued` while the entry is still in the outbox: the write exists on this
- * phone and nowhere else, so Undo really does remove it and Edit really does
- * reopen the sheet holding what was typed. `applied` once it has uploaded: the
- * table refuses DELETE, so the only reversal left is a correction and the
- * button says so. `undone` and `tooLate` are what the two paths report.
+ * `.forge/AMENDMENTS.md` A6 settles this, because two approved sheets drew the
+ * same moment differently and a builder may not improvise taste. Screen 02
+ * frame 3 is authoritative for placement: rows in the day card, not a card of
+ * its own. Screen 03 frame 2 is authoritative for contents: the entry, its local
+ * time, its `Queued` chip, and Undo and Edit for as long as it sits in the
+ * queue.
  *
- * The screen never shows Undo for a write it cannot undo. Screen 03 frame 2
- * draws the pair and annotates them "undoable for as long as it sits in the
- * queue", and this is that clause rather than a button that lies after a
- * second and a half.
+ * AND THE DAY CARD DOES NOT GROW WITH WHAT WAS LOGGED, WHICH IS THE AMENDED F27.
+ *
+ * A write changes a row, it does not append one. The entry takes the place of
+ * the plan's meals and needs-logging rows, exactly as `02-today.html` frame 3
+ * draws it, so the day card's maximum is a constant. The build this replaces
+ * drew one row per value inside a card inside the day card: six values took the
+ * day card from 223 px to 681 px and the weight trend to 1147 px against a
+ * 715 px fold.
+ *
+ * ONE WRITE IS ONE ROW, WHICH IS A6'S OWN SENTENCE AND ALSO THE ARITHMETIC.
+ * `02-today.html` frame 3 draws two rows because it draws two writes, a waist at
+ * 18:32 and two feelings at 18:33, each with its own time and its own chip. Six
+ * values typed into one sheet and saved once are one write at one moment, so
+ * they are one row: the values on the head, the moment and the place on the sub,
+ * the chip on the end.
+ *
+ * The head is clamped to two lines in the stylesheet, which is what makes the
+ * row a constant: 80 px with everything filled in, less with less, never more,
+ * whatever the owner types into the note. The trend does not move when he
+ * writes a paragraph.
  */
-type JustLogged = {
-  entryId: string;
-  values: LoggedValue[];
-  state: 'queued' | 'applied' | 'undone' | 'tooLate';
-};
+function entryLine(entry: JustLogged, timeZone: string): { head: string; sub: string } {
+  const values = new Map(entry.values.map((value) => [value.metric, value]));
+  const parts: string[] = [];
 
-export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone: string }) {
+  const waist = values.get('waist');
+  if (waist) {
+    const label = valueLabel({ value: null, rawValue: waist.rawValue, unit: waist.unit });
+    parts.push(strings.todayLog.entryPart(strings.quickLog.waist, `${label.number} ${label.unit}`));
+  }
+
+  // The four feelings, the first named in full and the rest running on, exactly
+  // as screen 03 frame 2 sets them: "Energy 4, fatigue 2, hunger 3, satiety 4".
+  for (const [index, field] of RATING_FIELDS.filter((one) => values.has(one.metric)).entries()) {
+    parts.push(
+      strings.todayLog.entryPart(
+        index === 0 && parts.length === 0
+          ? strings.todayLog.feelingName[field.metric]
+          : strings.todayLog.feelingRunOn[field.metric],
+        values.get(field.metric)!.rawValue,
+      ),
+    );
+  }
+
+  // The note last, in the owner's own words rather than under a label, because
+  // the label would cost a line and say nothing the words do not.
+  const note = values.get('note');
+  if (note) parts.push(note.rawValue);
+
+  return {
+    head: strings.todayLog.entryLine(parts),
+    sub:
+      entry.state === 'queued'
+        ? strings.todayLog.entrySavedQueued(time24(entry.at, timeZone))
+        : strings.todayLog.entrySaved(time24(entry.at, timeZone)),
+  };
+}
+
+export function QuickLog({
+  csrfToken,
+  timeZone,
+  children,
+}: {
+  csrfToken: string;
+  timeZone: string;
+  /**
+   * The day card's own rows, server-rendered and handed in.
+   *
+   * They are passed rather than imported because a just-logged entry takes
+   * their place, per screen 02 frame 3, and the state that decides lives on this
+   * side of the client boundary. Nothing about Today crosses that boundary to
+   * carry it: these arrive already rendered.
+   */
+  children: React.ReactNode;
+}) {
   const [open, setOpen] = useState(false);
   const [load, setLoad] = useState<Load>({ state: 'loading' });
   const [queued, setQueued] = useState(0);
@@ -156,7 +220,7 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
   const [ratings, setRatings] = useState<Ratings>({ energy: null, fatigue: null, hunger: null, satiety: null });
   const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
-  const [justLogged, setJustLogged] = useState<JustLogged | null>(null);
+  const justLogged = useJustLogged();
   const [refused, setRefused] = useState<string[] | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
@@ -170,12 +234,17 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
     const stop = startFlushTriggers();
     const refresh = () => {
       void depth().then(setQueued);
-      // The just-logged card follows the queue rather than a timer. The moment
+      // The just-logged rows follow the queue rather than a timer. The moment
       // the entry leaves, Undo goes with it, because from then on the only
       // reversal is a correction.
+      //
+      // `stillQueued` and not `pending`: a request in the air has not landed,
+      // and the row used to read Stored for as long as the send took, which on
+      // the wifi this queue exists for is up to ten seconds. Where the write IS
+      // and whether it can be undone are two questions.
       setJustLogged((current) => {
         if (!current || current.state !== 'queued') return current;
-        void pending(current.entryId).then((still) => {
+        void stillQueued(current.entryId).then((still) => {
           if (!still) {
             setJustLogged((latest) =>
               latest && latest.entryId === current.entryId && latest.state === 'queued'
@@ -303,12 +372,16 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
     setSaving(true);
     try {
       const entryId = crypto.randomUUID();
-      setJustLogged({ entryId, values, state: 'queued' });
+      // One instant, used twice: the rows in the day card print the time the
+      // owner typed it, and the queue sends that same time, not the time the
+      // upload happened to land.
+      const measuredAt = new Date();
+      setJustLogged({ entryId, at: measuredAt, values, state: 'queued' });
       await enqueue({
         id: entryId,
         url: '/api/log',
         body: {
-          measuredAt: new Date().toISOString(),
+          measuredAt: measuredAt.toISOString(),
           timeZone,
           values: values.map(({ id, metric, rawValue }) => ({ id, metric, rawValue })),
         },
@@ -369,125 +442,115 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
   const lastWaist = load.state === 'ready' ? load.snapshot.lastWaist : null;
   const staleDays = lastWaist ? daysBetween(new Date(lastWaist.measuredAt), now, timeZone) : null;
   /*
-   * Nothing to count up or down from.
+   * NOTHING TO COUNT UP OR DOWN FROM, AND SO NOTHING IS COUNTED.
    *
    * The stepper is a relative control: it moves the last measurement by half a
-   * centimetre. When the snapshot read fails, which is what the origin being
-   * unreachable looks like from in here, there is no last measurement, and one
-   * tap on the plus control used to queue 0.5 cm and report it as saved.
+   * centimetre. With no last measurement it has nothing to move, and it used to
+   * move zero, which is the defect three lines were open on. One tap queued a
+   * waist of 0.5 cm and the screen reported it as saved, for a value
+   * `src/lib/provenance.ts` refuses under 30 cm. On the owner's own first-ever
+   * waist it was worse than wrong, it was unusable: sixty taps to the floor of
+   * the stored band and a hundred and ninety-seven to 99.0, against F23's six.
    *
-   * It is refused rather than started from a guess, because a guess is a number
-   * on the screen the owner did not measure. This is the read failing or still
-   * in flight; the first-time state is a different thing and keeps its stepper,
-   * because there the absence is a fact rather than an unknown.
+   * So the number is typed when there is none, exactly as `03-quick-log.html`
+   * frame 3 draws it: the value reads `--`, muted, not a number and specifically
+   * not zero, and the field takes the first one. The buttons step it from there.
+   * Blank stays blank: an empty field is not sent and is never stored as zero.
+   *
+   * Both hands of the stepper are therefore disabled while the field is empty,
+   * whatever the reason it is empty, because half a centimetre from nothing is
+   * nothing in both directions.
    */
+  const nothingToStepFrom = waist === null;
+  /** The read failed or is still in flight, which is a different sentence. */
   const noBaseToStepFrom = waist === null && load.state !== 'ready';
+  const written = justLogged ? entryLine(justLogged, timeZone) : null;
 
   return (
     <>
+      {/*
+        * The plan's own rows, or the entry that just replaced them. Screen 02
+        * frame 3 draws the second: the day card carries the session and then
+        * what was written, with no meals row and no needs-logging row, because
+        * a write answers the question those two rows were asking.
+        */}
+      {justLogged && written ? (
+        <div data-just-logged={justLogged.state} aria-live="polite">
+          {/*
+            * `.lines` rather than `.stack`, and the reason is the clamp. A flex
+            * item's display is blockified, so `-webkit-box` on a child of
+            * `.stack` comes out as `flow-root` and the two-line clamp on the
+            * head silently becomes one. That was measurable: the whole entry
+            * rendered on one line and the values after the first two were gone.
+            */}
+          <div className="row entry" data-entry="written">
+            <div className="lines grow">
+              <span className="head">{written.head}</span>
+              <span className="sub num">{written.sub}</span>
+            </div>
+            {/*
+              * The chip is the row's own truth and never a guess at the queue's.
+              * Queued while it is on this phone, Stored once the Mac mini has
+              * it, Removed when Undo took it back, because "Stored" on a write
+              * that was never stored is the kind of small lie that makes every
+              * other label unreadable.
+              */}
+            <span className="chip">
+              {justLogged.state === 'queued'
+                ? strings.todayLog.queued
+                : justLogged.state === 'undone'
+                  ? strings.todayLog.removed
+                  : strings.todayLog.stored}
+            </span>
+          </div>
+
+          {/*
+            * Screen 03 frame 2's pair, and which of them is drawn is the
+            * whole point. Queued means the write is on this phone and
+            * nowhere else, so Undo is a deletion and it is true. Applied
+            * means the Mac mini has it, the table refuses DELETE, and the
+            * only reversal left is a correction, so the button changes its
+            * word rather than its behaviour.
+            */}
+          {justLogged.state === 'queued' ? (
+            <div className="actions">
+              <button type="button" className="btn grow" onClick={() => void undo(justLogged)}>
+                <UndoIcon />
+                {strings.todayLog.undo}
+              </button>
+              <button type="button" className="btn grow" onClick={() => void edit(justLogged)}>
+                {strings.todayLog.edit}
+              </button>
+            </div>
+          ) : null}
+
+          {justLogged.state === 'applied' || justLogged.state === 'tooLate' ? (
+            <div className="actions">
+              <Link className="btn grow" href={`/value/${justLogged.values[0].id}`}>
+                {strings.todayLog.correct}
+                <ChevronIcon className="ch" />
+              </Link>
+            </div>
+          ) : null}
+
+          {/*
+            * AND NO PARAGRAPH. Queued, Stored and Removed are each one word on
+            * the row's own chip, and Undo, Edit and Correct it are the controls
+            * that go with them: a sentence repeating any of that would be spent
+            * out of F27's 715 px, which is a budget every line above the weight
+            * trend draws on. A refused Undo answers by changing both at once,
+            * from Queued and Undo to Stored and Correct it, which is the same
+            * fact told in the place the owner is already looking.
+            */}
+        </div>
+      ) : (
+        children
+      )}
+
       <button type="button" className="btn primary block" onClick={() => setOpen(true)}>
         <PlusIcon />
         {strings.quickLog.open}
       </button>
-
-      {justLogged ? (
-        <>
-          <section
-            className="card"
-            style={{ marginTop: 'var(--s3)' }}
-            aria-live="polite"
-            data-just-logged={justLogged.state}
-          >
-            <span className="lbl">{strings.todayLog.justLogged}</span>
-            {justLogged.values.map((entry) => (
-              <div className="row" key={entry.id}>
-                <div className="stack grow">
-                  <span className="head">{metricLabel(entry.metric)}</span>
-                  <span className="sub num">
-                    {valueLabel({ value: null, rawValue: entry.rawValue, unit: entry.unit }).number}{' '}
-                    {valueLabel({ value: null, rawValue: entry.rawValue, unit: entry.unit }).unit}
-                  </span>
-                </div>
-                {/*
-                  * The chip is the row's own truth and never a guess at the
-                  * queue's. Queued while it is on this phone, Stored once the
-                  * Mac mini has it, Removed when Undo took it back, because
-                  * "Stored" on a write that was never stored is the kind of
-                  * small lie that makes every other label unreadable.
-                  */}
-                <span className="chip">
-                  {justLogged.state === 'queued'
-                    ? strings.todayLog.queued
-                    : justLogged.state === 'undone'
-                      ? strings.todayLog.removed
-                      : strings.todayLog.stored}
-                </span>
-              </div>
-            ))}
-
-            {/*
-              * Screen 03 frame 2's pair, and which of them is drawn is the
-              * whole point. Queued means the write is on this phone and
-              * nowhere else, so Undo is a deletion and it is true. Applied
-              * means the Mac mini has it, the table refuses DELETE, and the
-              * only reversal left is a correction, so the button changes its
-              * word rather than its behaviour.
-              */}
-            {justLogged.state === 'queued' ? (
-              <>
-                <div className="actions">
-                  <button type="button" className="btn grow" onClick={() => void undo(justLogged)}>
-                    <UndoIcon />
-                    {strings.todayLog.undo}
-                  </button>
-                  <button type="button" className="btn grow" onClick={() => void edit(justLogged)}>
-                    {strings.todayLog.edit}
-                  </button>
-                </div>
-                <p className="note" style={{ marginTop: 'var(--s2)' }}>
-                  {strings.todayLog.undoable}
-                </p>
-              </>
-            ) : null}
-
-            {justLogged.state === 'applied' || justLogged.state === 'tooLate' ? (
-              <>
-                <div className="actions">
-                  <Link className="btn grow" href={`/value/${justLogged.values[0].id}`}>
-                    {strings.todayLog.correct}
-                    <ChevronIcon className="ch" />
-                  </Link>
-                </div>
-                <p className="note" style={{ marginTop: 'var(--s2)' }}>
-                  {justLogged.state === 'tooLate'
-                    ? strings.todayLog.undoTooLate
-                    : strings.todayLog.uploaded}
-                </p>
-              </>
-            ) : null}
-
-            {justLogged.state === 'undone' ? (
-              <p className="note" style={{ marginTop: 'var(--s2)' }}>
-                {strings.todayLog.undone}
-              </p>
-            ) : null}
-          </section>
-
-          {/*
-            * "What happens next", the dashed card screen 03 frame 2 draws under
-            * the pair. It only means anything while something is still waiting,
-            * so it is drawn while something is still waiting.
-            */}
-          {justLogged.state === 'queued' ? (
-            <section className="card empty" style={{ marginTop: 'var(--s3)' }}>
-              <span className="lbl">{strings.todayLog.whatHappensNextLabel}</span>
-              <p className="sub" style={{ marginTop: 'var(--s2)' }}>
-                {strings.todayLog.whatHappensNext}
-              </p>
-            </section>
-          ) : null}
-        </>
-      ) : null}
 
       {open ? (
         <>
@@ -625,35 +688,69 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
                   <button
                     type="button"
                     aria-label={strings.quickLog.waistDown}
-                    onClick={() => setWaist((value) => Number((((value ?? 0) || 0) - WAIST_STEP).toFixed(1)))}
-                    disabled={waist === null}
+                    onClick={() => setWaist((value) => (value === null ? null : Number((value - WAIST_STEP).toFixed(1))))}
+                    disabled={nothingToStepFrom}
                   >
                     <MinusIcon />
                   </button>
+                  {/*
+                    * The value, and it is a field. Screen 03 frame 3 draws it as
+                    * the muted `--` on a first-ever waist, which is the state
+                    * the stepper alone cannot answer: it is relative, and there
+                    * is nothing to be relative to. So the first number is typed
+                    * and every one after it is stepped, which is F23's six taps
+                    * on both paths. The field carries no value attribute when it
+                    * is empty, so `--` is a placeholder and not a number.
+                    */}
                   <div className="grow centre">
-                    <div className={waist === null ? 'metric mut' : 'metric'}>
-                      {waist === null ? '--' : waist.toFixed(1)}{' '}
-                      <span className="sub">{strings.units.cm}</span>
-                    </div>
+                    <label className="visually-hidden" htmlFor="quick-log-waist">
+                      {strings.quickLog.waistFieldLabel}
+                    </label>
+                    <input
+                      id="quick-log-waist"
+                      className={nothingToStepFrom ? 'metric mut waistfield' : 'metric waistfield'}
+                      type="text"
+                      inputMode="decimal"
+                      autoComplete="off"
+                      placeholder={strings.quickLog.waistBlank}
+                      value={waist === null ? '' : waist.toFixed(1)}
+                      onChange={(event) => {
+                        const typed = event.target.value.replace(',', '.').trim();
+                        if (typed === '') {
+                          setWaist(null);
+                          return;
+                        }
+                        const parsed = Number(typed);
+                        if (Number.isFinite(parsed)) setWaist(parsed);
+                      }}
+                    />{' '}
+                    <span className="sub">{strings.units.cm}</span>
                   </div>
                   <button
                     type="button"
                     aria-label={strings.quickLog.waistUp}
-                    disabled={noBaseToStepFrom}
+                    disabled={nothingToStepFrom}
                     onClick={() =>
-                      setWaist((value) =>
-                        value === null
-                          ? Number(((lastWaist?.value ?? 0) + WAIST_STEP).toFixed(1))
-                          : Number((value + WAIST_STEP).toFixed(1)),
-                      )
+                      setWaist((value) => (value === null ? null : Number((value + WAIST_STEP).toFixed(1))))
                     }
                   >
                     <PlusIcon />
                   </button>
                 </div>
+                {/*
+                  * Two different sentences for two different absences, and the
+                  * difference is whether the app knows. Frame 3's first-ever
+                  * waist is a fact: there has never been one, so type it. A read
+                  * that failed is an unknown: the last one may exist and this
+                  * phone cannot see it, and that is worth saying out loud.
+                  */}
                 {noBaseToStepFrom ? (
                   <p className="note warn" data-waist="no-base">
                     {strings.quickLog.waistNoBase}
+                  </p>
+                ) : nothingToStepFrom ? (
+                  <p className="note" data-waist="type-it">
+                    {strings.quickLog.waistTypeIt}
                   </p>
                 ) : null}
               </div>

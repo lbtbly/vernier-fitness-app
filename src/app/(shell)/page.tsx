@@ -4,6 +4,7 @@ import { after } from 'next/server';
 import { ChartLegend } from '@/components/Chart';
 import { EmptyState } from '@/components/EmptyState';
 import { type Notice, NoticeRegion } from '@/components/Notices';
+import { OfflineBanner, WhatHappensNext } from '@/components/Queue';
 import { QuickLog, QuickLogTrigger } from '@/components/QuickLog';
 import { ScreenTitle } from '@/components/ScreenTitle';
 import { SourceChip } from '@/components/SourceChip';
@@ -33,16 +34,25 @@ export const dynamic = 'force-dynamic';
  * morning's 85.9 kg never gets the big type, because a body-composition scale
  * moves with hydration by more than a good week of progress does.
  *
- * THE FOLD, AND ONE DELIBERATE DEPARTURE FROM THE SHEET. F27 puts the session
- * row, the meals, what needs logging, the weight trend and adherence inside
- * 715 pixels at 393 by 852 with no scrolling. Screen 02 draws adherence under
- * the weight card and its own caption says that scrolls past the fold. The
- * rubric line is the contract, so adherence sits above the weight card here.
- * It carries everything screen 02 draws in it: two counts over their
- * denominators, the week as seven pills, the range under them and the sentence
- * about what a missed session is and is not. Nothing else about the screen
- * moved, and the reason is written down rather than left as a difference
- * somebody has to spot.
+ * THE FOLD, AND WHAT EVERY ELEMENT ABOVE IT COSTS. The amended F27 puts the
+ * session row, the meals, what needs logging and the weight trend inside 715
+ * pixels at 393 by 852 with no scrolling, in every state the owner's data can
+ * produce rather than in one, and it requires every element that can draw above
+ * the trend to carry a maximum height fixed by construction. There are four,
+ * and each one states its number where it is built:
+ *
+ *   the title header        63 px, fixed type on a fixed padding
+ *   the offline line        62 px, clamped to two lines in the stylesheet
+ *   the notice region       46 px, one summary row whatever it holds
+ *   the day card           its own maximum, the session row plus three
+ *
+ * ADHERENCE IS BELOW THE TREND, AND THAT IS THE ORDER SCREEN 02 DRAWS. It sat
+ * above the weight card for one round, because the old F27 named it inside the
+ * fold and hoisting it was the cheapest way to pass. Three approved artifacts
+ * put it below: DESIGN.md section 3, the screen table at DESIGN.md line 75, and
+ * `02-today.html` frame 1's own caption, "Scrolls past the fold to adherence".
+ * A5 struck the clause and F27 now forbids the hoist outright. The 182 px it
+ * cost are what pay for the card geometry on this screen being section 3's.
  *
  * One accented action on this screen, and it is Quick log: the thing due now.
  */
@@ -175,12 +185,20 @@ export default async function TodayPage() {
       <ScreenTitle label={longDate(now, timeZone)} title={strings.today.title} />
 
       {/*
-        * Everything between the title and the first card, in one region that is
-        * one line tall whatever it holds. The queue count screen 03 frame 2 puts
-        * here is added by the region itself, because only this phone knows it.
+        * DESIGN.md section 4's offline line, first, because it is the owner's
+        * own writing and it is the one thing under this title that is not a
+        * problem. Neutral, one line, with the count on it. It is a client
+        * island: the queue lives on this phone and the Mac mini cannot know it.
+        */}
+      <OfflineBanner />
+
+      {/*
+        * Then everything Today has to RAISE, in one region that is one line tall
+        * whatever it holds.
         *
-        * Three notices go in today and slices 5 to 14 add more. Nothing about
-        * the fold changes when they do: the region's height is fixed by
+        * Two notices go in today and slices 5 to 14 add more: F55's ingest line
+        * in slice 6, F133's three failure banners in slice 13. Nothing about the
+        * fold changes when they do, because the region's height is fixed by
         * `.notices > summary` and not by how much is wrong.
         */}
       <NoticeRegion notices={notices} />
@@ -225,85 +243,34 @@ export default async function TodayPage() {
         )}
 
         {/*
-          * Meals. The nutrition week is a later slice and nothing has been
-          * logged, so this row says exactly that and carries no number at all.
-          * A row reading "0 of 2,150 kcal" would be the app claiming a fact
-          * about the day it does not have.
+          * The two rows a write replaces, handed to the quick log rather than
+          * drawn beside it. Screen 02 frame 3 draws the day card with the
+          * session and then what was queued, and no meals or needs-logging row
+          * under it: a write is the answer to both questions, so it takes their
+          * place instead of pushing them down the screen. A6 fixes the day
+          * card's maximum at the row count that sheet draws, and this is how it
+          * is a constant rather than a promise.
           */}
-        <div className="row" data-meals="none">
-          <span className="head grow">{strings.day.meals}</span>
-          <span className="sub">{strings.day.mealsNone}</span>
-        </div>
-
-        <div className="row" data-due={due.length}>
-          <div className="stack grow">
-            <span className="head">{strings.todayLog.needsLogging}</span>
-            <span className="sub">{due.length === 0 ? strings.todayLog.nothingDue : due.join(' ')}</span>
+        <QuickLog csrfToken={csrfToken} timeZone={timeZone}>
+          {/*
+            * Meals. The nutrition week is a later slice and nothing has been
+            * logged, so this row says exactly that and carries no number at all.
+            * A row reading "0 of 2,150 kcal" would be the app claiming a fact
+            * about the day it does not have.
+            */}
+          <div className="row" data-meals="none">
+            <span className="head grow">{strings.day.meals}</span>
+            <span className="sub">{strings.day.mealsNone}</span>
           </div>
-          {due.length > 0 ? <span className="chip w">{strings.todayLog.dueCount(due.length)}</span> : null}
-        </div>
 
-        <QuickLog csrfToken={csrfToken} timeZone={timeZone} />
-      </section>
-
-      {/* ---------- adherence: a count over its denominator ---------- */}
-      <section className="card adherence" data-adherence={plan.windows[0].planned}>
-        <span className="lbl">{strings.adherence.label}</span>
-        {plan.windows.every((window) => window.planned === 0) ? (
-          <p className="sub" style={{ marginTop: 'var(--s2)' }}>
-            {strings.adherence.emptyBody}
-          </p>
-        ) : (
-          <div className="between">
-            <div className="stack">
-              <span className="big num" data-adherence-window="7">
-                {strings.adherence.count(plan.windows[0].completed, plan.windows[0].planned)}
-              </span>
-              <span className="note">{strings.adherence.lastDays(plan.windows[0].days)}</span>
+          <div className="row" data-due={due.length}>
+            <div className="stack grow">
+              <span className="head">{strings.todayLog.needsLogging}</span>
+              <span className="sub">{due.length === 0 ? strings.todayLog.nothingDue : due.join(' ')}</span>
             </div>
-            <div className="stack" style={{ alignItems: 'flex-end' }}>
-              <span className="big num" data-adherence-window="28">
-                {strings.adherence.count(plan.windows[1].completed, plan.windows[1].planned)}
-              </span>
-              <span className="note">{strings.adherence.alsoLastDays(plan.windows[1].days)}</span>
-            </div>
+            {due.length > 0 ? <span className="chip w">{strings.todayLog.dueCount(due.length)}</span> : null}
           </div>
-        )}
-
-        {/*
-          * The week, one pill a day, exactly as screen 02 draws it: done,
-          * missed, today, and a day with nothing planned. Nothing here is
-          * coloured red. A missed session is a Thursday that ran late, and the
-          * sentence under the row is the panel's finding in the product's own
-          * words, on the screen the owner opens every morning.
-          *
-          * The dates read "15 Aug", not the sheet's "Sat 15": DESIGN.md fixes
-          * two date shapes for the whole product and this is one of them.
-          */}
-        {plan.week.length > 0 ? (
-          <>
-            <ul className="pills" data-week="adherence">
-              {plan.week.map((day, index) => (
-                <li
-                  key={day.at}
-                  data-day={day.state ?? 'none'}
-                  data-today={index === plan.week.length - 1 ? '' : undefined}
-                >
-                  <span className="visually-hidden">
-                    {strings.adherence.dayCell(dayLabel(day.at), dayState(day.state))}
-                  </span>
-                </li>
-              ))}
-            </ul>
-            <div className="between">
-              <span className="note">{dayLabel(plan.week[0].at)}</span>
-              <span className="note">{dayLabel(plan.week[plan.week.length - 1].at)}</span>
-            </div>
-            <p className="note" style={{ marginTop: 'var(--s2)' }} data-adherence-note>
-              {strings.adherence.note}
-            </p>
-          </>
-        ) : null}
+        </QuickLog>
       </section>
 
       {/* ---------- is my health improving ---------- */}
@@ -418,6 +385,14 @@ export default async function TodayPage() {
         />
       )}
 
+      {/*
+        * "What happens next", screen 03 frame 2's dashed card, and A6 puts it
+        * here rather than above the trend. It explains a queue the owner has
+        * already been told about on the line under the title, so it is a thing
+        * you read after the trend and never before it.
+        */}
+      <WhatHappensNext />
+
       {/* ---------- waist ---------- */}
       {lastWaist?.reading ? (
         <section className="card" data-card="waist">
@@ -455,6 +430,66 @@ export default async function TodayPage() {
           </div>
         </section>
       ) : null}
+
+      {/* ---------- adherence: a count over its denominator ---------- */}
+      <section className="card adherence" data-adherence={plan.windows[0].planned}>
+        <span className="lbl">{strings.adherence.label}</span>
+        {plan.windows.every((window) => window.planned === 0) ? (
+          <p className="sub" style={{ marginTop: 'var(--s2)' }}>
+            {strings.adherence.emptyBody}
+          </p>
+        ) : (
+          <div className="between">
+            <div className="stack">
+              <span className="big num" data-adherence-window="7">
+                {strings.adherence.count(plan.windows[0].completed, plan.windows[0].planned)}
+              </span>
+              <span className="note">{strings.adherence.lastDays(plan.windows[0].days)}</span>
+            </div>
+            <div className="stack" style={{ alignItems: 'flex-end' }}>
+              <span className="big num" data-adherence-window="28">
+                {strings.adherence.count(plan.windows[1].completed, plan.windows[1].planned)}
+              </span>
+              <span className="note">{strings.adherence.alsoLastDays(plan.windows[1].days)}</span>
+            </div>
+          </div>
+        )}
+
+        {/*
+          * The week, one pill a day, exactly as screen 02 draws it: done,
+          * missed, today, and a day with nothing planned. Nothing here is
+          * coloured red. A missed session is a Thursday that ran late, and the
+          * sentence under the row is the panel's finding in the product's own
+          * words, on the screen the owner opens every morning.
+          *
+          * The dates read "15 Aug", not the sheet's "Sat 15": DESIGN.md fixes
+          * two date shapes for the whole product and this is one of them.
+          */}
+        {plan.week.length > 0 ? (
+          <>
+            <ul className="pills" data-week="adherence">
+              {plan.week.map((day, index) => (
+                <li
+                  key={day.at}
+                  data-day={day.state ?? 'none'}
+                  data-today={index === plan.week.length - 1 ? '' : undefined}
+                >
+                  <span className="visually-hidden">
+                    {strings.adherence.dayCell(dayLabel(day.at), dayState(day.state))}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <div className="between">
+              <span className="note">{dayLabel(plan.week[0].at)}</span>
+              <span className="note">{dayLabel(plan.week[plan.week.length - 1].at)}</span>
+            </div>
+            <p className="note" style={{ marginTop: 'var(--s2)' }} data-adherence-note>
+              {strings.adherence.note}
+            </p>
+          </>
+        ) : null}
+      </section>
 
       {/* ---------- the five body signals ---------- */}
       <section className="card" data-card="signals">

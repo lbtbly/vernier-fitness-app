@@ -532,6 +532,39 @@ a.value-link:active{opacity:.7}
 .stepper button svg{width:24px;height:24px}
 .stepper button:disabled{opacity:.4;cursor:default}
 
+/*
+ * The number between the two buttons, and it is a field.
+ *
+ * `03-quick-log.html` frame 3 draws it as the muted `--` on a first-ever waist,
+ * which is the one state a stepper cannot answer: it moves the last measurement
+ * by half a centimetre and there is no last measurement to move. Stepping up
+ * from zero was 60 taps to the bottom of the stored band and 197 to 99.0,
+ * against F23's six. So the first number is typed and every one after it is
+ * stepped.
+ *
+ * It carries no chrome, because it is not a text box on this sheet, it is the
+ * value: same 34 px tabular type, same position, same width the metric had. The
+ * placeholder is the sheet's own `--`, which is where "blank fields stay blank,
+ * they are not stored as zero" is enforced rather than described: an empty field
+ * has no value and no value is sent.
+ */
+.waistfield{
+  width:6ch;
+  border:0;
+  background:transparent;
+  color:inherit;
+  font:inherit;
+  font-size:var(--t-metric);
+  line-height:var(--t-metric-lh);
+  letter-spacing:var(--t-metric-ls);
+  font-variant-numeric:tabular-nums;
+  font-weight:600;
+  text-align:right;
+  padding:0;
+  border-radius:var(--r-sm);
+}
+.waistfield::placeholder{color:var(--text-3);opacity:1}
+
 .scale5{display:flex;gap:var(--s2)}
 .scale5 button{
   flex:1;
@@ -677,62 +710,114 @@ a.value-link:active{opacity:.7}
 .segctl a[aria-current=page]{background:var(--surface);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.3)}
 
 /*
- * The day card, tightened.
+ * THE DAY CARD, AND WHY THIS BLOCK NO LONGER TIGHTENS ANYTHING.
  *
- * F27 puts five things inside 715 px at 393x852 and the shell's 44 px row plus
- * 18 px of padding does not fit them. The rows here carry three lines of real
- * copy each and are still well over the 44 px touch floor; what came out is the
- * air, not the target.
+ * Today ran on `.today .card{margin-bottom:8px;padding:8px 16px}` for one round.
+ * DESIGN.md section 3 fixes 16 px of card padding and 12 px between cards, all
+ * thirteen wireframes draw it, and C4 and C5 are ticked against screens that
+ * inherit it; the compression was scoped to `.today` after an earlier version of
+ * it moved the global tokens and silently changed screens 01 and 03. Even
+ * scoped, it leaked: the quick-log sheet is rendered by a component inside
+ * `div.today`, so its loading, error, empty and stale cards all lost 8 px of
+ * padding they were graded with. That was defect 52.
+ *
+ * The amended F27 closes the door on it in the rubric itself: "The 715 is met at
+ * the card padding and the card gap DESIGN.md section 3 fixes, measured on the
+ * shipped screen: a fold bought by compressing them is a FAIL." So the block is
+ * gone and this screen uses the geometry every other screen uses. The room came
+ * from moving adherence back under the weight card, where screen 02 draws it,
+ * which is 182 px, and about 90 of them went straight back into these two
+ * values.
+ *
+ * What is left here is not compression. A day row carries one fact per line at
+ * body size, which is the size `02-today.html` sets those rows in, and the
+ * button margin is that sheet's own 14 px.
  */
-.card.day .row{min-height:0;padding:3px 0}
 .card.day .row .head{font-size:var(--t-body);line-height:var(--t-body-lh);margin:0}
-.card.day .btn{margin-top:8px}
+.card.day .btn.primary{margin-top:14px}
 
 /*
- * Adherence, above the fold and therefore counted in pixels.
+ * WHAT MAKES THE DAY CARD'S HEIGHT A NUMBER RATHER THAN A MEASUREMENT OF THE
+ * SEED. This is the amended F27's clause about elements above the trend, applied
+ * to the one card that carries the owner's own words.
  *
- * Two counts and their denominators, on one row, in the tight card. Screen 02
- * gives this its own full card with a row of day pills under it; F27 puts it
- * inside 715 px at 393x852 and the pills are the part that can go without
- * costing a fact. The numbers and both denominators are here in full.
+ * The row COUNT is a constant in the markup: the session, then either the meals
+ * and needs-logging pair or the one row a write replaces them with. What is not
+ * a constant is the length of any line in them. Every one is data. The session's
+ * title, its time-and-place line and the cause sentence under it are all
+ * composed from the plan. "Needs logging" joins one sentence per thing that is
+ * due, and slices 5 to 14 add more things that can be due. A just-logged row
+ * carries whatever the owner typed into the note, which has no limit at all.
+ *
+ * So every line in this card is clamped here, and that is the difference between
+ * a card that is bounded and one that merely looks bounded today: three rows of
+ * known height is a number, three rows of prose is whatever the day held. One
+ * line each, except the just-logged head, which gets two because six values and
+ * a note will not sit on one and 80 px is a constant just as 60 px is.
  */
+.card.day .row .head,
+.card.day .row .sub,
+.card.day .row .note{
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
 /*
- * TODAY, AND TODAY ALONE, RUNS TIGHTER THAN THE SHEET. Declared here, in one
- * block, because the last time this room was bought it was taken out of the
- * global tokens and it silently moved screen 01 and screen 03 with it.
- *
- * DESIGN.md section 3 fixes 12 px between cards and all thirteen wireframes
- * write it, so `--s3` stays 12 everywhere and `.card` keeps it. F27 puts five
- * things inside 715 px at 393x852 and screen 02's own caption says the sheet
- * scrolls past that fold, so this one screen closes the gap to 8 and takes 4 px
- * off the vertical padding of its cards. The arithmetic is on the screen it was
- * bought for.
- *
- * AND "NOTHING OUTSIDE `.today` CAN FEEL IT" WAS FALSE, ON THE ONE SCREEN THE
- * DEFECT NAMED. The quick-log sheet is rendered by a component inside Today's
- * section, so it is inside `div.today` in the DOM even though it is a fixed
- * dialog over the whole viewport and screen 03's own sheet. `.today .card`
- * matched its loading, error, empty and stale cards and `.today .banner`
- * matched its offline banner, and all five lost 8 px of padding and 4 px of
- * margin they had at a6d8acc. C5 puts the six card states on `00-patterns.html`
- * and says the geometry is defined once there; the sheet is not part of Today's
- * fold problem and does not pay for it.
- *
- * So the compression stops at the sheet, stated here rather than left to
- * source order. Anything the sheet draws is screen 00's geometry, whichever
- * screen raised it.
+ * A block, not a flex column, because a flex item's display is blockified and
+ * `-webkit-box` on a child of `.stack` comes out as `flow-root` with the clamp
+ * inert. Measured: the entry rendered on one line with everything after
+ * "fatigue 2" gone.
  */
-.today .card{margin-bottom:var(--s2);padding:var(--s2) var(--s4)}
-.today .banner{margin-bottom:var(--s2)}
-.today .title{padding:2px 0 var(--s2)}
-.today .card.day .row{padding:2px 0}
-.today .card.day .btn.primary{margin-top:6px}
-.today .card.adherence .pills{margin:8px 0 4px}
+.card.day .row.entry .lines{display:block;min-width:0}
+.card.day .row.entry .lines .sub{display:block;margin-top:2px}
+.card.day .row.entry .head{
+  white-space:normal;
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  overflow:hidden;
+}
 
-.today .sheet .card{margin-bottom:var(--s3);padding:var(--s4)}
-.today .sheet .banner{margin-bottom:var(--s3)}
+/*
+ * Undo and Edit, at the 44 px floor rather than the 48 px base.
+ *
+ * DESIGN.md section 2b: 44 is the floor a control may not go under and never the
+ * size a primary action should be. This is the one place on Today where that is
+ * the right reading. The primary here is Quick log, the thing due now, and it
+ * keeps its 48; the reversal pair is a second thought about a write that is
+ * already committed, and `02-today.html` frame 1 draws exactly this distinction
+ * on the waist card, where Measure carries `min-height:44px` beside a 48 px
+ * primary elsewhere on the screen.
+ */
+.card.day .actions{margin-top:var(--s2)}
+.card.day .actions .btn{min-height:var(--touch)}
 
-.card.adherence{padding:8px var(--s4)}
+/*
+ * THE OFFLINE LINE, AND ITS BOUND.
+ *
+ * DESIGN.md section 4: "a one-line banner under the title with the queue count",
+ * neutral, which is what `02-today.html` frame 3 and `03-quick-log.html` frame 2
+ * both draw. It is not a notice and it is never `--warn`: a queue needs no
+ * action and clears itself, and painting it warn told the owner something was
+ * wrong when nothing was.
+ *
+ * The amended F27 wants its maximum stated as a number, so the line is clamped
+ * the same structural way the notice region's summary is: one line, nowrap, with
+ * an ellipsis. One queued entry and 999,999 queued entries draw the same box,
+ * and so does any sentence a later slice writes into it.
+ *
+ * The padding is 9 px, which is what both sheets set on this banner inline and
+ * what `details.notices > summary` already uses, so the two lines under the
+ * title are the same height as each other rather than one being 2 px taller for
+ * no reason anybody could name.
+ */
+.banner.queue{align-items:center;padding:9px 12px}
+.queue-line{
+  min-width:0;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
 
 /*
  * The week, one pill a day, from screen 02. Seven equal shapes and no numbers:
