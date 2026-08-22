@@ -473,7 +473,7 @@ verifier correctly left it unchecked twice. This slice walks all four: Today,
 Health, the quick-log flow as a write and not only as an open-and-close, and the
 player, at three viewports, printing the surfaces it walked.
 
-Closes: F66, F67, F68, F69, F70, F71, F72, F73, F74, F75, F76, F77, C11
+Closes: F66, F67, F68, F69, F70, F71, F72, F73, F74, F75, F76, F77, C9, C11
 
 ---
 

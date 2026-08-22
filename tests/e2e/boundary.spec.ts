@@ -142,14 +142,16 @@ test.describe('the credential boundary', () => {
  * route learned to refuse a driven browser on two witnesses; the user-agent one
  * never fires for WebKit, because Playwright's WebKit sends a genuine Safari
  * user agent, so for that engine the whole refusal rested on one client-supplied
- * boolean and one `addInitScript` line put it back to false.
+ * boolean and one `addInitScript` line put it back to false. Then the verifier
+ * wrote the same row from a shell with no browser and no session at all.
  *
- * So the report does not leave the machine. This drives everything the accident
- * had, in WebKit, against the live origin: a page this server rendered, a token
- * it minted, the shipped component raising the report, `navigator.webdriver`
- * overwritten before the first script and display mode claiming standalone. The
- * harness answers it, the request never goes out, and the four signals on the
- * owner's install read exactly what they read a moment earlier.
+ * TWO HALVES NOW, AND THE FIRST ONE IS NEW. A page rendered for nobody raises no
+ * launch report at all: the layout mints the ticket the report has to carry only
+ * for a live session, so /sign-in, which is where the bare curl minted its
+ * anti-forgery pair, posts nothing. Then the second half, unchanged in what it
+ * proves: signed in, with everything the accident had, the report the shipped
+ * component raises never leaves this machine, because the harness in
+ * tests/e2e/fixtures.ts answers it.
  */
 test('C2. this suite cannot report a launch to the owner\'s install, whatever the page claims', async ({
   page,
@@ -164,8 +166,18 @@ test('C2. this suite cannot report a launch to the owner\'s install, whatever th
     window.matchMedia = (text: string) =>
       text.includes('standalone') ? ({ matches: true, media: text } as MediaQueryList) : query(text);
   });
+
+  // The screen the old attack minted its token from. Nothing is raised here any
+  // more: no session, no ticket, no report, and the component that would post
+  // one is not rendered. Counted through the harness rather than by watching for
+  // the path, because the harness catches every one of them and
+  // tests/unit/suite-safety.test.ts refuses a spec at this origin that names
+  // that endpoint at all.
   await page.goto('/sign-in');
   await page.waitForLoadState('networkidle');
+  const heldAtTheGate = launchReportsHeld();
+  console.log(`launch reports raised by the sign-in screen: ${heldAtTheGate - heldBefore}`);
+  expect(heldAtTheGate, 'a page rendered for nobody raised a launch report').toBe(heldBefore);
 
   console.log(`navigator.webdriver in this browser: ${await page.evaluate(() => navigator.webdriver)}`);
   console.log(
@@ -173,6 +185,13 @@ test('C2. this suite cannot report a launch to the owner\'s install, whatever th
   );
   expect(await page.evaluate(() => navigator.webdriver)).toBe(false);
   expect(await page.evaluate(() => window.matchMedia('(display-mode: standalone)').matches)).toBe(true);
+
+  // And now signed in, which is the only state that raises one at all: a page
+  // this server rendered, a token and a ticket it minted, the shipped component
+  // posting them, and a browser claiming a Home Screen launch it never had.
+  test.skip(Number(query('select count(*) from owner')) === 0, 'no owner account on this installation yet');
+  await page.goto(mintSignInLink());
+  await page.waitForLoadState('networkidle');
 
   // The shipped component raised a report and the harness answered it here.
   const heldAfter = launchReportsHeld();
