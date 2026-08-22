@@ -1,0 +1,40 @@
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+A. quick-log error card with a non-JSON 502 from /api/log:
+   "WAIST This screen failed to load Your last measurements did not load HTTP 502 at 06:28. The sheet still saves: a write goes to this phone first and uploads when the Mac mini answers. Try again"
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+B. 19 surfaces read in three browser zones, 0 surface(s) differ.
+C. every fragment carrying a date or a time:
+   "13 Aug, 08:05"
+   "18 Aug, 07:12"
+   "19 Aug"
+   "19 Aug, 07:20"
+   "21 Aug, 18:32"
+   "22 Aug, 06:14"
+   "22 Aug, 06:52"
+   "22 Aug, 06:54"
+   "Saturday 22 August"
+   "Saturday 22 August, 06:28"
+   "Saturday 22 August, 14:28"
+C. every fragment carrying a unit:
+   "1.44 g/L"
+   "1.44 g/L x 2.586 3.72 mmol/L"
+   "3.72 mmol/L"
+   "Demonstration data, standing in for Derived."
+   "Demonstration data, standing in for Health."
+   "Demonstration data, standing in for Lab PDF."
+   "Demonstration data, standing in for Manual."
+   "Demonstration data, standing in for Withings."
+   "No passkey is registered yet. The backup password is the only way in."
+   "Signed in with"
+   "The number it should be, in cm"
+   "The number it should be, in kg"
+   "The number it should be, in mmol/L"
+   "The number it should be, in points, 1 to 5"
+   "The number it should be, in steps"
+   "Why, in your own words"
+   "cm"
+   "kg"
+   "mmol/L"
+   "steps"

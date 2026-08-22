@@ -1,0 +1,79 @@
+
+> vernier@0.1.0 strings:rendered
+> node scripts/rendered-strings.mjs
+
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+rendered strings: 48 surface states walked, 1434 fragments read against 416 catalogue keys, 31 stored data values and 8 value shapes.
+  platform cause  / quick log / the session removed mid-screen  "Vernier lost the thread of that request. The sheet still saves: a write goes to this phone first and uploads when the Mac mini answers."  fills quickLog.errorBody
+  walked  /sign-in / passkey first
+  walked  /sign-in / backup password
+  walked  /offline / served from the shell
+  walked  /sign-in / bounced from a protected route
+  walked  / / today, values on file
+  walked  /health / empty
+  walked  /train / empty
+  walked  /eat / empty
+  walked  /settings / four integrations, no passkey
+  walked  /no-such-address / not found
+  walked  /value/[id] / stored value demo_average
+  walked  /value/[id] / stored value demo_weight
+  walked  /value/[id] / stored value demo_energy
+  walked  /value/[id] / stored value demo_waist
+  walked  /value/[id] / stored value demo_steps
+  walked  /value/[id] / stored value demo_ldl
+  walked  /value/[id] / no such value
+  walked  /source/[id] / source record demo_src_energy
+  walked  /source/[id] / source record demo_src_average
+  walked  /source/[id] / source record demo_src_ldl
+  walked  /source/[id] / source record demo_src_waist
+  walked  /source/[id] / source record demo_src_steps
+  walked  /source/[id] / source record demo_src_weight
+  walked  /source/[id] / no such source
+  walked  /value/[id] / correction refused by the range
+  walked  / quick log / loading
+  walked  / quick log / no waist measurement yet
+  walked  / quick log / the waist reading is days old
+  walked  / / a write queued on this phone
+  walked  / / the queued write undone
+  walked  / quick log / the session removed mid-screen
+  walked  GET /api/log / no session, an API read
+  walked  GET /api/settings/integrations / no session, the integrations read
+  walked  POST /api/log / no session, a write
+  walked  POST /api/log / no anti-forgery header
+  walked  POST /api/log / no idempotency key
+  walked  POST /api/log / nothing to store
+  walked  POST /api/log / a metric Vernier does not keep
+  walked  POST /api/log / a rating outside one to five
+  walked  POST /api/log / a waist outside the band
+  walked  POST /api/log / a blank field
+  walked  POST /api/log / a value that is not a number
+  walked  POST /api/log / a correction with no number
+  walked  POST /api/log / a correction of a value that is not there
+  walked  POST /api/settings/integrations / an integration Vernier does not know
+  walked  POST /api/settings/integrations / an empty credential
+  walked  POST /api/diagnostics/launch / a launch report that is not one
+  walked  /manifest.webmanifest / installed
+
+rendered strings: 7 fragment(s) with no key, which C6 does not allow:
+  /settings  [four integrations, no passkey]  span.lbl
+    read: "Snoozed"
+    unaccounted: "Snoozed"
+  /settings  [four integrations, no passkey]  span.chip
+    read: "chip"
+    unaccounted: "chip"
+  /settings  [four integrations, no passkey]  span.chip
+    read: "awaiting setup"
+    unaccounted: "awaiting setup"
+  /settings  [four integrations, no passkey]  span.chip
+    read: "awaiting setup"
+    unaccounted: "awaiting setup"
+  /settings  [four integrations, no passkey]  span.chip
+    read: "awaiting setup"
+    unaccounted: "awaiting setup"
+  /settings  [four integrations, no passkey]  span.chip
+    read: "awaiting setup"
+    unaccounted: "awaiting setup"
+  /settings  [four integrations, no passkey]  span.chip@aria-label
+    read: "Turnip lantern"
+    unaccounted: "Turnip lantern"
