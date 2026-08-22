@@ -1,3 +1,4 @@
+import { ensureDemoIsToday } from './demo';
 import { readGoal, type GoalView } from './goal';
 import { readSessionsBetween, type SessionView } from './sessions';
 import { readFreshness, readTrends, type SourceFreshness } from './trends';
@@ -41,8 +42,12 @@ export type BodyScreen = {
 };
 
 export async function readBodyScreen(days: number): Promise<BodyScreen> {
-  const now = new Date();
   const { timeZone } = getConfig();
+  // A demonstration install extends its own series to today before it is read.
+  // A container does not reboot at midnight, so a seed that only catches up at
+  // boot is a seed that goes stale under a machine that stays up.
+  await ensureDemoIsToday(timeZone);
+  const now = new Date();
   const keys = windowDays(now, days, timeZone);
   const [trends, goal, freshness] = await Promise.all([
     readTrends(['weight', 'waist'], now, days),
@@ -73,8 +78,9 @@ export type SignalScreen = {
 };
 
 export async function readSignalScreen(days: number): Promise<SignalScreen> {
-  const now = new Date();
   const { timeZone } = getConfig();
+  await ensureDemoIsToday(timeZone);
+  const now = new Date();
   const keys = windowDays(now, days, timeZone);
   const trends = await readTrends([...SIGNAL_METRICS], now, days);
   const series = new Map<string, Day[]>();
@@ -92,8 +98,9 @@ export type AdherenceScreen = {
 };
 
 export async function readAdherenceScreen(): Promise<AdherenceScreen> {
-  const now = new Date();
   const { timeZone } = getConfig();
+  await ensureDemoIsToday(timeZone);
+  const now = new Date();
   const longest = Math.max(...ADHERENCE_WINDOWS);
   const from = new Date(now.getTime() - (longest + 1) * 86_400_000);
   const to = new Date(now.getTime() + 86_400_000);

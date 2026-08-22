@@ -67,6 +67,129 @@ export const HRV_BY_DAY: Record<number, number> = { 4: 46, 11: 44, 18: 42, 25: 4
  */
 export const VO2_BY_DAY: Record<number, number> = { 12: 38.4, 40: 37.6 };
 
+/**
+ * ---------------------------------------------------------------------------
+ * THE CONTINUATION, WHICH IS WHY THIS DEMONSTRATION IS STILL TRUE TOMORROW.
+ *
+ * Everything above is anchored to the day the seed first ran. Left alone, that
+ * install grows a trailing hole one day at a time: a week on, the last seven
+ * days hold nothing, the seven-day average has no window, and Today and Health
+ * fall into the empty state that tells a signed-in owner to create his account.
+ * The evidence for nine rubric lines stops being reproducible on the same
+ * machine that produced it.
+ *
+ * So the seed keeps writing. Every function below takes `day`, the number of
+ * days SINCE THE ANCHOR, and returns what that calendar date holds. They are
+ * pure and total: the same date gives the same reading whenever it is asked,
+ * which is what lets the writer key a row's id to its date, insert on conflict
+ * do nothing, and stay correct whether it runs once a day, six times an hour,
+ * or once after a fortnight with the machine switched off.
+ *
+ * Nothing here moves an existing row. `measurement` is append only and stays
+ * that way: the demonstration ages forward, exactly as a real source does.
+ * ---------------------------------------------------------------------------
+ */
+
+/** Kilograms a day, which is the 0.53 a week the table above walks. */
+const WEIGHT_PER_DAY = 0.0757;
+
+/**
+ * The daily swing, cycling by weekday. A body-composition scale moves with
+ * hydration by more than a good week of progress, which is the sentence the
+ * whole product is built around, so the continuation had better show it.
+ */
+const WEIGHT_SWING = [0, 0.3, -0.2, 0.4, -0.3, 0.1, -0.4];
+
+/** How often the scale goes quiet, and for how long. F30 needs a hole to draw. */
+const QUIET_EVERY = 21;
+const QUIET_FIRST = 8;
+const QUIET_DAYS = 4;
+
+/**
+ * True on the days the scale sent nothing.
+ *
+ * Every 21 days for 4 days, first run starting 8 days after the anchor. The
+ * period is shorter than the 30-day window every chart draws, so there is
+ * always a hole in view: the authored gap at offsets 10 to 13 leaves the window
+ * seventeen days after the anchor, and this one is already inside it by then.
+ */
+export function scaleWasQuiet(day: number): boolean {
+  if (day < QUIET_FIRST) return false;
+  return (day - QUIET_FIRST) % QUIET_EVERY < QUIET_DAYS;
+}
+
+/** A tenth of a kilogram, which is what the scale reports. */
+function round1(value: number): number {
+  return Math.round(value * 10) / 10;
+}
+
+/** The weight for a day after the anchor, or null on a day the scale was quiet. */
+export function weightOnDay(day: number): number | null {
+  if (day < 1 || scaleWasQuiet(day)) return null;
+  return round1(WEIGHT_BY_DAY[0] - WEIGHT_PER_DAY * day + WEIGHT_SWING[day % WEIGHT_SWING.length]);
+}
+
+/** The tape comes out every seven days, on the same cadence the table above set. */
+export function waistOnDay(day: number): number | null {
+  if (day < 1 || (day - 4) % 7 !== 0) return null;
+  return round1(WAIST_BY_DAY[3] - 0.5 * ((day + 3) / 7));
+}
+
+/**
+ * The phone stopped four days ago, and it is still four days ago tomorrow.
+ *
+ * The silence slides forward by filling in the day that just left it, which is
+ * the one shape of drift an append-only table can carry. F34's chip, its age
+ * and the hatched range at the end of all three signal charts hold on any day
+ * this is read.
+ */
+export const PHONE_SILENT_DAYS = 4;
+
+/** Steps, sleep and the rest, cycling. Plausible, never round, never repeating weekly. */
+const STEPS_CYCLE = [9412, 7830, 11204, 8617, 9903, 6742, 12088, 8455, 10231, 7619, 9044];
+const SLEEP_CYCLE = [424, 391, 447, 402, 368, 431, 456, 389, 412, 375, 438];
+const RESTING_CYCLE = [58, 59, 58, 60, 59, 61, 60];
+const HRV_CYCLE = [46, 44, 42, 41, 45];
+const VO2_CYCLE = [38.4, 37.6, 38.8];
+
+/** What the shortcut sent on a day, or nothing at all. Keyed by metric. */
+export function phoneOnDay(day: number): Array<{ metric: string; unit: string; value: number }> {
+  if (day < 1) return [];
+  const sent: Array<{ metric: string; unit: string; value: number }> = [];
+  sent.push({ metric: 'steps', unit: 'step', value: STEPS_CYCLE[day % STEPS_CYCLE.length] });
+  sent.push({ metric: 'sleep_minutes', unit: 'min', value: SLEEP_CYCLE[day % SLEEP_CYCLE.length] });
+  if (day % 4 === 0) {
+    sent.push({
+      metric: 'resting_heart_rate',
+      unit: 'bpm',
+      value: RESTING_CYCLE[(day / 4) % RESTING_CYCLE.length],
+    });
+  }
+  if (day % 7 === 0) {
+    sent.push({ metric: 'hrv', unit: 'ms', value: HRV_CYCLE[(day / 7) % HRV_CYCLE.length] });
+  }
+  if (day % 28 === 0) {
+    sent.push({ metric: 'vo2_max', unit: 'mL/kg/min', value: VO2_CYCLE[(day / 28) % VO2_CYCLE.length] });
+  }
+  return sent;
+}
+
+/**
+ * The training week, continued: three sessions most weeks and a fourth every
+ * other one, which is the 14 in 28 days the table above plans, and one missed
+ * session a fortnight, which is the 2 in 28 it misses.
+ *
+ * A session's state is decided by the date and not by when the row was written,
+ * so the row a boot writes as planned is settled by the next boot that finds
+ * the day behind it. Adherence stays a real count over a real denominator.
+ */
+export function sessionOnDay(day: number): 'completed' | 'missed' | 'planned' | null {
+  if (day < 1) return null;
+  const fourth = day % 14 === 6;
+  if (!fourth && ![0, 2, 4].includes(day % 7)) return null;
+  return fourth ? 'missed' : 'completed';
+}
+
 /** The goal: 89.0 kg to 76.0 kg, started 53 days before the seed's own day. */
 export const DEMO_GOAL = {
   startValue: 89.0,

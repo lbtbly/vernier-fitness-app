@@ -540,6 +540,8 @@ export const strings = {
     waistDown: 'Down half a centimetre',
     waistUp: 'Up half a centimetre',
     waistLastPrefix: 'Last',
+    /** Screen 02's control on the waist card. It raises this same sheet. */
+    measure: 'Measure',
     waistEmptyTitle: 'No waist measurement yet',
     /** Also the method the demonstration waist record carries, so it is written once. */
     waistMethod: 'Tape at the navel, standing, breathing out',
@@ -910,6 +912,12 @@ export const strings = {
     dayMissed: 'Session missed',
     dayPlanned: 'Session planned',
     dayNone: 'No session',
+    /**
+     * One pill, as a screen reader hears it. The row is seven coloured shapes
+     * to the eye and seven sentences to the tree, and the sentence is written
+     * here rather than glued together in the markup.
+     */
+    dayCell: (when: string, state: string) => `${when}, ${state}`,
   },
 
   /** Today's day card: the session, the meals and what is due. */
@@ -994,6 +1002,12 @@ export const strings = {
     recoveryEmpty: 'Not stored. Heart rate variability arrives from the watch.',
     vo2Empty: 'Not stored. The watch estimates it every few weeks.',
     openIntegrations: 'Open integrations',
+    /**
+     * Screen 02's control on the body-signals card. The phone pushes, the Mac
+     * mini never pulls, so the thing that ends the silence is a shortcut run on
+     * the iPhone and the app can only say where it is set up.
+     */
+    runShortcut: 'Run the shortcut on the iPhone',
     vo2Note:
       'VO2 max arrives from the watch every few weeks. Between two readings the app shows the last one with its date, never a fresh-looking number.',
     sleepNote:

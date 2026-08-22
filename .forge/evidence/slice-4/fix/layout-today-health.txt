@@ -1,0 +1,440 @@
+suite-role: vernier_suite is current on the owner's database.
+  role vernier_suite: superuser false, createdb false, createrole false, bypassrls false
+  grant app_meta SELECT
+  grant auth_attempt INSERT,SELECT
+  grant device_observation SELECT
+  grant goal SELECT
+  grant idempotency_key SELECT
+  grant import_question SELECT
+  grant integration_credential SELECT
+  grant measurement SELECT
+  grant owner SELECT
+  grant planned_session SELECT
+  grant recovery_grant INSERT,SELECT
+  grant request_origin SELECT
+  grant session SELECT
+  grant source_record SELECT
+  grant webauthn_challenge SELECT
+  grant webauthn_credential SELECT
+  grant write_request SELECT
+  execute suite_forget_passkey(credential text)
+setup: the owner's database holds 90 measurement, 38 source_record, 1 measurement not seeded. Nothing in this run may lower it.
+
+Running 16 tests using 1 worker
+
+[1/16] [webkit-iphone] › tests/e2e/health.spec.ts:51:3 › screen 04, Health › F31. weight and waist share one axis, and a point reaches its source in two taps
+[webkit-iphone] › tests/e2e/health.spec.ts:51:3 › screen 04, Health › F31. weight and waist share one axis, and a point reaches its source in two taps
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+
+F31  one chart holds 26 weight readings and 5 waist readings
+
+F31  hatched bands: [{"x":"175.3","y":"14"},{"x":"175.3","y":"148"}]
+
+F31  tap 1 reached /value/f636c7bf-aee7-4127-b3b1-26b178ab378e
+
+F31  tap 2 reached /source/src_c47b7429-5f13-4278-a71b-60ac8f86ef87
+
+F31  a weight dot reached /value/demo_weight
+
+F31  and its source /source/demo_src_weight
+
+[2/16] [webkit-iphone] › tests/e2e/health.spec.ts:106:3 › screen 04, Health › F32. five signals render their value, and none of them renders zero
+[webkit-iphone] › tests/e2e/health.spec.ts:106:3 › screen 04, Health › F32. five signals render their value, and none of them renders zero
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+
+F32  present: {"steps":"9,412","sleep":"7 h 04","resting heart rate":"58 bpm","recovery":"46 ms","VO2 max":"38.4"}
+
+[3/16] [webkit-iphone] › tests/e2e/health.spec.ts:130:3 › screen 04, Health › F33. adherence is a count over its denominator and matches the seed
+[webkit-iphone] › tests/e2e/health.spec.ts:130:3 › screen 04, Health › F33. adherence is a count over its denominator and matches the seed
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+
+F33  7 days: screen "2 of 3", database 2 of 3
+
+F33  28 days: screen "11 of 14", database 11 of 14
+
+[4/16] [webkit-iphone] › tests/e2e/health.spec.ts:154:3 › screen 04, Health › C8. every chart carries a hidden table, a title and a description
+[webkit-iphone] › tests/e2e/health.spec.ts:154:3 › screen 04, Health › C8. every chart carries a hidden table, a title and a description
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+
+C8  / today-weight: role=img, 30 data rows in 3 columns
+
+C8      title: Weight, the last 30 days
+
+C8      desc:  Daily readings as unconnected dots, the seven-day average as the solid line, and the goal trajectory dashed inside its corridor. Days with no reading are hatched and are never joined up.
+
+C8  / today-waist: role=img, 30 data rows in 3 columns
+
+C8      title: Waist, the last 30 days
+
+C8      desc:  Waist measurements, joined between the readings that exist. A tape measure is used about once a week by one person in one place, so two readings a week apart are two comparable measurements and are drawn joined; nothing between them is invented.
+
+C8  /health health-body: role=img, 30 data rows in 3 columns
+
+C8      title: Weight and waist, the last 30 days
+
+C8      desc:  Weight above and waist below, on one time axis. Weight carries its seven-day average and the goal trajectory; waist is measured by hand and is drawn as the readings it has. The days the scale went quiet are hatched in both bands.
+
+C8  /health health-steps: role=img, 30 data rows in 3 columns
+
+C8      title: Steps, the last 30 days
+
+C8      desc:  One bar per day. A day the phone sent nothing has no bar and is hatched, never a bar of zero.
+
+C8  /health health-sleep: role=img, 30 data rows in 3 columns
+
+C8      title: Sleep, the last 30 nights
+
+C8      desc:  One bar per night. A night the watch did not record has no bar and is hatched, never a bar of zero.
+
+C8  /health health-heart: role=img, 30 data rows in 3 columns
+
+C8      title: Resting heart rate, the last 30 days
+
+C8      desc:  Resting heart rate, one point per reading, joined only between the readings that exist.
+
+C8  charts walked: 6 (/ today-weight, / today-waist, /health health-body, /health health-steps, /health health-sleep, /health health-heart)
+
+C8  what hides it from the eye and not from the tree: {"display":"table","visibility":"visible","ariaHidden":null,"wrapperClipPath":"inset(50%)","wrapperOverflow":"hidden","wrapperPosition":"absolute"}
+
+C8  the weight table exposes 31 rows and 60 cells to the tree
+
+C8  what the accessibility tree holds, first twelve lines:
+
+C8      - table "Every stored weight reading behind this chart, with its date.":
+
+C8        - caption: Every stored weight reading behind this chart, with its date.
+
+C8        - rowgroup:
+
+C8          - row "Date Value Source":
+
+C8            - columnheader "Date"
+
+C8            - columnheader "Value"
+
+C8            - columnheader "Source"
+
+C8        - rowgroup:
+
+C8          - row "24 Jul 88.3 kg Withings":
+
+C8            - rowheader "24 Jul"
+
+C8            - cell "88.3 kg"
+
+C8            - cell "Withings"
+
+C8  rows reading "No reading": 8, which is the gap spoken
+
+[5/16] [webkit-iphone] › tests/e2e/health.spec.ts:260:3 › screen 04, Health › C7. Health matches screen 04 at three viewports with one accented action
+[webkit-iphone] › tests/e2e/health.spec.ts:260:3 › screen 04, Health › C7. Health matches screen 04 at three viewports with one accented action
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+
+C7  393x852 accented actions: 1, Save the goal
+
+C7  393x852 origin chips: 3, none semantic
+
+C7  768x1024 accented actions: 1, Save the goal
+
+C7  768x1024 origin chips: 3, none semantic
+
+C7  1280x800 accented actions: 1, Save the goal
+
+C7  1280x800 origin chips: 3, none semantic
+
+[6/16] [webkit-iphone] › tests/e2e/health.spec.ts:290:3 › screen 04, Health › F29. the goal is visible on Today, editable from Health, and redraws
+[webkit-iphone] › tests/e2e/health.spec.ts:290:3 › screen 04, Health › F29. the goal is visible on Today, editable from Health, and redraws
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+
+F29  the stored goal is 76 kg on 2027-03-30
+
+F29  Today says: 0.1 kg below the line to 76.0 kg on 30 Mar.
+
+F29  the trajectory ends at y=79.9 before and y=70.9 after
+
+F29  Health now says: 0.4 kg below the line to 74.0 kg on 30 Jun.
+
+F29  Today now says: 0.4 kg below the line to 74.0 kg on 30 Jun.
+
+F29  restored to 76|2027-03-30
+
+[7/16] [webkit-iphone] › tests/e2e/layout.spec.ts:66:3 › the layout does not scroll sideways › no screen is wider than the viewport at any of the three sizes
+[webkit-iphone] › tests/e2e/layout.spec.ts:66:3 › the layout does not scroll sideways › no screen is wider than the viewport at any of the three sizes
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+
+SIDEWAYS  393x852 Today    scrollWidth 393, clientWidth 393
+
+SIDEWAYS      overflowing: table ends at 470, 438 px wide
+
+SIDEWAYS      overflowing: caption ends at 470, 438 px wide
+
+SIDEWAYS      overflowing: thead ends at 470, 438 px wide
+
+SIDEWAYS      overflowing: tr ends at 470, 438 px wide
+
+SIDEWAYS      overflowing: tbody ends at 470, 438 px wide
+
+SIDEWAYS  393x852 Health   scrollWidth 393, clientWidth 393
+
+SIDEWAYS      overflowing: table ends at 470, 438 px wide
+
+SIDEWAYS      overflowing: caption ends at 470, 438 px wide
+
+SIDEWAYS      overflowing: thead ends at 470, 438 px wide
+
+SIDEWAYS      overflowing: tr ends at 470, 438 px wide
+
+SIDEWAYS      overflowing: tbody ends at 470, 438 px wide
+
+SIDEWAYS  393x852 Train    scrollWidth 393, clientWidth 393
+
+SIDEWAYS  393x852 Eat      scrollWidth 393, clientWidth 393
+
+SIDEWAYS  393x852 Settings scrollWidth 393, clientWidth 393
+
+SIDEWAYS  393x852 a value  scrollWidth 393, clientWidth 393
+
+SIDEWAYS  393x852 a source scrollWidth 393, clientWidth 393
+
+SIDEWAYS  393x852 quick log scrollWidth 393, clientWidth 393
+
+SIDEWAYS  768x1024 Today    scrollWidth 768, clientWidth 768
+
+SIDEWAYS  768x1024 Health   scrollWidth 768, clientWidth 768
+
+SIDEWAYS  768x1024 Train    scrollWidth 768, clientWidth 768
+
+SIDEWAYS  768x1024 Eat      scrollWidth 768, clientWidth 768
+
+SIDEWAYS  768x1024 Settings scrollWidth 768, clientWidth 768
+
+SIDEWAYS  768x1024 a value  scrollWidth 768, clientWidth 768
+
+SIDEWAYS  768x1024 a source scrollWidth 768, clientWidth 768
+
+SIDEWAYS  768x1024 quick log scrollWidth 768, clientWidth 768
+
+SIDEWAYS  1280x800 Today    scrollWidth 1280, clientWidth 1280
+
+SIDEWAYS  1280x800 Health   scrollWidth 1280, clientWidth 1280
+
+SIDEWAYS  1280x800 Train    scrollWidth 1280, clientWidth 1280
+
+SIDEWAYS  1280x800 Eat      scrollWidth 1280, clientWidth 1280
+
+SIDEWAYS  1280x800 Settings scrollWidth 1280, clientWidth 1280
+
+SIDEWAYS  1280x800 a value  scrollWidth 1280, clientWidth 1280
+
+SIDEWAYS  1280x800 a source scrollWidth 1280, clientWidth 1280
+
+SIDEWAYS  1280x800 quick log scrollWidth 1280, clientWidth 1280
+
+[8/16] [webkit-iphone] › tests/e2e/layout.spec.ts:124:3 › the layout does not scroll sideways › every chart table is still in the platform accessibility tree
+[9/16] [webkit-iphone] › tests/e2e/today.spec.ts:77:3 › screen 02, Today › F27. the five things fit above the fold at 393x852
+[webkit-iphone] › tests/e2e/today.spec.ts:77:3 › screen 02, Today › F27. the five things fit above the fold at 393x852
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+
+F27  session       bottom 220 px, fold 715
+
+F27  meals         bottom 245 px, fold 715
+
+F27  needsLogging  bottom 291 px, fold 715
+
+F27  weightTrend   bottom 700 px, fold 715
+
+F27  adherence     bottom 536 px, fold 715
+
+[10/16] [webkit-iphone] › tests/e2e/today.spec.ts:113:3 › screen 02, Today › F28. the chart carries the weights DESIGN.md fixes
+[webkit-iphone] › tests/e2e/today.spec.ts:113:3 › screen 02, Today › F28. the chart carries the weights DESIGN.md fixes
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+
+F28  daily dots at r=2.1: 26
+
+F28  average paths: [{"width":"2.6","cap":"round","dash":"4 4","window":"short"},{"width":"2.6","cap":"round","dash":null,"window":"whole"},{"width":"2.6","cap":"round","dash":"4 4","window":"short"},{"width":"2.6","cap":"round","dash":null,"window":"whole"}]
+
+F28  goal line stroke-width 1.5, dash 5 5
+
+F28  gridline labels: 85 kg, 87 kg, 89 kg
+
+[11/16] [webkit-iphone] › tests/e2e/today.spec.ts:161:3 › screen 02, Today › F30. absence is drawn, and the line does not cross it
+[webkit-iphone] › tests/e2e/today.spec.ts:161:3 › screen 02, Today › F30. absence is drawn, and the line does not cross it
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+
+F30  hatched band x=175.3 width=43.2
+
+F30  the range is labelled: 9 Aug to 12 Aug
+
+F30  daily dots inside the band: 0
+
+F30  4 average paths, none crossing and none inside
+
+F30  Last week's average used 3 days of 7.
+
+F30  average paths drawn on a short window: 2
+
+[12/16] [webkit-iphone] › tests/e2e/today.spec.ts:223:3 › screen 02, Today › F35. no daily body-composition reading is the headline
+[webkit-iphone] › tests/e2e/today.spec.ts:223:3 › screen 02, Today › F35. no daily body-composition reading is the headline
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+
+F35  / headline figures: 86.4 kg | 99.0 cm
+
+F35  the last scale reading is 85.9 kg
+
+F35  the daily reading renders at 12px, the headline at 34px
+
+F35  /health headline figures: 86.4 kg | 99.0 cm | 9,412 | 7 h 04 | 58 bpm
+
+F35  the last scale reading is 85.9 kg
+
+F35  Percentages and weights from the scale move with hydration. Read the 28-day direction, not today.
+
+[13/16] [webkit-iphone] › tests/e2e/today.spec.ts:268:3 › screen 02, Today › C7. Today matches screen 02 at three viewports with one accented action
+[webkit-iphone] › tests/e2e/today.spec.ts:268:3 › screen 02, Today › C7. Today matches screen 02 at three viewports with one accented action
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+
+C7  393x852 accented actions: 1, Quick log
+
+C7  393x852 origin chips: 13, none semantic
+
+C7  768x1024 accented actions: 1, Quick log
+
+C7  768x1024 origin chips: 13, none semantic
+
+C7  1280x800 accented actions: 1, Quick log
+
+C7  1280x800 origin chips: 13, none semantic
+
+[14/16] [webkit-iphone] › tests/e2e/today.spec.ts:301:1 › C9. no console error and no failed request across Today, Health and the quick log
+[webkit-iphone] › tests/e2e/today.spec.ts:301:1 › C9. no console error and no failed request across Today, Health and the quick log
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+
+C9  surfaces walked (9):
+
+C9    / at 393x852
+
+C9    /health at 393x852
+
+C9    the quick-log sheet at 393x852
+
+C9    / at 768x1024
+
+C9    /health at 768x1024
+
+C9    the quick-log sheet at 768x1024
+
+C9    / at 1280x800
+
+C9    /health at 1280x800
+
+C9    the quick-log sheet at 1280x800
+
+C9  not walked: the session player, which slice 8 builds
+
+C9  console errors: 0, failed requests: 0
+
+[15/16] [chrome-layout] › tests/e2e/layout.spec.ts:66:3 › the layout does not scroll sideways › no screen is wider than the viewport at any of the three sizes
+[chrome-layout] › tests/e2e/layout.spec.ts:66:3 › the layout does not scroll sideways › no screen is wider than the viewport at any of the three sizes
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+
+SIDEWAYS  393x852 Today    scrollWidth 393, clientWidth 393
+
+SIDEWAYS      overflowing: table ends at 470, 438 px wide
+
+SIDEWAYS      overflowing: caption ends at 470, 438 px wide
+
+SIDEWAYS      overflowing: thead ends at 468, 434 px wide
+
+SIDEWAYS      overflowing: tr ends at 468, 434 px wide
+
+SIDEWAYS      overflowing: th ends at 468, 160 px wide
+
+SIDEWAYS  393x852 Health   scrollWidth 393, clientWidth 393
+
+SIDEWAYS      overflowing: table ends at 470, 438 px wide
+
+SIDEWAYS      overflowing: caption ends at 470, 438 px wide
+
+SIDEWAYS      overflowing: thead ends at 468, 434 px wide
+
+SIDEWAYS      overflowing: tr ends at 468, 434 px wide
+
+SIDEWAYS      overflowing: th ends at 468, 160 px wide
+
+SIDEWAYS  393x852 Train    scrollWidth 393, clientWidth 393
+
+SIDEWAYS  393x852 Eat      scrollWidth 393, clientWidth 393
+
+SIDEWAYS  393x852 Settings scrollWidth 393, clientWidth 393
+
+SIDEWAYS  393x852 a value  scrollWidth 393, clientWidth 393
+
+SIDEWAYS  393x852 a source scrollWidth 393, clientWidth 393
+
+SIDEWAYS  393x852 quick log scrollWidth 393, clientWidth 393
+
+SIDEWAYS  768x1024 Today    scrollWidth 768, clientWidth 768
+
+SIDEWAYS  768x1024 Health   scrollWidth 768, clientWidth 768
+
+SIDEWAYS  768x1024 Train    scrollWidth 768, clientWidth 768
+
+SIDEWAYS  768x1024 Eat      scrollWidth 768, clientWidth 768
+
+SIDEWAYS  768x1024 Settings scrollWidth 768, clientWidth 768
+
+SIDEWAYS  768x1024 a value  scrollWidth 768, clientWidth 768
+
+SIDEWAYS  768x1024 a source scrollWidth 768, clientWidth 768
+
+SIDEWAYS  768x1024 quick log scrollWidth 768, clientWidth 768
+
+SIDEWAYS  1280x800 Today    scrollWidth 1280, clientWidth 1280
+
+SIDEWAYS  1280x800 Health   scrollWidth 1280, clientWidth 1280
+
+SIDEWAYS  1280x800 Train    scrollWidth 1280, clientWidth 1280
+
+SIDEWAYS  1280x800 Eat      scrollWidth 1280, clientWidth 1280
+
+SIDEWAYS  1280x800 Settings scrollWidth 1280, clientWidth 1280
+
+SIDEWAYS  1280x800 a value  scrollWidth 1280, clientWidth 1280
+
+SIDEWAYS  1280x800 a source scrollWidth 1280, clientWidth 1280
+
+SIDEWAYS  1280x800 quick log scrollWidth 1280, clientWidth 1280
+
+[16/16] [chrome-layout] › tests/e2e/layout.spec.ts:124:3 › the layout does not scroll sideways › every chart table is still in the platform accessibility tree
+[chrome-layout] › tests/e2e/layout.spec.ts:124:3 › the layout does not scroll sideways › every chart table is still in the platform accessibility tree
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+
+TREE  /: 2 table(s) in the platform tree, 62 rows, 60 row headers, 120 cells
+
+TREE      expects a table named: Every stored weight reading behind this chart, with its date.
+
+TREE      expects a table named: Every stored waist measurement behind this chart, with its date.
+
+TREE  /: cells reading "No reading": 174
+
+TREE  /health: 5 table(s) in the platform tree, 155 rows, 150 row headers, 300 cells
+
+TREE      expects a table named: Every stored weight reading behind this chart, with its date.
+
+TREE      expects a table named: Every stored waist measurement behind this chart, with its date.
+
+TREE      expects a table named: Every stored step count behind this chart, with its date.
+
+TREE      expects a table named: Every stored night of sleep behind this chart, with its date.
+
+TREE      expects a table named: Every stored resting heart rate behind this chart, with its date.
+
+TREE  /health: cells reading "No reading": 504
+
+TREE  tables read out of the platform tree: 7
+
+teardown: the owner's database holds 90 measurement, 38 source_record, 1 measurement not seeded.
+teardown: test-stack: stopped
+teardown: it held 90 measurement, 38 source_record, 1 measurement not seeded before the run, so nothing of the owner's was taken.
+  1 skipped
+  15 passed (1.4m)

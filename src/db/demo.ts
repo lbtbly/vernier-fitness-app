@@ -1,20 +1,26 @@
-import { eq, sql } from 'drizzle-orm';
+import { and, eq, lt, sql } from 'drizzle-orm';
 import { getDb } from './client';
 import { insertGoalIfAbsent } from './goal';
-import { goal, measurement, plannedSession, sourceRecord } from './schema';
+import { appMeta, goal, measurement, plannedSession, sourceRecord } from './schema';
 import {
   DEMO_GOAL,
   DEMO_SESSIONS,
   HRV_BY_DAY,
+  PHONE_SILENT_DAYS,
   RESTING_BY_DAY,
   SLEEP_BY_DAY,
   STEPS_BY_DAY,
   VO2_BY_DAY,
   WAIST_BY_DAY,
   WEIGHT_BY_DAY,
+  phoneOnDay,
+  sessionOnDay,
+  waistOnDay,
+  weightOnDay,
 } from '@/lib/demo-series';
 import { IMPORT_VERSION, type Source } from '@/lib/provenance';
 import { strings } from '@/lib/strings';
+import { dayKey } from '@/lib/trend';
 import type { SourceKind } from './measurements';
 
 /**
@@ -42,6 +48,9 @@ import type { SourceKind } from './measurements';
  * will.
  *
  * Ids are fixed, so a second boot writes nothing new and no timestamp moves.
+ * The series behind the charts extends itself instead: see the continuation
+ * below, which writes the days between the anchor and today and never touches
+ * a row it has already written.
  *
  * Every word below comes out of the catalogue. A reference and a detail row are
  * free text in the database and they are read on /source/[id], so the seed
@@ -218,13 +227,13 @@ const DEMO_ROWS: DemoRow[] = [
  * morning's 85.9 sits half a kilo under the average it does not get to be. That
  * last pair is the whole point of the design, and it is a hydration swing.
  *
- * DATES ARE ANCHORED TO THE FIRST RUN AND NEVER MOVE. Every id names its own
- * offset in days, so a second boot writes nothing new and no timestamp shifts,
- * which is the same rule the six rows above have always followed. The
- * consequence is stated rather than hidden: a demonstration database left
- * running for a week grows a trailing gap, because the seed does not invent
- * readings for days it was not started on. That is the honest behaviour for a
- * seed and it is what a real silent source looks like too.
+ * DATES ARE ANCHORED, AND THE ANCHOR IS A STORED FACT. Every row here names its
+ * own offset in days from `demo.anchor_day`, so a second boot writes nothing
+ * new and no timestamp shifts. The days after the anchor are written by the
+ * continuation further down, one calendar date at a time, each with its date in
+ * its id. A demonstration left running for a fortnight therefore still ends
+ * today, and the evidence it stands behind is reproducible on the day it is
+ * read rather than only on the day it was written.
  * ---------------------------------------------------------------------------
  */
 
@@ -407,12 +416,9 @@ function seriesRows(): SeriesRow[] {
   return rows;
 }
 
-/** The instant an offset lands on, at a plausible hour, in the app's zone. */
-function instantAt(offset: number, hour: number, minute: number, timeZone: string): Date {
-  return instantOf(
-    { daysAgo: offset, atHour: hour, atMinute: minute } as DemoRow,
-    timeZone,
-  );
+/** The instant an offset before the anchor lands on, at a plausible hour, in the app's zone. */
+function instantAt(anchor: string, offset: number, hour: number, minute: number, timeZone: string): Date {
+  return instantOnDay(dayAfter(anchor, -offset), hour, minute, timeZone);
 }
 
 /** Nine calendar months on, which is what "over nine months" means on a calendar. */
@@ -422,22 +428,16 @@ function monthsOn(from: Date, months: number): Date {
   return on;
 }
 
-function instantOf(row: DemoRow, timeZone: string): Date {
-  // Anchored to the seed's own day, at a plausible hour, in the app's zone.
-  const now = new Date();
-  const local = new Intl.DateTimeFormat('en-CA', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    timeZone,
-  }).format(new Date(now.getTime() - row.daysAgo * 86_400_000));
-  const offset = new Intl.DateTimeFormat('en-US', { timeZone, timeZoneName: 'longOffset' })
-    .formatToParts(now)
-    .find((part) => part.type === 'timeZoneName')!
-    .value.replace('GMT', '');
-  const hour = String(row.atHour).padStart(2, '0');
-  const minute = String(row.atMinute).padStart(2, '0');
-  return new Date(`${local}T${hour}:${minute}:00${offset || '+00:00'}`);
+/**
+ * The instant one of the six anchor rows lands on.
+ *
+ * Anchored to the seed's own recorded day rather than to the clock, so a seed
+ * that runs for the first time on an installation whose anchor was set
+ * yesterday writes yesterday's six weeks, and the continuation carries them to
+ * today. Everything this file writes is a function of the anchor.
+ */
+function instantOf(anchor: string, row: DemoRow, timeZone: string): Date {
+  return instantOnDay(dayAfter(anchor, -row.daysAgo), row.atHour, row.atMinute, timeZone);
 }
 
 export type SeededRows = {
@@ -483,6 +483,342 @@ export async function countSeededRows(): Promise<SeededRows> {
 }
 
 /**
+ * ---------------------------------------------------------------------------
+ * THE SEED KEEPS ITS OWN SERIES ENDING TODAY.
+ *
+ * The six weeks above are anchored to the day the seed first ran, and that day
+ * is recorded in `app_meta` and never moves. Everything after it is written by
+ * the continuation in `src/lib/demo-series.ts`, one calendar day at a time, and
+ * every row's id carries its own date. So a boot on any later day writes the
+ * days that are missing and nothing else, and reading the same install a
+ * fortnight from now shows the same five things: a trend that reaches today, a
+ * hole drawn as a hole, a phone that stopped four days ago, a tape used every
+ * week and a training week with a real denominator.
+ *
+ * WHY THIS SHAPE AND NOT THE OTHER TWO. Replacing rather than skipping means
+ * updating `measurement`, and `measurement` is append only by a trigger this
+ * product will not weaken to make a demonstration convenient. Generating at
+ * read time means the rows a value sheet and a source sheet walk to would not
+ * exist, and provenance is the product. Appending is the one option that is
+ * true to both: a demonstration that ages forward, exactly as a real source
+ * does, with `measurement.seed` still computed by Postgres from a source no
+ * writer can set.
+ *
+ * It is idempotent by construction. Every id is its date, every insert is on
+ * conflict do nothing, and every value is a pure function of how far the date
+ * sits from the anchor, so running this once a day, six times an hour or once
+ * after a fortnight with the machine off all land on the same rows.
+ * ---------------------------------------------------------------------------
+ */
+
+/** The day the seed first ran. Written once, read for ever, never moved. */
+const ANCHOR_KEY = 'demo.anchor_day';
+/** How many days past the anchor the continuation has already written. */
+const FILLED_KEY = 'demo.filled_through';
+
+/** The day this process last brought the series up to, so a warm hit costs nothing. */
+let freshFor: string | null = null;
+/** One flight at a time: Today reads three screens at once and they share it. */
+let inFlight: Promise<void> | null = null;
+
+async function readMeta(key: string): Promise<string | null> {
+  const db = getDb();
+  const [row] = await db.select({ value: appMeta.value }).from(appMeta).where(eq(appMeta.key, key));
+  return row?.value ?? null;
+}
+
+async function writeMeta(key: string, value: string): Promise<void> {
+  const db = getDb();
+  await db
+    .insert(appMeta)
+    .values({ key, value })
+    .onConflictDoUpdate({ target: appMeta.key, set: { value, updatedAt: new Date() } });
+}
+
+/** Whole days between two day keys, which are calendar dates and not instants. */
+function daysApart(from: string, to: string): number {
+  return Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86_400_000);
+}
+
+/** The day key `ahead` days after another one. */
+function dayAfter(from: string, ahead: number): string {
+  return new Date(Date.parse(`${from}T00:00:00Z`) + ahead * 86_400_000).toISOString().slice(0, 10);
+}
+
+/**
+ * A day key at a plausible hour, as an instant in the app's zone.
+ *
+ * The offset is read at the target date rather than at now, so a row written
+ * across a daylight-saving change lands on the hour it says it does.
+ */
+function instantOnDay(on: string, hour: number, minute: number, timeZone: string): Date {
+  const noon = new Date(`${on}T12:00:00Z`);
+  const offset = new Intl.DateTimeFormat('en-US', { timeZone, timeZoneName: 'longOffset' })
+    .formatToParts(noon)
+    .find((part) => part.type === 'timeZoneName')!
+    .value.replace('GMT', '');
+  const hh = String(hour).padStart(2, '0');
+  const mm = String(minute).padStart(2, '0');
+  return new Date(`${on}T${hh}:${mm}:00${offset || '+00:00'}`);
+}
+
+type ContinuedRow = {
+  id: string;
+  metric: string;
+  value: number;
+  unit: string;
+  hour: number;
+  minute: number;
+  recordId: string;
+  standsInFor: Source;
+  kind: SourceKind;
+  reference: string;
+  detail: Array<{ key: string; value: string }>;
+};
+
+/** Everything one calendar day after the anchor holds, ready to be written. */
+function rowsForDay(day: number, on: string, today: number): ContinuedRow[] {
+  const rows: ContinuedRow[] = [];
+
+  const weight = weightOnDay(day);
+  if (weight !== null) {
+    rows.push({
+      id: `${DEMO_ID_PREFIX}weight_on_${on}`,
+      metric: 'weight',
+      value: weight,
+      unit: 'kg',
+      hour: 6,
+      minute: 52,
+      recordId: `${DEMO_ID_PREFIX}src_weight_on_${on}`,
+      standsInFor: 'withings',
+      kind: 'sync_batch',
+      reference: String(1184 + day),
+      detail: [
+        { key: 'source.field.endpoint', value: strings.demoSeed.field.endpoint },
+        { key: 'source.field.window', value: strings.demoSeed.field.syncWindow },
+        { key: 'source.field.rowsReceived', value: '1' },
+        { key: 'source.field.rowsStored', value: '1' },
+        { key: 'source.field.result', value: '200' },
+      ],
+    });
+  }
+
+  const waist = waistOnDay(day);
+  if (waist !== null) {
+    rows.push({
+      id: `${DEMO_ID_PREFIX}waist_on_${on}`,
+      metric: 'waist',
+      value: waist,
+      unit: 'cm',
+      hour: 7,
+      minute: 20,
+      recordId: `${DEMO_ID_PREFIX}src_waist_on_${on}`,
+      standsInFor: 'manual',
+      kind: 'manual_entry',
+      reference: strings.demoSeed.reference.waist,
+      detail: [
+        { key: 'source.field.enteredOn', value: strings.demoSeed.field.enteredOn },
+        { key: 'source.field.method', value: strings.quickLog.waistMethod },
+      ],
+    });
+  }
+
+  // The phone stopped four days ago, and it is still four days ago tomorrow:
+  // the silence slides by filling in the day that just left it.
+  if (day <= today - PHONE_SILENT_DAYS) {
+    const sent = phoneOnDay(day);
+    const detail = [
+      { key: 'source.field.shortcut', value: strings.demoSeed.shortcutName },
+      { key: 'source.field.rowsReceived', value: String(sent.length) },
+      { key: 'source.field.rowsStored', value: String(sent.length) },
+      { key: 'source.field.result', value: '202' },
+    ];
+    for (const [index, signal] of sent.entries()) {
+      rows.push({
+        id: `${DEMO_ID_PREFIX}${signal.metric}_on_${on}`,
+        metric: signal.metric,
+        value: signal.value,
+        unit: signal.unit,
+        hour: 7,
+        minute: 12 + index * 2,
+        recordId: `${DEMO_ID_PREFIX}src_health_on_${on}`,
+        standsInFor: 'apple_health_shortcut',
+        kind: 'shortcut_payload',
+        reference: String(3392 + day),
+        detail,
+      });
+    }
+  }
+
+  return rows;
+}
+
+/**
+ * Brings the demonstration series up to today, and says nothing when it is
+ * already there.
+ *
+ * Called from the boot seed and from the three screen reads, because a
+ * container left running does not reboot at midnight and a demonstration that
+ * is only correct at boot is the defect this fixes.
+ */
+export function ensureDemoIsToday(timeZone: string): Promise<void> {
+  if (!demoModeOn()) return Promise.resolve();
+  const today = dayKey(new Date(), timeZone);
+  if (freshFor === today) return Promise.resolve();
+  if (!inFlight) {
+    inFlight = continueDemoSeries(today, timeZone)
+      .then(() => {
+        freshFor = today;
+      })
+      .catch((error) => {
+        // A demonstration that could not extend itself is a log line, never a
+        // screen: the rows already stored still render.
+        console.error(`[vernier] demo seed not continued: ${(error as Error).message}`);
+      })
+      .finally(() => {
+        inFlight = null;
+      });
+  }
+  return inFlight;
+}
+
+/**
+ * The day the six weeks are counted back from, recorded once and never moved.
+ *
+ * It is a stored fact rather than a reading of the clock, which is what makes
+ * every date this file writes reproducible: the same anchor gives the same
+ * dates on the next boot, on the boot after a fortnight away, and on a machine
+ * that has been up since Tuesday.
+ */
+async function resolveAnchorDay(timeZone: string): Promise<string> {
+  const stored = await readMeta(ANCHOR_KEY);
+  if (stored) return stored;
+  const db = getDb();
+  const [first] = await db
+    .select({ at: measurement.measuredAt })
+    .from(measurement)
+    .where(eq(measurement.id, `${DEMO_ID_PREFIX}weight`));
+  const anchor = dayKey(first?.at ?? new Date(), timeZone);
+  await writeMeta(ANCHOR_KEY, anchor);
+  return anchor;
+}
+
+async function continueDemoSeries(today: string, timeZone: string): Promise<void> {
+  const db = getDb();
+  const anchor = await readMeta(ANCHOR_KEY);
+  if (!anchor) {
+    // Nothing has been seeded yet, so there is nothing to continue. The boot
+    // seed writes the anchor the moment it writes the six weeks.
+    return;
+  }
+
+  const days = daysApart(anchor, today);
+  if (days <= 0) return;
+  const filled = Number(await readMeta(FILLED_KEY) ?? '0');
+
+  // Back far enough to catch the days the phone's silence has since released.
+  const from = Math.max(1, filled - PHONE_SILENT_DAYS);
+  for (let day = from; day <= days; day += 1) {
+    const on = dayAfter(anchor, day);
+    const rows = rowsForDay(day, on, days);
+
+    const records = new Map<string, ContinuedRow>();
+    for (const row of rows) if (!records.has(row.recordId)) records.set(row.recordId, row);
+    for (const [id, row] of records) {
+      await db
+        .insert(sourceRecord)
+        .values({
+          id,
+          source: row.standsInFor,
+          kind: row.kind,
+          reference: row.reference,
+          occurredAt: instantOnDay(on, row.hour, row.minute, timeZone),
+          importVersion: IMPORT_VERSION,
+          detail: row.detail,
+          seed: true,
+        })
+        .onConflictDoNothing({ target: sourceRecord.id });
+    }
+
+    for (const row of rows) {
+      const measuredAt = instantOnDay(on, row.hour, row.minute, timeZone);
+      await db
+        .insert(measurement)
+        .values({
+          id: row.id,
+          metric: row.metric,
+          rawValue: String(row.value),
+          rawUnit: row.unit,
+          value: row.value,
+          unit: row.unit,
+          conversionFactor: null,
+          timeZone,
+          source: 'demo',
+          measuredAt,
+          confidence: 'demo',
+          importVersion: IMPORT_VERSION,
+          dedupDecision: 'unique',
+          dedupReason: strings.provenance.seeded,
+          sourceRecordId: row.recordId,
+          rootId: row.id,
+          correctsId: null,
+          correctionIndex: 0,
+          correctionReason: null,
+        })
+        .onConflictDoNothing({ target: measurement.id });
+    }
+
+    // The training week. A session on a day that has passed carries the state
+    // the pattern gives it; today's has not happened yet, so it is planned, and
+    // the next run that finds the day behind it settles it.
+    const state = sessionOnDay(day);
+    if (state) {
+      const shape = SESSION_SHAPES[day % SESSION_SHAPES.length];
+      const plannedFor = instantOnDay(on, shape.hour, shape.minute, timeZone);
+      const settled = day === days ? 'planned' : state;
+      const id = `${DEMO_ID_PREFIX}session_on_${on}`;
+      await db
+        .insert(plannedSession)
+        .values({
+          id,
+          plannedFor,
+          durationMinutes: shape.minutes,
+          title: shape.title,
+          place: shape.place,
+          cause: shape.cause,
+          state: settled,
+          completedAt: settled === 'completed' ? plannedFor : null,
+          seed: true,
+        })
+        .onConflictDoNothing({ target: plannedSession.id });
+      // planned_session is not append only: a plan is an intention and an
+      // intention is allowed to be revised. So a day that has passed since the
+      // last run gets the state its own date says it has.
+      await db
+        .update(plannedSession)
+        .set({ state: settled, completedAt: settled === 'completed' ? plannedFor : null })
+        .where(and(eq(plannedSession.id, id), eq(plannedSession.seed, true)));
+    }
+  }
+
+  // The six weeks above planned a session for the anchor's own day and left it
+  // planned. That day has passed, so it did not stay planned.
+  const startOfToday = instantOnDay(today, 0, 0, timeZone);
+  await db
+    .update(plannedSession)
+    .set({ state: 'completed', completedAt: sql`planned_for` })
+    .where(
+      and(
+        eq(plannedSession.seed, true),
+        eq(plannedSession.state, 'planned'),
+        lt(plannedSession.plannedFor, startOfToday),
+      ),
+    );
+
+  await writeMeta(FILLED_KEY, String(days));
+}
+
+/**
  * Loads the seed, or refuses and says so. Called once per boot, right after the
  * migrations, so both outcomes land in the same log the migration count does.
  */
@@ -497,11 +833,17 @@ export async function seedDemoData(timeZone: string): Promise<SeedResult> {
     };
   }
 
+  // The anchor first, because every date below is counted back from it. Read
+  // in this order: the day already recorded, then the day the seed's own first
+  // row carries for an installation seeded before this was written down, then
+  // today for an installation that has never been seeded at all.
+  const anchor = await resolveAnchorDay(timeZone);
+
   let written = 0;
   for (const row of DEMO_ROWS) {
     const id = `${DEMO_ID_PREFIX}${row.slug}`;
     const sourceRecordId = `${DEMO_ID_PREFIX}src_${row.slug}`;
-    const measuredAt = instantOf(row, timeZone);
+    const measuredAt = instantOf(anchor, row, timeZone);
 
     await db
       .insert(sourceRecord)
@@ -547,9 +889,13 @@ export async function seedDemoData(timeZone: string): Promise<SeedResult> {
     written += inserted.length;
   }
 
-  written += await seedSeries(timeZone);
-  written += await seedSessions(timeZone);
-  await seedGoal(timeZone);
+  written += await seedSeries(anchor, timeZone);
+  written += await seedSessions(anchor, timeZone);
+  await seedGoal(anchor, timeZone);
+
+  // And the days since the anchor, so a boot after a week away brings the
+  // series to today before the first screen is read.
+  await ensureDemoIsToday(timeZone);
 
   return { ran: true, written, ...(await countSeededRows()) };
 }
@@ -562,7 +908,7 @@ export async function seedDemoData(timeZone: string): Promise<SeedResult> {
  * carries the shape it stands in for, and `seed` is true on both. The composite
  * foreign key refuses any row that gets one of those two wrong.
  */
-async function seedSeries(timeZone: string): Promise<number> {
+async function seedSeries(anchor: string, timeZone: string): Promise<number> {
   const db = getDb();
   const rows = seriesRows();
   const records = new Map<string, SeriesRow>();
@@ -576,7 +922,7 @@ async function seedSeries(timeZone: string): Promise<number> {
         source: row.standsInFor,
         kind: row.kind,
         reference: row.reference,
-        occurredAt: instantAt(row.offset, row.hour, row.minute, timeZone),
+        occurredAt: instantAt(anchor, row.offset, row.hour, row.minute, timeZone),
         importVersion: IMPORT_VERSION,
         detail: row.detail,
         seed: true,
@@ -586,7 +932,7 @@ async function seedSeries(timeZone: string): Promise<number> {
 
   let written = 0;
   for (const row of rows) {
-    const measuredAt = instantAt(row.offset, row.hour, row.minute, timeZone);
+    const measuredAt = instantAt(anchor, row.offset, row.hour, row.minute, timeZone);
     const inserted = await db
       .insert(measurement)
       .values({
@@ -618,12 +964,12 @@ async function seedSeries(timeZone: string): Promise<number> {
 }
 
 /** The planned sessions adherence is counted against. */
-async function seedSessions(timeZone: string): Promise<number> {
+async function seedSessions(anchor: string, timeZone: string): Promise<number> {
   const db = getDb();
   let written = 0;
   for (const [index, session] of DEMO_SESSIONS.entries()) {
     const shape = SESSION_SHAPES[index % SESSION_SHAPES.length];
-    const plannedFor = instantAt(session.offset, shape.hour, shape.minute, timeZone);
+    const plannedFor = instantAt(anchor, session.offset, shape.hour, shape.minute, timeZone);
     const inserted = await db
       .insert(plannedSession)
       .values({
@@ -648,8 +994,8 @@ async function seedSessions(timeZone: string): Promise<number> {
  * The goal, written only if there is not one already, so a boot never walks
  * over a target the owner edited.
  */
-async function seedGoal(timeZone: string): Promise<void> {
-  const startAt = instantAt(DEMO_GOAL.startOffset, 7, 0, timeZone);
+async function seedGoal(anchor: string, timeZone: string): Promise<void> {
+  const startAt = instantAt(anchor, DEMO_GOAL.startOffset, 7, 0, timeZone);
   await insertGoalIfAbsent({
     metric: 'weight',
     unit: 'kg',

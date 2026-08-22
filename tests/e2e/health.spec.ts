@@ -199,39 +199,51 @@ test.describe('screen 04, Health', () => {
     await page.waitForLoadState('networkidle');
     await page.locator('[data-chart="health-body"]').waitFor();
     const table = page.locator('[id="health-body-table"]');
+    const clipped = page.locator('[data-chart-table="health-body"]');
 
     // First: the three things that would take this table OUT of the
     // accessibility tree, and none of them is true of it. `display: none`,
     // `visibility: hidden` and `aria-hidden` are what actually hide content
     // from a screen reader; a clip path is not, which is the whole reason the
     // visually-hidden pattern exists.
+    //
+    // The clip sits on the WRAPPER and not on the table. A table box will not
+    // lay out narrower than its own min-content whatever `width` asks for, so
+    // clipping the table itself hid the paint and left 406 px in the document
+    // and every screen with a chart on it scrolled sideways. Clipped from a
+    // wrapper with `overflow: hidden`, the table is as wide as it likes inside
+    // one pixel nothing can scroll to, and it is still in the tree.
     const hiding = await table.evaluate((node) => {
       const style = getComputedStyle(node);
+      const box = getComputedStyle(node.parentElement!);
       return {
         display: style.display,
         visibility: style.visibility,
         ariaHidden: node.getAttribute('aria-hidden'),
-        clipPath: style.clipPath,
-        position: style.position,
+        wrapperClipPath: box.clipPath,
+        wrapperOverflow: box.overflow,
+        wrapperPosition: box.position,
       };
     });
     console.log(`C8  what hides it from the eye and not from the tree: ${JSON.stringify(hiding)}`);
     expect(hiding.display).not.toBe('none');
     expect(hiding.visibility).not.toBe('hidden');
     expect(hiding.ariaHidden).toBeNull();
-    expect(hiding.clipPath).toContain('inset');
+    expect(hiding.wrapperClipPath).toContain('inset');
+    expect(hiding.wrapperOverflow).toBe('hidden');
+    expect(hiding.wrapperPosition).toBe('absolute');
 
     // Then the semantics themselves. Playwright's role engine skips a subtree
     // clipped to one pixel, because it decides visibility from geometry, so the
     // clip is lifted for the length of this read and put back. What is being
     // graded is the structure a screen reader walks: rows, row headers and
     // cells, not one summary string.
-    await table.evaluate((node) => node.classList.remove('visually-hidden'));
+    await clipped.evaluate((node) => node.classList.remove('visually-hidden'));
     const rowCount = await table.getByRole('row').count();
     const cellCount = await table.getByRole('cell').count();
     const snapshot = await table.ariaSnapshot();
     const missing = await table.getByText('No reading').count();
-    await table.evaluate((node) => node.classList.add('visually-hidden'));
+    await clipped.evaluate((node) => node.classList.add('visually-hidden'));
 
     console.log(`C8  the weight table exposes ${rowCount} rows and ${cellCount} cells to the tree`);
     console.log('C8  what the accessibility tree holds, first twelve lines:');

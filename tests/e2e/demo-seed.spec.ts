@@ -117,6 +117,89 @@ test.describe('the demonstration seed', () => {
     expect(byColumn).toBe(byPrefix);
   });
 
+  /**
+   * The seed is still true on a day that is not the day it ran.
+   *
+   * Slice 4's seed anchored every date to its first run and skipped every row
+   * on a second one, so a week later that installation carried an eight-day
+   * trailing hole, the seven-day window held nothing, and Today and Health fell
+   * into the empty state. Nine rubric lines rest on those two screens and the
+   * final pass proves all of them again on this same machine.
+   *
+   * The state is built the only honest way there is: reset with demonstration
+   * mode off so the migrations run and the seed refuses, write an anchor
+   * thirteen days back, then boot with it on. What comes up is exactly what an
+   * installation seeded thirteen days ago looks like when it is read today: a
+   * trend that reaches this morning, a quiet spell of the scale's inside the
+   * window, a phone four days silent and a settled training week.
+   */
+  test('brings its own series up to the day it is read', async () => {
+    console.log(testStackWithDemoMode('0', 'reset'));
+    scratchAttempt(
+      "insert into app_meta (key, value) values ('demo.anchor_day', to_char(current_date - 13, 'YYYY-MM-DD'))",
+    );
+    console.log(testStackWithDemoMode('1', 'up'));
+
+    const anchor = scratchQuery("select value from app_meta where key = 'demo.anchor_day'");
+    const filled = scratchQuery("select value from app_meta where key = 'demo.filled_through'");
+    console.log(`the anchor is ${anchor} and the continuation has filled ${filled} day(s) past it`);
+    expect(Number(filled)).toBeGreaterThanOrEqual(12);
+
+    // The trend reaches today. Not "recently": today, at the hour the scale
+    // reports, which is what the seven-day average and the fold both rest on.
+    const freshWeight = scratchQuery(
+      "select to_char(max(measured_at), 'YYYY-MM-DD HH24:MI') || ' | ' || (max(measured_at) > now() - interval '24 hours') from measurement where metric = 'weight'",
+    );
+    console.log(`the newest weight reading: ${freshWeight}`);
+    expect(freshWeight.endsWith('| true')).toBe(true);
+
+    // And it is a real window, not one reading dropped on the end.
+    const inTheWindow = Number(
+      scratchQuery(
+        "select count(distinct (measured_at at time zone 'UTC')::date) from measurement where metric = 'weight' and measured_at > now() - interval '30 days'",
+      ),
+    );
+    console.log(`weight readings on ${inTheWindow} of the last 30 days`);
+    expect(inTheWindow).toBeGreaterThan(20);
+    // Under thirty, because absence is the other half of what these screens
+    // draw: there is always a hole in the window for F30 to hatch.
+    expect(inTheWindow).toBeLessThan(30);
+
+    // The phone stopped four days ago, and it is still four days ago.
+    const silence = Number(
+      scratchQuery(
+        "select round(extract(epoch from now() - max(measured_at)) / 86400) from measurement where metric = 'steps'",
+      ),
+    );
+    console.log(`the shortcut last sent a batch ${silence} day(s) ago`);
+    expect(silence).toBeGreaterThanOrEqual(3);
+    expect(silence).toBeLessThanOrEqual(5);
+
+    // Adherence still has a denominator, and the sessions behind it have been
+    // settled rather than left planned for ever.
+    const week = scratchQuery(
+      "select count(*) || ' planned, ' || count(*) filter (where state = 'completed') || ' completed, ' || count(*) filter (where state = 'missed') || ' missed' from planned_session where planned_for > now() - interval '28 days'",
+    );
+    console.log(`the last 28 days hold ${week}`);
+    expect(Number(week.split(' ')[0])).toBeGreaterThanOrEqual(10);
+    const stalePlans = scratchQuery(
+      "select count(*) from planned_session where state = 'planned' and planned_for < date_trunc('day', now())",
+    );
+    console.log(`sessions still planned on a day that has passed: ${stalePlans}`);
+    expect(stalePlans).toBe('0');
+
+    // Every row it wrote on the way is still marked, including the new days.
+    expect(scratchQuery('select count(*) from measurement where not seed')).toBe('0');
+    expect(scratchQuery('select count(*) from source_record where not seed')).toBe('0');
+
+    // And it is idempotent: a second boot on the same day writes nothing.
+    const before = scratchQuery('select count(*) from measurement');
+    console.log(testStackWithDemoMode('1', 'up'));
+    const after = scratchQuery('select count(*) from measurement');
+    console.log(`a second boot on the same day: ${before} rows before, ${after} after`);
+    expect(after).toBe(before);
+  });
+
   test('refuses, in the database, a real row wearing a seeded record or the reverse', async () => {
     // A measurement cannot claim to be seeded or claim not to be: the column is
     // computed from the source, so there is no value a writer could put there.

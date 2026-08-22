@@ -4,12 +4,12 @@ import { after } from 'next/server';
 import { ChartLegend } from '@/components/Chart';
 import { EmptyState } from '@/components/EmptyState';
 import { OutboxBanner } from '@/components/OutboxBanner';
-import { QuickLog } from '@/components/QuickLog';
+import { QuickLog, QuickLogTrigger } from '@/components/QuickLog';
 import { ScreenTitle } from '@/components/ScreenTitle';
 import { SourceChip } from '@/components/SourceChip';
 import { StaleBanner, StaleCause, StaleChip } from '@/components/StaleNotice';
 import { WaistChart, WeightChart } from '@/components/WeightChart';
-import { ChevronIcon } from '@/components/icons';
+import { ChevronIcon, SyncIcon } from '@/components/icons';
 import { recordRequestOrigin } from '@/db/diagnostics';
 import { readLatestPerMetric, readOpenQuestions, readSourceRecordsFor, toView } from '@/db/measurements';
 import { TODAY_RANGE, readAdherenceScreen, readBodyScreen, readSignalScreen } from '@/db/screens';
@@ -37,8 +37,10 @@ export const dynamic = 'force-dynamic';
  * row, the meals, what needs logging, the weight trend and adherence inside
  * 715 pixels at 393 by 852 with no scrolling. Screen 02 draws adherence under
  * the weight card and its own caption says that scrolls past the fold. The
- * rubric line is the contract, so adherence sits above the weight card here and
- * renders as one compact row of two counts. Nothing else about the screen
+ * rubric line is the contract, so adherence sits above the weight card here.
+ * It carries everything screen 02 draws in it: two counts over their
+ * denominators, the week as seven pills, the range under them and the sentence
+ * about what a missed session is and is not. Nothing else about the screen
  * moved, and the reason is written down rather than left as a difference
  * somebody has to spot.
  *
@@ -75,6 +77,14 @@ function firstOf(days: Day[]) {
 /** A day key as a calendar date rather than as an instant, for a label. */
 function dayAsDate(on: string): Date {
   return new Date(`${on}T12:00:00Z`);
+}
+
+/** What one pill in the week row says, for the reader who cannot see it. */
+function dayState(state: 'completed' | 'missed' | 'planned' | null): string {
+  if (state === 'completed') return strings.adherence.dayDone;
+  if (state === 'missed') return strings.adherence.dayMissed;
+  if (state === 'planned') return strings.adherence.dayPlanned;
+  return strings.adherence.dayNone;
 }
 
 export default async function TodayPage() {
@@ -145,7 +155,7 @@ export default async function TodayPage() {
   const scale = body.freshness.find((source) => source.source === 'withings');
 
   return (
-    <>
+    <div className="today">
       <ScreenTitle label={longDate(now, timeZone)} title={strings.today.title} />
 
       {/*
@@ -211,10 +221,8 @@ export default async function TodayPage() {
           * about the day it does not have.
           */}
         <div className="row" data-meals="none">
-          <div className="stack grow">
-            <span className="head">{strings.day.meals}</span>
-            <span className="sub">{strings.day.mealsNone}</span>
-          </div>
+          <span className="head grow">{strings.day.meals}</span>
+          <span className="sub">{strings.day.mealsNone}</span>
         </div>
 
         <div className="row" data-due={due.length}>
@@ -236,7 +244,7 @@ export default async function TodayPage() {
             {strings.adherence.emptyBody}
           </p>
         ) : (
-          <div className="between" style={{ marginTop: 2 }}>
+          <div className="between">
             <div className="stack">
               <span className="big num" data-adherence-window="7">
                 {strings.adherence.count(plan.windows[0].completed, plan.windows[0].planned)}
@@ -251,6 +259,41 @@ export default async function TodayPage() {
             </div>
           </div>
         )}
+
+        {/*
+          * The week, one pill a day, exactly as screen 02 draws it: done,
+          * missed, today, and a day with nothing planned. Nothing here is
+          * coloured red. A missed session is a Thursday that ran late, and the
+          * sentence under the row is the panel's finding in the product's own
+          * words, on the screen the owner opens every morning.
+          *
+          * The dates read "15 Aug", not the sheet's "Sat 15": DESIGN.md fixes
+          * two date shapes for the whole product and this is one of them.
+          */}
+        {plan.week.length > 0 ? (
+          <>
+            <ul className="pills" data-week="adherence">
+              {plan.week.map((day, index) => (
+                <li
+                  key={day.at}
+                  data-day={day.state ?? 'none'}
+                  data-today={index === plan.week.length - 1 ? '' : undefined}
+                >
+                  <span className="visually-hidden">
+                    {strings.adherence.dayCell(dayLabel(day.at), dayState(day.state))}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <div className="between">
+              <span className="note">{dayLabel(plan.week[0].at)}</span>
+              <span className="note">{dayLabel(plan.week[plan.week.length - 1].at)}</span>
+            </div>
+            <p className="note" style={{ marginTop: 'var(--s2)' }} data-adherence-note>
+              {strings.adherence.note}
+            </p>
+          </>
+        ) : null}
       </section>
 
       {/* ---------- is my health improving ---------- */}
@@ -281,22 +324,25 @@ export default async function TodayPage() {
               </div>
             ) : null}
           </div>
+          <WeightChart id="today-weight" days={weightDays} goal={goal} unit={unit} height={80} />
+          <ChartLegend window={AVERAGE_WINDOW} goal={target ? { target, unit: kg } : null} />
+
           {/*
-            * F29's goal, on Today, in one line above the chart: where the
-            * average sits against the trajectory, and what the trajectory is.
-            * The four-week pace sits under the chart, because it is a slower
-            * fact and the fold is 715 pixels.
+            * F29's goal on Today, and the four-week pace, together under the
+            * chart. Screen 02 writes both on one line above it; here they are
+            * two lines below it, and that is the second thing this screen buys
+            * fold room with. F29 asks that the goal be visible on Today and
+            * editable from Health, and it is both. F27 counts pixels above the
+            * chart, and a sentence about the trajectory is a fact you read
+            * after the trajectory, never before it.
             */}
           {goal && target ? (
-            <p className="sub" style={{ marginBottom: 6 }} data-goal-line="today">
+            <p className="sub" style={{ marginTop: 'var(--s2)' }} data-goal-line="today">
               {goalSentence(summary.goalDelta, target, unit, shortDate(goal.targetAt, timeZone))}
             </p>
           ) : null}
-
-          <WeightChart id="today-weight" days={weightDays} goal={goal} unit={unit} height={96} />
-          <ChartLegend window={AVERAGE_WINDOW} goal={target ? { target, unit: kg } : null} />
           {goal ? (
-            <p className="note" style={{ marginTop: 'var(--s2)' }} data-goal-line="pace">
+            <p className="note" style={{ marginTop: 'var(--s1)' }} data-goal-line="pace">
               {summary.pace === null
                 ? strings.goal.paceUnknown
                 : strings.goal.pace(formatNumber(summary.pace, unit), kg)}
@@ -383,11 +429,20 @@ export default async function TodayPage() {
             ) : null}
           </div>
           <WaistChart id="today-waist" days={waistDays} unit="cm" />
-          <p className="note" style={{ marginTop: 'var(--s2)' }}>
-            {waistAge !== null && waistAge >= WAIST_DUE_DAYS
-              ? strings.quickLog.staleTitle(waistAge)
-              : strings.today.waistMeasured(shortDateTime(lastWaist.reading.measuredAt, timeZone))}
-          </p>
+          {/*
+            * Screen 02's own row: what the tape last said, and the control that
+            * takes a fresh one. It raises the quick log rather than opening a
+            * second waist form, because two ways to write one measurement is
+            * two ways to get it wrong.
+            */}
+          <div className="between" style={{ marginTop: 'var(--s2)' }}>
+            <span className="note grow">
+              {waistAge !== null && waistAge >= WAIST_DUE_DAYS
+                ? strings.quickLog.staleTitle(waistAge)
+                : strings.today.waistMeasured(shortDateTime(lastWaist.reading.measuredAt, timeZone))}
+            </span>
+            <QuickLogTrigger label={strings.quickLog.measure} />
+          </div>
         </section>
       ) : null}
 
@@ -459,6 +514,17 @@ export default async function TodayPage() {
           </div>
         ) : null}
         {scale?.stale ? <StaleCause freshness={scale} timeZone={timeZone} /> : null}
+
+        {/*
+          * Screen 02's control. The phone pushes and this machine never pulls,
+          * so nothing here can end the silence: what the app can do is say
+          * where the shortcut is set up, and the label says what actually
+          * fixes it.
+          */}
+        <Link className="btn block" href="/settings" style={{ marginTop: 'var(--s3)' }}>
+          <SyncIcon />
+          {strings.signals.runShortcut}
+        </Link>
       </section>
 
       {/* ---------- the last blood panel ---------- */}
@@ -526,6 +592,6 @@ export default async function TodayPage() {
       <p className="note centre" style={{ padding: '4px 20px 0' }}>
         {strings.today.closing}
       </p>
-    </>
+    </div>
   );
 }

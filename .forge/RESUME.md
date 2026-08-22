@@ -12,7 +12,7 @@ Current slice: 4, Today, Health and the trend charts. Closes F27-F35, C7, C8, C9
 
 ## Where the run actually stands
 
-**Twenty-nine of 166 rubric lines checked.** Every one ruled by a verifier that re-ran the command itself and accepted no builder capture as proof.
+**Forty-two of 166 rubric lines checked.** Every one ruled by a verifier that re-ran the command itself and accepted no builder capture as proof.
 
 Slices 1, 2 and 3 are built and live. Slice 3's defect fixes are at `4a4c3c5`, re-verify in flight.
 
@@ -114,6 +114,18 @@ The configuration file was repaired in place on 2026-08-21 by a one-shot Node sc
 compose.yaml passes exactly seven variables into the app container: APP_URL, APP_NAME, WEBAUTHN_RP_ID, WEBAUTHN_RP_NAME, TZ, DATABASE_URL, MASTER_KEY. The Withings, Google, Anthropic, mail, VAPID and BACKUP_DIR values sit in the configuration file and are withheld from the app process until the slice that needs them. That is least privilege and it is intended, not an omission.
 
 Playwright WebKit is cached on the host at ~/Library/Caches/ms-playwright, 297 MB. The e2e suite runs on the host against the containerised app, never inside the container, because WebKit on Linux ARM is unreliable and Safari is the only engine this product ever meets.
+
+## Slice 4 verdict: FAIL on C7, ten of thirteen lines closed
+
+F27 to F35 and C8 are proven, which is the substance of the slice: the trend leads, the goal is editable and redraws, absence is hatched and never smoothed, and every chart carries a hidden data table the platform accessibility tree really exposes. **C9 cannot close until slice 8**, because its line names the session player, and the verifier left it unchecked rather than passing it on a partial walk.
+
+C7 failed on four counts and three of them share one cause: **the 715 px fold was bought with borrowed money.**
+1. High, and D5's condition too. Today and Health scroll sideways 77 px at 393. The visually-hidden chart tables use `clip-path: inset(50%)`, which hides paint but not layout, plus `white-space:nowrap`, so each lays out 406 px inside a 361 px card. The trap in fixing it: `display:none` removes them from the accessibility tree and un-ticks C8, which is proven. It must leave layout flow and stay in the tree.
+2. The card gap went from 12 px to a literal 8 px **globally** to buy fold room on one screen, silently changing screens 01 and 03, which C4 and C5 are ticked against.
+3. The waist headline wraps at 393 only, because a nowrap flex takes its min-content floor from a long sibling label.
+4. Screen 02's seven day-pills, its date labels, its Measure and shortcut controls, and the sentence "Two missed sessions in a month is not a failure state, and the app does not colour it like one" were all dropped. `readAdherenceScreen` still computes the pill data and discards it. That sentence is the panel's tone finding in the product's own words, on the screen the owner opens daily.
+
+**The aged seed is a structural problem, not a cosmetic one.** Ids are keyed to a day offset and inserts are `on conflict do nothing`, so the boot log already reads "0 new row(s)" and a week from now this install has an eight-day trailing gap that collapses both body cards. The final full-scope pass proves all 166 lines again **on this same install**, so evidence that is not reproducible tomorrow is not evidence. Being fixed in the same dispatch.
 
 ## Slice 3 closed. C6 took six verifications and the sixth mechanism held.
 

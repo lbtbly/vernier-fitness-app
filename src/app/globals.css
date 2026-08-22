@@ -144,7 +144,7 @@ body{
 
 /* ---------- type ---------- */
 
-.title{padding:0 0 8px}
+.title{padding:var(--s1) 0 var(--s3)}
 .title h1{font-size:var(--t-display);line-height:var(--t-display-lh);letter-spacing:var(--t-display-ls);font-weight:700}
 .title .sub{font-size:var(--t-sub);line-height:var(--t-sub-lh);color:var(--text-2);margin-top:2px}
 
@@ -173,7 +173,7 @@ body{
   border:1px solid var(--line);
   border-radius:var(--r-lg);
   padding:var(--s4);
-  margin-bottom:8px;
+  margin-bottom:var(--s3);
 }
 
 .card.flat{background:transparent}
@@ -324,6 +324,24 @@ a:focus-visible,button:focus-visible,input:focus-visible,[tabindex]:focus-visibl
   outline-offset:2px;
 }
 
+/*
+ * Hidden from the eye, present in the accessibility tree, and OUT OF LAYOUT.
+ *
+ * The third one is not a nicety. A clip path hides the paint and not the box:
+ * `width:1px` is a request, and a `<table>` refuses it, because a table box is
+ * never laid out narrower than its own min-content. With `white-space:nowrap`
+ * on its cells that floor was 406 px inside a 361 px card, and the whole
+ * document scrolled 77 px sideways at 393x852 on Today and on Health. The
+ * `overflow:hidden` here is what makes that impossible: it clips the subtree
+ * and takes it out of every ancestor's scrollable overflow, whatever the
+ * element inside insists on being.
+ *
+ * So this class goes on a WRAPPER and never on the wide thing itself. The
+ * table inside lays out at whatever width it wants, and nothing outside the one
+ * clipped pixel can feel it. `display:none` would also have fixed the scroll,
+ * and it would have taken the chart tables out of the accessibility tree with
+ * it, which is C8's whole line.
+ */
 .visually-hidden{
   position:absolute;
   width:1px;height:1px;
@@ -616,7 +634,20 @@ a.value-link:active{opacity:.7}
 .note.warn,.warn{color:var(--warn)}
 
 /* Two headline figures side by side, which is screen 04's body card. */
+/*
+ * The two body headlines on Health, side by side, exactly as screen 04 draws
+ * them: one metric per column, each on one line, with its note under it.
+ *
+ * The columns are `flex:1 1 0` with `min-width:0` rather than left to their
+ * content, and the metrics never wrap. Sized by content, the left column's
+ * floor was the note "Weight, 7-day average, -0.6 kg on the week" and it took
+ * the width the waist metric needed, so at 393 px "99.0" and "cm" landed on two
+ * lines and that headline stood 74 px tall against the other one's 38. The
+ * notes wrap. The numbers do not.
+ */
 .headlines{display:flex;gap:var(--s6);margin:10px 0}
+.headlines > .stack{flex:1 1 0;min-width:0}
+.headlines .metric{white-space:nowrap}
 .chips{display:flex;gap:6px}
 
 /*
@@ -665,7 +696,51 @@ a.value-link:active{opacity:.7}
  * inside 715 px at 393x852 and the pills are the part that can go without
  * costing a fact. The numbers and both denominators are here in full.
  */
+/*
+ * TODAY, AND TODAY ALONE, RUNS TIGHTER THAN THE SHEET. Declared here, in one
+ * block, because the last time this room was bought it was taken out of the
+ * global tokens and it silently moved screen 01 and screen 03 with it.
+ *
+ * DESIGN.md section 3 fixes 12 px between cards and all thirteen wireframes
+ * write it, so `--s3` stays 12 everywhere and `.card` keeps it. F27 puts five
+ * things inside 715 px at 393x852 and screen 02's own caption says the sheet
+ * scrolls past that fold, so this one screen closes the gap to 8 and takes 4 px
+ * off the vertical padding of its cards. Nothing outside `.today` can feel it,
+ * and the arithmetic is on the screen it was bought for.
+ */
+.today .card{margin-bottom:var(--s2);padding:var(--s2) var(--s4)}
+.today .banner{margin-bottom:var(--s2)}
+.today .title{padding:2px 0 var(--s2)}
+.today .card.day .row{padding:2px 0}
+.today .card.day .btn.primary{margin-top:6px}
+.today .card.adherence .pills{margin:8px 0 4px}
+
 .card.adherence{padding:8px var(--s4)}
+
+/*
+ * The week, one pill a day, from screen 02. Seven equal shapes and no numbers:
+ * the counts above already carry the arithmetic, and this row carries the
+ * pattern, which is the thing a person reads in half a second.
+ *
+ * NOTHING HERE IS RED. A missed session is drawn in the same quiet grey a day
+ * with nothing planned is, one step apart, and the sentence under the row says
+ * why out loud. The current day is the dashed one, because it has not happened
+ * yet and a filled shape would be a claim about a Thursday evening that is
+ * still hours away.
+ */
+.pills{display:flex;gap:5px;list-style:none;margin:10px 0 5px}
+.pills li{
+  flex:1;
+  height:22px;
+  border-radius:6px;
+  background:var(--surface-3);
+}
+/* Done. The only filled pill, and the only one carrying a colour. */
+.pills li[data-day=completed]{background:var(--good)}
+/* Planned and not done. An outline where a filled shape would have been. */
+.pills li[data-day=missed]{background:transparent;border:1.5px solid var(--line-2)}
+/* Still to come, which on a trailing week is today. Dashed, as screen 02 draws it. */
+.pills li[data-day=planned]{background:transparent;border:1.5px dashed var(--text-3)}
 
 /*
  * Each quiet source that has stopped sending, one line, its own sentence.
@@ -680,5 +755,9 @@ a.value-link:active{opacity:.7}
  * The chart's data table. Hidden from the eye and not from a screen reader,
  * which is the point: a chart described by one summary sentence tells a blind
  * owner the shape of his data and none of the data.
+ *
+ * It sits inside a `.visually-hidden` wrapper and is a plain table itself, so
+ * `nowrap` here costs nothing: the width it asks for lands inside a clipped
+ * box that no ancestor can scroll to.
  */
 .visually-hidden caption,.visually-hidden th,.visually-hidden td{white-space:nowrap}

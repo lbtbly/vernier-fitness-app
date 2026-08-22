@@ -54,26 +54,36 @@ export function ChartTable({
   rows: ChartRow[];
   showSource?: boolean;
 }) {
+  /*
+   * The wrapper carries the hiding, the table carries the data. A table will
+   * not lay out narrower than its own min-content, so `.visually-hidden` on the
+   * table itself left a 406 px box in the document and every screen holding a
+   * chart scrolled sideways. Clipped from a wrapper, the table is as wide as it
+   * likes and still in the accessibility tree, which is the half of this that
+   * `display:none` would have thrown away.
+   */
   return (
-    <table className="visually-hidden" id={`${id}-table`}>
-      <caption>{caption}</caption>
-      <thead>
-        <tr>
-          <th scope="col">{strings.trend.columnDate}</th>
-          <th scope="col">{strings.trend.columnValue}</th>
-          {showSource ? <th scope="col">{strings.trend.columnSource}</th> : null}
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((row) => (
-          <tr key={row.at}>
-            <th scope="row">{row.when}</th>
-            <td>{row.value ?? strings.trend.noReading}</td>
-            {showSource ? <td>{row.source ?? strings.trend.noReading}</td> : null}
+    <div className="visually-hidden" data-chart-table={id}>
+      <table id={`${id}-table`}>
+        <caption>{caption}</caption>
+        <thead>
+          <tr>
+            <th scope="col">{strings.trend.columnDate}</th>
+            <th scope="col">{strings.trend.columnValue}</th>
+            {showSource ? <th scope="col">{strings.trend.columnSource}</th> : null}
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row.at}>
+              <th scope="row">{row.when}</th>
+              <td>{row.value ?? strings.trend.noReading}</td>
+              {showSource ? <td>{row.source ?? strings.trend.noReading}</td> : null}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 

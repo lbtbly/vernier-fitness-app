@@ -104,6 +104,18 @@ export default defineConfig({
       },
     },
     {
+      // The layout walk, in the second engine.
+      //
+      // The sideways scroll it grades was reproduced in WebKit and in Chrome,
+      // so it is graded in both: webkit-iphone picks this file up on its own
+      // and this project runs it again in Chrome. The accessibility-tree half
+      // needs the DevTools protocol, which is Chromium's, and it skips itself
+      // in WebKit rather than claiming a tree it cannot read.
+      name: 'chrome-layout',
+      testMatch: /layout\.spec\.ts/,
+      use: { ...devices['Desktop Chrome'], channel: 'chrome', viewport: { width: 393, height: 852 } },
+    },
+    {
       // Sequential focus navigation, which needs a browser that moves focus to
       // buttons and links. Safari on macOS only does that with Full Keyboard
       // Access turned on in System Settings, and that is a preference on the

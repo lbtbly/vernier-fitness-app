@@ -13,7 +13,17 @@ import {
   rollingAverage,
   windowDays,
 } from '@/lib/trend';
-import { DEMO_SESSIONS, DEMO_WEIGHT_GAP, WEIGHT_BY_DAY } from '@/lib/demo-series';
+import {
+  DEMO_SESSIONS,
+  DEMO_WEIGHT_GAP,
+  PHONE_SILENT_DAYS,
+  WEIGHT_BY_DAY,
+  phoneOnDay,
+  scaleWasQuiet,
+  sessionOnDay,
+  waistOnDay,
+  weightOnDay,
+} from '@/lib/demo-series';
 import { PACE_DAYS, weightSummary } from '@/lib/weight-summary';
 
 /**
@@ -214,6 +224,94 @@ describe('the demonstration seed, computed by hand', () => {
   test('the average sits a tenth of a kilogram under the line to 76.0', () => {
     expect(summary.goalDelta).toBeLessThan(0);
     expect(Math.abs(summary.goalDelta!).toFixed(1)).toBe('0.1');
+  });
+});
+
+/**
+ * The continuation, which is what keeps every number above true on a day that
+ * is not the day the seed ran.
+ *
+ * It is graded here rather than only against a database because these are the
+ * guarantees the screens rest on, and they are properties of a pure function
+ * over a day number: there is always a hole in the window, the phone is always
+ * four days silent, the trend always goes down, and the training week always
+ * has a denominator. A property that only holds on the days a suite happened to
+ * run is not a property.
+ */
+describe('the demonstration seed continues itself', () => {
+  /** The nearest day on or before this one that the scale reported on. */
+  const everyDayCarriesAReading = (day: number) => {
+    let on = day;
+    while (weightOnDay(on) === null) on -= 1;
+    return on;
+  };
+
+  test('the trend goes on falling at about half a kilogram a week', () => {
+    const start = weightOnDay(1)!;
+    const later = weightOnDay(everyDayCarriesAReading(28))!;
+    const perWeek = ((later - start) / 27) * 7;
+    expect(perWeek).toBeLessThan(-0.4);
+    expect(perWeek).toBeGreaterThan(-0.7);
+    // A tenth of a kilogram, which is what a scale reports.
+    expect(weightOnDay(5)! * 10).toBeCloseTo(Math.round(weightOnDay(5)! * 10), 6);
+  });
+
+  test('a day the scale sent nothing is a day with no reading, never a zero', () => {
+    expect(weightOnDay(8)).toBeNull();
+    expect(weightOnDay(11)).toBeNull();
+    expect(weightOnDay(12)).not.toBeNull();
+    expect(scaleWasQuiet(29)).toBe(true);
+  });
+
+  test('every thirty-day window holds a hole of three days or more', () => {
+    // The authored gap leaves the window seventeen days after the anchor. From
+    // there to a year out, every window a chart draws still has one to hatch.
+    for (let today = 20; today <= 400; today += 1) {
+      let longest = 0;
+      let run = 0;
+      for (let day = today - 29; day <= today; day += 1) {
+        run = weightOnDay(day) === null ? run + 1 : 0;
+        longest = Math.max(longest, run);
+      }
+      expect(longest, `no gap of three days in the window ending on day ${today}`).toBeGreaterThanOrEqual(3);
+    }
+  });
+
+  test('the trailing seven days always hold a reading, so no screen empties out', () => {
+    for (let today = 1; today <= 400; today += 1) {
+      const readings = [0, 1, 2, 3, 4, 5, 6].filter((back) => weightOnDay(today - back) !== null);
+      expect(readings.length, `no weight at all in the week ending on day ${today}`).toBeGreaterThan(0);
+    }
+  });
+
+  test('the tape comes out once a week and the waist keeps falling', () => {
+    expect(waistOnDay(4)).not.toBeNull();
+    expect(waistOnDay(5)).toBeNull();
+    expect(waistOnDay(11)).not.toBeNull();
+    expect(waistOnDay(11)!).toBeLessThan(waistOnDay(4)!);
+  });
+
+  test('the phone sends steps and sleep every day it sends anything', () => {
+    for (let day = 1; day <= 40; day += 1) {
+      const metrics = phoneOnDay(day).map((signal) => signal.metric);
+      expect(metrics).toContain('steps');
+      expect(metrics).toContain('sleep_minutes');
+      for (const signal of phoneOnDay(day)) expect(signal.value).toBeGreaterThan(0);
+    }
+    expect(PHONE_SILENT_DAYS).toBe(4);
+  });
+
+  test('the training week plans fourteen in twenty-eight and misses two', () => {
+    for (const today of [30, 61, 97, 143]) {
+      const window = [];
+      for (let day = today - 27; day <= today; day += 1) {
+        const state = sessionOnDay(day);
+        if (state) window.push(state);
+      }
+      expect(window.length, `sessions in the 28 days ending on day ${today}`).toBe(14);
+      expect(window.filter((state) => state === 'missed').length).toBe(2);
+      expect(window.filter((state) => state === 'completed').length).toBe(12);
+    }
   });
 });
 

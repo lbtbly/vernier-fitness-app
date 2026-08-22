@@ -58,6 +58,33 @@ const RATING_FIELDS = [
  */
 const LOG_ENDPOINT = '/api/log';
 
+/**
+ * The one signal that raises this sheet from somewhere else on Today.
+ *
+ * Screen 02 puts a Measure control on the waist card, and the waist field lives
+ * inside this sheet. A window event rather than a context or a lifted state:
+ * the sheet is one client island on an otherwise server-rendered screen, and a
+ * provider wrapped around Today would pull the whole page across the boundary
+ * to carry one boolean.
+ */
+export const QUICK_LOG_OPEN = 'vernier:quick-log';
+
+/**
+ * A control anywhere on Today that raises the quick log. It carries no state of
+ * its own and decides nothing: it says the owner asked, and the sheet answers.
+ */
+export function QuickLogTrigger({ label, className = 'btn' }: { label: string; className?: string }) {
+  return (
+    <button
+      type="button"
+      className={className}
+      onClick={() => window.dispatchEvent(new Event(QUICK_LOG_OPEN))}
+    >
+      {label}
+    </button>
+  );
+}
+
 const SCALE = [1, 2, 3, 4, 5];
 const WAIST_STEP = 0.5;
 
@@ -207,6 +234,13 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
   useEffect(() => {
     if (open) void read();
   }, [open, read]);
+
+  // Raised from the waist card, which is screen 02's Measure control.
+  useEffect(() => {
+    const raise = () => setOpen(true);
+    window.addEventListener(QUICK_LOG_OPEN, raise);
+    return () => window.removeEventListener(QUICK_LOG_OPEN, raise);
+  }, []);
 
   useEffect(() => {
     if (open) closeRef.current?.focus();
