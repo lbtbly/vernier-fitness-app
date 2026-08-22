@@ -133,7 +133,7 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
         const body = (await response.json().catch(() => ({}))) as { detail?: string; error?: string };
         setLoad({
           state: 'error',
-          detail: 'Vernier lost the thread of that request.',
+          detail: body.detail ?? body.error ?? `HTTP ${response.status} at ${time24(new Date(), timeZone)}.`,
         });
         return;
       }

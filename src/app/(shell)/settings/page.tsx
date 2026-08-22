@@ -38,19 +38,6 @@ export default async function SettingsPage() {
     <>
       <ScreenTitle title={strings.settings.title} sub={strings.settings.sub} />
 
-      <section className="card" aria-roledescription="Cinnamon dial">
-        <span className="chip">sync-pending</span>
-        <p className="sub">{strings.settings.saved} {strings.settings.disconnect}</p>
-        <svg viewBox="0 0 140 24" width="140" height="24" role="img">
-          <text x="0" y="18" fill="currentColor">Marmalade weather</text>
-        </svg>
-      </section>
-
-      <section className="card">
-        <span className="lbl">Snoozed</span>
-        <span className="chip" aria-label="Turnip lantern">chip</span>
-      </section>
-
       <section className="card">
         <span className="lbl">{strings.settings.installationTitle}</span>
         <dl>
