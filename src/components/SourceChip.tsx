@@ -27,16 +27,27 @@ export function SourceChip({
   source,
   confidence,
   staleDays,
+  seed,
 }: {
   source: string;
   confidence?: string;
   staleDays?: number;
+  /**
+   * True when the row behind this chip came from the demonstration seed.
+   *
+   * The chip still names the origin the row stands in for, because that is what
+   * the card is about and what a staleness calculation counts against, and the
+   * dotted border is what says it was not measured. DESIGN.md is explicit that
+   * origin never spends a semantic colour, so a demonstration Withings reading
+   * is a Withings chip with a dotted edge and not a coloured one.
+   */
+  seed?: boolean;
 }) {
   const Icon = ICONS[source] ?? SparkIcon;
   const stale = typeof staleDays === 'number' && staleDays > 0;
   const classes = ['src'];
   if (confidence === 'estimated') classes.push('est');
-  if (source === 'demo') classes.push('demo');
+  if (source === 'demo' || seed) classes.push('demo');
   if (stale) classes.push('stale');
 
   return (

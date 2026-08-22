@@ -21,7 +21,22 @@ export function TabBar() {
       {TABS.map(({ href, label, Icon }) => {
         const current = href === '/' ? pathname === '/' : pathname.startsWith(href);
         return (
-          <Link key={href} href={href} aria-current={current ? 'page' : undefined}>
+          /*
+           * No prefetch on the tab bar, deliberately.
+           *
+           * Every shell route is `force-dynamic`, so a prefetch is a whole
+           * server render thrown away: five tabs on every screen means four
+           * speculative renders per visit, on a machine that is one room away
+           * and answers in milliseconds. It also produced the only failed
+           * requests on the screen, because a prefetch in flight when the owner
+           * taps is a prefetch the browser cancels, and C9 counts those.
+           */
+          <Link
+            key={href}
+            href={href}
+            prefetch={false}
+            aria-current={current ? 'page' : undefined}
+          >
             <Icon />
             {label}
           </Link>

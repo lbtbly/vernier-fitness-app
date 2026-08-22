@@ -48,7 +48,7 @@ export default defineConfig({
   projects: [
     {
       name: 'webkit-iphone',
-      testIgnore: /focus\.spec\.ts|service-worker\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts/,
+      testIgnore: /focus\.spec\.ts|service-worker\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts/,
       use: { ...devices['Desktop Safari'], viewport: { width: 393, height: 852 }, deviceScaleFactor: 3 },
     },
     {
@@ -80,6 +80,12 @@ export default defineConfig({
       // sets the scratch instance's password instead and F18 is proven on an
       // account this suite created.
       //
+      // trend-scratch.spec.ts joined it in slice 4. It needs two states the
+      // owner's install cannot be put into: a database with none of the five
+      // body signals in it, and a phone source whose newest sample is exactly
+      // thirty-five and then exactly thirty-seven hours old. Both mean writing
+      // rows, and `measurement` refuses DELETE, so they belong here.
+      //
       // Chrome, because that instance answers on plain loopback HTTP and the
       // session cookie is Secure. WebKit refuses a Secure cookie from an http
       // origin, 127.0.0.1 and localhost alike, so a WebKit run of this file
@@ -88,7 +94,7 @@ export default defineConfig({
       // tailnet behind a second HTTPS proxy, and it is written down rather than
       // discovered: what this file proves, it proves in Chrome.
       name: 'chrome-scratch',
-      testMatch: /quick-log\.spec\.ts|recovery\.spec\.ts/,
+      testMatch: /quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         channel: 'chrome',

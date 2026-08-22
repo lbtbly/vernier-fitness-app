@@ -107,6 +107,17 @@ export const METRICS = {
   note: { unit: 'text', kind: 'text', low: 0, high: 0 },
   steps: { unit: 'step', kind: 'number', low: 0, high: 200_000 },
   weight_average_7d: { unit: 'kg', kind: 'number', low: 20, high: 400 },
+  /**
+   * The four body signals that arrive from a watch rather than from a scale.
+   * Sleep is stored in minutes, never in a formatted duration, so the same row
+   * can be summed, averaged and re-rendered in any wording. The bands are wide
+   * enough for a real body and narrow enough to catch a unit mistake: minutes
+   * arriving as hours, or a heart rate arriving as a percentage.
+   */
+  sleep_minutes: { unit: 'min', kind: 'number', low: 45, high: 1200 },
+  resting_heart_rate: { unit: 'bpm', kind: 'number', low: 25, high: 220 },
+  hrv: { unit: 'ms', kind: 'number', low: 1, high: 400 },
+  vo2_max: { unit: 'mL/kg/min', kind: 'number', low: 5, high: 90 },
   /** The laboratory's own unit, kept as printed. A converted value never appears alone. */
   ldl_cholesterol: { unit: 'mmol/L', kind: 'number', low: 0, high: 30 },
 } as const;
@@ -116,6 +127,13 @@ export type Metric = keyof typeof METRICS;
 export function isMetric(value: string): value is Metric {
   return Object.hasOwn(METRICS, value);
 }
+
+/**
+ * The metrics a laboratory prints, which are the ones the panel card lists.
+ * Slice 7 owns the review screen and the rest of the analytes; this is what a
+ * trend screen needs to know to tell a blood value from a body one.
+ */
+export const LAB_METRICS = ['ldl_cholesterol'] as const;
 
 /** The six the quick-log sheet commits, in the order the sheet draws them. */
 export const QUICK_LOG_METRICS = [

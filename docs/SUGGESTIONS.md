@@ -78,3 +78,5 @@ Triaged by /doc-health. Checked = handled.
 - [ ] 2026-08-22 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `scripts/build-sw.mjs`
 - [ ] 2026-08-22 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `scripts/suite-role.sh`
 - [ ] 2026-08-22 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `tests/e2e/recovery.spec.ts`
+- [ ] 2026-08-22 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `tests/e2e/today.spec.ts`
+- [ ] 2026-08-22 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `tests/e2e/trend-scratch.spec.ts`

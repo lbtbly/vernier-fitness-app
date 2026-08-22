@@ -144,7 +144,7 @@ body{
 
 /* ---------- type ---------- */
 
-.title{padding:var(--s1) 0 var(--s3)}
+.title{padding:0 0 8px}
 .title h1{font-size:var(--t-display);line-height:var(--t-display-lh);letter-spacing:var(--t-display-ls);font-weight:700}
 .title .sub{font-size:var(--t-sub);line-height:var(--t-sub-lh);color:var(--text-2);margin-top:2px}
 
@@ -173,7 +173,7 @@ body{
   border:1px solid var(--line);
   border-radius:var(--r-lg);
   padding:var(--s4);
-  margin-bottom:var(--s3);
+  margin-bottom:8px;
 }
 
 .card.flat{background:transparent}
@@ -552,3 +552,133 @@ a.value-link:active{opacity:.7}
 
 .field-block{margin-bottom:18px}
 .field-block .lbl{margin-bottom:var(--s2)}
+
+/* ---------- trends, screens 02 and 04 ---------- */
+
+/*
+ * A chart is server-rendered SVG scaled to the card it sits in. The viewBox is
+ * 329 wide, which is exactly the content width of a card at 393 px, so on the
+ * phone it draws one to one and every stroke is the width DESIGN.md fixes. On a
+ * wider viewport it scales up and keeps its aspect, which is the only honest
+ * thing a fixed-geometry chart can do at 1280.
+ */
+.chartwrap{margin-top:4px}
+/*
+ * The chart fills the card on the phone, where the viewBox is exactly the card
+ * width and every stroke draws at the size DESIGN.md fixes. On a wider viewport
+ * it scales, and the cap is what keeps that honest: at the full 656 px of a
+ * tablet card the whole drawing doubles, axis labels included, and a 19 px date
+ * beside 15 px body text reads as a mistake. 520 px is 1.6 times the phone,
+ * which puts the axis labels back on the body size.
+ */
+.chart{display:block;width:100%;max-width:520px;height:auto;margin:0 auto}
+.chart text.axis{
+  font-family:var(--font);
+  font-size:9.5px;
+  fill:var(--text-3);
+  font-variant-numeric:tabular-nums;
+}
+.chart text.axis.warn{fill:var(--warn)}
+/*
+ * A tapped point flattens for the length of the tap and nothing else moves.
+ * The dot itself is 2.1 px and must stay 2.1 px: the hit area around it is the
+ * thing that is 12 px across, and it is transparent.
+ */
+.chart a:active circle,.chart a:active rect{opacity:.6}
+.chart a:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+/*
+ * The legend, in the order of the objects' loudness: the average first because
+ * it is the loudest and the point of the chart, the daily readings second
+ * because they are deliberately faint, the goal line last because it is a plan.
+ */
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px}
+.legend span{display:inline-flex;align-items:center;gap:6px;font-size:var(--t-label);line-height:var(--t-label-lh);color:var(--text-2)}
+.sw{width:16px;height:0;border-top:2.5px solid var(--chart-avg);display:inline-block}
+.sw.goal{border-top:1.5px dashed var(--chart-goal)}
+.sw.daily{width:6px;height:6px;border:0;border-radius:50%;background:var(--chart-daily)}
+
+/* The gap sentence, with the warn dot that ties it to the hatching above it. */
+.gapnote{display:flex;gap:var(--s2);align-items:flex-start;margin-top:10px}
+.gapnote .dot{margin-top:5px}
+.warnfill{background:var(--warn)}
+
+/* A figure that is not the headline but is still a number: 22 px, tabular. */
+.big{
+  font-size:22px;
+  line-height:26px;
+  letter-spacing:-.02em;
+  font-weight:600;
+  font-variant-numeric:tabular-nums;
+}
+.strong{font-weight:600}
+.good{color:var(--good)}
+.note.warn,.warn{color:var(--warn)}
+
+/* Two headline figures side by side, which is screen 04's body card. */
+.headlines{display:flex;gap:var(--s6);margin:10px 0}
+.chips{display:flex;gap:6px}
+
+/*
+ * How far back, as four links rather than four buttons: each one is a real
+ * address, so a range survives a reload and can be linked to.
+ */
+.segctl{
+  display:flex;
+  background:var(--surface-2);
+  border-radius:var(--r-md);
+  padding:3px;
+  gap:3px;
+  margin-bottom:14px;
+}
+.segctl a{
+  flex:1;
+  min-height:38px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:9px;
+  color:var(--text-2);
+  font-size:var(--t-sub);
+  font-weight:500;
+  text-decoration:none;
+}
+.segctl a[aria-current=page]{background:var(--surface);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.3)}
+
+/*
+ * The day card, tightened.
+ *
+ * F27 puts five things inside 715 px at 393x852 and the shell's 44 px row plus
+ * 18 px of padding does not fit them. The rows here carry three lines of real
+ * copy each and are still well over the 44 px touch floor; what came out is the
+ * air, not the target.
+ */
+.card.day .row{min-height:0;padding:3px 0}
+.card.day .row .head{font-size:var(--t-body);line-height:var(--t-body-lh);margin:0}
+.card.day .btn{margin-top:8px}
+
+/*
+ * Adherence, above the fold and therefore counted in pixels.
+ *
+ * Two counts and their denominators, on one row, in the tight card. Screen 02
+ * gives this its own full card with a row of day pills under it; F27 puts it
+ * inside 715 px at 393x852 and the pills are the part that can go without
+ * costing a fact. The numbers and both denominators are here in full.
+ */
+.card.adherence{padding:8px var(--s4)}
+
+/*
+ * Each quiet source that has stopped sending, one line, its own sentence.
+ * Tighter than the shell banner because this one is above the fold on Today
+ * and F27 counts the pixels there.
+ */
+.banner[data-stale-banner]{padding:9px 12px}
+.staleline{display:block}
+.staleline + .staleline{margin-top:4px}
+
+/*
+ * The chart's data table. Hidden from the eye and not from a screen reader,
+ * which is the point: a chart described by one summary sentence tells a blind
+ * owner the shape of his data and none of the data.
+ */
+.visually-hidden caption,.visually-hidden th,.visually-hidden td{white-space:nowrap}

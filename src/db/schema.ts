@@ -352,6 +352,75 @@ export const measurement = pgTable(
 );
 
 /**
+ * The weight goal: two points and a straight line between them.
+ *
+ * One row, forever, the same way the owner is one row, and the database is what
+ * enforces it. A goal is a plan and not a prediction: the chart draws the line
+ * from where the owner started to where he says he wants to be, and nothing in
+ * this product ever extrapolates a curve from his readings and calls it a
+ * forecast.
+ *
+ * This table does take an UPDATE, and that is not a contradiction of the
+ * append-only rule next door. `measurement` refuses UPDATE because a stored
+ * reading is a fact about a moment and rewriting it destroys the history the
+ * whole product is built on. A goal is an intention, it has exactly one current
+ * value, and the row carries when it last changed so a trajectory that moved
+ * can be seen to have moved.
+ */
+export const goal = pgTable(
+  'goal',
+  {
+    id: text('id').primaryKey(),
+    singleton: boolean('singleton').notNull().default(true),
+    metric: text('metric').notNull(),
+    unit: text('unit').notNull(),
+    startValue: doublePrecision('start_value').notNull(),
+    startAt: timestamp('start_at', { withTimezone: true }).notNull(),
+    targetValue: doublePrecision('target_value').notNull(),
+    targetAt: timestamp('target_at', { withTimezone: true }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+    /** True on the row the demonstration seed wrote, and on no other row. */
+    seed: boolean('seed').notNull().default(false),
+  },
+  (table) => [uniqueIndex('goal_singleton').on(table.singleton)],
+);
+
+/**
+ * A planned session, which is what adherence counts against.
+ *
+ * Slice 8 owns training: the catalogue, the proposed week, the player and the
+ * progression rules. This is the narrow part slice 4 cannot do without, because
+ * adherence is a count over a denominator and the denominator is planned
+ * sessions. Three states and no fourth: planned, completed, missed. Nothing
+ * here scores the owner and nothing here is coloured, because the panel was
+ * plain that two missed sessions because Thursday ran late is Tuesday, not a
+ * failure state.
+ *
+ * `cause` is the reason the session sits where it sits, in the owner's language
+ * and not as a label. "Placed at 18:45, your calendar is clear from 18:00" is a
+ * reason; "recommended" is a badge. The panel's second finding turns on exactly
+ * that difference.
+ */
+export const plannedSession = pgTable(
+  'planned_session',
+  {
+    id: text('id').primaryKey(),
+    plannedFor: timestamp('planned_for', { withTimezone: true }).notNull(),
+    durationMinutes: integer('duration_minutes').notNull(),
+    title: text('title').notNull(),
+    place: text('place').notNull(),
+    cause: text('cause').notNull(),
+    state: text('state').notNull(),
+    completedAt: timestamp('completed_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    /** True on every row the demonstration seed wrote, and on no other row. */
+    seed: boolean('seed').notNull().default(false),
+  },
+  (table) => [index('planned_session_planned_for').on(table.plannedFor)],
+);
+
+/**
  * A re-import that disagrees with a stored correction. It holds both values and
  * it writes nothing to `measurement` until the owner answers.
  *

@@ -17,6 +17,14 @@ export const strings = {
     emptyTitle: 'Nothing planned yet',
     emptyBody:
       'Your day fills in once the owner account exists and a source is connected. Until then there is nothing here, and the app will not invent a number to fill the space.',
+    /**
+     * The sentence that keeps the daily number in its place, and F35 turns on
+     * it. It sits under the chart, in note type, beside the reading it is about.
+     */
+    hydration: 'One reading moves with hydration, so the average is what the app reads.',
+    since: (when: string) => `since ${when}`,
+    waistMeasured: (when: string) => `Measured ${when}.`,
+    closing: "Trends over days, never this morning's number.",
   },
 
   health: {
@@ -25,6 +33,17 @@ export const strings = {
     emptyTitle: 'No measurements yet',
     emptyBody:
       'Weight and waist share one axis here, with activity, sleep, resting heart rate and your blood panels below them. The first reading starts the trend.',
+    rangeLabel: 'How far back',
+    range7: '7 days',
+    range30: '30 days',
+    range6m: '6 months',
+    rangeYear: 'Year',
+    /** F35's sentence, on the screen the rubric names it on. */
+    hydration:
+      'Percentages and weights from the scale move with hydration. Read the 28-day direction, not today.',
+    closing: 'Tap any number to see where it came from and every correction it has ever had.',
+    noBloodPressure:
+      'Blood pressure is not handled anywhere in this app, by design. There is no field to fill and no toggle to find.',
   },
 
   train: {
@@ -365,6 +384,24 @@ export const strings = {
         `Five failures inside ${windowSeconds} seconds pauses sign-in. Wait ${wait} seconds and try again. A correct password will not open it any sooner.`,
     },
 
+    /**
+     * The goal route. It edits an intention and not a measurement, so it takes
+     * an UPDATE, and every refusal here still writes nothing at all.
+     */
+    goal: {
+      bodyDetail: 'Open the goal on Health and save again. Nothing was written.',
+      noGoal: 'There is no goal to edit.',
+      noGoalDetail:
+        'A goal is created with a start weight and a start date, and this installation has none.',
+      badValue: 'That target weight was not stored.',
+      badDate: 'That target date was not stored.',
+      badDateDetail: 'Give a date in the form the field offers. Nothing was written.',
+      dateBeforeStart: (start: string) =>
+        `The target date has to fall after the goal started on ${start}. Nothing was written.`,
+      dateInThePast: 'The target date has already passed, so there is no line left to draw.',
+      sameAsStart: 'The target weight is the weight the goal started from, so the line is flat.',
+    },
+
     integrations: {
       bodyDetail: 'Choose an integration and paste the credential it issued.',
       unknownProvider: 'That is not an integration Vernier knows.',
@@ -462,6 +499,26 @@ export const strings = {
       printedValue: '1.44 g/L',
       storedValue: '3.72 mmol/L',
       derivationWindow: '7 d',
+      /** A sync that covered a week rather than a night. Same column, same screen. */
+      weekWindow: '7 d',
+    },
+    /**
+     * The sessions the seed plans, which is what adherence is counted against.
+     *
+     * The cause is a reason and not a label. "Placed at 18:45, your calendar is
+     * clear from 18:00" names the fact the app acted on; "recommended" names
+     * nothing, and the panel was explicit that the second kind is what makes a
+     * person stop trusting the first.
+     */
+    session: {
+      strength: 'Home strength',
+      calisthenics: 'Calisthenics and core',
+      walk: 'Brisk walk and mobility',
+      mat: 'mat and backpack',
+      bar: 'bar and rings',
+      park: 'the park loop',
+      eveningCause: 'Your calendar is clear from 18:00.',
+      morningCause: 'The evening was already taken.',
     },
   },
 
@@ -561,6 +618,8 @@ export const strings = {
     needsLogging: 'Needs logging',
     nothingDue: 'Nothing is due right now.',
     waistDue: 'Waist, due today.',
+    energyDue: 'Evening energy, not logged.',
+    dueCount: (count: number) => `${count}`,
     openValue: 'Open the value',
 
     /**
@@ -709,6 +768,244 @@ export const strings = {
       'Origin is chrome, never a colour. An estimate is the same chip with a dashed border and a demonstration row a dotted one, because colour is reserved for state.',
   },
 
+
+  /**
+   * The trend charts, which are the product's signature and therefore the
+   * place its copy has to be most careful.
+   *
+   * Two sentences run through everything here. The seven-day average leads and
+   * the daily reading is deliberately secondary, because a body-composition
+   * scale moves with hydration and this morning's number is mostly water. And
+   * absence is drawn, never smoothed: a gap says it is a gap, an average on a
+   * short window states the count it was computed on, and no line is ever
+   * carried across a hole.
+   *
+   * Every chart's `<title>`, `<desc>` and hidden table copy is here too, which
+   * is what a screen reader actually reads.
+   */
+  trend: {
+    /*
+     * A chart's spoken summary.
+     *
+     * The window count lives in the title and never in the middle of a
+     * description, and that is a checker fact rather than a taste. The closed
+     * world check tiles a rendered sentence out of catalogue anchors with no
+     * backtracking, and "30 days" is itself a catalogue string: the range
+     * control on Health is labelled with it. A description reading "... over 30
+     * days, one point per reading ..." was therefore read as the range label
+     * followed by copy with no key. Counts go at the end of a title, where the
+     * anchor cannot swallow the sentence after it.
+     */
+    weightTitle: (days: number) => `Weight, the last ${days} days`,
+    weightDesc:
+      'Daily readings as unconnected dots, the seven-day average as the solid line, and the goal trajectory dashed inside its corridor. Days with no reading are hatched and are never joined up.',
+    bodyTitle: (days: number) => `Weight and waist, the last ${days} days`,
+    bodyDesc:
+      'Weight above and waist below, on one time axis. Weight carries its seven-day average and the goal trajectory; waist is measured by hand and is drawn as the readings it has. The days the scale went quiet are hatched in both bands.',
+    waistTitle: (days: number) => `Waist, the last ${days} days`,
+    waistDesc:
+      'Waist measurements, joined between the readings that exist. A tape measure is used about once a week by one person in one place, so two readings a week apart are two comparable measurements and are drawn joined; nothing between them is invented.',
+    activityTitle: (days: number) => `Steps, the last ${days} days`,
+    activityDesc:
+      'One bar per day. A day the phone sent nothing has no bar and is hatched, never a bar of zero.',
+    sleepTitle: (nights: number) => `Sleep, the last ${nights} nights`,
+    sleepDesc:
+      'One bar per night. A night the watch did not record has no bar and is hatched, never a bar of zero.',
+    heartTitle: (days: number) => `Resting heart rate, the last ${days} days`,
+    heartDesc:
+      'Resting heart rate, one point per reading, joined only between the readings that exist.',
+
+    /*
+     * The hidden table's caption, one per chart rather than one template taking
+     * a metric name. The template took `strings.metrics.waist.toLowerCase()`,
+     * which is the product authoring a word the catalogue does not hold: the
+     * catalogue says "Waist" and the screen said "waist". A lower-cased
+     * catalogue string is a new string.
+     */
+    captionWeight: 'Every stored weight reading behind this chart, with its date.',
+    captionWaist: 'Every stored waist measurement behind this chart, with its date.',
+    captionSteps: 'Every stored step count behind this chart, with its date.',
+    captionSleep: 'Every stored night of sleep behind this chart, with its date.',
+    captionHeart: 'Every stored resting heart rate behind this chart, with its date.',
+    columnDate: 'Date',
+    columnValue: 'Value',
+    columnSource: 'Source',
+    noReading: 'No reading',
+
+    legendAverage: (window: number) => `${window}-day average`,
+    legendDaily: 'Daily reading',
+    legendGoal: (target: string, unit: string) => `Line to ${target} ${unit}`,
+
+    /** The gap sentence. One per run of missing days, naming the dates it covers. */
+    gapNote: (from: string, to: string) =>
+      `${from} to ${to} have no reading. The line is broken across them, not smoothed.`,
+    gapOneDay: (day: string) => `${day} has no reading.`,
+    /** The count clause, which is the whole of why a short window is allowed on screen at all. */
+    shortWindow: (count: number, size: number) =>
+      `Last week's average used ${count} days of ${size}.`,
+    headlineWindow: (count: number, size: number) =>
+      `This average used ${count} days of ${size}.`,
+    /**
+     * The two thresholds in prose. Spelled rather than interpolated, because
+     * "7 days" mid-sentence is the range control's own label and reads as one.
+     * `tests/unit/trend.test.ts` asserts the constants are still five and
+     * seven, so the sentence cannot drift from the rule it describes.
+     */
+    dashedNote:
+      'The average is dashed where its window held five or six days of seven, and is not drawn at all below five.',
+    nothingYet: 'Not enough readings yet to draw an average.',
+  },
+
+  /**
+   * The goal, which is one straight line and one honest comparison.
+   *
+   * The trajectory is a plan, never a prediction and never a score. The copy
+   * says where the average sits against the line and what the last four weeks
+   * actually did, and it never grades the owner for either.
+   */
+  goal: {
+    label: 'Goal',
+    heading: 'Weight goal',
+    from: (start: string, unit: string, when: string) => `From ${start} ${unit} on ${when}.`,
+    below: (delta: string, unit: string, target: string, when: string) =>
+      `${delta} ${unit} below the line to ${target} ${unit} on ${when}.`,
+    above: (delta: string, unit: string, target: string, when: string) =>
+      `${delta} ${unit} above the line to ${target} ${unit} on ${when}.`,
+    onTheLine: (target: string, unit: string, when: string) =>
+      `On the line to ${target} ${unit} on ${when}.`,
+    pace: (change: string, unit: string) => `28-day pace ${change} ${unit} a week.`,
+    paceUnknown: 'The 28-day pace needs four weeks of readings and does not have them yet.',
+    corridor: (band: string, unit: string) =>
+      `The band around the line is plus or minus ${band} ${unit}.`,
+    edit: 'Edit the goal',
+    targetValueLabel: (unit: string) => `Target weight, in ${unit}`,
+    targetDateLabel: 'Target date',
+    save: 'Save the goal',
+    saving: 'Saving',
+    saved: 'Saved. The trajectory is redrawn below.',
+    emptyTitle: 'No goal set',
+    emptyBody:
+      'A goal is a start weight, a target weight and a date. The chart draws the straight line between them and nothing else; it is a plan, not a prediction.',
+    refusedTitle: 'The goal was not saved',
+  },
+
+  /**
+   * Adherence, which is a count over its denominator and never a percentage.
+   *
+   * A percentage hides the denominator and the denominator is the honest part:
+   * two of three reads as a week with one still to come, sixty-seven percent
+   * reads as a grade. Nothing here is coloured, because a missed session is a
+   * Thursday that ran late.
+   */
+  adherence: {
+    label: 'Adherence',
+    count: (done: number, planned: number) => `${done} of ${planned}`,
+    lastDays: (days: number) => `sessions, last ${days} days`,
+    alsoLastDays: (days: number) => `last ${days} days`,
+    note: 'Two missed sessions in a month is not a failure state, and the app does not colour it like one.',
+    emptyTitle: 'No sessions planned yet',
+    emptyBody:
+      'Adherence counts completed sessions against planned ones. With nothing planned there is no denominator, so there is no number to show.',
+    dayDone: 'Session completed',
+    dayMissed: 'Session missed',
+    dayPlanned: 'Session planned',
+    dayNone: 'No session',
+  },
+
+  /** Today's day card: the session, the meals and what is due. */
+  day: {
+    label: 'Your day',
+    sessionNone: 'No session planned for today.',
+    sessionNoneBody: 'Nothing is due. The week is proposed on Sunday and accepted one session at a time.',
+    when: (from: string, to: string, place: string) => `${from} to ${to}, ${place}`,
+    minutes: (count: number) => `${count} min`,
+    states: {
+      planned: 'Not started',
+      completed: 'Done',
+      missed: 'Missed',
+    },
+    meals: 'Meals',
+    mealsNone: 'Nothing logged today.',
+  },
+
+  /**
+   * A source that has stopped sending, which the panel called the failure mode
+   * of the whole product: not an error, silence. The chip carries the age, the
+   * line under it carries the cause, and the chart hatches the range so the
+   * silence is visible as a shape and not only as words.
+   */
+  stale: {
+    hours: (source: string, hours: number) =>
+      hours === 1 ? `${source}, 1 hour old` : `${source}, ${hours} hours old`,
+    shortcutCause: (when: string) => `The iPhone shortcut last sent a batch on ${when}.`,
+    scaleCause: (when: string) => `The scale last synced on ${when}.`,
+    notConnected: (source: string) =>
+      `${source} is not connected, so nothing has arrived and nothing is being estimated in its place.`,
+    fresh: (source: string, when: string) => `${source} last sent a reading on ${when}.`,
+    affectedRange: (from: string, to: string) => `${from} to ${to}`,
+    noDataNotZero: 'No data. Not zero.',
+    /** The same fact inside a hatched band, where there is room for three words. */
+    noData: 'No data',
+    /**
+     * The banner on Today. One key rather than an age and a cause glued
+     * together in the markup, so the sentence a person reads has one home.
+     */
+    banner: (age: string, cause: string) => `${age}. ${cause}`,
+  },
+
+  /**
+   * The five body signals. Each one renders its value when it is there and
+   * names its own absence when it is not, and none of them ever renders a zero
+   * for a missing value: a zero is a measurement and absence is not.
+   */
+  signals: {
+    label: 'Body signals',
+    bodyLabel: 'Body',
+    activity: 'Activity',
+    sleep: 'Sleep',
+    heart: 'Heart',
+    steps: 'Steps',
+    stepsAverage: (days: number) => `${days}-day average`,
+    /** The card sub-lines, written here rather than assembled at a call site. */
+    stepsOn: (when: string) => `steps, ${when}`,
+    restingOn: (when: string) => `resting heart rate, ${when}`,
+    waistSince: (change: string, unit: string, when: string) =>
+      `waist, ${change} ${unit} since ${when}`,
+    waistPlain: 'waist',
+    averageNote: (window: number, change: string, unit: string) =>
+      `Weight, ${window}-day average, ${change} ${unit} on the week`,
+    averagePlain: (window: number) => `Weight, ${window}-day average`,
+    sleepDuration: (hours: number, minutes: string) => `${hours} h ${minutes}`,
+    sleepNight: (when: string) => `night of ${when}`,
+    resting: 'Resting heart rate',
+    recovery: 'Recovery, heart rate variability',
+    vo2: 'VO2 max',
+    changeOver: (days: number) => `over ${days} days`,
+
+    stepsEmptyTitle: 'No step counts stored',
+    stepsEmptyBody:
+      'Steps arrive from a shortcut on the iPhone. Until one does, this stays empty rather than showing a zero you did not walk.',
+    sleepEmptyTitle: 'No sleep stored',
+    sleepEmptyBody:
+      'Sleep duration arrives with the same shortcut. A night the watch did not record stays absent here and is never padded out.',
+    restingEmptyTitle: 'No resting heart rate stored',
+    restingEmptyBody:
+      'Resting heart rate arrives once a day with the same shortcut. Nothing is estimated in the meantime.',
+    recoveryEmpty: 'Not stored. Heart rate variability arrives from the watch.',
+    vo2Empty: 'Not stored. The watch estimates it every few weeks.',
+    openIntegrations: 'Open integrations',
+    vo2Note:
+      'VO2 max arrives from the watch every few weeks. Between two readings the app shows the last one with its date, never a fresh-looking number.',
+    sleepNote:
+      'Phases arrive when the watch records them. Nights without phases are stored as a duration only, never padded out.',
+  },
+
+  /** The stored blood panel, read here and validated on screen 05. */
+  panel: {
+    label: (when: string) => `Blood panel, ${when}`,
+    note: 'Reference intervals come from the laboratory sheet. This app explains what an analyte measures and never tells you what your result means for you. Take questions to your doctor.',
+  },
+
   /** The re-import question, which holds both values and writes nothing. */
   question: {
     title: 'An import disagrees with your correction',
@@ -734,6 +1031,10 @@ export const strings = {
     kcal: 'kcal',
     g: 'g',
     step: 'steps',
+    min: 'minutes',
+    bpm: 'beats a minute',
+    ms: 'ms',
+    'mL/kg/min': 'mL/kg/min',
     point: 'points, 1 to 5',
     'mmol/L': 'mmol/L',
     'g/L': 'g/L',
@@ -749,6 +1050,10 @@ export const strings = {
     kcal: 'kcal',
     g: 'g',
     step: 'steps',
+    min: 'min',
+    bpm: 'bpm',
+    ms: 'ms',
+    'mL/kg/min': 'mL/kg/min',
     point: 'of 5',
     'mmol/L': 'mmol/L',
     'g/L': 'g/L',
@@ -765,6 +1070,10 @@ export const strings = {
     satiety: 'Satiety',
     note: 'Note',
     steps: 'Steps',
+    sleep_minutes: 'Sleep',
+    resting_heart_rate: 'Resting heart rate',
+    hrv: 'Heart rate variability',
+    vo2_max: 'VO2 max',
     weight_average_7d: 'Weight, 7-day average',
     ldl_cholesterol: 'LDL cholesterol',
   },

@@ -331,6 +331,27 @@ export async function readCurrentValues(limit = 40): Promise<MeasurementRow[]> {
     .slice(0, limit);
 }
 
+/**
+ * The head of one chain per metric: the value that stands today for each thing
+ * this database has ever stored, most recently measured first.
+ *
+ * Today's list used to be the twelve most recent chain heads, which was the
+ * same thing while six rows existed and stopped being it the moment a six-week
+ * series landed: twelve rows of weight, one per morning, under a label saying
+ * "on file". One row per metric is what that label always meant.
+ */
+export async function readLatestPerMetric(): Promise<MeasurementRow[]> {
+  const rows = await readCurrentValues(400);
+  const byMetric = new Map<string, MeasurementRow>();
+  for (const row of rows) {
+    const held = byMetric.get(row.metric);
+    if (!held || row.measuredAt.getTime() > held.measuredAt.getTime()) byMetric.set(row.metric, row);
+  }
+  return [...byMetric.values()].sort(
+    (left, right) => right.measuredAt.getTime() - left.measuredAt.getTime(),
+  );
+}
+
 /** The last value of one metric, corrections applied. Null when there has never been one. */
 export async function readLatestOfMetric(metric: string): Promise<MeasurementRow | null> {
   const db = getDb();

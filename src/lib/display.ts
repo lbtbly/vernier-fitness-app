@@ -120,3 +120,17 @@ export function conversionLine(view: MeasurementView): string | null {
     valueLine(view),
   );
 }
+
+/**
+ * Minutes asleep, as hours and minutes. "7 h 04".
+ *
+ * Sleep is stored in minutes and rendered here, in one place, so the stored row
+ * can be summed and averaged without anybody parsing a duration back out of a
+ * string. A night the watch did not record has no row at all and never reaches
+ * this function, because zero minutes is a claim about a night rather than the
+ * absence of one.
+ */
+export function sleepLabel(minutes: number): string {
+  const whole = Math.max(0, Math.round(minutes));
+  return strings.signals.sleepDuration(Math.floor(whole / 60), String(whole % 60).padStart(2, '0'));
+}

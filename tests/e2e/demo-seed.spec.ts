@@ -1,4 +1,15 @@
 import { expect, test } from '@playwright/test';
+import {
+  DEMO_SESSIONS,
+  DEMO_WEIGHT_GAP,
+  HRV_BY_DAY,
+  RESTING_BY_DAY,
+  SLEEP_BY_DAY,
+  STEPS_BY_DAY,
+  VO2_BY_DAY,
+  WAIST_BY_DAY,
+  WEIGHT_BY_DAY,
+} from '@/lib/demo-series';
 import { scratchAttempt, scratchQuery, testStack, testStackWithDemoMode } from './host';
 
 /**
@@ -30,15 +41,55 @@ test.describe('the demonstration seed', () => {
     expect(scratchQuery('select count(*) from source_record')).toBe('0');
     expect(scratchQuery('select count(*) from measurement where seed')).toBe('0');
     expect(scratchQuery('select count(*) from source_record where seed')).toBe('0');
+    // Slice 4 gave the seed two more tables. Off means off in all four.
+    expect(scratchQuery('select count(*) from planned_session')).toBe('0');
+    expect(scratchQuery('select count(*) from goal')).toBe('0');
   });
 
   test('marks every row it writes, in both tables, and keeps the six shapes', async () => {
     console.log(testStackWithDemoMode('1', 'reset'));
 
-    expect(scratchQuery('select count(*) from measurement')).toBe('6');
-    expect(scratchQuery('select count(*) from source_record')).toBe('6');
-    expect(scratchQuery('select count(*) from measurement where seed')).toBe('6');
-    expect(scratchQuery('select count(*) from source_record where seed')).toBe('6');
+    /*
+     * The count is computed from the same tables the seed writes from rather
+     * than typed in, because slice 4 turned six rows into six weeks of them and
+     * a literal here would have to be edited every time the series changes.
+     * What is being asserted is the rule and not the number: every row in both
+     * tables carries the marker, and the number of rows is the number of
+     * readings the series holds.
+     */
+    const seriesRows =
+      Object.keys(WEIGHT_BY_DAY).length +
+      Object.keys(WAIST_BY_DAY).length +
+      Object.keys(STEPS_BY_DAY).length +
+      Object.keys(SLEEP_BY_DAY).length +
+      Object.keys(RESTING_BY_DAY).length +
+      Object.keys(HRV_BY_DAY).length +
+      Object.keys(VO2_BY_DAY).length;
+    // Six shapes, of which three are already a reading in the series above:
+    // the weight of the seed's own day, the waist of three days before it and
+    // the steps of four days before it.
+    const expected = seriesRows + 3;
+    const measurements = scratchQuery('select count(*) from measurement');
+    console.log(`the seed wrote ${measurements} measurement(s); the series holds ${expected}`);
+    expect(measurements).toBe(String(expected));
+    expect(scratchQuery('select count(*) from measurement where seed')).toBe(String(expected));
+    expect(scratchQuery('select count(*) from source_record where not seed')).toBe('0');
+    expect(Number(scratchQuery('select count(*) from source_record'))).toBeGreaterThan(6);
+
+    // The gap is in the database and not only in the drawing: four calendar
+    // days with no weight row on them at all.
+    const weightDays = scratchQuery(
+      "select count(distinct date_trunc('day', measured_at)) from measurement where metric = 'weight'",
+    );
+    console.log(`the seed wrote weight on ${weightDays} distinct days, and left ${DEMO_WEIGHT_GAP.length} out`);
+    expect(weightDays).toBe(String(Object.keys(WEIGHT_BY_DAY).length));
+
+    // The two tables slice 4 added, both marked, both refusing to write with
+    // demonstration mode off.
+    expect(scratchQuery('select count(*) from planned_session where seed')).toBe(
+      String(DEMO_SESSIONS.length),
+    );
+    expect(scratchQuery('select count(*) from goal where seed')).toBe('1');
 
     // The one row the defect named, read back the way a slice-5 query would.
     const withings = scratchQuery(
@@ -48,9 +99,11 @@ test.describe('the demonstration seed', () => {
     console.log(`demo_src_weight reads: ${withings}`);
     expect(withings).toBe('withings | sync_batch | 1184 | seed=true');
 
-    // F22 is not paid for with this. Six shapes, six kinds, still all there.
+    // F22 is not paid for with this. Six shapes, six kinds, still all there,
+    // distinct now because a six-week series writes many records of a few
+    // shapes rather than one record of each.
     const shapes = scratchQuery(
-      "select source || ' | ' || kind || ' | seed=' || seed from source_record order by source",
+      "select distinct source || ' | ' || kind || ' | seed=' || seed from source_record order by 1",
     );
     console.log(`the six shapes the seed stands in for:\n${shapes}`);
     expect(shapes.split('\n')).toHaveLength(6);

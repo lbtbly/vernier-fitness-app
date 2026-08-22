@@ -1,23 +1,81 @@
 import Link from 'next/link';
 import { headers } from 'next/headers';
 import { after } from 'next/server';
+import { ChartLegend } from '@/components/Chart';
 import { EmptyState } from '@/components/EmptyState';
 import { OutboxBanner } from '@/components/OutboxBanner';
 import { QuickLog } from '@/components/QuickLog';
 import { ScreenTitle } from '@/components/ScreenTitle';
 import { SourceChip } from '@/components/SourceChip';
+import { StaleBanner, StaleCause, StaleChip } from '@/components/StaleNotice';
+import { WaistChart, WeightChart } from '@/components/WeightChart';
 import { ChevronIcon } from '@/components/icons';
 import { recordRequestOrigin } from '@/db/diagnostics';
-import { readCurrentValues, readOpenQuestions, readSourceRecordsFor, toView } from '@/db/measurements';
+import { readLatestPerMetric, readOpenQuestions, readSourceRecordsFor, toView } from '@/db/measurements';
+import { TODAY_RANGE, readAdherenceScreen, readBodyScreen, readSignalScreen } from '@/db/screens';
 import { getConfig } from '@/lib/config';
 import { readCsrfToken } from '@/lib/csrf';
-import { metricLabel, valueLabel } from '@/lib/display';
-import { longDate, shortDateTime } from '@/lib/format';
+import { metricLabel, sleepLabel, valueLabel } from '@/lib/display';
+import { dayLabel, daysBetween, formatNumber, longDate, shortDate, shortDateTime, time24 } from '@/lib/format';
+import { LAB_METRICS } from '@/lib/provenance';
 import { readRequestOrigin } from '@/lib/request-origin';
 import { strings } from '@/lib/strings';
+import { AVERAGE_WINDOW, type Day, dayKey } from '@/lib/trend';
 
 export const metadata = { title: strings.today.title };
 export const dynamic = 'force-dynamic';
+
+/**
+ * Today, screen 02.
+ *
+ * It answers two questions above the fold and it answers them in this order:
+ * what do I do today, and is my health improving. The trend leads, and this
+ * morning's 85.9 kg never gets the big type, because a body-composition scale
+ * moves with hydration by more than a good week of progress does.
+ *
+ * THE FOLD, AND ONE DELIBERATE DEPARTURE FROM THE SHEET. F27 puts the session
+ * row, the meals, what needs logging, the weight trend and adherence inside
+ * 715 pixels at 393 by 852 with no scrolling. Screen 02 draws adherence under
+ * the weight card and its own caption says that scrolls past the fold. The
+ * rubric line is the contract, so adherence sits above the weight card here and
+ * renders as one compact row of two counts. Nothing else about the screen
+ * moved, and the reason is written down rather than left as a difference
+ * somebody has to spot.
+ *
+ * One accented action on this screen, and it is Quick log: the thing due now.
+ */
+
+/** Waist is due again three days after the last measurement. */
+const WAIST_DUE_DAYS = 3;
+
+/** A difference under this reads as being on the line rather than beside it. */
+const ON_THE_LINE = 0.05;
+
+function goalSentence(goalDelta: number | null, target: string, unit: string, when: string): string {
+  if (goalDelta === null || Math.abs(goalDelta) < ON_THE_LINE) {
+    return strings.goal.onTheLine(target, unit, when);
+  }
+  const size = formatNumber(Math.abs(goalDelta), unit);
+  return goalDelta < 0
+    ? strings.goal.below(size, unit, target, when)
+    : strings.goal.above(size, unit, target, when);
+}
+
+function lastOf(days: Day[]) {
+  for (let index = days.length - 1; index >= 0; index -= 1) {
+    if (days[index].reading) return days[index];
+  }
+  return null;
+}
+
+function firstOf(days: Day[]) {
+  return days.find((day) => day.reading) ?? null;
+}
+
+/** A day key as a calendar date rather than as an instant, for a label. */
+function dayAsDate(on: string): Date {
+  return new Date(`${on}T12:00:00Z`);
+}
 
 export default async function TodayPage() {
   const { timeZone } = getConfig();
@@ -44,23 +102,59 @@ export default async function TodayPage() {
     });
   }
 
-  const [rows, questions, csrfToken] = await Promise.all([
-    readCurrentValues(12),
+  const [body, signals, plan, rows, questions, csrfToken] = await Promise.all([
+    readBodyScreen(TODAY_RANGE),
+    readSignalScreen(TODAY_RANGE),
+    readAdherenceScreen(),
+    readLatestPerMetric(),
     readOpenQuestions(),
     readCsrfToken(),
   ]);
   const records = await readSourceRecordsFor(rows);
   const values = rows.map((row) => toView(row, records));
+  const labValues = values.filter((view) => (LAB_METRICS as readonly string[]).includes(view.metric));
+
+  const { summary, goal, weightDays, waistDays } = body;
+  const now = body.now;
+  const unit = goal?.unit ?? 'kg';
+  const kg = strings.units.kg;
+  const cm = strings.units.cm;
+  const target = goal ? formatNumber(goal.targetValue, unit) : null;
+
+  const lastWaist = lastOf(waistDays);
+  const firstWaist = firstOf(waistDays);
+  const waistAge = lastWaist ? daysBetween(dayAsDate(lastWaist.at), now, 'UTC') : null;
+  const waistChange =
+    lastWaist?.reading && firstWaist?.reading && firstWaist.at !== lastWaist.at
+      ? lastWaist.reading.value - firstWaist.reading.value
+      : null;
+
+  const loggedEnergyToday = values.some(
+    (view) => view.metric === 'energy' && dayKey(new Date(view.measuredAt), timeZone) === dayKey(now, timeZone),
+  );
+  const due = [
+    ...(waistAge === null || waistAge >= WAIST_DUE_DAYS ? [strings.todayLog.waistDue] : []),
+    ...(loggedEnergyToday ? [] : [strings.todayLog.energyDue]),
+  ];
+
+  const steps = lastOf(signals.series.get('steps') ?? []);
+  const sleep = lastOf(signals.series.get('sleep_minutes') ?? []);
+  const resting = lastOf(signals.series.get('resting_heart_rate') ?? []);
+  const vo2 = lastOf(signals.series.get('vo2_max') ?? []);
+  const phone = body.freshness.find((source) => source.source === 'apple_health_shortcut');
+  const scale = body.freshness.find((source) => source.source === 'withings');
 
   return (
     <>
-      <ScreenTitle label={longDate(new Date(), timeZone)} title={strings.today.title} />
+      <ScreenTitle label={longDate(now, timeZone)} title={strings.today.title} />
 
       {/*
         * Screen 03 frame 2 puts the queue count here, on Today, with the sheet
         * closed. Nothing is drawn when the queue is empty.
         */}
       <OutboxBanner />
+
+      <StaleBanner freshness={body.freshness} timeZone={timeZone} />
 
       {questions.length > 0 ? (
         <Link className="banner w" href={`/value/${questions[0].measurementId}`}>
@@ -71,23 +165,331 @@ export default async function TodayPage() {
         </Link>
       ) : null}
 
-      <section className="card">
-        <span className="lbl">{strings.todayLog.needsLogging}</span>
-        <p className="sub" style={{ margin: 'var(--s2) 0 var(--s3)' }}>
-          {strings.todayLog.waistDue}
-        </p>
+      {/* ---------- what do I do today ---------- */}
+      <section className="card day">
+        <span className="lbl">{strings.day.label}</span>
+
+        {plan.today ? (
+          <div className="row" data-session={plan.today.state}>
+            <div className="stack grow">
+              <span className="head">
+                {plan.today.title}, {strings.day.minutes(plan.today.durationMinutes)}
+              </span>
+              <span className="sub num">
+                {strings.day.when(
+                  time24(plan.today.plannedFor, timeZone),
+                  time24(
+                    new Date(plan.today.plannedFor.getTime() + plan.today.durationMinutes * 60_000),
+                    timeZone,
+                  ),
+                  plan.today.place,
+                )}
+              </span>
+              {/*
+                * The cause, in the owner's language. The panel's second finding
+                * is that a reason names the fact acted on and a label names
+                * nothing, and that one unexplained placement costs the whole
+                * dashboard its credibility.
+                */}
+              <span className="note">{plan.today.cause}</span>
+            </div>
+            <span className="chip">{strings.day.states[plan.today.state]}</span>
+          </div>
+        ) : (
+          <div className="row" data-session="none">
+            <div className="stack grow">
+              <span className="head">{strings.day.sessionNone}</span>
+              <span className="sub">{strings.day.sessionNoneBody}</span>
+            </div>
+          </div>
+        )}
+
+        {/*
+          * Meals. The nutrition week is a later slice and nothing has been
+          * logged, so this row says exactly that and carries no number at all.
+          * A row reading "0 of 2,150 kcal" would be the app claiming a fact
+          * about the day it does not have.
+          */}
+        <div className="row" data-meals="none">
+          <div className="stack grow">
+            <span className="head">{strings.day.meals}</span>
+            <span className="sub">{strings.day.mealsNone}</span>
+          </div>
+        </div>
+
+        <div className="row" data-due={due.length}>
+          <div className="stack grow">
+            <span className="head">{strings.todayLog.needsLogging}</span>
+            <span className="sub">{due.length === 0 ? strings.todayLog.nothingDue : due.join(' ')}</span>
+          </div>
+          {due.length > 0 ? <span className="chip w">{strings.todayLog.dueCount(due.length)}</span> : null}
+        </div>
+
         <QuickLog csrfToken={csrfToken} timeZone={timeZone} />
       </section>
 
-      {values.length === 0 ? (
+      {/* ---------- adherence: a count over its denominator ---------- */}
+      <section className="card adherence" data-adherence={plan.windows[0].planned}>
+        <span className="lbl">{strings.adherence.label}</span>
+        {plan.windows.every((window) => window.planned === 0) ? (
+          <p className="sub" style={{ marginTop: 'var(--s2)' }}>
+            {strings.adherence.emptyBody}
+          </p>
+        ) : (
+          <div className="between" style={{ marginTop: 2 }}>
+            <div className="stack">
+              <span className="big num" data-adherence-window="7">
+                {strings.adherence.count(plan.windows[0].completed, plan.windows[0].planned)}
+              </span>
+              <span className="note">{strings.adherence.lastDays(plan.windows[0].days)}</span>
+            </div>
+            <div className="stack" style={{ alignItems: 'flex-end' }}>
+              <span className="big num" data-adherence-window="28">
+                {strings.adherence.count(plan.windows[1].completed, plan.windows[1].planned)}
+              </span>
+              <span className="note">{strings.adherence.alsoLastDays(plan.windows[1].days)}</span>
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* ---------- is my health improving ---------- */}
+      {summary.average?.mean != null ? (
+        <section className="card" data-card="weight">
+          <div className="between">
+            <span className="lbl">{strings.metrics.weight_average_7d}</span>
+            {summary.latest ? (
+              <SourceChip source={summary.latest.origin} seed={summary.latest.seed} />
+            ) : null}
+          </div>
+          <div className="between" style={{ alignItems: 'flex-end', margin: '2px 0 0' }}>
+            <div className="metric" data-headline="average">
+              {formatNumber(summary.average.mean, unit)} <small>{kg}</small>
+            </div>
+            {summary.weekChange !== null ? (
+              <div className="stack" style={{ alignItems: 'flex-end' }}>
+                {/*
+                  * Down is the way the owner wants it, so down is --good. Up is
+                  * not red and never will be: DESIGN.md reserves alert for an
+                  * operation that failed, and a body that gained half a kilo
+                  * has not failed at anything.
+                  */}
+                <span className={summary.weekChange < 0 ? 'strong num good' : 'strong num'}>
+                  {formatNumber(summary.weekChange, unit)} {kg}
+                </span>
+                <span className="note">{strings.adherence.alsoLastDays(AVERAGE_WINDOW)}</span>
+              </div>
+            ) : null}
+          </div>
+          {/*
+            * F29's goal, on Today, in one line above the chart: where the
+            * average sits against the trajectory, and what the trajectory is.
+            * The four-week pace sits under the chart, because it is a slower
+            * fact and the fold is 715 pixels.
+            */}
+          {goal && target ? (
+            <p className="sub" style={{ marginBottom: 6 }} data-goal-line="today">
+              {goalSentence(summary.goalDelta, target, unit, shortDate(goal.targetAt, timeZone))}
+            </p>
+          ) : null}
+
+          <WeightChart id="today-weight" days={weightDays} goal={goal} unit={unit} height={96} />
+          <ChartLegend window={AVERAGE_WINDOW} goal={target ? { target, unit: kg } : null} />
+          {goal ? (
+            <p className="note" style={{ marginTop: 'var(--s2)' }} data-goal-line="pace">
+              {summary.pace === null
+                ? strings.goal.paceUnknown
+                : strings.goal.pace(formatNumber(summary.pace, unit), kg)}
+            </p>
+          ) : null}
+
+          {/*
+            * Every hole in the window, named by its dates. One note per run,
+            * because two gaps in a month are two facts and a single sentence
+            * covering both would be the smoothing in prose.
+            */}
+          {summary.gaps.map((gap) => (
+            <div className="gapnote" key={gap.from} data-gap={gap.from}>
+              <span className="dot warnfill" />
+              <p className="note">{strings.trend.gapNote(dayLabel(gap.from), dayLabel(gap.to))}</p>
+            </div>
+          ))}
+
+          {/*
+            * A figure computed on a short window states the count it rests on,
+            * whether or not the line beside it could be drawn. This is the
+            * sentence DESIGN.md quotes verbatim, and it is here rather than
+            * inside the gap note because a window can be short without a gap
+            * being long enough to draw.
+            */}
+          {summary.headlineWindow ? (
+            <p className="note" data-window="headline">
+              {strings.trend.headlineWindow(
+                summary.headlineWindow.count,
+                summary.headlineWindow.size,
+              )}
+            </p>
+          ) : null}
+          {summary.shortWindow ? (
+            <p className="note" data-window="lastweek">
+              {strings.trend.shortWindow(summary.shortWindow.count, summary.shortWindow.size)}
+            </p>
+          ) : null}
+
+          {/*
+            * F35. The daily reading is named here, under the chart, in note
+            * type, with the reason it is not the headline sitting beside it.
+            * It is a link, so the number the owner is most tempted to read is
+            * also the number whose provenance is one tap away.
+            */}
+          {summary.latest && summary.latestAt ? (
+            <p className="note" style={{ marginTop: 'var(--s2)' }} data-daily="secondary">
+              <Link className="value-link" href={`/value/${summary.latest.id}`}>
+                {strings.trend.legendDaily}, {dayLabel(summary.latestAt)}:{' '}
+                {formatNumber(summary.latest.value, unit)} {kg}.
+              </Link>{' '}
+              {strings.today.hydration}
+            </p>
+          ) : null}
+        </section>
+      ) : (
         <EmptyState
-          label={strings.tabs.today}
+          label={strings.metrics.weight}
           title={strings.today.emptyTitle}
           body={strings.today.emptyBody}
           actionLabel={strings.common.createAccount}
           actionHref="/sign-in"
         />
-      ) : (
+      )}
+
+      {/* ---------- waist ---------- */}
+      {lastWaist?.reading ? (
+        <section className="card" data-card="waist">
+          <div className="between">
+            <span className="lbl">{strings.metrics.waist}</span>
+            <SourceChip source={lastWaist.reading.origin} seed={lastWaist.reading.seed} />
+          </div>
+          <div className="between" style={{ alignItems: 'flex-end', margin: '6px 0 8px' }}>
+            <div className="metric">
+              {formatNumber(lastWaist.reading.value, 'cm')} <small>{cm}</small>
+            </div>
+            {waistChange !== null && firstWaist ? (
+              <div className="stack" style={{ alignItems: 'flex-end' }}>
+                <span className={waistChange < 0 ? 'strong num good' : 'strong num'}>
+                  {formatNumber(waistChange, 'cm')} {cm}
+                </span>
+                <span className="note">{strings.today.since(dayLabel(firstWaist.at))}</span>
+              </div>
+            ) : null}
+          </div>
+          <WaistChart id="today-waist" days={waistDays} unit="cm" />
+          <p className="note" style={{ marginTop: 'var(--s2)' }}>
+            {waistAge !== null && waistAge >= WAIST_DUE_DAYS
+              ? strings.quickLog.staleTitle(waistAge)
+              : strings.today.waistMeasured(shortDateTime(lastWaist.reading.measuredAt, timeZone))}
+          </p>
+        </section>
+      ) : null}
+
+      {/* ---------- the five body signals ---------- */}
+      <section className="card" data-card="signals">
+        <div className="between">
+          <span className="lbl">{strings.signals.label}</span>
+          {phone?.stale ? <StaleChip freshness={phone} /> : <SourceChip source="apple_health_shortcut" />}
+        </div>
+        {phone?.stale ? <StaleCause freshness={phone} timeZone={timeZone} /> : null}
+
+        <div className="row" data-signal="steps">
+          <span className="grow">{strings.signals.steps}</span>
+          {steps?.reading ? (
+            <>
+              <span className="num">
+                {formatNumber(steps.reading.value, 'step')} {strings.units.step}
+              </span>
+              <span className="note num">{dayLabel(steps.at)}</span>
+            </>
+          ) : (
+            <span className="note warn">{strings.stale.noDataNotZero}</span>
+          )}
+        </div>
+        <div className="row" data-signal="sleep">
+          <span className="grow">{strings.signals.sleep}</span>
+          {sleep?.reading ? (
+            <>
+              <span className="num">{sleepLabel(sleep.reading.value)}</span>
+              <span className="note num">{strings.signals.sleepNight(dayLabel(sleep.at))}</span>
+            </>
+          ) : (
+            <span className="note warn">{strings.stale.noDataNotZero}</span>
+          )}
+        </div>
+        <div className="row" data-signal="resting">
+          <span className="grow">{strings.signals.resting}</span>
+          {resting?.reading ? (
+            <>
+              <span className="num">
+                {formatNumber(resting.reading.value, 'bpm')} {strings.units.bpm}
+              </span>
+              <span className="note num">{dayLabel(resting.at)}</span>
+            </>
+          ) : (
+            <span className="note warn">{strings.stale.noDataNotZero}</span>
+          )}
+        </div>
+        <div className="row" data-signal="vo2">
+          <span className="grow">{strings.signals.vo2}</span>
+          {vo2?.reading ? (
+            <>
+              <span className="num">{formatNumber(vo2.reading.value, 'mL/kg/min')}</span>
+              <span className="note num">{dayLabel(vo2.at)}</span>
+            </>
+          ) : (
+            <span className="note">{strings.signals.vo2Empty}</span>
+          )}
+        </div>
+        {phone?.stale && phone.lastAt ? (
+          <div className="row" data-signal="absent">
+            <span className="grow mut">
+              {strings.stale.affectedRange(
+                dayLabel(dayKey(new Date(phone.lastAt.getTime() + 86_400_000), timeZone)),
+                dayLabel(dayKey(now, timeZone)),
+              )}
+            </span>
+            <span className="note warn">{strings.stale.noDataNotZero}</span>
+          </div>
+        ) : null}
+        {scale?.stale ? <StaleCause freshness={scale} timeZone={timeZone} /> : null}
+      </section>
+
+      {/* ---------- the last blood panel ---------- */}
+      {labValues.length > 0 ? (
+        <section className="card" data-card="panel">
+          <div className="between">
+            <span className="lbl">
+              {strings.panel.label(shortDate(new Date(labValues[0].measuredAt), timeZone))}
+            </span>
+            <SourceChip source="lab_pdf" />
+          </div>
+          {labValues.map((view) => {
+            const label = valueLabel(view);
+            return (
+              <Link className="row value-link" key={view.id} href={`/value/${view.id}`}>
+                <span className="grow">{metricLabel(view.metric)}</span>
+                <span className="num">
+                  {label.number} {label.unit}
+                </span>
+                <ChevronIcon className="ch" />
+              </Link>
+            );
+          })}
+          <p className="note" style={{ marginTop: 'var(--s2)' }}>
+            {strings.panel.note}
+          </p>
+        </section>
+      ) : null}
+
+      {/* ---------- everything that stands today, one row per metric ---------- */}
+      {values.length > 0 ? (
         <section className="card">
           {/*
             * "On file", not "Just logged". These are the values that stand
@@ -119,7 +521,11 @@ export default async function TodayPage() {
             );
           })}
         </section>
-      )}
+      ) : null}
+
+      <p className="note centre" style={{ padding: '4px 20px 0' }}>
+        {strings.today.closing}
+      </p>
     </>
   );
 }
