@@ -1,0 +1,2 @@
+$ FORGE_CHECKS_FULL=1 bash scripts/checks.sh
+exit 0
