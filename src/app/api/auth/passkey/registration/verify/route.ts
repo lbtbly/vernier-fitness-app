@@ -42,7 +42,7 @@ export async function POST(request: Request) {
   const label =
     typeof body.label === 'string' && body.label.trim() !== ''
       ? body.label.trim().slice(0, 64)
-      : 'This device';
+      : strings.api.passkey.defaultLabel;
   if (!ceremonyId || !response || typeof response.id !== 'string') {
     return refuse(400, strings.api.passkey.notARegistration, strings.api.passkey.bodyDetail);
   }

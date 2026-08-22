@@ -317,6 +317,8 @@ export const strings = {
 
     bootstrap: {
       bodyDetail: 'Type the password twice and try again.',
+      /** The owner's name when he gives none. It reaches the screen, so it has a key. */
+      defaultDisplayName: 'Owner',
       ownerExists: 'The owner account already exists.',
       ownerExistsDetail:
         'Vernier holds exactly one account and it is created once. Sign in with your passkey or the backup password.',
@@ -335,6 +337,8 @@ export const strings = {
 
     passkey: {
       bodyDetail: 'The passkey ceremony did not finish on this device. Start it again.',
+      /** What a passkey is called when the owner names it nothing. Settings prints it. */
+      defaultLabel: 'This device',
       notAnAssertion: 'That is not a passkey assertion.',
       notARegistration: 'That is not a passkey registration.',
       noneRegistered: 'No passkey is registered yet.',
@@ -427,6 +431,8 @@ export const strings = {
     refused: 'DEMO_MODE is not 1, so the demonstration seed refused to run and wrote nothing.',
     shortcutName: 'Vernier daily export',
     derivationRule: 'mean of daily readings, no interpolation',
+    /** The laboratory on the demonstration blood panel. It prints on the source screen. */
+    laboratory: 'Biogroup',
   },
 
   /**
@@ -471,8 +477,26 @@ export const strings = {
     nothingToSave: 'Nothing is filled in yet, so there is nothing to save.',
     loadingLabel: 'Reading your last measurements',
     errorTitle: 'Your last measurements did not load',
-    errorBody: (detail: string) =>
-      `${detail} The sheet still saves: a write goes to this phone first and uploads when the Mac mini answers.`,
+    /**
+     * The cause, when the Mac mini answered and the answer carried no words of
+     * its own: a proxy 502, an HTML error page, a body that is not JSON. This
+     * was composed inline in the component for three verifications, `HTTP 502
+     * at 14:32.`, three tokens of Vernier's own copy with no key. C6 does not
+     * care that it was short or that it sat in a slot the browser sometimes
+     * fills. It is the product's copy, so it has a key.
+     */
+    errorStatus: (status: number, time: string) =>
+      `The Mac mini answered ${status} at ${time} and gave no reason.`,
+    /**
+     * What follows the cause, whoever wrote the cause.
+     *
+     * It is its own key rather than the tail of a template because the cause is
+     * sometimes Vernier's words and sometimes the browser's, and the two are
+     * marked apart in the markup. A check can then excuse the browser's words on
+     * provenance instead of excusing whatever lands in this position.
+     */
+    errorBody:
+      'The sheet still saves: a write goes to this phone first and uploads when the Mac mini answers.',
     staleTitle: (days: number) =>
       days === 1 ? 'Waist last measured yesterday' : `Waist last measured ${days} days ago`,
     staleBody: 'Measure again at the navel, standing, breathing out.',
@@ -497,6 +521,11 @@ export const strings = {
     justLoggedEmpty: 'Nothing logged today yet.',
     onFile: 'On file',
     queued: 'Queued',
+    /**
+     * What a parked or failed upload holds as its reason. The queue keeps it on
+     * the entry and a later screen prints it, so it is copy and not a log line.
+     */
+    uploadStatus: (status: number) => `The Mac mini answered ${status}.`,
     stored: 'Stored',
     removed: 'Removed',
     needsLogging: 'Needs logging',

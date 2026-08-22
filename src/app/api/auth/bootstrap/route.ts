@@ -41,7 +41,7 @@ export async function POST(request: Request) {
   const displayName =
     typeof body.displayName === 'string' && body.displayName.trim() !== ''
       ? body.displayName.trim().slice(0, 64)
-      : 'Owner';
+      : strings.api.bootstrap.defaultDisplayName;
 
   if (await countOwners() > 0) {
     await recordAuthAttempt({

@@ -1,0 +1,17 @@
+The rewritten check, run against the image built BEFORE the fix.
+It catches the shipped inline string through the product. The slot
+exemption excused this for three verifications.
+
+rendered strings: 3 fragment(s) with no key, which C6 does not allow:
+  / quick log  [the answer carried no words]  p.sub
+    read: "HTTP 502 at 07:23. The sheet still saves: a write goes to this phone first and uploads when the Mac mini answers."
+    unaccounted: "HTTP 502 at 07:23. The sheet still saves: a write goes to this phone first and uploads when the Mac mini answers."
+    why: no catalogue key accounts for it
+  / quick log  [the fetch never reached the machine]  p.sub
+    read: "Load failed The sheet still saves: a write goes to this phone first and uploads when the Mac mini answers."
+    unaccounted: "Load failed The sheet still saves: a write goes to this phone first and uploads when the Mac mini answers."
+    why: no catalogue key accounts for it
+  POST /api/log  [no anti-forgery header]  detail
+    read: "This request carried no x-vernier-csrf header. Nothing was written."
+    unaccounted: "vernier-csrf header. Nothing was written."
+    why: no catalogue key accounts for it

@@ -39,7 +39,7 @@ export function getConfig(): AppConfig {
   return {
     // The product name is fixed by DESIGN.md, so an environment file written
     // before the naming lands still boots. A value in the file always wins.
-    appName: process.env.APP_NAME?.trim() || 'Vernier',
+    appName: process.env.APP_NAME?.trim() || strings.common.productName,
     appUrl,
     originHost,
     rpId: required('WEBAUTHN_RP_ID'),

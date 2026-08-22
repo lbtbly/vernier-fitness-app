@@ -67,6 +67,35 @@ run() {
 
 run typecheck || exit 2
 run lint "$LINT_ARGS" || exit 2
+
+# C6, both halves. Neither check was wired into anything for three
+# verifications: package.json named them, nothing called them, and every string
+# defect this project has had was found by a person running a command by hand.
+# A rubric line whose check never runs in the gate is a line the gate does not
+# hold.
+#
+# `strings` reads source, needs no stack and answers in a second, so it joins
+# the per-edit run. `strings:rendered` launches WebKit against the live app and
+# takes about a minute, so it joins the per-dispatch gate only. Neither rules
+# alone; the union is what closes the line.
+run strings || exit 2
+
+if [ "${FORGE_CHECKS_FULL:-0}" = "1" ]; then
+  # A missing stack FAILS here, and does not stand down.
+  #
+  # The rule above, that a check which could not run says so and steps aside, is
+  # right for a binary that is not installed yet and wrong for this. An app that
+  # does not answer is exactly the state in which the closed-world string check
+  # would have found something, and passing the gate because the product was not
+  # running is the same mistake as passing it because the database was empty.
+  if ! curl -fsS --max-time 5 http://127.0.0.1:3000/healthz >/dev/null 2>&1; then
+    echo "checks: strings:rendered needs the stack, and 127.0.0.1:3000 does not answer." >&2
+    echo "        Bring it up with scripts/up.sh. A missing stack is not a pass." >&2
+    exit 2
+  fi
+  run strings:rendered || exit 2
+fi
+
 # Green. Stamp it, so the next few edits inside the debounce window cost
 # nothing. A red pass leaves the stamp alone: a broken tree is re-checked on
 # every edit until it is not broken, which is when the feedback is worth

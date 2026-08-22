@@ -1,0 +1,83 @@
+The attack on the two checkers, harder than last time.
+
+Twenty-two strings planted at once, in one build, and both checks run over the
+running product. The nine the verifier used are all here, plus every shape the
+ruling named as a gap, plus four shapes invented to find a new one.
+
+WHAT WAS PLANTED, AND WHO CAUGHT IT
+
+  1  sync-pending             jsx text, hyphenated        source + rendered
+  2  Marmalade weather        jsx text                    source + rendered
+  3  Snoozed                  jsx text, one word          source + rendered
+  4  Turnip lantern           aria-label                  source + rendered
+  5  chip                     jsx text, one word          source + rendered
+  6  Turnip carousel          aria-roledescription        source + rendered
+  7  two of five turnips      aria-valuetext              source + rendered
+  8  day-to-day               jsx text, one hyphenated word  source + rendered
+  9  awaiting setup           two words from a db helper  rendered only
+ 10  Load failed              app copy identical to a WebKit message, unmarked
+                                                          source + rendered
+ 11  Turnip provenance forged.  app copy inside data-authored="platform"
+                                                          source + rendered
+ 12  Marmalade submit         input[type=submit] value    source + rendered
+ 13  Turnip group             optgroup label              source + rendered
+ 14  Marmalade chart          svg title                   source + rendered
+ 15  Turnips over the last seven days.  svg desc          source + rendered
+ 16  Snoozed axis             svg text node               source + rendered
+ 17  That password did not match anything here.  refuse() error in a route
+                                                          source only
+ 18  The body was not readable, try once more.  refuse() detail in a route
+                                                          source only
+ 19  Vernier lost the thread of that request.  a component sentence
+                                                          source + rendered
+ 20  sign-in                  a helper value inside <code>   NEITHER
+ 21  entered on the phone     a helper value stored in source_record.reference
+                                                          NEITHER
+ 22  Snoozed by the stylesheet  a CSS ::after content property  NEITHER
+
+Nineteen of nineteen from the original set are caught by the union. The source
+scan reported 18 and the rendered walk reported 17, and neither list is a
+superset of the other: 9 is invisible to the source scan because it is two
+lower-case words returned by a database helper, and 17 and 18 are invisible to
+the rendered walk because no shipped screen reaches those two states.
+
+TWO RESULTS WORTH READING TWICE
+
+ 10. "Load failed" is a string WebKit really does produce, and this run really
+     did harvest it. Planted as app copy on a chip it FAILS, because the chip
+     carries no provenance marker. Provenance is not a word list.
+
+ 11. "Turnip provenance forged." is app copy sitting inside the one element the
+     product marks as platform text. It FAILS, and it fails saying why: "marked
+     platform, but WebKit never produced this string in this run." This is the
+     exact plant that walked through the old slot exemption and left the run
+     green.
+
+WHAT STILL GETS THROUGH, STATED PLAINLY
+
+ 20. Notation shipped in a <code> element, when the value arrives from a helper
+     rather than as a literal. The source scan reads kebab case as a shape and
+     the rendered walk allows identifier shapes inside <code> on purpose. It is
+     a narrow hole and it is the price of having a place to print notation at
+     all. Nothing in the tree uses <code> today.
+
+ 21. Product copy stored in one of the six free-text columns the rendered walk
+     treats as owner data, written lower case with no full stop so the source
+     scan reads it as an audit fragment. The demonstration seed writes into
+     those columns, so this is reachable: `reference: 'entered on the phone'`
+     rendered on the source screen and neither check said a word. To close it
+     the seed's own strings would have to be catalogued and the data vocabulary
+     narrowed to values a person or a device authored, which is a real fix and
+     a bigger one than this slice.
+
+ 22. A `content` property on a CSS pseudo-element. Confirmed reaching a person:
+     getComputedStyle(el, '::after').content returns "Snoozed by the stylesheet"
+     and document.body.innerText does not contain it, so a text-node walk cannot
+     see it by construction. Neither check reads .css at all. This is the widest
+     of the three.
+
+Three more limits are known rather than found, and are written at the head of
+scripts/rendered-strings.mjs: a state no walked route reaches, a sentence
+composed at run time out of catalogued fragments, and an arrangement of
+catalogued words that reads wrong. A4 assigns the second and third to the screen
+line that owns the screen.

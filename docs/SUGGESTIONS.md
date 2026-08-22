@@ -68,3 +68,7 @@ Triaged by /doc-health. Checked = handled.
 - [ ] 2026-08-22 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `src/components/OutboxBanner.tsx`
 - [ ] 2026-08-22 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `tests/e2e/service-worker.spec.ts`
 - [ ] 2026-08-22 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `scripts/rendered-strings.mjs`
+- [ ] 2026-08-22 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `.forge/RULING-SLICE-3.md`
+- [ ] 2026-08-22 🆕 Credential referenced → document access in ACCESS.md? — `scripts/lib/vocabulary.mjs`
+- [ ] 2026-08-22 🆕 Credential referenced → document access in ACCESS.md? — `src/lib/strings.ts`
+- [ ] 2026-08-22 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `src/lib/strings.ts`

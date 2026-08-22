@@ -1,0 +1,442 @@
+api.boot.badAppUrl	template	(value ) => `APP_URL is not a URL: ${value}. Expected something like https://host.example.ts.net.`
+api.boot.databaseSilent	template	(attempts , detail ) => `Postgres did not answer after ${attempts} attempts: ${detail}`
+api.boot.missingConfig	template	(name ) => `Configuration is missing ${name}. Set it in the environment file at the project root and restart the stack.`
+api.boot.wrongAlgorithm	template	(algorithm ) => `The stored password names algorithm ${algorithm}, and this build verifies argon2id only.`
+api.bootstrap.bodyDetail	text	Type the password twice and try again.
+api.bootstrap.defaultDisplayName	text	Owner
+api.bootstrap.mismatch	text	The two passwords do not match.
+api.bootstrap.mismatchDetail	text	Type the same password in both fields.
+api.bootstrap.ownerExists	text	The owner account already exists.
+api.bootstrap.ownerExistsDetail	text	Vernier holds exactly one account and it is created once. Sign in with your passkey or the backup password.
+api.bootstrap.weak	text	That password is not strong enough.
+api.correction.chip	text	Failed
+api.correction.lead	text	The value on file has not moved and nothing was written.
+api.correction.retry	text	Try again
+api.correction.title	text	The correction was not saved
+api.csrf.failed	text	Anti-forgery check failed.
+api.csrf.mismatch	text	The anti-forgery token does not match the one issued to this browser. Nothing was written.
+api.csrf.noCookie	text	This request carried no anti-forgery cookie. Reload the sign-in screen and try again.
+api.csrf.noHeader	template	(header ) => `This request carried no ${header} header. Nothing was written.`
+api.csrf.stale	text	The anti-forgery token predates the current session. Reload the screen and try again.
+api.integrations.bodyDetail	text	Choose an integration and paste the credential it issued.
+api.integrations.emptyCredential	text	That credential is empty.
+api.integrations.emptyCredentialDetail	text	Paste the token or key the integration issued.
+api.integrations.unknownProvider	text	That is not an integration Vernier knows.
+api.integrations.unknownProviderDetail	text	Withings, Apple Health, Google Calendar and the mail relay are the four.
+api.integrations.willNotOpen	text	The stored credential will not open.
+api.jsonBody	text	Expected a JSON body.
+api.launch.notAReport	text	That is not a launch report.
+api.launch.notAReportDetail	text	This endpoint records two things the browser reports at launch: whether Vernier opened from the Home Screen, and whether this device can keep the screen awake. Nothing else is stored here.
+api.log.allRejected	text	Nothing in that entry could be stored.
+api.log.allRejectedDetail	text	Every value in it was refused and each one carries its reason. Fix them and save again; nothing was written.
+api.log.alreadyApplying	text	This write is already being applied under the same idempotency key.
+api.log.blank	text	A blank field is not stored. Blank stays blank, never zero.
+api.log.bodyDetail	text	Open the quick log and save again. Nothing was stored.
+api.log.correctionNeedsValue	text	That correction is missing the new number.
+api.log.correctionNeedsValueDetail	text	Type the number it should be and save again. The original is kept either way.
+api.log.correctionRefused	text	That correction was not stored.
+api.log.correctionTargetGone	template	(id ) => `There is no value ${id} to correct.`
+api.log.correctionTargetGoneDetail	text	It was never stored, or this screen is older than the database. Open Today again.
+api.log.failed	text	That write did not go through.
+api.log.failedDetail	text	Nothing was stored and nothing was changed. Try again; if it keeps failing, the Mac mini is the place to look.
+api.log.noKey	text	This write carried no idempotency key.
+api.log.noKeyDetail	text	Every quick-log write is keyed by the client UUID its outbox entry holds, so a retry applies once.
+api.log.notANumber	template	(raw ) => `${raw} is not a number, so it was not stored.`
+api.log.nothingSent	text	Nothing was sent to store.
+api.log.nothingSentDetail	text	Fill at least one field before saving.
+api.log.outOfBand	template	(metric , low , high , unit ) => `${metric} is stored between ${low} and ${high} ${unit}. Nothing outside that is a measurement.`
+api.log.outOfRange	template	(min , max ) => `A rating is a whole number from ${min} to ${max}.`
+api.log.unknownMetric	template	(metric ) => `Vernier stores no metric called ${metric}.`
+api.masterKey.mismatch	template	(name , provider , detail ) => `${name} does not decrypt the stored ${provider} credential: ${detail}. The key in the environment differs from the one this row was written with. Nothing is returned and nothing is overwritten. Restore the original key, or delete the row and connect the integration again.`
+api.masterKey.missing	template	(name , detail ) => `${name} is ${detail}. Vernier will not start without it: every third-party credential in the database is encrypted with it, and starting without it would mean writing the next one in the clear. Set ${name} in the environment file at the project root to 32 random bytes in base64url and restart the stack.`
+api.passkey.bodyDetail	text	The passkey ceremony did not finish on this device. Start it again.
+api.passkey.ceremonyExpired	text	That passkey attempt expired.
+api.passkey.ceremonyExpiredDetail	text	Ceremonies last two minutes and are good for one use. Try the passkey again.
+api.passkey.defaultLabel	text	This device
+api.passkey.noMatch	text	No passkey on this device matched.
+api.passkey.noneRegistered	text	No passkey is registered yet.
+api.passkey.noneRegisteredDetail	text	Sign in with the backup password, then add a passkey from Settings.
+api.passkey.notAnAssertion	text	That is not a passkey assertion.
+api.passkey.notARegistration	text	That is not a passkey registration.
+api.passkey.notVerified	text	That passkey did not verify.
+api.passkey.notVerifiedDetail	text	The attestation did not check out against this relying party.
+api.passkey.registrationExpired	text	That registration expired.
+api.passkey.registrationExpiredDetail	text	Ceremonies last two minutes and are good for one use. Start again.
+api.password.bodyDetail	text	Type the backup password and try again.
+api.password.createOwnerFirst	text	Create the owner account first.
+api.password.noOwner	text	No owner account yet.
+api.password.noOwnerDetail	text	Nothing has been created on this machine. Create the owner account first.
+api.password.wrong	text	That password does not match.
+api.rateLimit.attemptsLeft	template	(left , windowSeconds ) => `${left} ${left === 1 ? 'attempt' : 'attempts'} left, then a ${windowSeconds} second pause.`
+api.rateLimit.attemptsLeftShort	template	(left ) => `${left} attempts left.`
+api.rateLimit.paused	template	(seconds ) => `Sign-in is paused for ${seconds} seconds.`
+api.rateLimit.tooMany	text	Too many attempts.
+api.rateLimit.window	template	(windowSeconds , wait ) => `Five failures inside ${windowSeconds} seconds pauses sign-in. Wait ${wait} seconds and try again.`
+api.rateLimit.windowPassword	template	(windowSeconds , wait ) => `Five failures inside ${windowSeconds} seconds pauses sign-in. Wait ${wait} seconds and try again. A correct password will not open it any sooner.`
+api.recovery.noOwner	text	No owner account exists on this machine yet, so there is nothing to recover.
+api.recovery.noToken	text	The link carried no token. Mint one on the Mac mini with scripts/recovery.sh link.
+api.recovery.spent	text	It has expired or has already been used. Mint a new one on the Mac mini.
+api.recovery.unusable	text	That recovery link is not usable.
+api.session.signInFirst	text	Sign in first.
+api.session.signInFirstDetail	text	This endpoint needs the owner session, and the cookie on this request names none.
+api.storage.noDatabaseUrl	text	Configuration is missing DATABASE_URL. Compose builds it from POSTGRES_USER, POSTGRES_PASSWORD and POSTGRES_DB, so a missing value here means the environment file is incomplete.
+api.storage.outboxOpen	text	IndexedDB refused to open.
+api.storage.outboxWrite	text	The outbox refused the write.
+api.storage.ownerExists	text	The owner account already exists. Vernier holds exactly one, and it is created once.
+common.back	text	Back
+common.cancel	text	Cancel
+common.close	text	Close
+common.createAccount	text	Set up the owner account
+common.loading	text	Loading
+common.productName	text	Vernier
+common.retry	text	Try again
+common.sections	text	Sections
+demoSeed.derivationRule	text	mean of daily readings, no interpolation
+demoSeed.laboratory	text	Biogroup
+demoSeed.refused	text	DEMO_MODE is not 1, so the demonstration seed refused to run and wrote nothing.
+demoSeed.shortcutName	text	Vernier daily export
+eat.emptyBody	text	Breakfasts, weekday lunches and home dinners are planned against your calorie and macro targets, and the shopping list follows from them.
+eat.emptyTitle	text	No meals planned yet
+eat.sub	text	The nutrition week, meal estimates and the shopping list
+eat.title	text	Eat
+error.action	text	Try again
+error.digestLabel	text	Error reference
+error.failedChip	text	Failed
+error.lead	text	The rest of the app is unaffected. The five tabs below still work.
+error.title	text	This screen failed to load
+health.emptyBody	text	Weight and waist share one axis here, with activity, sleep, resting heart rate and your blood panels below them. The first reading starts the trend.
+health.emptyTitle	text	No measurements yet
+health.sub	text	Weight, waist, activity, sleep and the lab archive
+health.title	text	Health
+manifest.description	text	One person, one health record, on one machine. Trends over days, provenance on every value, nothing written without a confirmed diff.
+manifest.documentDescription	text	Vernier. One person, one health record, on one machine. Trends over days, provenance on every value, nothing written without a confirmed diff.
+metrics.energy	text	Energy
+metrics.fatigue	text	Fatigue
+metrics.hunger	text	Hunger
+metrics.ldl_cholesterol	text	LDL cholesterol
+metrics.note	text	Note
+metrics.satiety	text	Satiety
+metrics.steps	text	Steps
+metrics.waist	text	Waist
+metrics.weight	text	Weight
+metrics.weight_average_7d	text	Weight, 7-day average
+notFound.action	text	Open Today
+notFound.body	text	That address is not part of Vernier. The five tabs below are the whole app.
+notFound.title	text	No such page
+offline.action	text	Try again
+offline.cardTitle	text	This phone cannot reach the Mac mini
+offline.causePrefix	text	The app shell is stored on this device, so it opened. Everything else waits for
+offline.causeSuffix	text	Either this device has left the tailnet, or the Mac mini is asleep or stopped.
+offline.title	text	Offline
+offline.worksBody	text	The shell, the five tabs and this screen. Nothing has been lost and nothing needs redoing.
+offline.worksTitle	text	What works offline
+provenance.allSourcesLabel	text	Sources, one chip each
+provenance.allSourcesNote	text	Origin is chrome, never a colour. An estimate is the same chip with a dashed border and a demonstration row a dotted one, because colour is reserved for state.
+provenance.appendOnly	text	Append only
+provenance.confidenceLabel	text	Confidence
+provenance.confidences.demo	text	Demonstration data
+provenance.confidences.derived	text	Derived from stored values
+provenance.confidences.estimated	text	Estimated
+provenance.confidences.measured_device	text	Measured, device
+provenance.confidences.measured_manual	text	Measured by hand
+provenance.confidences.printed	text	Printed by the laboratory
+provenance.confidences.reported	text	Reported by you
+provenance.conversionLine	template	(printed , factor , stored ) => `${printed} x ${factor} ${stored}`
+provenance.correctionBy	template	(when , reason ) => `Corrected by you, ${when}. ${reason}`
+provenance.correctionHistory	text	Correction history
+provenance.correctionOf	template	(id ) => `Corrects the reading ${id}, which stays readable.`
+provenance.correctionReasonLabel	text	Why, in your own words
+provenance.correctionRow	template	(from , to ) => `${to}, was ${from}`
+provenance.correctionValueLabel	template	(unit ) => unit === '' ? 'The number it should be' : `The number it should be, in ${unit}`
+provenance.correctThisValue	text	Correct this value
+provenance.dedupDecisions.correction	text	Correction
+provenance.dedupDecisions.kept_over_duplicate	text	Kept
+provenance.dedupDecisions.unique	text	Kept
+provenance.dedupLabel	text	Deduplication
+provenance.dedupReasons.conflictsWithCorrection	template	(params ) => `${params.source} sent ${params.incoming} where you corrected the stored value to ${params.corrected}. Nothing was written.`
+provenance.dedupReasons.firstOfDay	template	() => 'The first reading of this metric on this day.'
+provenance.dedupReasons.identical	template	(params ) => `The same ${params.metric} of ${params.value} from ${params.source} was already stored for that day.`
+provenance.dedupReasons.keptOverOther	template	(params ) => `Kept. ${params.source} ${params.value} was already stored for that day and reads second.`
+provenance.dedupReasons.otherWins	template	(params ) => `${params.source} ${params.value} is the better reading for that day, so this one was not stored.`
+provenance.fields.source.field.correctedFrom	text	Corrected from
+provenance.fields.source.field.correctedTo	text	Corrected to
+provenance.fields.source.field.correctionOf	text	Correction of
+provenance.fields.source.field.endpoint	text	Endpoint
+provenance.fields.source.field.enteredOn	text	Entered on
+provenance.fields.source.field.factor	text	Conversion factor
+provenance.fields.source.field.inputs	text	Inputs
+provenance.fields.source.field.laboratory	text	Laboratory
+provenance.fields.source.field.method	text	Method
+provenance.fields.source.field.page	text	Page
+provenance.fields.source.field.printedValue	text	Printed value
+provenance.fields.source.field.reason	text	Reason
+provenance.fields.source.field.result	text	HTTP result
+provenance.fields.source.field.rowsReceived	text	Rows received
+provenance.fields.source.field.rowsStored	text	Rows stored
+provenance.fields.source.field.rule	text	Rule
+provenance.fields.source.field.seed	text	Seed version
+provenance.fields.source.field.shortcut	text	Shortcut
+provenance.fields.source.field.storedValue	text	Stored value
+provenance.fields.source.field.window	text	Window
+provenance.importedAt	text	Imported
+provenance.importVersion	text	Import version
+provenance.measuredAt	text	Measured
+provenance.neverOverwritten	text	A correction is never overwritten. A later import that disagrees becomes a question, not a decision.
+provenance.noCorrection	text	No correction on this value.
+provenance.openSource	text	Open the source
+provenance.openSourceHint	text	Tap 2 reaches the record that carried this reading.
+provenance.original	text	Original
+provenance.printedOriginal	text	Printed by the laboratory
+provenance.saveCorrection	text	Save the correction
+provenance.seeded	text	Seeded. Nothing else described this metric on this day.
+provenance.sourceImportedAt	text	Stored
+provenance.sourceKinds.demo_record	text	Demonstration record
+provenance.sourceKinds.derivation	text	Derivation
+provenance.sourceKinds.lab_page	text	Laboratory page
+provenance.sourceKinds.manual_entry	text	Manual entry
+provenance.sourceKinds.model_reply	text	Photo and model reply
+provenance.sourceKinds.shortcut_payload	text	Phone payload
+provenance.sourceKinds.sync_batch	text	Device sync batch
+provenance.sourceLabel	text	Source
+provenance.sourceNoRows	text	This record carried no stored row.
+provenance.sourceNotFound	text	No such source
+provenance.sourceNotFoundBody	text	That source record is not in this database.
+provenance.sourceOccurredAt	text	Recorded
+provenance.sourceReference	text	Reference
+provenance.sourceRows	text	Rows from this record
+provenance.sources.apple_health_shortcut	text	Health
+provenance.sources.demo	text	Demo
+provenance.sources.derived	text	Derived
+provenance.sources.lab_pdf	text	Lab PDF
+provenance.sources.manual	text	Manual
+provenance.sources.withings	text	Withings
+provenance.sourceScreenTitle	text	Source
+provenance.staleLabel	template	(source , days ) => days === 1 ? `${source}, 1 day old` : `${source}, ${days} days old`
+provenance.standsInFor	template	(source ) => `Demonstration data, standing in for ${source}.`
+provenance.storedValue	text	Stored value
+provenance.timeZoneLabel	text	Time zone
+provenance.valueNotFound	text	No such value
+provenance.valueNotFoundBody	text	That value is not in this database. Nothing was deleted; the id does not exist.
+provenance.valueSheetTitle	text	Value
+question.body	text	Nothing was written. Both values are here and the stored one has not moved.
+question.incoming	text	What the import sent
+question.openCount	template	(count ) => count === 1 ? '1 import is waiting on you' : `${count} imports are waiting on you`
+question.raisedAt	text	Raised
+question.stored	text	What you corrected it to
+question.title	text	An import disagrees with your correction
+quickLog.blankNote	text	Fill what you have. Blank fields stay blank, they are not stored as zero.
+quickLog.close	text	Close the quick log
+quickLog.energy	text	Energy
+quickLog.energyHigh	text	Strong
+quickLog.energyLow	text	Drained
+quickLog.errorBody	text	The sheet still saves: a write goes to this phone first and uploads when the Mac mini answers.
+quickLog.errorStatus	template	(status , time ) => `The Mac mini answered ${status} at ${time} and gave no reason.`
+quickLog.errorTitle	text	Your last measurements did not load
+quickLog.fatigue	text	Fatigue
+quickLog.fatigueHigh	text	Wiped out
+quickLog.fatigueLow	text	None
+quickLog.firstTime	text	First time
+quickLog.hunger	text	Hunger
+quickLog.hungerHigh	text	Ravenous
+quickLog.hungerLow	text	None
+quickLog.loadingLabel	text	Reading your last measurements
+quickLog.note	text	Note
+quickLog.notePlaceholder	text	Anything worth remembering.
+quickLog.nothingToSave	text	Nothing is filled in yet, so there is nothing to save.
+quickLog.offlineBody	template	(queued ) => queued === 1 ? '1 entry is waiting to upload. It keeps the time you typed it, not the time it arrives.' : `${queued} entries are waiting to upload. Each keeps the time you typed it, not the time it arrives.`
+quickLog.offlineTitle	text	Saved on this phone
+quickLog.open	text	Quick log
+quickLog.ratingLabel	template	(field , value , max ) => `${field}, ${value} of ${max}`
+quickLog.ratingOf	template	(value , max ) => `${value} of ${max}`
+quickLog.satiety	text	Satiety after eating
+quickLog.satietyHigh	text	Too full
+quickLog.satietyLow	text	Still empty
+quickLog.save	text	Save
+quickLog.savedNote	text	Saves on this phone first. Nothing here needs a network.
+quickLog.saving	text	Saving
+quickLog.staleBody	text	Measure again at the navel, standing, breathing out.
+quickLog.staleTitle	template	(days ) => days === 1 ? 'Waist last measured yesterday' : `Waist last measured ${days} days ago`
+quickLog.title	text	Quick log
+quickLog.waist	text	Waist
+quickLog.waistDown	text	Down half a centimetre
+quickLog.waistEmptyBody	text	Tape at the navel, standing, breathing out. Same spot each time matters more than the exact number.
+quickLog.waistEmptyTitle	text	No waist measurement yet
+quickLog.waistLastPrefix	text	Last
+quickLog.waistMethod	text	Tape at the navel, standing, breathing out
+quickLog.waistUp	text	Up half a centimetre
+settings.addPasskey	text	Add a passkey on this device
+settings.checkCredential	text	Check it still opens
+settings.checkFailed	text	The stored credential did not open. The master key does not match the one it was written with.
+settings.checkPassed	text	The stored credential opens under the running master key.
+settings.chooseIntegration	text	Which integration
+settings.credentialHelp	text	Paste the token or key the service issued. It is encrypted on arrival and cannot be read back from this screen, an API response or a log line.
+settings.credentialLabel	text	Credential
+settings.disconnect	text	Disconnect
+settings.disconnected	text	Disconnected. The stored credential was deleted.
+settings.emptyBody	text	Withings, Apple Health, Google Calendar and the mail relay each connect from here, and each one reports its state and its last successful sync. None is connected yet.
+settings.emptyTitle	text	No integrations connected
+settings.fieldAppName	text	Application name
+settings.fieldOrigin	text	Application origin
+settings.fieldRpId	text	Passkey relying party
+settings.fieldTimeZone	text	Time zone
+settings.installationNote	text	These four values come from the environment file on the Mac mini and are read on every request. No credential is rendered on this screen, now or ever.
+settings.installationTitle	text	This installation
+settings.integrationsNote	text	A credential entered here is encrypted with the master key on this machine before it is written, and it is never rendered again. This screen shows state, scope and last successful sync, which is everything you need to know whether a source is working.
+settings.integrationStates.connected	text	Connected
+settings.integrationStates.disconnected	text	Not connected
+settings.integrationStates.error	text	Not working
+settings.integrationsTitle	text	Integrations
+settings.lastSyncLabel	text	Last successful sync
+settings.neverSynced	text	No successful sync yet
+settings.no	text	No
+settings.passkeyAdded	text	Passkey added.
+settings.passkeyBackedUp	text	Backed up
+settings.passkeyDeviceType	text	Device type
+settings.passkeyDeviceTypes.multiDevice	text	Usable across your devices
+settings.passkeyDeviceTypes.singleDevice	text	Bound to one device
+settings.passkeyLastUsed	text	Last used
+settings.passkeyLocal	text	This device only
+settings.passkeyNeverUsed	text	Not used yet
+settings.passkeysEmpty	text	No passkey is registered yet. The backup password is the only way in.
+settings.passkeysNote	text	A passkey is bound to the relying party, which is the tailnet name and not the machine name, so renaming the Mac mini does not invalidate it.
+settings.passkeysTitle	text	Passkeys
+settings.passkeySynced	text	Synced
+settings.providers.apple_health.name	text	Apple Health
+settings.providers.apple_health.purpose	text	Steps, workouts, sleep and resting heart rate from the iPhone shortcut.
+settings.providers.google_calendar.name	text	Google Calendar
+settings.providers.google_calendar.purpose	text	Free-busy reads and writes into the Vernier calendar only.
+settings.providers.mail_relay.name	text	Mail relay
+settings.providers.mail_relay.purpose	text	The Sunday review, sent from this machine.
+settings.providers.withings.name	text	Withings
+settings.providers.withings.purpose	text	Weight, fat mass and heart rate from the Body Smart scale.
+settings.saveCredential	text	Save the credential
+settings.saved	text	Saved and encrypted.
+settings.scopeLabel	text	Scope
+settings.sessionExpires	text	This session expires
+settings.sessionMethods.bootstrap	text	The one-time account setup
+settings.sessionMethods.passkey	text	A passkey on this device
+settings.sessionMethods.password	text	The backup password
+settings.sessionMethods.recovery	text	A recovery link minted on the Mac mini
+settings.sessionTitle	text	This session
+settings.signedInWith	text	Signed in with
+settings.signOut	text	Sign out
+settings.stateLabel	text	State
+settings.sub	text	The operator surface: integrations, consent, backup and machine state
+settings.title	text	Settings
+settings.yes	text	Yes
+signIn.createAction	text	Create account and add a passkey
+signIn.createLead	text	This runs once. After it completes, this screen is gone and the only way in is a passkey or this password.
+signIn.createTitle	text	Create the owner account
+signIn.createWorking	text	Creating the account
+signIn.fieldOrigin	text	Application origin
+signIn.fieldRpId	text	Passkey relying party
+signIn.fieldRpName	text	Relying party name
+signIn.lead	text	Your health data, on your machine.
+signIn.loseBothBody	text	Recovery is a local procedure you run on the Mac mini, written down in docs/security.md. No security question. No password sent by email. Nothing to phone up and ask for.
+signIn.loseBothLabel	text	If you lose both
+signIn.nextStepBody	text	Add a passkey with Face ID right after. The password stays as the way back in if the phone is lost.
+signIn.nextStepChip	text	Recommended
+signIn.nextStepLabel	text	Next step
+signIn.passkeyAction	text	Sign in with passkey
+signIn.passkeyRegistered	text	Passkey added. Opening Vernier.
+signIn.passkeyRetry	text	Try the passkey again
+signIn.passkeySkipped	text	The account exists and the password works. This browser offered no passkey, so add one from Settings on the iPhone or the Mac.
+signIn.passwordAction	text	Use the backup password
+signIn.passwordHashNote	text	Hashed with Argon2id on this machine. It never leaves it.
+signIn.passwordLabel	text	Backup password
+signIn.passwordRepeated	text	One character repeated is not a password.
+signIn.passwordRequirement	template	(length ) => `At least 12 characters. You typed ${length}.`
+signIn.passwordReuse	text	Not a password you use anywhere else.
+signIn.passwordSubmit	text	Sign in
+signIn.passwordTooLong	template	(maximum ) => `At most ${maximum} characters.`
+signIn.passwordTooShort	template	(minimum , typed ) => `At least ${minimum} characters. You typed ${typed}.`
+signIn.passwordVariety	text	Three of these four: a lower case letter, a capital, a digit, a symbol.
+signIn.reachable	text	The Mac mini is answering again. Try signing in.
+signIn.refused	text	That did not work.
+signIn.repeatLabel	text	Repeat it
+signIn.repeatMatch	text	Both fields match.
+signIn.repeatMismatch	text	The two fields do not match yet.
+signIn.rpNoteLead	text	Passkeys are registered to
+signIn.rpNoteTail	text	which is the tailnet and not the machine name. Renaming the Mac mini keeps them working.
+signIn.stillUnreachable	text	Still no answer. The machine is asleep, stopped, or off the tailnet.
+signIn.tailscaleNote	text	Tailscale gets you to this screen. It does not get you in. A passkey or the backup password is always required.
+signIn.title	text	Sign in
+signIn.unreachableAction	text	Try again
+signIn.unreachableBody	text	This device cannot reach the origin. Either it has left the tailnet, or the Mac mini is asleep or stopped. Sign-in needs the machine; nothing here works from the cache.
+signIn.unreachableTitle	text	The Mac mini is not answering.
+signIn.working	text	Working
+tabs.eat	text	Eat
+tabs.health	text	Health
+tabs.settings	text	Settings
+tabs.today	text	Today
+tabs.train	text	Train
+today.emptyBody	text	Your day fills in once the owner account exists and a source is connected. Until then there is nothing here, and the app will not invent a number to fill the space.
+today.emptyTitle	text	Nothing planned yet
+today.title	text	Today
+todayLog.correct	text	Correct it
+todayLog.edit	text	Edit
+todayLog.justLogged	text	Just logged
+todayLog.justLoggedEmpty	text	Nothing logged today yet.
+todayLog.needsLogging	text	Needs logging
+todayLog.nothingDue	text	Nothing is due right now.
+todayLog.onFile	text	On file
+todayLog.openValue	text	Open the value
+todayLog.queued	text	Queued
+todayLog.removed	text	Removed
+todayLog.stored	text	Stored
+todayLog.undo	text	Undo
+todayLog.undoable	text	Still on this phone. Undo removes it before it uploads, and Edit reopens the sheet.
+todayLog.undone	text	Removed before it uploaded. Nothing was stored.
+todayLog.undoTooLate	text	It had already uploaded, so there was nothing to undo. Correct it instead and the original stays readable.
+todayLog.uploaded	text	Uploaded to the Mac mini. Vernier never deletes a value, so a change from here is a correction kept beside the original.
+todayLog.uploadStatus	template	(status ) => `The Mac mini answered ${status}.`
+todayLog.waistDue	text	Waist, due today.
+todayLog.whatHappensNext	text	On the next connection the queue uploads in order and each entry keeps the time you typed it, not the time it arrived. If the Mac mini already holds a value for today, the app asks which one is right. It does not choose for you.
+todayLog.whatHappensNextLabel	text	What happens next
+train.emptyBody	text	Three to five sessions are proposed each week, each one carrying the reason it was placed where it was, and each one accepted on its own.
+train.emptyTitle	text	No sessions yet
+train.sub	text	The proposed week, the session player and the movement catalogue
+train.title	text	Train
+unitNames.cm	text	cm
+unitNames.g	text	g
+unitNames.g/L	text	g/L
+unitNames.kcal	text	kcal
+unitNames.kg	text	kg
+unitNames.km	text	km
+unitNames.mmol/L	text	mmol/L
+unitNames.point	text	points, 1 to 5
+unitNames.step	text	steps
+unitNames.text	text	
+unitNames.µg/L	text	µg/L
+units.cm	text	cm
+units.g	text	g
+units.g/L	text	g/L
+units.kcal	text	kcal
+units.kg	text	kg
+units.km	text	km
+units.mmol/L	text	mmol/L
+units.point	text	of 5
+units.step	text	steps
+units.text	text	
+units.µg/L	text	µg/L
+
+421 keys in src/lib/strings.ts
+strings: user-facing text written inline, which C6 does not allow:
+  src/app/(shell)/settings/page.tsx:58  jsx text  "sync-pending"
+  src/app/(shell)/settings/page.tsx:59  jsx text  "Marmalade weather"
+  src/app/(shell)/settings/page.tsx:60  jsx text  "Snoozed"
+  src/app/(shell)/settings/page.tsx:61  attribute aria-label  "Turnip lantern"
+  src/app/(shell)/settings/page.tsx:61  jsx text  "chip"
+  src/app/(shell)/settings/page.tsx:62  attribute aria-roledescription  "Turnip carousel"
+  src/app/(shell)/settings/page.tsx:63  attribute aria-valuetext  "two of five turnips"
+  src/app/(shell)/settings/page.tsx:64  jsx text  "day-to-day"
+  src/app/(shell)/settings/page.tsx:68  jsx text  "Load failed"
+  src/app/(shell)/settings/page.tsx:70  jsx text  "Turnip provenance forged."
+  src/app/(shell)/settings/page.tsx:72  sentence  "Marmalade submit"
+  src/app/(shell)/settings/page.tsx:74  sentence  "Turnip group"
+  src/app/(shell)/settings/page.tsx:79  jsx text  "Marmalade chart"
+  src/app/(shell)/settings/page.tsx:80  jsx text  "Turnips over the last seven days."
+  src/app/(shell)/settings/page.tsx:81  jsx text  "Snoozed axis"
+  src/app/api/auth/password/route.ts:70  refuse() error  "That password did not match anything here."
+  src/app/api/log/route.ts:137  refuse() detail  "The body was not readable, try once more."
+  src/components/QuickLog.tsx:163  sentence  "Vernier lost the thread of that request. ${}"

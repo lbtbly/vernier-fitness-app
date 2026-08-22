@@ -37,8 +37,18 @@
 //   3. Shapes that are values rather than words: a number, a time, a UUID, a
 //      prefixed id, a URL, a host, a zone name, and the month and weekday names
 //      the app's own formatters produce in the app's own zone.
+//   4. Text the browser itself wrote, and only where its provenance can be
+//      established twice over: the markup marks it at the branch that knows,
+//      and the string is one WebKit handed this run when a fetch was refused.
+//      A fragment failing either half fails the check.
 //
 // Anything else is a defect, reported with the text, the surface and the state.
+//
+// WHAT IT READS THAT IT DID NOT. Inside the svg: `title`, `desc` and `text`,
+// which are the words a chart says out loud and the words it draws on an axis.
+// It used to exclude every svg wholesale. Also `aria-roledescription`,
+// `aria-valuetext`, `aria-keyshortcuts`, the braille pair, and the `value` of a
+// submit control, which is a label carried as an attribute.
 //
 // WHAT IT CANNOT SEE, stated plainly rather than discovered later:
 //
@@ -46,23 +56,33 @@
 //     unauthenticated visitor can reach on this machine with the demonstration
 //     seed loaded. A screen that needs a registered passkey, a connected
 //     integration or an open import question is not walked, because none of the
-//     three exists here. Every surface it does walk is named in walk() below,
-//     so the gap is a list and not a guess.
-//   - What the browser itself says. The quick-log error card renders the cause
-//     it was given, and when a fetch never reached the machine that cause is
-//     WebKit's own words. Those have no key and can have none. A fragment whose
-//     only unaccounted text sits in the cause slot of one of the CAUSE_SLOTS
-//     keys is reported as a platform cause rather than failed.
+//     three exists here. Every surface it does walk is named in walk() below
+//     and printed on every run, so the gap is a list and not a guess.
 //   - Two catalogued strings written next to each other. Fragments are tiled
 //     from catalogue anchors, so a sentence assembled entirely out of words that
 //     are already copy somewhere else would tile. Every fragment it accepts is
-//     made of shipped copy; it does not prove the arrangement was intended.
+//     made of shipped copy; it does not prove the arrangement was intended. A4
+//     puts that arrangement under the screen line that owns the screen.
+//   - Text inside an element the shipped CSS hides with `display: none`. It is
+//     read here and judged like anything else, which errs the safe way.
 //   - /healthz, which answers a machine and is graded by C1 for saying as
 //     little as possible.
 import { execFileSync } from 'node:child_process';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { webkit } from '@playwright/test';
+import {
+  GLUE,
+  LABEL_ATTRIBUTE_ELEMENTS,
+  MACHINE_TEXT_ELEMENTS,
+  MACHINE_TOKENS,
+  NEVER_RENDERED,
+  SPOKEN_ATTRIBUTES,
+  SVG_EXCLUDED_SUBTREES,
+  SVG_TEXT_ELEMENTS,
+  TOKENS,
+  VALUE_AS_LABEL,
+} from './lib/vocabulary.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(here, '..');
@@ -249,20 +269,21 @@ for (const [column, statement] of DATA_QUERIES) {
 
 // --------------------------------------------------------------------------
 // Shapes that are values rather than words.
-
-const TOKENS = [
-  ['uuid', /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i],
-  ['id', /^(?:src_|q_|demo_)[A-Za-z0-9_.:-]+/],
-  ['url', /^https?:\/\/[^\s]+/],
-  ['zone', /^[A-Z][A-Za-z]+(?:\/[A-Za-z_]+)+/],
-  ['dotted identifier', /^[a-z][a-z0-9]*(?:\.[a-z0-9]+)+/],
-  ['machine identifier', /^[a-z][a-z0-9]*(?:[-_][a-z0-9]+)+/],
-  ['host', /^[a-z0-9][a-z0-9-]*(?:\.[a-z0-9-]+)+/],
-  ['number', /^[+-]?\d+(?:[.,:]\d+)*/],
-];
-
-/** Space and punctuation between two things that are accounted for. */
-const GLUE = /^[\s,.;:!?·•|/\\()[\]{}"'“”‘’«»–—+*=%~@#&<>$£€-]+/;
+//
+// TOKENS and GLUE live in scripts/lib/vocabulary.mjs now, with the spoken
+// attributes and the svg element lists, because both checkers need the same
+// answer to "what can a person read" and keeping two copies equal by hand is
+// what put aria-roledescription in neither.
+//
+// One shape is gone rather than moved. `machine identifier` matched
+// /^[a-z][a-z0-9]*(?:[-_][a-z0-9]+)+/, which is "sign-in", "check-in",
+// "opt-out", "follow-up" and "day-to-day": ordinary English that happens to
+// carry a hyphen, tiled as a value and never read as copy. C6 now says "however
+// few words it is, including one hyphenated word", so a hyphenated word is copy
+// and needs a key. What that shape legitimately covered is covered by name: a
+// value this check sent is an echo anchor, a value out of a column is a data
+// anchor, and notation a screen prints on purpose sits in a <code> and is read
+// under MACHINE_TOKENS, which apply nowhere else.
 
 const byFirstCharacter = new Map();
 
@@ -277,6 +298,9 @@ function indexAnchors() {
 }
 
 indexAnchors();
+
+/** One reading of whitespace, so a fragment compares the same everywhere. */
+const normalise = (text) => text.replace(/[\u00A0\u202F]/g, ' ').replace(/\s+/g, ' ').trim();
 
 const isWordCharacter = (character) => character !== undefined && /[A-Za-z0-9]/.test(character);
 
@@ -294,9 +318,10 @@ function anchorAt(text, index) {
   return null;
 }
 
-function tokenAt(text, index) {
+function tokenAt(text, index, machineText) {
   const rest = text.slice(index);
-  for (const [name, pattern] of TOKENS) {
+  const shapes = machineText ? [...TOKENS, ...MACHINE_TOKENS] : TOKENS;
+  for (const [name, pattern] of shapes) {
     const match = pattern.exec(rest);
     if (!match || match[0] === '') continue;
     const after = index + match[0].length;
@@ -311,7 +336,7 @@ function tokenAt(text, index) {
  * first character none of them can account for is where it fails, and the rest
  * of the line is what is reported, because that is the string somebody read.
  */
-function tile(text) {
+function tile(text, { machineText = false } = {}) {
   const used = [];
   let index = 0;
   while (index < text.length) {
@@ -321,7 +346,7 @@ function tile(text) {
       continue;
     }
     const anchor = anchorAt(text, index);
-    const token = tokenAt(text, index);
+    const token = tokenAt(text, index, machineText);
     const anchorLength = anchor ? anchor.text.length : 0;
     const tokenLength = token ? token.length : 0;
     if (anchorLength === 0 && tokenLength === 0) {
@@ -338,99 +363,240 @@ function tile(text) {
   return { ok: true, used };
 }
 
-/**
- * The one deliberate exemption, and it is one key wide.
- *
- * `quickLog.errorBody` renders the cause it was handed into a sentence of its
- * own. When the fetch reached the machine that cause is a catalogued refusal
- * and tiles like anything else. When the fetch never reached the machine it is
- * WebKit's own words, which have no key and can have none. A fragment whose
- * only unaccounted text sits in that slot is reported rather than failed.
- */
-const CAUSE_SLOTS = [{ key: 'quickLog.errorBody', fn: strings.quickLog.errorBody }].map(
-  ({ key, fn }) => ({ key, segments: fn(SENTINEL).split(SENTINEL).filter((part) => part.trim() !== '') }),
-);
+// --------------------------------------------------------------------------
+// The one exemption, and it is keyed to provenance.
+//
+// C6 puts text the product did not author outside the line, and requires the
+// check that excuses such text to establish that by provenance and to fail
+// every fragment whose provenance it cannot establish.
+//
+// WHAT THIS REPLACED, because the difference is the whole defect. There used to
+// be a slot: any fragment containing the literal segments of
+// `quickLog.errorBody` was reported as a platform cause and the run stayed
+// green. That is position, not provenance. It excused whatever landed in the
+// slot, so `HTTP 502 at 14:32.` composed inline in the component walked
+// straight through, and the verifier proved it by planting app copy there and
+// watching the check pass.
+//
+// Provenance is established two ways at once, and BOTH must hold:
+//
+//   1. The product says so at the branch that knows. The quick log marks the
+//      cause `data-authored="platform"` only where the string is a caught
+//      Error from a fetch that never reached the machine, and
+//      `data-authored="vernier"` on every branch that composes a catalogued
+//      string. A marker alone is not enough, because a marker is a claim.
+//   2. The browser says so, in this run. Before the walk starts, this check
+//      provokes fourteen transport failures through WebKit and records the
+//      message WebKit hands back for each. A fragment is excused only when its
+//      text is exactly one of those recorded messages. Nothing the product
+//      wrote can be one of them, because they came out of the browser and not
+//      out of the repository.
+//
+// A fragment marked platform whose text was never harvested FAILS, and it fails
+// naming what could not be established. So does an unaccounted fragment that
+// carries no marker, wherever it sits. There is no third path.
 
-function inCauseSlot(text) {
-  for (const slot of CAUSE_SLOTS) {
-    let index = 0;
-    let matched = true;
-    for (const segment of slot.segments) {
-      const found = text.indexOf(segment.trim(), index);
-      if (found === -1) {
-        matched = false;
-        break;
+/** message -> how it was provoked. Filled by harvestPlatformWords, once, first. */
+const platformVocabulary = new Map();
+
+/**
+ * Every way WebKit can refuse to reach the machine, and what it says about each.
+ *
+ * These are Playwright's abort reasons, which map onto the network errors the
+ * browser raises on its own. Running all of them means the recorded vocabulary
+ * is the platform's, complete for this engine and this version, and gathered in
+ * the same run that reads it rather than pasted into a list here.
+ */
+const TRANSPORT_FAILURES = [
+  'aborted',
+  'accessdenied',
+  'addressunreachable',
+  'blockedbyclient',
+  'blockedbyresponse',
+  'connectionaborted',
+  'connectionclosed',
+  'connectionfailed',
+  'connectionrefused',
+  'connectionreset',
+  'failed',
+  'internetdisconnected',
+  'namenotresolved',
+  'timedout',
+];
+
+async function harvestPlatformWords(page) {
+  for (const reason of TRANSPORT_FAILURES) {
+    await page.route('**/api/log', (route) => route.abort(reason));
+    const message = await page.evaluate(async () => {
+      try {
+        await fetch('/api/log', { headers: { accept: 'application/json' } });
+        return null;
+      } catch (error) {
+        return String(error && error.message ? error.message : error);
       }
-      index = found + segment.trim().length;
+    });
+    await page.unroute('**/api/log');
+    const normalised = normalise(message ?? '');
+    if (normalised !== '' && !platformVocabulary.has(normalised)) {
+      platformVocabulary.set(normalised, `WebKit, on a fetch aborted with ${reason}`);
     }
-    if (matched) return slot.key;
   }
-  return null;
+}
+
+/**
+ * Can this fragment's provenance be established as platform-authored. Returns
+ * how, or null, and null means the fragment fails.
+ */
+function platformProvenance(fragment, context) {
+  if (context.authored !== 'platform') return null;
+  return platformVocabulary.get(fragment) ?? null;
 }
 
 // --------------------------------------------------------------------------
 // Reading a rendered surface.
 
 /**
- * Every string a person can read or hear on the page: text nodes, the spoken
- * attributes, and the document title. Visually hidden text is included, because
- * a screen reader reads it and C8 puts it there on purpose.
+ * Every string a person can read or hear on the page.
+ *
+ * Text nodes, the spoken attributes, the two attributes that are drawn as
+ * labels, and the document title. Visually hidden text is included, because a
+ * screen reader reads it and C8 puts it there on purpose.
+ *
+ * IT READS INSIDE THE SVG NOW. It used to skip every svg wholesale with
+ * `element.closest('script, style, noscript, template, svg')`, which made
+ * `<svg><text>`, `<title>` and `<desc>` invisible: three of the places C6 now
+ * names by hand, and the three strings VoiceOver actually speaks over a chart.
+ * C8 requires a title and a desc inside every chart, so as shipped this check
+ * was blind to every word inside every chart of slices 4, 7, 9 and 12. Now the
+ * elements that hold words are read and the geometry is not: `path` stays out
+ * because it holds coordinates, and `defs`, `clipPath`, `mask`, `pattern` and
+ * `marker` stay out because nothing in them renders where it sits.
+ *
+ * Everything it reads is passed in from scripts/lib/vocabulary.mjs. This
+ * function is serialised into the page, so it can close over nothing: the lists
+ * arrive as an argument, which is also what keeps them equal to the ones the
+ * source-side checker uses.
  */
-function readTheScreen() {
+function readTheScreen(vocabulary) {
+  const { spoken, valueAsLabel, labelElements, svgText, svgExcluded, machineText, neverRendered } =
+    vocabulary;
   const found = [];
   const describe = (element) => {
     if (!element) return 'body';
     const classes = element.getAttribute('class');
     return element.tagName.toLowerCase() + (classes ? '.' + classes.split(/\s+/).join('.') : '');
   };
+  // Who wrote it, if the markup says, and whether the screen has declared this
+  // subtree to be notation rather than language.
+  const contextOf = (element) => {
+    const marked = element.closest('[data-authored]');
+    return {
+      authored: marked ? marked.getAttribute('data-authored') : null,
+      machineText: element.closest(machineText.join(', ')) !== null,
+    };
+  };
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   while (walker.nextNode()) {
     const node = walker.currentNode;
     const element = node.parentElement;
     if (!element) continue;
-    if (element.closest('script, style, noscript, template, svg')) continue;
+    if (element.closest(neverRendered.join(', '))) continue;
+    if (element.closest('svg')) {
+      if (element.closest(svgExcluded.join(', '))) continue;
+      if (!element.closest(svgText.join(', '))) continue;
+    }
     if (!node.data || node.data.trim() === '') continue;
-    found.push({ where: describe(element), text: node.data });
+    found.push({ where: describe(element), text: node.data, ...contextOf(element) });
   }
-  const spoken = ['aria-label', 'aria-description', 'aria-placeholder', 'placeholder', 'alt', 'title'];
   for (const element of document.querySelectorAll('[' + spoken.join('], [') + ']')) {
     for (const name of spoken) {
       const value = element.getAttribute(name);
-      if (value && value.trim() !== '') found.push({ where: describe(element) + '@' + name, text: value });
+      if (value && value.trim() !== '') {
+        found.push({ where: describe(element) + '@' + name, text: value, ...contextOf(element) });
+      }
     }
   }
-  if (document.title) found.push({ where: 'title', text: document.title });
+  // A <button> carries its label as children. These carry it as an attribute,
+  // and the text walk above never sees it.
+  for (const element of document.querySelectorAll(valueAsLabel.join(', '))) {
+    const value = element.getAttribute('value');
+    if (value && value.trim() !== '') {
+      found.push({ where: describe(element) + '@value', text: value, ...contextOf(element) });
+    }
+  }
+  for (const element of document.querySelectorAll(labelElements.join(', '))) {
+    const value = element.getAttribute('label');
+    if (value && value.trim() !== '') {
+      found.push({ where: describe(element) + '@label', text: value, ...contextOf(element) });
+    }
+  }
+  if (document.title) {
+    found.push({ where: 'title', text: document.title, authored: null, machineText: false });
+  }
   const description = document.querySelector('meta[name="description"]');
-  if (description) found.push({ where: 'meta description', text: description.getAttribute('content') || '' });
+  if (description) {
+    found.push({
+      where: 'meta description',
+      text: description.getAttribute('content') || '',
+      authored: null,
+      machineText: false,
+    });
+  }
   return found;
 }
 
 const defects = [];
-const platformCauses = [];
+const platformText = [];
 let fragmentsRead = 0;
 const surfacesWalked = [];
 
-function judge(surface, state, where, text) {
-  const fragment = text.replace(/[\u00A0\u202F]/g, ' ').replace(/\s+/g, ' ').trim();
+function judge(surface, state, where, text, context = {}) {
+  const fragment = normalise(text);
   if (fragment === '') return;
   fragmentsRead += 1;
-  const result = tile(fragment);
+  const result = tile(fragment, { machineText: context.machineText === true });
   if (result.ok) {
     if (VERBOSE) process.stdout.write(`  ok   ${surface} / ${state}  ${JSON.stringify(fragment)}\n`);
     return;
   }
-  const slot = inCauseSlot(fragment);
-  if (slot) {
-    platformCauses.push({ surface, state, where, text: fragment, slot });
+  const provenance = platformProvenance(fragment, context);
+  if (provenance) {
+    platformText.push({ surface, state, where, text: fragment, provenance });
     return;
   }
-  defects.push({ surface, state, where, text: fragment, unaccounted: result.rest });
+  defects.push({
+    surface,
+    state,
+    where,
+    text: fragment,
+    unaccounted: result.rest,
+    // A fragment the markup calls platform text but the browser never said is
+    // the exact shape the old slot exemption let through. It fails, and it
+    // fails saying which of the two halves of provenance was missing.
+    why:
+      context.authored === 'platform'
+        ? 'marked platform, but WebKit never produced this string in this run'
+        : 'no catalogue key accounts for it',
+  });
 }
 
 async function readSurface(page, surface, state) {
-  const found = await page.evaluate(readTheScreen);
+  const found = await page.evaluate(readTheScreen, {
+    spoken: SPOKEN_ATTRIBUTES,
+    valueAsLabel: VALUE_AS_LABEL,
+    labelElements: LABEL_ATTRIBUTE_ELEMENTS,
+    svgText: SVG_TEXT_ELEMENTS,
+    svgExcluded: SVG_EXCLUDED_SUBTREES,
+    machineText: MACHINE_TEXT_ELEMENTS,
+    neverRendered: NEVER_RENDERED,
+  });
   surfacesWalked.push(`${surface} / ${state}`);
-  for (const { where, text } of found) judge(surface, state, where, text);
+  for (const found_ of found) {
+    judge(surface, state, found_.where, found_.text, {
+      authored: found_.authored,
+      machineText: found_.machineText,
+    });
+  }
 }
 
 /** The strings an API answer puts on a screen. Machine fields are not read. */
@@ -470,9 +636,76 @@ if (explainAt !== -1) {
 // --------------------------------------------------------------------------
 // The walk.
 
+/**
+ * The six sources the database CHECK permits. F22 sends every one of them to
+ * the same destination shape, and C6's evidence clause requires this walk to
+ * cover at least one stored value per source.
+ */
+const PERMITTED_SOURCES = [
+  'apple_health_shortcut',
+  'demo',
+  'derived',
+  'lab_pdf',
+  'manual',
+  'withings',
+];
+
 const rowIds = db('select id from measurement order by measured_at desc');
-const ratingIds = db("select id from measurement where unit = 'point' limit 1");
+const ratingIds = db("select id from measurement where unit = 'point'");
 const sourceIds = db('select id from source_record order by recorded_at desc');
+const sourcesBehindAValue = db(
+  `select distinct record.source from measurement value
+   join source_record record on record.id = value.source_record_id`,
+);
+const kindsBehindAValue = db(
+  `select distinct record.kind from measurement value
+   join source_record record on record.id = value.source_record_id`,
+);
+
+// --------------------------------------------------------------------------
+// The population floor.
+//
+// This walk reads its list of surfaces out of the database: one `/value/[id]`
+// per stored row, one `/source/[id]` per source record. On an empty database
+// both loops walk nothing, the run prints a shorter list, and it exits 0 saying
+// "every fragment on every surface resolves to a key." A green over almost
+// nothing reads exactly like a green over everything, and that is not an edge
+// case: `compose.yaml` reads `DEMO_MODE: ${DEMO_MODE:-0}`, so a stack brought
+// up from a clean shell has no rows in it at all.
+//
+// So the floor is asserted before the browser is launched, and it is named in
+// C6's own evidence clause rather than left as advice. A zero is evidence only
+// beside the population it covered.
+const missingSources = PERMITTED_SOURCES.filter((source) => !sourcesBehindAValue.includes(source));
+const floor = [
+  ['stored values walked', rowIds.length, 1],
+  ['source records walked', sourceIds.length, 1],
+  ['ratings on the one to five scale', ratingIds.length, 1],
+  ['sources with a stored value behind them', sourcesBehindAValue.length, PERMITTED_SOURCES.length],
+];
+
+process.stdout.write('rendered strings: the population this walk covers\n');
+for (const [what, counted, needed] of floor) {
+  process.stdout.write(`  ${counted} ${what}, floor ${needed}\n`);
+}
+process.stdout.write(`  source kinds behind a value: ${kindsBehindAValue.sort().join(', ') || 'none'}\n`);
+
+const short = floor.filter(([, counted, needed]) => counted < needed);
+if (short.length > 0) {
+  process.stderr.write(
+    '\nrendered strings: the walk would cover too little to mean anything, so it did not run.\n',
+  );
+  for (const [what, counted, needed] of short) {
+    process.stderr.write(`  ${what}: ${counted}, and this needs ${needed}\n`);
+  }
+  if (missingSources.length > 0) {
+    process.stderr.write(`  no stored value stands in for: ${missingSources.join(', ')}\n`);
+  }
+  process.stderr.write(
+    '  Bring the stack up with demonstration data: DEMO_MODE=1 is named in .env.example.\n',
+  );
+  process.exit(1);
+}
 
 const browser = await webkit.launch();
 const context = await browser.newContext({
@@ -486,6 +719,13 @@ const page = await context.newPage();
 async function walk() {
   // The visitor at the gate, before any session exists on this context.
   await page.goto('/sign-in');
+
+  // Ask the browser what it says when it cannot reach the machine, before
+  // reading a single surface. This is the whole of the platform exemption and
+  // it is gathered rather than declared: fourteen transport failures, fourteen
+  // messages, all of them out of WebKit in this run.
+  await harvestPlatformWords(page);
+
   await readSurface(page, '/sign-in', 'passkey first');
   await page.getByRole('button', { name: strings.signIn.passwordAction, exact: true }).click();
   await readSurface(page, '/sign-in', 'backup password');
@@ -577,6 +817,33 @@ async function walk() {
   await open.click();
   await page.locator('[data-state="stale"]').first().waitFor();
   await readSurface(page, '/ quick log', 'the waist reading is days old');
+  await page.locator('.sheet [aria-label="' + strings.quickLog.close + '"]').first().click();
+  await page.unroute('**/api/log');
+
+  // The machine answered and the answer carried no words: a proxy 502, an HTML
+  // error page, a body that is not JSON. The card falls back to its status
+  // line, which is Vernier's own copy. That line was written inline in the
+  // component for three verifications and no walked state ever reached it,
+  // which is exactly why this state is walked now.
+  await page.route('**/api/log', async (route) => {
+    if (route.request().method() !== 'GET') return route.fallback();
+    return route.fulfill({ status: 502, contentType: 'application/json', body: '{}' });
+  });
+  await open.click();
+  await page.locator('.card.error[data-state="error"]').first().waitFor();
+  await readSurface(page, '/ quick log', 'the answer carried no words');
+  await page.locator('.sheet [aria-label="' + strings.quickLog.close + '"]').first().click();
+  await page.unroute('**/api/log');
+
+  // The fetch never reached the machine, so the cause is the browser's. This is
+  // the one state the platform exemption exists for, and walking it is what
+  // proves the exemption is exercised rather than merely written down.
+  await page.route('**/api/log', (route) =>
+    route.request().method() === 'GET' ? route.abort('connectionfailed') : route.fallback(),
+  );
+  await open.click();
+  await page.locator('.card.error[data-state="error"]').first().waitFor();
+  await readSurface(page, '/ quick log', 'the fetch never reached the machine');
   await page.locator('.sheet [aria-label="' + strings.quickLog.close + '"]').first().click();
   await page.unroute('**/api/log');
 
@@ -717,7 +984,19 @@ async function walkTheApi() {
     if (Array.isArray(body)) return body.forEach(echoOfTheRequest);
     if (body && typeof body === 'object') return Object.values(body).forEach(echoOfTheRequest);
   };
-  for (const [, , options] of refusals) echoOfTheRequest(options.data);
+  for (const [, , options] of refusals) {
+    echoOfTheRequest(options.data);
+    // And the header names, which a refusal quotes back: "This request carried
+    // no x-vernier-csrf header." That name used to tile as a `machine
+    // identifier`, a shape that also swallowed every hyphenated English word,
+    // so the shape is gone and the name is accounted for the honest way: it is
+    // a string this file sent a moment earlier and it is tagged as one. Names
+    // only. A header VALUE is a token or a credential and neither belongs in a
+    // vocabulary of things a person may read.
+    for (const name of Object.keys(options.headers ?? {})) {
+      addAnchor(name, 'echo of a header this check sent');
+    }
+  }
   indexAnchors();
 
   for (const [state, path, options] of refusals) {
@@ -746,12 +1025,12 @@ try {
 // The report.
 
 process.stdout.write(
-  `rendered strings: ${surfacesWalked.length} surface states walked, ${fragmentsRead} fragments read against ${catalogueKeys} catalogue keys, ${dataValues} stored data values and ${TOKENS.length} value shapes.\n`,
+  `rendered strings: ${surfacesWalked.length} surface states walked, ${fragmentsRead} fragments read against ${catalogueKeys} catalogue keys, ${dataValues} stored data values, ${TOKENS.length} value shapes and ${platformVocabulary.size} distinct message(s) harvested from WebKit.\n`,
 );
 
-for (const cause of platformCauses) {
+for (const text of platformText) {
   process.stdout.write(
-    `  platform cause  ${cause.surface} / ${cause.state}  ${JSON.stringify(cause.text)}  fills ${cause.slot}\n`,
+    `  platform text  ${text.surface} / ${text.state}  ${JSON.stringify(text.text)}  provenance: ${text.provenance}\n`,
   );
 }
 
@@ -767,7 +1046,7 @@ if (defects.length === 0) {
 process.stderr.write(`\nrendered strings: ${defects.length} fragment(s) with no key, which C6 does not allow:\n`);
 for (const defect of defects) {
   process.stderr.write(
-    `  ${defect.surface}  [${defect.state}]  ${defect.where}\n    read: ${JSON.stringify(defect.text)}\n    unaccounted: ${JSON.stringify(defect.unaccounted)}\n`,
+    `  ${defect.surface}  [${defect.state}]  ${defect.where}\n    read: ${JSON.stringify(defect.text)}\n    unaccounted: ${JSON.stringify(defect.unaccounted)}\n    why: ${defect.why}\n`,
   );
 }
 process.exit(1);

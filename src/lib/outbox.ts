@@ -244,14 +244,14 @@ export async function flushOutbox(options: { force?: boolean } = {}): Promise<Fl
         // Parking is for a request the server will never accept.
         if (PARK_ON.has(response.status)) {
           entry.parked = true;
-          entry.lastError = `HTTP ${response.status}`;
+          entry.lastError = strings.todayLog.uploadStatus(response.status);
           lastError = entry.lastError;
           await save(entry);
           notify();
           continue;
         }
 
-        throw new Error(`HTTP ${response.status}`);
+        throw new Error(strings.todayLog.uploadStatus(response.status));
       } catch (error) {
         entry.attempts += 1;
         const base = Math.min(2 ** entry.attempts * 1000, 5 * 60_000);

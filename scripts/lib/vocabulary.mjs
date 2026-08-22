@@ -1,0 +1,105 @@
+// One vocabulary, two checkers.
+//
+// scripts/strings.mjs reads the source and scripts/rendered-strings.mjs reads
+// the screen. Neither one closes C6 alone; the union does. That only holds if
+// the two agree on what a person can read, and for three verifications they did
+// not: `SPOKEN_ATTRIBUTES` existed twice with the same six entries, both copies
+// missing `aria-roledescription`, and nothing anywhere kept them equal. A rule
+// one checker holds and the other does not is the defect class behind every C6
+// failure this slice has had.
+//
+// So the lists live here and both checkers import them. Add an attribute once
+// and both see it.
+
+/**
+ * Every attribute whose value a person reads or a screen reader speaks.
+ *
+ * Text-valued only. `aria-labelledby` and `aria-describedby` are absent on
+ * purpose: they carry element ids, and the text they point at is already read
+ * where it is written. `aria-valuenow` and `aria-level` are numbers. What is
+ * here is authored copy, and authored copy needs a key.
+ */
+export const SPOKEN_ATTRIBUTES = [
+  'alt',
+  'aria-braillelabel',
+  'aria-brailleroledescription',
+  'aria-description',
+  'aria-keyshortcuts',
+  'aria-label',
+  'aria-placeholder',
+  'aria-roledescription',
+  'aria-valuetext',
+  'placeholder',
+  'title',
+];
+
+/**
+ * Elements whose `value` attribute is drawn on the control rather than sent
+ * with the form. A `<button>` carries its label as children and is read by the
+ * text walk; these three carry it as an attribute and are not.
+ */
+export const VALUE_AS_LABEL = ['input[type="submit"]', 'input[type="button"]', 'input[type="reset"]'];
+
+/** Elements whose `label` attribute is drawn in a menu or a track list. */
+export const LABEL_ATTRIBUTE_ELEMENTS = ['optgroup', 'track'];
+
+/**
+ * Inside an svg, the elements that hold words. C8 puts a `<title>` and a
+ * `<desc>` in every chart and those are the strings VoiceOver actually speaks;
+ * `<text>` is what a sighted reader sees on the axis. Everything else in an svg
+ * is geometry, and `path` and `defs` stay out.
+ */
+export const SVG_TEXT_ELEMENTS = ['title', 'desc', 'text', 'tspan', 'textPath'];
+
+/** Inside an svg, subtrees that are never rendered where they sit. */
+export const SVG_EXCLUDED_SUBTREES = ['defs', 'clipPath', 'mask', 'pattern', 'marker'];
+
+/** Elements whose text content is machine notation rather than prose. */
+export const MACHINE_TEXT_ELEMENTS = ['code', 'kbd', 'samp', 'pre'];
+
+/** Subtrees that never reach a reader at all. */
+export const NEVER_RENDERED = ['script', 'style', 'noscript', 'template'];
+
+/**
+ * Space and punctuation between two things that are accounted for.
+ *
+ * Glue is skipped rather than matched, so it can never be the reason a fragment
+ * passes: a fragment made only of glue reads as empty and is not counted.
+ */
+export const GLUE = /^[\s,.;:!?·•|/\\()[\]{}"'“”‘’«»–—+*=%~@#&<>$£€-]+/;
+
+/**
+ * Shapes that are values rather than words.
+ *
+ * There used to be a ninth, `machine identifier`,
+ * `/^[a-z][a-z0-9]*(?:[-_][a-z0-9]+)+/`, and it swallowed "sign-in",
+ * "check-in", "opt-out", "follow-up" and "day-to-day". Any lowercase hyphenated
+ * English word tiled as a value and never as copy, which is a hole a real
+ * inline string walks through. It is deleted rather than narrowed, because the
+ * three things it legitimately covered are already covered better and by name:
+ * a value this check sent itself is an echo anchor, a value read out of a
+ * column is a data anchor, and notation a screen prints on purpose sits in a
+ * `<code>` and is read under MACHINE_TOKENS below. A bare run of prose is never
+ * a machine identifier again.
+ */
+export const TOKENS = [
+  ['uuid', /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i],
+  ['id', /^(?:src_|q_|demo_)[A-Za-z0-9_.:-]+/],
+  ['url', /^https?:\/\/[^\s]+/],
+  ['zone', /^[A-Z][A-Za-z]+(?:\/[A-Za-z_]+)+/],
+  ['dotted identifier', /^[a-z][a-z0-9]*(?:\.[a-z0-9]+)+/],
+  ['host', /^[a-z0-9][a-z0-9-]*(?:\.[a-z0-9-]+)+/],
+  ['number', /^[+-]?\d+(?:[.,:]\d+)*/],
+];
+
+/**
+ * Extra shapes allowed only inside a MACHINE_TEXT_ELEMENTS subtree, where the
+ * screen has said in markup that what follows is notation and not language.
+ */
+export const MACHINE_TOKENS = [['machine identifier', /^[A-Za-z_][A-Za-z0-9]*(?:[-_.][A-Za-z0-9]+)+/]];
+
+/** Two letters in a row is copy. One letter, punctuation or a numeral is glue. */
+export const LOOKS_LIKE_COPY = /[A-Za-z]{2,}/;
+
+/** Words that are markup, not language. */
+export const NOT_COPY = new Set(['px', 'em', 'rem']);

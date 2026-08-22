@@ -86,6 +86,7 @@ if (!process.argv.includes('--check')) process.exit(0);
 //      are rendered verbatim on the value sheet and at the gate.
 //   3. Shape. A prose sentence anywhere in these trees.
 import ts from 'typescript';
+import { LOOKS_LIKE_COPY, NOT_COPY, SPOKEN_ATTRIBUTES } from './lib/vocabulary.mjs';
 
 /**
  * Everything that renders a screen or answers a request. src/lib and src/db are
@@ -102,32 +103,64 @@ const SCAN_DIRS = [
 /** The catalogue itself, which is where the strings are supposed to be. */
 const CATALOGUE = join(projectRoot, 'src', 'lib', 'strings.ts');
 
-/** Attributes a person reads or hears. */
-const SPOKEN_ATTRIBUTES = new Set(['aria-label', 'aria-description', 'aria-placeholder', 'placeholder', 'alt', 'title']);
-
-/** Two letters in a row is copy. One letter, punctuation or a numeral is glue. */
-const LOOKS_LIKE_COPY = /[A-Za-z]{2,}/;
-
-/** Words that are markup, not language. */
-const NOT_COPY = new Set(['px', 'em', 'rem']);
+/**
+ * Attributes a person reads or hears, from the module both checkers import.
+ *
+ * This was a second local list once, six entries, equal to the other one by
+ * hand and drifted from the truth in both places at the same time:
+ * `aria-roledescription` was missing from both, which made it the single string
+ * shape the union of the two checks could not see. There is one list now.
+ */
+const SPOKEN = new Set(SPOKEN_ATTRIBUTES);
 
 /**
- * A sentence a person reads: three or more words, and either it opens with a
- * capital or it closes on a full stop, a question mark or an exclamation mark.
+ * A string a person reads.
  *
- * That line is drawn where it is because of what sits just under it. This
- * codebase writes three kinds of multi-word string on purpose and none of them
- * is copy: an audit reason stored in a column, which is deliberately a
- * lower-case fragment with no full stop; a stylesheet or an SVG path, which
- * opens on a brace or an angle bracket; and a SQL statement, which opens on a
- * verb in lower case and closes on a bracket. None of the three can pass this
- * test, and no sentence written for a reader can fail it.
+ * The word count is gone. It said "three or more words" and that is exactly the
+ * rule `'not connected'` walked through, two words returned by a database helper
+ * and painted on a chip. C6 now says "however few words it is", so this asks
+ * about shape and never about length: it opens with a capital or it closes on a
+ * full stop, a question mark or an exclamation mark.
+ *
+ * What sits under that line is machine notation, and it is excluded by naming
+ * what it looks like rather than by how short it is. A route key, a MIME type,
+ * a header name, a SCREAMING constant, an identifier in camel or snake or kebab
+ * case: none of them is prose, and each one is a shape. An audit reason stored
+ * in a column stays out because it is deliberately lower case with no full
+ * stop, a stylesheet or an SVG path opens on a brace or an angle bracket, and a
+ * SQL statement opens on a lower-case verb. No sentence written for a reader
+ * can fail this test, and one capitalised word now fails it the way a paragraph
+ * does.
  */
+const MACHINE_SHAPES = [
+  /^[A-Z][A-Z0-9]*(?:[-_][A-Z0-9]+)*$/, // HTTP, POST, MASTER_KEY
+  /^[a-z][a-z0-9]*(?:[A-Z][a-z0-9]*)+$/, // camelCase
+  /^[A-Z][a-z0-9]*(?:[A-Z][a-z0-9]*)+$/, // PascalCase, which is how a class names itself
+  /^[A-Za-z][A-Za-z0-9]*(?:[-_.][A-Za-z0-9]+)+$/, // kebab, snake, dotted, Idempotency-Key
+  /^[A-Za-z]+\/[A-Za-z0-9.+-]+$/, // application/json, Europe/Paris, mmol/L
+  /^\W*$/, // punctuation only
+];
+
+/**
+ * Every shape above is one run of characters with no space in it, which is the
+ * whole of the claim: notation is a token and copy is language. A shape that
+ * could swallow a phrase would be the `machine identifier` mistake again, so
+ * this is asserted here rather than trusted, and the check refuses to start if
+ * any shape ever accepts a sentence.
+ */
+for (const shape of MACHINE_SHAPES) {
+  if (shape.test('Sign in first.') || shape.test('sign-in first')) {
+    process.stderr.write('strings: a machine shape accepts a phrase, which is the hole it exists to avoid.\n');
+    process.exit(2);
+  }
+}
+
 function readsAsASentence(text) {
   const trimmed = text.trim();
   if (trimmed.startsWith('<') || trimmed.startsWith(':') || trimmed.startsWith('{')) return false;
   const words = trimmed.split(/\s+/).filter((word) => /[A-Za-z]{2,}/.test(word));
-  if (words.length < 3) return false;
+  if (words.length === 0) return false;
+  if (MACHINE_SHAPES.some((shape) => shape.test(trimmed))) return false;
   return /^[A-Z]/.test(trimmed) || /[.?!]$/.test(trimmed);
 }
 
@@ -192,7 +225,7 @@ for (const dir of SCAN_DIRS) {
         if (LOOKS_LIKE_COPY.test(text) && !NOT_COPY.has(text)) {
           violations.push({ file: name, line: at(node), kind: 'jsx text', text });
         }
-      } else if (ts.isJsxAttribute(node) && SPOKEN_ATTRIBUTES.has(node.name.getText(tree))) {
+      } else if (ts.isJsxAttribute(node) && SPOKEN.has(node.name.getText(tree))) {
         const text = literalOf(node.initializer);
         if (text !== null && LOOKS_LIKE_COPY.test(text)) {
           violations.push({

@@ -1,0 +1,130 @@
+rendered strings: the population this walk covers
+  6 stored values walked, floor 1
+  6 source records walked, floor 1
+  1 ratings on the one to five scale, floor 1
+  6 sources with a stored value behind them, floor 6
+  source kinds behind a value: demo_record, derivation, lab_page, manual_entry, shortcut_payload, sync_batch
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+rendered strings: 50 surface states walked, 1688 fragments read against 421 catalogue keys, 31 stored data values, 7 value shapes and 1 distinct message(s) harvested from WebKit.
+  platform text  / quick log / the fetch never reached the machine  "Load failed"  provenance: WebKit, on a fetch aborted with aborted
+  walked  /sign-in / passkey first
+  walked  /sign-in / backup password
+  walked  /offline / served from the shell
+  walked  /sign-in / bounced from a protected route
+  walked  / / today, values on file
+  walked  /health / empty
+  walked  /train / empty
+  walked  /eat / empty
+  walked  /settings / four integrations, no passkey
+  walked  /no-such-address / not found
+  walked  /value/[id] / stored value demo_average
+  walked  /value/[id] / stored value demo_weight
+  walked  /value/[id] / stored value demo_energy
+  walked  /value/[id] / stored value demo_waist
+  walked  /value/[id] / stored value demo_steps
+  walked  /value/[id] / stored value demo_ldl
+  walked  /value/[id] / no such value
+  walked  /source/[id] / source record demo_src_energy
+  walked  /source/[id] / source record demo_src_average
+  walked  /source/[id] / source record demo_src_ldl
+  walked  /source/[id] / source record demo_src_waist
+  walked  /source/[id] / source record demo_src_steps
+  walked  /source/[id] / source record demo_src_weight
+  walked  /source/[id] / no such source
+  walked  /value/[id] / correction refused by the range
+  walked  / quick log / loading
+  walked  / quick log / no waist measurement yet
+  walked  / quick log / the waist reading is days old
+  walked  / quick log / the answer carried no words
+  walked  / quick log / the fetch never reached the machine
+  walked  / / a write queued on this phone
+  walked  / / the queued write undone
+  walked  / quick log / the session removed mid-screen
+  walked  GET /api/log / no session, an API read
+  walked  GET /api/settings/integrations / no session, the integrations read
+  walked  POST /api/log / no session, a write
+  walked  POST /api/log / no anti-forgery header
+  walked  POST /api/log / no idempotency key
+  walked  POST /api/log / nothing to store
+  walked  POST /api/log / a metric Vernier does not keep
+  walked  POST /api/log / a rating outside one to five
+  walked  POST /api/log / a waist outside the band
+  walked  POST /api/log / a blank field
+  walked  POST /api/log / a value that is not a number
+  walked  POST /api/log / a correction with no number
+  walked  POST /api/log / a correction of a value that is not there
+  walked  POST /api/settings/integrations / an integration Vernier does not know
+  walked  POST /api/settings/integrations / an empty credential
+  walked  POST /api/diagnostics/launch / a launch report that is not one
+  walked  /manifest.webmanifest / installed
+
+rendered strings: 17 fragment(s) with no key, which C6 does not allow:
+  /settings  [four integrations, no passkey]  span.chip
+    read: "sync-pending"
+    unaccounted: "sync-pending"
+    why: no catalogue key accounts for it
+  /settings  [four integrations, no passkey]  span.lbl
+    read: "Marmalade weather"
+    unaccounted: "Marmalade weather"
+    why: no catalogue key accounts for it
+  /settings  [four integrations, no passkey]  span.lbl
+    read: "Snoozed"
+    unaccounted: "Snoozed"
+    why: no catalogue key accounts for it
+  /settings  [four integrations, no passkey]  span.chip
+    read: "chip"
+    unaccounted: "chip"
+    why: no catalogue key accounts for it
+  /settings  [four integrations, no passkey]  span.chip
+    read: "day-to-day"
+    unaccounted: "day-to-day"
+    why: no catalogue key accounts for it
+  /settings  [four integrations, no passkey]  span.chip
+    read: "awaiting setup"
+    unaccounted: "awaiting setup"
+    why: no catalogue key accounts for it
+  /settings  [four integrations, no passkey]  span.chip
+    read: "Load failed"
+    unaccounted: "Load failed"
+    why: no catalogue key accounts for it
+  /settings  [four integrations, no passkey]  span
+    read: "Turnip provenance forged."
+    unaccounted: "Turnip provenance forged."
+    why: marked platform, but WebKit never produced this string in this run
+  /settings  [four integrations, no passkey]  title
+    read: "Marmalade chart"
+    unaccounted: "Marmalade chart"
+    why: no catalogue key accounts for it
+  /settings  [four integrations, no passkey]  desc
+    read: "Turnips over the last seven days."
+    unaccounted: "Turnips over the last seven days."
+    why: no catalogue key accounts for it
+  /settings  [four integrations, no passkey]  text
+    read: "Snoozed axis"
+    unaccounted: "Snoozed axis"
+    why: no catalogue key accounts for it
+  /settings  [four integrations, no passkey]  span.chip@aria-label
+    read: "Turnip lantern"
+    unaccounted: "Turnip lantern"
+    why: no catalogue key accounts for it
+  /settings  [four integrations, no passkey]  span.chip@aria-roledescription
+    read: "Turnip carousel"
+    unaccounted: "Turnip carousel"
+    why: no catalogue key accounts for it
+  /settings  [four integrations, no passkey]  span.chip@aria-valuetext
+    read: "two of five turnips"
+    unaccounted: "two of five turnips"
+    why: no catalogue key accounts for it
+  /settings  [four integrations, no passkey]  input@value
+    read: "Marmalade submit"
+    unaccounted: "Marmalade submit"
+    why: no catalogue key accounts for it
+  /settings  [four integrations, no passkey]  optgroup@label
+    read: "Turnip group"
+    unaccounted: "Turnip group"
+    why: no catalogue key accounts for it
+  / quick log  [the answer carried no words]  span
+    read: "Vernier lost the thread of that request. 502"
+    unaccounted: "lost the thread of that request. 502"
+    why: no catalogue key accounts for it

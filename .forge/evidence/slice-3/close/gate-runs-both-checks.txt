@@ -1,0 +1,10 @@
+The gate, wired. strings on every edit, strings:rendered per dispatch,
+and a missing stack fails rather than standing down.
+
+$ FORGE_CHECKS_FULL=1 bash scripts/checks.sh
+exit=0
+
+$ the same gate with the stack unreachable (probe port moved to 51999)
+checks: strings:rendered needs the stack, and 127.0.0.1:3000 does not answer.
+        Bring it up with scripts/up.sh. A missing stack is not a pass.
+exit=2

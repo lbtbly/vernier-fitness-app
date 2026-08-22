@@ -136,7 +136,7 @@ const DEMO_ROWS: DemoRow[] = [
     kind: 'lab_page',
     reference: 'page 2, row 7',
     detail: [
-      { key: 'source.field.laboratory', value: 'Biogroup' },
+      { key: 'source.field.laboratory', value: strings.demoSeed.laboratory },
       { key: 'source.field.page', value: '2' },
       { key: 'source.field.printedValue', value: '1.44 g/L' },
       { key: 'source.field.factor', value: '2.586' },

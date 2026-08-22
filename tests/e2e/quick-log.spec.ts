@@ -279,11 +279,26 @@ test.describe('the quick log', () => {
   });
 
   /**
-   * F20. Three edits, four rows, and the original still readable. The database
-   * refuses UPDATE outright, so this is not a convention the code follows: it
-   * is the only thing the table permits.
+   * F20. Three edits, four rows, and the original still readable.
+   *
+   * EVERY EDIT GOES THROUGH THE SCREEN, and that is the whole point of this
+   * test rather than a nicety. It used to post `correctsId: originalId` three
+   * times straight at `/api/log`, which no shipped screen does: the value sheet
+   * hands `CorrectionForm` the id of the row that stands TODAY, and after the
+   * first edit that row is a correction and never a root. The route resolved it
+   * with `readChain()`, which keys on `root_id`, so the second edit found an
+   * empty chain and answered 404, and the owner was told a row sitting in the
+   * table "was never stored". The old test passed through all of it, because
+   * posting the root id is the one input that cannot reproduce the bug.
+   *
+   * So: one visit to `/value/[id]`, three saves, and the assertion after each
+   * one is that the chain grew and no error card was drawn. The database
+   * refuses UPDATE outright, so the four rows are not a convention the code
+   * follows, they are the only thing the table permits.
    */
-  test('appends three corrections and keeps the original readable', async ({ page, context }) => {
+  test('appends three corrections through the value screen and keeps the original readable', async ({
+    page,
+  }) => {
     resetProvenance();
     await signIn(page);
 
@@ -300,35 +315,55 @@ test.describe('the quick log', () => {
     const originalValue = query(`select raw_value from measurement where id = '${originalId}'`);
     console.log(`original ${originalId} = ${originalValue}`);
 
-    const csrf = (await context.cookies()).find((cookie) => cookie.name === 'vernier_csrf')!.value;
+    await page.goto(`/value/${originalId}`);
     for (const [index, value] of ['92.2', '98.5', '99.2'].entries()) {
-      const response = await page.request.post('/api/log', {
-        headers: {
-          'content-type': 'application/json',
-          'idempotency-key': crypto.randomUUID(),
-          'x-vernier-csrf': csrf,
-        },
-        data: { action: 'correct', correctsId: originalId, rawValue: value, reason: `Edit ${index + 1}` },
-      });
-      expect(response.status()).toBe(201);
+      // The form is the only thing touched here. Whatever id it is carrying is
+      // the id the product decided to send, which is the id under test.
+      const sending = await page.locator('#correction-value').inputValue();
+      await page.locator('#correction-value').fill(value);
+      await page.locator('#correction-reason').fill(`Edit ${index + 1}`);
+      await page.getByRole('button', { name: 'Save the correction' }).click();
+      await expect
+        .poll(() => query(`select count(*) from measurement where root_id = '${originalId}'`), {
+          timeout: 20_000,
+        })
+        .toBe(String(index + 2));
+      // A 404 from the route draws screen 00's error card on this very screen.
+      // Its absence is the difference between one edit and three.
+      await expect(page.locator('.card.error[data-state="error"]')).toHaveCount(0);
+      console.log(`edit ${index + 1} through the screen: ${sending} corrected to ${value}`);
     }
 
     const chain = query(
       `select correction_index || ' | ' || raw_value || ' | ' || coalesce(correction_reason, 'original')
        from measurement where root_id = '${originalId}' order by correction_index`,
     );
-    console.log(`the chain after three edits:\n${chain}`);
+    console.log(`the chain after three edits through the screen:\n${chain}`);
     expect(chain.split('\n')).toHaveLength(4);
     expect(chain).toContain(`0 | ${originalValue} | original`);
+    expect(chain).toContain('1 | 92.2 | Edit 1');
+    expect(chain).toContain('2 | 98.5 | Edit 2');
     expect(chain).toContain('3 | 99.2 | Edit 3');
+
+    // Each correction names the row it corrected, and no two name the same one,
+    // which is what a chain is and what a fork would not be.
+    const links = query(
+      `select correction_index || ' corrects ' || coalesce(corrects_id, 'nothing')
+       from measurement where root_id = '${originalId}' order by correction_index`,
+    );
+    console.log(`the links:\n${links}`);
+    expect(new Set(links.split('\n')).size).toBe(4);
 
     // The original is still exactly what it was, byte for byte.
     expect(query(`select raw_value from measurement where id = '${originalId}'`)).toBe(originalValue);
 
-    await page.goto(`/value/${originalId}`);
+    // And all four rows are readable on the screen: three correction cards and
+    // the original struck through.
     await expect(page.getByText('Correction history')).toBeVisible();
-    await expect(page.getByText('Append only').first()).toBeVisible();
+    await expect(page.getByText('Append only')).toHaveCount(3);
+    await expect(page.locator('s')).toHaveCount(1);
     await settle(page);
+    await page.screenshot({ path: `${CAPTURES}f20-three-edits-through-the-screen-393.png`, fullPage: true });
     await page.screenshot({ path: `${CAPTURES}f21-value-sheet-corrected-393.png`, fullPage: true });
   });
 

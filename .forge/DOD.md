@@ -10,6 +10,27 @@ Screens referenced by number are the thirteen exported PNGs in `.forge/screens/`
 Interaction detail is the matching HTML file in `.forge/wireframes/`. Three
 viewports means 393x852, 768 and 1280 CSS pixels wide, captured.
 
+## How evidence is read
+
+Two rules govern every line below. Both were added on 2026-08-22 by the
+architect, after slice 3's third verdict exposed the two ways a line can be
+marked with evidence that proves less than the line says. Both raise the bar on
+lines already approved. Neither moves a threshold, and the count stands at one
+hundred and sixty-six. Amendment A4 records the reasoning.
+
+**A zero is evidence only beside the population it covered.** A search returning
+nothing, a count of zero errors, or a walk reporting no defect closes a line only
+when the same run prints what it walked and that population is not empty. A clean
+walk over an empty database, an empty screen or an empty file list does not close
+anything. It is a run with nothing in it, and it reads identically to a run that
+found nothing wrong, which is what makes it dangerous.
+
+**Evidence takes the path the product offers.** A line describing what a person
+can do is proven along the route a shipped screen actually takes. A result
+reached by a request no screen issues proves the layer underneath and not the
+line. Where both are worth recording, the product path is the evidence and the
+direct path is the note.
+
 ---
 
 ## Function
@@ -593,9 +614,19 @@ their interaction detail in `.forge/wireframes/`, and the standards skill.
   captures plus five state captures overlaid on the screen-00 geometry.
 - [ ] **C6.** Dates render as "21 Aug" or "Friday 21 August" and times as 24-hour
   Europe/Paris on every surface; units are kg, cm, km, kcal, g and the printed
-  laboratory unit. No user-facing string is written inline in a component.
-  Evidence: a string inventory listing every user-facing string with its key, and a
-  timezone-shifted run producing identical rendered dates.
+  laboratory unit, and any other suffix is a catalogued count noun for a
+  dimensionless metric, never a second unit for a metric named here. No string the
+  product authored reaches a person without a catalogue key, wherever in the
+  shipped tree it was written and however few words it is, including one
+  hyphenated word: a component, a route handler, middleware, a database helper, a
+  spoken attribute, an svg title, an svg description, an svg text node. Text the
+  product did not author is outside the line, and the check that excuses it
+  establishes that by provenance and fails every fragment whose provenance it
+  cannot establish. Two catalogued strings placed adjacent are read by the screen
+  line that owns that screen, not here. Evidence: a string inventory listing every
+  string the product authored with its key, produced by a walk that prints the
+  surfaces it covered and covers at least one stored value per source, and a
+  timezone-shifted run across six zones producing identical rendered dates.
 - [ ] **C7.** Today matches screen 02 and Health matches screen 04 at three
   viewports, with exactly one accented action per screen and origin badges rendered
   as neutral chrome rather than a semantic colour. Evidence: six captures plus a

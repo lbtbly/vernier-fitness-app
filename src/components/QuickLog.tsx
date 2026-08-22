@@ -55,7 +55,26 @@ const WAIST_STEP = 0.5;
 /** Days after which the waist reading on file is old enough to say so. */
 const WAIST_STALE_DAYS = 3;
 
-type Load = { state: 'loading' } | { state: 'ready'; snapshot: LogSnapshot } | { state: 'error'; detail: string };
+/**
+ * Who wrote the cause the error card prints.
+ *
+ * `vernier` is a catalogued string: a refusal the route sent, or the status
+ * line this component builds from a key. `platform` is the browser's own words,
+ * handed over by a fetch that never reached the machine, in a wording and a
+ * locale this product does not control and cannot catalogue.
+ *
+ * It is carried in state and written into the markup because provenance is
+ * knowable exactly here, at the branch that produced the string, and nowhere
+ * downstream. A check that reads the screen cannot tell the two apart by
+ * looking at the words, and one that guesses from position excuses whatever
+ * lands in the slot, which is how an inline string shipped three times.
+ */
+type Authored = 'vernier' | 'platform';
+
+type Load =
+  | { state: 'loading' }
+  | { state: 'ready'; snapshot: LogSnapshot }
+  | { state: 'error'; detail: string; authored: Authored };
 
 type LoggedValue = { id: string; metric: string; rawValue: string; unit: string };
 
@@ -131,9 +150,18 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
       const response = await fetch('/api/log', { headers: { accept: 'application/json' } });
       if (!response.ok) {
         const body = (await response.json().catch(() => ({}))) as { detail?: string; error?: string };
+        // Every branch here is Vernier's copy. The first two are refusals the
+        // route sent, each one a catalogue key on its way through JSON. The
+        // third is the case where the answer carried no words at all, and it is
+        // a key too now: it used to be `HTTP ${status} at ${time}.` written
+        // straight into this line.
         setLoad({
           state: 'error',
-          detail: body.detail ?? body.error ?? `HTTP ${response.status} at ${time24(new Date(), timeZone)}.`,
+          detail:
+            body.detail ??
+            body.error ??
+            strings.quickLog.errorStatus(response.status, time24(new Date(), timeZone)),
+          authored: 'vernier',
         });
         return;
       }
@@ -144,7 +172,10 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
       // a proven route home.
       connectivityProved();
     } catch (error) {
-      setLoad({ state: 'error', detail: (error as Error).message });
+      // The fetch never reached the machine, so this string is the browser's,
+      // not Vernier's. No key exists for it and none can be written: the wording
+      // and the locale belong to WebKit. It is marked at the branch that knows.
+      setLoad({ state: 'error', detail: (error as Error).message, authored: 'platform' });
     }
   }, [timeZone]);
 
@@ -419,7 +450,10 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
                     <span className="chip a">{strings.error.title}</span>
                   </div>
                   <div className="head">{strings.quickLog.errorTitle}</div>
-                  <p className="sub">{strings.quickLog.errorBody(load.detail)}</p>
+                  <p className="sub">
+                    <span data-authored={load.authored}>{load.detail}</span>{' '}
+                    {strings.quickLog.errorBody}
+                  </p>
                   <div className="actions">
                     <button type="button" className="btn grow" onClick={() => void read()}>
                       {strings.common.retry}

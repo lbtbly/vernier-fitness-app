@@ -23,7 +23,16 @@ import { strings } from '@/lib/strings';
  * the range allows.
  */
 
-type Failure = { error: string; detail: string };
+/**
+ * A refusal drawn on the card, and who wrote its cause.
+ *
+ * `vernier` is the route's own words, a catalogue key travelling as JSON.
+ * `platform` is the browser's, from a write that never reached the machine.
+ * The marker is set at the branch that knows, the same way the quick log sets
+ * it, because the check that reads this screen has to tell them apart by
+ * provenance and cannot tell them apart by looking.
+ */
+type Failure = { error: string; detail: string; authored: 'vernier' | 'platform' };
 
 export function CorrectionForm({
   measurementId,
@@ -61,6 +70,7 @@ export function CorrectionForm({
         setFailure({
           error: body.error ?? strings.api.correction.title,
           detail: body.detail ?? strings.api.correction.lead,
+          authored: 'vernier',
         });
         return;
       }
@@ -70,7 +80,11 @@ export function CorrectionForm({
     } catch (error) {
       // The origin went away mid-write. Same card, same shape, and the cause
       // is what the browser actually said rather than a number.
-      setFailure({ error: strings.api.correction.title, detail: (error as Error).message });
+      setFailure({
+        error: strings.api.correction.title,
+        detail: (error as Error).message,
+        authored: 'platform',
+      });
     } finally {
       setBusy(false);
     }
@@ -109,7 +123,8 @@ export function CorrectionForm({
           </div>
           <div className="head">{failure.error}</div>
           <p className="sub">
-            {failure.detail} {strings.api.correction.lead}
+            <span data-authored={failure.authored}>{failure.detail}</span>{' '}
+            {strings.api.correction.lead}
           </p>
           <div className="actions">
             <button type="button" className="btn grow" onClick={() => setFailure(null)}>

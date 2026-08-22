@@ -1,5 +1,12 @@
 import { once } from '@/db/idempotency';
-import { appendCorrection, readChain, readLogSnapshot, storeMeasurement, toView } from '@/db/measurements';
+import {
+  appendCorrection,
+  readChain,
+  readLogSnapshot,
+  readMeasurement,
+  storeMeasurement,
+  toView,
+} from '@/db/measurements';
 import { getConfig } from '@/lib/config';
 import { csrfFailure } from '@/lib/csrf';
 import { ok, refuse, sessionOrRefusal } from '@/lib/gate';
@@ -150,7 +157,18 @@ async function handle(request: Request) {
     }
 
     const { handled: corrected } = await once(key, '/api/log#correct', async () => {
-      const anchorChain = await readChain(correctsId);
+      // Two steps, and the second one is why the first exists. `readChain` keys
+      // on `root_id`, and a correction row's own id is never any row's root, so
+      // resolving the chain straight from `correctsId` worked once and then
+      // 404ed forever. Through the screen that is one edit and then "this value
+      // was never stored" about a row sitting in the table.
+      //
+      // `appendCorrection` in src/db/measurements.ts has always done it this
+      // way: read the row, then read the chain its root anchors. This route
+      // called the same function with the wrong argument twenty lines earlier
+      // and contradicted it. Now they agree.
+      const anchor = await readMeasurement(correctsId);
+      const anchorChain = anchor ? await readChain(anchor.rootId) : [];
       const head = anchorChain.at(-1);
       if (!head) {
         return {

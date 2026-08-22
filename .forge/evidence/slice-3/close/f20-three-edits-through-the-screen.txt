@@ -1,0 +1,27 @@
+
+Running 1 test using 1 worker
+
+ Container vernier-app-1 Restarting 
+ Container vernier-app-1 Started 
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+original 5a73369f-b2ba-43cd-b447-1e4a53ab6db8 = 99.0
+edit 1 through the screen: 99.0 corrected to 92.2
+edit 2 through the screen: 92.2 corrected to 98.5
+edit 3 through the screen: 98.5 corrected to 99.2
+the chain after three edits through the screen:
+0 | 99.0 | original
+1 | 92.2 | Edit 1
+2 | 98.5 | Edit 2
+3 | 99.2 | Edit 3
+the links:
+0 corrects nothing
+1 corrects 5a73369f-b2ba-43cd-b447-1e4a53ab6db8
+2 corrects 4c39d85d-0e6e-4d58-842b-632200c528df
+3 corrects 0d9c688a-e700-4c44-be21-10fe795859cc
+  ✓  1 [webkit-iphone] › tests/e2e/quick-log.spec.ts:299:3 › the quick log › appends three corrections through the value screen and keeps the original readable (5.3s)
+
+  1 passed (6.5s)
+0|5a73369f-b2ba-43cd-b447-1e4a53ab6db8|nothing|99.0|original
+1|4c39d85d-0e6e-4d58-842b-632200c528df|5a73369f-b2ba-43cd-b447-1e4a53ab6db8|92.2|Edit 1
+2|0d9c688a-e700-4c44-be21-10fe795859cc|4c39d85d-0e6e-4d58-842b-632200c528df|98.5|Edit 2
+3|a4c9626e-5561-4eea-a955-c8c6a7a41316|0d9c688a-e700-4c44-be21-10fe795859cc|99.2|Edit 3
