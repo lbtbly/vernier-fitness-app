@@ -2576,3 +2576,6 @@
 2026-08-22T13:52:57Z | a55292674bf068242 | stopped | 55s
 2026-08-22T13:53:50Z | ab4eeb824e1482ab7 | stopped | 53s
 2026-08-22T13:57:14Z | a0a9cc7f85cdc9460 | stopped | 204s
+2026-08-22T13:58:05Z | builder | stopped | 51s
+2026-08-22T13:58:09Z | a10ca9c6fc8d08873 | stopped | 4s
+2026-08-22T13:59:56Z | a661caf90a028d41b | stopped | 107s
