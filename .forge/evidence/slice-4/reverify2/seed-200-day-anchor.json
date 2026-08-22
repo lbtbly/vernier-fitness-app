@@ -1,0 +1,156 @@
+{
+ "tag": "q200",
+ "url": "http://127.0.0.1:3101/",
+ "today": {
+  "docScrollWidth": 393,
+  "docClientWidth": 393,
+  "emptyStates": [],
+  "weightHeadline": "71.0 kg",
+  "metrics": [
+   "71.0 kg",
+   "84.0 cm"
+  ],
+  "goalLine": "5.9 kg below the line to 76.0 kg on 12 Sept.",
+  "paceLine": "28-day pace -0.5 kg a week.",
+  "adherence": [
+   "2 of 3",
+   "11 of 14"
+  ],
+  "adherenceNote": "Two missed sessions in a month is not a failure state, and the app does not colour it like one.",
+  "pills": [
+   "none",
+   "none",
+   "completed",
+   "none",
+   "completed",
+   "none",
+   "planned"
+  ],
+  "rangeLabels": [
+   "16 Aug",
+   "22 Aug"
+  ],
+  "sessionRow": {
+   "top": 195,
+   "bottom": 261
+  },
+  "meals": {
+   "top": 261,
+   "bottom": 286
+  },
+  "due": {
+   "top": 286,
+   "bottom": 332
+  },
+  "adherenceCard": {
+   "top": 403,
+   "bottom": 577
+  },
+  "svgs": [
+   {
+    "title": "Weight, the last 30 days",
+    "bottom": 742,
+    "paths": 2,
+    "circles": 45
+   },
+   {
+    "title": "Waist, the last 30 days",
+    "bottom": 1134,
+    "paths": 1,
+    "circles": 10
+   }
+  ],
+  "staleChips": [
+   "Not started",
+   "1",
+   "Withings",
+   "29 Jul to 1 Aug",
+   "Manual",
+   "Health, 4 days old",
+   "The iPhone shortcut last sent a batch on 18 Aug, 07:20.",
+   "No data. Not zero.",
+   "The scale last synced on 18 Aug, 06:52.",
+   "Demo",
+   "Demo",
+   "Demo",
+   "Demo",
+   "Demo",
+   "Demo",
+   "Demo"
+  ],
+  "bodyText": "SATURDAY 22 AUGUST\nToday\nWithings, 4 days old. The scale last synced on 18 Aug, 06:52.\nHealth, 4 days old. The iPhone shortcut last sent a batch on 18 Aug, 07:20.\nYOUR DAY\nBrisk walk and mobility, 30 min\n07:15 to 07:45, the park loop\nThe evening was already taken.\nNot started\nMeals\nNothing logged today.\nNeeds logging\nEvening energy, not logged.\n1\nQuick log\nADHERENCE\n2 of 3\nsessions, last 7 days\n11 of 14\nlast 28 days\n16 Aug, No session\n17 Aug, No session\n18 Aug, Session completed\n19 Aug, No session\n20 Aug, Session completed\n21 Aug, No session\n22 Aug, Session planned\n16 Aug\n22 Aug\n\nTwo missed sessions in a month is not a failure state, and the app does not colour it like one.\n\nWEIGHT, 7-DAY AVERAGE\nWithings\n71.0 kg\n-0.5 kg\nlast 7 days\n70 kg\n74 kg\n78 kg\n24 Jul\n29 Jul to 1 Aug\n22 Aug\nEvery stored weight reading behind this chart, with its date.\nDate\tValue\tSource\n24 Jul\t73.4 kg\tWithings\n25 Jul\t72.6 kg\tWithings\n26 Jul\t72.9 kg\tWithings\n27 Jul\t72.3 kg\tWithings\n28 Jul\t72.7 kg\tWithings\n29 Jul\tNo reading\tNo reading\n30 Jul\tNo reading\tNo reading\n31 Jul\tNo reading\tNo reading\n1 Aug\tNo reading\tNo reading\n2 Aug\t72.4 kg\tWithings\n3 Aug\t71.8 kg\tWithings\n4 Aug\t72.1 kg\tWithings\n5 Aug\t72.3 kg\tWithings\n6 Aug\t71.8 kg\tWithings\n7 Aug\t72.3 kg\tWithings\n8 Aug\t71.5 kg\tWithings\n9 Aug\t71.8 kg\tWithings\n10 Aug\t71.3 kg\tWithings\n11 Aug\t71.6 kg\tWithings\n12 Aug\t71.8 kg\tWithings\n13 Aug\t71.2 kg\tWithings\n14 Aug\t71.8 kg"
+ },
+ "health": {
+  "docScrollWidth": 393,
+  "docClientWidth": 393,
+  "headlines": [
+   {
+    "text": "71.0 kg",
+    "h": 39
+   },
+   {
+    "text": "84.0 cm",
+    "h": 39
+   }
+  ],
+  "emptyStates": [],
+  "charts": [
+   {
+    "title": "Weight and waist, the last 30 days",
+    "paths": 3
+   },
+   {
+    "title": "Steps, the last 30 days",
+    "paths": 0
+   },
+   {
+    "title": "Sleep, the last 30 nights",
+    "paths": 0
+   },
+   {
+    "title": "Resting heart rate, the last 30 days",
+    "paths": 1
+   }
+  ],
+  "tables": [
+   {
+    "caption": "Every stored weight reading behind this chart, with its date.",
+    "rows": 30
+   },
+   {
+    "caption": "Every stored waist measurement behind this chart, with its date.",
+    "rows": 30
+   },
+   {
+    "caption": "Every stored step count behind this chart, with its date.",
+    "rows": 30
+   },
+   {
+    "caption": "Every stored night of sleep behind this chart, with its date.",
+    "rows": 30
+   },
+   {
+    "caption": "Every stored resting heart rate behind this chart, with its date.",
+    "rows": 30
+   },
+   {
+    "rows": 0
+   },
+   {
+    "rows": 0
+   },
+   {
+    "rows": 0
+   },
+   {
+    "rows": 0
+   },
+   {
+    "rows": 0
+   }
+  ],
+  "hatch": 4,
+  "bodyText": "SATURDAY 22 AUGUST\nHealth\n7 days\n30 days\n6 months\nYear\nBODY\nWithings\nManual\n71.0 kg\nWeight, 7-day average, -0.5 kg on the week\n84.0 cm\nwaist, -2.0 cm since 25 Jul\nWeight kg\n70 kg\n74 kg\n78 kg\nWaist cm\n24 Jul\n29 Jul to 1 Aug\n22 Aug\nEvery stored weight reading behind this chart, with its date.\nDate\tValue\tSource\n24 Jul\t73.4 kg\tWithings\n25 Jul\t72.6 kg\tWithings\n26 Jul\t72.9 kg\tWithings\n27 Jul\t72.3 kg\tWithings\n28 Jul\t72.7 kg\tWithings\n29 Jul\tNo reading\tNo reading\n30 Jul\tNo reading\tNo reading\n31 Jul\tNo reading\tNo reading\n1 Aug\tNo reading\tNo reading\n2 Aug\t72.4 kg\tWithings\n3 Aug\t71.8 kg\tWithings\n4 Aug\t72.1 kg\tWithings\n5 Aug\t72.3 kg\tWithings\n6 Aug\t71.8 kg\tWithings\n7 Aug\t72.3 kg\tWithings\n8 Aug\t71.5 kg\tWithings\n9 Aug\t71.8 kg\tWithings\n10 Aug\t71.3 kg\tWithings\n11 Aug\t71.6 kg\tWithings\n12 Aug\t71.8 kg\tWithings\n13 Aug\t71.2 kg\tWithings\n14 Aug\t71.8 kg\tWithings\n15 Aug\t71.0 kg\tWithings\n16 Aug\t71.3 kg\tWithings\n17 Aug\t70.7 kg\tWithings\n18 Aug\t71.1 kg\tWithings\n19 Aug\tNo reading\tNo reading\n20 Aug\tNo reading\tNo reading\n21 Aug\tNo reading\tNo reading\n22 Aug\tNo reading\tNo reading\nEvery stored waist measurement behind this chart, with its date.\nDate\tValue\tSource\n24 Jul\tNo reading\tNo reading\n25 Jul\t86.0 cm\tManual\n26 Jul\tNo reading\tNo reading\n27 Jul\tNo reading\tNo reading\n28 Jul\tNo reading\tNo reading\n29 Jul\tNo reading\tNo reading\n30 Jul\tNo reading\tNo reading\n31 Jul\tNo reading\tNo reading\n1 Aug\t85.5 cm\tManual\n2 Aug\tNo reading\tNo reading\n3 Aug\tNo reading\tNo reading\n4 Aug\tNo reading\tNo reading\n5 Aug\tNo reading\tNo reading\n6 Aug\tNo reading\tNo reading\n7 Aug\tNo reading\tNo reading\n8 Aug\t85.0 cm\tManual\n9 Aug\tNo reading\tNo reading\n10 Aug\tNo reading\tNo reading\n11 Aug\tNo reading\tNo reading\n12 Aug\tNo reading\tNo reading\n13 Aug\tNo reading\tNo reading\n14 Aug\tNo reading\tNo reading\n15 Aug\t84.5 cm\tManual\n16 Aug\tNo reading\tNo reading\n17 Aug\tNo reading\tNo reading\n18 Aug\tNo reading\tNo reading\n19 Aug\tNo reading\tNo reading\n20 Aug\tNo reading\tNo reading\n21 Aug\tNo reading\tNo reading\n22 Aug\t84.0 cm\tManual\n7-day average\nDaily reading\nLine to 76.0 kg\n\n29 Jul to 1 Aug have no reading. The line is broken across them, not smoothed.\n\n19 Aug to 22 Aug have no reading. The line is broken across them, not smoothed.\n\nThis average used 3 days"
+ },
+ "consoleErrors": []
+}

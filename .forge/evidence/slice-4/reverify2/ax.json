@@ -1,0 +1,111 @@
+{
+  "/": {
+    "totalNodes": 1229,
+    "tablesInTree": [
+      {
+        "accessibleName": "Every stored weight reading behind this chart, with its date.",
+        "caption": "",
+        "rows": 31,
+        "cells": 93,
+        "columnheaders": 3,
+        "rowheaders": 30,
+        "ignored": false
+      },
+      {
+        "accessibleName": "Every stored waist measurement behind this chart, with its date.",
+        "caption": "",
+        "rows": 31,
+        "cells": 93,
+        "columnheaders": 3,
+        "rowheaders": 30,
+        "ignored": false
+      }
+    ],
+    "ignoredTableNodes": 0,
+    "graphics": [
+      {
+        "role": "image",
+        "name": "Weight, the last 30 days Daily readings as unconnected dots, the seven-day average as the solid line, and the goal trajectory dashed inside its corridor. Days with no reading are hatched and are never joined up.",
+        "desc": "Daily readings as unconnected dots, the seven-day average as the solid line, and the goal trajectory dashed inside its corridor. Days with no reading are hatched and are never joined up."
+      },
+      {
+        "role": "image",
+        "name": "Waist, the last 30 days Waist measurements, joined between the readings that exist. A tape measure is used about once a week by one person in one place, so two readings a week apart are two comparable measurements and are drawn joined; nothing between them is invented.",
+        "desc": "Waist measurements, joined between the readings that exist. A tape measure is used about once a week by one person in one place, so two readings a week apart are two comparable measurements and are drawn joined; nothing between them is invented."
+      }
+    ]
+  },
+  "/health": {
+    "totalNodes": 2027,
+    "tablesInTree": [
+      {
+        "accessibleName": "Every stored weight reading behind this chart, with its date.",
+        "caption": "",
+        "rows": 31,
+        "cells": 93,
+        "columnheaders": 3,
+        "rowheaders": 30,
+        "ignored": false
+      },
+      {
+        "accessibleName": "Every stored waist measurement behind this chart, with its date.",
+        "caption": "",
+        "rows": 31,
+        "cells": 93,
+        "columnheaders": 3,
+        "rowheaders": 30,
+        "ignored": false
+      },
+      {
+        "accessibleName": "Every stored step count behind this chart, with its date.",
+        "caption": "",
+        "rows": 31,
+        "cells": 93,
+        "columnheaders": 3,
+        "rowheaders": 30,
+        "ignored": false
+      },
+      {
+        "accessibleName": "Every stored night of sleep behind this chart, with its date.",
+        "caption": "",
+        "rows": 31,
+        "cells": 93,
+        "columnheaders": 3,
+        "rowheaders": 30,
+        "ignored": false
+      },
+      {
+        "accessibleName": "Every stored resting heart rate behind this chart, with its date.",
+        "caption": "",
+        "rows": 31,
+        "cells": 93,
+        "columnheaders": 3,
+        "rowheaders": 30,
+        "ignored": false
+      }
+    ],
+    "ignoredTableNodes": 0,
+    "graphics": [
+      {
+        "role": "image",
+        "name": "Weight and waist, the last 30 days Weight above and waist below, on one time axis. Weight carries its seven-day average and the goal trajectory; waist is measured by hand and is drawn as the readings it has. The days the scale went quiet are hatched in both bands.",
+        "desc": "Weight above and waist below, on one time axis. Weight carries its seven-day average and the goal trajectory; waist is measured by hand and is drawn as the readings it has. The days the scale went quiet are hatched in both bands."
+      },
+      {
+        "role": "image",
+        "name": "Steps, the last 30 days One bar per day. A day the phone sent nothing has no bar and is hatched, never a bar of zero.",
+        "desc": "One bar per day. A day the phone sent nothing has no bar and is hatched, never a bar of zero."
+      },
+      {
+        "role": "image",
+        "name": "Sleep, the last 30 nights One bar per night. A night the watch did not record has no bar and is hatched, never a bar of zero.",
+        "desc": "One bar per night. A night the watch did not record has no bar and is hatched, never a bar of zero."
+      },
+      {
+        "role": "image",
+        "name": "Resting heart rate, the last 30 days Resting heart rate, one point per reading, joined only between the readings that exist.",
+        "desc": "Resting heart rate, one point per reading, joined only between the readings that exist."
+      }
+    ]
+  }
+}

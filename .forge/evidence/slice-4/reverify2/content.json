@@ -1,0 +1,803 @@
+{
+  "today393": {
+    "scrollHeight": 2716,
+    "scrollTop": 0,
+    "day": {
+      "top": 131,
+      "bottom": 354,
+      "h": 223,
+      "text": "Your dayHome strength, 35 min18:45 to 19:20, mat and backpackYour calendar is cl"
+    },
+    "sessionRow": {
+      "top": 154,
+      "bottom": 220,
+      "h": 66,
+      "text": "Home strength, 35 min18:45 to 19:20, mat and backpackYour calendar is clear from"
+    },
+    "meals": {
+      "top": 220,
+      "bottom": 245,
+      "h": 25,
+      "text": "MealsNothing logged today."
+    },
+    "due": {
+      "top": 245,
+      "bottom": 291,
+      "h": 46,
+      "text": "Needs loggingEvening energy, not logged.1"
+    },
+    "adherenceCard": {
+      "top": 362,
+      "bottom": 536,
+      "h": 174,
+      "text": "Adherence2 of 3sessions, last 7 days11 of 14last 28 days16 Aug, No session17 Aug"
+    },
+    "weightChart": null,
+    "weightCardBottomChart": null,
+    "accentButtons": [
+      {
+        "tag": "BUTTON",
+        "cls": "btn primary block",
+        "text": "Quick log"
+      }
+    ],
+    "anyAccentBg": [
+      {
+        "tag": "BUTTON",
+        "cls": "btn primary block",
+        "text": "Quick log"
+      }
+    ],
+    "chips": [
+      {
+        "cls": "chip",
+        "text": "Not started",
+        "color": "rgb(161, 161, 168)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "border": "rgb(58, 58, 64)"
+      },
+      {
+        "cls": "chip w",
+        "text": "1",
+        "color": "rgb(233, 180, 76)",
+        "bg": "rgba(233, 180, 76, 0.13)",
+        "border": "rgb(233, 180, 76)"
+      }
+    ],
+    "pills": [
+      {
+        "state": "none",
+        "isToday": false,
+        "sr": "16 Aug, No session",
+        "bg": "rgb(35, 35, 39)",
+        "border": "0px none rgb(245, 245, 247)"
+      },
+      {
+        "state": "completed",
+        "isToday": false,
+        "sr": "17 Aug, Session completed",
+        "bg": "rgb(79, 208, 138)",
+        "border": "0px none rgb(245, 245, 247)"
+      },
+      {
+        "state": "none",
+        "isToday": false,
+        "sr": "18 Aug, No session",
+        "bg": "rgb(35, 35, 39)",
+        "border": "0px none rgb(245, 245, 247)"
+      },
+      {
+        "state": "none",
+        "isToday": false,
+        "sr": "19 Aug, No session",
+        "bg": "rgb(35, 35, 39)",
+        "border": "0px none rgb(245, 245, 247)"
+      },
+      {
+        "state": "completed",
+        "isToday": false,
+        "sr": "20 Aug, Session completed",
+        "bg": "rgb(79, 208, 138)",
+        "border": "0px none rgb(245, 245, 247)"
+      },
+      {
+        "state": "none",
+        "isToday": false,
+        "sr": "21 Aug, No session",
+        "bg": "rgb(35, 35, 39)",
+        "border": "0px none rgb(245, 245, 247)"
+      },
+      {
+        "state": "planned",
+        "isToday": true,
+        "sr": "22 Aug, Session planned",
+        "bg": "rgba(0, 0, 0, 0)",
+        "border": "1.333333px dashed rgb(124, 124, 133)"
+      }
+    ],
+    "adherenceCounts": [
+      {
+        "window": "7",
+        "text": "2 of 3"
+      },
+      {
+        "window": "28",
+        "text": "11 of 14"
+      }
+    ],
+    "adherenceNote": "Two missed sessions in a month is not a failure state, and the app does not colour it like one.",
+    "rangeLabels": [
+      "16 Aug",
+      "22 Aug"
+    ],
+    "measureBtn": {
+      "found": true,
+      "cls": "btn",
+      "bg": "rgb(28, 28, 31)",
+      "h": 48
+    },
+    "runShortcut": {
+      "found": true,
+      "cls": "btn block",
+      "bg": "rgb(28, 28, 31)"
+    },
+    "cardGapToday": "8px",
+    "visuallyHiddenWrappers": [
+      {
+        "tag": "SPAN",
+        "display": "block",
+        "vis": "visible",
+        "overflow": "hidden",
+        "w": 1,
+        "childTable": false
+      },
+      {
+        "tag": "SPAN",
+        "display": "block",
+        "vis": "visible",
+        "overflow": "hidden",
+        "w": 1,
+        "childTable": false
+      },
+      {
+        "tag": "SPAN",
+        "display": "block",
+        "vis": "visible",
+        "overflow": "hidden",
+        "w": 1,
+        "childTable": false
+      },
+      {
+        "tag": "SPAN",
+        "display": "block",
+        "vis": "visible",
+        "overflow": "hidden",
+        "w": 1,
+        "childTable": false
+      },
+      {
+        "tag": "SPAN",
+        "display": "block",
+        "vis": "visible",
+        "overflow": "hidden",
+        "w": 1,
+        "childTable": false
+      },
+      {
+        "tag": "SPAN",
+        "display": "block",
+        "vis": "visible",
+        "overflow": "hidden",
+        "w": 1,
+        "childTable": false
+      },
+      {
+        "tag": "SPAN",
+        "display": "block",
+        "vis": "visible",
+        "overflow": "hidden",
+        "w": 1,
+        "childTable": false
+      },
+      {
+        "tag": "DIV",
+        "display": "block",
+        "vis": "visible",
+        "overflow": "hidden",
+        "w": 1,
+        "childTable": true
+      },
+      {
+        "tag": "DIV",
+        "display": "block",
+        "vis": "visible",
+        "overflow": "hidden",
+        "w": 1,
+        "childTable": true
+      }
+    ],
+    "tablesDisplay": [
+      {
+        "id": "today-weight-table",
+        "display": "table",
+        "vis": "visible",
+        "w": 406,
+        "rows": 31,
+        "caption": "Every stored weight reading behind this chart, with its date."
+      },
+      {
+        "id": "today-waist-table",
+        "display": "table",
+        "vis": "visible",
+        "w": 438,
+        "rows": 31,
+        "caption": "Every stored waist measurement behind this chart, with its date."
+      },
+      {
+        "id": "",
+        "display": "none",
+        "vis": "visible",
+        "w": 0,
+        "rows": 0
+      },
+      {
+        "id": "",
+        "display": "none",
+        "vis": "visible",
+        "w": 0,
+        "rows": 0
+      },
+      {
+        "id": "",
+        "display": "none",
+        "vis": "visible",
+        "w": 0,
+        "rows": 0
+      },
+      {
+        "id": "",
+        "display": "none",
+        "vis": "visible",
+        "w": 0,
+        "rows": 0
+      },
+      {
+        "id": "",
+        "display": "none",
+        "vis": "visible",
+        "w": 0,
+        "rows": 0
+      },
+      {
+        "id": "",
+        "display": "none",
+        "vis": "visible",
+        "w": 0,
+        "rows": 0
+      },
+      {
+        "id": "",
+        "display": "none",
+        "vis": "visible",
+        "w": 0,
+        "rows": 0
+      },
+      {
+        "id": "",
+        "display": "none",
+        "vis": "visible",
+        "w": 0,
+        "rows": 0
+      },
+      {
+        "id": "",
+        "display": "none",
+        "vis": "visible",
+        "w": 0,
+        "rows": 0
+      },
+      {
+        "id": "",
+        "display": "none",
+        "vis": "visible",
+        "w": 0,
+        "rows": 0
+      },
+      {
+        "id": "",
+        "display": "none",
+        "vis": "visible",
+        "w": 0,
+        "rows": 0
+      },
+      {
+        "id": "",
+        "display": "none",
+        "vis": "visible",
+        "w": 0,
+        "rows": 0
+      },
+      {
+        "id": "",
+        "display": "none",
+        "vis": "visible",
+        "w": 0,
+        "rows": 0
+      },
+      {
+        "id": "",
+        "display": "none",
+        "vis": "visible",
+        "w": 0,
+        "rows": 0
+      },
+      {
+        "id": "",
+        "display": "none",
+        "vis": "visible",
+        "w": 0,
+        "rows": 0
+      },
+      {
+        "id": "",
+        "display": "none",
+        "vis": "visible",
+        "w": 0,
+        "rows": 0
+      },
+      {
+        "id": "",
+        "display": "none",
+        "vis": "visible",
+        "w": 0,
+        "rows": 0
+      },
+      {
+        "id": "",
+        "display": "none",
+        "vis": "visible",
+        "w": 0,
+        "rows": 0
+      },
+      {
+        "id": "",
+        "display": "none",
+        "vis": "visible",
+        "w": 0,
+        "rows": 0
+      },
+      {
+        "id": "",
+        "display": "none",
+        "vis": "visible",
+        "w": 0,
+        "rows": 0
+      },
+      {
+        "id": "",
+        "display": "none",
+        "vis": "visible",
+        "w": 0,
+        "rows": 0
+      },
+      {
+        "id": "",
+        "display": "none",
+        "vis": "visible",
+        "w": 0,
+        "rows": 0
+      },
+      {
+        "id": "",
+        "display": "none",
+        "vis": "visible",
+        "w": 0,
+        "rows": 0
+      },
+      {
+        "id": "",
+        "display": "none",
+        "vis": "visible",
+        "w": 0,
+        "rows": 0
+      },
+      {
+        "id": "",
+        "display": "none",
+        "vis": "visible",
+        "w": 0,
+        "rows": 0
+      },
+      {
+        "id": "",
+        "display": "none",
+        "vis": "visible",
+        "w": 0,
+        "rows": 0
+      },
+      {
+        "id": "",
+        "display": "none",
+        "vis": "visible",
+        "w": 0,
+        "rows": 0
+      }
+    ]
+  },
+  "measureRaisesQuickLog": {
+    "open": true,
+    "tag": "DIV",
+    "text": "Quick logSaturday 22 August, 16:07WaistLast 99.0 cm, 22 Aug99.0 cmEnergy12345DrainedStrongFatigue12345NoneWiped outHunger12345NoneRavenousSatiety after eating12"
+  },
+  "health393": {
+    "headlines": [
+      {
+        "cols": [
+          {
+            "colH": 76,
+            "colW": 152,
+            "metricText": "86.4 kg",
+            "metricH": 38,
+            "metricLines": 1,
+            "whiteSpace": "nowrap",
+            "flex": "1 1 0px",
+            "minWidth": "0px",
+            "note": "Weight, 7-day average, -0.6 kg on the week"
+          },
+          {
+            "colH": 76,
+            "colW": 152,
+            "metricText": "99.0 cm",
+            "metricH": 38,
+            "metricLines": 1,
+            "whiteSpace": "nowrap",
+            "flex": "1 1 0px",
+            "minWidth": "0px",
+            "note": "waist, -0.8 cm since 29 Jul"
+          }
+        ]
+      }
+    ],
+    "accent": [
+      {
+        "tag": "BUTTON",
+        "cls": "btn primary block",
+        "text": "Save the goal"
+      }
+    ],
+    "chips": [
+      {
+        "cls": "chips",
+        "text": "WithingsManual",
+        "color": "rgb(245, 245, 247)",
+        "bg": "rgba(0, 0, 0, 0)",
+        "border": "rgb(245, 245, 247)"
+      }
+    ],
+    "cardGap": "12px"
+  },
+  "quicklog393": {
+    "open": true,
+    "cardMargin": "8px",
+    "btns": [
+      {
+        "text": "",
+        "h": 44
+      },
+      {
+        "text": "",
+        "h": 60
+      },
+      {
+        "text": "",
+        "h": 60
+      },
+      {
+        "text": "1",
+        "h": 52
+      },
+      {
+        "text": "2",
+        "h": 52
+      },
+      {
+        "text": "3",
+        "h": 52
+      },
+      {
+        "text": "4",
+        "h": 52
+      },
+      {
+        "text": "5",
+        "h": 52
+      },
+      {
+        "text": "1",
+        "h": 52
+      },
+      {
+        "text": "2",
+        "h": 52
+      },
+      {
+        "text": "3",
+        "h": 52
+      },
+      {
+        "text": "4",
+        "h": 52
+      },
+      {
+        "text": "5",
+        "h": 52
+      },
+      {
+        "text": "1",
+        "h": 52
+      },
+      {
+        "text": "2",
+        "h": 52
+      },
+      {
+        "text": "3",
+        "h": 52
+      },
+      {
+        "text": "4",
+        "h": 52
+      },
+      {
+        "text": "5",
+        "h": 52
+      },
+      {
+        "text": "1",
+        "h": 52
+      },
+      {
+        "text": "2",
+        "h": 52
+      },
+      {
+        "text": "3",
+        "h": 52
+      },
+      {
+        "text": "4",
+        "h": 52
+      },
+      {
+        "text": "5",
+        "h": 52
+      },
+      {
+        "text": "Save",
+        "h": 52
+      }
+    ]
+  },
+  "quicklog768": {
+    "open": true,
+    "cardMargin": "8px",
+    "btns": [
+      {
+        "text": "",
+        "h": 44
+      },
+      {
+        "text": "",
+        "h": 60
+      },
+      {
+        "text": "",
+        "h": 60
+      },
+      {
+        "text": "1",
+        "h": 52
+      },
+      {
+        "text": "2",
+        "h": 52
+      },
+      {
+        "text": "3",
+        "h": 52
+      },
+      {
+        "text": "4",
+        "h": 52
+      },
+      {
+        "text": "5",
+        "h": 52
+      },
+      {
+        "text": "1",
+        "h": 52
+      },
+      {
+        "text": "2",
+        "h": 52
+      },
+      {
+        "text": "3",
+        "h": 52
+      },
+      {
+        "text": "4",
+        "h": 52
+      },
+      {
+        "text": "5",
+        "h": 52
+      },
+      {
+        "text": "1",
+        "h": 52
+      },
+      {
+        "text": "2",
+        "h": 52
+      },
+      {
+        "text": "3",
+        "h": 52
+      },
+      {
+        "text": "4",
+        "h": 52
+      },
+      {
+        "text": "5",
+        "h": 52
+      },
+      {
+        "text": "1",
+        "h": 52
+      },
+      {
+        "text": "2",
+        "h": 52
+      },
+      {
+        "text": "3",
+        "h": 52
+      },
+      {
+        "text": "4",
+        "h": 52
+      },
+      {
+        "text": "5",
+        "h": 52
+      },
+      {
+        "text": "Save",
+        "h": 52
+      }
+    ]
+  },
+  "quicklog1280": {
+    "open": true,
+    "cardMargin": "8px",
+    "btns": [
+      {
+        "text": "",
+        "h": 44
+      },
+      {
+        "text": "",
+        "h": 60
+      },
+      {
+        "text": "",
+        "h": 60
+      },
+      {
+        "text": "1",
+        "h": 52
+      },
+      {
+        "text": "2",
+        "h": 52
+      },
+      {
+        "text": "3",
+        "h": 52
+      },
+      {
+        "text": "4",
+        "h": 52
+      },
+      {
+        "text": "5",
+        "h": 52
+      },
+      {
+        "text": "1",
+        "h": 52
+      },
+      {
+        "text": "2",
+        "h": 52
+      },
+      {
+        "text": "3",
+        "h": 52
+      },
+      {
+        "text": "4",
+        "h": 52
+      },
+      {
+        "text": "5",
+        "h": 52
+      },
+      {
+        "text": "1",
+        "h": 52
+      },
+      {
+        "text": "2",
+        "h": 52
+      },
+      {
+        "text": "3",
+        "h": 52
+      },
+      {
+        "text": "4",
+        "h": 52
+      },
+      {
+        "text": "5",
+        "h": 52
+      },
+      {
+        "text": "1",
+        "h": 52
+      },
+      {
+        "text": "2",
+        "h": 52
+      },
+      {
+        "text": "3",
+        "h": 52
+      },
+      {
+        "text": "4",
+        "h": 52
+      },
+      {
+        "text": "5",
+        "h": 52
+      },
+      {
+        "text": "Save",
+        "h": 52
+      }
+    ]
+  },
+  "signIn": {
+    "cardMargin": "0px",
+    "titlePadding": null,
+    "buttons": [
+      {
+        "text": "Sign in with passkey",
+        "h": 52,
+        "fs": "16px",
+        "bg": "rgb(90, 169, 255)"
+      },
+      {
+        "text": "Use the backup password",
+        "h": 52,
+        "fs": "16px",
+        "bg": "rgba(0, 0, 0, 0)"
+      }
+    ]
+  }
+}
