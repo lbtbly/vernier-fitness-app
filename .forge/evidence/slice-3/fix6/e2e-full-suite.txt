@@ -1,0 +1,348 @@
+setup: the owner's database holds 7 measurement, 7 source_record, 1 measurement not seeded. Nothing in this run may lower it.
+
+Running 36 tests using 1 worker
+
+first attempt: 201 {"ownerId":"ef88f678-444c-4a2e-8f05-c82d2faeec8f","displayName":"Owner","created":true}
+second attempt: 409 {"error":"The owner account already exists.","detail":"Vernier holds exactly one account and it is created once. Sign in with your passkey or the backup password."}
+bootstrap | success | the owner account was created
+bootstrap | refused | the owner account already exists
+bootstrap | refused | the owner account already exists
+CREATE UNIQUE INDEX owner_singleton ON public.owner USING btree (singleton)
+  ✓   1 [webkit-iphone] › tests/e2e/bootstrap.spec.ts:15:3 › first run › creates the owner once and refuses the second attempt with 409 (4.2s)
+  ✓   2 [webkit-iphone] › tests/e2e/bootstrap.spec.ts:61:3 › first run › refuses a password that is too weak, and creates nothing (4.3s)
+route table against https://lamberts-mac-mini.tailda76d6.ts.net, 23 routes on disk
+
+GET  /                                            protected 307  refused  redirected to sign-in (307)
+POST /api/auth/bootstrap                          gate      403  refused  refuses an unauthenticated request
+POST /api/auth/passkey/authentication/options     gate      403  refused  refuses an unauthenticated request
+POST /api/auth/passkey/authentication/verify      gate      403  refused  refuses an unauthenticated request
+POST /api/auth/passkey/registration/options       protected 401  refused  401 with no session
+POST /api/auth/passkey/registration/verify        protected 401  refused  401 with no session
+POST /api/auth/password                           gate      403  refused  refuses an unauthenticated request
+POST /api/auth/sign-out                           protected 401  refused  401 with no session
+GET  /api/diagnostics/device                      public    200  open     answers without a session, as it must
+POST /api/diagnostics/launch                      public    403  open     answers without a session, as it must
+GET  /api/log                                     protected 401  refused  401 with no session
+POST /api/log                                     protected 401  refused  401 with no session
+GET  /api/settings/integrations                   protected 401  refused  401 with no session
+POST /api/settings/integrations                   protected 401  refused  401 with no session
+GET  /eat                                         protected 307  refused  redirected to sign-in (307)
+GET  /health                                      protected 307  refused  redirected to sign-in (307)
+GET  /healthz                                     public    200  open     answers without a session, as it must
+GET  /manifest.webmanifest                        public    200  open     answers without a session, as it must
+GET  /offline                                     public    200  open     answers without a session, as it must
+GET  /settings                                    protected 307  refused  redirected to sign-in (307)
+GET  /sign-in                                     public    200  open     answers without a session, as it must
+GET  /sign-in/recover                             gate      401  refused  refuses an unauthenticated request
+GET  /source/[id]                                 protected 307  refused  redirected to sign-in (307)
+GET  /train                                       protected 307  refused  redirected to sign-in (307)
+GET  /value/[id]                                  protected 307  refused  redirected to sign-in (307)
+
+GET  /favicon.ico                                 shell     200  open     static shell
+GET  /icons/apple-touch-icon-180.png              shell     200  open     static shell
+GET  /icons/favicon-32.png                        shell     200  open     static shell
+GET  /icons/icon-192.png                          shell     200  open     static shell
+GET  /icons/icon-512.png                          shell     200  open     static shell
+GET  /icons/vernier-mark.svg                      shell     200  open     static shell
+GET  /sw.js                                       shell     200  open     static shell
+
+32 requests, 0 failing. Public routes answer, gate routes refuse, everything else needs a session.
+
+  ✓   3 [webkit-iphone] › tests/e2e/boundary.spec.ts:15:3 › the route table › every route answers what it should to a caller with no session (473ms)
+  ✓   4 [webkit-iphone] › tests/e2e/boundary.spec.ts:27:3 › the route table › a document redirects and an API path answers 401 (604ms)
+last_reported_at before: 2026-08-22 10:07:49.636726+02
+no cookie and no header: 403 {"error":"Anti-forgery check failed.","detail":"This request carried no x-vernier-csrf header. Nothing was written."}
+cookie but no header: 403 {"error":"Anti-forgery check failed.","detail":"This request carried no x-vernier-csrf header. Nothing was written."}
+a token that does not match: 403 {"error":"Anti-forgery check failed.","detail":"The anti-forgery token does not match the one issued to this browser. Nothing was written."}
+with the token: 204
+last_reported_at after: 2026-08-22 10:07:50.299706+02
+  ✓   5 [webkit-iphone] › tests/e2e/boundary.spec.ts:51:3 › the launch report › refuses a post with no anti-forgery token and writes nothing (692ms)
+the launch the browser raised: 204
+  ✓   6 [webkit-iphone] › tests/e2e/boundary.spec.ts:103:3 › the launch report › a real launch in a browser still reports itself (608ms)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+no anti-forgery header: 403 {"error":"Anti-forgery check failed.","detail":"This request carried no x-vernier-csrf header. Nothing was written."}
+stored row: withings | connected | user.metrics | kVoN4PFFiw4vC+HWLVQ+/1x/oieZgmY7d6mW | sHsmZk5IO-m18Rsy
+  ✓   7 [webkit-iphone] › tests/e2e/boundary.spec.ts:118:3 › the credential boundary › settings renders state, scope and last sync, and never the credential (1.9s)
+gate  52px  16px  Sign in with passkey
+gate  52px  16px  Use the backup password
+  ✓   8 [webkit-iphone] › tests/e2e/button-geometry.spec.ts:33:1 › the gate keeps its 52 px escalation (326ms)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+/  48px  16px  Quick log
+/settings  48px  16px  Save the credential
+/settings  48px  16px  Add a passkey on this device
+/settings  48px  16px  Sign out
+/health  48px  16px  Set up the owner account
+/train  48px  16px  Set up the owner account
+/eat  48px  16px  Set up the owner account
+operator panel quiet buttons: [{"label":"Sign out","classes":"btn quiet block","minHeight":"48px","height":"48px","fontSize":"16px"}]
+  ✓   9 [webkit-iphone] › tests/e2e/button-geometry.spec.ts:44:1 › every shell button sits on the 48 px, 16 px base (1.1s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+icon buttons: [{"label":"Close the quick log","classes":"btn icon","minHeight":"44px","height":"44px","fontSize":"16px"}]
+  ✓  10 [webkit-iphone] › tests/e2e/button-geometry.spec.ts:70:1 › an icon button is 44 square, which is the floor and not the target (911ms)
+test-stack: ready at http://127.0.0.1:3101
+  ✓  11 [webkit-iphone] › tests/e2e/demo-seed.spec.ts:26:3 › the demonstration seed › writes nothing at all with demonstration mode off (3.0s)
+test-stack: ready at http://127.0.0.1:3101
+demo_src_weight reads: withings | sync_batch | 1184 | seed=true
+the six shapes the seed stands in for:
+apple_health_shortcut | shortcut_payload | seed=true
+demo | demo_record | seed=true
+derived | derivation | seed=true
+lab_pdf | lab_page | seed=true
+manual | manual_entry | seed=true
+withings | sync_batch | seed=true
+rows found by the id prefix: 6, rows found by the column: 6
+  ✓  12 [webkit-iphone] › tests/e2e/demo-seed.spec.ts:35:3 › the demonstration seed › marks every row it writes, in both tables, and keeps the six shapes (3.3s)
+measurement.seed is_generated: ALWAYS
+a withings reading pointed at a seeded record:
+ERROR:  insert or update on table "measurement" violates foreign key constraint "measurement_seed_matches_source_record"
+DETAIL:  Key (source_record_id, seed)=(demo_src_weight, f) is not present in table "source_record".
+a demonstration reading pointed at a real record:
+ERROR:  insert or update on table "measurement" violates foreign key constraint "measurement_seed_matches_source_record"
+DETAIL:  Key (source_record_id, seed)=(real-batch, t) is not present in table "source_record".
+  ✓  13 [webkit-iphone] › tests/e2e/demo-seed.spec.ts:67:3 › the demonstration seed › refuses, in the database, a real row wearing a seeded record or the reverse (659ms)
+  ✓  14 [webkit-iphone] › tests/e2e/gate.spec.ts:51:3 › screen 01, the gate › renders passkey first and password second at three viewports (847ms)
+  ✓  15 [webkit-iphone] › tests/e2e/gate.spec.ts:94:3 › screen 01, the gate › shows the password field when the owner asks for it (354ms)
+  ✓  16 [webkit-iphone] › tests/e2e/gate.spec.ts:113:3 › screen 01, the gate › names the cause when the machine is not answering (393ms)
+  ✓  17 [webkit-iphone] › tests/e2e/gate.spec.ts:136:3 › screen 01, first run › renders the one-time owner creation at three viewports (766ms)
+stored row under the right key: 7z0ivGLhJz6zGu3q9w8P+HafdLawnh7Wo7mLeA== | sHsmZk5IO-m18Rsy
+test-stack: ready at http://127.0.0.1:3101
+test-stack: running under a master key that did not write the stored rows
+check under the wrong key: 500 {"error":"The stored credential will not open.","detail":"MASTER_KEY does not decrypt the stored withings credential: the row was written under key sHsmZk5IO-m18Rsy and the running key is Rdnx7X3bCppjuLG1. The key in the environment differs from the one this row was written with. Nothing is returned and nothing is overwritten. Restore the original key, or delete the row and connect the integration again."}
+  ✓  18 [webkit-iphone] › tests/e2e/master-key.spec.ts:20:3 › the master key › encrypts a credential, then refuses to open it under a different key (5.2s)
+test-stack: booting with no master key, in the foreground, so the refusal is visible
+▲ Next.js 16.3.2
+- Local:         http://localhost:3000
+- Network:       http://0.0.0.0:3000
+✓ Ready in 0ms
+✓ Running next.config took 0.6ms
+[vernier] refusing to start: MASTER_KEY is not set. Vernier will not start without it: every third-party credential in the database is encrypted with it, and starting without it would mean writing the next one in the clear. Set MASTER_KEY in the environment file at the project root to 32 random bytes in base64url and restart the stack.
+test-stack: the container exited with code 1
+test-stack: ready at http://127.0.0.1:3101
+  ✓  19 [webkit-iphone] › tests/e2e/master-key.spec.ts:79:3 › the master key › refuses to start at all when the key is absent, and creates no owner (3.2s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+after the recovery link, the browser is at https://lamberts-mac-mini.tailda76d6.ts.net/
+stored credential row: id=KZhFFbcocJJ44cFEmwU_XjaX5bxPTGNgF8PPBOqGvWI public_key_bytes=77 counter=0 transports=internal,hybrid device_type=multiDevice backed_up=true aaguid=00000000-0000-0000-0000-000000000000 label=This device
+diagnostics: passkeyRegistered true, first observed 2026-08-22T08:08:18.942Z
+after sign-in 1: counter=0 last_used_at=2026-08-22 10:08:19.359+02
+after sign-in 2: counter=0 last_used_at=2026-08-22 10:08:19.829+02
+recovery: removed passkey KZhFFbcocJJ44cFEmwU_XjaX5bxPTGNgF8PPBOqGvWI
+recovery: no passkey is registered now, so the passkey_registered signal was cleared with it.
+device_observation: passkey_registered was absent before this test and is absent after it
+  ✓  20 [webkit-iphone] › tests/e2e/passkey.spec.ts:26:3 › the passkey round trip › registers, then authenticates twice on a counter that never moves (2.7s)
+owner rows: 1
+  id: 687a9fa8-0423-4e32-b2ad-deea430a9b6b name: Owner created: 2026-08-21T23:20:00.117Z
+  password: argon2id m=19456 t=2 p=1 tag=32 set: 2026-08-22T08:05:43.251Z
+passkeys: 0
+failed attempts inside the 60 second window: 0 of 5 allowed
+last five attempts:
+  2026-08-22T08:08:19.832Z passkey success | signed in with the passkey reporting counter 0
+  2026-08-22T08:08:19.735Z sign-out success | the passkey session was ended by the owner
+  2026-08-22T08:08:19.361Z passkey success | signed in with the passkey reporting counter 0
+  2026-08-22T08:08:19.240Z sign-out success | the recovery session was ended by the owner
+  2026-08-22T08:08:18.942Z passkey success | a passkey was registered, device type multiDevice
+  ✓  21 [webkit-iphone] › tests/e2e/recovery.spec.ts:21:3 › local recovery › reads the state of the account from the host shell (331ms)
+recovery: the backup password is set. Argon2id m=19456 t=2 p=1, 16-byte nonce, stored on the owner row.
+the owner row after the reset: argon2id m=19456 t=2 p=1 tag=32 nonce_bytes=16
+password | success | signed in with the backup password
+recovery | success | the backup password was reset from the host shell
+  ✓  22 [webkit-iphone] › tests/e2e/recovery.spec.ts:30:3 › local recovery › sets a new backup password, and it signs in on a browser holding no passkey (1.6s)
+statuses: 401, 401, 401, 401, 401, 429, 429
+  attempt 1: 4 attempts left, then a 60 second pause.
+  attempt 2: 3 attempts left, then a 60 second pause.
+  attempt 3: 2 attempts left, then a 60 second pause.
+  attempt 4: 1 attempt left, then a 60 second pause.
+  attempt 5: Sign-in is paused for 60 seconds.
+  attempt 6: Five failures inside 60 seconds pauses sign-in. Wait 60 seconds and try again. A correct password will not open it any sooner.
+  attempt 7: Five failures inside 60 seconds pauses sign-in. Wait 60 seconds and try again. A correct password will not open it any sooner.
+rate-limited | refused by the rate limiter, 60 seconds left in the window
+rate-limited | refused by the rate limiter, 60 seconds left in the window
+failure | the backup password did not match
+failure | the backup password did not match
+failure | the backup password did not match
+failure | the backup password did not match
+failure | the backup password did not match
+  ✓  23 [webkit-iphone] › tests/e2e/zz-rate-limit.spec.ts:18:3 › the rate limiter › pauses sign-in after five failures and writes one row per attempt (650ms)
+recovery: the lockout window is clear. 6 failure(s) inside it are now ignored and still on the record.
+recovery: the lockout window is clear. 7 failure(s) inside it are now ignored and still on the record.
+  ✓  24 [webkit-iphone] › tests/e2e/zz-rate-limit.spec.ts:68:3 › the rate limiter › clears from the host shell, appending a row rather than editing one (713ms)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+the worker is active and controlling this page
+service worker targets: https://lamberts-mac-mini.tailda76d6.ts.net/sw.js
+worker probe of /healthz, origin reachable: HTTP 200
+worker probe of /healthz, origin taken away: FAILED: Failed to fetch
+worker probe of POST /api/log, origin taken away: FAILED: Failed to fetch
+host curl of /healthz while the browser is cut off: 200
+  ✓  25 [chrome-worker] › tests/e2e/service-worker.spec.ts:39:3 › the service worker › installs, controls the page, and loses the origin with the host still answering (1.2s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+cache intact: HTTP 200 text/html; charset=utf-8
+cache entries evicted: 33
+cache evicted: HTTP 503 text/html; charset=utf-8
+  ✓  26 [chrome-worker] › tests/e2e/service-worker.spec.ts:143:3 › the service worker › answers an evicted cache with the catalogue's offline copy and not a bare word (927ms)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+waist: 3 taps from Today
+energy: 3 taps from Today
+fatigue: 3 taps from Today
+hunger: 3 taps from Today
+satiety: 3 taps from Today
+note: 3 taps from Today
+waist=3 energy=3 fatigue=3 hunger=3 satiety=3 note=3
+energy 4 point manual reported
+fatigue 2 point manual reported
+hunger 3 point manual reported
+note Slept badly. Left knee fine. text manual reported
+satiety 4 point manual reported
+waist 99.0 cm manual measured_manual
+  ✓  27 [chrome-scratch] › tests/e2e/quick-log.spec.ts:142:3 › the quick log › commits each of the six in six taps or fewer from Today (6.2s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+queued offline: {"id":"986856b3-b477-4d73-be92-80f4027bc705","url":"/api/log","method":"POST","headers":{"content-type":"application/json"},"body":"{\"measuredAt\":\"2026-08-22T08:08:39.998Z\",\"timeZone\":\"Europe/Paris\",\"values\":[{\"id\":\"148449f8-10c7-4d68-a5c8-062e1ac3b5bb\",\"metric\":\"waist\",\"rawValue\":\"98.5\"},{\"id\":\"665b45f0-0503-41f6-9c67-25fbbf29b60a\",\"metric\":\"energy\",\"rawValue\":\"2\"}]}","createdAt":1787386119999,"attempts":0,"nextAttemptAt":0,"lastError":null,"parked":false}
+Today with the sheet closed reads: Saved on this phone 1 entry is waiting to upload. It keeps the time you typed it, not the time it arrives.
+the queue after the origin came back: [{"attempts":1,"waitMs":1652.03466796875,"lastError":"Failed to fetch"}]
+replay answered 201
+request log for 986856b3-b477-4d73-be92-80f4027bc705:
+applied
+replayed
+  ✓  28 [chrome-scratch] › tests/e2e/quick-log.spec.ts:216:3 › the quick log › commits offline, shows the queue, and replays exactly once (4.1s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+original ee9d8eda-a101-4ebd-8fa7-2ce773a30be8 = 99.0
+edit 1 through the screen: 99.0 corrected to 92.2
+edit 2 through the screen: 92.2 corrected to 98.5
+edit 3 through the screen: 98.5 corrected to 99.2
+the chain after three edits through the screen:
+0 | 99.0 | original
+1 | 92.2 | Edit 1
+2 | 98.5 | Edit 2
+3 | 99.2 | Edit 3
+the links:
+0 corrects nothing
+1 corrects ee9d8eda-a101-4ebd-8fa7-2ce773a30be8
+2 corrects d9813cc3-2fb7-4f71-a065-76f8e2e684bf
+3 corrects ea5337a3-5728-4609-961c-71ea0ddd002d
+  ✓  29 [chrome-scratch] › tests/e2e/quick-log.spec.ts:354:3 › the quick log › appends three corrections through the value screen and keeps the original readable (5.4s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+what the value screen says about a word where a number belongs:
+Correct this valueFailedThat correction was not stored.ninety-seven is not a number, so it was not stored. The value on file has not moved and nothing was written.Try again
+correcting a 1-to-5 rating to "99": 401 This endpoint needs the owner session, and the cookie on this request names none.
+  ✘  30 [chrome-scratch] › tests/e2e/quick-log.spec.ts:436:3 › the quick log › refuses a correction the metric does not allow, and draws it as an error card (4.0s)
+  -  31 [chrome-scratch] › tests/e2e/quick-log.spec.ts:559:3 › the quick log › undoes a queued write, and offers a correction rather than a deletion once it has uploaded
+  -  32 [chrome-scratch] › tests/e2e/quick-log.spec.ts:645:3 › the quick log › walks from a value to its source in two taps, for all six sources
+  -  33 [chrome-scratch] › tests/e2e/quick-log.spec.ts:688:3 › the quick log › raises a question rather than overwriting a correction
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+--- 393 px ---
+  44 px  16px  Close the quick log
+  60 px  13.3333px  Down half a centimetre
+  60 px  13.3333px  Up half a centimetre
+  52 px  17px  Energy, 1 of 5
+  52 px  17px  Energy, 2 of 5
+  52 px  17px  Energy, 3 of 5
+  52 px  17px  Energy, 4 of 5
+  52 px  17px  Energy, 5 of 5
+  52 px  17px  Fatigue, 1 of 5
+  52 px  17px  Fatigue, 2 of 5
+  52 px  17px  Fatigue, 3 of 5
+  52 px  17px  Fatigue, 4 of 5
+  52 px  17px  Fatigue, 5 of 5
+  52 px  17px  Hunger, 1 of 5
+  52 px  17px  Hunger, 2 of 5
+  52 px  17px  Hunger, 3 of 5
+  52 px  17px  Hunger, 4 of 5
+  52 px  17px  Hunger, 5 of 5
+  52 px  17px  Satiety after eating, 1 of 5
+  52 px  17px  Satiety after eating, 2 of 5
+  52 px  17px  Satiety after eating, 3 of 5
+  52 px  17px  Satiety after eating, 4 of 5
+  52 px  17px  Satiety after eating, 5 of 5
+  80 px  15px  
+  52 px  16px  Save
+--- 768 px ---
+  44 px  16px  Close the quick log
+  60 px  13.3333px  Down half a centimetre
+  60 px  13.3333px  Up half a centimetre
+  52 px  17px  Energy, 1 of 5
+  52 px  17px  Energy, 2 of 5
+  52 px  17px  Energy, 3 of 5
+  52 px  17px  Energy, 4 of 5
+  52 px  17px  Energy, 5 of 5
+  52 px  17px  Fatigue, 1 of 5
+  52 px  17px  Fatigue, 2 of 5
+  52 px  17px  Fatigue, 3 of 5
+  52 px  17px  Fatigue, 4 of 5
+  52 px  17px  Fatigue, 5 of 5
+  52 px  17px  Hunger, 1 of 5
+  52 px  17px  Hunger, 2 of 5
+  52 px  17px  Hunger, 3 of 5
+  52 px  17px  Hunger, 4 of 5
+  52 px  17px  Hunger, 5 of 5
+  52 px  17px  Satiety after eating, 1 of 5
+  52 px  17px  Satiety after eating, 2 of 5
+  52 px  17px  Satiety after eating, 3 of 5
+  52 px  17px  Satiety after eating, 4 of 5
+  52 px  17px  Satiety after eating, 5 of 5
+  80 px  15px  
+  52 px  16px  Save
+--- 1280 px ---
+  44 px  16px  Close the quick log
+  60 px  13.3333px  Down half a centimetre
+  60 px  13.3333px  Up half a centimetre
+  52 px  17px  Energy, 1 of 5
+  52 px  17px  Energy, 2 of 5
+  52 px  17px  Energy, 3 of 5
+  52 px  17px  Energy, 4 of 5
+  52 px  17px  Energy, 5 of 5
+  52 px  17px  Fatigue, 1 of 5
+  52 px  17px  Fatigue, 2 of 5
+  52 px  17px  Fatigue, 3 of 5
+  52 px  17px  Fatigue, 4 of 5
+  52 px  17px  Fatigue, 5 of 5
+  52 px  17px  Hunger, 1 of 5
+  52 px  17px  Hunger, 2 of 5
+  52 px  17px  Hunger, 3 of 5
+  52 px  17px  Hunger, 4 of 5
+  52 px  17px  Hunger, 5 of 5
+  52 px  17px  Satiety after eating, 1 of 5
+  52 px  17px  Satiety after eating, 2 of 5
+  52 px  17px  Satiety after eating, 3 of 5
+  52 px  17px  Satiety after eating, 4 of 5
+  52 px  17px  Satiety after eating, 5 of 5
+  80 px  15px  
+  52 px  16px  Save
+  ✓  34 [chrome-scratch] › tests/e2e/quick-log.spec.ts:772:3 › the quick log against screen 03 › matches screen 03 at three viewports, with 44 px targets or better (4.6s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+stale chip reads: Demo, 3 days old
+loading skeletons: 3
+error card reads: WaistThis screen failed to loadYour last measurements did not loadFailed to fetch The sheet still saves: a write goes to this phone first and uploads when the Mac mini answers.Try again
+offline banner reads: Saved on this phone 1 entry is waiting to upload. It keeps the time you typed it, not the time it arrives.
+sheet width and left, per state: loaded 393/0, loading 393/0, error 393/0, offline 393/0
+empty card reads: No waist measurement yetTape at the navel, standing, breathing out. Same spot each time matters more than the exact number.
+  ✓  35 [chrome-scratch] › tests/e2e/quick-log.spec.ts:816:3 › the quick log against screen 03 › draws loading, empty, error, offline and stale on screen 00 geometry (7.5s)
+focus traversal: 3 stops of 3 interactive elements
+  input.input: 2px solid rgb(143, 196, 255) at 2px
+  button.btn primary block: 2px solid rgb(143, 196, 255) at 2px
+  button.btn quiet block: 2px solid rgb(143, 196, 255) at 2px
+  ✓  36 [chrome-keyboard] › tests/e2e/focus.spec.ts:32:1 › every interactive element on the gate carries a 2 px focus outline at 2 px offset (593ms)
+teardown: the owner's database holds 7 measurement, 7 source_record, 1 measurement not seeded.
+teardown: test-stack: stopped
+teardown: it held 7 measurement, 7 source_record, 1 measurement not seeded before the run, so nothing of the owner's was taken.
+
+
+  1) [chrome-scratch] › tests/e2e/quick-log.spec.ts:436:3 › the quick log › refuses a correction the metric does not allow, and draws it as an error card 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 422
+    Received: 401
+
+      485 |       const body = (await response.json()) as { error?: string; detail?: string };
+      486 |       console.log(`correcting a 1-to-5 rating to ${JSON.stringify(bad)}: ${response.status()} ${body.detail}`);
+    > 487 |       expect(response.status()).toBe(422);
+          |                                 ^
+      488 |       expect(String(body.error).length, 'a refusal names a cause').toBeGreaterThan(0);
+      489 |       expect(String(body.detail).length, 'a refusal names a next step').toBeGreaterThan(0);
+      490 |     }
+        at /Users/lambertbouley/Claude/lbtbly-fitness-app/tests/e2e/quick-log.spec.ts:487:33
+
+    Error Context: test-results/quick-log-the-quick-log-re-084da-d-draws-it-as-an-error-card-chrome-scratch/error-context.md
+
+  1 failed
+    [chrome-scratch] › tests/e2e/quick-log.spec.ts:436:3 › the quick log › refuses a correction the metric does not allow, and draws it as an error card 
+  3 did not run
+  32 passed (1.5m)

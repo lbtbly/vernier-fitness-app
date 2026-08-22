@@ -1,5 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import { expect, test } from '@playwright/test';
+import { strings } from '@/lib/strings';
 import { baseUrl, mintSignInLink, projectRoot, query } from './host';
 
 /**
@@ -123,6 +124,70 @@ test.describe('the service worker', () => {
     const fromHost = hostStatus('/healthz');
     console.log(`host curl of /healthz while the browser is cut off: ${fromHost}`);
     expect(fromHost).toBe('200');
+
+    await context.unroute('**/*');
+    await context.setOffline(false);
+  });
+
+  /**
+   * C6, at the last resort. With Cache Storage evicted the worker answered
+   * `new Response('Offline', {status: 503})`: a word on a screen with no
+   * catalogue key, duplicating strings.offline.title with no reference to it,
+   * and reachable in normal use because eviction is the browser's decision
+   * under storage pressure rather than anybody's action here.
+   *
+   * The worker cannot import the catalogue, so scripts/build-sw.mjs writes it
+   * in and `npm run sw:check` keeps the two equal. This is the other end of
+   * that: the words the owner actually reads when every cache has gone.
+   */
+  test('answers an evicted cache with the catalogue\'s offline copy and not a bare word', async ({
+    page,
+    context,
+  }) => {
+    await page.goto(mintSignInLink());
+    await page.goto('/');
+    await expect
+      .poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller)), { timeout: 30_000 })
+      .toBe(true);
+
+    // The control: the origin gone, the caches intact. This is the offline
+    // document the worker precached, and it is what the owner normally gets.
+    await context.route('**/*', (route) => route.abort('connectionfailed'));
+    const cached = await page.goto('/eat');
+    console.log(`cache intact: HTTP ${cached?.status()} ${cached?.headers()['content-type']}`);
+    expect(cached?.status()).toBe(200);
+    await expect(page.getByRole('heading', { name: strings.offline.cardTitle })).toBeVisible();
+
+    // Now the browser takes the storage back, which is the state this answers.
+    await context.unroute('**/*');
+    await page.goto('/');
+    const evicted = await page.evaluate(async () => {
+      let entries = 0;
+      for (const name of await caches.keys()) {
+        const cache = await caches.open(name);
+        for (const request of await cache.keys()) {
+          await cache.delete(request);
+          entries += 1;
+        }
+      }
+      return entries;
+    });
+    console.log(`cache entries evicted: ${evicted}`);
+    expect(evicted).toBeGreaterThan(0);
+
+    await context.route('**/*', (route) => route.abort('connectionfailed'));
+    const lastResort = await page.goto('/eat');
+    const body = await page.content();
+    console.log(
+      `cache evicted: HTTP ${lastResort?.status()} ${lastResort?.headers()['content-type']}`,
+    );
+    expect(lastResort?.status()).toBe(503);
+    expect(lastResort?.headers()['content-type']).toContain('text/html');
+    expect(body).toContain(strings.offline.title);
+    expect(body).toContain(strings.offline.cardTitle);
+    expect(body).toContain(strings.offline.causeSuffix);
+    // The bare word on its own, which is what this replaced.
+    expect(body).not.toMatch(/^Offline$/);
 
     await context.unroute('**/*');
     await context.setOffline(false);

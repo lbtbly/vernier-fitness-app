@@ -111,6 +111,30 @@ async function signIn(page: Page): Promise<void> {
 }
 
 /**
+ * The headers a signed-in write carries, with the session written in by hand.
+ *
+ * The session cookie is Secure, as F11 requires, and Playwright's request
+ * context will not attach a Secure cookie to an http origin even a loopback
+ * one, where the browser itself does. The page above is signed in through the
+ * shipped door; this is that same session, in the header the browser would have
+ * sent, so what is being measured stays the route's behaviour and not
+ * Playwright's cookie policy.
+ */
+async function signedInHeaders(
+  context: BrowserContext,
+  extra: Record<string, string> = {},
+): Promise<Record<string, string>> {
+  const jar = new Map((await context.cookies()).map((cookie) => [cookie.name, cookie.value]));
+  return {
+    'content-type': 'application/json',
+    'idempotency-key': crypto.randomUUID(),
+    'x-vernier-csrf': jar.get('vernier_csrf')!,
+    cookie: [...jar].map(([name, value]) => `${name}=${value}`).join('; '),
+    ...extra,
+  };
+}
+
+/**
  * The instance these tests run against, brought up before they do.
  *
  * The same image, the same boot path, the same demonstration seed, its own
@@ -306,12 +330,14 @@ test.describe('the quick log', () => {
 
     // The retry loop guarantees a second arrival. Send one on purpose, with the
     // same key, the way a lost response would.
+    //
+    // The session travels by hand here. The cookie is Secure, as F11 requires,
+    // and Playwright's request context will not attach a Secure cookie to an
+    // http origin even a loopback one, where the browser itself does. The page
+    // is signed in; this is the same session, written into the header the
+    // browser would have written.
     const replay = await page.request.post('/api/log', {
-      headers: {
-        'content-type': 'application/json',
-        'idempotency-key': queuedKey.id,
-        'x-vernier-csrf': (await context.cookies()).find((cookie) => cookie.name === 'vernier_csrf')!.value,
-      },
+      headers: await signedInHeaders(context, { 'idempotency-key': queuedKey.id }),
       data: JSON.parse(queuedKey.body),
     });
     console.log(`replay answered ${replay.status()}`);
@@ -464,14 +490,9 @@ test.describe('the quick log', () => {
     await page.screenshot({ path: `${CAPTURES}d3-correction-refused-393.png`, fullPage: true });
 
     // And every out-of-range value the append-only table would have kept.
-    const csrf = (await context.cookies()).find((cookie) => cookie.name === 'vernier_csrf')!.value;
     for (const bad of ['99', '-4.7', '3.5', '0', '', 'ninety-seven']) {
       const response = await page.request.post('/api/log', {
-        headers: {
-          'content-type': 'application/json',
-          'idempotency-key': crypto.randomUUID(),
-          'x-vernier-csrf': csrf,
-        },
+        headers: await signedInHeaders(context),
         data: { action: 'correct', correctsId: ratingId, rawValue: bad, reason: 'a test' },
       });
       const body = (await response.json()) as { error?: string; detail?: string };
@@ -489,11 +510,7 @@ test.describe('the quick log', () => {
     // A correction the range does allow still goes through, so the gate is a
     // gate and not a wall.
     const good = await page.request.post('/api/log', {
-      headers: {
-        'content-type': 'application/json',
-        'idempotency-key': crypto.randomUUID(),
-        'x-vernier-csrf': csrf,
-      },
+      headers: await signedInHeaders(context),
       data: { action: 'correct', correctsId: ratingId, rawValue: '2', reason: 'Felt worse than I said' },
     });
     expect(good.status()).toBe(201);
@@ -511,11 +528,7 @@ test.describe('the quick log', () => {
     // `rejected` array and no error field at all, so the same event had two
     // contracts and the queue read the refusal as applied.
     const allRefused = await page.request.post('/api/log', {
-      headers: {
-        'content-type': 'application/json',
-        'idempotency-key': crypto.randomUUID(),
-        'x-vernier-csrf': csrf,
-      },
+      headers: await signedInHeaders(context),
       data: {
         timeZone: 'Europe/Paris',
         values: [
@@ -691,10 +704,9 @@ test.describe('the quick log', () => {
       .toBe('1');
 
     const originalId = scratchQuery("select id from measurement where metric = 'waist' and source = 'manual'");
-    const csrf = (await context.cookies()).find((cookie) => cookie.name === 'vernier_csrf')!.value;
 
     await page.request.post('/api/log', {
-      headers: { 'content-type': 'application/json', 'idempotency-key': crypto.randomUUID(), 'x-vernier-csrf': csrf },
+      headers: await signedInHeaders(context),
       data: { action: 'correct', correctsId: originalId, rawValue: '99.2', reason: 'Typed a 2 for a 9.' },
     });
 

@@ -36,12 +36,12 @@ export function baseUrl(): string {
 /**
  * A read of the owner's database, and only a read.
  *
- * `default_transaction_read_only` is set on the session before the statement
- * runs, so every statement this function carries runs in a read-only
- * transaction and Postgres itself refuses a TRUNCATE, a DELETE, an UPDATE or an
- * INSERT with "cannot execute ... in a read-only transaction". Not a naming
- * convention, not a review rule, not a count of rows: the database says no. A
- * test that needs to write has the scratch instance for it.
+ * `default_transaction_read_only` is set on the connection through PGOPTIONS,
+ * so every statement this function carries runs in a read-only transaction and
+ * Postgres itself refuses a TRUNCATE, a DELETE, an UPDATE or an INSERT with
+ * "cannot execute ... in a read-only transaction". Not a naming convention, not
+ * a review rule, not a count of rows: the database says no. A test that needs
+ * to write has the scratch instance for it.
  */
 export function query(statement: string): string {
   // One line, always. A statement written across several lines in a test would
@@ -56,7 +56,7 @@ export function query(statement: string): string {
       'db',
       'sh',
       '-c',
-      `psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -At -c "set default_transaction_read_only = on" -c ${JSON.stringify(oneLine)}`,
+      `PGOPTIONS='-c default_transaction_read_only=on' psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -At -c ${JSON.stringify(oneLine)}`,
     ],
     { cwd: projectRoot, encoding: 'utf8' },
   ).trim();
