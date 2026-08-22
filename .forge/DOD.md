@@ -137,37 +137,37 @@ direct path is the note.
   holding both values and writes nothing until it is answered: the stored value is
   byte-identical before and after the import. Evidence: the question capture and
   the two row states.
-- [ ] **F27.** At 393x852, Today shows the session row, the meals, what needs
+- [x] **F27.** At 393x852, Today shows the session row, the meals, what needs
   logging, the weight trend and adherence within the top 715 pixels with no
   scrolling. Evidence: a full-page capture with the fold marked.
-- [ ] **F28.** The weight chart draws daily readings as 2.1 px unconnected dots, a
+- [x] **F28.** The weight chart draws daily readings as 2.1 px unconnected dots, a
   7-day average as a 2.6 px round-capped path, and the goal trajectory as a 1.5 px
   path dashed 5 5 with a corridor of plus or minus 0.5 kg. Evidence: the stroke
   widths and dash array read off the rendered markup.
-- [ ] **F29.** The 89.0 kg to 76.0 kg over nine months goal is visible on Today
+- [x] **F29.** The 89.0 kg to 76.0 kg over nine months goal is visible on Today
   and editable from Health, and changing either the target weight or the target
   date redraws the trajectory within one page load. Evidence: before and after
   captures with the two goal values.
-- [ ] **F30.** Absence is drawn, never smoothed. A gap of three days or more
+- [x] **F30.** Absence is drawn, never smoothed. A gap of three days or more
   breaks the line, hatches the missing range at 45 degrees and labels the dates; a
   rolling average whose window holds 5 or 6 of 7 days is dashed and states its
   count, and below 5 days it is not drawn. No interpolated, carried-forward or
   zero-filled point appears in the rendered path. Evidence: a capture over a seeded
   gap plus the path data showing the break.
-- [ ] **F31.** Weight and waist share one axis on Health, and a point on either
+- [x] **F31.** Weight and waist share one axis on Health, and a point on either
   reaches its source in two taps. Evidence: the capture and the two-tap walk.
-- [ ] **F32.** Activity, sleep, heart rate, recovery and VO2 max each render their
+- [x] **F32.** Activity, sleep, heart rate, recovery and VO2 max each render their
   value when present and render an empty state naming what is absent and what to do
   when not. Neither ever renders 0 for a missing value. Evidence: captures of both
   states for all five.
-- [ ] **F33.** Adherence renders as a count over its denominator for 7 and 28
+- [x] **F33.** Adherence renders as a count over its denominator for 7 and 28
   days, and both match a hand computation over the demonstration seed. Evidence:
   the capture and the hand computation.
-- [ ] **F34.** A source whose last successful sync is older than 36 hours shows a
+- [x] **F34.** A source whose last successful sync is older than 36 hours shows a
   warn chip naming the age and the cause and hatches the affected range; the chip
   clears when a fresher sample lands. Evidence: captures at 35 and 37 hours and
   after a fresh sample.
-- [ ] **F35.** No daily body-composition reading is the headline number on any
+- [x] **F35.** No daily body-composition reading is the headline number on any
   screen, and one sentence on Health states that hydration moves scale estimates.
   Evidence: the capture and the sentence.
 - [ ] **F36.** In demonstration mode the whole Withings pipeline runs with no
@@ -631,7 +631,7 @@ their interaction detail in `.forge/wireframes/`, and the standards skill.
   viewports, with exactly one accented action per screen and origin badges rendered
   as neutral chrome rather than a semantic colour. Evidence: six captures plus a
   count of accented elements per screen.
-- [ ] **C8.** Every chart carries a visually hidden table of its date and value
+- [x] **C8.** Every chart carries a visually hidden table of its date and value
   rows, a title and a description, and a screen reader reads the data rows rather
   than a single summary string. Evidence: the markup and a VoiceOver capture.
 - [ ] **C9.** Zero console errors and zero failed network requests across Today,
