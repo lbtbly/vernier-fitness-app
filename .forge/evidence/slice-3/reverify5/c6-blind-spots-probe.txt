@@ -1,0 +1,19 @@
+Read back off the live /settings screen, WebKit at 393x852, with the attack
+batch built into the image. Both checkers had already been run against the same
+build: scripts/strings.mjs reported only the .css content declaration and the
+quoted "Load failed"; scripts/rendered-strings.mjs reported the ::after content
+and <code>sign-in</code>. Neither reported either fragment below.
+
+BEFORE-CONNECT
+  inputValueAttr      "waist due at the weekend"
+  inputValueProp      "waist due at the weekend"
+  inputVisible        true
+  foreignObjectText   "row 12, page 6"
+  foreignObjectRect   {"x":96.2,"y":740,"width":200,"height":20}
+  codeText            "sign-in"                 <- reported by the rendered check
+  plantAInNotes       []                        <- the connected branch does not render
+  chipTexts           ["Not connected","Not connected","Not connected","Not connected"]
+
+AFTER-CONNECT, a credential saved through the shipped settings form
+  plantAInNotes       ["page 4, row 11"]        <- now rendered, still reported by nothing
+  chipTexts           ["Connected","Not connected","Not connected","Not connected"]

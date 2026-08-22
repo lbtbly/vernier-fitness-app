@@ -1,0 +1,5 @@
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+controller true
+CONTROL, cache intact -> {"status":200,"ct":"text/html; charset=utf-8","body":"OFFLINE\nThis phone cannot reach the Mac mini\nThe app shell is stored on this device, so it opened. Everything else waits for lamberts-mac-mini.tailda76d6.ts.net"}
+evicted entries 36
+AFTER EVICTION -> {"status":503,"ct":"text/plain","body":"Offline"}

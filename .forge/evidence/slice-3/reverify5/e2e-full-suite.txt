@@ -1,0 +1,386 @@
+
+Running 35 tests using 1 worker
+
+first attempt: 201 {"ownerId":"5db483b1-cb1d-48f6-ae67-2ac7c042f555","displayName":"Owner","created":true}
+second attempt: 409 {"error":"The owner account already exists.","detail":"Vernier holds exactly one account and it is created once. Sign in with your passkey or the backup password."}
+bootstrap | success | the owner account was created
+bootstrap | refused | the owner account already exists
+bootstrap | refused | the owner account already exists
+CREATE UNIQUE INDEX owner_singleton ON public.owner USING btree (singleton)
+  ✓   1 [webkit-iphone] › tests/e2e/bootstrap.spec.ts:15:3 › first run › creates the owner once and refuses the second attempt with 409 (3.3s)
+  ✓   2 [webkit-iphone] › tests/e2e/bootstrap.spec.ts:61:3 › first run › refuses a password that is too weak, and creates nothing (3.1s)
+route table against https://lamberts-mac-mini.tailda76d6.ts.net, 23 routes on disk
+
+GET  /                                            protected 307  refused  redirected to sign-in (307)
+POST /api/auth/bootstrap                          gate      403  refused  refuses an unauthenticated request
+POST /api/auth/passkey/authentication/options     gate      403  refused  refuses an unauthenticated request
+POST /api/auth/passkey/authentication/verify      gate      403  refused  refuses an unauthenticated request
+POST /api/auth/passkey/registration/options       protected 401  refused  401 with no session
+POST /api/auth/passkey/registration/verify        protected 401  refused  401 with no session
+POST /api/auth/password                           gate      403  refused  refuses an unauthenticated request
+POST /api/auth/sign-out                           protected 401  refused  401 with no session
+GET  /api/diagnostics/device                      public    200  open     answers without a session, as it must
+POST /api/diagnostics/launch                      public    403  open     answers without a session, as it must
+GET  /api/log                                     protected 401  refused  401 with no session
+POST /api/log                                     protected 401  refused  401 with no session
+GET  /api/settings/integrations                   protected 401  refused  401 with no session
+POST /api/settings/integrations                   protected 401  refused  401 with no session
+GET  /eat                                         protected 307  refused  redirected to sign-in (307)
+GET  /health                                      protected 307  refused  redirected to sign-in (307)
+GET  /healthz                                     public    200  open     answers without a session, as it must
+GET  /manifest.webmanifest                        public    200  open     answers without a session, as it must
+GET  /offline                                     public    200  open     answers without a session, as it must
+GET  /settings                                    protected 307  refused  redirected to sign-in (307)
+GET  /sign-in                                     public    200  open     answers without a session, as it must
+GET  /sign-in/recover                             gate      401  refused  refuses an unauthenticated request
+GET  /source/[id]                                 protected 307  refused  redirected to sign-in (307)
+GET  /train                                       protected 307  refused  redirected to sign-in (307)
+GET  /value/[id]                                  protected 307  refused  redirected to sign-in (307)
+
+GET  /favicon.ico                                 shell     200  open     static shell
+GET  /icons/apple-touch-icon-180.png              shell     200  open     static shell
+GET  /icons/favicon-32.png                        shell     200  open     static shell
+GET  /icons/icon-192.png                          shell     200  open     static shell
+GET  /icons/icon-512.png                          shell     200  open     static shell
+GET  /icons/vernier-mark.svg                      shell     200  open     static shell
+GET  /sw.js                                       shell     200  open     static shell
+
+32 requests, 0 failing. Public routes answer, gate routes refuse, everything else needs a session.
+
+  ✓   3 [webkit-iphone] › tests/e2e/boundary.spec.ts:15:3 › the route table › every route answers what it should to a caller with no session (337ms)
+  ✓   4 [webkit-iphone] › tests/e2e/boundary.spec.ts:27:3 › the route table › a document redirects and an API path answers 401 (971ms)
+last_reported_at before: 2026-08-22 09:25:57.910218+02
+no cookie and no header: 403 {"error":"Anti-forgery check failed.","detail":"This request carried no x-vernier-csrf header. Nothing was written."}
+cookie but no header: 403 {"error":"Anti-forgery check failed.","detail":"This request carried no x-vernier-csrf header. Nothing was written."}
+a token that does not match: 403 {"error":"Anti-forgery check failed.","detail":"The anti-forgery token does not match the one issued to this browser. Nothing was written."}
+with the token: 204
+last_reported_at after: 2026-08-22 09:25:58.656736+02
+  ✓   5 [webkit-iphone] › tests/e2e/boundary.spec.ts:51:3 › the launch report › refuses a post with no anti-forgery token and writes nothing (824ms)
+the launch the browser raised: 204
+  ✓   6 [webkit-iphone] › tests/e2e/boundary.spec.ts:103:3 › the launch report › a real launch in a browser still reports itself (849ms)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+no anti-forgery header: 403 {"error":"Anti-forgery check failed.","detail":"This request carried no x-vernier-csrf header. Nothing was written."}
+stored row: withings | connected | user.metrics | zjhI8Fk288DcMHaALnKXbbWblY7PlJkrhVfJ8w== | sHsmZk5IO-m18Rsy
+  ✓   7 [webkit-iphone] › tests/e2e/boundary.spec.ts:118:3 › the credential boundary › settings renders state, scope and last sync, and never the credential (2.5s)
+gate  52px  16px  Sign in with passkey
+gate  52px  16px  Use the backup password
+  ✓   8 [webkit-iphone] › tests/e2e/button-geometry.spec.ts:33:1 › the gate keeps its 52 px escalation (479ms)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+/  48px  16px  Quick log
+/settings  48px  16px  Save the credential
+/settings  48px  16px  Add a passkey on this device
+/settings  48px  16px  Sign out
+/health  48px  16px  Set up the owner account
+/train  48px  16px  Set up the owner account
+/eat  48px  16px  Set up the owner account
+operator panel quiet buttons: [{"label":"Sign out","classes":"btn quiet block","minHeight":"48px","height":"48px","fontSize":"16px"}]
+  ✓   9 [webkit-iphone] › tests/e2e/button-geometry.spec.ts:44:1 › every shell button sits on the 48 px, 16 px base (1.2s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+icon buttons: [{"label":"Close the quick log","classes":"btn icon","minHeight":"44px","height":"44px","fontSize":"16px"}]
+  ✓  10 [webkit-iphone] › tests/e2e/button-geometry.spec.ts:70:1 › an icon button is 44 square, which is the floor and not the target (1.2s)
+test-stack: ready at http://127.0.0.1:3101
+  ✓  11 [webkit-iphone] › tests/e2e/demo-seed.spec.ts:26:3 › the demonstration seed › writes nothing at all with demonstration mode off (3.7s)
+test-stack: ready at http://127.0.0.1:3101
+demo_src_weight reads: withings | sync_batch | 1184 | seed=true
+the six shapes the seed stands in for:
+apple_health_shortcut | shortcut_payload | seed=true
+demo | demo_record | seed=true
+derived | derivation | seed=true
+lab_pdf | lab_page | seed=true
+manual | manual_entry | seed=true
+withings | sync_batch | seed=true
+rows found by the id prefix: 6, rows found by the column: 6
+  ✓  12 [webkit-iphone] › tests/e2e/demo-seed.spec.ts:35:3 › the demonstration seed › marks every row it writes, in both tables, and keeps the six shapes (3.1s)
+measurement.seed is_generated: ALWAYS
+a withings reading pointed at a seeded record:
+ERROR:  insert or update on table "measurement" violates foreign key constraint "measurement_seed_matches_source_record"
+DETAIL:  Key (source_record_id, seed)=(demo_src_weight, f) is not present in table "source_record".
+a demonstration reading pointed at a real record:
+ERROR:  insert or update on table "measurement" violates foreign key constraint "measurement_seed_matches_source_record"
+DETAIL:  Key (source_record_id, seed)=(real-batch, t) is not present in table "source_record".
+  ✓  13 [webkit-iphone] › tests/e2e/demo-seed.spec.ts:67:3 › the demonstration seed › refuses, in the database, a real row wearing a seeded record or the reverse (675ms)
+  ✓  14 [webkit-iphone] › tests/e2e/gate.spec.ts:51:3 › screen 01, the gate › renders passkey first and password second at three viewports (841ms)
+  ✓  15 [webkit-iphone] › tests/e2e/gate.spec.ts:94:3 › screen 01, the gate › shows the password field when the owner asks for it (375ms)
+  ✓  16 [webkit-iphone] › tests/e2e/gate.spec.ts:113:3 › screen 01, the gate › names the cause when the machine is not answering (385ms)
+  ✓  17 [webkit-iphone] › tests/e2e/gate.spec.ts:136:3 › screen 01, first run › renders the one-time owner creation at three viewports (747ms)
+stored row under the right key: D2d9zbyBv0hZCUeNhFOLdfEhQYN+4FeTTF+K8w== | sHsmZk5IO-m18Rsy
+test-stack: ready at http://127.0.0.1:3101
+test-stack: running under a master key that did not write the stored rows
+check under the wrong key: 500 {"error":"The stored credential will not open.","detail":"MASTER_KEY does not decrypt the stored withings credential: the row was written under key sHsmZk5IO-m18Rsy and the running key is CSvA-QageXP45NQ6. The key in the environment differs from the one this row was written with. Nothing is returned and nothing is overwritten. Restore the original key, or delete the row and connect the integration again."}
+  ✓  18 [webkit-iphone] › tests/e2e/master-key.spec.ts:20:3 › the master key › encrypts a credential, then refuses to open it under a different key (5.1s)
+test-stack: booting with no master key, in the foreground, so the refusal is visible
+▲ Next.js 16.3.2
+- Local:         http://localhost:3000
+- Network:       http://0.0.0.0:3000
+✓ Ready in 0ms
+✓ Running next.config took 0.5ms
+[vernier] refusing to start: MASTER_KEY is not set. Vernier will not start without it: every third-party credential in the database is encrypted with it, and starting without it would mean writing the next one in the clear. Set MASTER_KEY in the environment file at the project root to 32 random bytes in base64url and restart the stack.
+test-stack: the container exited with code 1
+test-stack: ready at http://127.0.0.1:3101
+  ✓  19 [webkit-iphone] › tests/e2e/master-key.spec.ts:79:3 › the master key › refuses to start at all when the key is absent, and creates no owner (2.9s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+after the recovery link, the browser is at https://lamberts-mac-mini.tailda76d6.ts.net/
+stored credential row: id=nPiqvIKC43ZnxC2K44DZXT1cDrVTW5C4iwR2EaSna5s public_key_bytes=77 counter=0 transports=internal,hybrid device_type=multiDevice backed_up=true aaguid=00000000-0000-0000-0000-000000000000 label=This device
+diagnostics: passkeyRegistered true, first observed 2026-08-22T07:26:28.658Z
+after sign-in 1: counter=0 last_used_at=2026-08-22 09:26:29.128+02
+after sign-in 2: counter=0 last_used_at=2026-08-22 09:26:29.758+02
+recovery: removed passkey nPiqvIKC43ZnxC2K44DZXT1cDrVTW5C4iwR2EaSna5s
+device_observation: passkey_registered put back to absent, which is what it was
+  ✓  20 [webkit-iphone] › tests/e2e/passkey.spec.ts:26:3 › the passkey round trip › registers, then authenticates twice on a counter that never moves (2.9s)
+ Container vernier-app-1 Restarting 
+ Container vernier-app-1 Started 
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+waist: 3 taps from Today
+energy: 3 taps from Today
+fatigue: 3 taps from Today
+hunger: 3 taps from Today
+satiety: 3 taps from Today
+note: 3 taps from Today
+waist=3 energy=3 fatigue=3 hunger=3 satiety=3 note=3
+energy 4 point manual reported
+fatigue 2 point manual reported
+hunger 3 point manual reported
+note Slept badly. Left knee fine. text manual reported
+satiety 4 point manual reported
+waist 99.0 cm manual measured_manual
+  ✓  21 [webkit-iphone] › tests/e2e/quick-log.spec.ts:95:3 › the quick log › commits each of the six in six taps or fewer from Today (5.9s)
+ Container vernier-app-1 Restarting 
+ Container vernier-app-1 Started 
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+queued offline: {"id":"ea34d87d-17b4-4a17-9f82-e47eca7e80ba","url":"/api/log","method":"POST","headers":{"content-type":"application/json"},"body":"{\"measuredAt\":\"2026-08-22T07:26:39.764Z\",\"timeZone\":\"Europe/Paris\",\"values\":[{\"id\":\"c596885a-ab97-4a21-a8f7-22649604ede9\",\"metric\":\"waist\",\"rawValue\":\"98.5\"},{\"id\":\"6e6b6251-81f7-4056-ae3f-ff8c7a81d28f\",\"metric\":\"energy\",\"rawValue\":\"2\"}]}","createdAt":1787383599764,"attempts":0,"nextAttemptAt":0,"lastError":null,"parked":false}
+Today with the sheet closed reads: Saved on this phone 1 entry is waiting to upload. It keeps the time you typed it, not the time it arrives.
+the queue after the origin came back: [{"attempts":1,"waitMs":1260.962890625,"lastError":"Load failed"}]
+replay answered 201
+request log for ea34d87d-17b4-4a17-9f82-e47eca7e80ba:
+applied
+replayed
+  ✓  22 [webkit-iphone] › tests/e2e/quick-log.spec.ts:169:3 › the quick log › commits offline, shows the queue, and replays exactly once (4.5s)
+ Container vernier-app-1 Restarting 
+ Container vernier-app-1 Started 
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+original f5e8e271-d172-4e82-b70e-c4a767daf751 = 99.0
+edit 1 through the screen: 99.0 corrected to 92.2
+edit 2 through the screen: 92.2 corrected to 98.5
+edit 3 through the screen: 98.5 corrected to 99.2
+the chain after three edits through the screen:
+0 | 99.0 | original
+1 | 92.2 | Edit 1
+2 | 98.5 | Edit 2
+3 | 99.2 | Edit 3
+the links:
+0 corrects nothing
+1 corrects f5e8e271-d172-4e82-b70e-c4a767daf751
+2 corrects 85002bb7-4a63-4d74-839b-399635662289
+3 corrects 3af9c59d-6c90-45dd-962f-d9a832cf963f
+  ✓  23 [webkit-iphone] › tests/e2e/quick-log.spec.ts:299:3 › the quick log › appends three corrections through the value screen and keeps the original readable (5.0s)
+ Container vernier-app-1 Restarting 
+ Container vernier-app-1 Started 
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+what the value screen says about a word where a number belongs:
+Correct this valueFailedThat correction was not stored.ninety-seven is not a number, so it was not stored. The value on file has not moved and nothing was written.Try again
+correcting a 1-to-5 rating to "99": 422 A rating is a whole number from 1 to 5.
+correcting a 1-to-5 rating to "-4.7": 422 A rating is a whole number from 1 to 5.
+correcting a 1-to-5 rating to "3.5": 422 A rating is a whole number from 1 to 5.
+correcting a 1-to-5 rating to "0": 422 A rating is a whole number from 1 to 5.
+correcting a 1-to-5 rating to "": 422 Type the number it should be and save again. The original is kept either way.
+correcting a 1-to-5 rating to "ninety-seven": 422 ninety-seven is not a number, so it was not stored.
+the reason stored on the correction: Corrects the reading demo_energy, which stays readable.
+a write whose every value is refused: 422 Every value in it was refused and each one carries its reason. Fix them and save again; nothing was written.
+  ✓  24 [webkit-iphone] › tests/e2e/quick-log.spec.ts:381:3 › the quick log › refuses a correction the metric does not allow, and draws it as an error card (4.0s)
+ Container vernier-app-1 Restarting 
+ Container vernier-app-1 Started 
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+the just-logged card while queued:
+Just loggedWaist98.5 cmQueuedFatigue2 of 5QueuedUndoEditStill on this phone. Undo removes it before it uploads, and Edit reopens the sheet.
+entries left in the outbox after Undo: 0
+the just-logged card once it has uploaded:
+Just loggedWaist98.5 cmStoredHunger3 of 5StoredCorrect itUploaded to the Mac mini. Vernier never deletes a value, so a change from here is a correction kept beside the original.
+the card labels on Today: ["Needs logging","Just logged","On file"]
+  ✓  25 [webkit-iphone] › tests/e2e/quick-log.spec.ts:504:3 › the quick log › undoes a queued write, and offers a correction rather than a deletion once it has uploaded (5.0s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+demo_src_steps|apple_health_shortcut|shortcut_payload
+demo_src_energy|demo|demo_record
+demo_src_average|derived|derivation
+demo_src_ldl|lab_pdf|lab_page
+demo_src_waist|manual|manual_entry
+src_b186036a-5c71-4cf2-805d-1f9836591449|manual|manual_entry
+demo_src_weight|withings|sync_batch
+source apple_health_shortcut (shortcut_payload) rendered by src/app/(shell)/source/[id]/page.tsx
+source demo (demo_record) rendered by src/app/(shell)/source/[id]/page.tsx
+source derived (derivation) rendered by src/app/(shell)/source/[id]/page.tsx
+source lab_pdf (lab_page) rendered by src/app/(shell)/source/[id]/page.tsx
+source manual (manual_entry) rendered by src/app/(shell)/source/[id]/page.tsx
+source withings (sync_batch) rendered by src/app/(shell)/source/[id]/page.tsx
+  ✓  26 [webkit-iphone] › tests/e2e/quick-log.spec.ts:590:3 › the quick log › walks from a value to its source in two taps, for all six sources (4.0s)
+ Container vernier-app-1 Restarting 
+ Container vernier-app-1 Started 
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+before the disagreeing write:
+29415093-6508-437a-8272-6f2a6e6d2529|99.2|manual|1
+470e6446-a42c-4cb3-a149-1f650f28037a|99.0|manual|0
+demo_average|86.4|demo|0
+demo_energy|4|demo|0
+demo_ldl|1.44|demo|0
+demo_steps|9412|demo|0
+demo_waist|98.5|demo|0
+demo_weight|85.9|demo|0
+the disagreeing write answered 200: [{"id":"q_402892f7-cfd6-4bc2-9bc3-dc0b05658e3c","metric":"waist"}]
+after:
+29415093-6508-437a-8272-6f2a6e6d2529|99.2|manual|1
+470e6446-a42c-4cb3-a149-1f650f28037a|99.0|manual|0
+demo_average|86.4|demo|0
+demo_energy|4|demo|0
+demo_ldl|1.44|demo|0
+demo_steps|9412|demo|0
+demo_waist|98.5|demo|0
+demo_weight|85.9|demo|0
+the question that was raised instead: 99.2 vs 92.2 | open
+  ✓  27 [webkit-iphone] › tests/e2e/quick-log.spec.ts:633:3 › the quick log › raises a question rather than overwriting a correction (4.3s)
+ Container vernier-app-1 Restarting 
+ Container vernier-app-1 Started 
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+--- 393 px ---
+  44 px  16px  Close the quick log
+  60 px  11px  Down half a centimetre
+  60 px  11px  Up half a centimetre
+  52 px  17px  Energy, 1 of 5
+  52 px  17px  Energy, 2 of 5
+  52 px  17px  Energy, 3 of 5
+  52 px  17px  Energy, 4 of 5
+  52 px  17px  Energy, 5 of 5
+  52 px  17px  Fatigue, 1 of 5
+  52 px  17px  Fatigue, 2 of 5
+  52 px  17px  Fatigue, 3 of 5
+  52 px  17px  Fatigue, 4 of 5
+  52 px  17px  Fatigue, 5 of 5
+  52 px  17px  Hunger, 1 of 5
+  52 px  17px  Hunger, 2 of 5
+  52 px  17px  Hunger, 3 of 5
+  52 px  17px  Hunger, 4 of 5
+  52 px  17px  Hunger, 5 of 5
+  52 px  17px  Satiety after eating, 1 of 5
+  52 px  17px  Satiety after eating, 2 of 5
+  52 px  17px  Satiety after eating, 3 of 5
+  52 px  17px  Satiety after eating, 4 of 5
+  52 px  17px  Satiety after eating, 5 of 5
+  80 px  15px  
+  52 px  16px  Save
+--- 768 px ---
+  44 px  16px  Close the quick log
+  60 px  11px  Down half a centimetre
+  60 px  11px  Up half a centimetre
+  52 px  17px  Energy, 1 of 5
+  52 px  17px  Energy, 2 of 5
+  52 px  17px  Energy, 3 of 5
+  52 px  17px  Energy, 4 of 5
+  52 px  17px  Energy, 5 of 5
+  52 px  17px  Fatigue, 1 of 5
+  52 px  17px  Fatigue, 2 of 5
+  52 px  17px  Fatigue, 3 of 5
+  52 px  17px  Fatigue, 4 of 5
+  52 px  17px  Fatigue, 5 of 5
+  52 px  17px  Hunger, 1 of 5
+  52 px  17px  Hunger, 2 of 5
+  52 px  17px  Hunger, 3 of 5
+  52 px  17px  Hunger, 4 of 5
+  52 px  17px  Hunger, 5 of 5
+  52 px  17px  Satiety after eating, 1 of 5
+  52 px  17px  Satiety after eating, 2 of 5
+  52 px  17px  Satiety after eating, 3 of 5
+  52 px  17px  Satiety after eating, 4 of 5
+  52 px  17px  Satiety after eating, 5 of 5
+  80 px  15px  
+  52 px  16px  Save
+--- 1280 px ---
+  44 px  16px  Close the quick log
+  60 px  11px  Down half a centimetre
+  60 px  11px  Up half a centimetre
+  52 px  17px  Energy, 1 of 5
+  52 px  17px  Energy, 2 of 5
+  52 px  17px  Energy, 3 of 5
+  52 px  17px  Energy, 4 of 5
+  52 px  17px  Energy, 5 of 5
+  52 px  17px  Fatigue, 1 of 5
+  52 px  17px  Fatigue, 2 of 5
+  52 px  17px  Fatigue, 3 of 5
+  52 px  17px  Fatigue, 4 of 5
+  52 px  17px  Fatigue, 5 of 5
+  52 px  17px  Hunger, 1 of 5
+  52 px  17px  Hunger, 2 of 5
+  52 px  17px  Hunger, 3 of 5
+  52 px  17px  Hunger, 4 of 5
+  52 px  17px  Hunger, 5 of 5
+  52 px  17px  Satiety after eating, 1 of 5
+  52 px  17px  Satiety after eating, 2 of 5
+  52 px  17px  Satiety after eating, 3 of 5
+  52 px  17px  Satiety after eating, 4 of 5
+  52 px  17px  Satiety after eating, 5 of 5
+  80 px  15px  
+  52 px  16px  Save
+  ✓  28 [webkit-iphone] › tests/e2e/quick-log.spec.ts:715:3 › the quick log against screen 03 › matches screen 03 at three viewports, with 44 px targets or better (4.4s)
+ Container vernier-app-1 Restarting 
+ Container vernier-app-1 Started 
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+stale chip reads: Demo, 3 days old
+loading skeletons: 3
+error card reads: WaistThis screen failed to loadYour last measurements did not loadLoad failed The sheet still saves: a write goes to this phone first and uploads when the Mac mini answers.Try again
+offline banner reads: Saved on this phone 1 entry is waiting to upload. It keeps the time you typed it, not the time it arrives.
+sheet width and left, per state: loaded 393/0, loading 393/0, error 393/0, offline 393/0
+empty card reads: No waist measurement yetTape at the navel, standing, breathing out. Same spot each time matters more than the exact number.
+ Container vernier-app-1 Restarting 
+ Container vernier-app-1 Started 
+  ✓  29 [webkit-iphone] › tests/e2e/quick-log.spec.ts:759:3 › the quick log against screen 03 › draws loading, empty, error, offline and stale on screen 00 geometry (7.9s)
+owner rows: 1
+  id: 687a9fa8-0423-4e32-b2ad-deea430a9b6b name: Owner created: 2026-08-21T23:20:00.117Z
+  password: argon2id m=19456 t=2 p=1 tag=32 set: 2026-08-22T06:56:44.651Z
+passkeys: 0
+failed attempts inside the 60 second window: 0 of 5 allowed
+last five attempts:
+  2026-08-22T07:27:10.292Z recovery success | signed in with a one-time grant minted on the host shell
+  2026-08-22T07:27:05.873Z recovery success | signed in with a one-time grant minted on the host shell
+  2026-08-22T07:27:01.834Z recovery success | signed in with a one-time grant minted on the host shell
+  2026-08-22T07:26:55.711Z recovery success | signed in with a one-time grant minted on the host shell
+  2026-08-22T07:26:52.537Z recovery success | signed in with a one-time grant minted on the host shell
+  ✓  30 [webkit-iphone] › tests/e2e/recovery.spec.ts:21:3 › local recovery › reads the state of the account from the host shell (473ms)
+recovery: the backup password is set. Argon2id m=19456 t=2 p=1, 16-byte nonce, stored on the owner row.
+the owner row after the reset: argon2id m=19456 t=2 p=1 tag=32 nonce_bytes=16
+password | success | signed in with the backup password
+recovery | success | the backup password was reset from the host shell
+  ✓  31 [webkit-iphone] › tests/e2e/recovery.spec.ts:30:3 › local recovery › sets a new backup password, and it signs in on a browser holding no passkey (2.4s)
+statuses: 401, 401, 401, 401, 401, 429, 429
+  attempt 1: 4 attempts left, then a 60 second pause.
+  attempt 2: 3 attempts left, then a 60 second pause.
+  attempt 3: 2 attempts left, then a 60 second pause.
+  attempt 4: 1 attempt left, then a 60 second pause.
+  attempt 5: Sign-in is paused for 60 seconds.
+  attempt 6: Five failures inside 60 seconds pauses sign-in. Wait 60 seconds and try again. A correct password will not open it any sooner.
+  attempt 7: Five failures inside 60 seconds pauses sign-in. Wait 60 seconds and try again. A correct password will not open it any sooner.
+rate-limited | refused by the rate limiter, 60 seconds left in the window
+rate-limited | refused by the rate limiter, 60 seconds left in the window
+failure | the backup password did not match
+failure | the backup password did not match
+failure | the backup password did not match
+failure | the backup password did not match
+failure | the backup password did not match
+  ✓  32 [webkit-iphone] › tests/e2e/zz-rate-limit.spec.ts:18:3 › the rate limiter › pauses sign-in after five failures and writes one row per attempt (667ms)
+recovery: the lockout window is clear. 6 failure(s) inside it are now ignored and still on the record.
+recovery: the lockout window is clear. 7 failure(s) inside it are now ignored and still on the record.
+  ✓  33 [webkit-iphone] › tests/e2e/zz-rate-limit.spec.ts:68:3 › the rate limiter › clears from the host shell, appending a row rather than editing one (721ms)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+the worker is active and controlling this page
+service worker targets: https://lamberts-mac-mini.tailda76d6.ts.net/sw.js
+worker probe of /healthz, origin reachable: HTTP 200
+worker probe of /healthz, origin taken away: FAILED: Failed to fetch
+worker probe of POST /api/log, origin taken away: FAILED: Failed to fetch
+host curl of /healthz while the browser is cut off: 200
+  ✓  34 [chrome-worker] › tests/e2e/service-worker.spec.ts:38:3 › the service worker › installs, controls the page, and loses the origin with the host still answering (1.3s)
+focus traversal: 3 stops of 3 interactive elements
+  input.input: 2px solid rgb(143, 196, 255) at 2px
+  button.btn primary block: 2px solid rgb(143, 196, 255) at 2px
+  button.btn quiet block: 2px solid rgb(143, 196, 255) at 2px
+  ✓  35 [chrome-keyboard] › tests/e2e/focus.spec.ts:32:1 › every interactive element on the gate carries a 2 px focus outline at 2 px offset (595ms)
+ Container vernier-app-1 Restarting 
+ Container vernier-app-1 Started 
+teardown: the rows this run wrote are gone and the seed is back.
+
+  35 passed (1.6m)
