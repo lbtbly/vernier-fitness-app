@@ -31,6 +31,18 @@ reached by a request no screen issues proves the layer underneath and not the
 line. Where both are worth recording, the product path is the evidence and the
 direct path is the note.
 
+A third rule was added on 2026-08-22 by the architect, after slice 4 failed
+verification four times on F27. Amendment A5 records the reasoning.
+
+**A fixed budget binds only over a closed set.** A line that fixes a number and a
+boundary — pixels above a fold, seconds to read, taps to commit — either names
+every element that spends the budget, or requires that every element which can
+spend it carries a maximum fixed by construction rather than by a count of rows,
+states that maximum as a number, and shows the maxima summing inside the budget.
+A budget met on one day's data is a measurement of the data. Where a later slice
+may put a new element inside the boundary, the boundedness clause governs it in
+advance, so the budget does not have to be re-argued once per slice.
+
 ---
 
 ## Function
@@ -123,7 +135,7 @@ direct path is the note.
   highlighted, the photo and the model reply, the derivation, and the demonstration
   record. Evidence: six captures, one per source, all landing on the same screen
   shape.
-- [x] **F23.** Waist, energy, fatigue, hunger, satiety and a free note each commit
+- [ ] **F23.** Waist, energy, fatigue, hunger, satiety and a free note each commit
   from Today in six taps or fewer. Evidence: a scripted interaction printing the
   tap count for each of the six.
 - [ ] **F24.** With the origin unreachable, a quick-log write commits locally,
@@ -137,9 +149,22 @@ direct path is the note.
   holding both values and writes nothing until it is answered: the stored value is
   byte-identical before and after the import. Evidence: the question capture and
   the two row states.
-- [ ] **F27.** At 393x852, Today shows the session row, the meals, what needs
-  logging, the weight trend and adherence within the top 715 pixels with no
-  scrolling. Evidence: a full-page capture with the fold marked.
+- [ ] **F27.** At 393x852 with no scrolling, a freshly loaded Today shows the
+  session row, the meals, what needs logging and the weight trend within the top
+  715 pixels, in every state the owner's own data can produce and not in one.
+  Adherence is never drawn above the weight trend. Every element the page can draw
+  above the weight trend carries a maximum height fixed by construction rather
+  than by a count of rows — the notice region whatever it holds, the day card
+  whatever was logged into it, and anything a later slice adds above the trend —
+  each maximum stated as a number, measured at its smallest and its largest count,
+  and the maxima sum inside 715. The 715 is met at the card padding and the card
+  gap DESIGN.md section 3 fixes, measured on the shipped screen: a fold bought by
+  compressing them is a FAIL. Evidence: full-page captures with the fold marked,
+  in both engines, in at least these states — nothing raised; every source quiet;
+  an open import question; offline with entries queued; and immediately after one
+  quick log writing all six values F23 names — plus the measured height of each
+  bounded element at its extreme count, the notice region at 1 and at 999999
+  notices, and the two measured card values.
 - [x] **F28.** The weight chart draws daily readings as 2.1 px unconnected dots, a
   7-day average as a 2.6 px round-capped path, and the goal trajectory as a 1.5 px
   path dashed 5 5 with a corridor of plus or minus 0.5 kg. Evidence: the stroke
@@ -627,7 +652,7 @@ their interaction detail in `.forge/wireframes/`, and the standards skill.
   string the product authored with its key, produced by a walk that prints the
   surfaces it covered and covers at least one stored value per source, and a
   timezone-shifted run across six zones producing identical rendered dates.
-- [x] **C7.** Today matches screen 02 and Health matches screen 04 at three
+- [ ] **C7.** Today matches screen 02 and Health matches screen 04 at three
   viewports, with exactly one accented action per screen and origin badges rendered
   as neutral chrome rather than a semantic colour. Evidence: six captures plus a
   count of accented elements per screen.
@@ -655,9 +680,12 @@ their interaction detail in `.forge/wireframes/`, and the standards skill.
 - [ ] **C14.** The training week and the calendar write render the same confirm
   component with different rows, matching the definition on screen 00 at three
   viewports. Evidence: six captures plus the shared component reference.
-- [ ] **C15.** Weekly review matches screen 11 at three viewports, and the calendar
-  diff on it is readable end to end in four seconds. Evidence: three captures plus
-  a timed read.
+- [ ] **C15.** Weekly review matches screen 11 at three viewports. On the calendar
+  diff the three counts and the before-and-after columns state what will change,
+  and a reader reaches that answer in four seconds or less at the largest diff the
+  confirm screen can produce as well as at a two-row diff; the row list below them
+  states its own length as a number before it is scrolled. Evidence: three
+  captures, both timed reads each with its row count, and the stated length.
 - [ ] **C16.** Settings and integrations matches screen 12 at three viewports,
   carrying integration status with last successful sync and a test control, the AI
   consent switches, export, permanent delete, archive status and machine state.

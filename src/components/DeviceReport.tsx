@@ -16,17 +16,31 @@ import { CSRF_HEADER } from '@/lib/cookie-names';
  * that reaches the Mac mini reports again.
  *
  * The post writes, so it carries the anti-forgery token the root layout read
- * off this request. Nothing but a document this server rendered can produce
- * one, and the suite drives a document this server rendered, which is how a
- * headless run set both signals true on the owner's install. So the report
- * carries a third boolean: whether something is driving this browser. The
+ * off this request. That token was not enough on its own, because the
+ * middleware mints one for any caller who asks: the verifier wrote the row
+ * with four lines of curl, no browser and no session, using a pair minted by
+ * one unauthenticated GET of /sign-in.
+ *
+ * SO THE POST CARRIES A TICKET AS WELL, AND THIS COMPONENT ONLY EXISTS WHEN
+ * THERE IS ONE. The layout mints it for the session the document was rendered
+ * for and renders nothing here without one, so the sign-in screen raises no
+ * report at all. A caller that never held a page of this app cannot produce the
+ * value, and the route refuses the report without it.
+ *
+ * The third boolean stays: whether something is driving this browser. The
  * platform answers that itself in `navigator.webdriver`, the server stores
  * nothing for a report that says yes, and the field is required, so a caller
  * that is not this component is refused as malformed rather than believed.
  */
 const REPORTED = 'vernier.launch-reported';
 
-export function DeviceReport({ csrfToken }: { csrfToken: string }) {
+export function DeviceReport({
+  csrfToken,
+  launchTicket,
+}: {
+  csrfToken: string;
+  launchTicket: string;
+}) {
   useEffect(() => {
     let alreadyReported = false;
     try {
@@ -50,19 +64,18 @@ export function DeviceReport({ csrfToken }: { csrfToken: string }) {
     fetch('/api/diagnostics/launch', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', [CSRF_HEADER]: csrfToken },
-      body: JSON.stringify({ standalone, wakeLock, webdriver }),
+      body: JSON.stringify({ standalone, wakeLock, webdriver, ticket: launchTicket }),
       keepalive: true,
     })
       .then(async (response) => {
         // A refused post wrote nothing, so this launch has not been reported
         // and the next one must try again. So did a 200 carrying
         // `recorded: false`, which is what a driven browser is answered with:
-        // the request succeeded and the row did not move.
+        // the request succeeded and the row did not move. A believed report
+        // says `recorded: true` and names the signals as the rows now read.
         if (!response.ok) return;
-        if (response.status !== 204) {
-          const outcome = (await response.json().catch(() => null)) as { recorded?: boolean } | null;
-          if (outcome?.recorded === false) return;
-        }
+        const outcome = (await response.json().catch(() => null)) as { recorded?: boolean } | null;
+        if (outcome?.recorded !== true) return;
         try {
           sessionStorage.setItem(REPORTED, '1');
         } catch {
@@ -73,7 +86,7 @@ export function DeviceReport({ csrfToken }: { csrfToken: string }) {
         // The Mac mini is unreachable. Nothing to tell the owner: this is
         // bookkeeping, and the offline screen already says what is happening.
       });
-  }, [csrfToken]);
+  }, [csrfToken, launchTicket]);
 
   return null;
 }

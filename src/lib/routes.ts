@@ -17,10 +17,19 @@ export type RouteClass = 'public' | 'gate' | 'protected';
 /**
  * Answers in full to anyone who can reach the tailnet.
  *
- * The two diagnostics endpoints are here on purpose. Four lines of
- * `.forge/PREFLIGHT.md` call them from a shell with no session, and they return
- * booleans, timestamps and tailnet peer addresses only. They read nothing a
- * session would protect.
+ * The diagnostics READ is here on purpose. Four lines of `.forge/PREFLIGHT.md`
+ * call it from a shell with no session, and it returns booleans, timestamps and
+ * tailnet peer addresses only. It reads nothing a session would protect.
+ *
+ * THE DIAGNOSTICS WRITE IS NOT HERE ANY MORE. /api/diagnostics/launch sat on
+ * this list because the root layout posted from every page including /sign-in,
+ * and that made the row C2 reads back as proof of a Home Screen launch writable
+ * by anything that could reach the port: the verifier set both signals with four
+ * lines of curl, no browser and no session, using an anti-forgery pair minted by
+ * one unauthenticated GET of /sign-in. Only the owner launches the owner's app,
+ * so the write needs his session and the layout raises no report without one.
+ * The read stays open, because a preflight script curls it and it says nothing
+ * a stranger on the tailnet could not already read off `tailscale status`.
  */
 export const PUBLIC_PATHS: string[] = [
   '/sign-in',
@@ -30,7 +39,6 @@ export const PUBLIC_PATHS: string[] = [
   '/sw.js',
   '/favicon.ico',
   '/api/diagnostics/device',
-  '/api/diagnostics/launch',
 ];
 
 /**
@@ -38,7 +46,7 @@ export const PUBLIC_PATHS: string[] = [
  *
  * A prefix is right for build output and icons, where the names are generated
  * and there is nothing to review one by one. An API namespace is not that. The
- * two public diagnostics endpoints are named above, so a third one written in a
+ * one public diagnostics endpoint is named above, so a second one written in a
  * later slice is protected until somebody decides otherwise and says so here.
  */
 export const PUBLIC_PREFIXES: string[] = ['/_next/', '/icons/'];
@@ -82,9 +90,11 @@ export function isApiRoute(pathname: string): boolean {
  * Where the anti-forgery cookie is issued: on the screens that can raise a
  * mutating request, and nowhere else.
  *
- * Liveness, the offline document, the worker, the icons and the two
- * diagnostics endpoints stay exactly as slice 1 shipped them, with no cookie
- * added to a response that a preflight script or a service worker reads.
+ * Liveness, the offline document, the worker, the icons and the diagnostics
+ * endpoints stay exactly as slice 1 shipped them, with no cookie added to a
+ * response that a preflight script or a service worker reads. The launch report
+ * needs a session and an anti-forgery token now, and it gets both off the page
+ * that raised it rather than off a cookie this endpoint issues to a stranger.
  */
 const NO_COOKIE_PATHS: string[] = [
   '/healthz',

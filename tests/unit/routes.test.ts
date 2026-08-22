@@ -10,22 +10,30 @@ describe('the route table', () => {
     for (const path of ['/sign-in', '/healthz', '/offline', '/manifest.webmanifest', '/sw.js']) {
       expect(classifyRoute(path)).toBe('public');
     }
-    for (const path of ['/api/diagnostics/device', '/api/diagnostics/launch']) {
-      expect(classifyRoute(path)).toBe('public');
-    }
+    expect(classifyRoute('/api/diagnostics/device')).toBe('public');
     for (const path of ['/icons/icon-192.png', '/_next/static/chunk.js']) {
       expect(classifyRoute(path)).toBe('public');
     }
   });
 
-  it('opens the two diagnostics endpoints by name and nothing else in that namespace', () => {
-    // These two are public because four lines of .forge/PREFLIGHT.md curl them
-    // from a shell with no session. That was a decision about two endpoints,
-    // not about a namespace: a prefix here would hand the same opening to
+  it('opens the diagnostics read by name, and not the write beside it', () => {
+    // The read is public because four lines of .forge/PREFLIGHT.md curl it from
+    // a shell with no session. That was a decision about one endpoint, not
+    // about a namespace: a prefix here would hand the same opening to
     // /api/diagnostics/ingest, which slice 12 has yet to write and which nobody
     // has reviewed.
     expect(classifyRoute('/api/diagnostics/device')).toBe('public');
-    expect(classifyRoute('/api/diagnostics/launch')).toBe('public');
+
+    // AND THE WRITE IS PROTECTED, WHICH IT WAS NOT. /api/diagnostics/launch
+    // was on the public list, and that made device_observation writable by
+    // anything on the tailnet: the verifier set standalone_seen and
+    // wake_lock_available true with four lines of curl, no browser and no
+    // session, using an anti-forgery pair minted by one unauthenticated GET of
+    // /sign-in. That row is C2's evidence. Nothing curls the write, only the
+    // owner's own launch raises it, and the owner has a session.
+    expect(classifyRoute('/api/diagnostics/launch')).toBe('protected');
+    expect(isOpenRoute('/api/diagnostics/launch')).toBe(false);
+
     for (const path of [
       '/api/diagnostics/anything-else',
       '/api/diagnostics/ingest',

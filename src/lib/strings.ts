@@ -415,7 +415,17 @@ export const strings = {
     launch: {
       notAReport: 'That is not a launch report.',
       notAReportDetail:
-        'This endpoint records two things the browser reports at launch: whether Vernier opened from the Home Screen, and whether this device can keep the screen awake. Nothing else is stored here.',
+        'This endpoint records two things the browser reports at launch: whether Vernier opened from the Home Screen, and whether this device can keep the screen awake. A report carries those two answers, whether the browser is being driven, and the ticket the page it came from was served with. Nothing else is stored here.',
+      /**
+       * The refusal that closes the door a bare curl walked through. Every
+       * other witness on this route asks who is calling, and no header answers
+       * that: a driven WebKit and Safari are the same bytes on the wire. This
+       * one asks whether the page was served at all, and the ticket that
+       * answers it is minted only into a document rendered for a live session.
+       */
+      notThisApp: 'That launch report did not come from a launch of Vernier.',
+      notThisAppDetail:
+        'Every page Vernier renders for a signed-in session carries a ticket, and the launch report sends it back. This report carried one this server did not mint, or one minted for another session, or one older than a quarter of an hour. Nothing was stored.',
       /**
        * What a driven browser is told. C2 reads this row back as proof the
        * owner opened Vernier from his Home Screen, so a row a test can author

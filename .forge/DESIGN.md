@@ -123,6 +123,23 @@ states, the provenance walk and the confirm diff, which is what it was written
 to define. It is not authoritative for button geometry, and where it disagrees
 with the screens that draw the real thing, the screens win.
 
+**A just-logged entry is a row in the day card, not a card of its own.** Added by
+the architect on 2026-08-22, on the escalation ladder, recorded in
+`.forge/AMENDMENTS.md` A6. `02-today.html` frame 3 is authoritative for where it
+sits, because it is the sheet that draws Today. `03-quick-log.html` frame 2 is
+authoritative for what it carries: the entry, its local time, its `Queued` chip,
+and the Undo and Edit controls for as long as it sits in the queue. The day card's
+height does not grow with the number of entries logged: a write changes a row, it
+does not append one, and the card's maximum is the row count `02-today.html`
+draws. The "What happens next" card sits below the weight card, not above it. The
+four feelings are one row, as `03-quick-log.html` frame 2 draws them, never four.
+
+The reason is F27's fold. Anything above the weight trend whose height is a count
+of rows moves the trend off the screen the moment the owner uses the app. Section
+4's offline banner is unchanged by this and stays where it is written: one line
+under the title, neutral, carrying the queue count. An offline queue is not a
+notice. It needs no action, it clears itself, and it is never drawn in `--warn`.
+
 ## 3. Tokens
 
 Copy verbatim. `:root` holds the scales; the two theme blocks hold colour. The

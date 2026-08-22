@@ -266,11 +266,18 @@ Closes: F19, F20, F21, F22, F23, F24, F25, F26, C5, C6
 improving" in under ten seconds, with the trend leading, the goal visible, and
 every gap in the data drawn as a gap.**
 
-Today fits the session row, the meals, what needs logging, the weight trend and
-adherence inside the 715 px above the fold at 393x852. Charts are server-rendered
-SVG: 2.1 px daily dots never connected, a 2.6 px seven-day average as the loudest
-object, a 1.5 px dashed goal trajectory with a plus or minus 0.5 kg corridor, and
-gridlines at whole kilograms.
+A freshly loaded Today fits the session row, the meals, what needs logging and the
+weight trend inside the 715 px above the fold at 393x852, in every state the
+owner's data can produce. Adherence sits below the trend, where screen 02 draws
+it. Everything above the trend is bounded by construction: the notice region at a
+constant height whatever it holds, and the day card at the row count screen 02
+draws whatever was logged into it. Card padding and card gap on Today are the
+16 px and 12 px DESIGN.md section 3 fixes; the fold is not bought by squeezing
+them. See `.forge/AMENDMENTS.md` A5 and A6.
+
+Charts are server-rendered SVG: 2.1 px daily dots never connected, a 2.6 px
+seven-day average as the loudest object, a 1.5 px dashed goal trajectory with a
+plus or minus 0.5 kg corridor, and gridlines at whole kilograms.
 
 The 89.0 kg to 76.0 kg over nine months goal is visible and editable, and the
 trajectory redraws. A gap of three days or more breaks the line, hatches the range
@@ -283,9 +290,18 @@ hours shows a warn chip naming the age and the cause. A daily body-composition
 reading is never the headline, and one sentence says why.
 
 Every chart ships a visually hidden data table, a `<title>` and a `<desc>`, which
-is what VoiceOver actually reads.
+is what VoiceOver actually reads. It is hidden from the eye without leaving the
+layout box, so the card does not lay out wider than the viewport.
 
-Closes: F27, F28, F29, F30, F31, F32, F33, F34, F35, C7, C8, C9
+**Carried into the re-dispatch, from four failed verifications.** Three lines this
+slice regressed are slice 3's and are repaired here without moving into this
+slice's Closes list: C5 and F24, where the offline queue count went behind a
+disclosure and the quick-log sheet inherited Today's compression, and F23, whose
+first-ever waist takes 60 taps because the stepper steps from zero instead of from
+the `--` screen 03 frame 3 draws. C7 and F23 lost their tick at the slice 4
+ruling; `.forge/RULING-SLICE-4.md` says why and what closes each.
+
+Closes: F27, F28, F29, F30, F31, F32, F33, F34, F35, C7, C8
 
 ---
 
@@ -450,6 +466,12 @@ increase, and the same site twice in a row deloads and never advances.
 
 Nothing interrupts an open session. No rating prompt, no permission prompt, no
 upsell, no banner.
+
+C9 moves here from slice 4. Its line names four surfaces and one of them is the
+session player, which this slice builds, so it could not close in slice 4 and the
+verifier correctly left it unchecked twice. This slice walks all four: Today,
+Health, the quick-log flow as a write and not only as an open-and-close, and the
+player, at three viewports, printing the surfaces it walked.
 
 Closes: F66, F67, F68, F69, F70, F71, F72, F73, F74, F75, F76, F77, C11
 

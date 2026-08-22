@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server';
 import { recordDeviceLaunch } from '@/db/diagnostics';
 import { csrfFailure } from '@/lib/csrf';
-import { ok, refuse } from '@/lib/gate';
+import { ok, refuse, sessionOrRefusal } from '@/lib/gate';
 import { couldBeAHomeScreenLaunch, isDrivenBrowser } from '@/lib/launch-report';
+import { readLaunchTicket } from '@/lib/launch-ticket';
 import { readRequestOrigin } from '@/lib/request-origin';
 import { strings } from '@/lib/strings';
 
@@ -14,39 +14,63 @@ export const dynamic = 'force-dynamic';
  * whether Wake Lock exists on the device, so the app reports it once per
  * launch and the server keeps it.
  *
- * Three booleans in, nothing out. Anything else in the body is ignored rather
- * than stored, and a body that is not three booleans is refused, so this
- * endpoint can never become a place to put data.
+ * Three booleans and a ticket in, one honest answer out. Anything else in the
+ * body is ignored rather than stored, and a body that is not that shape is
+ * refused, so this endpoint can never become a place to put data.
  *
- * It writes, so it carries the anti-forgery token like every other mutating
- * route. C2 reads this row back as proof the owner opened the app from his
- * Home Screen, and evidence anything on the tailnet can author with a curl is
- * not evidence. The report is raised from the root layout, which is a server
- * component and mints the token it hands to the client.
+ * WHAT THIS ROW IS. C2 reads it back as one sentence: the owner opened Vernier
+ * from the iPhone Home Screen icon and it came up with no browser chrome. It is
+ * one of three lines the owner is personally blocked on, so a row anything on
+ * the tailnet can author is not evidence, it is noise wearing the shape of
+ * evidence.
  *
- * AND A TOKEN WAS NOT ENOUGH, BECAUSE THE TEST SUITE HOLDS ONE. On 2026-08-22
- * standalone_seen and wake_lock_available both went true on the owner's live
- * install, at 16:13:55, from a headless browser on this Mac. Two rubric lines
- * then read as met by a signal the suite had set. So the report now says
- * whether the context driving it is automated, the server says the same thing
- * from the user agent, and either one stops the write: nothing stored, and a
- * body that names why and names where such a run belongs. A person holding a
- * phone is what this row is about, and a browser under WebDriver is not that.
+ * WHAT WAS OPEN UNTIL NOW. An anti-forgery token was not enough, because the
+ * middleware mints one for any caller who asks: on 2026-08-22 the verifier set
+ * both signals true with four lines of curl on an image byte for byte identical
+ * to the owner's install. One unauthenticated GET of /sign-in for the token
+ * pair, one POST of three booleans with an iPhone user agent, 204, two rows
+ * written. No browser, no session, no device.
  *
- * That answer is 200 rather than 4xx, deliberately. This is raised from the
- * root layout, so every page a driven browser opens raises one, and a refusal
- * status would put a failed request and a console error on every screen the
- * suite walks. C9 counts exactly those. The outcome goes in the body, which the
- * caller reads and the browser does not log.
+ * THE TWO CHECKS THAT NOW STAND BETWEEN THAT CURL AND THE ROW.
  *
- * What survives it is written down in src/lib/launch-report.ts: a client that
- * is not a browser at all can still claim anything it likes, which is why the
- * write also records the address the report arrived from, so a row is
- * attributable instead of anonymous.
+ * A session. The read side of these diagnostics is public by necessity, because
+ * four lines of .forge/PREFLIGHT.md curl it from a shell with no session, and it
+ * stays public. The write side had no such reason and never did: only the owner
+ * launches the owner's app. The route is off PUBLIC_PATHS, so the middleware
+ * turns a session-less caller away at the door, and this handler asks the
+ * database whether that cookie names a live session rather than trusting the
+ * door.
+ *
+ * A ticket. The root layout mints one into every document it renders for a live
+ * session, keyed with MASTER_KEY over that session's id, and the report sends it
+ * back. It cannot be computed off the machine and it cannot be lifted off
+ * /sign-in, because a page rendered for no session carries none. See
+ * src/lib/launch-ticket.ts for what that closes and what it does not.
+ *
+ * THE THREE WITNESSES BELOW ARE UNCHANGED AND ARE STILL NOT IDENTIFICATION. No
+ * server-side witness tells a driven WebKit from Safari, and this route does not
+ * pretend to one. They refuse the accident: navigator.webdriver, an automation
+ * runtime naming itself in the user agent, and a Home Screen claim from a
+ * platform with no Home Screen.
+ *
+ * AND THE ANSWER SAYS WHAT WAS STORED. This used to answer 204 with an empty
+ * body, which is why an attack log could read "HTTP 204" beside two rows that
+ * had just moved. Now a report that was believed is answered with the signals as
+ * the rows read after the write, and a report that was not is answered with the
+ * reason it was not. Both are 200, deliberately: the report is raised from the
+ * root layout, so every page raises one, and a refusal status would put a failed
+ * request and a console error on every screen the suite walks. C9 counts exactly
+ * those.
  */
 export async function POST(request: Request) {
   const csrf = await csrfFailure(request);
   if (csrf) return csrf.response;
+
+  // The door has already turned away a caller with no session cookie at all.
+  // This is the check that decides whether the cookie names a live session, and
+  // it is also where the id the ticket is bound to comes from.
+  const { session, refusal } = await sessionOrRefusal();
+  if (!session) return refusal;
 
   let body: unknown;
   try {
@@ -55,23 +79,43 @@ export async function POST(request: Request) {
     return refuse(400, strings.api.jsonBody, strings.api.launch.notAReportDetail);
   }
 
-  const report = body as { standalone?: unknown; wakeLock?: unknown; webdriver?: unknown } | null;
+  const report = body as {
+    standalone?: unknown;
+    wakeLock?: unknown;
+    webdriver?: unknown;
+    ticket?: unknown;
+  } | null;
   if (
     !report ||
     typeof report.standalone !== 'boolean' ||
     typeof report.wakeLock !== 'boolean' ||
-    typeof report.webdriver !== 'boolean'
+    typeof report.webdriver !== 'boolean' ||
+    typeof report.ticket !== 'string' ||
+    report.ticket === ''
   ) {
     return refuse(400, strings.api.launch.notAReport, strings.api.launch.notAReportDetail);
   }
 
+  /*
+   * WAS THIS PAGE SERVED. The one question on this route that a header cannot
+   * answer for the caller, because the answer is a keyed hash of the session
+   * this document was rendered for and the key never leaves the container.
+   *
+   * Checked before the witnesses below, because it is the cheaper question and
+   * the more decisive one: the witnesses ask what is driving a browser, and this
+   * asks whether there was a browser holding a page of this app at all.
+   */
+  const ticket = readLaunchTicket(report.ticket, session.id);
+  if (ticket !== 'ok') {
+    return ok({
+      recorded: false,
+      reason: strings.api.launch.notThisApp,
+      detail: strings.api.launch.notThisAppDetail,
+    });
+  }
+
   const userAgent = request.headers.get('user-agent');
   if (isDrivenBrowser(report.webdriver, userAgent)) {
-    // Nothing is stored, and the status is 200 rather than 403 on purpose: the
-    // root layout raises this on every page, so a refusal status would put a
-    // failed request and a console error on every screen the suite walks, and
-    // C9 counts both. The outcome is in the body, where the caller reads it and
-    // the browser does not log it.
     return ok({
       recorded: false,
       reason: strings.api.launch.automated,
@@ -80,19 +124,11 @@ export async function POST(request: Request) {
   }
 
   /*
-   * AND THE THIRD WITNESS, WHICH IS THE ONE THAT FIRES FOR WEBKIT. Playwright's
-   * WebKit is a genuine WebKit build sending a genuine Safari user agent, so
-   * neither witness above catches it and one `addInitScript` line puts the
-   * client's own answer back to false. There is no reliable server-side witness
-   * for that engine and this route does not pretend to one.
-   *
-   * What it can do is refuse the claim rather than identify the claimant. C2
-   * reads this row back as one sentence: the owner opened Vernier from the
-   * iPhone Home Screen icon. A user agent naming a desktop has no Home Screen to
-   * put an icon on, so a standalone launch reported from one is not that fact
-   * whoever sent it. This suite drives on a Mac, so it fires for WebKit and for
-   * Chromium alike. A report that claims no Home Screen is stored as usual,
-   * because standalone false is an honest thing for a Mac to say.
+   * The witness that fires for WebKit. A user agent naming a desktop has no Home
+   * Screen to put an icon on, so a standalone launch reported from one is not
+   * the fact C2 reads back whoever sent it. It narrows the claim rather than
+   * identifying the claimant, and a report that claims no Home Screen is stored
+   * as usual, because standalone false is an honest thing for a Mac to say.
    */
   if (report.standalone && !couldBeAHomeScreenLaunch(userAgent)) {
     return ok({
@@ -108,11 +144,15 @@ export async function POST(request: Request) {
   // evidence, and a value that would only mislead a reader of this row. The
   // same rule Today already applies before it records a request origin.
   const { peerAddress, viaTailscale } = readRequestOrigin(request.headers);
-  await recordDeviceLaunch({
+  const reportedFrom = viaTailscale ? peerAddress : null;
+  const stored = await recordDeviceLaunch({
     standalone: report.standalone,
     wakeLock: report.wakeLock,
-    reportedFrom: viaTailscale ? peerAddress : null,
+    reportedFrom,
   });
 
-  return new NextResponse(null, { status: 204, headers: { 'Cache-Control': 'no-store' } });
+  // What the rows read now, straight back off the write, plus where the report
+  // was attributed to. A caller is told what it changed rather than left to
+  // infer it from an empty 204.
+  return ok({ recorded: true, signals: stored, reportedFrom });
 }

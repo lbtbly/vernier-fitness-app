@@ -1,10 +1,14 @@
 import type { Metadata, Viewport } from 'next';
+import { cookies } from 'next/headers';
 import { DeviceReport } from '@/components/DeviceReport';
 import { ServiceWorker } from '@/components/ServiceWorker';
 import { getConfig } from '@/lib/config';
+import { SESSION_COOKIE } from '@/lib/cookie-names';
 import { readCsrfToken } from '@/lib/csrf';
+import { mintLaunchTicket } from '@/lib/launch-ticket';
 import './globals.css';
 import { strings } from '@/lib/strings';
+import { hashSessionToken } from '@/lib/tokens';
 
 /**
  * Every route renders per request. The origin, the relying party, the app name
@@ -55,9 +59,31 @@ export const viewport: Viewport = {
  * component and the middleware has already minted the value for this very
  * request, so the layout reads it here and hands it down rather than leaving a
  * mutating route with no anti-forgery on it.
+ *
+ * AND IT HANDS DOWN THE TICKET THAT SAYS THIS PAGE WAS SERVED. The report is
+ * the only witness C2 has that the owner opened Vernier from his Home Screen,
+ * and until now anything that could reach the port could write it: no browser,
+ * no session, an anti-forgery pair minted by one unauthenticated GET of
+ * /sign-in. The ticket is keyed with MASTER_KEY over the id of the session this
+ * document is being rendered for, so a caller cannot compute one and cannot
+ * lift one off a page served to nobody.
+ *
+ * The cookie is hashed here rather than read back through the database. The
+ * session id IS that hash, the route checks the session is live before it
+ * checks the ticket, and a layout that queried on every page render of every
+ * screen would pay for it on /offline, which has to render with nothing behind
+ * it. A ticket minted for a session that turns out to be dead buys its holder
+ * nothing: the route refuses it at the door.
+ *
+ * No session, no ticket, and no report is raised at all. The sign-in screen
+ * posts nothing, which is both correct, because a launch nobody has signed into
+ * is not the fact C2 reads back, and the reason the old attack had a page to
+ * mint its token from.
  */
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const csrfToken = await readCsrfToken();
+  const [csrfToken, jar] = await Promise.all([readCsrfToken(), cookies()]);
+  const sessionCookie = jar.get(SESSION_COOKIE)?.value;
+  const launchTicket = sessionCookie ? mintLaunchTicket(hashSessionToken(sessionCookie)) : null;
 
   return (
     <html lang="en" data-theme="dark">
@@ -72,7 +98,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         {children}
         <ServiceWorker />
-        <DeviceReport csrfToken={csrfToken} />
+        {launchTicket ? <DeviceReport csrfToken={csrfToken} launchTicket={launchTicket} /> : null}
       </body>
     </html>
   );

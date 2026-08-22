@@ -54,16 +54,27 @@
  * about itself. tests/e2e/fixtures.ts holds it and tests/unit/suite-safety.test.ts
  * refuses a spec that opens a context around it.
  *
- * WHAT THIS DOES NOT DO, WRITTEN DOWN RATHER THAN IMPLIED. It does not make the
- * endpoint unforgeable. Anything that can reach the port and hold an
- * anti-forgery token can post two booleans and a false third, and no header a
- * client sends is proof of the client. What it does is close the accident: the
- * suite's own runs, driving a real browser through a real page, are refused by
- * the platform's own flag in Chromium, by the claim they are making in WebKit,
- * and by the harness in both. The row also records the address the report
- * arrived from, so a row that is written is attributable instead of anonymous,
- * and C2's own evidence clause still names the device screenshot that no
- * server-side check can stand in for.
+ * WHAT THIS FILE DOES NOT DO, WRITTEN DOWN RATHER THAN IMPLIED. It does not make
+ * the endpoint unforgeable. Every witness here is read off a header or off a
+ * boolean the client chose, and no header a client sends is proof of the client.
+ * What they do is close the accident: the suite's own runs, driving a real
+ * browser through a real page, are refused by the platform's own flag in
+ * Chromium, by the claim they are making in WebKit, and by the harness in both.
+ *
+ * THE THIRD THING IS NOT IN THIS FILE EITHER, AND IT IS THE ONE THAT CLOSED THE
+ * DOOR. On 2026-08-22 the verifier wrote both signals with four lines of curl:
+ * an anti-forgery pair minted by one unauthenticated GET of /sign-in, then a
+ * POST with an iPhone user agent. No browser, no session, no automation, and
+ * every witness in this file walked past it, because an iPhone user agent is
+ * four words to type. So the write is off the public route list. It needs the
+ * owner's session, and it needs a ticket the root layout mints into the document
+ * it renders for that session, keyed with MASTER_KEY. See
+ * src/lib/launch-ticket.ts. A caller that holds no session gets 401 at the door
+ * and a caller that never held a page of this app cannot produce the value.
+ *
+ * The row also records the address the report arrived from, so a row that is
+ * written is attributable instead of anonymous, and C2's own evidence clause
+ * still names the device screenshot that no server-side check can stand in for.
  */
 
 /**

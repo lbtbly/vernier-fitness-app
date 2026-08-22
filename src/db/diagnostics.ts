@@ -68,7 +68,7 @@ export async function recordDeviceLaunch(report: {
   standalone: boolean;
   wakeLock: boolean;
   reportedFrom: string | null;
-}): Promise<void> {
+}): Promise<Record<string, boolean>> {
   const db = getDb();
   const rows = [
     { signal: SIGNALS.standaloneSeen, observed: report.standalone },
@@ -77,8 +77,15 @@ export async function recordDeviceLaunch(report: {
       : []),
   ];
 
+  // What the rows READ once the write has landed, not what the report claimed.
+  // The observed column is sticky true and the endpoint answers with this, so a
+  // caller told a signal is true is being told what the next reader of the row
+  // will see. A report of standalone false against a row that is already true
+  // gets `true` back, which is the truth about the row and not agreement with
+  // the report.
+  const stored: Record<string, boolean> = {};
   for (const row of rows) {
-    await db
+    const [written] = await db
       .insert(deviceObservation)
       .values({
         signal: row.signal,
@@ -94,8 +101,11 @@ export async function recordDeviceLaunch(report: {
           lastReportedAt: sql`now()`,
           reportedFrom: sql`excluded.reported_from`,
         },
-      });
+      })
+      .returning({ signal: deviceObservation.signal, observed: deviceObservation.observed });
+    if (written) stored[written.signal] = written.observed;
   }
+  return stored;
 }
 
 /**
