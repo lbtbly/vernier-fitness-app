@@ -795,9 +795,9 @@ async function typeIntoTheWaist(
 }
 
 /** The trace as one line per keystroke, in the shape the defect was reported in. */
-function traceLines(engine: Engine, what: string, trace: Keystroke[]): string {
+function traceLines(line: string, engine: Engine, what: string, trace: Keystroke[]): string {
   return trace
-    .map((step) => `F23  ${engine.padEnd(6)} ${what} "${step.key}" -> "${step.value}" caret ${step.caret}`)
+    .map((step) => `${line.padEnd(4)} ${engine.padEnd(6)} ${what} "${step.key}" -> "${step.value}" caret ${step.caret}`)
     .join('\n');
 }
 
@@ -891,7 +891,7 @@ test('F23 and C5. a first-ever waist commits in six taps or fewer, from a blank 
         await field.click();
         taps += 1;
         const first = await typeIntoTheWaist(page, ['9', '9', '.', '0']);
-        console.log(traceLines(engine, 'first-ever', first));
+        console.log(traceLines('F23', engine, 'first-ever', first));
         expect(
           first.map((step) => step.value),
           'typing 99.0 into an empty field did not produce 99.0',
@@ -946,14 +946,14 @@ test('F23 and C5. a first-ever waist commits in six taps or fewer, from a blank 
         expect(caretAfterTap, 'a tap past the last digit did not put the caret after it').toBe(4);
 
         const cleared = await typeIntoTheWaist(page, ['Backspace', 'Backspace', 'Backspace', 'Backspace']);
-        console.log(traceLines(engine, 'clearing  ', cleared));
+        console.log(traceLines('F23', engine, 'clearing  ', cleared));
         expect(
           cleared.map((step) => step.value),
           'the field could not be emptied one character at a time',
         ).toEqual(['99.', '99', '9', '']);
 
         const corrected = await typeIntoTheWaist(page, ['9', '1', '.', '4']);
-        console.log(traceLines(engine, 'correction', corrected));
+        console.log(traceLines('F23', engine, 'correction', corrected));
         expect(
           corrected.map((step) => step.value),
           'typing 91.4 over an existing value did not produce 91.4',
@@ -1045,7 +1045,7 @@ test('C5. a waist typed while the snapshot read is in flight survives the answer
         await expect(page.locator('.sheet [data-state="loading"]')).toBeVisible();
 
         const typed = await typeIntoTheWaist(page, [...TYPED]);
-        console.log(traceLines(engine, 'mid-read  ', typed));
+        console.log(traceLines('C5', engine, 'mid-read  ', typed));
         expect(typed.map((step) => step.value), 'the field could not be typed into while loading').toEqual(
           typedSoFar(TYPED),
         );
