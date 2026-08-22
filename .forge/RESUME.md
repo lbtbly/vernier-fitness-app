@@ -88,6 +88,28 @@ It is permanent: `measurement` refuses DELETE, and that refusal is a guarantee t
 
 Two things follow. The row is now a standing test of the guarantee, so every future run must leave it alone. And it is a fabricated measurement in a health record whose whole point is provenance, so it should be removed before the owner logs real waist measurements, by a deliberate operator action rather than by a test. Offered to the owner on 2026-08-22; awaiting his word.
 
+## F27 passes at the fifth attempt. 41 of 166.
+
+The rebuild against A5 held. Every element above the trend carries a stated maximum bounded by construction: title 63, offline line 39, notice region 46, day card 322, weight card 165, three gaps 36, padding 8. Sum 679 against 715, at section 3's 16 and 12 geometry, so the fold is not bought by compression. Adherence opens at 1051 with the trend ending at 600.
+
+The verifier attacked each bound rather than observing it: a 2,376-character note, 101 queued entries, all 84 date labels the formatter can produce, 8,000- and 19,500-character strings injected into the notice summary, and the worst case combined. 679 px, Chrome and WebKit pixel-identical, scrollY 0. **F27, F24 and C7 are ticked.** F32, F34 and C8 held under the changed layout.
+
+**Two residuals it named honestly.** `header.title` and the weight card header carry no clamp; neither takes its height from a count of rows, which is what F27 forbids, and the title was proven over its entire closed catalogue, but both hold by enumeration rather than by construction and neither would resist a longer string written in later.
+
+## The waist field cannot be typed into, and the tests hid it
+
+Open, being fixed. `#quick-log-waist` is controlled on `value={waist.toFixed(1)}`, so every keystroke round-trips through `Number()` and resets the caret: typing 99.0 yields 9.1 in both engines, the client band then refuses it as under 30 cm, and both stepper hands are disabled while the field is blank, so there is no second path.
+
+**Why four rounds and a green suite never saw it:** every test used Playwright's `fill()`, which sets the whole value in one input event. Nobody had typed into the field. The same blindness hid a second defect, a value typed while the sheet's read is in flight being silently replaced when it lands, against screen 03 frame 2's own caption, "no lost typing". And the field ships at 40 px against section 2b's 44 px floor.
+
+This matters past the rubric: **Withings supplies weight, never waist.** Waist is manual forever and is one of the two headline metrics on Today and Health.
+
+## Carried into slice 5 and beyond
+
+- `04-health.html` frame 1 draws a body-composition row and no fat-mass, muscle or body-water metric exists in `src/lib/provenance.ts` yet. They arrive with Withings. The final pass must compare that row on a build that holds the data.
+- A latent lie: when the origin answers a queued write with one of `PARK_ON`'s six statuses, the offline line and its count vanish, the chip flips to Stored, and "Correct it" is offered on a measurement that does not exist. No shipped request produces those statuses today, so F24 stands.
+- The suite-safety sweep's regex does not reach `expect(query(...)).toBe('0')`, of which two specs carry 16. All 16 are real today, but a hollow assertion in that shape would pass unrecorded.
+
 ## Architect ruling on slice 4, 2026-08-22. F27 was not measurable, and the rubric guaranteed the loop.
 
 Full text in `.forge/RULING-SLICE-4.md`. Amendments A5 and A6 in `.forge/AMENDMENTS.md`. 166 lines still, 38 checked, no threshold lowered.
