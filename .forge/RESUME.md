@@ -12,23 +12,35 @@ Current slice: 3, the provenance spine and the quick log. Closes F19-F26, C5, C6
 
 ## Where the run actually stands
 
-**Twenty-two of 166 rubric lines checked:** F1, F2, F3, F5, F6, F7, F8, F9, F10, F11, F13, F14, F15, F16, F17, F18, C1, C3, D2, D4. Every one ruled by a verifier that re-ran the command itself and accepted no builder capture as proof.
+**Twenty-nine of 166 rubric lines checked.** Every one ruled by a verifier that re-ran the command itself and accepted no builder capture as proof.
 
-Slices 1 and 2 are built, live and committed. Slice 1 at `25954aa`, slice 2 at `0c66771`.
+Slices 1, 2 and 3 are built and live. Slice 3's defect fixes are at `4a4c3c5`, re-verify in flight.
 
-**Slice 1: one FAIL, then fixed.** Three defects. C3, the offline document painting the framework's chunk-load error on any uncached route, is fixed and re-proven cold: `/offline` is now a self-contained document with zero external references, so it cannot need a chunk. F4, R1 and C2 remain open and are owner-blocked, not code-blocked.
+**Slice 1: one FAIL, cleared.** The offline document painted the framework's chunk-load error on any uncached route. Fixed structurally: `/offline` is a self-contained document with zero external references, so it cannot need a chunk. F4, R1 and C2 stay open, owner-blocked, not code-blocked.
 
-**Slice 2: one FAIL, fixed, re-verified PASS at `f64a222`.** Two defects, both closed:
-1. F12. `POST /api/diagnostics/launch` sat in `CSRF_EXEMPT_PATHS`, so a bare curl with no token returned 204 and wrote. Worse than its severity: that row is the row C2's evidence rests on, so anything on the tailnet could author the proof that the owner installed the app. The fix threads a real token from the server layout and deletes the exemption.
-2. C4. The shipped CSS dropped two declarations from `.btn.quiet`, so the secondary action renders as a bordered white button the same size as the primary, against the design sheet's own annotation that the password option is never louder. The fix restores them and diffs every button, field and card rule against the wireframes.
+**Slice 2: one FAIL, cleared, re-verified PASS.** A state-changing route sat outside anti-forgery, so a bare curl wrote the very row C2's evidence rests on. The exemption list is gone entirely. Also a CSS regression that made the secondary action as loud as the primary.
 
-Two latent issues went into the same dispatch: `PUBLIC_PREFIXES` carried `/api/diagnostics/` as a standing prefix, wider than the two endpoints ever intended to be public, so a third diagnostics route would become public with no decision; and `scripts/recovery.sh` restates the Argon2id parameters with nothing asserting the two copies agree.
+**Slice 3: one FAIL, four defects, all fixed, re-verify in flight.**
+1. D3, high. The correction path skipped validation. A rating of 1 to 5 accepted 99 and -4.7 with a 201, and the table refuses DELETE, so both were permanent. A validation gap in an append-only store is not a bug that can be cleaned up afterwards. Every write now runs one gate with a per-metric band.
+2. F25. The demo seed stamped its measurements but not its source records, so a seeded row was indistinguishable from a real Withings batch by anything but an id prefix. Now `measurement.seed` is a generated column no writer can set or clear, bound to `source_record.seed` by a composite foreign key, backfilled from the data.
+3. C5. Undo and Edit were drawn in the wireframe and shipped nowhere, and two adjacent cards shared one label.
+4. C6. The string checker walked only `.tsx`, so 45 sentences in `.ts` route handlers were invisible to it. One reached the screen reading "Send correctsId and rawValue".
 
-Escalation ladder: one FAIL on slice 1, cleared. One FAIL on slice 2, cleared. Neither slice reached a second failure, so no re-plan and no further tier raise. Both slices were built at the raised model tier from the start, because slice 1 set the conventions the rest imitate and slice 2 is the security boundary.
+Escalation ladder: one FAIL each on slices 1, 2 and 3. None reached a second, so no re-plan and no further tier raise. All three slices were built at the raised tier from the start.
 
-D1, D3 and D5 sweep clean but stay unchecked by design: each names all thirteen screens and only seven exist. Not refused, not reached. The final full-scope verify closes them.
+**The verifier out-tested the suite twice, and both times it mattered.** On slice 1 it proved the offline path cold, where the builder had proved it warm. On slice 3 it found `serviceWorkers: 'block'` in the Playwright config, meaning the offline test ran with no worker at all; it re-proved the outbox by hand with the worker active, showing the worker's own fetch failing while a host curl answered 200 at the same moment. The suite now carries a project that proves it.
 
-The test harness landed with slice 2, not at the end: Vitest with 34 unit tests, Playwright with 17 end-to-end in WebKit at 393x852 against the live HTTPS origin. Slice 1 shipped none and no rubric line named one, which is how a suite becomes unwritable by slice 13.
+Suites at the last count: 78 unit, 35 end-to-end across three projects, WebKit at 393x852 against the live HTTPS origin.
+
+D1, D3 and D5 stay unchecked by design: each names all thirteen screens and only eight exist.
+
+## Amendments
+
+Three plan corrections are recorded in `.forge/AMENDMENTS.md`, with before, after, reason and disclosure. **No DOD line has been edited since the greenlight**; all 166 and their thresholds stand as approved.
+
+- **A1.** Slice 5 cannot upsert. The append-only trigger refuses it, confirmed on the live database. PLAN.md now says insert with `ON CONFLICT DO NOTHING` on `(source, external_key)` or record a dedup decision.
+- **A2.** A raised import question had no answer path, so its warning was permanent. Slice 5 owns the control now.
+- **A3.** A photo estimate stores `source='manual'`, `confidence='estimated'`, kind `photo_estimate`. No seventh source; the model's involvement is a confidence and a record, not an origin.
 
 ## What needs the owner, and only the owner
 
