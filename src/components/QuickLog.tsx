@@ -95,6 +95,34 @@ const WAIST_STEP = 0.5;
 const WAIST_STALE_DAYS = 3;
 
 /**
+ * The waist field's text, tidied without being rewritten.
+ *
+ * A comma is a decimal point, which this field has always accepted and which
+ * the owner's phone offers on its numeric keypad. Nothing else is touched: the
+ * text goes to the store as it was typed, because rounding a tape reading on
+ * the way into a table that refuses DELETE throws away a digit no correction
+ * can get back.
+ */
+function cleanWaist(typed: string): string {
+  return typed.replace(',', '.').trim();
+}
+
+/**
+ * The number in the waist field, or null while what is in it is not one yet.
+ *
+ * Null covers three different states and all three behave the same way here:
+ * nothing typed, a half-typed number like `9.`, and a word. The stepper has
+ * nothing to move in any of them, and Save says which it is, in words, from the
+ * same rule the route applies.
+ */
+function waistReading(typed: string): number | null {
+  const raw = cleanWaist(typed);
+  if (raw === '') return null;
+  const value = Number(raw);
+  return Number.isFinite(value) ? value : null;
+}
+
+/**
  * Who wrote the cause the error card prints, and what happened to make them
  * write it.
  *
@@ -216,13 +244,66 @@ export function QuickLog({
   const [open, setOpen] = useState(false);
   const [load, setLoad] = useState<Load>({ state: 'loading' });
   const [queued, setQueued] = useState(0);
-  const [waist, setWaist] = useState<number | null>(null);
+  /**
+   * WHAT IS IN THE WAIST FIELD IS WHAT THE OWNER TYPED, CHARACTER FOR CHARACTER.
+   *
+   * It used to be a number and the field was controlled on `waist.toFixed(1)`,
+   * so every keystroke went out through `Number()` and came back reformatted
+   * with the caret pushed to the end of the new string: `9` re-rendered as
+   * `9.0`, the next `9` landed in the tenths, and typing `99.0` gave `9.1` in
+   * Chrome and in WebKit alike. The client band then refused it under 30 cm,
+   * correctly, and both stepper hands are disabled while there is nothing to
+   * step from, so on an install with no waist ever measured there was no way in
+   * at all. Withings sends a weight and never a waist: this field is the only
+   * door that metric has, forever.
+   *
+   * So the state is the text, nothing rewrites it between keystrokes, and the
+   * number is derived where a number is wanted.
+   */
+  const [waist, setWaist] = useState('');
   const [ratings, setRatings] = useState<Ratings>({ energy: null, fatigue: null, hunger: null, satiety: null });
   const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
   const justLogged = useJustLogged();
   const [refused, setRefused] = useState<string[] | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+
+  /** The number in the field, and the one thing that decides what it can do. */
+  const waistTyped = waistReading(waist);
+
+  /**
+   * Has the owner put this number there himself, since the sheet was raised.
+   *
+   * The snapshot read fills the field with the last stored measurement when it
+   * lands, and it landed on top of typing: with the read in flight, 91.4 typed
+   * into the field became 98.5 the moment the answer arrived, in both engines,
+   * with the loading skeleton drawn beside a live editable field so nothing on
+   * screen warned. `03-quick-log.html` frame 2 captions itself "No spinner, no
+   * retry loop, no lost typing", and the third of those is this flag: what the
+   * owner put in the field outranks anything the network has to say about it.
+   *
+   * A ref rather than state because nothing renders from it, and it must be
+   * readable by a promise that resolves after the keystroke it has to lose to.
+   */
+  const ownersOwn = useRef(false);
+
+  /** Every path that puts a number in the field on the owner's behalf. */
+  function takeWaist(next: string) {
+    ownersOwn.current = true;
+    setWaist(next);
+  }
+
+  /**
+   * The stepper moves the number that is in the field, and there is no other
+   * number it could move: it is a relative control, half a centimetre at a
+   * time, and half a centimetre from nothing is nothing. Both hands are
+   * disabled while the field holds no number, so this returning early is the
+   * belt beside that brace rather than a second rule.
+   */
+  function stepWaist(by: number) {
+    if (waistTyped === null) return;
+    takeWaist((waistTyped + by).toFixed(1));
+  }
 
   // The token the server rendered, kept where the flusher and the push-woken
   // worker can both reach it at send time.
@@ -288,7 +369,11 @@ export function QuickLog({
       }
       const snapshot = (await response.json()) as LogSnapshot;
       setLoad({ state: 'ready', snapshot });
-      setWaist(snapshot.lastWaist?.value ?? null);
+      // The last measurement is a starting point for the stepper, not a
+      // correction of the owner. If he has typed since the sheet was raised,
+      // the answer that arrives second loses, however much later it lands.
+      const stored = snapshot.lastWaist?.value ?? null;
+      if (!ownersOwn.current) setWaist(stored === null ? '' : stored.toFixed(1));
       // Trigger 5: a request of the app's own just succeeded, so the queue has
       // a proven route home.
       connectivityProved();
@@ -307,9 +392,14 @@ export function QuickLog({
     if (open) void read();
   }, [open, read]);
 
-  // Raised from the waist card, which is screen 02's Measure control.
+  // Raised from the waist card, which is screen 02's Measure control. A fresh
+  // raise is the one moment the field holds nothing of the owner's, so this is
+  // where the snapshot gets its right to fill it back.
   useEffect(() => {
-    const raise = () => setOpen(true);
+    const raise = () => {
+      ownersOwn.current = false;
+      setOpen(true);
+    };
     window.addEventListener(QUICK_LOG_OPEN, raise);
     return () => window.removeEventListener(QUICK_LOG_OPEN, raise);
   }, []);
@@ -320,8 +410,13 @@ export function QuickLog({
 
   function filledValues() {
     const values: Array<{ id: string; metric: string; rawValue: string; unit: string }> = [];
-    if (waist !== null) {
-      values.push({ id: crypto.randomUUID(), metric: 'waist', rawValue: waist.toFixed(1), unit: 'cm' });
+    // The text, not a rounding of it, and anything non-blank goes through.
+    // A field holding something that is not a number is a question the owner
+    // gets an answer to: `validateValue` refuses it below, in words, rather
+    // than the sheet quietly saving five values out of six.
+    const typedWaist = cleanWaist(waist);
+    if (typedWaist !== '') {
+      values.push({ id: crypto.randomUUID(), metric: 'waist', rawValue: typedWaist, unit: 'cm' });
     }
     for (const field of RATING_FIELDS) {
       const value = ratings[field.metric];
@@ -388,6 +483,9 @@ export function QuickLog({
       });
       setRatings({ energy: null, fatigue: null, hunger: null, satiety: null });
       setNote('');
+      // Written and gone. Whatever is in the field belongs to the entry that
+      // just left, so the next raise takes its number from the snapshot again.
+      ownersOwn.current = false;
       setOpen(false);
       // Step three of the three, and it is not a wait: the sheet has already
       // closed and the value is already committed on this phone. If the Mac
@@ -422,16 +520,19 @@ export function QuickLog({
       return;
     }
     const nextRatings: Ratings = { energy: null, fatigue: null, hunger: null, satiety: null };
-    let nextWaist: number | null = null;
+    let nextWaist = '';
     let nextNote = '';
     for (const value of entry.values) {
-      if (value.metric === 'waist') nextWaist = Number(value.rawValue);
+      if (value.metric === 'waist') nextWaist = value.rawValue;
       else if (value.metric === 'note') nextNote = value.rawValue;
       else if (value.metric in nextRatings) {
         nextRatings[value.metric as keyof Ratings] = Number(value.rawValue);
       }
     }
-    setWaist(nextWaist);
+    // Through `takeWaist`, because reopening the sheet starts a snapshot read
+    // and what is being restored is the owner's own number: the read that lands
+    // a moment later must not put the stored measurement back over it.
+    takeWaist(nextWaist);
     setRatings(nextRatings);
     setNote(nextNote);
     setJustLogged(null);
@@ -461,9 +562,9 @@ export function QuickLog({
    * whatever the reason it is empty, because half a centimetre from nothing is
    * nothing in both directions.
    */
-  const nothingToStepFrom = waist === null;
+  const nothingToStepFrom = waistTyped === null;
   /** The read failed or is still in flight, which is a different sentence. */
-  const noBaseToStepFrom = waist === null && load.state !== 'ready';
+  const noBaseToStepFrom = waistTyped === null && load.state !== 'ready';
   const written = justLogged ? entryLine(justLogged, timeZone) : null;
 
   return (
@@ -688,7 +789,7 @@ export function QuickLog({
                   <button
                     type="button"
                     aria-label={strings.quickLog.waistDown}
-                    onClick={() => setWaist((value) => (value === null ? null : Number((value - WAIST_STEP).toFixed(1))))}
+                    onClick={() => stepWaist(-WAIST_STEP)}
                     disabled={nothingToStepFrom}
                   >
                     <MinusIcon />
@@ -713,16 +814,16 @@ export function QuickLog({
                       inputMode="decimal"
                       autoComplete="off"
                       placeholder={strings.quickLog.waistBlank}
-                      value={waist === null ? '' : waist.toFixed(1)}
-                      onChange={(event) => {
-                        const typed = event.target.value.replace(',', '.').trim();
-                        if (typed === '') {
-                          setWaist(null);
-                          return;
-                        }
-                        const parsed = Number(typed);
-                        if (Number.isFinite(parsed)) setWaist(parsed);
-                      }}
+                      /*
+                       * The text, straight back out, and nothing in between.
+                       * Every version of this that reformatted the value on the
+                       * way through moved the caret with it, and a field that
+                       * moves the caret cannot be typed into: `99.0` arrived as
+                       * `9.1`. Tidying and parsing happen at Save, where the
+                       * owner has stopped typing.
+                       */
+                      value={waist}
+                      onChange={(event) => takeWaist(event.target.value)}
                     />{' '}
                     <span className="sub">{strings.units.cm}</span>
                   </div>
@@ -730,9 +831,7 @@ export function QuickLog({
                     type="button"
                     aria-label={strings.quickLog.waistUp}
                     disabled={nothingToStepFrom}
-                    onClick={() =>
-                      setWaist((value) => (value === null ? null : Number((value + WAIST_STEP).toFixed(1))))
-                    }
+                    onClick={() => stepWaist(WAIST_STEP)}
                   >
                     <PlusIcon />
                   </button>

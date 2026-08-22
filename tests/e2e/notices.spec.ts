@@ -70,7 +70,23 @@ import { strings } from '../../src/lib/strings';
  * write path: every write below goes through `/api/log` or through the sheet.
  */
 
-const CAPTURES = `${projectRoot}.forge/evidence/slice-4/fix4/`;
+/**
+ * AND THE WAIST FIELD, WHICH LIVES HERE FOR THE SAME REASON THE FOLD DOES.
+ *
+ * F23 and C5 came back on the one control the owner cannot do without: the
+ * field could not be typed into, and a value typed while the snapshot read was
+ * in flight was replaced by the last stored measurement when it landed. Both
+ * happened in Chrome and in WebKit, and the suite that missed them used
+ * `fill()`, which sets a whole value in one event and never moves a caret.
+ *
+ * Withings sends a weight and never a waist. That field is the only door that
+ * metric has, on both of the owner's devices, forever, so the tests below type
+ * into it one key at a time in both engines and read the field back after every
+ * keystroke. They are here because this is the file that drives two engines
+ * against one scratch database, and because an install with no waist ever
+ * measured costs a container rebuild to reach.
+ */
+const CAPTURES = `${projectRoot}.forge/evidence/slice-4/fix5/`;
 
 /** DESIGN.md section 3: 852 minus a 54 px status bar and an 83 px tab bar. */
 const FOLD = 715;
@@ -744,6 +760,59 @@ test('F24 and C5. the offline line is neutral, one line, under the title, with t
   }
 });
 
+/** What one keystroke did: the key, what the field held after it, where the caret sat. */
+type Keystroke = { key: string; value: string; caret: number | null };
+
+/**
+ * A number typed the way a person types one, one key at a time.
+ *
+ * THIS IS THE TEST AND NOT A DETAIL OF IT. This field was proven four times
+ * with `page.locator('#quick-log-waist').fill('99.0')`, which sets the whole
+ * value in a single input event and never moves a caret, and four green rounds
+ * passed over a field that could not be typed into at all: it was controlled on
+ * `waist.toFixed(1)`, so `9` re-rendered as `9.0` with the caret pushed past
+ * the decimal, the next `9` landed in the tenths, and `99.0` arrived as `9.1`
+ * in Chrome and in WebKit alike. A field is typed into, so the test types.
+ *
+ * The trace comes back rather than the final value, because what has to be true
+ * is true after every keystroke and not only at the end.
+ */
+async function typeIntoTheWaist(
+  page: import('@playwright/test').Page,
+  keys: string[],
+): Promise<Keystroke[]> {
+  const field = page.locator('#quick-log-waist');
+  const trace: Keystroke[] = [];
+  for (const key of keys) {
+    await field.press(key);
+    const read = await field.evaluate((node) => ({
+      value: (node as HTMLInputElement).value,
+      caret: (node as HTMLInputElement).selectionStart,
+    }));
+    trace.push({ key, ...read });
+  }
+  return trace;
+}
+
+/** The trace as one line per keystroke, in the shape the defect was reported in. */
+function traceLines(engine: Engine, what: string, trace: Keystroke[]): string {
+  return trace
+    .map((step) => `F23  ${engine.padEnd(6)} ${what} "${step.key}" -> "${step.value}" caret ${step.caret}`)
+    .join('\n');
+}
+
+/**
+ * Every character typed so far, and nothing else, after every keystroke.
+ *
+ * The assertion the old evidence could not make. `expect(trace.map(...))` over
+ * the whole run rather than one check at the end: `9.1` is a correct final
+ * value for somebody who typed `9.1`, and the defect was that `99.0` produced
+ * it.
+ */
+function typedSoFar(text: string): string[] {
+  return [...text].map((_, index) => text.slice(0, index + 1));
+}
+
 /**
  * F23's first-ever waist, on an installation that has never held one, and the
  * two things screen 03 frame 3 draws for it.
@@ -807,10 +876,31 @@ test('F23 and C5. a first-ever waist commits in six taps or fewer, from a blank 
 
         await page.screenshot({ path: `${CAPTURES}f23-first-ever-waist-${engine}-393x852.png`, fullPage: true });
 
-        // Tap two: the field. Then the number, then Save.
+        // AND IT IS A TARGET. It shipped 133x40 under DESIGN.md section 2b's
+        // 44 px floor, because the sheet draws the value as a display and the
+        // build made it a field. 52 px is the quick log's own escalation.
+        const box = (await field.boundingBox())!;
+        console.log(
+          `C5   ${engine.padEnd(6)} the waist field measures ${Math.round(box.width)}x${Math.round(box.height)} px`,
+        );
+        expect(Math.round(box.height), 'the waist field is under the 44 px floor').toBeGreaterThanOrEqual(44);
+
+        // Tap two: the field. Then the number, and the number is TYPED, one
+        // character at a time. The keys are not taps on a control and the count
+        // is the same three it always was: raise, field, Save.
         await field.click();
         taps += 1;
-        await field.fill('99.0');
+        const first = await typeIntoTheWaist(page, ['9', '9', '.', '0']);
+        console.log(traceLines(engine, 'first-ever', first));
+        expect(
+          first.map((step) => step.value),
+          'typing 99.0 into an empty field did not produce 99.0',
+        ).toEqual(typedSoFar('99.0'));
+        expect(
+          first.map((step) => step.caret),
+          'the caret was moved by something other than the owner',
+        ).toEqual([1, 2, 3, 4]);
+
         await page.getByRole('button', { name: 'Save', exact: true }).click();
         taps += 1;
 
@@ -836,7 +926,45 @@ test('F23 and C5. a first-ever waist commits in six taps or fewer, from a blank 
         await page.getByRole('button', { name: 'Up half a centimetre' }).click();
         expect(await page.locator('#quick-log-waist').inputValue()).toBe('99.5');
         console.log(`F23  ${engine.padEnd(6)} with a measurement on file one tap moves it to 99.5`);
-        await page.locator('.sheet').getByRole('button', { name: 'Close the quick log' }).click();
+
+        // AND A CORRECTION TO A NUMBER ALREADY IN THE FIELD, which is what the
+        // second and every later tape reading is. Backspace first, because the
+        // keypad this field raises on a phone has one and no select-all: each
+        // delete used to be reformatted the same way each keystroke was, so
+        // `99.` came straight back as `99.0` and the field could not be emptied
+        // either.
+        const cleared = await typeIntoTheWaist(page, ['Backspace', 'Backspace', 'Backspace', 'Backspace']);
+        console.log(traceLines(engine, 'clearing  ', cleared));
+        expect(
+          cleared.map((step) => step.value),
+          'the field could not be emptied one character at a time',
+        ).toEqual(['99.', '99', '9', '']);
+
+        const corrected = await typeIntoTheWaist(page, ['9', '1', '.', '4']);
+        console.log(traceLines(engine, 'correction', corrected));
+        expect(
+          corrected.map((step) => step.value),
+          'typing 91.4 over an existing value did not produce 91.4',
+        ).toEqual(typedSoFar('91.4'));
+
+        await page.screenshot({ path: `${CAPTURES}f23-typed-correction-${engine}-393x852.png`, fullPage: true });
+        await page.getByRole('button', { name: 'Save', exact: true }).click();
+
+        await expect
+          .poll(
+            () =>
+              scratchQuery(
+                "select raw_value from measurement where metric = 'waist' order by measured_at desc limit 1",
+              ),
+            { timeout: 20_000 },
+          )
+          .toBe('91.4');
+        console.log(
+          `F23  ${engine.padEnd(6)} the corrected reading stored as ` +
+            `${scratchQuery("select raw_value || ' ' || unit || ' ' || source from measurement where metric = 'waist' order by measured_at desc limit 1")}, ` +
+            `over ${scratchQuery("select count(*) from measurement where metric = 'waist'")} waist rows, ` +
+            'both kept, because this table appends',
+        );
       },
     );
   }

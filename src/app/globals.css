@@ -547,9 +547,18 @@ a.value-link:active{opacity:.7}
  * placeholder is the sheet's own `--`, which is where "blank fields stay blank,
  * they are not stored as zero" is enforced rather than described: an empty field
  * has no value and no value is sent.
+ *
+ * IT IS ALSO A TARGET, AND IT TOOK THE SHEET'S OWN SIZE. It shipped 133x40,
+ * under the 44 px floor DESIGN.md section 2b says no control may go under,
+ * because the sheet draws it as a display and the build made it a field without
+ * giving it the height a field is tapped at. 52 px is the quick log's own
+ * escalation, the same as `.sheet .btn` and `.scale5 button`, and it changes no
+ * geometry: the stepper's hands are 60 px tall and the row is as tall as they
+ * are.
  */
 .waistfield{
   width:6ch;
+  min-height:52px;
   border:0;
   background:transparent;
   color:inherit;

@@ -806,14 +806,26 @@ test.describe('the quick log against screen 03', () => {
       await page.screenshot({ path: `${CAPTURES}c5-quick-log-${name}.png` });
 
       // Every target inside the sheet, measured rather than asserted.
+      //
+      // `input` is in that list now, and its absence is how the waist field
+      // shipped at 133x40 under a line that says 44: the walk read buttons,
+      // textareas and links, the one field on the sheet was in none of those,
+      // and three viewports of green said the targets were fine.
       const targets = await page
-        .locator('.sheet button, .sheet textarea, .sheet a')
+        .locator('.sheet button, .sheet input, .sheet textarea, .sheet a')
         .evaluateAll((nodes) =>
           nodes.map((node) => {
             const box = node.getBoundingClientRect();
             const style = getComputedStyle(node);
+            // A field carries no text of its own, so it is named by the label
+            // that points at it. Without this the waist field would be measured
+            // and then reported as an empty string.
+            const labelled = node.id
+              ? document.querySelector(`label[for="${node.id}"]`)?.textContent?.trim()
+              : undefined;
+            const named = node.getAttribute('aria-label') ?? labelled ?? node.textContent?.trim().slice(0, 24);
             return {
-              label: node.getAttribute('aria-label') ?? node.textContent?.trim().slice(0, 24) ?? node.tagName,
+              label: named && named !== '' ? named : node.tagName.toLowerCase(),
               height: Math.round(box.height),
               fontSize: style.fontSize,
               classes: node.className,

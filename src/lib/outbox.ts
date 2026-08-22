@@ -102,9 +102,24 @@ export async function allEntries(): Promise<OutboxEntry[]> {
   return rows.sort((left, right) => left.createdAt - right.createdAt);
 }
 
+/**
+ * How many writes are on this phone and not on the Mac mini, parked ones
+ * included.
+ *
+ * They used to be filtered out of this count, which is the opposite of what
+ * parking is for. A parked entry is one the origin refused permanently: it is
+ * not going to upload, nothing else holds it, and it is exactly the entry the
+ * owner most needs to see. Filtering it took the offline line off the screen
+ * along with its count, so a queue holding one refused write reported an empty
+ * queue.
+ *
+ * No request the app ships today comes back with one of `PARK_ON`'s six
+ * statuses, so this moves nothing that has ever been measured. It stops the
+ * first slice that returns one from turning a refusal into silence.
+ */
 export async function depth(): Promise<number> {
   const rows = await allEntries();
-  return rows.filter((entry) => !entry.parked).length;
+  return rows.length;
 }
 
 export async function enqueue(entry: {
@@ -167,10 +182,17 @@ export async function pending(id: string): Promise<boolean> {
  * instance with the origin taken away: the row said Stored beside an offline
  * line reading "1 entry saved on this phone", which is the app contradicting
  * itself about the owner's own data in two places on one screen.
+ *
+ * A PARKED ENTRY IS STILL ON THIS PHONE, and this used to say it was not. The
+ * answer went false the moment the origin refused a write permanently, so the
+ * just-logged row flipped its chip to Stored and offered "Correct it" on a
+ * measurement that had never been written anywhere, for a write that is sitting
+ * three feet from the owner in IndexedDB. Where the write is has one true
+ * answer and parking does not change it.
  */
 export async function stillQueued(id: string): Promise<boolean> {
   const rows = await allEntries();
-  return rows.some((entry) => entry.id === id && !entry.parked);
+  return rows.some((entry) => entry.id === id);
 }
 
 /**
