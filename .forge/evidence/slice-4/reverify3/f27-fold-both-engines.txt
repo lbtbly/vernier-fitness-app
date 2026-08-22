@@ -1,0 +1,32 @@
+F27. Today's fold at 393x852, re-verified by the verifier in BOTH engines.
+Live install over HTTPS for the live rows; the scratch instance for the anchors.
+The fold is 715 px. 'trend' is svg.chart inside [data-card=weight].
+
+anchor          engine   quiet banner  trend  adherence  scrollY  holds
+live            chrome   1     46      689    524        0        True
+live            webkit   1     46      689    524        0        True
+q196            chrome   1     46      689    524        0        True
+q196-question   chrome   1     46      758    594        0        False
+q196-question   webkit   1     46      758    594        0        False
+q196            webkit   1     46      689    524        0        True
+q198            chrome   2     46      689    524        0        True
+q198            webkit   2     46      689    524        0        True
+q199            chrome   2     46      688    523        0        True
+q199            webkit   2     46      688    523        0        True
+q200            chrome   2     46      689    524        0        True
+q200            webkit   2     46      689    524        0        True
+
+The banner's height read off the shipped element, fed the copy strings.stale.bannerSummary
+produces for each count, in both engines at every anchor:
+  live            chrome   {"1": 46, "2": 46, "3": 46, "5": 46, "9": 46, "42": 46, "999999": 46}
+  live            webkit   {"1": 46, "2": 46, "3": 46, "5": 46, "9": 46, "42": 46, "999999": 46}
+  q196            chrome   {"1": 46, "2": 46, "3": 46, "5": 46, "9": 46, "42": 46, "999999": 46}
+  q196-question   chrome   {"1": 46, "2": 46, "3": 46, "5": 46, "9": 46, "42": 46, "999999": 46}
+  q196-question   webkit   {"1": 46, "2": 46, "3": 46, "5": 46, "9": 46, "42": 46, "999999": 46}
+  q196            webkit   {"1": 46, "2": 46, "3": 46, "5": 46, "9": 46, "42": 46, "999999": 46}
+  q198            chrome   {"1": 46, "2": 46, "3": 46, "5": 46, "9": 46, "42": 46, "999999": 46}
+  q198            webkit   {"1": 46, "2": 46, "3": 46, "5": 46, "9": 46, "42": 46, "999999": 46}
+  q199            chrome   {"1": 46, "2": 46, "3": 46, "5": 46, "9": 46, "42": 46, "999999": 46}
+  q199            webkit   {"1": 46, "2": 46, "3": 46, "5": 46, "9": 46, "42": 46, "999999": 46}
+  q200            chrome   {"1": 46, "2": 46, "3": 46, "5": 46, "9": 46, "42": 46, "999999": 46}
+  q200            webkit   {"1": 46, "2": 46, "3": 46, "5": 46, "9": 46, "42": 46, "999999": 46}

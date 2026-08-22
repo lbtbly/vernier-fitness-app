@@ -1,0 +1,27 @@
+row before: standalone_seen=true@unattributed@2026-08-22 18:20:57.133965+02 | wake_lock_available=true@unattributed@2026-08-22 18:20:57.134975+02
+
+ATTACK 1: node, no browser at all, holding a token it read from its own jar.
+  standalone true, wakeLock true, webdriver false, Safari user agent
+    -> 204 
+    row: standalone_seen=true@unattributed@2026-08-22 18:23:51.499519+02 | wake_lock_available=true@unattributed@2026-08-22 18:23:51.501024+02
+
+ATTACK 2: a real driven browser that overrides navigator.webdriver before the first script.
+  webkit: navigator.webdriver now reads false; UA Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) V
+    launch report -> 403 {"error":"Anti-forgery check failed.","detail":"This request carried no anti-forgery cookie. Reload the sign-in screen a
+    row UNMOVED: standalone_seen=true@unattributed@2026-08-22 18:23:51.499519+02 | wake_lock_available=true@unattributed@2026-08-22 18:23:51.501024+02
+  chrome: navigator.webdriver now reads false; UA Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Hea
+    launch report -> 200 {"recorded":false,"reason":"A driven browser cannot report a launch.","detail":"This row is read back as evidence that V
+    row UNMOVED: standalone_seen=true@unattributed@2026-08-22 18:23:51.499519+02 | wake_lock_available=true@unattributed@2026-08-22 18:23:51.501024+02
+
+ATTACK 3: the shipped client, undriven, is still allowed to write.
+  standalone true, wakeLock true, webdriver false, no user agent header at all
+    -> 204 
+    row: standalone_seen=true@unattributed@2026-08-22 18:23:54.109585+02 | wake_lock_available=true@unattributed@2026-08-22 18:23:54.112282+02
+
+ATTACK 4: a body with extra fields, and a body with strings instead of booleans.
+  four fields including a payload
+    -> 204 
+    row: standalone_seen=true@unattributed@2026-08-22 18:23:54.238904+02 | wake_lock_available=true@unattributed@2026-08-22 18:23:54.240007+02
+  strings instead of booleans
+    -> 400 {"error":"That is not a launch report.","detail":"This endpoint records two things the browser reports at launch: whether Vernier opened from the Home Screen, a
+    row: standalone_seen=true@unattributed@2026-08-22 18:23:54.238904+02 | wake_lock_available=true@unattributed@2026-08-22 18:23:54.240007+02

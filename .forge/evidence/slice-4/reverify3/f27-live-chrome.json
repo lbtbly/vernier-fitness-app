@@ -1,0 +1,141 @@
+{
+ "scrollY": 0,
+ "docScrollWidth": 393,
+ "docClientWidth": 393,
+ "docScrollHeight": 2704,
+ "outboxBanner": null,
+ "banners": [
+  {
+   "cls": "banner w",
+   "text": "One source has gone quiet.Health, 4 days old. The iPhone shortcut last sent a ba",
+   "top": 65,
+   "bottom": 111,
+   "h": 46
+  }
+ ],
+ "staleBanner": {
+  "top": 65,
+  "bottom": 111,
+  "h": 46,
+  "count": "1",
+  "text": "One source has gone quiet."
+ },
+ "summaryBox": {
+  "w": 359,
+  "h": 44
+ },
+ "sessionRow": {
+  "top": 119,
+  "bottom": 342,
+  "h": 223
+ },
+ "meals": null,
+ "adherence": {
+  "top": 350,
+  "bottom": 524,
+  "h": 174
+ },
+ "weightCard": {
+  "top": 532,
+  "bottom": 879,
+  "h": 347
+ },
+ "weightChart": {
+  "top": 609,
+  "bottom": 689,
+  "h": 80
+ },
+ "charts": [
+  {
+   "card": "weight",
+   "top": 609,
+   "bottom": 689,
+   "h": 80
+  },
+  {
+   "card": "waist",
+   "top": 972,
+   "bottom": 1035,
+   "h": 64
+  }
+ ],
+ "cardsInOrder": [
+  {
+   "tag": "header",
+   "cls": "title",
+   "top": 8,
+   "bottom": 65
+  },
+  {
+   "tag": "details",
+   "cls": "banner w",
+   "top": 65,
+   "bottom": 111
+  },
+  {
+   "tag": "section",
+   "cls": "card day",
+   "top": 119,
+   "bottom": 342
+  },
+  {
+   "tag": "section",
+   "cls": "card adherence",
+   "top": 350,
+   "bottom": 524
+  },
+  {
+   "tag": "section",
+   "cls": "card",
+   "top": 532,
+   "bottom": 879
+  },
+  {
+   "tag": "section",
+   "cls": "card",
+   "top": 887,
+   "bottom": 1100
+  },
+  {
+   "tag": "section",
+   "cls": "card",
+   "top": 1108,
+   "bottom": 1446
+  },
+  {
+   "tag": "section",
+   "cls": "card",
+   "top": 1454,
+   "bottom": 1618
+  },
+  {
+   "tag": "section",
+   "cls": "card",
+   "top": 1626,
+   "bottom": 2597
+  },
+  {
+   "tag": "p",
+   "cls": "note centre",
+   "top": 2605,
+   "bottom": 2627
+  }
+ ],
+ "tag": "live",
+ "engine": "chrome",
+ "errors": [
+  "REQFAIL https://lamberts-mac-mini.tailda76d6.ts.net/value/demo_weight?_rsc=tXyZJ52UQVBCVsD3"
+ ],
+ "fold": 715,
+ "trendBottom": 689,
+ "foldHolds": true,
+ "summaryHeightByCount": {
+  "1": 46,
+  "2": 46,
+  "3": 46,
+  "5": 46,
+  "9": 46,
+  "42": 46,
+  "999999": 46
+ }
+}

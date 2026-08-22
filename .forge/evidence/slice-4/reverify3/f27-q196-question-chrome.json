@@ -1,0 +1,151 @@
+{
+ "scrollY": 0,
+ "docScrollWidth": 393,
+ "docClientWidth": 393,
+ "docScrollHeight": 2302,
+ "outboxBanner": null,
+ "banners": [
+  {
+   "cls": "banner w",
+   "text": "One source has gone quiet.Health, 4 days old. The iPhone shortcut last sent a ba",
+   "top": 65,
+   "bottom": 111,
+   "h": 46
+  },
+  {
+   "cls": "banner w",
+   "text": "An import disagrees with your correction 1 import is waiting on you",
+   "top": 119,
+   "bottom": 181,
+   "h": 62
+  }
+ ],
+ "staleBanner": {
+  "top": 65,
+  "bottom": 111,
+  "h": 46,
+  "count": "1",
+  "text": "One source has gone quiet."
+ },
+ "summaryBox": {
+  "w": 359,
+  "h": 44
+ },
+ "sessionRow": {
+  "top": 189,
+  "bottom": 412,
+  "h": 223
+ },
+ "meals": null,
+ "adherence": {
+  "top": 420,
+  "bottom": 594,
+  "h": 174
+ },
+ "weightCard": {
+  "top": 602,
+  "bottom": 930,
+  "h": 329
+ },
+ "weightChart": {
+  "top": 679,
+  "bottom": 758,
+  "h": 80
+ },
+ "charts": [
+  {
+   "card": "weight",
+   "top": 679,
+   "bottom": 758,
+   "h": 80
+  },
+  {
+   "card": "waist",
+   "top": 1023,
+   "bottom": 1087,
+   "h": 64
+  }
+ ],
+ "cardsInOrder": [
+  {
+   "tag": "header",
+   "cls": "title",
+   "top": 8,
+   "bottom": 65
+  },
+  {
+   "tag": "details",
+   "cls": "banner w",
+   "top": 65,
+   "bottom": 111
+  },
+  {
+   "tag": "a",
+   "cls": "banner w",
+   "top": 119,
+   "bottom": 181
+  },
+  {
+   "tag": "section",
+   "cls": "card day",
+   "top": 189,
+   "bottom": 412
+  },
+  {
+   "tag": "section",
+   "cls": "card adherence",
+   "top": 420,
+   "bottom": 594
+  },
+  {
+   "tag": "section",
+   "cls": "card",
+   "top": 602,
+   "bottom": 930
+  },
+  {
+   "tag": "section",
+   "cls": "card",
+   "top": 938,
+   "bottom": 1152
+  },
+  {
+   "tag": "section",
+   "cls": "card",
+   "top": 1160,
+   "bottom": 1498
+  },
+  {
+   "tag": "section",
+   "cls": "card",
+   "top": 1506,
+   "bottom": 2195
+  },
+  {
+   "tag": "p",
+   "cls": "note centre",
+   "top": 2203,
+   "bottom": 2225
+  }
+ ],
+ "tag": "q196-question",
+ "engine": "chrome",
+ "errors": [
+  "REQFAIL http://127.0.0.1:3101/value/99399ffc-fbb0-45ec-98d1-955efe56daf1?_rsc=5CB68i4pnAekjehf :: net::ERR_ABORTED",
+  "REQFAIL http://127.0.0.1:3101/value/demo_weight_on_2026-08-22?_rsc=5CB68i4pnAekjehf :: net::ERR_ABORTED",
+  "REQFAIL http://127.0.0.1:3101/value/demo_weight_on_2026-08-22?_rsc=tXyZJ52UQVBCVsD3 :: net::ERR_ABORTED",
+  "REQFAIL http://127.0.0.1:3101/value/99399ffc-fbb0-45ec-98d1-955efe56daf1?_rsc=tXyZJ52UQVBCVsD3 :: net::ERR_ABORTED"
+ ],
+ "fold": 715,
+ "trendBottom": 758,
+ "foldHolds": false,
+ "summaryHeightByCount": {
+  "1": 46,
+  "2": 46,
+  "3": 46,
+  "5": 46,
+  "9": 46,
+  "42": 46,
+  "999999": 46
+ }
+}

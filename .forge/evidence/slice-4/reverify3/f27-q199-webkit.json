@@ -1,0 +1,133 @@
+{
+ "scrollY": 0,
+ "docScrollWidth": 393,
+ "docClientWidth": 393,
+ "docScrollHeight": 2328,
+ "outboxBanner": null,
+ "banners": [
+  {
+   "cls": "banner w",
+   "text": "2 sources have gone quiet.Withings, 3 days old. The scale last synced on 19 Aug,",
+   "top": 65,
+   "bottom": 111,
+   "h": 46
+  }
+ ],
+ "staleBanner": {
+  "top": 65,
+  "bottom": 111,
+  "h": 46,
+  "count": "2",
+  "text": "2 sources have gone quiet."
+ },
+ "summaryBox": {
+  "w": 359,
+  "h": 44
+ },
+ "sessionRow": {
+  "top": 119,
+  "bottom": 341,
+  "h": 222
+ },
+ "meals": null,
+ "adherence": {
+  "top": 349,
+  "bottom": 523,
+  "h": 174
+ },
+ "weightCard": {
+  "top": 531,
+  "bottom": 924,
+  "h": 393
+ },
+ "weightChart": {
+  "top": 608,
+  "bottom": 688,
+  "h": 80
+ },
+ "charts": [
+  {
+   "card": "weight",
+   "top": 608,
+   "bottom": 688,
+   "h": 80
+  },
+  {
+   "card": "waist",
+   "top": 1017,
+   "bottom": 1080,
+   "h": 64
+  }
+ ],
+ "cardsInOrder": [
+  {
+   "tag": "header",
+   "cls": "title",
+   "top": 8,
+   "bottom": 65
+  },
+  {
+   "tag": "details",
+   "cls": "banner w",
+   "top": 65,
+   "bottom": 111
+  },
+  {
+   "tag": "section",
+   "cls": "card day",
+   "top": 119,
+   "bottom": 341
+  },
+  {
+   "tag": "section",
+   "cls": "card adherence",
+   "top": 349,
+   "bottom": 523
+  },
+  {
+   "tag": "section",
+   "cls": "card",
+   "top": 531,
+   "bottom": 924
+  },
+  {
+   "tag": "section",
+   "cls": "card",
+   "top": 932,
+   "bottom": 1145
+  },
+  {
+   "tag": "section",
+   "cls": "card",
+   "top": 1153,
+   "bottom": 1524
+  },
+  {
+   "tag": "section",
+   "cls": "card",
+   "top": 1532,
+   "bottom": 2221
+  },
+  {
+   "tag": "p",
+   "cls": "note centre",
+   "top": 2229,
+   "bottom": 2251
+  }
+ ],
+ "tag": "q199",
+ "engine": "webkit",
+ "errors": [],
+ "fold": 715,
+ "trendBottom": 688,
+ "foldHolds": true,
+ "summaryHeightByCount": {
+  "1": 46,
+  "2": 46,
+  "3": 46,
+  "5": 46,
+  "9": 46,
+  "42": 46,
+  "999999": 46
+ }
+}
