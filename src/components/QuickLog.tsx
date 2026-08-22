@@ -451,7 +451,7 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
                   </div>
                   <div className="head">{strings.quickLog.errorTitle}</div>
                   <p className="sub">
-                    <span data-authored="platform">Load failed</span>{' '}
+                    <span data-authored={load.authored}>{load.detail}</span>{' '}
                     {strings.quickLog.errorBody}
                   </p>
                   <div className="actions">
