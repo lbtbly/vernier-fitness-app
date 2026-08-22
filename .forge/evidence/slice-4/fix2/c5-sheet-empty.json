@@ -1,0 +1,37 @@
+[
+ {
+  "where": "today column",
+  "what": "card day",
+  "state": null,
+  "padding": "8px 16px 8px 16px",
+  "marginBottom": "8px"
+ },
+ {
+  "where": "sheet",
+  "what": "card empty",
+  "state": "empty",
+  "padding": "16px 16px 16px 16px",
+  "marginBottom": "12px"
+ },
+ {
+  "where": "today column",
+  "what": "card adherence",
+  "state": null,
+  "padding": "8px 16px 8px 16px",
+  "marginBottom": "8px"
+ },
+ {
+  "where": "today column",
+  "what": "card empty",
+  "state": null,
+  "padding": "8px 16px 8px 16px",
+  "marginBottom": "8px"
+ },
+ {
+  "where": "today column",
+  "what": "card",
+  "state": "signals",
+  "padding": "8px 16px 8px 16px",
+  "marginBottom": "8px"
+ }
+]

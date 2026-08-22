@@ -1,0 +1,49 @@
+{
+ "fold": 715,
+ "docScrollWidth": 393,
+ "docClientWidth": 393,
+ "staleBanner": {
+  "top": 65,
+  "bottom": 164,
+  "h": 99
+ },
+ "staleBannerCount": "2",
+ "staleBannerText": "Withings, 4 days old. The scale last synced on 18 Aug, 06:52.\nHealth, 4 days old. The iPhone shortcut last sent a batch on 18 Aug, 07:20.",
+ "staleSummary": null,
+ "sessionRow": {
+  "top": 195,
+  "bottom": 261,
+  "h": 66
+ },
+ "meals": {
+  "top": 261,
+  "bottom": 286,
+  "h": 25
+ },
+ "due": {
+  "top": 286,
+  "bottom": 332,
+  "h": 46
+ },
+ "adherence": {
+  "top": 403,
+  "bottom": 577,
+  "h": 174
+ },
+ "weightCard": {
+  "top": 585,
+  "bottom": 978,
+  "h": 393
+ },
+ "weightChart": {
+  "top": 662,
+  "bottom": 742,
+  "h": 80
+ },
+ "weightChartTitle": "Weight, the last 30 days",
+ "weightHeadline": "71.0 kg",
+ "trendBottom": 742,
+ "tag": "q200",
+ "errors": [],
+ "foldHolds": false
+}

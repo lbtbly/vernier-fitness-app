@@ -319,7 +319,7 @@ body{
   *{transition-duration:1ms !important}
 }
 
-a:focus-visible,button:focus-visible,input:focus-visible,[tabindex]:focus-visible{
+a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible,[tabindex]:focus-visible{
   outline:2px solid var(--focus);
   outline-offset:2px;
 }
@@ -773,7 +773,15 @@ details.banner[data-stale-banner]{display:block;padding:0}
 details.banner > summary{
   display:flex;
   gap:10px;
-  align-items:flex-start;
+  /* One line, so it centres. The lines that open sit under it, indented. */
+  align-items:center;
+  /*
+   * A control, so the 44 px floor applies to it. DESIGN.md section 2b is
+   * explicit that 44 is a floor and never a target, and this is one of the two
+   * places the floor is the right number: the row is 361 px wide and carries
+   * one word of state.
+   */
+  min-height:var(--touch);
   padding:9px 12px;
   /* The default triangle, in both engines, so the chevron is the only marker. */
   list-style:none;

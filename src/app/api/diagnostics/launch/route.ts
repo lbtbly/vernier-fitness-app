@@ -78,11 +78,16 @@ export async function POST(request: Request) {
     });
   }
 
-  const { peerAddress } = readRequestOrigin(request.headers);
+  // Only a request that came through the Tailscale proxy carries a real peer
+  // address. Next fills x-forwarded-for from the socket for everything else,
+  // which on this machine is the container bridge gateway: not a visitor, not
+  // evidence, and a value that would only mislead a reader of this row. The
+  // same rule Today already applies before it records a request origin.
+  const { peerAddress, viaTailscale } = readRequestOrigin(request.headers);
   await recordDeviceLaunch({
     standalone: report.standalone,
     wakeLock: report.wakeLock,
-    reportedFrom: peerAddress,
+    reportedFrom: viaTailscale ? peerAddress : null,
   });
 
   return new NextResponse(null, { status: 204, headers: { 'Cache-Control': 'no-store' } });

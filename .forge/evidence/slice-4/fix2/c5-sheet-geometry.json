@@ -1,0 +1,297 @@
+{
+ "captured": {
+  "loading": [
+   {
+    "where": "today column",
+    "what": "banner w",
+    "state": "1",
+    "padding": "0px 0px 0px 0px",
+    "marginBottom": "8px"
+   },
+   {
+    "where": "today column",
+    "what": "card day",
+    "state": null,
+    "padding": "8px 16px 8px 16px",
+    "marginBottom": "8px"
+   },
+   {
+    "where": "sheet",
+    "what": "card",
+    "state": "loading",
+    "padding": "16px 16px 16px 16px",
+    "marginBottom": "12px"
+   },
+   {
+    "where": "today column",
+    "what": "card adherence",
+    "state": null,
+    "padding": "8px 16px 8px 16px",
+    "marginBottom": "8px"
+   },
+   {
+    "where": "today column",
+    "what": "card",
+    "state": "weight",
+    "padding": "8px 16px 8px 16px",
+    "marginBottom": "8px"
+   },
+   {
+    "where": "today column",
+    "what": "card",
+    "state": "waist",
+    "padding": "8px 16px 8px 16px",
+    "marginBottom": "8px"
+   },
+   {
+    "where": "today column",
+    "what": "card",
+    "state": "signals",
+    "padding": "8px 16px 8px 16px",
+    "marginBottom": "8px"
+   },
+   {
+    "where": "today column",
+    "what": "card",
+    "state": "panel",
+    "padding": "8px 16px 8px 16px",
+    "marginBottom": "8px"
+   },
+   {
+    "where": "today column",
+    "what": "card",
+    "state": null,
+    "padding": "8px 16px 8px 16px",
+    "marginBottom": "8px"
+   }
+  ],
+  "error": [
+   {
+    "where": "today column",
+    "what": "banner w",
+    "state": "1",
+    "padding": "0px 0px 0px 0px",
+    "marginBottom": "8px"
+   },
+   {
+    "where": "today column",
+    "what": "card day",
+    "state": null,
+    "padding": "8px 16px 8px 16px",
+    "marginBottom": "8px"
+   },
+   {
+    "where": "sheet",
+    "what": "card error",
+    "state": "error",
+    "padding": "16px 16px 16px 16px",
+    "marginBottom": "12px"
+   },
+   {
+    "where": "today column",
+    "what": "card adherence",
+    "state": null,
+    "padding": "8px 16px 8px 16px",
+    "marginBottom": "8px"
+   },
+   {
+    "where": "today column",
+    "what": "card",
+    "state": "weight",
+    "padding": "8px 16px 8px 16px",
+    "marginBottom": "8px"
+   },
+   {
+    "where": "today column",
+    "what": "card",
+    "state": "waist",
+    "padding": "8px 16px 8px 16px",
+    "marginBottom": "8px"
+   },
+   {
+    "where": "today column",
+    "what": "card",
+    "state": "signals",
+    "padding": "8px 16px 8px 16px",
+    "marginBottom": "8px"
+   },
+   {
+    "where": "today column",
+    "what": "card",
+    "state": "panel",
+    "padding": "8px 16px 8px 16px",
+    "marginBottom": "8px"
+   },
+   {
+    "where": "today column",
+    "what": "card",
+    "state": null,
+    "padding": "8px 16px 8px 16px",
+    "marginBottom": "8px"
+   }
+  ],
+  "stale": [
+   {
+    "where": "today column",
+    "what": "banner w",
+    "state": "1",
+    "padding": "0px 0px 0px 0px",
+    "marginBottom": "8px"
+   },
+   {
+    "where": "today column",
+    "what": "card day",
+    "state": null,
+    "padding": "8px 16px 8px 16px",
+    "marginBottom": "8px"
+   },
+   {
+    "where": "sheet",
+    "what": "card",
+    "state": "stale",
+    "padding": "16px 16px 16px 16px",
+    "marginBottom": "12px"
+   },
+   {
+    "where": "today column",
+    "what": "card adherence",
+    "state": null,
+    "padding": "8px 16px 8px 16px",
+    "marginBottom": "8px"
+   },
+   {
+    "where": "today column",
+    "what": "card",
+    "state": "weight",
+    "padding": "8px 16px 8px 16px",
+    "marginBottom": "8px"
+   },
+   {
+    "where": "today column",
+    "what": "card",
+    "state": "waist",
+    "padding": "8px 16px 8px 16px",
+    "marginBottom": "8px"
+   },
+   {
+    "where": "today column",
+    "what": "card",
+    "state": "signals",
+    "padding": "8px 16px 8px 16px",
+    "marginBottom": "8px"
+   },
+   {
+    "where": "today column",
+    "what": "card",
+    "state": "panel",
+    "padding": "8px 16px 8px 16px",
+    "marginBottom": "8px"
+   },
+   {
+    "where": "today column",
+    "what": "card",
+    "state": null,
+    "padding": "8px 16px 8px 16px",
+    "marginBottom": "8px"
+   }
+  ],
+  "offline": [
+   {
+    "where": "today column",
+    "what": "banner",
+    "state": "offline",
+    "padding": "11px 12px 11px 12px",
+    "marginBottom": "8px"
+   },
+   {
+    "where": "today column",
+    "what": "banner w",
+    "state": "1",
+    "padding": "0px 0px 0px 0px",
+    "marginBottom": "8px"
+   },
+   {
+    "where": "today column",
+    "what": "card day",
+    "state": null,
+    "padding": "8px 16px 8px 16px",
+    "marginBottom": "8px"
+   },
+   {
+    "where": "today column",
+    "what": "card",
+    "state": null,
+    "padding": "8px 16px 8px 16px",
+    "marginBottom": "8px"
+   },
+   {
+    "where": "today column",
+    "what": "card empty",
+    "state": null,
+    "padding": "8px 16px 8px 16px",
+    "marginBottom": "8px"
+   },
+   {
+    "where": "sheet",
+    "what": "banner",
+    "state": "offline",
+    "padding": "11px 12px 11px 12px",
+    "marginBottom": "12px"
+   },
+   {
+    "where": "sheet",
+    "what": "card",
+    "state": "loading",
+    "padding": "16px 16px 16px 16px",
+    "marginBottom": "12px"
+   },
+   {
+    "where": "today column",
+    "what": "card adherence",
+    "state": null,
+    "padding": "8px 16px 8px 16px",
+    "marginBottom": "8px"
+   },
+   {
+    "where": "today column",
+    "what": "card",
+    "state": "weight",
+    "padding": "8px 16px 8px 16px",
+    "marginBottom": "8px"
+   },
+   {
+    "where": "today column",
+    "what": "card",
+    "state": "waist",
+    "padding": "8px 16px 8px 16px",
+    "marginBottom": "8px"
+   },
+   {
+    "where": "today column",
+    "what": "card",
+    "state": "signals",
+    "padding": "8px 16px 8px 16px",
+    "marginBottom": "8px"
+   },
+   {
+    "where": "today column",
+    "what": "card",
+    "state": "panel",
+    "padding": "8px 16px 8px 16px",
+    "marginBottom": "8px"
+   },
+   {
+    "where": "today column",
+    "what": "card",
+    "state": null,
+    "padding": "8px 16px 8px 16px",
+    "marginBottom": "8px"
+   }
+  ]
+ },
+ "errors": [
+  "CONSOLE Failed to load resource: net::ERR_CONNECTION_FAILED",
+  "CONSOLE Failed to load resource: net::ERR_CONNECTION_FAILED",
+  "CONSOLE Failed to load resource: net::ERR_CONNECTION_FAILED"
+ ]
+}

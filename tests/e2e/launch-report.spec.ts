@@ -177,11 +177,13 @@ test.describe('the launch report', () => {
 
     // The row it wrote, and what it says about where it came from. The scratch
     // instance answers on plain loopback with no Tailscale proxy in front of
-    // it, so there is no forwarded address and the column is null: unattributed
-    // rather than attributed to a machine it did not come from.
+    // it, so there is no forwarded address to believe. Next fills
+    // x-forwarded-for from the socket regardless, and on this machine that is
+    // the container bridge gateway, so the column reads null: unattributed,
+    // rather than attributed to a machine the report did not come from.
     const row = scratchQuery(SIGNALS);
     console.log(`signals after: ${row}`);
-    expect(row).toContain('standalone_seen=f@unattributed');
+    expect(row).toContain('standalone_seen=false@unattributed');
     // standalone was false, so wake lock was not believed and no row was
     // written for it. That rule is older than this file and it still holds.
     expect(row).not.toContain('wake_lock_available');
