@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
-import { expect, test, type Locator, type Page } from '@playwright/test';
+import { expect, newGuardedContext, test, type Locator, type Page } from './fixtures';
 import { projectRoot } from './host';
 
 /**
@@ -134,7 +134,7 @@ test.describe('screen 01, first run', () => {
   });
 
   test('renders the one-time owner creation at three viewports', async ({ browser }) => {
-    const context = await browser.newContext({ baseURL: SCRATCH, viewport: VIEWPORTS[0] });
+    const context = await newGuardedContext(browser, { baseURL: SCRATCH, viewport: VIEWPORTS[0] });
     const page = await context.newPage();
 
     for (const viewport of VIEWPORTS) {

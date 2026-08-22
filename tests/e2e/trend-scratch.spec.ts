@@ -1,5 +1,5 @@
 import { mkdirSync } from 'node:fs';
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures';
 import {
   ensureScratchOwner,
   projectRoot,
@@ -162,7 +162,9 @@ test('F34. a source is stale past thirty-six hours, and the chip clears when a f
   await openHealth(page);
   console.log(`F34  at 35 hours the warn chip count is ${await page.locator('.src.stale').count()}`);
   expect(await page.locator('.src.stale').count()).toBe(0);
-  expect(await page.locator('[data-stale-banner]').count()).toBe(0);
+  // The notice region under Today's title, which is where the quiet sources
+  // are named. Health draws none of its own and draws none of this either.
+  expect(await page.locator('[data-notices]').count()).toBe(0);
   // Absence is still drawn: thirty-five hours with no sample is still a hole in
   // the chart, it is simply not old enough to be worth a warning.
   console.log(

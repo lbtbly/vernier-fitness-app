@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 import { strings } from '@/lib/strings';
 import { baseUrl, mintSignInLink, projectRoot, query } from './host';
 

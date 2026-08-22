@@ -1,0 +1,18 @@
+import { webkit } from '@playwright/test';
+import { execFileSync } from 'node:child_process';
+const url='http://127.0.0.1:3101';
+const link = execFileSync('bash',['scripts/recovery.sh','link','10'],{cwd:process.cwd(),encoding:'utf8',env:{...process.env,RECOVERY_CONTAINER:'vernier-scratch'}}).trim().split('\n').at(-1).trim();
+const res = await fetch(link,{redirect:'manual'});
+const set = res.headers.getSetCookie();
+console.log('status', res.status, 'location', res.headers.get('location'));
+console.log(set.map(s=>s.split(';')[0].split('=')[0]+' :: '+s.split(';').slice(1).join(';')).join('\n'));
+const jar = set.map(s=>s.split(';')[0]).map(p=>{const i=p.indexOf('=');return {name:p.slice(0,i), value:p.slice(i+1)};});
+const browser = await webkit.launch();
+const context = await browser.newContext({viewport:{width:393,height:852}});
+await context.addCookies(jar.map(c=>({...c, domain:'127.0.0.1', path:'/', secure:false, httpOnly:true, sameSite:'Strict'})));
+const page = await context.newPage();
+await page.goto(url+'/');
+await page.waitForLoadState('networkidle');
+console.log('landed on', page.url());
+console.log('title', await page.title());
+await browser.close();

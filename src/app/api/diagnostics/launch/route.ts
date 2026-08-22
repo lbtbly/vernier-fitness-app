@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { recordDeviceLaunch } from '@/db/diagnostics';
 import { csrfFailure } from '@/lib/csrf';
 import { ok, refuse } from '@/lib/gate';
-import { isDrivenBrowser } from '@/lib/launch-report';
+import { couldBeAHomeScreenLaunch, isDrivenBrowser } from '@/lib/launch-report';
 import { readRequestOrigin } from '@/lib/request-origin';
 import { strings } from '@/lib/strings';
 
@@ -65,7 +65,8 @@ export async function POST(request: Request) {
     return refuse(400, strings.api.launch.notAReport, strings.api.launch.notAReportDetail);
   }
 
-  if (isDrivenBrowser(report.webdriver, request.headers.get('user-agent'))) {
+  const userAgent = request.headers.get('user-agent');
+  if (isDrivenBrowser(report.webdriver, userAgent)) {
     // Nothing is stored, and the status is 200 rather than 403 on purpose: the
     // root layout raises this on every page, so a refusal status would put a
     // failed request and a console error on every screen the suite walks, and
@@ -75,6 +76,29 @@ export async function POST(request: Request) {
       recorded: false,
       reason: strings.api.launch.automated,
       detail: strings.api.launch.automatedDetail,
+    });
+  }
+
+  /*
+   * AND THE THIRD WITNESS, WHICH IS THE ONE THAT FIRES FOR WEBKIT. Playwright's
+   * WebKit is a genuine WebKit build sending a genuine Safari user agent, so
+   * neither witness above catches it and one `addInitScript` line puts the
+   * client's own answer back to false. There is no reliable server-side witness
+   * for that engine and this route does not pretend to one.
+   *
+   * What it can do is refuse the claim rather than identify the claimant. C2
+   * reads this row back as one sentence: the owner opened Vernier from the
+   * iPhone Home Screen icon. A user agent naming a desktop has no Home Screen to
+   * put an icon on, so a standalone launch reported from one is not that fact
+   * whoever sent it. This suite drives on a Mac, so it fires for WebKit and for
+   * Chromium alike. A report that claims no Home Screen is stored as usual,
+   * because standalone false is an honest thing for a Mac to say.
+   */
+  if (report.standalone && !couldBeAHomeScreenLaunch(userAgent)) {
+    return ok({
+      recorded: false,
+      reason: strings.api.launch.notAHomeScreen,
+      detail: strings.api.launch.notAHomeScreenDetail,
     });
   }
 

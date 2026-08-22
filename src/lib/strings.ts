@@ -432,6 +432,16 @@ export const strings = {
       automated: 'A driven browser cannot report a launch.',
       automatedDetail:
         'This row is read back as evidence that Vernier opened from the Home Screen on the owner\'s phone, so it is only written by a browser a person is holding. Nothing was stored. Point the run at the scratch instance on 127.0.0.1:3101 instead.',
+      /**
+       * The witness that fires for WebKit, which is the engine the owner's
+       * devices run and the one this suite drives. Playwright's WebKit sends a
+       * genuine Safari user agent, so nothing in a header says it is automated;
+       * what it does say is Macintosh, and a Macintosh has no Home Screen to put
+       * an icon on. The claim is refused rather than the caller identified.
+       */
+      notAHomeScreen: 'A Home Screen launch cannot be reported from a desktop.',
+      notAHomeScreenDetail:
+        'This row is read back as evidence that Vernier opened from the Home Screen icon on the owner\'s iPhone, and the browser reporting this launch says it is running on a desktop. Nothing was stored. A launch that reports no Home Screen is recorded as usual.',
     },
 
     recovery: {
@@ -558,6 +568,17 @@ export const strings = {
     waistLastPrefix: 'Last',
     /** Screen 02's control on the waist card. It raises this same sheet. */
     measure: 'Measure',
+    /**
+     * The stepper moves the last measurement by half a centimetre, so with no
+     * last measurement it has nothing to move. It says so rather than counting
+     * up from zero: one tap used to queue 0.5 cm and report it as saved, and the
+     * band this product stores a waist in starts at 30.
+     */
+    waistNoBase: 'No last measurement to step from. The feelings and the note still save.',
+    /** A write the queue would not take. Screen 00's error card, in the sheet. */
+    refusedTitle: 'That entry was not saved',
+    refusedBody:
+      'Nothing was put on this phone and nothing was sent. Change what is named here and save again.',
     waistEmptyTitle: 'No waist measurement yet',
     /** Also the method the demonstration waist record carries, so it is written once. */
     waistMethod: 'Tape at the navel, standing, breathing out',

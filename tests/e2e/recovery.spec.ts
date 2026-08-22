@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { expect, test } from '@playwright/test';
+import { expect, newGuardedContext, test } from './fixtures';
 import { ensureScratchOwner, scratchQuery, scratchRecovery, scratchUrl, testStack, waitForScratch } from './host';
 
 /**
@@ -65,7 +65,10 @@ test.describe('local recovery', () => {
     expect(row).toBe('argon2id m=19456 t=2 p=1 tag=32 nonce_bytes=16');
 
     // A browser that has never seen this installation: no cookie, no passkey.
-    const context = await browser.newContext({ baseURL: scratchUrl, viewport: { width: 393, height: 852 } });
+    const context = await newGuardedContext(browser, {
+      baseURL: scratchUrl,
+      viewport: { width: 393, height: 852 },
+    });
     const page = await context.newPage();
     try {
       await page.goto('/sign-in');

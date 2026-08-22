@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 import { apiClient } from './api-client';
 import { scratchQuery, scratchUrl, testStack, waitForScratch } from './host';
 

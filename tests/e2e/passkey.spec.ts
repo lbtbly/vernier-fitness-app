@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, newGuardedContext, test } from './fixtures';
 import { forgetSuitePasskey, mintSignInLink, query } from './host';
 import { authenticatorInitScript, makeAuthenticatorSeed } from './software-authenticator';
 
@@ -53,7 +53,7 @@ test.describe('the passkey round trip', () => {
     const alreadyRegistered = Number(query('select count(*) from webauthn_credential'));
 
     const seed = await makeAuthenticatorSeed();
-    const context = await browser.newContext({ viewport: { width: 393, height: 852 } });
+    const context = await newGuardedContext(browser, { viewport: { width: 393, height: 852 } });
     await context.addInitScript(authenticatorInitScript(seed));
     const page = await context.newPage();
 

@@ -21,6 +21,7 @@ import {
 } from '@/lib/outbox';
 import { RATING_MAX, RATING_MIN } from '@/lib/provenance';
 import { strings } from '@/lib/strings';
+import { validateValue } from '@/lib/value-refusal';
 
 /**
  * The quick log, screen 03. Raised from Today, one thumb, no keyboard unless
@@ -156,6 +157,7 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
   const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
   const [justLogged, setJustLogged] = useState<JustLogged | null>(null);
+  const [refused, setRefused] = useState<string[] | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
   // The token the server rendered, kept where the flusher and the push-woken
@@ -195,6 +197,7 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
 
   const read = useCallback(async () => {
     setLoad({ state: 'loading' });
+    setRefused(null);
     try {
       const response = await fetch(LOG_ENDPOINT, { headers: { accept: 'application/json' } });
       if (!response.ok) {
@@ -271,6 +274,32 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
   async function save() {
     const values = filledValues();
     if (values.length === 0) return;
+
+    /*
+     * The queue accepts nothing the server is certain to refuse.
+     *
+     * This path commits to the phone and uploads later, so an entry it accepts
+     * is reported to the owner as safe the instant he taps Save. With the origin
+     * unreachable the snapshot read fails, the waist stepper had no base, and
+     * one tap on the plus control queued 0.5 cm: the just-logged card then read
+     * "Waist 0.5 cm, Queued" beside "Still on this phone" for a value the band
+     * in provenance.ts refuses at 30 cm. The data was safe and the message was
+     * not. So the same rule the route applies is applied here, from the same
+     * function, before anything is put in the queue or claimed to be saved.
+     *
+     * It refuses rather than blocks: no network is asked, no spinner runs, the
+     * sheet stays open on what was typed, and every reason is on the screen.
+     */
+    const refusals = values.flatMap((value) => {
+      const checked = validateValue(value);
+      return checked.ok ? [] : [checked.detail];
+    });
+    if (refusals.length > 0) {
+      setRefused(refusals);
+      return;
+    }
+    setRefused(null);
+
     setSaving(true);
     try {
       const entryId = crypto.randomUUID();
@@ -339,6 +368,20 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
   const now = new Date();
   const lastWaist = load.state === 'ready' ? load.snapshot.lastWaist : null;
   const staleDays = lastWaist ? daysBetween(new Date(lastWaist.measuredAt), now, timeZone) : null;
+  /*
+   * Nothing to count up or down from.
+   *
+   * The stepper is a relative control: it moves the last measurement by half a
+   * centimetre. When the snapshot read fails, which is what the origin being
+   * unreachable looks like from in here, there is no last measurement, and one
+   * tap on the plus control used to queue 0.5 cm and report it as saved.
+   *
+   * It is refused rather than started from a guess, because a guess is a number
+   * on the screen the owner did not measure. This is the read failing or still
+   * in flight; the first-time state is a different thing and keeps its stepper,
+   * because there the absence is a fact rather than an unknown.
+   */
+  const noBaseToStepFrom = waist === null && load.state !== 'ready';
 
   return (
     <>
@@ -491,6 +534,29 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
                 </div>
               ) : null}
 
+              {/*
+                * A write the queue would not take, and the reason the server
+                * would have given. Nothing was put on this phone and nothing
+                * was sent, which is what the card says: the alternative was
+                * telling the owner an entry was safe when the flush was
+                * certain to refuse it.
+                */}
+              {refused ? (
+                <div className="card error" data-state="refused">
+                  <div className="between">
+                    <span className="lbl">{strings.quickLog.title}</span>
+                    <span className="chip a">{strings.error.title}</span>
+                  </div>
+                  <div className="head">{strings.quickLog.refusedTitle}</div>
+                  {refused.map((reason) => (
+                    <p className="sub" key={reason}>
+                      {reason}
+                    </p>
+                  ))}
+                  <p className="sub">{strings.quickLog.refusedBody}</p>
+                </div>
+              ) : null}
+
               {load.state === 'loading' ? (
                 <div className="card" data-state="loading" aria-busy="true" aria-label={strings.quickLog.loadingLabel}>
                   <div className="between">
@@ -575,10 +641,11 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
                   <button
                     type="button"
                     aria-label={strings.quickLog.waistUp}
+                    disabled={noBaseToStepFrom}
                     onClick={() =>
                       setWaist((value) =>
                         value === null
-                          ? (lastWaist?.value ?? 0) + WAIST_STEP
+                          ? Number(((lastWaist?.value ?? 0) + WAIST_STEP).toFixed(1))
                           : Number((value + WAIST_STEP).toFixed(1)),
                       )
                     }
@@ -586,6 +653,11 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
                     <PlusIcon />
                   </button>
                 </div>
+                {noBaseToStepFrom ? (
+                  <p className="note warn" data-waist="no-base">
+                    {strings.quickLog.waistNoBase}
+                  </p>
+                ) : null}
               </div>
 
               {RATING_FIELDS.map((field) => (

@@ -39,7 +39,7 @@ const SUITE_ROLE = 'vernier_suite';
 
 function specs(): Array<[string, string]> {
   return readdirSync(e2e)
-    .filter((name) => name.endsWith('.ts') && name !== 'host.ts')
+    .filter((name) => name.endsWith('.ts') && name !== 'host.ts' && name !== 'fixtures.ts')
     .map((name) => [name, readFileSync(join(e2e, name), 'utf8')]);
 }
 
@@ -151,6 +151,47 @@ describe('the suite against the owner\'s installation', () => {
       const source = readFileSync(join(e2e, name), 'utf8');
       expect(source, `${name} posts a launch report at the live origin`).not.toContain('baseUrl()');
     }
+  });
+
+  it('lets no spec open a browsing context outside the harness that holds the launch report', () => {
+    // THE SECOND HALF OF THE LOCK ABOVE, AND THE HALF THAT DOES NOT DEPEND ON A
+    // SPEC MENTIONING THE ENDPOINT. The shipped client raises a launch report
+    // from the root layout, so every page this suite opens at the live origin
+    // raises one. That was refused by the route on two witnesses, and the
+    // user-agent witness never fires for WebKit: Playwright's WebKit sends a
+    // genuine Safari user agent, so the whole refusal rested on one
+    // client-supplied boolean and one addInitScript line put it back.
+    //
+    // So the report does not leave this machine. tests/e2e/fixtures.ts fulfils
+    // it in the harness for every context whose target is not the scratch
+    // instance, and a spec gets that by importing `test`. What is asserted here
+    // is the shape that makes it unavoidable: no spec imports `test` from
+    // anywhere else, and no spec opens a context of its own around it.
+    const fixtures = readFileSync(join(e2e, 'fixtures.ts'), 'utf8');
+    expect(fixtures).toContain("'**/api/diagnostics/launch'");
+    expect(fixtures).toContain('route.fulfill(');
+    expect(fixtures).toContain('scratchUrl');
+
+    const offenders: string[] = [];
+    for (const [name, source] of specs()) {
+      if (name.endsWith('.spec.ts') && /from '@playwright\/test'/.test(source)) {
+        offenders.push(`${name} imports test from @playwright/test`);
+      }
+      if (/browser\.newContext\(/.test(source)) offenders.push(`${name} opens a context of its own`);
+      // The hold is installed on the CONTEXT, so `page.unrouteAll` cannot
+      // reach it and a blanket `context.route('**/*')` that unroutes its own
+      // pattern afterwards never touches it. What is refused is clearing the
+      // context's routes, or removing this one by name.
+      if (/context\.unrouteAll\(|unroute\([^)]*diagnostics\/launch/.test(source)) {
+        offenders.push(`${name} removes the route that holds the launch report`);
+      }
+    }
+    expect(offenders, 'a spec outside the harness that holds the launch report').toEqual([]);
+
+    // And every spec is reached by it, rather than most of them.
+    const files = specs().filter(([name]) => name.endsWith('.spec.ts'));
+    const wired = files.filter(([, source]) => source.includes("from './fixtures'"));
+    expect(wired.map(([name]) => name)).toEqual(files.map(([name]) => name));
   });
 
   it('grants that role no way to edit or remove anything, anywhere', () => {
