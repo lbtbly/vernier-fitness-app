@@ -1,0 +1,47 @@
+C2. The launch report, and the witness that never fired for WebKit.
+
+THE PROBLEM. Playwright's WebKit is a genuine WebKit build and sends a genuine
+Safari user agent with no automation token in it. So the server's user-agent
+witness never fires for the engine the owner's iPhone and Mac run and the engine
+this suite's main project drives, and the whole refusal rested on one
+client-supplied boolean: one addInitScript line put navigator.webdriver back to
+false and the server accepted the pair at 204.
+
+THE ANSWER, STATED PLAINLY. There is no reliable server-side witness that tells
+Playwright's WebKit from Safari, and none is claimed. Two things stand in its
+place: a third witness that refuses the CLAIM rather than identifying the
+claimant, and a harness that stops the request leaving this machine.
+
+1. THE THIRD WITNESS, at the server, on the scratch instance.
+
+  ✓  43 [chrome-scratch] › tests/e2e/launch-report.spec.ts:51:3 › the launch report › refuses a post with no anti-forgery token and writes nothing (440ms)
+  two booleans and no third: 400 {"error":"That is not a launch report.","detail":"This endpoint records two things the browser reports at launch: whether Vernier opened from the Home Screen, and whether this device can keep the screen awake. Nothing else is stored here."}
+  ✓  44 [chrome-scratch] › tests/e2e/launch-report.spec.ts:93:3 › the launch report › refuses a report that omits whether the browser is being driven (223ms)
+  signals before: none
+  the launch this suite's browser raised: 200 {"recorded":false,"reason":"A driven browser cannot report a launch.","detail":"This row is read back as evidence that Vernier opened from the Home Screen on the owner's phone, so it is only written by a browser a person is holding. Nothing was stored. Point the run at the scratch instance on 127.0.0.1:3101 instead."}
+  navigator.webdriver in this browser: true
+  ✓  45 [chrome-scratch] › tests/e2e/launch-report.spec.ts:111:3 › the launch report › refuses this suite's own browser and leaves the signals where they were (712ms)
+  a headless agent claiming it is not driven: 200 {"recorded":false,"reason":"A driven browser cannot report a launch.","detail":"This row is read back as evidence that Vernier opened from the Home Screen on the owner's phone, so it is only written by a browser a person is holding. Nothing was stored. Point the run at the scratch instance on 127.0.0.1:3101 instead."}
+  ✓  46 [chrome-scratch] › tests/e2e/launch-report.spec.ts:143:3 › the launch report › refuses a headless user agent even when the body claims otherwise (233ms)
+  a Safari user agent claiming a Home Screen launch: 200 {"recorded":false,"reason":"A Home Screen launch cannot be reported from a desktop.","detail":"This row is read back as evidence that Vernier opened from the Home Screen icon on the owner's iPhone, and the browser reporting this launch says it is running on a desktop. Nothing was stored. A launch that reports no Home Screen is recorded as usual."}
+  ✓  47 [chrome-scratch] › tests/e2e/launch-report.spec.ts:169:3 › the launch report › refuses a Home Screen launch reported from a desktop, Safari user agent and all (219ms)
+  navigator.webdriver in this browser: false
+  the launch it raised: 200 {"recorded":false,"reason":"A Home Screen launch cannot be reported from a desktop.","detail":"This row is read back as evidence that Vernier opened from the Home Screen icon on the owner's iPhone, and the browser reporting this launch says it is running on a desktop. Nothing was stored. A launch that reports no Home Screen is recorded as usual."}
+  ✓  48 [chrome-scratch] › tests/e2e/launch-report.spec.ts:196:3 › the launch report › refuses a driven browser that has overwritten the flag it tells on itself with (488ms)
+  an honest report: 204
+  signals after: standalone_seen=false@unattributed
+  ✓  49 [chrome-scratch] › tests/e2e/launch-report.spec.ts:235:3 › the launch report › writes an honest report and records the address it arrived from (121ms)
+
+2. THE HARNESS, at the OWNER'S LIVE INSTALL, in WEBKIT, from
+   tests/e2e/boundary.spec.ts. Everything the accident had, plus both overrides.
+
+  the owner's device signals before: standalone_seen=true@2026-08-22 16:13:55.795+02/2026-08-22 17:13:57.479182+02/unattributed, wake_lock_available=true@2026-08-22 16:13:55.804+02/2026-08-22 16:13:55.804748+02/unattributed
+  launch reports this worker answered itself: 1
+  the owner's device signals after: standalone_seen=true@2026-08-22 16:13:55.795+02/2026-08-22 17:13:57.479182+02/unattributed, wake_lock_available=true@2026-08-22 16:13:55.804+02/2026-08-22 16:13:55.804748+02/unattributed
+  ✓   6 [webkit-iphone] › tests/e2e/boundary.spec.ts:154:1 › C2. this suite cannot report a launch to the owner's install, whatever the page claims (1.2s)
+
+3. AND THE WHOLE RUN, read at the start and again at the end. Nothing this
+   suite did moved device_observation on the owner's install, byte for byte.
+
+  setup: its device signals read standalone_seen=true@2026-08-22 16:13:55.795+02/2026-08-22 17:13:57.479182+02/unattributed, wake_lock_available=true@2026-08-22 16:13:55.804+02/2026-08-22 16:13:55.804748+02/unattributed. Nothing in this run may write them.
+  teardown: its device signals read standalone_seen=true@2026-08-22 16:13:55.795+02/2026-08-22 17:13:57.479182+02/unattributed, wake_lock_available=true@2026-08-22 16:13:55.804+02/2026-08-22 16:13:55.804748+02/unattributed.

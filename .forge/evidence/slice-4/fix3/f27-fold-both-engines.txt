@@ -1,0 +1,47 @@
+F27. Today's fold at 393x852, after the region fix, in BOTH engines.
+The scratch instance for the anchors, the owner's live install for the last row.
+The fold is 715 px. 'trend' is svg.chart inside [data-card=weight]. Region is [data-notices].
+Every anchor carries ONE open import question, raised through the shipped /api/log path.
+
+anchor  engine  quiet  notices  region  trend  scrollY  holds
+q196    chrome  1      2        46 px   689    0        True
+q196    webkit  1      2        46 px   689    0        True
+q198    chrome  2      2        46 px   689    0        True
+q198    webkit  2      2        46 px   689    0        True
+q199    chrome  2      2        46 px   689    0        True
+q199    webkit  2      2        46 px   689    0        True
+q200    chrome  2      2        46 px   689    0        True
+q200    webkit  2      2        46 px   689    0        True
+queue   chrome  2      3        46 px   689    0        True
+queue   webkit  2      3        46 px   689    0        True
+
+And the owner's live install, in WebKit over HTTPS, one source quiet and no
+open question, from tests/e2e/today.spec.ts:
+F27  session       bottom 208 px, fold 715
+F27  meals         bottom 233 px, fold 715
+F27  needsLogging  bottom 279 px, fold 715
+F27  weightTrend   bottom 689 px, fold 715
+F27  adherence     bottom 524 px, fold 715
+F27  every region height measured, across 8 readings: 46
+F27  region heights with three notices in it: 46
+
+The one line, at each anchor and in each engine:
+  q196  chrome the one line reads: 2 things are waiting on you
+  q196  webkit the one line reads: 2 things are waiting on you
+  q198  chrome the one line reads: 2 things are waiting on you
+  q198  webkit the one line reads: 2 things are waiting on you
+  q199  chrome the one line reads: 2 things are waiting on you
+  q199  webkit the one line reads: 2 things are waiting on you
+  q200  chrome the one line reads: 2 things are waiting on you
+  q200  webkit the one line reads: 2 things are waiting on you
+  queue  chrome the one line reads: 3 things are waiting on you
+  queue  webkit the one line reads: 3 things are waiting on you
+
+And one tap under it, with all three notices raised at once:
+  queue  chrome one tap under it: 3 things are waiting on youSaved on this phone. 1 entry is waiting to upload. It keeps the time you typed it, not the time it arrives.Withings, 4 days old. The scale last synced on 18 Aug, 06:52.Health, 4 days old. The iPhone shortcut last sent a batch on 18 Aug, 07:20.An import disagrees with your correction
+  queue  webkit one tap under it: 3 things are waiting on youSaved on this phone. 1 entry is waiting to upload. It keeps the time you typed it, not the time it arrives.Withings, 4 days old. The scale last synced on 18 Aug, 06:52.Health, 4 days old. The iPhone shortcut last sent a batch on 18 Aug, 07:20.An import disagrees with your correction
+
+The region's height fed the copy strings.notices.summary produces for 1, 2, 3, 5, 9,
+42 and 999999 notices, through the shipped element, at every anchor and in both
+engines: one number, 46 px, across all of it. See the two 'every region height'
+lines above, each of which is the whole set.

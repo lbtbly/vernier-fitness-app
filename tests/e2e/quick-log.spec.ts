@@ -983,6 +983,13 @@ test.describe('the quick log tells the truth about what it queued', () => {
     await up.click({ force: true });
     await expect(page.locator('.metric.mut')).toHaveText(/--/);
 
+    // The viewport rather than the page: the sheet is fixed over it, and a
+    // full-page stitch draws it once at the top with its own scroll offset
+    // still applied, which cuts the card off the picture.
+    await page.locator('.sheetbody').evaluate((node) => node.scrollTo(0, 0));
+    await settle(page);
+    await page.screenshot({ path: `${CAPTURES}f24-no-base-to-step-from-393.png` });
+
     // AND THE CAPTURE PATH IS NOT BLOCKED. Everything else on the sheet still
     // saves with the origin gone, which is the whole point of the queue.
     await page.getByRole('button', { name: 'Energy, 4 of 5' }).click();
@@ -1007,8 +1014,6 @@ test.describe('the quick log tells the truth about what it queued', () => {
     // And no waist of any size went with it.
     expect(queued[0]).not.toContain('waist');
 
-    await settle(page);
-    await page.screenshot({ path: `${CAPTURES}f24-no-base-to-step-from-393.png`, fullPage: true });
     await goOnline(context, page);
   });
 
@@ -1059,8 +1064,12 @@ test.describe('the quick log tells the truth about what it queued', () => {
     expect(await page.locator('[data-just-logged]').count()).toBe(0);
     expect(scratchQuery("select count(*) from measurement where metric = 'waist'")).toBe('0');
 
+    // The viewport rather than the page: the sheet is fixed over it, and a
+    // full-page stitch draws it once at the top with its own scroll offset
+    // still applied, which cuts the card off the picture.
+    await page.locator('.sheetbody').evaluate((node) => node.scrollTo(0, 0));
     await settle(page);
-    await page.screenshot({ path: `${CAPTURES}f24-queue-refuses-a-refusable-value-393.png`, fullPage: true });
+    await page.screenshot({ path: `${CAPTURES}f24-queue-refuses-a-refusable-value-393.png` });
 
     resetScratchProvenance();
   });

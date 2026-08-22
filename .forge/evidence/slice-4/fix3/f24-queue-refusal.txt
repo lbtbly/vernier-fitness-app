@@ -1,0 +1,33 @@
+F24. The capture path never blocks, and never lies about what it did.
+
+THE DEFECT. With the origin unreachable the quick-log sheet's snapshot read
+fails, so the waist stepper had no base. One tap on the plus control queued a
+waist measurement of 0.5 cm and the just-logged card reported 'Waist 0.5 cm,
+Queued' beside 'Still on this phone'. The band in src/lib/provenance.ts:102 is
+30 to 250 cm, so the flush was certain to refuse it and nothing would ever be
+stored. The data was safe and the message was a lie.
+
+BOTH HALVES ARE CLOSED. The stepper refuses to start from nothing and says why,
+and the queue asks the same rule the route asks before it accepts anything.
+
+1. NO BASE TO STEP FROM, with the origin taken away.
+
+  with no snapshot: up enabled false, down enabled false
+  and it says: No last measurement to step from. The feelings and the note still save.
+  the queue holds 1 entry(s): {"measuredAt":"2026-08-22T17:19:05.942Z","timeZone":"Europe/Paris","values":[{"id":"6f10c747-3b2d-4ac4-b527-ff4d9dd3c876","metric":"energy","rawValue":"4"}]}
+  ✓  61 [chrome-scratch] › tests/e2e/quick-log.spec.ts:958:3 › the quick log tells the truth about what it queued › refuses to step a waist it has no reading to step from, and says why (3.3s)
+
+   The plus control is disabled with the minus, the field says why, and the
+   capture path is NOT blocked: the rating saved and went into the queue with
+   no waist beside it.
+
+2. THE QUEUE REFUSES WHAT THE FLUSH WOULD REFUSE, at the moment it is typed.
+
+  the refusal reads: That entry was not savedWaist is stored between 30 and 250 cm. Nothing outside that is a measurement.Nothing was put on this phone and nothing was sent. Change what is named here and save again.
+  entries in the queue after the refusal: 0
+  ✓  62 [chrome-scratch] › tests/e2e/quick-log.spec.ts:1015:3 › the quick log tells the truth about what it queued › refuses a value the flush would refuse, at the moment it is typed (4.7s)
+
+   Nothing was put on the phone, nothing was sent, no just-logged card was
+   raised, and select count(*) from measurement where metric = 'waist' is 0.
+   The reason is the route's own key, strings.api.log.outOfBand, rendered from
+   the one function both writers now share: src/lib/value-refusal.ts.
