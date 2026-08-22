@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm';
 import { getDb } from './client';
 import { integrationCredential } from './schema';
 import { openSecret, sealSecret } from '@/lib/master-key';
+import { strings } from '@/lib/strings';
 
 /**
  * Third-party credentials, encrypted at rest, and the only place any of them is
@@ -16,26 +17,26 @@ import { openSecret, sealSecret } from '@/lib/master-key';
 export const INTEGRATIONS = [
   {
     provider: 'withings',
-    name: 'Withings',
-    purpose: 'Weight, fat mass and heart rate from the Body Smart scale.',
+    name: strings.settings.providers.withings.name,
+    purpose: strings.settings.providers.withings.purpose,
     scope: 'user.metrics',
   },
   {
     provider: 'apple_health',
-    name: 'Apple Health',
-    purpose: 'Steps, workouts, sleep and resting heart rate from the iPhone shortcut.',
+    name: strings.settings.providers.apple_health.name,
+    purpose: strings.settings.providers.apple_health.purpose,
     scope: 'ingest.write',
   },
   {
     provider: 'google_calendar',
-    name: 'Google Calendar',
-    purpose: 'Free-busy reads and writes into the Vernier calendar only.',
+    name: strings.settings.providers.google_calendar.name,
+    purpose: strings.settings.providers.google_calendar.purpose,
     scope: 'calendar.events.owned calendar.freebusy calendar.calendars.own',
   },
   {
     provider: 'mail_relay',
-    name: 'Mail relay',
-    purpose: 'The Sunday review, sent from this machine.',
+    name: strings.settings.providers.mail_relay.name,
+    purpose: strings.settings.providers.mail_relay.purpose,
     scope: 'smtp.send',
   },
 ] as const;

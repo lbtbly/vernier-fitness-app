@@ -1,6 +1,7 @@
 import { listCredentials, putChallenge, readOwner } from '@/db/auth';
 import { csrfFailure } from '@/lib/csrf';
 import { ok, refuse, sessionOrRefusal } from '@/lib/gate';
+import { strings } from '@/lib/strings';
 import { buildRegistrationOptions } from '@/lib/webauthn';
 
 export const dynamic = 'force-dynamic';
@@ -19,7 +20,7 @@ export async function POST(request: Request) {
 
   const owner = await readOwner();
   if (!owner || owner.id !== session.ownerId) {
-    return refuse(409, 'No owner account yet.', 'Create the owner account first.');
+    return refuse(409, strings.api.password.noOwner, strings.api.password.createOwnerFirst);
   }
 
   const existing = await listCredentials(owner.id);

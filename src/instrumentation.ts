@@ -52,14 +52,11 @@ export async function register(): Promise<void> {
     const { seedDemoData } = await import('./db/demo');
     const { getConfig } = await import('./lib/config');
     const result = await seedDemoData(getConfig().timeZone);
+    const marked = `${result.measurements} measurement(s) and ${result.sourceRecords} source record(s) marked seed`;
     if (result.ran) {
-      console.log(
-        `[vernier] demo seed: ran, ${result.written} new row(s), ${result.measurements} row(s) stamped demo, ${result.sourceRecords} source record(s)`,
-      );
+      console.log(`[vernier] demo seed: ran, ${result.written} new row(s), ${marked}`);
     } else {
-      console.log(
-        `[vernier] demo seed: refused, ${result.reason} Rows stamped demo: ${result.measurements}`,
-      );
+      console.log(`[vernier] demo seed: refused, ${result.reason} ${marked}`);
     }
   } catch (error) {
     console.error(`[vernier] demo seed did not run: ${(error as Error).message}`);

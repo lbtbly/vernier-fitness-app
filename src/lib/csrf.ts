@@ -7,6 +7,7 @@ import {
   readSession,
   tokensMatch,
 } from '@/lib/session';
+import { strings } from '@/lib/strings';
 
 /**
  * Anti-forgery on every mutating route.
@@ -52,22 +53,22 @@ export async function csrfFailure(request: Request): Promise<CsrfFailure | null>
   const refuse = (reason: string): CsrfFailure => ({
     response: NextResponse.json(
       {
-        error: 'Anti-forgery check failed.',
+        error: strings.api.csrf.failed,
         detail: reason,
       },
       { status: 403, headers: { 'Cache-Control': 'no-store' } },
     ),
   });
 
-  if (!headerToken) return refuse(`This request carried no ${CSRF_HEADER} header. Nothing was written.`);
-  if (!cookieToken) return refuse('This request carried no anti-forgery cookie. Reload the sign-in screen and try again.');
+  if (!headerToken) return refuse(strings.api.csrf.noHeader(CSRF_HEADER));
+  if (!cookieToken) return refuse(strings.api.csrf.noCookie);
   if (!tokensMatch(headerToken, cookieToken)) {
-    return refuse('The anti-forgery token does not match the one issued to this browser. Nothing was written.');
+    return refuse(strings.api.csrf.mismatch);
   }
 
   const session = await readSession();
   if (session && !tokensMatch(cookieToken, session.csrfToken)) {
-    return refuse('The anti-forgery token predates the current session. Reload the screen and try again.');
+    return refuse(strings.api.csrf.stale);
   }
 
   return null;

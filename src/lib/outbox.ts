@@ -22,6 +22,8 @@
  * decides whether a write happens.
  */
 
+import { strings } from '@/lib/strings';
+
 const DB_NAME = 'vernier';
 const DB_VERSION = 1;
 const STORE = 'outbox';
@@ -60,7 +62,7 @@ function openDatabase(): Promise<IDBDatabase> {
       if (!db.objectStoreNames.contains(META)) db.createObjectStore(META);
     };
     request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error ?? new Error('IndexedDB refused to open.'));
+    request.onerror = () => reject(request.error ?? new Error(strings.api.storage.outboxOpen));
   });
 }
 
@@ -75,7 +77,7 @@ function transact<T>(
         const tx = db.transaction(storeName, mode);
         const request = run(tx.objectStore(storeName));
         request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error ?? new Error('The outbox refused the write.'));
+        request.onerror = () => reject(request.error ?? new Error(strings.api.storage.outboxWrite));
         tx.oncomplete = () => db.close();
       }),
   );
@@ -132,6 +134,39 @@ async function remove(id: string): Promise<void> {
   await transact('readwrite', (store) => store.delete(id));
 }
 
+/**
+ * The entry currently being sent, if any.
+ *
+ * Undo is only honest while the write is still sitting here, and "still
+ * sitting here" has to exclude the entry whose request is in the air right
+ * now: deleting that one would remove the queue record while the Mac mini goes
+ * on to store the row, and the screen would claim an undo that did not happen.
+ * The flusher runs in this page, so one variable is the whole answer.
+ */
+let inFlight: string | null = null;
+
+/** Is this write still in the queue, and therefore still genuinely reversible. */
+export async function pending(id: string): Promise<boolean> {
+  if (inFlight === id) return false;
+  const rows = await allEntries();
+  return rows.some((entry) => entry.id === id && !entry.parked);
+}
+
+/**
+ * Drop a queued write, and say whether there was one to drop.
+ *
+ * This is the only reversal in the product that removes rather than corrects,
+ * and it is only available for as long as the entry has not left this phone.
+ * Once the Mac mini has it, `measurement` refuses DELETE and undo becomes a
+ * correction, which is a different act with a different word on the button.
+ */
+export async function discard(id: string): Promise<boolean> {
+  if (!(await pending(id))) return false;
+  await remove(id);
+  notify();
+  return true;
+}
+
 async function save(entry: OutboxEntry): Promise<void> {
   await transact('readwrite', (store) => store.put(entry));
 }
@@ -182,6 +217,7 @@ export async function flushOutbox(options: { force?: boolean } = {}): Promise<Fl
       if (!entry) break;
 
       try {
+        inFlight = entry.id;
         const response = await fetch(entry.url, {
           method: entry.method,
           headers: {
@@ -225,6 +261,8 @@ export async function flushOutbox(options: { force?: boolean } = {}): Promise<Fl
         await save(entry);
         notify();
         break;
+      } finally {
+        inFlight = null;
       }
     }
   } finally {

@@ -3,6 +3,7 @@ import { readOwner, recordAuthAttempt, saveCredential, takeChallenge } from '@/d
 import { recordPasskeyRegistered } from '@/db/diagnostics';
 import { csrfFailure } from '@/lib/csrf';
 import { ok, peerOf, refuse, sessionOrRefusal } from '@/lib/gate';
+import { strings } from '@/lib/strings';
 import { checkRegistration, counterToStore } from '@/lib/webauthn';
 
 export const dynamic = 'force-dynamic';
@@ -26,14 +27,14 @@ export async function POST(request: Request) {
   const peer = peerOf(request);
   const owner = await readOwner();
   if (!owner || owner.id !== session.ownerId) {
-    return refuse(409, 'No owner account yet.', 'Create the owner account first.');
+    return refuse(409, strings.api.password.noOwner, strings.api.password.createOwnerFirst);
   }
 
   let body: { ceremonyId?: unknown; response?: unknown; label?: unknown };
   try {
     body = (await request.json()) as typeof body;
   } catch {
-    return refuse(400, 'Expected a JSON body.', 'Send ceremonyId and the authenticator response.');
+    return refuse(400, strings.api.jsonBody, strings.api.passkey.bodyDetail);
   }
 
   const ceremonyId = typeof body.ceremonyId === 'string' ? body.ceremonyId : '';
@@ -43,15 +44,15 @@ export async function POST(request: Request) {
       ? body.label.trim().slice(0, 64)
       : 'This device';
   if (!ceremonyId || !response || typeof response.id !== 'string') {
-    return refuse(400, 'That is not a passkey registration.', 'Send ceremonyId and the authenticator response.');
+    return refuse(400, strings.api.passkey.notARegistration, strings.api.passkey.bodyDetail);
   }
 
   const expectedChallenge = await takeChallenge(ceremonyId, 'registration');
   if (!expectedChallenge) {
     return refuse(
       400,
-      'That registration expired.',
-      'Ceremonies last two minutes and are good for one use. Start again.',
+      strings.api.passkey.registrationExpired,
+      strings.api.passkey.registrationExpiredDetail,
     );
   }
 
@@ -59,11 +60,11 @@ export async function POST(request: Request) {
   try {
     verification = await checkRegistration({ response, expectedChallenge });
   } catch (error) {
-    return refuse(400, 'That passkey did not verify.', (error as Error).message);
+    return refuse(400, strings.api.passkey.notVerified, (error as Error).message);
   }
 
   if (!verification.verified || !verification.registrationInfo) {
-    return refuse(400, 'That passkey did not verify.', 'The attestation did not check out against this relying party.');
+    return refuse(400, strings.api.passkey.notVerified, strings.api.passkey.notVerifiedDetail);
   }
 
   const { credential, credentialDeviceType, credentialBackedUp, aaguid } = verification.registrationInfo;

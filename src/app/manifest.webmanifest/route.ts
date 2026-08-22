@@ -1,4 +1,5 @@
 import { getConfig } from '@/lib/config';
+import { strings } from '@/lib/strings';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,8 +15,7 @@ export function GET() {
     id: '/',
     name: appName,
     short_name: appName,
-    description:
-      'One person, one health record, on one machine. Trends over days, provenance on every value, nothing written without a confirmed diff.',
+    description: strings.manifest.description,
     start_url: '/',
     scope: '/',
     display: 'standalone',

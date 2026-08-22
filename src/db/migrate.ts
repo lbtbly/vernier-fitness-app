@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { getDb, getPool } from './client';
+import { strings } from '@/lib/strings';
 
 const MIGRATIONS_FOLDER = process.env.MIGRATIONS_FOLDER ?? './drizzle';
 const LEDGER = 'drizzle.__drizzle_migrations';
@@ -26,9 +27,7 @@ async function waitForDatabase(attempts = 30, waitMs = 1000): Promise<void> {
       return;
     } catch (error) {
       if (attempt === attempts) {
-        throw new Error(
-          `Postgres did not answer after ${attempts} attempts: ${(error as Error).message}`,
-        );
+        throw new Error(strings.api.boot.databaseSilent(attempts, (error as Error).message));
       }
       await new Promise((resolve) => setTimeout(resolve, waitMs));
     }

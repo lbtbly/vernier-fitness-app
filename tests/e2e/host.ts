@@ -58,6 +58,19 @@ export function testStack(...args: string[]): string {
   }).trim();
 }
 
+/**
+ * The same scratch instance with demonstration mode set on purpose, which is
+ * the whole of F25's question: off writes nothing at all, on writes six rows
+ * and marks every one of them.
+ */
+export function testStackWithDemoMode(demoMode: '0' | '1', ...args: string[]): string {
+  return execFileSync('bash', ['scripts/test-stack.sh', ...args], {
+    cwd: projectRoot,
+    encoding: 'utf8',
+    env: { ...process.env, DEMO_MODE: demoMode },
+  }).trim();
+}
+
 export function scratchQuery(statement: string): string {
   const oneLine = statement.replace(/\s+/g, ' ').trim();
   return execFileSync(
@@ -87,6 +100,30 @@ export async function waitForScratch(): Promise<void> {
     await new Promise((resolve) => setTimeout(resolve, 500));
   }
   throw new Error(`the scratch instance never answered on ${scratchUrl}`);
+}
+
+/**
+ * A statement whose refusal is the point.
+ *
+ * Postgres writes a constraint violation to stderr and psql exits non-zero, so
+ * both streams are merged and the exit code is swallowed: what is being read
+ * back here is whether the database said no, and which constraint said it.
+ */
+export function scratchAttempt(statement: string): string {
+  const oneLine = statement.replace(/\s+/g, ' ').trim();
+  return execFileSync(
+    'docker',
+    [
+      'compose',
+      'exec',
+      '-T',
+      'db',
+      'sh',
+      '-c',
+      `psql -U "$POSTGRES_USER" -d vernier_scratch -At -c ${JSON.stringify(oneLine)} 2>&1 || true`,
+    ],
+    { cwd: projectRoot, encoding: 'utf8' },
+  ).trim();
 }
 
 export function ownerExists(): boolean {

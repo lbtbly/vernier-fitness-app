@@ -3,7 +3,8 @@ import { appendCorrection, readChain, readLogSnapshot, storeMeasurement, toView 
 import { getConfig } from '@/lib/config';
 import { csrfFailure } from '@/lib/csrf';
 import { ok, refuse, sessionOrRefusal } from '@/lib/gate';
-import { METRICS, RATING_MAX, RATING_MIN, isMetric } from '@/lib/provenance';
+import { METRICS, checkValue } from '@/lib/provenance';
+import { strings } from '@/lib/strings';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,27 +25,46 @@ const HEADER = 'idempotency-key';
 
 type Incoming = { id: string; metric: string; rawValue: string };
 
-/** A value the sheet sent, checked before anything is stored. */
-function validate(entry: Incoming): { ok: true; value: number | null } | { ok: false; detail: string } {
-  if (!isMetric(entry.metric)) {
-    return { ok: false, detail: `Vernier stores no metric called ${entry.metric}.` };
+/**
+ * The one gate every write passes, corrections included.
+ *
+ * There is deliberately one of these and it takes a metric and a raw string,
+ * because that is all any writer has. The rule it applies lives in
+ * `src/lib/provenance.ts` beside the metric table, so the range a rating is
+ * allowed and the range a waist measurement is allowed are stated once, next
+ * to the unit, rather than in whichever handler happens to be writing.
+ *
+ * It matters more here than anywhere else in the app: `measurement` refuses
+ * DELETE at the database and it is right to, so a value this function lets
+ * past is permanent. A validation gap in an append-only store is not a bug you
+ * can clean up afterwards.
+ */
+function validate(entry: { metric: string; rawValue: string }):
+  | { ok: true; value: number | null }
+  | { ok: false; detail: string } {
+  const checked = checkValue(entry.metric, entry.rawValue);
+  if (checked.ok) return { ok: true, value: checked.value };
+  const line = strings.api.log;
+  switch (checked.problem) {
+    case 'unknownMetric':
+      return { ok: false, detail: line.unknownMetric(entry.metric) };
+    case 'blank':
+      return { ok: false, detail: line.blank };
+    case 'notANumber':
+      return { ok: false, detail: line.notANumber(entry.rawValue.trim()) };
+    case 'rating':
+      return { ok: false, detail: line.outOfRange(checked.low, checked.high) };
+    case 'range':
+      return {
+        ok: false,
+        detail: line.outOfBand(
+          strings.metrics[entry.metric as keyof typeof strings.metrics],
+          String(checked.low),
+          String(checked.high),
+          strings.units[METRICS[entry.metric as keyof typeof METRICS].unit],
+        ),
+      };
   }
-  const metric = METRICS[entry.metric];
-  const raw = entry.rawValue.trim();
-  if (raw === '') {
-    return { ok: false, detail: 'A blank field is not stored. Blank stays blank, never zero.' };
-  }
-
-  if (metric.kind === 'text') return { ok: true, value: null };
-
-  const value = Number(raw);
-  if (!Number.isFinite(value)) {
-    return { ok: false, detail: `${raw} is not a number, so it was not stored.` };
-  }
-  if (metric.kind === 'rating' && (value < RATING_MIN || value > RATING_MAX || !Number.isInteger(value))) {
-    return { ok: false, detail: `A rating is a whole number from ${RATING_MIN} to ${RATING_MAX}.` };
-  }
-  return { ok: true, value };
 }
 
 function usableTimeZone(candidate: unknown, fallback: string): string {
@@ -64,7 +84,26 @@ export async function GET() {
   return ok({ ...(await readLogSnapshot(timeZone)) });
 }
 
+/**
+ * Nothing leaves this route without a cause and a next step, including the
+ * failure nobody predicted.
+ *
+ * An unhandled throw in a route handler is answered by the framework with a
+ * bare 500 and an empty body, and an empty body renders on screen as the two
+ * words "HTTP 500", which names no cause and offers no action. Screen 00
+ * defines what an error looks like and that is not it, so the last resort is
+ * written here rather than left to the framework.
+ */
 export async function POST(request: Request) {
+  try {
+    return await handle(request);
+  } catch (error) {
+    console.error(`[vernier] /api/log failed: ${(error as Error).message}`);
+    return refuse(500, strings.api.log.failed, strings.api.log.failedDetail);
+  }
+}
+
+async function handle(request: Request) {
   const csrf = await csrfFailure(request);
   if (csrf) return csrf.response;
 
@@ -73,11 +112,7 @@ export async function POST(request: Request) {
 
   const key = request.headers.get(HEADER)?.trim();
   if (!key) {
-    return refuse(
-      400,
-      'This write carried no idempotency key.',
-      'Every quick-log write is keyed by the client UUID its outbox entry holds, so a retry applies once.',
-    );
+    return refuse(400, strings.api.log.noKey, strings.api.log.noKeyDetail);
   }
 
   let body: {
@@ -92,7 +127,7 @@ export async function POST(request: Request) {
   try {
     body = (await request.json()) as typeof body;
   } catch {
-    return refuse(400, 'Expected a JSON body.', 'Send measuredAt, timeZone and one or more values.');
+    return refuse(400, strings.api.jsonBody, strings.api.log.bodyDetail);
   }
 
   const config = getConfig();
@@ -109,8 +144,8 @@ export async function POST(request: Request) {
     if (correctsId === '' || rawValue === '') {
       return refuse(
         422,
-        'A correction needs the value it corrects and the new number.',
-        'Send correctsId and rawValue. The original is kept either way.',
+        strings.api.log.correctionNeedsValue,
+        strings.api.log.correctionNeedsValueDetail,
       );
     }
 
@@ -122,16 +157,36 @@ export async function POST(request: Request) {
           outcome: 'refused' as const,
           handled: {
             status: 404,
-            body: { error: `No measurement ${correctsId} to correct.` } as Record<string, unknown>,
+            body: {
+              error: strings.api.log.correctionTargetGone(correctsId),
+              detail: strings.api.log.correctionTargetGoneDetail,
+            } as Record<string, unknown>,
           },
         };
       }
-      const parsed = Number(rawValue);
+
+      // The same gate the quick log's own values pass. It was not here once,
+      // and the two rows that fact wrote into an append-only table could not
+      // be taken back out: a correction is a write and it is checked like one.
+      const checked = validate({ metric: head.metric, rawValue });
+      if (!checked.ok) {
+        return {
+          outcome: 'refused' as const,
+          handled: {
+            status: 422,
+            body: {
+              error: strings.api.log.correctionRefused,
+              detail: checked.detail,
+            } as Record<string, unknown>,
+          },
+        };
+      }
+
       const row = await appendCorrection({
         id: crypto.randomUUID(),
         correctsId,
         rawValue,
-        value: head.unit === 'text' ? null : Number.isFinite(parsed) ? parsed : null,
+        value: checked.value,
         reason,
         timeZone,
       });
@@ -157,7 +212,7 @@ export async function POST(request: Request) {
 
   const values = Array.isArray(body.values) ? (body.values as Incoming[]) : [];
   if (values.length === 0) {
-    return refuse(422, 'Nothing was sent to store.', 'Fill at least one field before saving.');
+    return refuse(422, strings.api.log.nothingSent, strings.api.log.nothingSentDetail);
   }
 
   const { handled } = await once(key, '/api/log', async () => {
@@ -175,7 +230,7 @@ export async function POST(request: Request) {
       reference: key,
       occurredAt: measuredAt,
       detail: [
-        { key: 'source.field.enteredOn', value: 'Quick log' },
+        { key: 'source.field.enteredOn', value: strings.quickLog.title },
         { key: 'source.field.rowsReceived', value: String(values.length) },
       ],
     };

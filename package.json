@@ -17,7 +17,8 @@
     "test": "npm run test:unit && npm run test:e2e",
     "test:unit": "vitest run",
     "test:e2e": "playwright test",
-    "routes": "node scripts/route-table.mjs"
+    "routes": "node scripts/route-table.mjs",
+    "strings": "node scripts/strings.mjs --check"
   },
   "dependencies": {
     "@simplewebauthn/browser": "13.3.0",

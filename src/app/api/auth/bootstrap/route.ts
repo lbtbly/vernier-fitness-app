@@ -8,6 +8,7 @@ import { csrfFailure } from '@/lib/csrf';
 import { ok, peerOf, refuse } from '@/lib/gate';
 import { passwordProblems } from '@/lib/password';
 import { startSession } from '@/lib/session';
+import { strings } from '@/lib/strings';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,7 +33,7 @@ export async function POST(request: Request) {
   try {
     body = (await request.json()) as typeof body;
   } catch {
-    return refuse(400, 'Expected a JSON body.', 'Send password and repeat as strings.');
+    return refuse(400, strings.api.jsonBody, strings.api.bootstrap.bodyDetail);
   }
 
   const password = typeof body.password === 'string' ? body.password : '';
@@ -49,20 +50,16 @@ export async function POST(request: Request) {
       reason: 'the owner account already exists',
       peer,
     });
-    return refuse(
-      409,
-      'The owner account already exists.',
-      'Vernier holds exactly one account and it is created once. Sign in with your passkey or the backup password.',
-    );
+    return refuse(409, strings.api.bootstrap.ownerExists, strings.api.bootstrap.ownerExistsDetail);
   }
 
   if (password !== repeat) {
-    return refuse(422, 'The two passwords do not match.', 'Type the same password in both fields.');
+    return refuse(422, strings.api.bootstrap.mismatch, strings.api.bootstrap.mismatchDetail);
   }
 
   const problems = passwordProblems(password);
   if (problems.length > 0) {
-    return refuse(422, 'That password is not strong enough.', problems.join(' '), { problems });
+    return refuse(422, strings.api.bootstrap.weak, problems.join(' '), { problems });
   }
 
   try {
@@ -83,11 +80,7 @@ export async function POST(request: Request) {
         reason: 'the owner account already exists',
         peer,
       });
-      return refuse(
-        409,
-        'The owner account already exists.',
-        'Vernier holds exactly one account and it is created once. Sign in with your passkey or the backup password.',
-      );
+      return refuse(409, strings.api.bootstrap.ownerExists, strings.api.bootstrap.ownerExistsDetail);
     }
     throw error;
   }

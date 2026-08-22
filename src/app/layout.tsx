@@ -4,6 +4,7 @@ import { ServiceWorker } from '@/components/ServiceWorker';
 import { getConfig } from '@/lib/config';
 import { readCsrfToken } from '@/lib/csrf';
 import './globals.css';
+import { strings } from '@/lib/strings';
 
 /**
  * Every route renders per request. The origin, the relying party, the app name
@@ -19,8 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
       default: config.appName,
       template: `%s · ${config.appName}`,
     },
-    description:
-      'Vernier. One person, one health record, on one machine. Trends over days, provenance on every value, nothing written without a confirmed diff.',
+    description: strings.manifest.documentDescription,
     applicationName: config.appName,
     manifest: '/manifest.webmanifest',
     appleWebApp: {

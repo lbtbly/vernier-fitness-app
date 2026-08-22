@@ -257,6 +257,30 @@ export function MinusIcon({ className }: IconProps) {
   );
 }
 
+/** Screen 03 frame 2's undo arrow, the same path .forge/wireframes/03-quick-log.html draws. */
+export function UndoIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} aria-hidden="true" focusable="false">
+      <path
+        d="M4 8.6h8.2a4.2 4.2 0 1 1 0 8.4H8"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M7 5.6 4 8.6l3 3"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function CloseIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 20 20" className={className} aria-hidden="true" focusable="false">

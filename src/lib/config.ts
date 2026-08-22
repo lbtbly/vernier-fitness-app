@@ -8,6 +8,9 @@
  * APP_URL and WEBAUTHN_RP_ID. PLAN.md's prose calls them APP_ORIGIN and RP_ID.
  * The file on disk wins.
  */
+
+import { strings } from '@/lib/strings';
+
 export type AppConfig = {
   appName: string;
   appUrl: string;
@@ -20,9 +23,7 @@ export type AppConfig = {
 function required(name: string): string {
   const value = process.env[name];
   if (!value || value.trim() === '') {
-    throw new Error(
-      `Configuration is missing ${name}. Set it in the environment file at the project root and restart the stack.`,
-    );
+    throw new Error(strings.api.boot.missingConfig(name));
   }
   return value.trim();
 }
@@ -33,7 +34,7 @@ export function getConfig(): AppConfig {
   try {
     originHost = new URL(appUrl).host;
   } catch {
-    throw new Error(`APP_URL is not a URL: ${appUrl}. Expected something like https://host.example.ts.net.`);
+    throw new Error(strings.api.boot.badAppUrl(appUrl));
   }
   return {
     // The product name is fixed by DESIGN.md, so an environment file written

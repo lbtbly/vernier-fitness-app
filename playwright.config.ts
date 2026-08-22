@@ -31,15 +31,33 @@ export default defineConfig({
     // The worker owns every fetch on this origin once it is installed, and a
     // request it makes is outside page.route's reach. A test that wants to take
     // the origin away has to be able to take it away, so the worker stands down
-    // here. What the worker itself does offline is C3, and it is measured
-    // against the worker rather than through it.
+    // for the suite that goes through the page.
+    //
+    // That default hid something for a while: the offline test ran with no
+    // worker at all, which proves the page's behaviour and says nothing about
+    // the worker's. So the worker gets its own project below, where it is
+    // allowed to install, control the page, and be measured directly.
     serviceWorkers: 'block',
   },
   projects: [
     {
       name: 'webkit-iphone',
-      testIgnore: /focus\.spec\.ts/,
+      testIgnore: /focus\.spec\.ts|service-worker\.spec\.ts/,
       use: { ...devices['Desktop Safari'], viewport: { width: 393, height: 852 }, deviceScaleFactor: 3 },
+    },
+    {
+      // The worker, with the worker running. Chrome because this needs a real
+      // registration, a controlled page and a target whose own fetches can be
+      // read back, and because what is being graded here is the worker's code
+      // rather than an engine's rendering.
+      name: 'chrome-worker',
+      testMatch: /service-worker\.spec\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        channel: 'chrome',
+        viewport: { width: 393, height: 852 },
+        serviceWorkers: 'allow',
+      },
     },
     {
       // Sequential focus navigation, which needs a browser that moves focus to

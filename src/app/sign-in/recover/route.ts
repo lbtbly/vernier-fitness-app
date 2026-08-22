@@ -4,6 +4,7 @@ import { consumeRecoveryGrant, readOwner, recordAuthAttempt } from '@/db/auth';
 import { getConfig } from '@/lib/config';
 import { NO_STORE, peerOf } from '@/lib/gate';
 import { startSession } from '@/lib/session';
+import { strings } from '@/lib/strings';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,19 +29,19 @@ export async function GET(request: Request) {
   const failed = (reason: string) =>
     NextResponse.json(
       {
-        error: 'That recovery link is not usable.',
+        error: strings.api.recovery.unusable,
         detail: reason,
       },
       { status: 401, headers: { ...NO_STORE } },
     );
 
   if (!token) {
-    return failed('The link carried no token. Mint one on the Mac mini with scripts/recovery.sh link.');
+    return failed(strings.api.recovery.noToken);
   }
 
   const owner = await readOwner();
   if (!owner) {
-    return failed('No owner account exists on this machine yet, so there is nothing to recover.');
+    return failed(strings.api.recovery.noOwner);
   }
 
   const id = createHash('sha256').update(token).digest('base64url');
@@ -52,7 +53,7 @@ export async function GET(request: Request) {
       reason: 'the recovery grant was expired, already spent or unknown',
       peer,
     });
-    return failed('It has expired or has already been used. Mint a new one on the Mac mini.');
+    return failed(strings.api.recovery.spent);
   }
 
   await startSession(owner.id, 'recovery');

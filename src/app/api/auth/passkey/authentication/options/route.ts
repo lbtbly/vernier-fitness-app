@@ -2,6 +2,7 @@ import { listCredentials, putChallenge, readOwner, recentFailures, recordAuthAtt
 import { csrfFailure } from '@/lib/csrf';
 import { ok, peerOf, refuse } from '@/lib/gate';
 import { SIGN_IN_WINDOW_SECONDS, lockoutState } from '@/lib/rate-limit';
+import { strings } from '@/lib/strings';
 import { buildAuthenticationOptions } from '@/lib/webauthn';
 
 export const dynamic = 'force-dynamic';
@@ -29,27 +30,23 @@ export async function POST(request: Request) {
     });
     return refuse(
       429,
-      'Too many attempts.',
-      `Five failures inside ${SIGN_IN_WINDOW_SECONDS} seconds pauses sign-in. Wait ${lockout.retryAfterSeconds} seconds and try again.`,
+      strings.api.rateLimit.tooMany,
+      strings.api.rateLimit.window(SIGN_IN_WINDOW_SECONDS, lockout.retryAfterSeconds),
       { retryAfterSeconds: lockout.retryAfterSeconds },
     );
   }
 
   const owner = await readOwner();
   if (!owner) {
-    return refuse(
-      404,
-      'No owner account yet.',
-      'Nothing has been created on this machine. Create the owner account first.',
-    );
+    return refuse(404, strings.api.password.noOwner, strings.api.password.noOwnerDetail);
   }
 
   const credentials = await listCredentials(owner.id);
   if (credentials.length === 0) {
     return refuse(
       409,
-      'No passkey is registered yet.',
-      'Sign in with the backup password, then add a passkey from Settings.',
+      strings.api.passkey.noneRegistered,
+      strings.api.passkey.noneRegisteredDetail,
     );
   }
 

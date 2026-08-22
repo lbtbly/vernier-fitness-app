@@ -8,6 +8,7 @@ import {
 import { csrfFailure } from '@/lib/csrf';
 import { ok, refuse, sessionOrRefusal } from '@/lib/gate';
 import { MasterKeyMismatchError } from '@/lib/master-key';
+import { strings } from '@/lib/strings';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,13 +39,17 @@ export async function POST(request: Request) {
   try {
     body = (await request.json()) as typeof body;
   } catch {
-    return refuse(400, 'Expected a JSON body.', 'Send provider, action and, for a save, the credential.');
+    return refuse(400, strings.api.jsonBody, strings.api.integrations.bodyDetail);
   }
 
   const provider = typeof body.provider === 'string' ? body.provider : '';
   const action = typeof body.action === 'string' ? body.action : 'save';
   if (!isIntegrationProvider(provider)) {
-    return refuse(422, 'That is not an integration Vernier knows.', 'Withings, Apple Health, Google Calendar and the mail relay are the four.');
+    return refuse(
+      422,
+      strings.api.integrations.unknownProvider,
+      strings.api.integrations.unknownProviderDetail,
+    );
   }
 
   try {
@@ -60,14 +65,18 @@ export async function POST(request: Request) {
 
     const secret = typeof body.secret === 'string' ? body.secret : '';
     if (secret.trim() === '') {
-      return refuse(422, 'That credential is empty.', 'Paste the token or key the integration issued.');
+      return refuse(
+        422,
+        strings.api.integrations.emptyCredential,
+        strings.api.integrations.emptyCredentialDetail,
+      );
     }
     const scope = typeof body.scope === 'string' ? body.scope : undefined;
     await storeIntegrationSecret({ provider, secret, scope });
     return ok({ integrations: await describeIntegrations() }, 201);
   } catch (error) {
     if (error instanceof MasterKeyMismatchError) {
-      return refuse(500, 'The stored credential will not open.', error.message);
+      return refuse(500, strings.api.integrations.willNotOpen, error.message);
     }
     throw error;
   }

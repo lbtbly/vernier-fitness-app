@@ -7,6 +7,7 @@ import {
   SOURCES,
   type ChainRow,
   type StoredCandidate,
+  checkValue,
   currentOfChain,
   decideDedup,
   isSource,
@@ -204,5 +205,75 @@ describe('the correction chain', () => {
 
   it('never loses a row to ordering', () => {
     expect(orderChain(chain).map((row) => row.rawValue)).toEqual(['92.2', '98.5', '99.0', '99.2']);
+  });
+});
+
+/**
+ * The gate every write passes, corrections included.
+ *
+ * These cases are not hypothetical. Correcting a rating to 99 and then to -4.7
+ * was accepted twice, and `measurement` refuses DELETE, so both rows are still
+ * in a chain somewhere as a matter of record. A rule that runs on one write
+ * path and not the other is not a rule, and in an append-only table it is
+ * permanent damage rather than a bug to be cleaned up later.
+ */
+describe('what Vernier will store', () => {
+  it('takes a rating that is a whole number inside the band', () => {
+    expect(checkValue('energy', '4')).toEqual({ ok: true, value: 4 });
+  });
+
+  it('refuses 99 for a rating out of five', () => {
+    expect(checkValue('energy', '99')).toEqual({ ok: false, problem: 'rating', low: 1, high: 5 });
+  });
+
+  it('refuses a negative rating', () => {
+    expect(checkValue('energy', '-4.7')).toEqual({ ok: false, problem: 'rating', low: 1, high: 5 });
+  });
+
+  it('refuses a fractional rating', () => {
+    expect(checkValue('satiety', '3.5')).toEqual({ ok: false, problem: 'rating', low: 1, high: 5 });
+  });
+
+  it('refuses a word where a number belongs', () => {
+    expect(checkValue('waist', 'ninety-seven')).toEqual({
+      ok: false,
+      problem: 'notANumber',
+      low: 30,
+      high: 250,
+    });
+  });
+
+  it('refuses a waist measurement outside the band a tape can produce', () => {
+    expect(checkValue('waist', '4000')).toEqual({ ok: false, problem: 'range', low: 30, high: 250 });
+    expect(checkValue('waist', '0')).toEqual({ ok: false, problem: 'range', low: 30, high: 250 });
+  });
+
+  it('takes a waist measurement inside it', () => {
+    expect(checkValue('waist', '98.5')).toEqual({ ok: true, value: 98.5 });
+  });
+
+  it('stores a free note with no number rather than a zero', () => {
+    expect(checkValue('note', 'Slept badly.')).toEqual({ ok: true, value: null });
+  });
+
+  it('refuses a blank field on every metric, and never stores it as zero', () => {
+    for (const metric of QUICK_LOG_METRICS) {
+      expect(checkValue(metric, '   ')).toMatchObject({ ok: false, problem: 'blank' });
+    }
+  });
+
+  it('refuses a metric it has never heard of', () => {
+    expect(checkValue('blood_pressure', '120')).toMatchObject({
+      ok: false,
+      problem: 'unknownMetric',
+    });
+  });
+
+  it('gives every metric a band, so no writer can be the one without a rule', () => {
+    for (const [name, rule] of Object.entries(METRICS)) {
+      expect(typeof rule.low, name).toBe('number');
+      expect(typeof rule.high, name).toBe('number');
+      if (rule.kind !== 'text') expect(rule.high, name).toBeGreaterThan(rule.low);
+    }
   });
 });

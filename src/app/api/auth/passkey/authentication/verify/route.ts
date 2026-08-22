@@ -10,6 +10,7 @@ import { csrfFailure } from '@/lib/csrf';
 import { ok, peerOf, refuse } from '@/lib/gate';
 import { SIGN_IN_WINDOW_SECONDS, lockoutState } from '@/lib/rate-limit';
 import { startSession } from '@/lib/session';
+import { strings } from '@/lib/strings';
 import { checkAuthentication, counterToStore } from '@/lib/webauthn';
 
 export const dynamic = 'force-dynamic';
@@ -39,8 +40,8 @@ export async function POST(request: Request) {
     });
     return refuse(
       429,
-      'Too many attempts.',
-      `Five failures inside ${SIGN_IN_WINDOW_SECONDS} seconds pauses sign-in. Wait ${lockout.retryAfterSeconds} seconds and try again.`,
+      strings.api.rateLimit.tooMany,
+      strings.api.rateLimit.window(SIGN_IN_WINDOW_SECONDS, lockout.retryAfterSeconds),
       { retryAfterSeconds: lockout.retryAfterSeconds },
     );
   }
@@ -49,13 +50,13 @@ export async function POST(request: Request) {
   try {
     body = (await request.json()) as typeof body;
   } catch {
-    return refuse(400, 'Expected a JSON body.', 'Send ceremonyId and the authenticator response.');
+    return refuse(400, strings.api.jsonBody, strings.api.passkey.bodyDetail);
   }
 
   const ceremonyId = typeof body.ceremonyId === 'string' ? body.ceremonyId : '';
   const response = body.response as AuthenticationResponseJSON | undefined;
   if (!ceremonyId || !response || typeof response.id !== 'string') {
-    return refuse(400, 'That is not a passkey assertion.', 'Send ceremonyId and the authenticator response.');
+    return refuse(400, strings.api.passkey.notAnAssertion, strings.api.passkey.bodyDetail);
   }
 
   const expectedChallenge = await takeChallenge(ceremonyId, 'authentication');
@@ -68,8 +69,8 @@ export async function POST(request: Request) {
     });
     return refuse(
       400,
-      'That passkey attempt expired.',
-      'Ceremonies last two minutes and are good for one use. Try the passkey again.',
+      strings.api.passkey.ceremonyExpired,
+      strings.api.passkey.ceremonyExpiredDetail,
     );
   }
 
@@ -84,10 +85,10 @@ export async function POST(request: Request) {
     const after = lockoutState(await recentFailures());
     return refuse(
       401,
-      'No passkey on this device matched.',
+      strings.api.passkey.noMatch,
       after.locked
-        ? `Sign-in is paused for ${after.retryAfterSeconds} seconds.`
-        : `${after.attemptsLeft} ${after.attemptsLeft === 1 ? 'attempt' : 'attempts'} left, then a ${SIGN_IN_WINDOW_SECONDS} second pause.`,
+        ? strings.api.rateLimit.paused(after.retryAfterSeconds)
+        : strings.api.rateLimit.attemptsLeft(after.attemptsLeft, SIGN_IN_WINDOW_SECONDS),
       { attemptsLeft: after.attemptsLeft },
     );
   }
@@ -105,7 +106,7 @@ export async function POST(request: Request) {
       reason: `the assertion did not verify: ${(error as Error).message}`.slice(0, 200),
       peer,
     });
-    return refuse(401, 'That passkey did not verify.', (error as Error).message);
+    return refuse(401, strings.api.passkey.notVerified, (error as Error).message);
   }
 
   if (!verified) {
@@ -116,9 +117,12 @@ export async function POST(request: Request) {
       peer,
     });
     const after = lockoutState(await recentFailures());
-    return refuse(401, 'That passkey did not verify.', `${after.attemptsLeft} attempts left.`, {
-      attemptsLeft: after.attemptsLeft,
-    });
+    return refuse(
+      401,
+      strings.api.passkey.notVerified,
+      strings.api.rateLimit.attemptsLeftShort(after.attemptsLeft),
+      { attemptsLeft: after.attemptsLeft },
+    );
   }
 
   await recordCredentialUse(credential.id, counterToStore(newCounter));

@@ -10,6 +10,7 @@ import {
 } from './schema';
 import { hashPassword, type StoredPassword } from '@/lib/password';
 import { SIGN_IN_WINDOW_SECONDS } from '@/lib/rate-limit';
+import { strings } from '@/lib/strings';
 
 /**
  * Everything the gate reads and writes. The route handlers stay thin, the way
@@ -18,7 +19,7 @@ import { SIGN_IN_WINDOW_SECONDS } from '@/lib/rate-limit';
 
 export class OwnerExistsError extends Error {
   constructor() {
-    super('The owner account already exists. Vernier holds exactly one, and it is created once.');
+    super(strings.api.storage.ownerExists);
     this.name = 'OwnerExistsError';
   }
 }

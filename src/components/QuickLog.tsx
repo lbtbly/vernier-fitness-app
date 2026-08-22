@@ -1,16 +1,19 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { SourceChip } from '@/components/SourceChip';
-import { CloseIcon, MinusIcon, PlusIcon, WarnIcon } from '@/components/icons';
+import { ChevronIcon, CloseIcon, MinusIcon, PlusIcon, UndoIcon, WarnIcon } from '@/components/icons';
 import { metricLabel, valueLabel } from '@/lib/display';
 import { daysBetween, longDate, shortDate, time24 } from '@/lib/format';
 import type { LogSnapshot, MeasurementView } from '@/lib/measurement-view';
 import {
   connectivityProved,
   depth,
+  discard,
   enqueue,
   flushOutbox,
+  pending,
   rememberCsrfToken,
   startFlushTriggers,
   subscribe,
@@ -54,6 +57,28 @@ const WAIST_STALE_DAYS = 3;
 
 type Load = { state: 'loading' } | { state: 'ready'; snapshot: LogSnapshot } | { state: 'error'; detail: string };
 
+type LoggedValue = { id: string; metric: string; rawValue: string; unit: string };
+
+/**
+ * What just happened, and which reversal is honest for it.
+ *
+ * `queued` while the entry is still in the outbox: the write exists on this
+ * phone and nowhere else, so Undo really does remove it and Edit really does
+ * reopen the sheet holding what was typed. `applied` once it has uploaded: the
+ * table refuses DELETE, so the only reversal left is a correction and the
+ * button says so. `undone` and `tooLate` are what the two paths report.
+ *
+ * The screen never shows Undo for a write it cannot undo. Screen 03 frame 2
+ * draws the pair and annotates them "undoable for as long as it sits in the
+ * queue", and this is that clause rather than a button that lies after a
+ * second and a half.
+ */
+type JustLogged = {
+  entryId: string;
+  values: LoggedValue[];
+  state: 'queued' | 'applied' | 'undone' | 'tooLate';
+};
+
 export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone: string }) {
   const [open, setOpen] = useState(false);
   const [load, setLoad] = useState<Load>({ state: 'loading' });
@@ -62,7 +87,7 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
   const [ratings, setRatings] = useState<Ratings>({ energy: null, fatigue: null, hunger: null, satiety: null });
   const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
-  const [justLogged, setJustLogged] = useState<Array<{ metric: string; rawValue: string; unit: string }>>([]);
+  const [justLogged, setJustLogged] = useState<JustLogged | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
   // The token the server rendered, kept where the flusher and the push-woken
@@ -75,6 +100,22 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
     const stop = startFlushTriggers();
     const refresh = () => {
       void depth().then(setQueued);
+      // The just-logged card follows the queue rather than a timer. The moment
+      // the entry leaves, Undo goes with it, because from then on the only
+      // reversal is a correction.
+      setJustLogged((current) => {
+        if (!current || current.state !== 'queued') return current;
+        void pending(current.entryId).then((still) => {
+          if (!still) {
+            setJustLogged((latest) =>
+              latest && latest.entryId === current.entryId && latest.state === 'queued'
+                ? { ...latest, state: 'applied' }
+                : latest,
+            );
+          }
+        });
+        return current;
+      });
     };
     const unsubscribe = subscribe(refresh);
     refresh();
@@ -142,9 +183,10 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
     if (values.length === 0) return;
     setSaving(true);
     try {
-      setJustLogged(values.map(({ metric, rawValue, unit }) => ({ metric, rawValue, unit })));
+      const entryId = crypto.randomUUID();
+      setJustLogged({ entryId, values, state: 'queued' });
       await enqueue({
-        id: crypto.randomUUID(),
+        id: entryId,
         url: '/api/log',
         body: {
           measuredAt: new Date().toISOString(),
@@ -165,6 +207,45 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
     }
   }
 
+  /**
+   * Undo, and it removes rather than corrects, because at this point there is
+   * nothing on the Mac mini to correct. If the entry has already gone the card
+   * says so instead of pretending: a reversal that quietly did nothing is worse
+   * than a reversal that was refused.
+   */
+  async function undo(entry: JustLogged) {
+    const dropped = await discard(entry.entryId);
+    setJustLogged({ ...entry, state: dropped ? 'undone' : 'tooLate' });
+  }
+
+  /**
+   * Edit, which is the same reversal followed by the sheet reopening on what
+   * was typed. It only exists while the write is still queued, for the same
+   * reason Undo does.
+   */
+  async function edit(entry: JustLogged) {
+    const dropped = await discard(entry.entryId);
+    if (!dropped) {
+      setJustLogged({ ...entry, state: 'tooLate' });
+      return;
+    }
+    const nextRatings: Ratings = { energy: null, fatigue: null, hunger: null, satiety: null };
+    let nextWaist: number | null = null;
+    let nextNote = '';
+    for (const value of entry.values) {
+      if (value.metric === 'waist') nextWaist = Number(value.rawValue);
+      else if (value.metric === 'note') nextNote = value.rawValue;
+      else if (value.metric in nextRatings) {
+        nextRatings[value.metric as keyof Ratings] = Number(value.rawValue);
+      }
+    }
+    setWaist(nextWaist);
+    setRatings(nextRatings);
+    setNote(nextNote);
+    setJustLogged(null);
+    setOpen(true);
+  }
+
   const now = new Date();
   const lastWaist = load.state === 'ready' ? load.snapshot.lastWaist : null;
   const staleDays = lastWaist ? daysBetween(new Date(lastWaist.measuredAt), now, timeZone) : null;
@@ -176,22 +257,103 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
         {strings.quickLog.open}
       </button>
 
-      {justLogged.length > 0 ? (
-        <section className="card" style={{ marginTop: 'var(--s3)' }} aria-live="polite">
-          <span className="lbl">{strings.todayLog.justLogged}</span>
-          {justLogged.map((entry) => (
-            <div className="row" key={`${entry.metric}-${entry.rawValue}`}>
-              <div className="stack grow">
-                <span className="head">{metricLabel(entry.metric)}</span>
-                <span className="sub num">
-                  {valueLabel({ value: null, rawValue: entry.rawValue, unit: entry.unit }).number}{' '}
-                  {valueLabel({ value: null, rawValue: entry.rawValue, unit: entry.unit }).unit}
+      {justLogged ? (
+        <>
+          <section
+            className="card"
+            style={{ marginTop: 'var(--s3)' }}
+            aria-live="polite"
+            data-just-logged={justLogged.state}
+          >
+            <span className="lbl">{strings.todayLog.justLogged}</span>
+            {justLogged.values.map((entry) => (
+              <div className="row" key={entry.id}>
+                <div className="stack grow">
+                  <span className="head">{metricLabel(entry.metric)}</span>
+                  <span className="sub num">
+                    {valueLabel({ value: null, rawValue: entry.rawValue, unit: entry.unit }).number}{' '}
+                    {valueLabel({ value: null, rawValue: entry.rawValue, unit: entry.unit }).unit}
+                  </span>
+                </div>
+                {/*
+                  * The chip is the row's own truth and never a guess at the
+                  * queue's. Queued while it is on this phone, Stored once the
+                  * Mac mini has it, Removed when Undo took it back, because
+                  * "Stored" on a write that was never stored is the kind of
+                  * small lie that makes every other label unreadable.
+                  */}
+                <span className="chip">
+                  {justLogged.state === 'queued'
+                    ? strings.todayLog.queued
+                    : justLogged.state === 'undone'
+                      ? strings.todayLog.removed
+                      : strings.todayLog.stored}
                 </span>
               </div>
-              <span className="chip">{queued > 0 ? strings.todayLog.queued : strings.todayLog.stored}</span>
-            </div>
-          ))}
-        </section>
+            ))}
+
+            {/*
+              * Screen 03 frame 2's pair, and which of them is drawn is the
+              * whole point. Queued means the write is on this phone and
+              * nowhere else, so Undo is a deletion and it is true. Applied
+              * means the Mac mini has it, the table refuses DELETE, and the
+              * only reversal left is a correction, so the button changes its
+              * word rather than its behaviour.
+              */}
+            {justLogged.state === 'queued' ? (
+              <>
+                <div className="actions">
+                  <button type="button" className="btn grow" onClick={() => void undo(justLogged)}>
+                    <UndoIcon />
+                    {strings.todayLog.undo}
+                  </button>
+                  <button type="button" className="btn grow" onClick={() => void edit(justLogged)}>
+                    {strings.todayLog.edit}
+                  </button>
+                </div>
+                <p className="note" style={{ marginTop: 'var(--s2)' }}>
+                  {strings.todayLog.undoable}
+                </p>
+              </>
+            ) : null}
+
+            {justLogged.state === 'applied' || justLogged.state === 'tooLate' ? (
+              <>
+                <div className="actions">
+                  <Link className="btn grow" href={`/value/${justLogged.values[0].id}`}>
+                    {strings.todayLog.correct}
+                    <ChevronIcon className="ch" />
+                  </Link>
+                </div>
+                <p className="note" style={{ marginTop: 'var(--s2)' }}>
+                  {justLogged.state === 'tooLate'
+                    ? strings.todayLog.undoTooLate
+                    : strings.todayLog.uploaded}
+                </p>
+              </>
+            ) : null}
+
+            {justLogged.state === 'undone' ? (
+              <p className="note" style={{ marginTop: 'var(--s2)' }}>
+                {strings.todayLog.undone}
+              </p>
+            ) : null}
+          </section>
+
+          {/*
+            * "What happens next", the dashed card screen 03 frame 2 draws under
+            * the pair. It only means anything while something is still waiting,
+            * so it is drawn while something is still waiting.
+            */}
+          {justLogged.state === 'queued' ? (
+            <section className="card empty" style={{ marginTop: 'var(--s3)' }}>
+              <span className="lbl">{strings.todayLog.whatHappensNextLabel}</span>
+              <p className="sub" style={{ marginTop: 'var(--s2)' }}>
+                {strings.todayLog.whatHappensNext}
+              </p>
+            </section>
+          ) : null}
+        </>
       ) : null}
 
       {open ? (

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { headers } from 'next/headers';
 import { after } from 'next/server';
 import { EmptyState } from '@/components/EmptyState';
+import { OutboxBanner } from '@/components/OutboxBanner';
 import { QuickLog } from '@/components/QuickLog';
 import { ScreenTitle } from '@/components/ScreenTitle';
 import { SourceChip } from '@/components/SourceChip';
@@ -55,6 +56,12 @@ export default async function TodayPage() {
     <>
       <ScreenTitle label={longDate(new Date(), timeZone)} title={strings.today.title} />
 
+      {/*
+        * Screen 03 frame 2 puts the queue count here, on Today, with the sheet
+        * closed. Nothing is drawn when the queue is empty.
+        */}
+      <OutboxBanner />
+
       {questions.length > 0 ? (
         <Link className="banner w" href={`/value/${questions[0].measurementId}`}>
           <span className="grow">
@@ -82,7 +89,13 @@ export default async function TodayPage() {
         />
       ) : (
         <section className="card">
-          <span className="lbl">{strings.todayLog.justLogged}</span>
+          {/*
+            * "On file", not "Just logged". These are the values that stand
+            * today, each one the head of its own correction chain; the card
+            * the quick log raises above is the write that was made a moment
+            * ago. Two cards, two things, two labels.
+            */}
+          <span className="lbl">{strings.todayLog.onFile}</span>
           {values.map((view) => {
             const label = valueLabel(view);
             return (

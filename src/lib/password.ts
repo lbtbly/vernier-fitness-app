@@ -1,4 +1,5 @@
 import { argon2Sync, randomBytes, timingSafeEqual } from 'node:crypto';
+import { strings } from '@/lib/strings';
 
 /**
  * The backup password. Argon2id through Node's own crypto, which has carried it
@@ -41,19 +42,19 @@ const PASSWORD_MAXIMUM_LENGTH = 256;
 export function passwordProblems(password: string): string[] {
   const problems: string[] = [];
   if (password.length < PASSWORD_MINIMUM_LENGTH) {
-    problems.push(`At least ${PASSWORD_MINIMUM_LENGTH} characters. You typed ${password.length}.`);
+    problems.push(strings.signIn.passwordTooShort(PASSWORD_MINIMUM_LENGTH, password.length));
   }
   if (password.length > PASSWORD_MAXIMUM_LENGTH) {
-    problems.push(`At most ${PASSWORD_MAXIMUM_LENGTH} characters.`);
+    problems.push(strings.signIn.passwordTooLong(PASSWORD_MAXIMUM_LENGTH));
   }
   const classes = [/[a-z]/, /[A-Z]/, /[0-9]/, /[^A-Za-z0-9]/].filter((pattern) =>
     pattern.test(password),
   ).length;
   if (classes < 3) {
-    problems.push('Three of these four: a lower case letter, a capital, a digit, a symbol.');
+    problems.push(strings.signIn.passwordVariety);
   }
   if (password.length > 0 && /^(.)\1+$/.test(password)) {
-    problems.push('One character repeated is not a password.');
+    problems.push(strings.signIn.passwordRepeated);
   }
   return problems;
 }
@@ -86,9 +87,7 @@ export function hashPassword(password: string): StoredPassword {
  */
 export function verifyPassword(password: string, stored: StoredPassword): boolean {
   if (stored.passwordAlgorithm !== 'argon2id') {
-    throw new Error(
-      `The stored password names algorithm ${stored.passwordAlgorithm}, and this build verifies argon2id only.`,
-    );
+    throw new Error(strings.api.boot.wrongAlgorithm(stored.passwordAlgorithm));
   }
   const expected = Buffer.from(stored.passwordTag, 'base64');
   const candidate = argon2Sync('argon2id', {

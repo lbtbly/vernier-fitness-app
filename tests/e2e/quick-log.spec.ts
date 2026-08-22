@@ -122,7 +122,7 @@ test.describe('the quick log', () => {
       let taps = 0;
 
       await page.goto('/');
-      await page.getByRole('button', { name: 'Quick log' }).click();
+      await page.getByRole('button', { name: 'Quick log', exact: true }).click();
       taps += 1;
 
       await expect(page.getByRole('dialog', { name: 'Quick log' })).toBeVisible();
@@ -170,7 +170,7 @@ test.describe('the quick log', () => {
     resetProvenance();
     await signIn(page);
 
-    await page.getByRole('button', { name: 'Quick log' }).click();
+    await page.getByRole('button', { name: 'Quick log', exact: true }).click();
     await expect(page.getByRole('dialog', { name: 'Quick log' })).toBeVisible();
     // Wait for the snapshot to land, so the sheet is in its loaded state before
     // the origin disappears, which is the real sequence: signal drops mid entry.
@@ -207,9 +207,21 @@ test.describe('the quick log', () => {
     // Nothing reached the database while the origin was gone.
     expect(query("select count(*) from measurement where metric = 'energy' and source = 'manual'")).toBe('0');
 
-    // The queue count is on screen, and the marker says so plainly.
-    await page.getByRole('button', { name: 'Quick log' }).click();
-    await expect(page.locator('[data-state="offline"]')).toBeVisible();
+    // The queue count is on Today, with the sheet closed, which is where
+    // screen 03 frame 2 draws it. save() closes the sheet, so this is the state
+    // the owner is actually looking at a second after he presses Save, and it
+    // used to show a marker with no number in it.
+    const todayBanner = page.locator('main [data-state="offline"]').first();
+    await expect(todayBanner).toBeVisible();
+    const todayCount = await todayBanner.textContent();
+    console.log(`Today with the sheet closed reads: ${todayCount}`);
+    expect(todayCount).toMatch(/entr(y|ies) (is|are) waiting to upload/);
+    await settle(page);
+    await page.screenshot({ path: `${CAPTURES}c5-offline-today-count-393.png`, fullPage: true });
+
+    // And the same count inside the sheet, from the same key.
+    await page.getByRole('button', { name: 'Quick log', exact: true }).click();
+    await expect(page.locator('.sheet [data-state="offline"]')).toBeVisible();
     await settle(page);
     await page.screenshot({ path: `${CAPTURES}f24-offline-queued-393.png`, fullPage: true });
     await page.locator('.sheet').getByRole('button', { name: 'Close the quick log' }).click();
@@ -275,7 +287,7 @@ test.describe('the quick log', () => {
     resetProvenance();
     await signIn(page);
 
-    await page.getByRole('button', { name: 'Quick log' }).click();
+    await page.getByRole('button', { name: 'Quick log', exact: true }).click();
     await page.getByRole('button', { name: 'Up half a centimetre' }).click();
     await page.getByRole('button', { name: 'Save', exact: true }).click();
     await expect
@@ -318,6 +330,189 @@ test.describe('the quick log', () => {
     await expect(page.getByText('Append only').first()).toBeVisible();
     await settle(page);
     await page.screenshot({ path: `${CAPTURES}f21-value-sheet-corrected-393.png`, fullPage: true });
+  });
+
+  /**
+   * D3. A correction is a write, so it passes the same gate the quick log's own
+   * values pass, and a refusal is drawn as screen 00's error card.
+   *
+   * Both halves of this were broken and the second half is the one that could
+   * not be undone. `ninety-seven` reached `Number()` as NaN, the CHECK
+   * constraint threw, and the route answered 500 with an empty body, which the
+   * value screen rendered as the two words "HTTP 500". Meanwhile 99 and -4.7
+   * were accepted for a rating out of five and written into a table that
+   * refuses DELETE, where they still are.
+   */
+  test('refuses a correction the metric does not allow, and draws it as an error card', async ({
+    page,
+    context,
+  }) => {
+    resetProvenance();
+    await signIn(page);
+
+    const ratingId = query("select id from measurement where metric = 'energy' and seed");
+    const before = query(`select count(*) from measurement where root_id = '${ratingId}'`);
+    expect(before).toBe('1');
+
+    // On screen, through the shipped form, which is where the bare status code
+    // was rendered.
+    await page.goto(`/value/${ratingId}`);
+    await page.locator('#correction-value').fill('ninety-seven');
+    await page.getByRole('button', { name: 'Save the correction' }).click();
+
+    const card = page.locator('[data-state="error"]');
+    await expect(card).toBeVisible({ timeout: 15_000 });
+    const shown = await card.textContent();
+    console.log(`what the value screen says about a word where a number belongs:\n${shown}`);
+    expect(shown).toContain('ninety-seven is not a number');
+    expect(shown).not.toContain('HTTP 500');
+    // Screen 00 state 4 draws the error card with an --alert border. Resolved
+    // through a probe rather than compared against the token's own text, so
+    // this reads the colour the owner actually sees.
+    const alert = await page.evaluate(() => {
+      const probe = document.createElement('span');
+      probe.style.color = 'var(--alert)';
+      document.body.append(probe);
+      const colour = getComputedStyle(probe).color;
+      probe.remove();
+      return colour;
+    });
+    expect(await card.evaluate((node) => getComputedStyle(node).borderColor)).toBe(alert);
+    await settle(page);
+    await page.screenshot({ path: `${CAPTURES}d3-correction-refused-393.png`, fullPage: true });
+
+    // And every out-of-range value the append-only table would have kept.
+    const csrf = (await context.cookies()).find((cookie) => cookie.name === 'vernier_csrf')!.value;
+    for (const bad of ['99', '-4.7', '3.5', '0', '', 'ninety-seven']) {
+      const response = await page.request.post('/api/log', {
+        headers: {
+          'content-type': 'application/json',
+          'idempotency-key': crypto.randomUUID(),
+          'x-vernier-csrf': csrf,
+        },
+        data: { action: 'correct', correctsId: ratingId, rawValue: bad, reason: 'a test' },
+      });
+      const body = (await response.json()) as { error?: string; detail?: string };
+      console.log(`correcting a 1-to-5 rating to ${JSON.stringify(bad)}: ${response.status()} ${body.detail}`);
+      expect(response.status()).toBe(422);
+      expect(String(body.error).length, 'a refusal names a cause').toBeGreaterThan(0);
+      expect(String(body.detail).length, 'a refusal names a next step').toBeGreaterThan(0);
+    }
+
+    // Nothing was written, which is the only outcome that can be relied on in a
+    // table that refuses DELETE.
+    expect(query(`select count(*) from measurement where root_id = '${ratingId}'`)).toBe('1');
+    expect(query(`select raw_value from measurement where id = '${ratingId}'`)).toBe('4');
+
+    // A correction the range does allow still goes through, so the gate is a
+    // gate and not a wall.
+    const good = await page.request.post('/api/log', {
+      headers: {
+        'content-type': 'application/json',
+        'idempotency-key': crypto.randomUUID(),
+        'x-vernier-csrf': csrf,
+      },
+      data: { action: 'correct', correctsId: ratingId, rawValue: '2', reason: 'Felt worse than I said' },
+    });
+    expect(good.status()).toBe(201);
+    expect(query(`select count(*) from measurement where root_id = '${ratingId}'`)).toBe('2');
+
+    // And the reason stored on it names the whole id rather than eight
+    // characters of one, which read as a mangled word.
+    const reason = query(`select dedup_reason from measurement where root_id = '${ratingId}' and correction_index = 1`);
+    console.log(`the reason stored on the correction: ${reason}`);
+    expect(reason).toContain(ratingId);
+  });
+
+  /**
+   * C5. Screen 03 frame 2's Undo and Edit, and the clause that makes them
+   * honest: "undoable for as long as it sits in the queue".
+   *
+   * While the write is in the outbox it is genuinely reversible, so Undo drops
+   * it and nothing is ever stored. Once it has uploaded, `measurement` refuses
+   * DELETE and the only reversal left is a correction, so the button changes
+   * its word. The surface says which one it is doing.
+   */
+  test('undoes a queued write, and offers a correction rather than a deletion once it has uploaded', async ({
+    page,
+    context,
+  }) => {
+    resetProvenance();
+    await signIn(page);
+
+    // Queued, and therefore genuinely reversible.
+    await page.getByRole('button', { name: 'Quick log', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Fatigue, 2 of 5' })).toBeEnabled();
+    await goOffline(context, page);
+    await page.getByRole('button', { name: 'Fatigue, 2 of 5' }).click();
+    await page.getByRole('button', { name: 'Save', exact: true }).click();
+
+    const card = page.locator('[data-just-logged]');
+    await expect(card).toHaveAttribute('data-just-logged', 'queued');
+    await expect(page.getByRole('button', { name: 'Undo' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Edit' })).toBeVisible();
+    await expect(page.getByText('What happens next')).toBeVisible();
+    console.log(`the just-logged card while queued:\n${await card.textContent()}`);
+    await settle(page);
+    await page.screenshot({ path: `${CAPTURES}c5-just-logged-queued-393.png`, fullPage: true });
+
+    await page.getByRole('button', { name: 'Undo' }).click();
+    await expect(card).toHaveAttribute('data-just-logged', 'undone');
+    await expect(page.getByText('Removed before it uploaded. Nothing was stored.')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Undo' })).toBeHidden();
+
+    const left = await page.evaluate(async () => {
+      const db = await new Promise<IDBDatabase>((resolve, reject) => {
+        const request = indexedDB.open('vernier', 1);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      const rows = await new Promise<unknown[]>((resolve, reject) => {
+        const request = db.transaction('outbox', 'readonly').objectStore('outbox').getAll();
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      db.close();
+      return rows.length;
+    });
+    console.log(`entries left in the outbox after Undo: ${left}`);
+    expect(left).toBe(0);
+    await settle(page);
+    await page.screenshot({ path: `${CAPTURES}c5-just-logged-undone-393.png`, fullPage: true });
+
+    await goOnline(context, page);
+    // Nothing ever reached the Mac mini, which is what makes it an undo.
+    expect(query("select count(*) from measurement where metric = 'fatigue' and source = 'manual'")).toBe('0');
+
+    // Applied, and therefore not reversible by deletion. The card says so and
+    // offers the correction instead.
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Quick log', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Hunger, 3 of 5' })).toBeEnabled();
+    await page.getByRole('button', { name: 'Hunger, 3 of 5' }).click();
+    await page.getByRole('button', { name: 'Save', exact: true }).click();
+
+    await expect(card).toHaveAttribute('data-just-logged', 'applied', { timeout: 20_000 });
+    console.log(`the just-logged card once it has uploaded:\n${await card.textContent()}`);
+    await expect(page.getByRole('button', { name: 'Undo' })).toBeHidden();
+    await expect(page.getByRole('link', { name: 'Correct it' })).toBeVisible();
+    await expect(page.getByText('Vernier never deletes a value')).toBeVisible();
+    await settle(page);
+    await page.screenshot({ path: `${CAPTURES}c5-just-logged-applied-393.png`, fullPage: true });
+
+    // Two cards, two things, two labels. Today used to draw the write that was
+    // just made and the values that stand today side by side, both headed
+    // JUST LOGGED, from one key used for two different meanings.
+    const labels = await page.locator('main .card > .lbl').allTextContents();
+    console.log(`the card labels on Today: ${JSON.stringify(labels)}`);
+    expect(new Set(labels).size, 'no two cards on Today wear the same label').toBe(labels.length);
+    expect(labels).toContain('Just logged');
+    expect(labels).toContain('On file');
+
+    // The action really does reach the value's own sheet, where a correction
+    // appends beside the original.
+    await page.getByRole('link', { name: 'Correct it' }).click();
+    await expect(page.getByText('Correct this value')).toBeVisible();
   });
 
   /**
@@ -371,7 +566,7 @@ test.describe('the quick log', () => {
     resetProvenance();
     await signIn(page);
 
-    await page.getByRole('button', { name: 'Quick log' }).click();
+    await page.getByRole('button', { name: 'Quick log', exact: true }).click();
     await page.getByRole('button', { name: 'Up half a centimetre' }).click();
     await page.getByRole('button', { name: 'Save', exact: true }).click();
     await expect
@@ -456,7 +651,7 @@ test.describe('the quick log against screen 03', () => {
     for (const [name, width, height] of VIEWPORTS) {
       await page.setViewportSize({ width, height });
       await page.goto('/');
-      await page.getByRole('button', { name: 'Quick log' }).click();
+      await page.getByRole('button', { name: 'Quick log', exact: true }).click();
       await expect(page.getByRole('dialog', { name: 'Quick log' })).toBeVisible();
       await expect(page.getByRole('button', { name: 'Energy, 4 of 5' })).toBeVisible();
       await settle(page);
@@ -499,7 +694,7 @@ test.describe('the quick log against screen 03', () => {
 
     // Loaded first, because every other state is measured against its geometry.
     await page.goto('/');
-    await page.getByRole('button', { name: 'Quick log' }).click();
+    await page.getByRole('button', { name: 'Quick log', exact: true }).click();
     await expect(page.getByRole('button', { name: 'Energy, 4 of 5' })).toBeVisible();
     const loadedBox = await page.locator('.sheet').boundingBox();
     await settle(page);
@@ -524,7 +719,7 @@ test.describe('the quick log against screen 03', () => {
       // holding open has already been captured.
       await route.continue().catch(() => undefined);
     });
-    await page.getByRole('button', { name: 'Quick log' }).click();
+    await page.getByRole('button', { name: 'Quick log', exact: true }).click();
     await expect(page.locator('[data-state="loading"]')).toBeVisible();
     const loadingBox = await page.locator('.sheet').boundingBox();
     await settle(page);
@@ -538,7 +733,7 @@ test.describe('the quick log against screen 03', () => {
     // Error: the origin taken away while the sheet opens. The card names the
     // failure in words and says what still works, which here is the save itself.
     await goOffline(context, page);
-    await page.getByRole('button', { name: 'Quick log' }).click();
+    await page.getByRole('button', { name: 'Quick log', exact: true }).click();
     await expect(page.locator('[data-state="error"]')).toBeVisible({ timeout: 20_000 });
     const errorText = await page.locator('[data-state="error"]').textContent();
     console.log(`error card reads: ${errorText}`);
@@ -551,9 +746,9 @@ test.describe('the quick log against screen 03', () => {
     // carries the queue count.
     await page.getByRole('button', { name: 'Hunger, 3 of 5' }).click();
     await page.getByRole('button', { name: 'Save', exact: true }).click();
-    await page.getByRole('button', { name: 'Quick log' }).click();
-    await expect(page.locator('[data-state="offline"]')).toBeVisible();
-    const offlineText = await page.locator('[data-state="offline"]').textContent();
+    await page.getByRole('button', { name: 'Quick log', exact: true }).click();
+    await expect(page.locator('.sheet [data-state="offline"]')).toBeVisible();
+    const offlineText = await page.locator('.sheet [data-state="offline"]').textContent();
     console.log(`offline banner reads: ${offlineText}`);
     expect(offlineText).toMatch(/entr(y|ies) (is|are) waiting to upload/);
     const offlineBox = await page.locator('.sheet').boundingBox();
@@ -576,7 +771,7 @@ test.describe('the quick log against screen 03', () => {
     // re-seed, so the absence is real rather than routed around.
     query('truncate measurement, source_record, import_question, idempotency_key, write_request');
     await page.goto('/');
-    await page.getByRole('button', { name: 'Quick log' }).click();
+    await page.getByRole('button', { name: 'Quick log', exact: true }).click();
     await expect(page.locator('[data-state="empty"]')).toBeVisible({ timeout: 20_000 });
     const emptyText = await page.locator('[data-state="empty"]').textContent();
     console.log(`empty card reads: ${emptyText}`);

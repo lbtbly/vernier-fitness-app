@@ -1,13 +1,16 @@
+import { sql } from 'drizzle-orm';
 import {
   bigint,
   boolean,
   doublePrecision,
+  foreignKey,
   index,
   integer,
   jsonb,
   pgTable,
   text,
   timestamp,
+  unique,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
 
@@ -236,6 +239,15 @@ export const recoveryGrant = pgTable('recovery_grant', {
  * where the key names a line in the string catalogue and the value is data.
  * No user-facing sentence is stored here, which is what keeps C6's inventory
  * complete and what lets a second language reach the source screen too.
+ *
+ * `seed` is the demonstration marker and it is a column because it has to be
+ * one. A source record written by the seed carries the shape it stands in for,
+ * so its `source` really does read `withings` and its kind really does read
+ * `sync_batch`, and F22's six destinations stay walkable. That leaves nothing
+ * in the row itself to tell it from a real Withings batch, and an id prefix is
+ * a naming convention rather than a constraint. This column is the fact, the
+ * unique below is what lets `measurement` point at it, and the two together
+ * make `where seed` the whole answer on both tables.
  */
 export const sourceRecord = pgTable(
   'source_record',
@@ -249,8 +261,13 @@ export const sourceRecord = pgTable(
     recordedAt: timestamp('recorded_at', { withTimezone: true }).notNull().defaultNow(),
     importVersion: text('import_version').notNull(),
     detail: jsonb('detail').notNull(),
+    /** True on every row the demonstration seed wrote, and on no other row. */
+    seed: boolean('seed').notNull().default(false),
   },
-  (table) => [index('source_record_occurred_at').on(table.occurredAt)],
+  (table) => [
+    index('source_record_occurred_at').on(table.occurredAt),
+    unique('source_record_id_seed').on(table.id, table.seed),
+  ],
 );
 
 /**
@@ -260,7 +277,8 @@ export const sourceRecord = pgTable(
  * values enforced by the database, not by a handler: `withings`,
  * `apple_health_shortcut`, `manual`, `lab_pdf`, `derived`, `demo`. A demo row
  * is therefore distinguishable from a real one by reading the table, which is
- * the only place that distinction can be trusted.
+ * the only place that distinction can be trusted, and `seed` below carries the
+ * same fact in one column on both tables the seed writes to.
  *
  * `rawValue` is text and holds what actually arrived: "98.0", "4", the typed
  * note, or the laboratory's printed "1.44". `value` is the canonical number in
@@ -304,11 +322,32 @@ export const measurement = pgTable(
     correctionIndex: integer('correction_index').notNull().default(0),
     /** Null on an original. A correction says why in the owner's own words. */
     correctionReason: text('correction_reason'),
+    /**
+     * The demonstration marker, and no writer gets a say in it. The database
+     * computes it from the source, so a seeded row cannot be written without
+     * it and a real row cannot claim it. `where seed` reads the same here as
+     * it does on `source_record`, which is the whole point of having it twice.
+     */
+    seed: boolean('seed')
+      .notNull()
+      .generatedAlwaysAs(sql`"source" = 'demo'`),
   },
   (table) => [
     index('measurement_metric_measured_at').on(table.metric, table.measuredAt),
     index('measurement_root').on(table.rootId, table.correctionIndex),
     index('measurement_source').on(table.source),
+    /*
+     * The linkage, enforced by Postgres rather than by a handler. A seeded
+     * measurement can only point at a seeded source record and a real one can
+     * only point at a real one, so the seed cannot leave a row behind that
+     * reads as a real Withings batch and nothing later can attach a real
+     * reading to a demonstration record.
+     */
+    foreignKey({
+      name: 'measurement_seed_matches_source_record',
+      columns: [table.sourceRecordId, table.seed],
+      foreignColumns: [sourceRecord.id, sourceRecord.seed],
+    }),
   ],
 );
 

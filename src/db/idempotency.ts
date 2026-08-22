@@ -1,6 +1,7 @@
 import { eq, sql } from 'drizzle-orm';
 import { getDb } from './client';
 import { idempotencyKey, writeRequest } from './schema';
+import { strings } from '@/lib/strings';
 
 /**
  * Exactly once, on a network that guarantees at least once.
@@ -96,7 +97,7 @@ export async function once(
           status: 409,
           body: {
             applied: true,
-            detail: 'This write is already being applied under the same idempotency key.',
+            detail: strings.api.log.alreadyApplying,
           },
         },
         replayed: true,

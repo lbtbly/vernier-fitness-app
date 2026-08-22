@@ -77,7 +77,7 @@ export function SignInForm(props: Props) {
   }
 
   function refuse(data: Record<string, unknown>) {
-    const title = typeof data.error === 'string' ? data.error : 'That did not work.';
+    const title = typeof data.error === 'string' ? data.error : strings.signIn.refused;
     const body = typeof data.detail === 'string' ? data.detail : '';
     setNotice({ tone: 'alert', title, body });
   }

@@ -9,10 +9,10 @@ import type { SourceKind } from './measurements';
  * The demonstration seed.
  *
  * Two rules, and they are the whole of it. It runs only when `DEMO_MODE` is 1,
- * and every measurement it writes carries source `demo`. Never `manual`, never
- * blank, never the origin it is standing in for: a demonstration row has to be
- * tellable from a real one by reading the database, because a badge in the user
- * interface is a claim and a column is a fact.
+ * and every row it writes, in both tables, is marked `seed`. Never blank, never
+ * left to a naming convention: a demonstration row has to be tellable from a
+ * real one by reading the database, because a badge in the user interface is a
+ * claim, an id prefix is a habit, and a column is a fact.
  *
  * The source records it writes do carry the six real kinds, and that is not a
  * contradiction. The measurement's source says where the value entered this
@@ -20,6 +20,14 @@ import type { SourceKind } from './measurements';
  * row stands in for, so the sync batch, the shortcut payload, the laboratory
  * page, the model reply, the derivation and the demonstration record all exist
  * and all render through one screen. The value sheet prints both, plainly.
+ *
+ * What keeps that honest is `seed`. `measurement.seed` is computed by Postgres
+ * from the source and cannot be set by any writer; `source_record.seed` is set
+ * here; and a foreign key over both columns refuses a seeded measurement that
+ * points at a real record or a real measurement that points at a seeded one.
+ * So `demo_src_weight` still reads `source=withings, kind=sync_batch,
+ * reference=1184`, and it also reads `seed=true`, which no Withings batch ever
+ * will.
  *
  * Ids are fixed, so a second boot writes nothing new and no timestamp moves.
  */
@@ -89,7 +97,7 @@ const DEMO_ROWS: DemoRow[] = [
     kind: 'shortcut_payload',
     reference: 'batch-3391',
     detail: [
-      { key: 'source.field.shortcut', value: 'Vernier daily export' },
+      { key: 'source.field.shortcut', value: strings.demoSeed.shortcutName },
       { key: 'source.field.rowsReceived', value: '4' },
       { key: 'source.field.rowsStored', value: '4' },
       { key: 'source.field.result', value: '202' },
@@ -110,7 +118,7 @@ const DEMO_ROWS: DemoRow[] = [
     reference: 'quick-log',
     detail: [
       { key: 'source.field.enteredOn', value: 'iPhone' },
-      { key: 'source.field.method', value: 'Tape at the navel, standing, breathing out' },
+      { key: 'source.field.method', value: strings.quickLog.waistMethod },
     ],
   },
   {
@@ -151,7 +159,7 @@ const DEMO_ROWS: DemoRow[] = [
     detail: [
       { key: 'source.field.inputs', value: '7' },
       { key: 'source.field.window', value: '7 d' },
-      { key: 'source.field.rule', value: 'mean of daily readings, no interpolation' },
+      { key: 'source.field.rule', value: strings.demoSeed.derivationRule },
     ],
   },
   {
@@ -192,9 +200,29 @@ function instantOf(row: DemoRow, timeZone: string): Date {
   return new Date(`${local}T${hour}:${minute}:00${offset || '+00:00'}`);
 }
 
+export type SeededRows = { measurements: number; sourceRecords: number };
+
 export type SeedResult =
-  | { ran: false; reason: string; measurements: number }
-  | { ran: true; measurements: number; sourceRecords: number; written: number };
+  | ({ ran: false; reason: string } & SeededRows)
+  | ({ ran: true; written: number } & SeededRows);
+
+/**
+ * How many seeded rows the database holds, counted off the marker column in
+ * both tables the seed touches. F25 reads this back: zero and zero with
+ * demonstration mode off, six and six with it on.
+ */
+export async function countSeededRows(): Promise<SeededRows> {
+  const db = getDb();
+  const [measurements] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(measurement)
+    .where(eq(measurement.seed, true));
+  const [sourceRecords] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(sourceRecord)
+    .where(eq(sourceRecord.seed, true));
+  return { measurements: measurements?.n ?? 0, sourceRecords: sourceRecords?.n ?? 0 };
+}
 
 /**
  * Loads the seed, or refuses and says so. Called once per boot, right after the
@@ -204,14 +232,10 @@ export async function seedDemoData(timeZone: string): Promise<SeedResult> {
   const db = getDb();
 
   if (!demoModeOn()) {
-    const [counted] = await db
-      .select({ n: sql<number>`count(*)::int` })
-      .from(measurement)
-      .where(eq(measurement.source, 'demo'));
     return {
       ran: false,
-      reason: 'DEMO_MODE is not 1, so the demonstration seed refused to run and wrote nothing.',
-      measurements: counted?.n ?? 0,
+      reason: strings.demoSeed.refused,
+      ...(await countSeededRows()),
     };
   }
 
@@ -233,6 +257,7 @@ export async function seedDemoData(timeZone: string): Promise<SeedResult> {
         occurredAt: measuredAt,
         importVersion: IMPORT_VERSION,
         detail: row.detail,
+        seed: true,
       })
       .onConflictDoNothing({ target: sourceRecord.id });
 
@@ -264,15 +289,5 @@ export async function seedDemoData(timeZone: string): Promise<SeedResult> {
     written += inserted.length;
   }
 
-  const [counted] = await db
-    .select({ n: sql<number>`count(*)::int` })
-    .from(measurement)
-    .where(eq(measurement.source, 'demo'));
-
-  return {
-    ran: true,
-    measurements: counted?.n ?? 0,
-    sourceRecords: DEMO_ROWS.length,
-    written,
-  };
+  return { ran: true, written, ...(await countSeededRows()) };
 }

@@ -98,17 +98,17 @@ export const IMPORT_VERSION = '2026-08-3';
  * number and is never stored as a zero.
  */
 export const METRICS = {
-  weight: { unit: 'kg', kind: 'number' },
-  waist: { unit: 'cm', kind: 'number' },
-  energy: { unit: 'point', kind: 'rating' },
-  fatigue: { unit: 'point', kind: 'rating' },
-  hunger: { unit: 'point', kind: 'rating' },
-  satiety: { unit: 'point', kind: 'rating' },
-  note: { unit: 'text', kind: 'text' },
-  steps: { unit: 'step', kind: 'number' },
-  weight_average_7d: { unit: 'kg', kind: 'number' },
+  weight: { unit: 'kg', kind: 'number', low: 20, high: 400 },
+  waist: { unit: 'cm', kind: 'number', low: 30, high: 250 },
+  energy: { unit: 'point', kind: 'rating', low: 1, high: 5 },
+  fatigue: { unit: 'point', kind: 'rating', low: 1, high: 5 },
+  hunger: { unit: 'point', kind: 'rating', low: 1, high: 5 },
+  satiety: { unit: 'point', kind: 'rating', low: 1, high: 5 },
+  note: { unit: 'text', kind: 'text', low: 0, high: 0 },
+  steps: { unit: 'step', kind: 'number', low: 0, high: 200_000 },
+  weight_average_7d: { unit: 'kg', kind: 'number', low: 20, high: 400 },
   /** The laboratory's own unit, kept as printed. A converted value never appears alone. */
-  ldl_cholesterol: { unit: 'mmol/L', kind: 'number' },
+  ldl_cholesterol: { unit: 'mmol/L', kind: 'number', low: 0, high: 30 },
 } as const;
 
 export type Metric = keyof typeof METRICS;
@@ -129,6 +129,50 @@ export const QUICK_LOG_METRICS = [
 
 export const RATING_MIN = 1;
 export const RATING_MAX = 5;
+
+/** What was wrong with a value, as a case a caller renders. Never a sentence here. */
+export type ValueProblem = 'unknownMetric' | 'blank' | 'notANumber' | 'rating' | 'range';
+
+export type CheckedValue =
+  | { ok: true; value: number | null }
+  | { ok: false; problem: ValueProblem; low: number; high: number };
+
+/**
+ * Is this a value Vernier will store, and what is the number if so.
+ *
+ * Every writer runs this and there is no second copy of the rule: the quick
+ * log, a correction, and the importers eleven slices from now all ask the same
+ * question of the same table above. The band per metric lives beside the unit
+ * because that is where a reader looks for it, and because a rating out of five
+ * that accepts 99 is not a validation gap in a form, it is a permanent row in a
+ * table that refuses DELETE.
+ *
+ * A free note has no number and is stored with none. A blank field is refused
+ * rather than stored as a zero, which is the same absence rule the charts draw.
+ */
+export function checkValue(metric: string, rawValue: string): CheckedValue {
+  if (!isMetric(metric)) return { ok: false, problem: 'unknownMetric', low: 0, high: 0 };
+  const rule = METRICS[metric];
+  const raw = rawValue.trim();
+  if (raw === '') return { ok: false, problem: 'blank', low: rule.low, high: rule.high };
+  if (rule.kind === 'text') return { ok: true, value: null };
+
+  const value = Number(raw);
+  if (!Number.isFinite(value)) {
+    return { ok: false, problem: 'notANumber', low: rule.low, high: rule.high };
+  }
+  if (rule.kind === 'rating') {
+    const whole = Number.isInteger(value);
+    if (!whole || value < rule.low || value > rule.high) {
+      return { ok: false, problem: 'rating', low: rule.low, high: rule.high };
+    }
+    return { ok: true, value };
+  }
+  if (value < rule.low || value > rule.high) {
+    return { ok: false, problem: 'range', low: rule.low, high: rule.high };
+  }
+  return { ok: true, value };
+}
 
 /**
  * What deduplication needs to know about a value already in the table. Kept to

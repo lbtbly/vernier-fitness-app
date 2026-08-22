@@ -4,6 +4,7 @@ import { ok, peerOf, refuse } from '@/lib/gate';
 import { verifyPassword } from '@/lib/password';
 import { SIGN_IN_WINDOW_SECONDS, lockoutState } from '@/lib/rate-limit';
 import { startSession } from '@/lib/session';
+import { strings } from '@/lib/strings';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,8 +32,8 @@ export async function POST(request: Request) {
     });
     return refuse(
       429,
-      'Too many attempts.',
-      `Five failures inside ${SIGN_IN_WINDOW_SECONDS} seconds pauses sign-in. Wait ${lockout.retryAfterSeconds} seconds and try again. A correct password will not open it any sooner.`,
+      strings.api.rateLimit.tooMany,
+      strings.api.rateLimit.windowPassword(SIGN_IN_WINDOW_SECONDS, lockout.retryAfterSeconds),
       { retryAfterSeconds: lockout.retryAfterSeconds, attemptsLeft: 0 },
     );
   }
@@ -41,7 +42,7 @@ export async function POST(request: Request) {
   try {
     body = (await request.json()) as typeof body;
   } catch {
-    return refuse(400, 'Expected a JSON body.', 'Send the password as a string.');
+    return refuse(400, strings.api.jsonBody, strings.api.password.bodyDetail);
   }
   const password = typeof body.password === 'string' ? body.password : '';
 
@@ -53,11 +54,7 @@ export async function POST(request: Request) {
       reason: 'no owner account exists yet',
       peer,
     });
-    return refuse(
-      404,
-      'No owner account yet.',
-      'Nothing has been created on this machine. Create the owner account first.',
-    );
+    return refuse(404, strings.api.password.noOwner, strings.api.password.noOwnerDetail);
   }
 
   if (!password || !verifyPassword(password, owner)) {
@@ -70,10 +67,10 @@ export async function POST(request: Request) {
     const after = lockoutState(await recentFailures());
     return refuse(
       401,
-      'That password does not match.',
+      strings.api.password.wrong,
       after.locked
-        ? `Sign-in is paused for ${after.retryAfterSeconds} seconds.`
-        : `${after.attemptsLeft} ${after.attemptsLeft === 1 ? 'attempt' : 'attempts'} left, then a ${SIGN_IN_WINDOW_SECONDS} second pause.`,
+        ? strings.api.rateLimit.paused(after.retryAfterSeconds)
+        : strings.api.rateLimit.attemptsLeft(after.attemptsLeft, SIGN_IN_WINDOW_SECONDS),
       { attemptsLeft: after.attemptsLeft, retryAfterSeconds: after.retryAfterSeconds },
     );
   }

@@ -1,4 +1,5 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto';
+import { strings } from '@/lib/strings';
 
 /**
  * The master key, and the only place a third-party credential is ever in the
@@ -15,32 +16,14 @@ const KEY_NAME = 'MASTER_KEY';
 
 export class MasterKeyMissingError extends Error {
   constructor(detail: string) {
-    super(
-      [
-        KEY_NAME,
-        ' is ',
-        detail,
-        '. Vernier will not start without it: every third-party credential in the database is encrypted with it, and starting without it would mean writing the next one in the clear. Set ',
-        KEY_NAME,
-        ' in the environment file at the project root to 32 random bytes in base64url and restart the stack.',
-      ].join(''),
-    );
+    super(strings.api.masterKey.missing(KEY_NAME, detail));
     this.name = 'MasterKeyMissingError';
   }
 }
 
 export class MasterKeyMismatchError extends Error {
   constructor(provider: string, detail: string) {
-    super(
-      [
-        KEY_NAME,
-        ' does not decrypt the stored ',
-        provider,
-        ' credential: ',
-        detail,
-        '. The key in the environment differs from the one this row was written with. Nothing is returned and nothing is overwritten. Restore the original key, or delete the row and connect the integration again.',
-      ].join(''),
-    );
+    super(strings.api.masterKey.mismatch(KEY_NAME, provider, detail));
     this.name = 'MasterKeyMismatchError';
   }
 }

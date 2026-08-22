@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { recordDeviceLaunch } from '@/db/diagnostics';
 import { csrfFailure } from '@/lib/csrf';
+import { refuse } from '@/lib/gate';
+import { strings } from '@/lib/strings';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,7 +30,7 @@ export async function POST(request: Request) {
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: 'Expected a JSON body.' }, { status: 400 });
+    return refuse(400, strings.api.jsonBody, strings.api.launch.notAReportDetail);
   }
 
   const report = body as { standalone?: unknown; wakeLock?: unknown } | null;
@@ -37,10 +39,7 @@ export async function POST(request: Request) {
     typeof report.standalone !== 'boolean' ||
     typeof report.wakeLock !== 'boolean'
   ) {
-    return NextResponse.json(
-      { error: 'Expected standalone and wakeLock as booleans.' },
-      { status: 400 },
-    );
+    return refuse(400, strings.api.launch.notAReport, strings.api.launch.notAReportDetail);
   }
 
   await recordDeviceLaunch({ standalone: report.standalone, wakeLock: report.wakeLock });

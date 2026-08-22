@@ -95,6 +95,30 @@ export const strings = {
     signOut: 'Sign out',
     signedInWith: 'Signed in with',
     sessionExpires: 'This session expires',
+
+    /**
+     * The four integrations, named and explained. The scope beside each one in
+     * src/db/integrations.ts is an OAuth value and stays there: it is what the
+     * service was asked for, not a sentence written for a reader.
+     */
+    providers: {
+      withings: {
+        name: 'Withings',
+        purpose: 'Weight, fat mass and heart rate from the Body Smart scale.',
+      },
+      apple_health: {
+        name: 'Apple Health',
+        purpose: 'Steps, workouts, sleep and resting heart rate from the iPhone shortcut.',
+      },
+      google_calendar: {
+        name: 'Google Calendar',
+        purpose: 'Free-busy reads and writes into the Vernier calendar only.',
+      },
+      mail_relay: {
+        name: 'Mail relay',
+        purpose: 'The Sunday review, sent from this machine.',
+      },
+    },
   },
 
   signIn: {
@@ -123,6 +147,11 @@ export const strings = {
     repeatLabel: 'Repeat it',
     passwordRequirement: (length: number) =>
       `At least 12 characters. You typed ${length}.`,
+    /** The same three sentences src/lib/password.ts returns, so the rule and the copy are one. */
+    passwordTooShort: (minimum: number, typed: number) =>
+      `At least ${minimum} characters. You typed ${typed}.`,
+    passwordTooLong: (maximum: number) => `At most ${maximum} characters.`,
+    passwordRepeated: 'One character repeated is not a password.',
     passwordVariety: 'Three of these four: a lower case letter, a capital, a digit, a symbol.',
     passwordReuse: 'Not a password you use anywhere else.',
     passwordHashNote: 'Hashed with Argon2id on this machine. It never leaves it.',
@@ -136,6 +165,7 @@ export const strings = {
     loseBothBody:
       'Recovery is a local procedure you run on the Mac mini, written down in docs/security.md. No security question. No password sent by email. Nothing to phone up and ask for.',
 
+    refused: 'That did not work.',
     passkeyRegistered: 'Passkey added. Opening Vernier.',
     passkeySkipped:
       'The account exists and the password works. This browser offered no passkey, so add one from Settings on the iPhone or the Mac.',
@@ -186,6 +216,187 @@ export const strings = {
   },
 
   /**
+   * What a route says when it refuses, and what the shell says when a write
+   * cannot be applied.
+   *
+   * These are user-facing copy like any other. A refusal reaches a person: the
+   * gate renders the error field straight onto the screen, the value sheet
+   * renders it into the error card, and a `curl` on the tailnet reads it as
+   * prose. Naming a JSON field to that person, which this catalogue used to do
+   * in four places, tells them nothing they can act on.
+   *
+   * Every line here is one cause and one next step, which is what screen 00's
+   * error card draws and what D3 grades.
+   */
+  api: {
+    jsonBody: 'Expected a JSON body.',
+
+    session: {
+      signInFirst: 'Sign in first.',
+      signInFirstDetail:
+        'This endpoint needs the owner session, and the cookie on this request names none.',
+    },
+
+    csrf: {
+      failed: 'Anti-forgery check failed.',
+      noHeader: (header: string) => `This request carried no ${header} header. Nothing was written.`,
+      noCookie:
+        'This request carried no anti-forgery cookie. Reload the sign-in screen and try again.',
+      mismatch:
+        'The anti-forgery token does not match the one issued to this browser. Nothing was written.',
+      stale: 'The anti-forgery token predates the current session. Reload the screen and try again.',
+    },
+
+    log: {
+      noKey: 'This write carried no idempotency key.',
+      noKeyDetail:
+        'Every quick-log write is keyed by the client UUID its outbox entry holds, so a retry applies once.',
+      bodyDetail: 'Open the quick log and save again. Nothing was stored.',
+      nothingSent: 'Nothing was sent to store.',
+      nothingSentDetail: 'Fill at least one field before saving.',
+      unknownMetric: (metric: string) => `Vernier stores no metric called ${metric}.`,
+      blank: 'A blank field is not stored. Blank stays blank, never zero.',
+      notANumber: (raw: string) => `${raw} is not a number, so it was not stored.`,
+      outOfRange: (min: number, max: number) =>
+        `A rating is a whole number from ${min} to ${max}.`,
+      outOfBand: (metric: string, low: string, high: string, unit: string) =>
+        `${metric} is stored between ${low} and ${high} ${unit}. Nothing outside that is a measurement.`,
+      correctionNeedsValue: 'That correction is missing the new number.',
+      correctionRefused: 'That correction was not stored.',
+      correctionNeedsValueDetail:
+        'Type the number it should be and save again. The original is kept either way.',
+      correctionTargetGone: (id: string) => `There is no value ${id} to correct.`,
+      correctionTargetGoneDetail:
+        'It was never stored, or this screen is older than the database. Open Today again.',
+      failed: 'That write did not go through.',
+      failedDetail:
+        'Nothing was stored and nothing was changed. Try again; if it keeps failing, the Mac mini is the place to look.',
+      alreadyApplying: 'This write is already being applied under the same idempotency key.',
+    },
+
+    correction: {
+      /** Screen 00's error card, on the value sheet. One cause, one action. */
+      title: 'The correction was not saved',
+      lead: 'The value on file has not moved and nothing was written.',
+      chip: 'Failed',
+      retry: 'Try again',
+    },
+
+    bootstrap: {
+      bodyDetail: 'Type the password twice and try again.',
+      ownerExists: 'The owner account already exists.',
+      ownerExistsDetail:
+        'Vernier holds exactly one account and it is created once. Sign in with your passkey or the backup password.',
+      mismatch: 'The two passwords do not match.',
+      mismatchDetail: 'Type the same password in both fields.',
+      weak: 'That password is not strong enough.',
+    },
+
+    password: {
+      bodyDetail: 'Type the backup password and try again.',
+      noOwner: 'No owner account yet.',
+      noOwnerDetail: 'Nothing has been created on this machine. Create the owner account first.',
+      createOwnerFirst: 'Create the owner account first.',
+      wrong: 'That password does not match.',
+    },
+
+    passkey: {
+      bodyDetail: 'The passkey ceremony did not finish on this device. Start it again.',
+      notAnAssertion: 'That is not a passkey assertion.',
+      notARegistration: 'That is not a passkey registration.',
+      noneRegistered: 'No passkey is registered yet.',
+      noneRegisteredDetail: 'Sign in with the backup password, then add a passkey from Settings.',
+      ceremonyExpired: 'That passkey attempt expired.',
+      ceremonyExpiredDetail:
+        'Ceremonies last two minutes and are good for one use. Try the passkey again.',
+      registrationExpired: 'That registration expired.',
+      registrationExpiredDetail: 'Ceremonies last two minutes and are good for one use. Start again.',
+      noMatch: 'No passkey on this device matched.',
+      notVerified: 'That passkey did not verify.',
+      notVerifiedDetail: 'The attestation did not check out against this relying party.',
+    },
+
+    rateLimit: {
+      tooMany: 'Too many attempts.',
+      paused: (seconds: number) => `Sign-in is paused for ${seconds} seconds.`,
+      attemptsLeft: (left: number, windowSeconds: number) =>
+        `${left} ${left === 1 ? 'attempt' : 'attempts'} left, then a ${windowSeconds} second pause.`,
+      attemptsLeftShort: (left: number) => `${left} attempts left.`,
+      window: (windowSeconds: number, wait: number) =>
+        `Five failures inside ${windowSeconds} seconds pauses sign-in. Wait ${wait} seconds and try again.`,
+      windowPassword: (windowSeconds: number, wait: number) =>
+        `Five failures inside ${windowSeconds} seconds pauses sign-in. Wait ${wait} seconds and try again. A correct password will not open it any sooner.`,
+    },
+
+    integrations: {
+      bodyDetail: 'Choose an integration and paste the credential it issued.',
+      unknownProvider: 'That is not an integration Vernier knows.',
+      unknownProviderDetail:
+        'Withings, Apple Health, Google Calendar and the mail relay are the four.',
+      emptyCredential: 'That credential is empty.',
+      emptyCredentialDetail: 'Paste the token or key the integration issued.',
+      willNotOpen: 'The stored credential will not open.',
+    },
+
+    launch: {
+      notAReport: 'That is not a launch report.',
+      notAReportDetail:
+        'This endpoint records two things the browser reports at launch: whether Vernier opened from the Home Screen, and whether this device can keep the screen awake. Nothing else is stored here.',
+    },
+
+    recovery: {
+      unusable: 'That recovery link is not usable.',
+      noToken: 'The link carried no token. Mint one on the Mac mini with scripts/recovery.sh link.',
+      noOwner: 'No owner account exists on this machine yet, so there is nothing to recover.',
+      spent: 'It has expired or has already been used. Mint a new one on the Mac mini.',
+    },
+
+    boot: {
+      missingConfig: (name: string) =>
+        `Configuration is missing ${name}. Set it in the environment file at the project root and restart the stack.`,
+      badAppUrl: (value: string) =>
+        `APP_URL is not a URL: ${value}. Expected something like https://host.example.ts.net.`,
+      wrongAlgorithm: (algorithm: string) =>
+        `The stored password names algorithm ${algorithm}, and this build verifies argon2id only.`,
+      databaseSilent: (attempts: number, detail: string) =>
+        `Postgres did not answer after ${attempts} attempts: ${detail}`,
+    },
+
+    storage: {
+      noDatabaseUrl:
+        'Configuration is missing DATABASE_URL. Compose builds it from POSTGRES_USER, POSTGRES_PASSWORD and POSTGRES_DB, so a missing value here means the environment file is incomplete.',
+      outboxOpen: 'IndexedDB refused to open.',
+      outboxWrite: 'The outbox refused the write.',
+      ownerExists: 'The owner account already exists. Vernier holds exactly one, and it is created once.',
+    },
+
+    masterKey: {
+      missing: (name: string, detail: string) =>
+        `${name} is ${detail}. Vernier will not start without it: every third-party credential in the database is encrypted with it, and starting without it would mean writing the next one in the clear. Set ${name} in the environment file at the project root to 32 random bytes in base64url and restart the stack.`,
+      mismatch: (name: string, provider: string, detail: string) =>
+        `${name} does not decrypt the stored ${provider} credential: ${detail}. The key in the environment differs from the one this row was written with. Nothing is returned and nothing is overwritten. Restore the original key, or delete the row and connect the integration again.`,
+    },
+  },
+
+  /** The manifest and the document head, which is copy a share sheet reads out. */
+  manifest: {
+    description:
+      'One person, one health record, on one machine. Trends over days, provenance on every value, nothing written without a confirmed diff.',
+    documentDescription:
+      'Vernier. One person, one health record, on one machine. Trends over days, provenance on every value, nothing written without a confirmed diff.',
+  },
+
+  /**
+   * The demonstration seed's own copy: the refusal it logs when demonstration
+   * mode is off, and the two sentences its records carry as data.
+   */
+  demoSeed: {
+    refused: 'DEMO_MODE is not 1, so the demonstration seed refused to run and wrote nothing.',
+    shortcutName: 'Vernier daily export',
+    derivationRule: 'mean of daily readings, no interpolation',
+  },
+
+  /**
    * The quick-log sheet, screen 03. Six values, one Save, and the copy says
    * plainly that the write lands on the phone first, because that is what makes
    * a basement gym with a captive wifi portal a non-event rather than a bug.
@@ -204,6 +415,8 @@ export const strings = {
     waistUp: 'Up half a centimetre',
     waistLastPrefix: 'Last',
     waistEmptyTitle: 'No waist measurement yet',
+    /** Also the method the demonstration waist record carries, so it is written once. */
+    waistMethod: 'Tape at the navel, standing, breathing out',
     waistEmptyBody:
       'Tape at the navel, standing, breathing out. Same spot each time matters more than the exact number.',
     energy: 'Energy',
@@ -237,16 +450,46 @@ export const strings = {
         : `${queued} entries are waiting to upload. Each keeps the time you typed it, not the time it arrives.`,
   },
 
-  /** Today's own additions this slice: the entry point and what was just logged. */
+  /**
+   * Today's own additions this slice: the entry point, what was just logged,
+   * and the two words that keep a reversal honest.
+   *
+   * `justLogged` names the card the quick log raises the moment a write is
+   * committed on this phone. `onFile` names the list of values that stand
+   * today. They were the same key once, so Today drew two cards side by side
+   * both headed JUST LOGGED, which is two different things wearing one label.
+   */
   todayLog: {
     justLogged: 'Just logged',
     justLoggedEmpty: 'Nothing logged today yet.',
+    onFile: 'On file',
     queued: 'Queued',
     stored: 'Stored',
+    removed: 'Removed',
     needsLogging: 'Needs logging',
     nothingDue: 'Nothing is due right now.',
     waistDue: 'Waist, due today.',
     openValue: 'Open the value',
+
+    /**
+     * Screen 03 frame 2 draws Undo and Edit and annotates them "undoable for
+     * as long as it sits in the queue". That clause is the whole design and
+     * the copy states it rather than implying it: while the entry is on this
+     * phone the write really can be dropped, and once the Mac mini has it the
+     * table refuses DELETE and the only honest reversal is a correction.
+     */
+    undo: 'Undo',
+    edit: 'Edit',
+    correct: 'Correct it',
+    undoable: 'Still on this phone. Undo removes it before it uploads, and Edit reopens the sheet.',
+    undone: 'Removed before it uploaded. Nothing was stored.',
+    uploaded:
+      'Uploaded to the Mac mini. Vernier never deletes a value, so a change from here is a correction kept beside the original.',
+    undoTooLate:
+      'It had already uploaded, so there was nothing to undo. Correct it instead and the original stays readable.',
+    whatHappensNextLabel: 'What happens next',
+    whatHappensNext:
+      'On the next connection the queue uploads in order and each entry keeps the time you typed it, not the time it arrived. If the Mac mini already holds a value for today, the app asks which one is right. It does not choose for you.',
   },
 
   /**
@@ -294,7 +537,13 @@ export const strings = {
         `${params.source} ${params.value} is the better reading for that day, so this one was not stored.`,
       firstOfDay: () => 'The first reading of this metric on this day.',
     },
-    correctionOf: (shortId: string) => `Corrects the reading ${shortId}, which stays readable.`,
+    /**
+     * The whole id, never a slice of one. Eight characters of a UUID reads as
+     * a mangled word rather than an identifier, and this sentence is frozen on
+     * the row at write time: it is the line somebody follows back to the
+     * original months later, so it names something they can search for.
+     */
+    correctionOf: (id: string) => `Corrects the reading ${id}, which stays readable.`,
     seeded: 'Seeded. Nothing else described this metric on this day.',
 
     valueSheetTitle: 'Value',

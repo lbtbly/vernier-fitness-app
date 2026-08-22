@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import type { SessionRow } from '@/db/auth';
 import { readRequestOrigin } from '@/lib/request-origin';
 import { readSessionAndTouch } from '@/lib/session';
+import { strings } from '@/lib/strings';
 
 /**
  * The small shared parts of every gate handler: where a request came from, how
@@ -43,11 +44,7 @@ export async function sessionOrRefusal(): Promise<
   if (!session) {
     return {
       session: null,
-      refusal: refuse(
-        401,
-        'Sign in first.',
-        'This endpoint needs the owner session, and the cookie on this request names none.',
-      ),
+      refusal: refuse(401, strings.api.session.signInFirst, strings.api.session.signInFirstDetail),
     };
   }
   return { session, refusal: null };

@@ -339,8 +339,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,[tabindex]:focus-visibl
  * Sign-in is the one screen with no tab bar, so its column fills the viewport
  * and the passkey action sits on the optical centre, exactly as
  * .forge/wireframes/01-sign-in.html frame 1 draws it. The buttons and inputs
- * are 52 px here rather than the shell's 44: this is a screen you use with one
- * thumb, once, and the wireframe measures 52.
+ * are 52 px here rather than the shell's 48: this is a screen you use with one
+ * thumb, once, and the wireframe measures 52. 44 is the floor a control may
+ * not go under, which is .btn.icon and nothing else.
  */
 .gate{padding-bottom:var(--s5)}
 .gate .app-scroll{padding-bottom:var(--s5);display:flex;flex-direction:column}

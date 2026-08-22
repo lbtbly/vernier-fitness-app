@@ -227,7 +227,7 @@ export type CorrectionInput = {
 export async function appendCorrection(input: CorrectionInput): Promise<MeasurementRow> {
   const db = getDb();
   const anchor = await readMeasurement(input.correctsId);
-  if (!anchor) throw new Error(`No measurement ${input.correctsId} to correct.`);
+  if (!anchor) throw new Error(strings.api.log.correctionTargetGone(input.correctsId));
 
   const chain = await readChain(anchor.rootId);
   const current = orderChain(chain).at(-1)!;
@@ -263,7 +263,7 @@ export async function appendCorrection(input: CorrectionInput): Promise<Measurem
       confidence: 'measured_manual',
       importVersion: IMPORT_VERSION,
       dedupDecision: 'correction',
-      dedupReason: strings.provenance.correctionOf(current.id.slice(0, 8)),
+      dedupReason: strings.provenance.correctionOf(current.id),
       sourceRecordId,
       rootId: current.rootId,
       correctsId: current.id,

@@ -29,6 +29,13 @@
       "when": 1787360883100,
       "tag": "0003_provenance",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1787366011304,
+      "tag": "0004_demo_marker",
+      "breakpoints": true
     }
   ]
 }
