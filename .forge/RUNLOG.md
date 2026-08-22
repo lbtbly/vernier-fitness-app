@@ -2212,3 +2212,6 @@
 2026-08-22T09:04:36Z | a8841d21fe7d4f128 | stopped | 44s
 2026-08-22T09:05:24Z | adbb43ad822a50fcd | stopped | 48s
 2026-08-22T09:06:10Z | a340cee82fb9e5b1b | stopped | 46s
+2026-08-22T09:06:59Z | ab502ca6ecb29a23d | stopped | 49s
+2026-08-22T09:07:27Z | verifier | stopped | 28s
+2026-08-22T09:09:02Z | a2a1a86eb5a8728b2 | stopped | 95s

@@ -54,6 +54,16 @@ Three plan corrections are recorded in `.forge/AMENDMENTS.md`, with before, afte
 - **A2.** A raised import question had no answer path, so its warning was permanent. Slice 5 owns the control now.
 - **A3.** A photo estimate stores `source='manual'`, `confidence='estimated'`, kind `photo_estimate`. No seventh source; the model's involvement is a confidence and a record, not an origin.
 
+## Amendment to that decision, same day, after the sixth verdict
+
+The sixth verification found **three live C6 holes**, not latent ones: each was reached in a browser on the shipped build with the gate green. It also answered the question the decision turned on, which was what is more expensive to fix later than now, and gave three specific answers. So one further dispatch was authorised before slice 4, covering only those three. This is a departure from "move on regardless" and the reason is the criterion, not impatience: I asked what is cheaper now, and got a credible answer.
+
+1. **The suite's read-write path to the owner's database.** The read-only connection holds and Postgres refused every escape tried inside one `-c` string, but it is one helper among several, and `recovery.sh` already drives a read-write connection into the live database that two specs use to UPDATE and DELETE. The static test meant to hold the line greps for `query(` and skips anything else. Fix: a Postgres role with no write grants, so an unmodelled path inherits the refusal rather than escaping it. After slice 5 those tables hold real Withings history and the table refuses DELETE, so a loss is permanent.
+2. **`tests/e2e/passkey.spec.ts:52` breaks the moment the owner registers a passkey**, because it asserts the screen reads "No passkey is registered yet.", which renders only at zero passkeys. The run has been parked on that exact action for hours. R7 fails with it. Two lines now, a baffling failure at the worst moment otherwise.
+3. **C6's mechanism, not its instances.** Five rounds each closed a real hole and each was overtaken, because the check asks whether a fragment *could* have come from the browser. The inversion the verifier named ends it: pass the caught `Error` object through and check **identity**, not text equality. A composed literal then fails because it is not that object's message, and a fragment in the wrong state fails because no such object exists there. Left as is, every slice from 4 to 14 adds screens under a check that grades provenance by circumstantial agreement.
+
+After that dispatch the run moves to slice 4 whatever C6's verdict, on the reasoning already recorded.
+
 ## Lead decision, 2026-08-22: C6 does not block the other eleven slices
 
 C6 has failed five verifications. Each round closed real holes and the list has shrunk to named items, so the loop has been productive rather than circular, and the verifier's own standing judgement is "converging, not circling". But the sixth builder pass is in flight and slice 4 has not started.
