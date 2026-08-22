@@ -1,5 +1,5 @@
-import { liveProvenanceCensus, testStack } from './host';
-import { LIVE_CENSUS } from './global-setup';
+import { liveDeviceObservations, liveProvenanceCensus, testStack } from './host';
+import { LIVE_CENSUS, LIVE_DEVICE_SIGNALS } from './global-setup';
 
 /**
  * The suite leaves the owner's database exactly as it found it, and says so.
@@ -23,6 +23,35 @@ export default function globalTeardown(): void {
   const before = process.env[LIVE_CENSUS];
   const after = liveProvenanceCensus();
   console.log(`teardown: the owner's database holds ${after}.`);
+
+  /*
+   * And the device signals, which are the ones this suite actually wrote once.
+   *
+   * The evidence columns are absolute: `observed` and `first_observed_at` are
+   * what C2 reads, and nothing in a test run may produce them. A moved
+   * `last_reported_at` with the evidence unchanged is a report that was
+   * delivered and stored nothing, which after the harness hold in fixtures.ts
+   * can only be a real browser on a real device: it is printed rather than
+   * failed, because failing a run on the owner picking up his phone would be a
+   * red for something that is not a defect.
+   */
+  const signalsBefore = process.env[LIVE_DEVICE_SIGNALS];
+  const signalsAfter = liveDeviceObservations();
+  console.log(`teardown: its device signals read ${signalsAfter}.`);
+  if (signalsBefore !== undefined && signalsBefore !== signalsAfter) {
+    const evidence = (line: string) => line.replace(/\/[^,]*/g, '');
+    if (evidence(signalsBefore) !== evidence(signalsAfter)) {
+      throw new Error(
+        `this run wrote device_observation on the owner's install: it read ${signalsBefore} ` +
+          `and now reads ${signalsAfter}. C2 reads that table back as proof he opened Vernier from ` +
+          'his Home Screen, and no test may author it. Find out what did.',
+      );
+    }
+    console.log(
+      `teardown: a launch was reported to the owner's install during this run and stored nothing new. ` +
+        `Before: ${signalsBefore}. After: ${signalsAfter}.`,
+    );
+  }
 
   try {
     console.log(`teardown: ${testStack('down')}`);

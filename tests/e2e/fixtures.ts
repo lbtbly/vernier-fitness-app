@@ -65,15 +65,27 @@ function reportsForReal(target: string | undefined): boolean {
   return target !== undefined && target.replace(/\/+$/, '') === scratchUrl.replace(/\/+$/, '');
 }
 
+/**
+ * How many launch reports this worker answered itself. Read by boundary.spec.ts,
+ * which drives the whole accident at the live origin in WebKit and proves the
+ * request never left the machine.
+ */
+let held = 0;
+
+export function launchReportsHeld(): number {
+  return held;
+}
+
 async function holdTheLaunchReport(context: BrowserContext, target: string | undefined): Promise<void> {
   if (reportsForReal(target)) return;
-  await context.route(LAUNCH_REPORT, (route) =>
-    route.fulfill({
+  await context.route(LAUNCH_REPORT, (route) => {
+    held += 1;
+    return route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify(NOT_RECORDED),
-    }),
-  );
+    });
+  });
 }
 
 /**

@@ -1,7 +1,18 @@
-import { ensureSuiteRole, liveProvenanceCensus } from './host';
+import { ensureSuiteRole, liveDeviceObservations, liveProvenanceCensus } from './host';
 
 /** What the run must find again at the end. Read once, before a spec runs. */
 export const LIVE_CENSUS = 'VERNIER_LIVE_CENSUS_AT_START';
+
+/**
+ * And the four device signals, read the same way and for a sharper reason.
+ *
+ * The provenance census catches a row that went missing. This catches a row that
+ * appeared: `device_observation` is the table C2 reads back as evidence of a
+ * device, and this suite wrote it on the owner's install on 2026-08-22 without
+ * anybody noticing until a verifier read the row a day later. Written down at
+ * the start of every run from now on, and checked at the end.
+ */
+export const LIVE_DEVICE_SIGNALS = 'VERNIER_LIVE_DEVICE_SIGNALS_AT_START';
 
 /**
  * One reading of the owner's database, taken before anything runs.
@@ -24,4 +35,7 @@ export default function globalSetup(): void {
   const census = liveProvenanceCensus();
   process.env[LIVE_CENSUS] = census;
   console.log(`setup: the owner's database holds ${census}. Nothing in this run may lower it.`);
+  const signals = liveDeviceObservations();
+  process.env[LIVE_DEVICE_SIGNALS] = signals;
+  console.log(`setup: its device signals read ${signals}. Nothing in this run may write them.`);
 }

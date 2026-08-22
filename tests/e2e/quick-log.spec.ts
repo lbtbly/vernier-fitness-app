@@ -932,3 +932,136 @@ test.describe('the quick log against screen 03', () => {
     resetScratchProvenance();
   });
 });
+
+/**
+ * F24. The capture path never blocks, and never lies about what it did.
+ *
+ * The second half of that is what failed. The sheet's waist control is a
+ * stepper: it moves the LAST measurement by half a centimetre, so with no last
+ * measurement it has nothing to move. With the origin unreachable the snapshot
+ * read fails, and one tap on the plus control put 0.5 cm in it and queued it.
+ * The just-logged card then read "Waist 0.5 cm, Queued" beside "Still on this
+ * phone" for a value the band in src/lib/provenance.ts refuses at 30 cm, so the
+ * flush was certain to reject it and nothing would ever be stored. The data was
+ * safe and the message was not.
+ *
+ * Both halves are closed here. The stepper refuses to start from nothing and
+ * says why, and the queue asks the same rule the route asks before it accepts
+ * anything at all.
+ */
+test.describe('the quick log tells the truth about what it queued', () => {
+  test.describe.configure({ mode: 'serial' });
+  test.beforeAll(async () => {
+    await bringUpTheScratchInstance();
+  });
+
+  test('refuses to step a waist it has no reading to step from, and says why', async ({
+    page,
+    context,
+  }) => {
+    resetScratchProvenance();
+    await signIn(page);
+
+    // The origin taken away, which is the state the defect was found in: the
+    // snapshot read fails and there is no last measurement to count from.
+    await goOffline(context, page);
+    await page.getByRole('button', { name: 'Quick log', exact: true }).click();
+    await expect(page.locator('[data-state="error"]')).toBeVisible({ timeout: 20_000 });
+
+    const up = page.getByRole('button', { name: 'Up half a centimetre' });
+    const down = page.getByRole('button', { name: 'Down half a centimetre' });
+    console.log(`with no snapshot: up enabled ${await up.isEnabled()}, down enabled ${await down.isEnabled()}`);
+    await expect(up).toBeDisabled();
+    await expect(down).toBeDisabled();
+
+    const why = (await page.locator('[data-waist="no-base"]').textContent())!.trim();
+    console.log(`and it says: ${why}`);
+    expect(why).toContain('No last measurement to step from');
+    await expect(page.locator('.metric.mut')).toHaveText(/--/);
+
+    // A tap on the plus lands on nothing, so the reading is still absent.
+    await up.click({ force: true });
+    await expect(page.locator('.metric.mut')).toHaveText(/--/);
+
+    // AND THE CAPTURE PATH IS NOT BLOCKED. Everything else on the sheet still
+    // saves with the origin gone, which is the whole point of the queue.
+    await page.getByRole('button', { name: 'Energy, 4 of 5' }).click();
+    await page.getByRole('button', { name: 'Save', exact: true }).click();
+    const queued = await page.evaluate(async () => {
+      const db = await new Promise<IDBDatabase>((resolve, reject) => {
+        const request = indexedDB.open('vernier', 1);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      const rows = await new Promise<Array<{ body: string }>>((resolve, reject) => {
+        const request = db.transaction('outbox', 'readonly').objectStore('outbox').getAll();
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      db.close();
+      return rows.map((row) => row.body);
+    });
+    console.log(`the queue holds ${queued.length} entry(s): ${queued.join(' | ')}`);
+    expect(queued).toHaveLength(1);
+    expect(queued[0]).toContain('energy');
+    // And no waist of any size went with it.
+    expect(queued[0]).not.toContain('waist');
+
+    await settle(page);
+    await page.screenshot({ path: `${CAPTURES}f24-no-base-to-step-from-393.png`, fullPage: true });
+    await goOnline(context, page);
+  });
+
+  test('refuses a value the flush would refuse, at the moment it is typed', async ({ page }) => {
+    resetScratchProvenance();
+    await signIn(page);
+
+    // A database with no waist reading in it at all, truncated without the
+    // re-seed so the absence is real. The stepper counts up from nothing here
+    // because the absence is a fact rather than an unknown, and one tap lands
+    // on 0.5 cm, which the band refuses at 30.
+    scratchQuery('truncate measurement, source_record, import_question, idempotency_key, write_request');
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Quick log', exact: true }).click();
+    await expect(page.locator('[data-state="empty"]')).toBeVisible({ timeout: 20_000 });
+    await page.getByRole('button', { name: 'Up half a centimetre' }).click();
+    await expect(page.locator('.sheet .metric')).toHaveText(/0\.5/);
+
+    await page.getByRole('button', { name: 'Save', exact: true }).click();
+
+    // The sheet stays open on what was typed and the card names the reason the
+    // server would have given, from the same key.
+    const refused = page.locator('[data-state="refused"]');
+    await expect(refused).toBeVisible();
+    const said = (await refused.textContent())!.replace(/\s+/g, ' ').trim();
+    console.log(`the refusal reads: ${said}`);
+    expect(said).toContain('Waist is stored between 30 and 250 cm');
+    expect(said).toContain('Nothing was put on this phone and nothing was sent');
+
+    // Nothing was queued, nothing was claimed as just logged, and nothing
+    // reached the database.
+    const depth = await page.evaluate(async () => {
+      const db = await new Promise<IDBDatabase>((resolve, reject) => {
+        const request = indexedDB.open('vernier', 1);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      const rows = await new Promise<unknown[]>((resolve, reject) => {
+        const request = db.transaction('outbox', 'readonly').objectStore('outbox').getAll();
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      db.close();
+      return rows.length;
+    });
+    console.log(`entries in the queue after the refusal: ${depth}`);
+    expect(depth).toBe(0);
+    expect(await page.locator('[data-just-logged]').count()).toBe(0);
+    expect(scratchQuery("select count(*) from measurement where metric = 'waist'")).toBe('0');
+
+    await settle(page);
+    await page.screenshot({ path: `${CAPTURES}f24-queue-refuses-a-refusable-value-393.png`, fullPage: true });
+
+    resetScratchProvenance();
+  });
+});

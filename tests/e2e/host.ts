@@ -357,6 +357,27 @@ export function resetScratchProvenance(): void {
 }
 
 /**
+ * The signals C2 reads back as proof the owner opened Vernier from his iPhone
+ * Home Screen, in one line, for the run to compare against.
+ *
+ * On 2026-08-22 two of them went true on the owner's install at 16:13:55,
+ * written by a headless browser on this Mac, and two owner-blocked rubric lines
+ * read as met by a row the suite had authored. This is the census that would
+ * have caught it while the run that did it was still running.
+ */
+export function liveDeviceObservations(): string {
+  return query(`
+    select coalesce(
+      string_agg(
+        signal || '=' || observed || '@' || coalesce(first_observed_at::text, 'never')
+          || '/' || last_reported_at::text || '/' || coalesce(reported_from, 'unattributed'),
+        ', ' order by signal
+      ), 'none')
+    from device_observation
+  `);
+}
+
+/**
  * The demonstration seed, re-anchored a chosen number of days back, on the
  * scratch instance and nowhere else.
  *

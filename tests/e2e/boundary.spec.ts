@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process';
-import { expect, test } from './fixtures';
-import { appLogs, baseUrl, mintSignInLink, projectRoot, query } from './host';
+import { expect, launchReportsHeld, test } from './fixtures';
+import { appLogs, baseUrl, liveDeviceObservations, mintSignInLink, projectRoot, query } from './host';
 
 /**
  * The boundary, which is the point of this slice: nothing reaches the app
@@ -130,4 +130,57 @@ test.describe('the credential boundary', () => {
     // And nothing the app logged along the way holds it either.
     expect(appLogs()).not.toContain(secret);
   });
+});
+
+/**
+ * C2. The accident, re-run at the owner's own install, in the engine his iPhone
+ * and his Mac run, and it does not reach him.
+ *
+ * On 2026-08-22 standalone_seen and wake_lock_available both went true on that
+ * install at 16:13:55, written by a headless browser on this Mac, and two
+ * owner-blocked rubric lines read as met by a row this suite had authored. The
+ * route learned to refuse a driven browser on two witnesses; the user-agent one
+ * never fires for WebKit, because Playwright's WebKit sends a genuine Safari
+ * user agent, so for that engine the whole refusal rested on one client-supplied
+ * boolean and one `addInitScript` line put it back to false.
+ *
+ * So the report does not leave the machine. This drives everything the accident
+ * had, in WebKit, against the live origin: a page this server rendered, a token
+ * it minted, the shipped component raising the report, `navigator.webdriver`
+ * overwritten before the first script and display mode claiming standalone. The
+ * harness answers it, the request never goes out, and the four signals on the
+ * owner's install read exactly what they read a moment earlier.
+ */
+test('C2. this suite cannot report a launch to the owner\'s install, whatever the page claims', async ({
+  page,
+}) => {
+  const before = liveDeviceObservations();
+  const heldBefore = launchReportsHeld();
+  console.log(`the owner's device signals before: ${before}`);
+
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'webdriver', { get: () => false });
+    const query = window.matchMedia.bind(window);
+    window.matchMedia = (text: string) =>
+      text.includes('standalone') ? ({ matches: true, media: text } as MediaQueryList) : query(text);
+  });
+  await page.goto('/sign-in');
+  await page.waitForLoadState('networkidle');
+
+  console.log(`navigator.webdriver in this browser: ${await page.evaluate(() => navigator.webdriver)}`);
+  console.log(
+    `display-mode standalone in this browser: ${await page.evaluate(() => window.matchMedia('(display-mode: standalone)').matches)}`,
+  );
+  expect(await page.evaluate(() => navigator.webdriver)).toBe(false);
+  expect(await page.evaluate(() => window.matchMedia('(display-mode: standalone)').matches)).toBe(true);
+
+  // The shipped component raised a report and the harness answered it here.
+  const heldAfter = launchReportsHeld();
+  console.log(`launch reports this worker answered itself: ${heldAfter - heldBefore}`);
+  expect(heldAfter).toBeGreaterThan(heldBefore);
+
+  // And the row C2 reads is where it was, to the microsecond.
+  const after = liveDeviceObservations();
+  console.log(`the owner's device signals after: ${after}`);
+  expect(after).toBe(before);
 });

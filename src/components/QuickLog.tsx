@@ -543,11 +543,9 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
                 */}
               {refused ? (
                 <div className="card error" data-state="refused">
-                  <div className="between">
-                    <span className="lbl">{strings.quickLog.title}</span>
-                    <span className="chip a">{strings.error.title}</span>
+                  <div className="head" style={{ marginTop: 0 }}>
+                    {strings.quickLog.refusedTitle}
                   </div>
-                  <div className="head">{strings.quickLog.refusedTitle}</div>
                   {refused.map((reason) => (
                     <p className="sub" key={reason}>
                       {reason}
