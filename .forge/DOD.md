@@ -86,33 +86,33 @@ viewports means 393x852, 768 and 1280 CSS pixels wide, captured.
   machine holding no passkey, using only host shell access, and it asks no secret
   question and sends no password by email. Evidence: the procedure run end to end
   with the resulting successful sign-in.
-- [ ] **F19.** Every stored measurement carries raw value, unit, timezone, source
+- [x] **F19.** Every stored measurement carries raw value, unit, timezone, source
   from the six permitted values, measurement time, import time, confidence, import
   version and a deduplication decision, all non-null. Evidence: the table
   definition and a rejected insert missing one field.
-- [ ] **F20.** Editing a stored value appends a correction and never overwrites:
+- [x] **F20.** Editing a stored value appends a correction and never overwrites:
   after three edits the original and all three corrections are readable, four rows
   in total. Evidence: the query result.
-- [ ] **F21.** Every value on screen carries a source chip, and one tap opens a
+- [x] **F21.** Every value on screen carries a source chip, and one tap opens a
   sheet holding stored value and unit, measurement and import time in Europe/Paris,
   source, confidence, deduplication decision, and the correction history with the
   original struck through. Evidence: a capture of the sheet for a corrected value.
-- [ ] **F22.** A second tap from that sheet reaches the source for all six
+- [x] **F22.** A second tap from that sheet reaches the source for all six
   sources: the device sync batch, the phone payload, the lab page with the row
   highlighted, the photo and the model reply, the derivation, and the demonstration
   record. Evidence: six captures, one per source, all landing on the same screen
   shape.
-- [ ] **F23.** Waist, energy, fatigue, hunger, satiety and a free note each commit
+- [x] **F23.** Waist, energy, fatigue, hunger, satiety and a free note each commit
   from Today in six taps or fewer. Evidence: a scripted interaction printing the
   tap count for each of the six.
-- [ ] **F24.** With the origin unreachable, a quick-log write commits locally,
+- [x] **F24.** With the origin unreachable, a quick-log write commits locally,
   shows a queued marker and the queue count, and replays exactly once when the
   origin returns: one row in the database and one idempotency key in the request
   log. Evidence: the capture, the row count and the request log.
 - [ ] **F25.** Demonstration data loads only when demonstration mode is on and
   stamps every row with source `demo`; with it off the seed refuses to run and the
   tables stay at zero rows. Evidence: both runs and both row counts.
-- [ ] **F26.** An import that disagrees with a stored correction raises a question
+- [x] **F26.** An import that disagrees with a stored correction raises a question
   holding both values and writes nothing until it is answered: the stored value is
   byte-identical before and after the import. Evidence: the question capture and
   the two row states.

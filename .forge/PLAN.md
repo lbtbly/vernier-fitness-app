@@ -304,8 +304,17 @@ one in the same transaction.
 
 The measure call sends `meastypes=1,5,6,8,11,76,77,88` and `category=1`
 explicitly, never an unfiltered call, loops on `more`/`offset` with a bounded page
-cap, decodes each value as `value * 10 ** unit`, upserts on `(grpid, type)` and
-advances the cursor to `max(modified)` only after the write commits. Blood
+cap, decodes each value as `value * 10 ** unit`, inserts with `ON CONFLICT DO
+NOTHING` against a unique index on `(source, external_key)` where the external
+key is `grpid:type`, or records a dedup decision when the row already exists,
+and advances the cursor to `max(modified)` only after the write commits. It
+cannot upsert: slice 3 made the measurement table append-only with a trigger,
+and an upsert fires it. See `.forge/AMENDMENTS.md` A1.
+
+A re-import that disagrees with a stored correction raises an import question,
+and this slice also ships the control that answers one: both values with their
+provenance, the owner picks or edits, the choice writes a correction naming the
+question, and the question closes. See `.forge/AMENDMENTS.md` A2. Blood
 pressure is excluded twice: a group carrying type 9 or 10 is dropped whole, so its
 type 11 is never harvested, and the storage layer rejects any type outside the
 allowlist even if the fetch layer is bypassed.
