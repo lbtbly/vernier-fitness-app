@@ -137,7 +137,7 @@ direct path is the note.
   holding both values and writes nothing until it is answered: the stored value is
   byte-identical before and after the import. Evidence: the question capture and
   the two row states.
-- [x] **F27.** At 393x852, Today shows the session row, the meals, what needs
+- [ ] **F27.** At 393x852, Today shows the session row, the meals, what needs
   logging, the weight trend and adherence within the top 715 pixels with no
   scrolling. Evidence: a full-page capture with the fold marked.
 - [x] **F28.** The weight chart draws daily readings as 2.1 px unconnected dots, a
@@ -608,7 +608,7 @@ their interaction detail in `.forge/wireframes/`, and the standards skill.
   password second, the one-time owner creation, and the host-unreachable state.
   Every interactive element shows a 2 px focus outline at 2 px offset. Evidence:
   three captures plus a keyboard-traversal capture.
-- [x] **C5.** Quick log matches screen 03 at three viewports, presented as a sheet
+- [ ] **C5.** Quick log matches screen 03 at three viewports, presented as a sheet
   with 44 px minimum targets, and the loading, empty, error, offline and stale
   states render with the geometry defined once on screen 00. Evidence: three
   captures plus five state captures overlaid on the screen-00 geometry.
@@ -627,7 +627,7 @@ their interaction detail in `.forge/wireframes/`, and the standards skill.
   string the product authored with its key, produced by a walk that prints the
   surfaces it covered and covers at least one stored value per source, and a
   timezone-shifted run across six zones producing identical rendered dates.
-- [ ] **C7.** Today matches screen 02 and Health matches screen 04 at three
+- [x] **C7.** Today matches screen 02 and Health matches screen 04 at three
   viewports, with exactly one accented action per screen and origin badges rendered
   as neutral chrome rather than a semantic colour. Evidence: six captures plus a
   count of accented elements per screen.
