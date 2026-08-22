@@ -775,8 +775,12 @@ const kindsBehindAValue = db(
 // both loops walk nothing, the run prints a shorter list, and it exits 0 saying
 // "every fragment on every surface resolves to a key." A green over almost
 // nothing reads exactly like a green over everything, and that is not an edge
-// case: `compose.yaml` reads `DEMO_MODE: ${DEMO_MODE:-0}`, so a stack brought
-// up from a clean shell has no rows in it at all.
+// case: compose.yaml falls back to demonstration mode 0 when the environment
+// file carries no DEMO_MODE line, and for the whole of slice 3 the owner's file
+// carried none, so a stack brought up from a clean shell had no rows in it at
+// all. scripts/up.sh reconciles that setting now, and the floor stands anyway:
+// a bring-up is a thing that can be got wrong and a floor is a thing that says
+// so.
 //
 // So the floor is asserted before the browser is launched, and it is named in
 // C6's own evidence clause rather than left as advice. A zero is evidence only
@@ -807,7 +811,7 @@ if (short.length > 0) {
     process.stderr.write(`  no stored value stands in for: ${missingSources.join(', ')}\n`);
   }
   process.stderr.write(
-    '  Bring the stack up with demonstration data: DEMO_MODE=1 is named in .env.example.\n',
+    '  Bring the stack up with demonstration data: bash scripts/up.sh sets DEMO_MODE from the environment file.\n',
   );
   process.exit(1);
 }

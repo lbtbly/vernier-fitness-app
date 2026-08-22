@@ -9,20 +9,43 @@ by hand.
 ## The two checks
 
 `npm run strings` reads the source. It prints the inventory, one line per key,
-then parses every `.ts` and `.tsx` under `src/app`, `src/components`, `src/lib`
-and `src/db` and fails on copy written inline: a JSX text node, a spoken
-attribute, a literal in the `error` or `detail` position of `refuse()`, or a
-string shaped like language rather than notation anywhere in those trees. It
-needs no stack and answers in a second, so it runs on every edit.
+then parses every `.ts` and `.tsx` under `src/`, all of it, and fails on copy
+written inline: a JSX text node, a spoken attribute, a literal in the `error` or
+`detail` position of `refuse()`, a string shaped like language rather than
+notation, or a `content:` declaration painting words from a stylesheet. It
+walked four named directories once and the root of `src/` was in none of them,
+which is where the middleware refusal shipped from, so there is no list of
+directories any more. What is still outside the walk is printed on every run.
+It needs no stack and answers in a second, so it runs on every edit.
 
 `npm run strings:rendered` reads the screen. It walks the shipped product in
-fifty states through WebKit, reads every fragment a person can see or hear, and
-asserts each one resolves to a catalogue key, a value out of a column, a value
-shape, or text WebKit itself produced. It needs a live stack and about a minute,
-so it runs once per dispatch.
+fifty states through WebKit, reads every fragment a person can see or hear
+including what `content` paints on a `::before` or an `::after`, and asserts
+each one resolves to a catalogue key, a value the owner or a device wrote into a
+column, a value shape, or text WebKit itself produced in that run. It needs a
+live stack and about a minute, so it runs once per dispatch.
 
 Neither is complete on its own and the limits are written at the head of each
 file rather than discovered later.
+
+## Three things that are never an excuse
+
+**Position.** `<code>`, `<kbd>`, `<samp>` and `<pre>` used to exempt any kebab,
+snake or dotted run inside them, so `<code>sign-in</code>` from a helper
+rendered at 45 px and both checks passed. Where a fragment landed says nothing
+about who wrote it. There is no element exemption in either checker.
+
+**A column.** The rendered check builds its data vocabulary `where not seed`.
+The demonstration seed is the product writing, and reading its words back out of
+`source_record.reference` excused `page 2, row 7` and `quick-log`, both composed
+in `src/db/demo.ts` and both painted on a source screen with no key. The seed's
+own words are catalogue keys.
+
+**A marker.** A fragment marked `data-authored="platform"` is excused only when
+WebKit produced that exact string in the same run. Mark a node and echo a
+harvested string and both halves hold, which is a real defeat, so the same run
+reads the shipped tree and fails any literal equal to a message the browser
+handed it. The product never writes the browser's words down.
 
 ## The state the rendered check needs
 
@@ -40,9 +63,21 @@ owner's installation:
 DEMO_MODE=1 bash scripts/test-stack.sh reset
 ```
 
-On the live stack the same state comes from `DEMO_MODE=1`, which is named in
-`.env.example` and defaults to 1 there. It was named nowhere at all until
-2026-08-22, so `scripts/up.sh` from a clean shell brought Vernier up empty and
+On the live stack the same state comes from `DEMO_MODE=1`, and it comes from the
+bring-up rather than from a shell. `scripts/up.sh` runs
+`node scripts/gen-env.mjs --settings` first, which adds any setting the owner's
+environment file does not carry and leaves every key it already has alone. Ask
+the running container what it got, never the file:
+
+```
+docker compose exec -T app printenv DEMO_MODE
+```
+
+It failed twice before that. The setting was named nowhere at all, and then it
+was named only in `.env.example`, which is documentation: the owner's own file
+had no `DEMO_MODE` line, `compose.yaml` reads `${DEMO_MODE:-0}`, and the default
+won while `APP_URL`, `APP_NAME`, `WEBAUTHN_RP_ID` and `TZ` resolved correctly
+from that same file. A clean `bash scripts/up.sh` brought Vernier up empty and
 the walk passed over nothing.
 
 ## The gate

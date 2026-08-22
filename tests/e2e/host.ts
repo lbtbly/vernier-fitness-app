@@ -142,8 +142,36 @@ export function ownerExists(): boolean {
  *
  * The restart is what re-seeds, through the same boot path the container uses in
  * anger, so nothing here writes a demonstration row by hand.
+ *
+ * AND IT REFUSES TO RUN AGAINST ANYTHING THAT IS NOT THE SEED. This helper runs
+ * against the owner's live install, and the append-only trigger does not save
+ * it: TRUNCATE walks straight past a row-level trigger, which is how a
+ * permanent row was removed from this database during a verification. Harmless
+ * while every row is demonstration data and destructive the moment slice 5
+ * writes the first real Withings reading. So it counts the rows that are not
+ * seed first, in both tables the seed touches, and if there is one it throws and
+ * writes nothing at all. The suite fails loudly and the owner's history stays
+ * where it is. To run these tests against a database with real readings in it,
+ * point the suite at the scratch instance: `bash scripts/test-stack.sh reset`
+ * builds an empty one on 127.0.0.1:3101 and nothing there is the owner's.
  */
+export function ownerRowsHeld(): number {
+  return Number(
+    query(
+      `select (select count(*) from measurement where not seed)
+            + (select count(*) from source_record where not seed)`,
+    ),
+  );
+}
+
 export function resetProvenance(): void {
+  const owned = ownerRowsHeld();
+  if (owned > 0) {
+    throw new Error(
+      `resetProvenance refused: this database holds ${owned} row(s) that are not seed data, and TRUNCATE would take them. ` +
+        'Run the suite against the scratch instance instead: bash scripts/test-stack.sh reset.',
+    );
+  }
   query('truncate measurement, source_record, import_question, idempotency_key, write_request');
   execFileSync('docker', ['compose', 'restart', 'app'], { cwd: projectRoot, encoding: 'utf8' });
   execFileSync(

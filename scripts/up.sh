@@ -16,6 +16,20 @@ for arg in "$@"; do
   esac
 done
 
+# Reconcile the settings the environment file must carry before Compose reads
+# it. Compose interpolates from that file and falls back to the default written
+# into compose.yaml when a key is absent, silently: DEMO_MODE was documented at
+# 1 in .env.example, missing from the file, and every bring-up put the app at 0
+# while its four neighbours resolved correctly from the same file. The state the
+# tests need has to come from the bring-up and never from a shell export, so the
+# repair runs here, adds only what is absent, and says nothing when there is
+# nothing to add.
+if command -v node >/dev/null 2>&1; then
+  node scripts/gen-env.mjs --settings
+else
+  echo "up.sh: node is not installed, so the environment settings were not reconciled." >&2
+fi
+
 if [ "$BUILD" -eq 1 ]; then
   compose up -d --build
 else

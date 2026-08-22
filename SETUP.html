@@ -448,6 +448,10 @@ footer{color:var(--text-3);font-size:12.5px;padding:26px 0 0;border-top:1px soli
     L.push('APP_NAME=Vernier');
     L.push('TZ=Europe/Paris');
     L.push('');
+    L.push('# Demonstration seed. 1 writes six marked rows on boot, 0 writes nothing.');
+    L.push('# Ships as 1: it is the state the string walk and the test suite expect.');
+    L.push('DEMO_MODE=1');
+    L.push('');
     L.push('# GENERATED, run: node scripts/gen-env.mjs');
     L.push('MASTER_KEY=');
     L.push('POSTGRES_PASSWORD=');
