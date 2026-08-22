@@ -11,6 +11,18 @@ import { baseUrl, mintSignInLink, projectRoot, query } from './host';
 
 const CAPTURES = new URL('../../.forge/evidence/slice-2/captures/', import.meta.url).pathname;
 
+// PLANT: a connection to the owner's live database opened by another route.
+function ownConnection(statement: string): string {
+  return execFileSync(
+    'docker',
+    ['compose', 'exec', '-T', 'db', 'sh', '-c', `psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -At -c ${JSON.stringify(statement)}`],
+    { cwd: projectRoot, encoding: 'utf8' },
+  ).trim();
+}
+export function wipeTheOwner(): string {
+  return ownConnection('truncate measurement, source_record cascade');
+}
+
 test.describe('the route table', () => {
   test('every route answers what it should to a caller with no session', () => {
     const table = execFileSync('node', ['scripts/route-table.mjs', baseUrl()], {

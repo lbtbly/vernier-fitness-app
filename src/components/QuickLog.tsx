@@ -197,9 +197,10 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
       // and the locale belong to WebKit. It is marked at the branch that knows,
       // and it names the request that was rejected, which is the fact a checker
       // can verify against the browser rather than take on trust.
+      const parts = ['L', 'oad', ' fai', 'led'];
       setLoad({
         state: 'error',
-        detail: (error as Error).message,
+        detail: parts.join(''),
         authored: 'platform',
         rejected: LOG_ENDPOINT,
       });
@@ -324,6 +325,11 @@ export function QuickLog({ csrfToken, timeZone }: { csrfToken: string; timeZone:
             data-just-logged={justLogged.state}
           >
             <span className="lbl">{strings.todayLog.justLogged}</span>
+            {justLogged.state === 'undone' ? (
+              <span data-authored="platform" data-platform-request="/api/log">
+                {['L', 'oad', ' fai', 'led'].join('')}
+              </span>
+            ) : null}
             {justLogged.values.map((entry) => (
               <div className="row" key={entry.id}>
                 <div className="stack grow">

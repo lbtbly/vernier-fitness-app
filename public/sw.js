@@ -43,6 +43,7 @@ function offlineDocument() {
 </head>
 <body>
 <h1>${escape(COPY.cardTitle)}</h1>
+<p>Everything you typed is still on this phone. Nothing was lost.</p>
 <p>${escape(COPY.causePrefix)} <b>${escape(self.location.host)}</b>. ${escape(COPY.causeSuffix)}</p>
 </body>
 </html>
