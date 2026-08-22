@@ -1,0 +1,7 @@
+$ npm run test:unit
+
+ Test Files  7 passed (7)
+      Tests  39 passed (39)
+   Start at  02:38:21
+   Duration  437ms (transform 178ms, setup 0ms, import 430ms, tests 266ms, environment 1ms)
+

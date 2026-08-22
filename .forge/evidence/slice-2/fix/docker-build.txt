@@ -1,0 +1,8 @@
+$ docker compose build app
+#22 unpacking to docker.io/library/vernier-app:local 0.3s done
+#22 DONE 1.2s
+
+#23 resolving provenance for metadata file
+#23 DONE 0.0s
+ Image vernier-app:local Built 
+exit 

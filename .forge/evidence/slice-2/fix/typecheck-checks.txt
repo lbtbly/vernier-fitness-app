@@ -1,0 +1,8 @@
+$ npm run typecheck
+
+> vernier@0.1.0 typecheck
+> tsc --noEmit
+
+
+$ FORGE_CHECKS_FULL=1 bash scripts/checks.sh; echo "exit $?"
+exit 0

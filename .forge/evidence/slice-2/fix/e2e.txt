@@ -1,0 +1,9 @@
+$ npm run test:e2e
+  ✓  18 [webkit-iphone] › tests/e2e/zz-rate-limit.spec.ts:68:3 › the rate limiter › clears from the host shell, appending a row rather than editing one (692ms)
+focus traversal: 3 stops of 3 interactive elements
+  input.input: 2px solid rgb(143, 196, 255) at 2px
+  button.btn primary block: 2px solid rgb(143, 196, 255) at 2px
+  button.btn quiet block: 2px solid rgb(143, 196, 255) at 2px
+  ✓  19 [chrome-keyboard] › tests/e2e/focus.spec.ts:32:1 › every interactive element on the gate carries a 2 px focus outline at 2 px offset (745ms)
+
+  19 passed (34.3s)
