@@ -88,6 +88,41 @@ Index of all thirteen: `/Users/lambertbouley/Claude/lbtbly-fitness-app/.forge/wi
 
 ---
 
+## 2b. Resolved contradictions between the sheets
+
+Recorded by the lead on 2026-08-22, after a rule-by-rule diff of all thirteen
+wireframes found them disagreeing with each other. A builder cannot follow two
+sheets, and a verifier cannot rule against a value that has two answers, so each
+of these is settled here and this section wins.
+
+**Button geometry. The base is `min-height: 48px` and `font-size: 16px`.**
+Nine of the thirteen sheets say 48 and 16. `00-patterns.html` alone says 44 and
+15, and it is the outlier rather than the reference: it was written first. The
+larger values are deliberate escalations and they stay:
+
+| Surface | min-height | Why |
+|---|---|---|
+| Base, every shell screen | 48px | The system |
+| Sign-in, quick-log sheet | 52px | One committed action, reached one-handed |
+| Session player | 56px, and 88px on the transport | Sweaty hands, mid-set, no second attempt |
+| Tab items, icon buttons | 44px floor | The accessibility minimum, never the target |
+
+44px is the floor a control may not go under. It is not the size a primary
+action should be.
+
+**`.btn.quiet` carries all three declarations**, `background:transparent`,
+`border-color:transparent`, `color:var(--accent)`. `00-patterns.html` writes the
+first alone and patches the colour inline at its one usage, which is how the
+shipped stylesheet lost it and rendered the secondary action as a second box the
+same size as the primary. Twelve sheets write the full rule. They win.
+
+**`.btn svg` is 20px.** `00-patterns.html` says 18. Twelve sheets say 20.
+
+The pattern in all three: `00-patterns.html` is authoritative for the six card
+states, the provenance walk and the confirm diff, which is what it was written
+to define. It is not authoritative for button geometry, and where it disagrees
+with the screens that draw the real thing, the screens win.
+
 ## 3. Tokens
 
 Copy verbatim. `:root` holds the scales; the two theme blocks hold colour. The
