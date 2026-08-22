@@ -44,45 +44,45 @@ viewports means 393x852, 768 and 1280 CSS pixels wide, captured.
   changes the origin the sign-in page reports, with no source file modified.
   Evidence: `git status` clean, the two rendered pages, and the two configuration
   values.
-- [ ] **F8.** Owner creation succeeds exactly once. A second creation request
+- [x] **F8.** Owner creation succeeds exactly once. A second creation request
   returns 409 and the owner row count is 1 before and after. Evidence: both
   responses and both counts.
-- [ ] **F9.** A passkey registers and then authenticates against relying-party
+- [x] **F9.** A passkey registers and then authenticates against relying-party
   identifier `tailda76d6.ts.net` in a WebKit session, and the stored credential
   holds its identifier, public key, counter, transports, device type and backed-up
   flag. Evidence: the two round trips captured and the stored row.
-- [ ] **F10.** The backup password verifies through Argon2id at memory 19456 KiB
+- [x] **F10.** The backup password verifies through Argon2id at memory 19456 KiB
   or more, 2 passes or more, parallelism 1, with a 16-byte per-owner nonce, read
   from the stored parameter columns rather than from source. Evidence: the row,
   plus a successful and a failed verification.
-- [ ] **F11.** The session cookie carries HttpOnly, Secure and SameSite=Strict
+- [x] **F11.** The session cookie carries HttpOnly, Secure and SameSite=Strict
   with a maximum age under 24 hours, and its value differs before and after
   sign-in. Evidence: two `Set-Cookie` captures.
 - [ ] **F12.** A state-changing request without the anti-forgery token returns
   403 and writes nothing; the same request with the token succeeds. Evidence: both
   responses and a row count before and after the rejected request.
-- [ ] **F13.** Six failed sign-in attempts within 60 seconds return 429, and a
+- [x] **F13.** Six failed sign-in attempts within 60 seconds return 429, and a
   seventh attempt with correct credentials still returns 429 until the window
   passes. Each of the seven appends exactly one row to the local audit log.
   Evidence: the seven responses and the seven audit rows.
-- [ ] **F14.** Every route the app serves, other than the sign-in page, the
+- [x] **F14.** Every route the app serves, other than the sign-in page, the
   liveness endpoint and the static shell, returns 401 or redirects to sign-in when
   called without a session. Evidence: a script that enumerates the route table and
   prints one line per route with its status.
-- [ ] **F15.** A third-party credential entered through settings is unreadable in
+- [x] **F15.** A third-party credential entered through settings is unreadable in
   the database: selecting the row directly returns ciphertext, and the settings
   screen renders only state, scope and last successful sync. Evidence: the raw row
   and the rendered screen at 393 px.
-- [ ] **F16.** No credential value is reachable from the browser, from any API
+- [x] **F16.** No credential value is reachable from the browser, from any API
   response or from any log line. Searching the rendered HTML, every API response
   body recorded during a full test run, the container logs and the git working
   tree for the four seeded credential values, the master key and the ingest token
   returns zero hits. Evidence: the search command and its empty output.
-- [ ] **F17.** With the master key absent the app refuses to start with a named
+- [x] **F17.** With the master key absent the app refuses to start with a named
   error and creates no owner; with a master key that does not match existing
   ciphertext, decryption fails with a named error rather than returning an empty
   value. Evidence: both startup logs and the failed decryption.
-- [ ] **F18.** The documented local recovery procedure restores access on a
+- [x] **F18.** The documented local recovery procedure restores access on a
   machine holding no passkey, using only host shell access, and it asks no secret
   question and sends no password by email. Evidence: the procedure run end to end
   with the resulting successful sign-in.
@@ -579,7 +579,7 @@ their interaction detail in `.forge/wireframes/`, and the standards skill.
   application origin with no browser chrome, and standalone display mode reports
   true in that session. Evidence: a device screenshot and the reported value.
   Sibling: C3, which proves the shell and worker with no device.
-- [ ] **C3.** A worker is active at the root scope, its script is served with a
+- [x] **C3.** A worker is active at the root scope, its script is served with a
   no-cache directive, and with the network disabled the shell renders an offline
   screen naming the cause and offering one action, not a browser error page.
   Evidence: the registration state, the response headers, and the offline capture.

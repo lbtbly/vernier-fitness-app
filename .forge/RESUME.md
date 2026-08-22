@@ -6,34 +6,46 @@ Owner decisions, taken 2026-08-21, binding:
 - R5 is PARKED by the owner's instruction. The run never reboots this Mac mini on its own. R5 stays in the rubric, unchecked, with "parked, awaiting the owner's chosen moment" as its reason. Parking is not softening: the line and its threshold are untouched.
 - Scope is FULL. All fourteen slices, run to completion across as many sessions as it takes. Nothing dropped.
 
-Last phase: 8 BUILD and 9 VERIFY, iterating on slice 1.
+Last phase: 8 BUILD and 9 VERIFY, iterating on slice 2.
 Size: L. Eleven vertical workstreams with five separate external integrations, each carrying its own auth, data flow and failure modes.
-Current slice: 1, the walking skeleton and the live URL. Closes F1-F7, C1-C3, R1.
+Current slice: 2, the gate. Closes F8-F18, C4. Slice 1 is done but for three owner-blocked lines: F4, R1, C2.
 
 ## Where the run actually stands
 
-**Nine of 166 rubric lines checked: F1, F2, F3, F5, F6, F7, C1, D2, D4.** The verifier ruled them itself and re-ran every command rather than accepting the builder's 22 captures.
+**Twenty of 166 rubric lines checked:** F1, F2, F3, F5, F6, F7, F8, F9, F10, F11, F13, F14, F15, F16, F17, F18, C1, C3, D2, D4. Every one ruled by a verifier that re-ran the command itself and accepted no builder capture as proof.
 
-**Slice 1 verdict: FAIL, first failure.** Three defects, recorded in DEFECTS.md, sent back to the builder in one dispatch:
-1. C3, the only real bug. Offline on a route not already cached paints the framework's chunk-load error card, because the worker precached the offline document but none of the chunks it needs. The builder tested warm, which passes while proving nothing. The fix is structural: a self-contained offline document with inlined CSS and no framework JavaScript, so it cannot need a chunk.
-2. F4 and R1, the second-device clause. Unprovable rather than broken. The owner did open the URL on his iPhone and it answered, but nothing recorded it. Both peers answer tailscale ping; ports 22, 5900, 3283, 3031, 88 and 8080 are closed on each, so no agent here can originate a request from a second device. The fix is to record the forwarded tailnet peer address so a visit is readable afterwards.
-3. C2, the Home Screen launch. Same shape. The owner installed Vernier and opened it from the icon and it worked, but `/api/diagnostics/device` is a 404, so the launch left nothing a command can read. PREFLIGHT.md already specified that endpoint. Once it ships, the next launch banks the evidence.
+Slices 1 and 2 are built, live and committed. Slice 1 at `25954aa`, slice 2 at `0c66771`.
 
-Escalation ladder position: **one FAIL on slice 1**. A second FAIL on this slice means re-dispatching the builder a tier higher; a third sends the slice back to the architect. Slice 1 has been built at the raised tier from the start, because it sets the conventions the other thirteen imitate.
+**Slice 1: one FAIL, then fixed.** Three defects. C3, the offline document painting the framework's chunk-load error on any uncached route, is fixed and re-proven cold: `/offline` is now a self-contained document with zero external references, so it cannot need a chunk. F4, R1 and C2 remain open and are owner-blocked, not code-blocked.
 
-D1, D3 and D5 swept clean but are deliberately left unchecked: each names all thirteen screens and only seven exist. Not refused, not reached. The final full-scope verify closes them.
+**Slice 2: one FAIL, fix in flight.** Two defects:
+1. F12. `POST /api/diagnostics/launch` sat in `CSRF_EXEMPT_PATHS`, so a bare curl with no token returned 204 and wrote. Worse than its severity: that row is the row C2's evidence rests on, so anything on the tailnet could author the proof that the owner installed the app. The fix threads a real token from the server layout and deletes the exemption.
+2. C4. The shipped CSS dropped two declarations from `.btn.quiet`, so the secondary action renders as a bordered white button the same size as the primary, against the design sheet's own annotation that the password option is never louder. The fix restores them and diffs every button, field and card rule against the wireframes.
+
+Two latent issues went into the same dispatch: `PUBLIC_PREFIXES` carried `/api/diagnostics/` as a standing prefix, wider than the two endpoints ever intended to be public, so a third diagnostics route would become public with no decision; and `scripts/recovery.sh` restates the Argon2id parameters with nothing asserting the two copies agree.
+
+Escalation ladder: one FAIL on slice 1, now cleared. One FAIL on slice 2, fix in flight. Both slices were built at the raised model tier from the start, because slice 1 set the conventions the rest imitate and slice 2 is the security boundary.
+
+D1, D3 and D5 sweep clean but stay unchecked by design: each names all thirteen screens and only seven exist. Not refused, not reached. The final full-scope verify closes them.
+
+The test harness landed with slice 2, not at the end: Vitest with 34 unit tests, Playwright with 17 end-to-end in WebKit at 393x852 against the live HTTPS origin. Slice 1 shipped none and no rubric line named one, which is how a suite becomes unwritable by slice 13.
 
 ## What needs the owner, and only the owner
 
-Open Vernier from the iPhone Home Screen icon once more, after the diagnostics endpoint lands. That single launch converts C2 from testimony into evidence and flips `standaloneSeen` to true. Everything else on the owner's list is done.
+Two actions on the iPhone, and together they close five lines:
+
+1. **Open Vernier from the Home Screen icon.** Flips `standaloneSeen`, flips `wakeLockAvailable` on iOS 18.4 or newer, and records `100.121.138.9` as a tailnet peer. That is the second-device clause of F4 and R1 and the evidence for C2. Nothing on this machine can originate it: ports 22, 5900, 3283, 3031, 88 and 8080 are closed on both peers.
+2. **Create the account and register a passkey.** Flips `passkeyRegistered`. WebKit exposes no virtual authenticator to automation, so the suite's ceremony is software; the server-side verification is real, proven by flipping one byte of the DER signature and watching it fail correctly.
+
+Also on the owner, on this Mac: `bash scripts/recovery.sh password` to set a backup password he actually holds. The live one is a random value nobody has, left by the last recovery test, and re-running the full e2e suite resets it again. Documented, not a bug.
 
 ## State on disk
 
 - `.forge/GOAL.md`, the verbatim spec. `.forge/BRIEF.md`, forge shape, with the Roles census, the Research summary and the Panel synthesis.
 - `.forge/research/`, nine notes: scout, withings, google-calendar, ios-pwa, apple-health-shortcut, nutrition-data, exercise-media, stack-facts, training-rules.
 - `.forge/DESIGN.md`, thirteen wireframes, thirteen PNG exports in `.forge/screens/`.
-- `.forge/PLAN.md` (14 slices), `.forge/DOD.md` (166 lines, 9 checked), `.forge/PREFLIGHT.md`, `.forge/EVIDENCE.md`, `.forge/DEFECTS.md`.
-- Product code committed at `e86aed3`, slice 1. The stack runs: two healthy containers, live at https://lamberts-mac-mini.tailda76d6.ts.net.
+- `.forge/PLAN.md` (14 slices), `.forge/DOD.md` (166 lines, 20 checked), `.forge/PREFLIGHT.md`, `.forge/EVIDENCE.md`, `.forge/DEFECTS.md`.
+- Product code committed through `0c66771`. The stack runs: two healthy containers, live at https://lamberts-mac-mini.tailda76d6.ts.net.
 
 ## Host and configuration facts
 
@@ -43,7 +55,7 @@ The configuration file was repaired in place on 2026-08-21 by a one-shot Node sc
 
 compose.yaml passes exactly seven variables into the app container: APP_URL, APP_NAME, WEBAUTHN_RP_ID, WEBAUTHN_RP_NAME, TZ, DATABASE_URL, MASTER_KEY. The Withings, Google, Anthropic, mail, VAPID and BACKUP_DIR values sit in the configuration file and are withheld from the app process until the slice that needs them. That is least privilege and it is intended, not an omission.
 
-Playwright WebKit is cached on the host at ~/Library/Caches/ms-playwright, 297 MB. Slice 1 shipped no test suite and no rubric line named one; the harness goes in with slice 2 rather than accumulating thirteen slices of untested code.
+Playwright WebKit is cached on the host at ~/Library/Caches/ms-playwright, 297 MB. The e2e suite runs on the host against the containerised app, never inside the container, because WebKit on Linux ARM is unreliable and Safari is the only engine this product ever meets.
 
 ## Notes for later sessions
 

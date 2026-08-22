@@ -1,0 +1,16 @@
+correct password while the window is open -> 429
+waiting for the 60 second window to pass, with no unlock command
+  +5s: 429 Too many attempts.
+  +10s: 429 Too many attempts.
+  +15s: 429 Too many attempts.
+  +20s: 429 Too many attempts.
+  +25s: 429 Too many attempts.
+  +30s: 429 Too many attempts.
+  +35s: 429 Too many attempts.
+  +40s: 429 Too many attempts.
+  +45s: 429 Too many attempts.
+  +51s: 429 Too many attempts.
+  +56s: 429 Too many attempts.
+  +61s: 200 signed in
+the window passed on its own and the correct password opened it: true
+session cookie now present: true
