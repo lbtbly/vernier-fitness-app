@@ -31,6 +31,8 @@ export type DeviceDiagnostics = {
   pushSubscription: boolean;
   firstObservedAt: Record<SignalName, string | null>;
   lastReportedAt: Record<SignalName, string | null>;
+  /** The address each signal was last reported from, null when unattributed. */
+  reportedFrom: Record<SignalName, string | null>;
   tailscaleProxySeen: boolean;
   recentPeers: Array<{ address: string; viaTailscale: boolean; lastSeenAt: string }>;
 };
@@ -50,13 +52,22 @@ const PEER_LIMIT = 5;
  *
  * Wake Lock is only believed from a launch that was standalone. The preflight
  * line asks whether the installed app on the phone has it, and a desktop
- * browser tab answering yes would answer a different question. No launch is
- * told apart from any other here, because telling them apart would mean
- * storing a device identifier, and this endpoint stores none.
+ * browser tab answering yes would answer a different question.
+ *
+ * WHERE THE REPORT CAME FROM IS STORED, AND NOTHING ABOUT WHO SENT IT. This
+ * used to tell no launch apart from any other, on the grounds that telling them
+ * apart would mean storing a device identifier. It cost the line it was
+ * protecting: two signals went true on the owner's install from a headless
+ * browser on this Mac and the stored row could not say so, so C2's evidence
+ * became ambiguous rather than absent. The address the proxy forwarded is the
+ * same fact `request_origin` already keeps for exactly this question, and it
+ * answers "the phone or this machine" without answering "whose". Null means the
+ * report did not come through the proxy at all.
  */
 export async function recordDeviceLaunch(report: {
   standalone: boolean;
   wakeLock: boolean;
+  reportedFrom: string | null;
 }): Promise<void> {
   const db = getDb();
   const rows = [
@@ -73,6 +84,7 @@ export async function recordDeviceLaunch(report: {
         signal: row.signal,
         observed: row.observed,
         firstObservedAt: row.observed ? new Date() : null,
+        reportedFrom: report.reportedFrom,
       })
       .onConflictDoUpdate({
         target: deviceObservation.signal,
@@ -80,6 +92,7 @@ export async function recordDeviceLaunch(report: {
           observed: sql`${deviceObservation.observed} or excluded.observed`,
           firstObservedAt: sql`coalesce(${deviceObservation.firstObservedAt}, excluded.first_observed_at)`,
           lastReportedAt: sql`now()`,
+          reportedFrom: sql`excluded.reported_from`,
         },
       });
   }
@@ -118,6 +131,7 @@ export async function readDeviceDiagnostics(): Promise<DeviceDiagnostics> {
     bySignal.get(SIGNALS[name])?.firstObservedAt?.toISOString() ?? null;
   const lastAt = (name: SignalName) =>
     bySignal.get(SIGNALS[name])?.lastReportedAt?.toISOString() ?? null;
+  const fromAt = (name: SignalName) => bySignal.get(SIGNALS[name])?.reportedFrom ?? null;
 
   return {
     standaloneSeen: observed('standaloneSeen'),
@@ -138,6 +152,15 @@ export async function readDeviceDiagnostics(): Promise<DeviceDiagnostics> {
       wakeLockAvailable: lastAt('wakeLockAvailable'),
       passkeyRegistered: lastAt('passkeyRegistered'),
       pushSubscription: lastAt('pushSubscription'),
+    },
+    // Null on a signal nothing has reported, and equally on the rows that were
+    // written before the column existed. A reader is told the row is
+    // unattributed rather than told a machine it was not.
+    reportedFrom: {
+      standaloneSeen: fromAt('standaloneSeen'),
+      wakeLockAvailable: fromAt('wakeLockAvailable'),
+      passkeyRegistered: fromAt('passkeyRegistered'),
+      pushSubscription: fromAt('pushSubscription'),
     },
     tailscaleProxySeen: peers.some((peer) => peer.viaTailscale),
     recentPeers: peers.map((peer) => ({

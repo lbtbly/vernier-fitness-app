@@ -1,0 +1,1 @@
+ALTER TABLE "device_observation" ADD COLUMN "reported_from" text;

@@ -44,6 +44,17 @@ function specs(): Array<[string, string]> {
 }
 
 const host = readFileSync(join(e2e, 'host.ts'), 'utf8');
+const playwrightConfig = readFileSync(
+  fileURLToPath(new URL('../../playwright.config.ts', import.meta.url)),
+  'utf8',
+);
+
+/** One of playwright.config.ts's own file patterns, as a regular expression. */
+function pattern(around: RegExp, source: string): RegExp {
+  const found = around.exec(source);
+  if (!found) throw new Error(`playwright.config.ts has no ${around.source}`);
+  return new RegExp(found[1]);
+}
 const roleScript = readFileSync(join(scripts, 'suite-role.sh'), 'utf8');
 const recoveryScript = readFileSync(join(scripts, 'recovery.sh'), 'utf8');
 
@@ -109,6 +120,37 @@ describe('the suite against the owner\'s installation', () => {
     expect(reset).toContain('scratchQuery(');
     expect(reset).toContain('SCRATCH_CONTAINER');
     expect([...host.matchAll(/-d vernier_scratch/g)].length).toBeGreaterThan(0);
+  });
+
+  it('lets no spec report a launch at the owner\'s install', () => {
+    // The write that made two owner-blocked rubric lines read as met. C2 reads
+    // device_observation back as proof the owner opened Vernier from his iPhone
+    // Home Screen, and on 2026-08-22 standalone_seen and wake_lock_available
+    // both went true on his install from a headless browser on this Mac. The
+    // route refuses a driven browser now; this is the second lock, and it is
+    // the one that stops a spec being pointed at that install in the first
+    // place.
+    //
+    // Read off playwright.config.ts by asking its own patterns, not by matching
+    // the text of them: the scratch project is the only one whose baseURL is not
+    // the live origin, so a spec that posts a launch must be matched by it and
+    // ignored by the project that runs everything else.
+    const scratchProject = playwrightConfig.slice(playwrightConfig.indexOf("name: 'chrome-scratch'"));
+    expect(scratchProject).toContain('baseURL: process.env.SCRATCH_URL');
+    const scratchMatch = pattern(/testMatch: \/(.+?)\/,/, scratchProject);
+    const liveIgnore = pattern(/testIgnore: \/(.+?)\/,/, playwrightConfig);
+
+    const reporters = specs()
+      .filter(([, source]) => source.includes('/api/diagnostics/launch'))
+      .map(([name]) => name);
+    expect(reporters.length, 'no spec posts a launch report at all').toBeGreaterThan(0);
+
+    for (const name of reporters) {
+      expect(scratchMatch.test(name), `${name} posts a launch report and the scratch project does not run it`).toBe(true);
+      expect(liveIgnore.test(name), `${name} posts a launch report and the live project does not ignore it`).toBe(true);
+      const source = readFileSync(join(e2e, name), 'utf8');
+      expect(source, `${name} posts a launch report at the live origin`).not.toContain('baseUrl()');
+    }
   });
 
   it('grants that role no way to edit or remove anything, anywhere', () => {

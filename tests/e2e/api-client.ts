@@ -60,7 +60,10 @@ export function apiClient(baseUrl: string) {
     async post(
       path: string,
       body: unknown,
-      options: { csrf?: boolean; csrfValue?: string } = {},
+      // `userAgent` is here for the one route that reads it: the launch report
+      // refuses an automation runtime by name, and a spec proving that refusal
+      // has to be able to send one.
+      options: { csrf?: boolean; csrfValue?: string; userAgent?: string } = {},
     ): Promise<ApiResponse> {
       const headers: Record<string, string> = {
         'content-type': 'application/json',
@@ -69,6 +72,7 @@ export function apiClient(baseUrl: string) {
       if (options.csrf !== false) {
         headers['x-vernier-csrf'] = options.csrfValue ?? jar.get('vernier_csrf') ?? '';
       }
+      if (options.userAgent) headers['user-agent'] = options.userAgent;
       const response = await fetch(`${baseUrl}${path}`, {
         method: 'POST',
         redirect: 'manual',

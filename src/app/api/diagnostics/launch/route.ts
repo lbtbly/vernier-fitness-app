@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { recordDeviceLaunch } from '@/db/diagnostics';
 import { csrfFailure } from '@/lib/csrf';
-import { refuse } from '@/lib/gate';
+import { ok, refuse } from '@/lib/gate';
 import { isDrivenBrowser } from '@/lib/launch-report';
 import { readRequestOrigin } from '@/lib/request-origin';
 import { strings } from '@/lib/strings';
@@ -29,9 +29,15 @@ export const dynamic = 'force-dynamic';
  * install, at 16:13:55, from a headless browser on this Mac. Two rubric lines
  * then read as met by a signal the suite had set. So the report now says
  * whether the context driving it is automated, the server says the same thing
- * from the user agent, and either one refuses the write outright: 403, nothing
- * stored, and a refusal that names where such a run belongs. A person holding a
+ * from the user agent, and either one stops the write: nothing stored, and a
+ * body that names why and names where such a run belongs. A person holding a
  * phone is what this row is about, and a browser under WebDriver is not that.
+ *
+ * That answer is 200 rather than 4xx, deliberately. This is raised from the
+ * root layout, so every page a driven browser opens raises one, and a refusal
+ * status would put a failed request and a console error on every screen the
+ * suite walks. C9 counts exactly those. The outcome goes in the body, which the
+ * caller reads and the browser does not log.
  *
  * What survives it is written down in src/lib/launch-report.ts: a client that
  * is not a browser at all can still claim anything it likes, which is why the
@@ -60,7 +66,16 @@ export async function POST(request: Request) {
   }
 
   if (isDrivenBrowser(report.webdriver, request.headers.get('user-agent'))) {
-    return refuse(403, strings.api.launch.automated, strings.api.launch.automatedDetail);
+    // Nothing is stored, and the status is 200 rather than 403 on purpose: the
+    // root layout raises this on every page, so a refusal status would put a
+    // failed request and a console error on every screen the suite walks, and
+    // C9 counts both. The outcome is in the body, where the caller reads it and
+    // the browser does not log it.
+    return ok({
+      recorded: false,
+      reason: strings.api.launch.automated,
+      detail: strings.api.launch.automatedDetail,
+    });
   }
 
   const { peerAddress } = readRequestOrigin(request.headers);

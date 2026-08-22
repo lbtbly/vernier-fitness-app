@@ -417,10 +417,17 @@ export const strings = {
       notAReportDetail:
         'This endpoint records two things the browser reports at launch: whether Vernier opened from the Home Screen, and whether this device can keep the screen awake. Nothing else is stored here.',
       /**
-       * The refusal a driven browser gets. C2 reads this row back as proof the
+       * What a driven browser is told. C2 reads this row back as proof the
        * owner opened Vernier from his Home Screen, so a row a test can author
-       * is not proof of anything, and the endpoint says why rather than
-       * answering 204 and quietly writing nothing.
+       * is not proof of anything, and the endpoint says so in the body rather
+       * than dropping the report without a word.
+       *
+       * NOT A 4xx, DELIBERATELY. The report is raised from the root layout, so
+       * every page a driven browser opens raises one, and a refusal status
+       * would put a console error and a failed request on every screen the
+       * suite walks. C9 counts exactly those, on Today, on Health and through
+       * the quick log. So the answer is 200 with the outcome in it: the caller
+       * is told the report was not recorded and why, and the walk stays clean.
        */
       automated: 'A driven browser cannot report a launch.',
       automatedDetail:

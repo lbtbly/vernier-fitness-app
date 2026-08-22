@@ -17,7 +17,12 @@ import { CSRF_HEADER } from '@/lib/cookie-names';
  *
  * The post writes, so it carries the anti-forgery token the root layout read
  * off this request. Nothing but a document this server rendered can produce
- * one, which is what makes the stored row worth reading back as evidence.
+ * one, and the suite drives a document this server rendered, which is how a
+ * headless run set both signals true on the owner's install. So the report
+ * carries a third boolean: whether something is driving this browser. The
+ * platform answers that itself in `navigator.webdriver`, the server stores
+ * nothing for a report that says yes, and the field is required, so a caller
+ * that is not this component is refused as malformed rather than believed.
  */
 const REPORTED = 'vernier.launch-reported';
 
@@ -36,17 +41,28 @@ export function DeviceReport({ csrfToken }: { csrfToken: string }) {
     const legacyStandalone = (navigator as Navigator & { standalone?: boolean }).standalone === true;
     const standalone = window.matchMedia('(display-mode: standalone)').matches || legacyStandalone;
     const wakeLock = 'wakeLock' in navigator;
+    // The platform's own answer to "is something driving this browser". True
+    // under WebDriver and under the DevTools protocol, false for a person
+    // tapping an icon, and reported honestly here rather than filtered: the
+    // server decides what to do with it.
+    const webdriver = navigator.webdriver === true;
 
     fetch('/api/diagnostics/launch', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', [CSRF_HEADER]: csrfToken },
-      body: JSON.stringify({ standalone, wakeLock }),
+      body: JSON.stringify({ standalone, wakeLock, webdriver }),
       keepalive: true,
     })
-      .then((response) => {
+      .then(async (response) => {
         // A refused post wrote nothing, so this launch has not been reported
-        // and the next one must try again.
+        // and the next one must try again. So did a 200 carrying
+        // `recorded: false`, which is what a driven browser is answered with:
+        // the request succeeded and the row did not move.
         if (!response.ok) return;
+        if (response.status !== 204) {
+          const outcome = (await response.json().catch(() => null)) as { recorded?: boolean } | null;
+          if (outcome?.recorded === false) return;
+        }
         try {
           sessionStorage.setItem(REPORTED, '1');
         } catch {

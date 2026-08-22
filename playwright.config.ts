@@ -48,7 +48,7 @@ export default defineConfig({
   projects: [
     {
       name: 'webkit-iphone',
-      testIgnore: /focus\.spec\.ts|service-worker\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts/,
+      testIgnore: /focus\.spec\.ts|service-worker\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|launch-report\.spec\.ts/,
       use: { ...devices['Desktop Safari'], viewport: { width: 393, height: 852 }, deviceScaleFactor: 3 },
     },
     {
@@ -86,6 +86,15 @@ export default defineConfig({
       // thirty-five and then exactly thirty-seven hours old. Both mean writing
       // rows, and `measurement` refuses DELETE, so they belong here.
       //
+      // launch-report.spec.ts joined it after the same lesson arrived through a
+      // different door. It used to be a describe block in boundary.spec.ts,
+      // driven at the live origin, and every run moved device_observation on
+      // the owner's install: the table C2 reads back as proof he opened Vernier
+      // from his Home Screen. On 2026-08-22 two of those signals went true
+      // there from a headless browser. A row the suite can author is not
+      // evidence of a device, so the suite writes it here, where nobody will
+      // ever read it as evidence of anything.
+      //
       // Chrome, because that instance answers on plain loopback HTTP and the
       // session cookie is Secure. WebKit refuses a Secure cookie from an http
       // origin, 127.0.0.1 and localhost alike, so a WebKit run of this file
@@ -94,7 +103,7 @@ export default defineConfig({
       // tailnet behind a second HTTPS proxy, and it is written down rather than
       // discovered: what this file proves, it proves in Chrome.
       name: 'chrome-scratch',
-      testMatch: /quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts/,
+      testMatch: /launch-report\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         channel: 'chrome',
