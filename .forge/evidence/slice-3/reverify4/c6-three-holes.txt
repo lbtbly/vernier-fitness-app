@@ -1,0 +1,129 @@
+# C6: three shapes the union of both checks does not see.
+# Verifier, 2026-08-22, fourth verification of slice 3.
+
+== 1. Copy the product authored, stored in the seed, rendered on a shipped screen ==
+src/db/demo.ts:137  reference: 'page 2, row 7'
+src/db/demo.ts:118  reference: 'quick-log'
+Read off the shipped screens in WebKit at 393x852, signed in through the
+recovery link, with the tree exactly at HEAD and nothing planted:
+
+  /source/demo_src_ldl   ... Reference | page 2, row 7 | Recorded | 13 Aug, 08:05 ...
+  /source/demo_src_waist ... Reference | quick-log     | Recorded | 19 Aug, 07:20 ...
+
+Both checks pass over that same tree, printed below.
+
+== npm run strings ==
+
+421 keys in src/lib/strings.ts
+strings: no user-facing string is written inline. 4 trees scanned, .ts and .tsx, 421 keys.
+exit 0
+
+== npm run strings:rendered, population first ==
+rendered strings: the population this walk covers
+  6 stored values walked, floor 1
+  6 source records walked, floor 1
+  1 ratings on the one to five scale, floor 1
+  6 sources with a stored value behind them, floor 6
+  source kinds behind a value: demo_record, derivation, lab_page, manual_entry, shortcut_payload, sync_batch
+rendered strings: 50 surface states walked, 1668 fragments read against 421 catalogue keys, 31 stored data values, 7 value shapes and 1 distinct message(s) harvested from WebKit.
+  platform text  / quick log / the fetch never reached the machine  "Load failed"  provenance: WebKit, on a fetch aborted with aborted
+rendered strings: every fragment on every surface resolves to a key.
+exit 0
+
+== 2. A CSS ::after content property. The widest of the three. ==
+
+Planted one declaration, rebuilt the image, rebuilt nothing else:
+
+  src/app/globals.css   .chip::after{content:" Not synced yet"}
+
+Both checks green over it. Neither reads a .css file at all: strings.mjs walks
+.ts and .tsx under four src trees, and rendered-strings.mjs reads text nodes
+with a TreeWalker plus a fixed attribute list.
+
+  npm run strings          exit 0
+  npm run strings:rendered exit 0, "every fragment on every surface resolves to a key"
+
+Read back off the shipped screen in WebKit, /value/demo_waist:
+
+  getComputedStyle(chip, '::after').content   ->  "\" Not synced yet\""
+  document.body.innerText.includes(...)       ->  false
+  document.body.textContent.includes(...)     ->  false
+  TreeWalker(SHOW_TEXT) concatenation         ->  false
+
+Painted and legible on every chip in the capture beside this file,
+c6-css-after-reaches-the-screen-393.png: "Measured by hand Not synced yet",
+"Correction Not synced yet", "Append only Not synced yet".
+
+Plant removed. `git grep -F "Not synced yet" HEAD -- src/` finds nothing.
+
+== 3. A helper value inside <code>. ==
+
+Planted in src/components/QuickLog.tsx:
+
+  function helperNote(): string { return 'sign-in'; }
+  ... <code>{helperNote()}</code>
+
+Both checks green over it.
+  strings.mjs: readsAsASentence('sign-in') is false, MACHINE_SHAPES matches the
+  kebab shape, and the value is not a JsxText node so the JSX rule never sees it.
+  rendered-strings.mjs: <code> is in MACHINE_TEXT_ELEMENTS, so MACHINE_TOKENS
+  applies and /^[A-Za-z_][A-Za-z0-9]*(?:[-_.][A-Za-z0-9]+)+/ tiles it.
+
+Read back off the shipped screen, quick log error card:
+  document.querySelector('code').outerHTML  ->  "<code>sign-in</code>"
+  bounding width                            ->  45.15 px
+  document.body.innerText.includes('sign-in') -> true
+
+The builder's claim that nothing in the tree uses <code> today is TRUE:
+`grep -rn "<code|<kbd|<samp|<pre" src/` returns nothing, there is no markdown
+dependency and no dangerouslySetInnerHTML anywhere in src/.
+
+Plant removed. `git grep -F helperNote HEAD -- src/` finds nothing.
+
+== 4. The provenance mechanism, both of the builder's proofs, reproduced ==
+
+Planted together, one rebuild:
+  a. an unmarked chip carrying the real WebKit string:
+     <span className="lbl">Load failed</span>
+  b. app copy inside the marked span:
+     <span data-authored={load.authored}>{load.detail} Turnip provenance forged.</span>
+
+  npm run strings:rendered exit 1, 6 fragments with no key, including:
+
+    / quick log  [the fetch never reached the machine]  span.lbl
+      read: "Load failed"
+      why: no catalogue key accounts for it
+    / quick log  [the fetch never reached the machine]  span
+      read: "Turnip provenance forged."
+      why: marked platform, but WebKit never produced this string in this run
+
+Both proofs hold. Position alone does not excuse, and a marker alone does not
+excuse.
+
+== 5. Defeating it: mark the node AND echo a harvested string ==
+
+Planted:
+  <span data-authored="platform">Load failed</span>
+
+  npm run strings:rendered  exit 0
+  and it reported the forged copy as platform text in THREE states, including
+  "the answer carried no words", which is a 502 where WebKit said nothing at
+  all and the product invented the browser's words:
+
+    platform text  / quick log / the answer carried no words  "Load failed"
+      provenance: WebKit, on a fetch aborted with aborted
+
+  Read back off the screen: the error card said
+    "Load failed The sheet still saves: a write goes to this phone first ..."
+  with the real cause dropped.
+
+  npm run strings  exit 1
+    src/components/QuickLog.tsx:459  jsx text  "Load failed"
+
+So the rendered check alone IS defeatable by marker plus echo. The union
+caught this instance, because the smuggled string had to be written as a
+literal in a scanned tree. The residual is exactly the harvested vocabulary,
+which on this machine and this WebKit is one string, "Load failed".
+
+Plant removed at commit a7190bb; the checkpoint hook had swept it into 40a5c14.
+`git grep -F 'data-authored="platform">Load failed' HEAD -- src/` finds nothing.

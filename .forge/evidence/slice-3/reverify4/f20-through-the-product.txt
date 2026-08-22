@@ -1,0 +1,49 @@
+# F20 through the product. Verifier, 2026-08-22.
+
+Not a curl. WebKit at 393x852 against https://lamberts-mac-mini.tailda76d6.ts.net,
+signed in through the one-time recovery link, three saves on /value/demo_waist,
+touching nothing but #correction-value, #correction-reason and "Save the
+correction". Whatever id the form carried is the id the product decided to send.
+
+  start URL https://lamberts-mac-mini.tailda76d6.ts.net/value/demo_waist
+  chain before: demo_waist|0|98.5
+
+  edit "97.5": form anchored at demo_waist|0
+               error cards on screen = 0
+               newest row = e70309b6-...|1|97.5|demo_waist
+  edit "96.5": form anchored at e70309b6-...|1
+               error cards on screen = 0
+               newest row = e14aac3b-...|2|96.5|e70309b6-...
+  edit "95.5": form anchored at e14aac3b-...|2
+               error cards on screen = 0
+               newest row = b864b7b3-...|3|95.5|e14aac3b-...
+
+  network:
+    POST /api/log -> 201
+    POST /api/log -> 201
+    POST /api/log -> 201
+
+  chain after, correction_index | id | corrects_id | root_id | raw_value | reason
+    0|demo_waist||demo_waist|98.5|
+    1|e70309b6-b011-4507-a2a8-3240664b10c8|demo_waist|demo_waist|97.5|Edit 1 by the verifier
+    2|e14aac3b-4ced-471b-88cc-51fb4317d5d0|e70309b6-b011-4507-a2a8-3240664b10c8|96.5|Edit 2 by the verifier
+    3|b864b7b3-bebe-43c7-a625-e5fe99bc8fea|e14aac3b-4ced-471b-88cc-51fb4317d5d0|95.5|Edit 3 by the verifier
+
+  rows in this chain: 4
+
+Corrections 2 and 3 each correct a correction row, which is what the old code
+could not resolve. No 404, no error card, at any step.
+
+All four readable on a fresh load of /value/demo_waist, capture beside this
+file, f20-four-rows-readable-393.png:
+
+  95.5 cm current, three "Append only" correction cards reading
+  97.5 was 98.5, 96.5 was 97.5, 95.5 was 96.5, and Original 98.5 cm struck through.
+
+The four rows were permanent while they stood: the table refuses UPDATE and
+DELETE. They were removed later by TRUNCATE, during the population-floor test,
+which is the one operation the append-only guard does not stop.
+
+Second, independent proof on the same path: tests/e2e/quick-log.spec.ts:299,
+"appends three corrections through the value screen and keeps the original
+readable", passed in the full suite run at 08:13.

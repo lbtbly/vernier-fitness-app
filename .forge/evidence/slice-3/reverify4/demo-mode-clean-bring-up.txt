@@ -1,0 +1,30 @@
+# DEMO_MODE from a clean shell. Verifier, 2026-08-22.
+
+.env.example now carries DEMO_MODE=1 with both values documented. That half is
+done and it is what a fresh clone would copy.
+
+The installed stack on this machine does not get it. compose.yaml:57 reads
+`DEMO_MODE: ${DEMO_MODE:-0}` and Compose interpolates from the environment file
+in the project directory. That file has no DEMO_MODE line, so the default wins:
+
+  docker compose config | grep -i demo
+      DEMO_MODE: "0"
+
+The same file resolves everything else correctly in the same command, so
+Compose is reading it:
+
+      APP_NAME: Vernier
+      APP_URL: https://lamberts-mac-mini.tailda76d6.ts.net
+      TZ: Europe/Paris
+      WEBAUTHN_RP_ID: tailda76d6.ts.net
+
+And the bring-up the runbook names, from a shell with nothing exported:
+
+  bash scripts/up.sh
+      up.sh: db and app are healthy.
+  docker compose exec -T app printenv DEMO_MODE
+      0
+
+So the state the walk and the suite expect is still produced only by exporting
+DEMO_MODE=1 in the shell. On this installation the fix has not landed; the
+repository is right and the environment file was never updated to match it.

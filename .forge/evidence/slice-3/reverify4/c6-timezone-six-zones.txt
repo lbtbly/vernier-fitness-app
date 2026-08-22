@@ -1,0 +1,7 @@
+# The six zones, hashed. C6's date clause, re-run by the verifier 2026-08-22.
+Europe/Paris             34a015c5047e40fd
+Pacific/Auckland         34a015c5047e40fd
+America/Los_Angeles      34a015c5047e40fd
+Pacific/Kiritimati       34a015c5047e40fd
+Asia/Kolkata             34a015c5047e40fd
+UTC                      34a015c5047e40fd

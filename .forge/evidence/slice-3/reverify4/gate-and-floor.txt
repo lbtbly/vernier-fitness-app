@@ -1,0 +1,40 @@
+# The gate, and the population floor. Verifier, 2026-08-22.
+
+scripts/checks.sh now names both checks. `strings` runs on every pass;
+`strings:rendered` runs only under FORGE_CHECKS_FULL=1, which is the
+per-dispatch gate runlog.sh sets.
+
+1. Green, clean tree, seeded database.
+   FORGE_CHECKS_FULL=1 bash scripts/checks.sh   -> exit 0
+   bash -x confirms the run reaches `npm run -s strings:rendered` and that it
+   prints its 50 walked surface states before returning 0.
+
+2. The source half failing fails the gate.
+   With a planted inline string, the run stopped at `strings failed:` and
+   never reached the rendered half.
+   FORGE_CHECKS_FULL=1 bash scripts/checks.sh   -> exit 2
+
+3. The rendered half failing fails the gate, on its own.
+   truncate table measurement, source_record cascade
+   FORGE_CHECKS_FULL=1 bash scripts/checks.sh   -> exit 2
+   `strings` was green in that run; the failure is the floor:
+
+     rendered strings: the population this walk covers
+       0 stored values walked, floor 1
+       0 source records walked, floor 1
+       0 ratings on the one to five scale, floor 1
+       0 sources with a stored value behind them, floor 6
+       source kinds behind a value: none
+     rendered strings: the walk would cover too little to mean anything, so it did not run.
+       no stored value stands in for: apple_health_shortcut, demo, derived, lab_pdf, manual, withings
+
+   node scripts/rendered-strings.mjs on its own -> exit 1
+
+4. A stack that does not answer fails rather than standing down.
+   docker compose stop app
+   FORGE_CHECKS_FULL=1 bash scripts/checks.sh   -> exit 2
+     checks: strings:rendered needs the stack, and 127.0.0.1:3000 does not answer.
+             Bring it up with scripts/up.sh. A missing stack is not a pass.
+
+5. The seed was restored: docker compose restart app with DEMO_MODE=1 wrote
+   6 measurements and 6 source records, all marked seed in both tables.

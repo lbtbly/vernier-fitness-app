@@ -1,0 +1,11 @@
+# Suites re-run by the verifier, 2026-08-22, against the shipped stack.
+
+== unit ==
+
+ Test Files  10 passed (10)
+      Tests  79 passed (79)
+   Start at  08:21:30
+   Duration  861ms (transform 552ms, setup 0ms, import 1.24s, tests 910ms, environment 1ms)
+
+
+== e2e ==
