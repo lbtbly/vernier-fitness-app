@@ -115,6 +115,14 @@ compose.yaml passes exactly seven variables into the app container: APP_URL, APP
 
 Playwright WebKit is cached on the host at ~/Library/Caches/ms-playwright, 297 MB. The e2e suite runs on the host against the containerised app, never inside the container, because WebKit on Linux ARM is unreliable and Safari is the only engine this product ever meets.
 
+## Carried to slice 14, the hardening slice
+
+**The application connects to Postgres as the bootstrap superuser.** Slice 3 boxed the test suite in with a `vernier_suite` role holding SELECT plus two narrow INSERTs and nothing else, so a test can no longer destroy the owner's history. The app has no such bound: a bug in any route can do anything to any table. The builder named this itself as the larger of the two remaining exposures and correctly declined to fix it inside a slice about provenance. It belongs with the security hardening in slice 14, alongside R6.
+
+**A superuser also stays reachable from this machine** because pg_hba trusts the container's local socket, so anyone who can run `docker compose exec db` bypasses every grant. That is the owner's own access and no privilege closes it; for the suite it is closed by shape in `suite-safety.test.ts`. Recorded so nobody mistakes the suite's boundary for a database-wide one.
+
+**`suite_forget_passkey` is a security-definer function permanently installed on the live database**, bounded by a twelve-character marker in a credential id and asserted by a unit test. Security definer runs as the function's owner and steps outside the grant, so its bound is the only thing holding it. Worth a look in slice 14 whether it should exist on a production database at all, or only on the scratch instance.
+
 ## Notes for later sessions
 
 - **Decided 2026-08-22, for whoever builds slice 6.** `.forge/PREFLIGHT.md` line 146 curls `/api/diagnostics/ingest` with no session and reads `lastIngestWithin36h`. `tests/unit/routes.test.ts` currently asserts that path classifies protected. The preflight line is right and the test encodes today's absence rather than a decision: that endpoint is a diagnostics READ, the same class as `/api/diagnostics/device` and `/api/diagnostics/launch`, and the preflight script has no session to offer. Slice 6 names it in `PUBLIC_PATHS` and updates that assertion. It returns a boolean and a timestamp, never a payload, never a token, never a count.
