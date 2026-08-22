@@ -933,6 +933,18 @@ test('F23 and C5. a first-ever waist commits in six taps or fewer, from a blank 
         // delete used to be reformatted the same way each keystroke was, so
         // `99.` came straight back as `99.0` and the field could not be emptied
         // either.
+        //
+        // The tap lands past the last digit, at the right edge of a
+        // right-aligned field, which is where a thumb goes to correct a number
+        // and which is what puts the caret after it. A value the stepper wrote
+        // leaves the caret at 0, and four backspaces at 0 delete nothing: real,
+        // measured in both engines, and a tap is how a person gets past it.
+        const field2 = (await field.boundingBox())!;
+        await field.click({ position: { x: field2.width - 4, y: field2.height / 2 } });
+        const caretAfterTap = await field.evaluate((node) => (node as HTMLInputElement).selectionStart);
+        console.log(`F23  ${engine.padEnd(6)} a tap at the right edge puts the caret at ${caretAfterTap}`);
+        expect(caretAfterTap, 'a tap past the last digit did not put the caret after it').toBe(4);
+
         const cleared = await typeIntoTheWaist(page, ['Backspace', 'Backspace', 'Backspace', 'Backspace']);
         console.log(traceLines(engine, 'clearing  ', cleared));
         expect(
@@ -965,6 +977,113 @@ test('F23 and C5. a first-ever waist commits in six taps or fewer, from a blank 
             `over ${scratchQuery("select count(*) from measurement where metric = 'waist'")} waist rows, ` +
             'both kept, because this table appends',
         );
+      },
+    );
+  }
+
+  // Put the instance back the way the rest of the suite expects it.
+  testStackWithDemoMode('1', 'reset');
+  await waitForScratch();
+});
+
+/**
+ * C5. The snapshot read is not allowed to correct the owner.
+ *
+ * The sheet reads `/api/log` when it opens and fills the waist field with the
+ * last stored measurement, and the field is live and editable while that read
+ * is in the air, with a skeleton card drawn beside it and nothing saying a
+ * value is on its way. So a number typed into it was silently replaced when the
+ * answer landed: 91.4 became 98.5, in both engines.
+ *
+ * `03-quick-log.html` frame 2 captions itself "No spinner, no retry loop, no
+ * lost typing", and this is the third of those. What the owner put in the field
+ * outranks anything the network has to say about it, however much later it
+ * arrives.
+ *
+ * The read is held for three and a half seconds, which is a slow tailnet and
+ * not a fiction: the same delay the C5 loading state is captured at.
+ */
+test('C5. a waist typed while the snapshot read is in flight survives the answer landing', async () => {
+  const TYPED = '91.4';
+
+  for (const engine of ENGINES) {
+    // Rebuilt per engine, so both read the same rows and neither inherits the
+    // other's writes. Without it the second engine would find the first
+    // engine's 91.4 on file and pass whatever the sheet did with it.
+    testStackWithDemoMode('1', 'reset');
+    await waitForScratch();
+    await ensureScratchOwner();
+
+    const onFile = scratchQuery(
+      "select raw_value from measurement where metric = 'waist' order by measured_at desc limit 1",
+    );
+    console.log(`C5   ${engine.padEnd(6)} the last stored waist is ${onFile} cm, and ${TYPED} is typed over it`);
+    expect(onFile, 'there is no stored measurement for the read to overwrite the typing with').toMatch(/\d/);
+    expect(onFile, 'the number typed is the number on file, so this test cannot fail').not.toBe(TYPED);
+    const jar = await scratchSession();
+
+    await inEngine(
+      engine,
+      { viewport: { width: 393, height: 852 }, deviceScaleFactor: 3, serviceWorkers: 'block' },
+      async (page, context) => {
+        await context.addCookies(cookiesFor(jar));
+        // The read, held in the air. The write is not: Save has to reach the
+        // origin in the same walk, and holding both would be measuring the
+        // queue instead of the field.
+        await context.route('**/api/log', async (route) => {
+          if (route.request().method() !== 'GET') return route.continue();
+          await new Promise((resolve) => setTimeout(resolve, 3500));
+          await route.continue().catch(() => undefined);
+        });
+        await page.goto(`${scratchUrl}/`);
+        await page.waitForLoadState('load');
+
+        await page.getByRole('button', { name: 'Quick log', exact: true }).click();
+        await expect(page.getByRole('dialog', { name: 'Quick log' })).toBeVisible();
+        // The state the defect lives in: the skeleton is up and the field is
+        // live beside it.
+        await expect(page.locator('.sheet [data-state="loading"]')).toBeVisible();
+
+        const typed = await typeIntoTheWaist(page, [...TYPED]);
+        console.log(traceLines(engine, 'mid-read  ', typed));
+        expect(typed.map((step) => step.value), 'the field could not be typed into while loading').toEqual(
+          typedSoFar(TYPED),
+        );
+        await page.screenshot({ path: `${CAPTURES}c5-typed-during-read-${engine}-393x852.png`, fullPage: true });
+
+        // The answer lands. Waited for by the response and then by the thing
+        // the answer draws, because the field is filled from the same handler
+        // that draws it.
+        await page.waitForResponse(
+          (response) =>
+            response.url().includes('/api/log') && response.request().method() === 'GET' && response.ok(),
+          { timeout: 20_000 },
+        );
+        // The waist block's own note, "Last 98.5 cm, 19 Aug", and not the
+        // sheet header's date, which is also a `.note.num`.
+        const lastMeasured = page.locator('.sheet .field-block .note.num');
+        await expect(lastMeasured).toBeVisible();
+        const lastLine = (await lastMeasured.textContent())?.trim();
+
+        const held = await page.locator('#quick-log-waist').inputValue();
+        console.log(
+          `C5   ${engine.padEnd(6)} the read landed saying "${lastLine}" and the field still reads ${held}`,
+        );
+        expect(held, 'the snapshot replaced what the owner had typed').toBe(TYPED);
+        await page.screenshot({ path: `${CAPTURES}c5-read-landed-${engine}-393x852.png`, fullPage: true });
+
+        // And it is the typed number that commits, through the shipped Save.
+        await page.getByRole('button', { name: 'Save', exact: true }).click();
+        await expect
+          .poll(
+            () =>
+              scratchQuery(
+                "select raw_value from measurement where metric = 'waist' and source = 'manual' order by measured_at desc limit 1",
+              ),
+            { timeout: 20_000 },
+          )
+          .toBe(TYPED);
+        console.log(`C5   ${engine.padEnd(6)} and ${TYPED} is what reached the database`);
       },
     );
   }
