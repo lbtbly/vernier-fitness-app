@@ -705,8 +705,22 @@ a.value-link:active{opacity:.7}
  * write it, so `--s3` stays 12 everywhere and `.card` keeps it. F27 puts five
  * things inside 715 px at 393x852 and screen 02's own caption says the sheet
  * scrolls past that fold, so this one screen closes the gap to 8 and takes 4 px
- * off the vertical padding of its cards. Nothing outside `.today` can feel it,
- * and the arithmetic is on the screen it was bought for.
+ * off the vertical padding of its cards. The arithmetic is on the screen it was
+ * bought for.
+ *
+ * AND "NOTHING OUTSIDE `.today` CAN FEEL IT" WAS FALSE, ON THE ONE SCREEN THE
+ * DEFECT NAMED. The quick-log sheet is rendered by a component inside Today's
+ * section, so it is inside `div.today` in the DOM even though it is a fixed
+ * dialog over the whole viewport and screen 03's own sheet. `.today .card`
+ * matched its loading, error, empty and stale cards and `.today .banner`
+ * matched its offline banner, and all five lost 8 px of padding and 4 px of
+ * margin they had at a6d8acc. C5 puts the six card states on `00-patterns.html`
+ * and says the geometry is defined once there; the sheet is not part of Today's
+ * fold problem and does not pay for it.
+ *
+ * So the compression stops at the sheet, stated here rather than left to
+ * source order. Anything the sheet draws is screen 00's geometry, whichever
+ * screen raised it.
  */
 .today .card{margin-bottom:var(--s2);padding:var(--s2) var(--s4)}
 .today .banner{margin-bottom:var(--s2)}
@@ -714,6 +728,9 @@ a.value-link:active{opacity:.7}
 .today .card.day .row{padding:2px 0}
 .today .card.day .btn.primary{margin-top:6px}
 .today .card.adherence .pills{margin:8px 0 4px}
+
+.today .sheet .card{margin-bottom:var(--s3);padding:var(--s4)}
+.today .sheet .banner{margin-bottom:var(--s3)}
 
 .card.adherence{padding:8px var(--s4)}
 
@@ -743,11 +760,32 @@ a.value-link:active{opacity:.7}
 .pills li[data-day=planned]{background:transparent;border:1.5px dashed var(--text-3)}
 
 /*
- * Each quiet source that has stopped sending, one line, its own sentence.
- * Tighter than the shell banner because this one is above the fold on Today
- * and F27 counts the pixels there.
+ * The quiet sources, one line whatever the count is.
+ *
+ * Tighter than the shell banner because this one is above the fold on Today and
+ * F27 counts the pixels there. And it is a disclosure rather than a list for
+ * the same reason: a line per source made the banner's height a function of the
+ * data, and two quiet sources pushed the weight trend 27 px under the fold. The
+ * summary row is the constant; what opens under it is every age and every
+ * cause, unabridged.
  */
-.banner[data-stale-banner]{padding:9px 12px}
+details.banner[data-stale-banner]{display:block;padding:0}
+details.banner > summary{
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+  padding:9px 12px;
+  /* The default triangle, in both engines, so the chevron is the only marker. */
+  list-style:none;
+  cursor:pointer;
+}
+details.banner > summary::-webkit-details-marker{display:none}
+details.banner > summary::marker{content:''}
+details.banner > summary .ch{transition:transform var(--dur) var(--ease)}
+details.banner[open] > summary .ch{transform:rotate(90deg)}
+@media (prefers-reduced-motion: reduce){details.banner > summary .ch{transition:none}}
+/* Indented to the summary's text, so age and cause read under the line they explain. */
+.stalelines{padding:0 12px 9px 40px}
 .staleline{display:block}
 .staleline + .staleline{margin-top:4px}
 

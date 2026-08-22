@@ -416,6 +416,15 @@ export const strings = {
       notAReport: 'That is not a launch report.',
       notAReportDetail:
         'This endpoint records two things the browser reports at launch: whether Vernier opened from the Home Screen, and whether this device can keep the screen awake. Nothing else is stored here.',
+      /**
+       * The refusal a driven browser gets. C2 reads this row back as proof the
+       * owner opened Vernier from his Home Screen, so a row a test can author
+       * is not proof of anything, and the endpoint says why rather than
+       * answering 204 and quietly writing nothing.
+       */
+      automated: 'A driven browser cannot report a launch.',
+      automatedDetail:
+        'This row is read back as evidence that Vernier opened from the Home Screen on the owner\'s phone, so it is only written by a browser a person is holding. Nothing was stored. Point the run at the scratch instance on 127.0.0.1:3101 instead.',
     },
 
     recovery: {
@@ -959,6 +968,18 @@ export const strings = {
      * together in the markup, so the sentence a person reads has one home.
      */
     banner: (age: string, cause: string) => `${age}. ${cause}`,
+    /**
+     * The banner's one visible line, whatever the count is.
+     *
+     * F27 counts pixels above the fold and the number of quiet sources is data,
+     * so the line that carries it cannot grow with it. This one names how many
+     * have stopped and nothing else; the ages and the causes sit one tap below
+     * it, and each source's own chip and cause line still ship in the card that
+     * source feeds. The wording is the only thing that changes between one quiet
+     * source and five, and it changes by a numeral.
+     */
+    bannerSummary: (count: number) =>
+      count === 1 ? 'One source has gone quiet.' : `${count} sources have gone quiet.`,
   },
 
   /**

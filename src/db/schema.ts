@@ -39,12 +39,22 @@ export const appMeta = pgTable('app_meta', {
  *
  * One row per signal, never one row per launch. The time is stored so a value
  * that has not been seen in months is visible as stale rather than as current.
+ *
+ * `reported_from` is the address the launch report arrived from, or null when
+ * it did not come through the Tailscale proxy, which on this install means
+ * something on the Mac mini itself. It is here because the row was anonymous
+ * and a verifier could not tell the owner's phone from a headless browser: on
+ * 2026-08-22 both signals went true from an automated run and read exactly like
+ * a real Home Screen launch. The same class of fact `request_origin` already
+ * holds, evidence of origin and never a credential, and nothing reads it to
+ * decide anything.
  */
 export const deviceObservation = pgTable('device_observation', {
   signal: text('signal').primaryKey(),
   observed: boolean('observed').notNull(),
   firstObservedAt: timestamp('first_observed_at', { withTimezone: true }),
   lastReportedAt: timestamp('last_reported_at', { withTimezone: true }).notNull().defaultNow(),
+  reportedFrom: text('reported_from'),
 });
 
 /**

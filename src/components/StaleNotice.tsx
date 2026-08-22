@@ -1,4 +1,4 @@
-import { ScaleIcon, WarnIcon, WaveIcon } from '@/components/icons';
+import { ChevronIcon, ScaleIcon, WarnIcon, WaveIcon } from '@/components/icons';
 import type { SourceFreshness } from '@/db/trends';
 import { sourceLabel } from '@/lib/display';
 import { shortDateTime } from '@/lib/format';
@@ -66,7 +66,24 @@ export function StaleCause({
   );
 }
 
-/** The banner Today carries under its title. One row, a named cause, no modal. */
+/**
+ * The banner Today carries under its title. One row, a count, no modal.
+ *
+ * IT USED TO DRAW A LINE PER QUIET SOURCE, AND ITS HEIGHT WAS THEREFORE DATA.
+ * Two lines instead of one added 41 px, which put the weight trend 26 to 27 px
+ * under F27's 715 px fold on about one day in six, and five quiet sources would
+ * have added twice that again. A banner that fits only while at most one source
+ * is silent does not fit a product with five of them, and silence is the whole
+ * failure mode, so the answer is not to draw fewer warnings.
+ *
+ * So it collapses. One line, always, naming how many sources have stopped, in
+ * the warn treatment, above the fold. Every age and every cause is one tap
+ * below it in a native disclosure, and none of it was moved off the screen:
+ * each source also keeps its own warn chip, its own cause sentence and its own
+ * hatched range in the card it feeds, which is what DESIGN.md section 4 defines
+ * the stale state as. This is the same shape the offline banner already ships
+ * in: one line under the title carrying a count.
+ */
 export function StaleBanner({
   freshness,
   timeZone,
@@ -77,15 +94,19 @@ export function StaleBanner({
   const quiet = freshness.filter((source) => source.stale);
   if (quiet.length === 0) return null;
   return (
-    <div className="banner w" data-stale-banner={quiet.length}>
-      <WarnIcon />
-      <span className="grow">
+    <details className="banner w" data-stale-banner={quiet.length}>
+      <summary data-stale-summary={quiet.length}>
+        <WarnIcon />
+        <b className="grow">{strings.stale.bannerSummary(quiet.length)}</b>
+        <ChevronIcon className="ch" />
+      </summary>
+      <div className="stalelines">
         {quiet.map((source) => (
-          <span key={source.source} className="staleline">
+          <span key={source.source} className="staleline" data-stale-line={source.source}>
             {strings.stale.banner(staleAge(source), staleCause(source, timeZone))}
           </span>
         ))}
-      </span>
-    </div>
+      </div>
+    </details>
   );
 }
