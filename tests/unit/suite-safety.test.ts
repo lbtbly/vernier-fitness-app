@@ -178,6 +178,10 @@ describe('the suite against the owner\'s installation', () => {
         offenders.push(`${name} imports test from @playwright/test`);
       }
       if (/browser\.newContext\(/.test(source)) offenders.push(`${name} opens a context of its own`);
+      // A spec may need a second engine, and notices.spec.ts does. It gets one
+      // through `inEngine`, which routes the context through the same hold; a
+      // raw launch would be outside it.
+      if (/\.launch\(/.test(source)) offenders.push(`${name} launches a browser of its own`);
       // The hold is installed on the CONTEXT, so `page.unrouteAll` cannot
       // reach it and a blanket `context.route('**/*')` that unroutes its own
       // pattern afterwards never touches it. What is refused is clearing the

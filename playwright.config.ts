@@ -48,7 +48,7 @@ export default defineConfig({
   projects: [
     {
       name: 'webkit-iphone',
-      testIgnore: /focus\.spec\.ts|service-worker\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|launch-report\.spec\.ts/,
+      testIgnore: /focus\.spec\.ts|service-worker\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|launch-report\.spec\.ts|notices\.spec\.ts/,
       use: { ...devices['Desktop Safari'], viewport: { width: 393, height: 852 }, deviceScaleFactor: 3 },
     },
     {
@@ -80,6 +80,16 @@ export default defineConfig({
       // sets the scratch instance's password instead and F18 is proven on an
       // account this suite created.
       //
+      // notices.spec.ts joined it after the second F27 failure. It grades the
+      // one region under Today's title against states the live install cannot
+      // be put into on demand: two syncing sources quiet at once, which happens
+      // about one day in six, with an open import question beside them. Both
+      // mean moving the demonstration anchor and re-seeding, so they belong
+      // here. It launches its own Chrome and its own WebKit from inside the
+      // test, because a fold measured in one engine and shipped in the other is
+      // what this defect has already cost twice, and because the two engines
+      // have to read the same rows.
+      //
       // trend-scratch.spec.ts joined it in slice 4. It needs two states the
       // owner's install cannot be put into: a database with none of the five
       // body signals in it, and a phone source whose newest sample is exactly
@@ -101,9 +111,14 @@ export default defineConfig({
       // never gets past the sign-in screen. Chrome accepts one from a loopback
       // origin. The engine is the price of not putting a test instance on the
       // tailnet behind a second HTTPS proxy, and it is written down rather than
-      // discovered: what this file proves, it proves in Chrome.
+      // discovered: what these files prove, they prove in Chrome.
+      //
+      // notices.spec.ts is the one exception and says so in its own header: it
+      // injects the session the shipped recovery route minted with the Secure
+      // attribute relaxed, so WebKit will carry it over loopback too, and it
+      // grades its fold in both engines against one database.
       name: 'chrome-scratch',
-      testMatch: /launch-report\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts/,
+      testMatch: /launch-report\.spec\.ts|notices\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         channel: 'chrome',

@@ -1,4 +1,4 @@
-import { expect, test } from './fixtures';
+import { expect, newGuardedContext, test } from './fixtures';
 import { apiClient } from './api-client';
 import {
   ensureScratchOwner,
@@ -155,6 +155,81 @@ test.describe('the launch report', () => {
     expect(lying.body.recorded).toBe(false);
     expect(String(lying.body.reason)).toBe('A driven browser cannot report a launch.');
     expect(scratchQuery(LAST_REPORTED)).toBe(before);
+  });
+
+  /**
+   * The witness that fires for WebKit, at the server, with the exact pair the
+   * verifier got a 204 out of: a genuine Safari user agent and webdriver false.
+   *
+   * Playwright's WebKit sends that user agent because it IS WebKit, so no header
+   * says it is automated and `navigator.webdriver` is one addInitScript line
+   * from reading false. What is refused here is the claim rather than the
+   * caller: a Macintosh has no Home Screen to put an icon on.
+   */
+  test('refuses a Home Screen launch reported from a desktop, Safari user agent and all', async () => {
+    const before = scratchQuery(SIGNALS);
+    const client = apiClient(scratchUrl);
+    await client.get('/sign-in');
+
+    const fromAMac = await client.post(
+      '/api/diagnostics/launch',
+      { standalone: true, wakeLock: true, webdriver: false },
+      {
+        userAgent:
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15',
+      },
+    );
+    console.log(`a Safari user agent claiming a Home Screen launch: ${fromAMac.status} ${fromAMac.text}`);
+    expect(fromAMac.status).toBe(200);
+    expect(fromAMac.body.recorded).toBe(false);
+    expect(String(fromAMac.body.reason)).toBe('A Home Screen launch cannot be reported from a desktop.');
+    expect(scratchQuery(SIGNALS)).toBe(before);
+  });
+
+  /**
+   * And the whole accident re-run: a real browser this server rendered a page
+   * for, with `navigator.webdriver` overwritten before the first script, which
+   * is the one line that reopened it. Chrome here because this instance answers
+   * on loopback http; the user agent it sends is a real Chrome one on a Mac,
+   * which is the same shape WebKit's is.
+   */
+  test('refuses a driven browser that has overwritten the flag it tells on itself with', async ({
+    browser,
+  }) => {
+    const before = scratchQuery(SIGNALS);
+    const context = await newGuardedContext(browser, {
+      baseURL: scratchUrl,
+      viewport: { width: 393, height: 852 },
+    });
+    // The accident, both halves of it. `navigator.webdriver` is the flag the
+    // client tells on itself with, and display-mode standalone is the claim
+    // that made two rubric lines read as met. A driven browser can assert both.
+    await context.addInitScript(() => {
+      Object.defineProperty(navigator, 'webdriver', { get: () => false });
+      const query = window.matchMedia.bind(window);
+      window.matchMedia = (text: string) =>
+        text.includes('standalone') ? ({ matches: true, media: text } as MediaQueryList) : query(text);
+    });
+    const page = await context.newPage();
+    const reported = page.waitForResponse(
+      (response) =>
+        response.url().endsWith('/api/diagnostics/launch') && response.request().method() === 'POST',
+    );
+    await page.goto('/sign-in');
+    const response = await reported;
+    const body = await response.text();
+    console.log(`navigator.webdriver in this browser: ${await page.evaluate(() => navigator.webdriver)}`);
+    console.log(`the launch it raised: ${response.status()} ${body}`);
+    expect(await page.evaluate(() => navigator.webdriver)).toBe(false);
+    expect(
+      await page.evaluate(() => window.matchMedia('(display-mode: standalone)').matches),
+      'the page did not claim a standalone launch, so nothing was being attacked',
+    ).toBe(true);
+    expect(response.status()).toBe(200);
+    expect(JSON.parse(body).recorded).toBe(false);
+    expect(String(JSON.parse(body).reason)).toBe('A Home Screen launch cannot be reported from a desktop.');
+    expect(scratchQuery(SIGNALS)).toBe(before);
+    await context.close();
   });
 
   test('writes an honest report and records the address it arrived from', async () => {

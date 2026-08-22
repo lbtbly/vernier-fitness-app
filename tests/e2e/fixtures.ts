@@ -1,4 +1,15 @@
-import { test as base, type Browser, type BrowserContext, type BrowserContextOptions } from '@playwright/test';
+import {
+  test as base,
+  type Browser,
+  type BrowserContext,
+  type BrowserContextOptions,
+  type Page,
+} from '@playwright/test';
+// The driver package rather than the test runner's re-export. The runner's
+// `chromium` and `webkit` carry the current project's launch options, so a
+// WebKit launched from inside a project whose channel is chrome is asked for a
+// chrome channel and refuses. These two are the plain browser types.
+import { chromium, webkit } from 'playwright';
 import { scratchUrl } from './host';
 
 /**
@@ -91,3 +102,47 @@ export const test = base.extend({
 
 export { expect } from '@playwright/test';
 export type { BrowserContext, Locator, Page } from '@playwright/test';
+
+/**
+ * The same walk in both engines, from inside one test.
+ *
+ * A layout defect that was measured in one engine and shipped in the other is
+ * what F27 has now cost twice, so the spec that grades a fold runs both. They
+ * run here rather than as two Playwright projects because the state being
+ * measured is expensive to build and has to be the SAME state: the anchored
+ * demonstration seed takes a container restart, and two projects would build it
+ * twice and compare two databases.
+ *
+ * Chrome by channel rather than by bundled Chromium, which is what
+ * playwright.config.ts drives everywhere else, and the browser types come from
+ * the driver package so the surrounding project's channel is not inherited. The
+ * context goes through
+ * `newGuardedContext`, so a browser launched here is under the same hold on the
+ * launch report as one the harness handed out.
+ */
+export const ENGINES = ['chrome', 'webkit'] as const;
+
+export type Engine = (typeof ENGINES)[number];
+
+export async function inEngine(
+  engine: Engine,
+  options: BrowserContextOptions,
+  walk: (page: Page, context: BrowserContext) => Promise<void>,
+): Promise<void> {
+  // `channel` is stated on both, including as undefined on WebKit. The test
+  // runner puts the surrounding project's launch options on these browser
+  // types, and this file is matched by a project whose channel is chrome, so a
+  // WebKit launched without saying otherwise is asked for a chrome channel and
+  // refuses.
+  const browser =
+    engine === 'chrome'
+      ? await chromium.launch({ channel: 'chrome' })
+      : await webkit.launch({ channel: undefined });
+  try {
+    const context = await newGuardedContext(browser, options);
+    const page = await context.newPage();
+    await walk(page, context);
+  } finally {
+    await browser.close();
+  }
+}

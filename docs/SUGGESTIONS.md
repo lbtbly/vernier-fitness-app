@@ -89,3 +89,4 @@ Triaged by /doc-health. Checked = handled.
 - [ ] 2026-08-22 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `src/components/Notices.tsx`
 - [ ] 2026-08-22 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `src/lib/value-refusal.ts`
 - [ ] 2026-08-22 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `tests/e2e/fixtures.ts`
+- [ ] 2026-08-22 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `tests/e2e/notices.spec.ts`

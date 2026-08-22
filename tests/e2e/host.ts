@@ -357,6 +357,60 @@ export function resetScratchProvenance(): void {
 }
 
 /**
+ * The demonstration seed, re-anchored a chosen number of days back, on the
+ * scratch instance and nowhere else.
+ *
+ * F27 measures Today's fold against the states the live install actually
+ * reaches, and the two that matter cannot be waited for: the scale goes quiet
+ * four days in every twenty-one, so two sources are silent at once on about one
+ * day in six, and there is no shipped path that makes that happen today. The
+ * seed is a pure function of `demo.anchor_day`, so moving the anchor moves the
+ * whole six weeks and the continuation fills forward to today from there. Anchor
+ * 198, 199 and 200 days back are the three consecutive days the verifier
+ * measured the defect at, and 196 is the neighbouring day with one source quiet.
+ *
+ * TRUNCATE and a restart, exactly as `resetScratchProvenance` does and for the
+ * same reasons: `measurement` refuses DELETE, and the restart is what re-seeds
+ * through the boot path the container uses in anger. The database is named
+ * `vernier_scratch` in the statement, so no ordering or environment puts this
+ * anywhere near the owner's install.
+ */
+export function anchorScratchDemo(daysAgo: number): string {
+  if (!Number.isInteger(daysAgo) || daysAgo < 1 || daysAgo > 3650) {
+    throw new Error(`an anchor of ${daysAgo} days is not a day count`);
+  }
+  scratchQuery('truncate measurement, source_record, import_question, idempotency_key, write_request');
+  scratchQuery("delete from app_meta where key in ('demo.anchor_day', 'demo.filled_through')");
+  scratchQuery(
+    `insert into app_meta (key, value) values ('demo.anchor_day', to_char(current_date - ${daysAgo}, 'YYYY-MM-DD'))`,
+  );
+  execFileSync('docker', ['restart', SCRATCH_CONTAINER], { cwd: projectRoot, encoding: 'utf8' });
+  execFileSync(
+    'bash',
+    [
+      '-c',
+      `for i in $(seq 1 60); do curl -fsS ${scratchUrl}/healthz >/dev/null 2>&1 && exit 0; sleep 1; done; exit 1`,
+    ],
+    { cwd: projectRoot, encoding: 'utf8' },
+  );
+  return scratchQuery("select value from app_meta where key = 'demo.anchor_day'");
+}
+
+/** How many syncing sources are past the staleness threshold, asked of the database. */
+export function scratchQuietSources(hours = 36): number {
+  return Number(
+    scratchQuery(`
+      select count(*) from (
+        select sr.source, max(m.measured_at) last
+        from measurement m join source_record sr on sr.id = m.source_record_id
+        where sr.source in ('withings', 'apple_health_shortcut')
+        group by sr.source
+      ) s where s.last < now() - interval '${Number(hours)} hours'
+    `),
+  );
+}
+
+/**
  * What the owner's install holds, in one line, for the run to compare against.
  *
  * Read at the start and read again at the end. Nothing in this suite may lower
