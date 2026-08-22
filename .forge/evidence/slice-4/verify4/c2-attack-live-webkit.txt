@@ -1,0 +1,11 @@
+BEFORE
+standalone_seen|t|2026-08-22 16:13:55.795+02|2026-08-22 17:13:57.479182+02|null
+wake_lock_available|t|2026-08-22 16:13:55.804+02|2026-08-22 16:13:55.804748+02|null
+user agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.5 Safari/605.1.15
+navigator.webdriver as the page sees it: false
+standalone as the page sees it: true
+launch report answers seen: ["POST 200 {\"recorded\":false,\"reason\":\"A Home Screen launch cannot be reported from a desktop.\",\"detail\":\"This row is read back as evidence that Vernier opened from the Home Screen icon on the owner's iPhone, and the browser reporting this launch says it is running on a desktop. Nothing was stored. A launch that reports no Home Screen is recorded as usual.\"}"]
+AFTER
+standalone_seen|t|2026-08-22 16:13:55.795+02|2026-08-22 17:13:57.479182+02|null
+wake_lock_available|t|2026-08-22 16:13:55.804+02|2026-08-22 16:13:55.804748+02|null
+device_observation: byte for byte unmoved

@@ -88,6 +88,30 @@ It is permanent: `measurement` refuses DELETE, and that refusal is a guarantee t
 
 Two things follow. The row is now a standing test of the guarantee, so every future run must leave it alone. And it is a fabricated measurement in a health record whose whole point is provenance, so it should be removed before the owner logs real waist measurements, by a deliberate operator action rather than by a test. Offered to the owner on 2026-08-22; awaiting his word.
 
+## Slice 4 is with the architect after four failures, all on F27 and its neighbours
+
+40 of 166 checked. The count fell from 42: C5 and F24 went back to unchecked when the fix that bounded the notice region hid the offline queue count behind a disclosure.
+
+**The pattern is the finding.** Each fix bounded the element in front of it and the next element grew.
+1. The fold held at 700 px, but only because global tokens had been shrunk and screen 02's adherence pills and tone sentence dropped to buy the room.
+2. Tokens restored, a second stale line appeared past 36 hours of quiet and the trend fell to 742. One day in six, forever.
+3. The stale banner was bounded, an open import question added a second banner, the trend fell to 758.
+4. All notices folded into one region, genuinely bounded and proven at 46 px from 1 to 999999 notices in both engines. The trend then fell to **1147 px**, because the just-logged card draws one row per logged value and the six values F23 names take the day card from 223 px to 681 px.
+
+The architect is ruling three questions in `.forge/RULING-SLICE-4.md`: whether F27 is measurable as written when the screen's content grows with the owner's own data, how to resolve a real conflict between two approved artifacts, and who owns F23's first-ever waist entry.
+
+**The conflict is genuine and worth stating.** DESIGN.md section 4 defines the offline state as a one-line banner under the title carrying the queue count. F27 requires bounded height above the fold. With more than one notice both cannot hold in the current design: folding the count into the disclosure is what bounded the region and is what failed C5 and F24. The panel's finding constrains any answer, which is that the owner must see that something of his is unsent without hunting for it.
+
+## A hole in the launch report, being closed separately
+
+A bare fetch with **no browser, no session and no automation**, using an anti-forgery pair minted by one unauthenticated GET of `/sign-in` and an iPhone user agent, answers 204 and sets both device signals true. The previous fix refuses a standalone claim from a desktop user agent and holds the Playwright suite; an iPhone user agent walks past the first and nothing outside Playwright is held by the second.
+
+That matters more than a normal endpoint because the row is C2's evidence, the owner is already being asked to clear two false rows by hand, and a signal anything on the tailnet can set with four lines of curl is not evidence of a device. A builder is closing it independently of the layout ruling.
+
+## The R7 flake has now appeared three times
+
+`quick-log.spec.ts:564` once, `passkey.spec.ts:101` once, `passkey.spec.ts:130` once, each on a byte-identical tree, each passing on re-run. `retries: 0`, so any one of them fails R7's final run outright. Carried to the final full-scope verification; the fix is a bounded retry on read-after-write assertions or `retries: 1` scoped to those specs, never a rubric change.
+
 ## The C2 signal is poisoned and only the owner can clear it, BEFORE he launches
 
 Resolved attribution first: the "unidentified client" the slice 4 re-verify reported was this run's own agents, including the verifier itself and later the builder. `request_origin` holds one address for its whole life, `100.65.127.62`, this Mac. The iPhone's `100.121.138.9` has never appeared. Writes stopped when each agent finished, confirmed by idle windows of 45 and 60 seconds with zero growth and no automation process left alive. No external party reached the app.

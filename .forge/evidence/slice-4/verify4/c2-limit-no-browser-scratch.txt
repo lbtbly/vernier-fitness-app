@@ -1,0 +1,5 @@
+scratch device_observation cleared: ""
+anti-forgery pair minted by one unauthenticated GET of /sign-in: yes
+POST /api/diagnostics/launch, iPhone user agent, no session: HTTP 204 ""
+scratch device_observation after: "standalone_seen|t|2026-08-22 20:13:26.167+02|null
+wake_lock_available|t|2026-08-22 20:13:26.173+02|null"

@@ -1,0 +1,14 @@
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+scratch: 1 quiet source(s)
+393x852  notices=2 state=offline sheetOpen=false queuedChips=["Queued"]
+393x852  the one line reads: "2 things are waiting on you"
+393x852  a queue count is readable on Today with the sheet closed: false
+393x852  and after one tap on the line: true
+768x1024  notices=2 state=offline sheetOpen=false queuedChips=["Queued"]
+768x1024  the one line reads: "2 things are waiting on you"
+768x1024  a queue count is readable on Today with the sheet closed: false
+768x1024  and after one tap on the line: true
+1280x800  notices=2 state=offline sheetOpen=false queuedChips=["Queued"]
+1280x800  the one line reads: "2 things are waiting on you"
+1280x800  a queue count is readable on Today with the sheet closed: false
+1280x800  and after one tap on the line: true

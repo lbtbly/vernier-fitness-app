@@ -1,0 +1,5 @@
+scratch device_observation cleared: ""
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+user agent: Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1
+limit 1 answers: ["204 "]
+scratch device_observation after limit 1: "standalone_seen|t|2026-08-22 20:12:11.4+02|null\nwake_lock_available|t|2026-08-22 20:12:11.402+02|null"

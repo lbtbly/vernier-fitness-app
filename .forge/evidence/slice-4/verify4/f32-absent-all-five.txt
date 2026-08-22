@@ -1,0 +1,58 @@
+rows: 0 measurement
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+--- Health, nothing stored ---
+SATURDAY 22 AUGUST
+Health
+7 days
+30 days
+6 months
+Year
+BODY
+No measurements yet
+
+Weight and waist share one axis here, with activity, sleep, resting heart rate and your blood panels below them. The first reading starts the trend.
+
+Set up the owner account
+GOAL
+No goal set
+
+A goal is a start weight, a target weight and a date. The chart draws the straight line between them and nothing else; it is a plan, not a prediction.
+
+ACTIVITY
+Health
+No step counts stored
+
+Steps arrive from a shortcut on the iPhone. Until one does, this stays empty rather than showing a zero you did not walk.
+
+Open integrations
+SLEEP
+Health
+No sleep stored
+
+Sleep duration arrives with the same shortcut. A night the watch did not record stays absent here and is never padded out.
+
+Open integrations
+HEART
+Health
+No resting heart rate stored
+
+Resting heart rate arrives once a day with the same shortcut. Nothing is estimated in the meantime.
+
+Open integrations
+Recovery, heart rate variability
+Not stored. Heart rate variability arrives from the watch.
+VO2 max
+Not stored. The watch estimates it every few weeks.
+
+VO2 max arrives from the watch every few weeks. Between two readings the app shows the last one with its date, never a fresh-looking number.
+
+Tap any number to see where it came from and every correction it has ever had.
+
+Blood pressure is not handled anywhere in this app, by design. There is no field to fill and no toggle to find.
+
+Today
+Health
+Train
+Eat
+Settings
+leaf nodes reading zero, over 121 elements: []

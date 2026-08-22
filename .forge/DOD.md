@@ -126,7 +126,7 @@ direct path is the note.
 - [x] **F23.** Waist, energy, fatigue, hunger, satiety and a free note each commit
   from Today in six taps or fewer. Evidence: a scripted interaction printing the
   tap count for each of the six.
-- [x] **F24.** With the origin unreachable, a quick-log write commits locally,
+- [ ] **F24.** With the origin unreachable, a quick-log write commits locally,
   shows a queued marker and the queue count, and replays exactly once when the
   origin returns: one row in the database and one idempotency key in the request
   log. Evidence: the capture, the row count and the request log.
@@ -608,7 +608,7 @@ their interaction detail in `.forge/wireframes/`, and the standards skill.
   password second, the one-time owner creation, and the host-unreachable state.
   Every interactive element shows a 2 px focus outline at 2 px offset. Evidence:
   three captures plus a keyboard-traversal capture.
-- [x] **C5.** Quick log matches screen 03 at three viewports, presented as a sheet
+- [ ] **C5.** Quick log matches screen 03 at three viewports, presented as a sheet
   with 44 px minimum targets, and the loading, empty, error, offline and stale
   states render with the geometry defined once on screen 00. Evidence: three
   captures plus five state captures overlaid on the screen-00 geometry.

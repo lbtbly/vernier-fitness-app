@@ -2,3 +2,29 @@ recovery: one use, valid for 10 minutes. Open it on the device you want signed i
 anchor 2026-02-03, 2 quiet, 1 open question(s)
 chrome on load                     trend ends   689  fold 715  scrollY 0  region 46  notices 2  banners 1  dayCard 223
 chrome notices open                trend ends   827  fold 715  scrollY 0  region 184  notices 2  banners 1  dayCard 223
+chrome after one quick log         trend ends  1147  fold 715  scrollY 0  region 46  notices 2  banners 1  dayCard 681
+   just-logged card: {"state":"applied","height":438,"rows":6}
+         8..  65  h  57  header.title 
+        65.. 111  h  46  details.notices banner w data-notices=2
+       119.. 800  h 681  section.card day 
+       808.. 982  h 174  section.card adherence data-adherence=10
+       990..1383  h 393  section.card data-card=weight
+      1391..1604  h 214  section.card data-card=waist
+      1612..1968  h 356  section.card data-card=signals
+      1976..2759  h 783  section.card 
+      2767..2789  h  22  p.note centre 
+chrome after reload                trend ends   689  fold 715  scrollY 0  region 46  notices 2  banners 1  dayCard 223
+webkit on load                     trend ends   689  fold 715  scrollY 0  region 46  notices 2  banners 1  dayCard 223
+webkit notices open                trend ends   827  fold 715  scrollY 0  region 184  notices 2  banners 1  dayCard 223
+webkit after one quick log         trend ends  1147  fold 715  scrollY 0  region 46  notices 2  banners 1  dayCard 681
+   just-logged card: {"state":"applied","height":438,"rows":6}
+         8..  65  h  57  header.title 
+        65.. 111  h  46  details.notices banner w data-notices=2
+       119.. 800  h 681  section.card day 
+       808.. 982  h 174  section.card adherence data-adherence=10
+       990..1383  h 393  section.card data-card=weight
+      1391..1604  h 214  section.card data-card=waist
+      1612..1968  h 356  section.card data-card=signals
+      1976..3135  h1159  section.card 
+      3143..3165  h  22  p.note centre 
+webkit after reload                trend ends   689  fold 715  scrollY 0  region 46  notices 2  banners 1  dayCard 223

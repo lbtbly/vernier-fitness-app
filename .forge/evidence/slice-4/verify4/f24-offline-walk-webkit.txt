@@ -1,0 +1,17 @@
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+anchor 2026-08-19
+before: 92 measurement, 0 write_request, 0 idempotency_key
+offline stepper: up disabled=true down disabled=true
+the sheet reads: No last measurement to step from. The feelings and the note still save.
+the stepper shows: -- cm
+after forcing the plus: -- cm
+OFFLINE  just-logged {"state":"queued","height":282,"rows":3}  notices 2 "2 things are waiting on you"  trend ends 1138
+queued markers on the card: ["Queued","Queued","Queued"]
+during the outage: 92 measurement
+after the origin returns: 95 measurement, 1 write_request, 1 idempotency_key
+energy=4
+fatigue=4
+note=Logged with the Mac mini gone.
+9c64725b-4754-4a39-9b6b-725f6983ab80 | applied
+after replay: notices 1 "One source has gone quiet." trend ends 689
+console errors: 0 
