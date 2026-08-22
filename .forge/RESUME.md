@@ -54,6 +54,12 @@ Three plan corrections are recorded in `.forge/AMENDMENTS.md`, with before, afte
 - **A2.** A raised import question had no answer path, so its warning was permanent. Slice 5 owns the control now.
 - **A3.** A photo estimate stores `source='manual'`, `confidence='estimated'`, kind `photo_estimate`. No seventh source; the model's involvement is a confidence and a record, not an origin.
 
+## Slice 3 in one paragraph, for whoever reads this cold
+
+Five builder dispatches, four verifications, one architect ruling, one rubric amendment. Everything closed except C6, which failed four times, each time on a different shape of the same flaw: a checker rule that a real string walked past. Word count, then unwalked directories, then position-not-provenance, then constructs no text walk can see. The turning point was the architect finding that `scripts/checks.sh` ran only typecheck and lint, so **no string check had ever run in the gate** and every failure was found by a human. The gate now runs four checks and fails on any. F20 also regressed and was un-ticked mid-slice, then fixed and re-proven through the product rather than through a request no screen issues. The verifier's standing judgement after the fourth failure was "converging, not circling", with five named surfaces and five small fixes, which is the dispatch now in flight.
+
+**Two hazards found in slice 3 that belong to slice 5, and must not be lost.** `tests/e2e/host.ts` truncates the live database and restarts the app: harmless while every row is seed data, destructive the moment Withings imports a real reading, and the append-only trigger does not help because TRUNCATE walks past it. And the checkpoint hook has committed red trees at least twice, titled "checks red", against `scripts/checks.sh`'s own header.
+
 ## What needs the owner, and only the owner
 
 Two actions on the iPhone, and together they close five lines:

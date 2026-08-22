@@ -111,7 +111,7 @@ direct path is the note.
   from the six permitted values, measurement time, import time, confidence, import
   version and a deduplication decision, all non-null. Evidence: the table
   definition and a rejected insert missing one field.
-- [ ] **F20.** Editing a stored value appends a correction and never overwrites:
+- [x] **F20.** Editing a stored value appends a correction and never overwrites:
   after three edits the original and all three corrections are readable, four rows
   in total. Evidence: the query result.
 - [x] **F21.** Every value on screen carries a source chip, and one tap opens a

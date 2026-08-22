@@ -9,3 +9,10 @@
 
 
 == e2e ==
+  button.btn quiet block: 2px solid rgb(143, 196, 255) at 2px
+  ✓  35 [chrome-keyboard] › tests/e2e/focus.spec.ts:32:1 › every interactive element on the gate carries a 2 px focus outline at 2 px offset (528ms)
+
+  35 passed (1.6m)
+
+== database after the suite ==
+6|6|6|6
