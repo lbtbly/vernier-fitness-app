@@ -54,6 +54,16 @@ Three plan corrections are recorded in `.forge/AMENDMENTS.md`, with before, afte
 - **A2.** A raised import question had no answer path, so its warning was permanent. Slice 5 owns the control now.
 - **A3.** A photo estimate stores `source='manual'`, `confidence='estimated'`, kind `photo_estimate`. No seventh source; the model's involvement is a confidence and a record, not an origin.
 
+## Lead decision, 2026-08-22: C6 does not block the other eleven slices
+
+C6 has failed five verifications. Each round closed real holes and the list has shrunk to named items, so the loop has been productive rather than circular, and the verifier's own standing judgement is "converging, not circling". But the sixth builder pass is in flight and slice 4 has not started.
+
+**The decision: after the next verification, the run moves to slice 4 whatever C6's verdict is.** If C6 closes, it closes. If it does not, it stays `- [ ]` with its defects recorded and is ruled at the full-scope verification before ship, which is where every line is proven once on the finished product anyway.
+
+This is not softening and it changes no threshold. An unproven line blocks the run's completion, not the run's progress; PASS still requires one hundred percent and C6 is still one of the hundred and sixty-six. What stops is eleven slices waiting on one checker's remaining edge cases, three of which the verifier searched for live instances behind and found none.
+
+**A hard prerequisite rides with this.** The test suite must not be able to truncate the owner's live database before slice 5 imports real Withings readings. The verifier proved the exposure by logging a reading through the shipped app mid-suite and watching the truncate take it. That fix is in the same dispatch and it is not deferrable, whatever happens to C6.
+
 ## Slice 3 in one paragraph, for whoever reads this cold
 
 Five builder dispatches, four verifications, one architect ruling, one rubric amendment. Everything closed except C6, which failed four times, each time on a different shape of the same flaw: a checker rule that a real string walked past. Word count, then unwalked directories, then position-not-provenance, then constructs no text walk can see. The turning point was the architect finding that `scripts/checks.sh` ran only typecheck and lint, so **no string check had ever run in the gate** and every failure was found by a human. The gate now runs four checks and fails on any. F20 also regressed and was un-ticked mid-slice, then fixed and re-proven through the product rather than through a request no screen issues. The verifier's standing judgement after the fourth failure was "converging, not circling", with five named surfaces and five small fixes, which is the dispatch now in flight.
