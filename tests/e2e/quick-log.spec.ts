@@ -717,7 +717,7 @@ test.describe('the quick log', () => {
     console.log(`before the disagreeing write:\n${before}`);
 
     const conflicting = await page.request.post('/api/log', {
-      headers: { 'content-type': 'application/json', 'idempotency-key': crypto.randomUUID(), 'x-vernier-csrf': csrf },
+      headers: await signedInHeaders(context),
       data: {
         measuredAt: new Date().toISOString(),
         timeZone: 'Europe/Paris',

@@ -1,0 +1,22 @@
+strings failed:
+units.g	text	g
+units.g/L	text	g/L
+units.kcal	text	kcal
+units.kg	text	kg
+units.km	text	km
+units.mmol/L	text	mmol/L
+units.point	text	of 5
+units.step	text	steps
+units.text	text	
+units.µg/L	text	µg/L
+
+433 keys in src/lib/strings.ts
+strings: 72 files under src/, 70 module(s) parsed and 1 stylesheet(s) read, against 433 keys.
+  outside this walk  public/sw.js, whose one answer to a person is generated from the catalogue by scripts/build-sw.mjs
+  outside this walk  public/icons and public/favicon.ico, which carry no words
+  outside this walk  drizzle/*.sql, and the four config files at the root
+  outside this walk  scripts/ and tests/, which speak to an operator and never to a screen
+  outside this walk  docs/ and SETUP.html, documents rather than product surfaces
+strings: user-facing text written inline, which C6 does not allow:
+  src/middleware.ts:97  sentence  "The Mac mini refused that, and here is why."
+gate exit 2

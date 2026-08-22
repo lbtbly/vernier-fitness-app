@@ -1,0 +1,6 @@
+Europe/Paris           34a015c5047e40fd
+UTC                    34a015c5047e40fd
+America/Los_Angeles    34a015c5047e40fd
+Asia/Tokyo             34a015c5047e40fd
+Pacific/Kiritimati     34a015c5047e40fd
+Pacific/Midway         34a015c5047e40fd

@@ -1,0 +1,67 @@
+rendered strings: the population this walk covers
+  7 stored values walked, floor 1
+  7 source records walked, floor 1
+  1 ratings on the one to five scale, floor 1
+  6 sources with a stored value behind them, floor 6
+  source kinds behind a value: demo_record, derivation, lab_page, manual_entry, shortcut_payload, sync_batch
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+rendered strings: 52 surface states walked, 1801 fragments read against 433 catalogue keys, 4 stored data values the owner or a device wrote, 7 value shapes and 1 distinct message(s) harvested from WebKit.
+  73 file(s) of the shipped tree read for the browser's own words: "Load failed"
+  platform text  / quick log / the fetch never reached the machine  "Load failed"  provenance: WebKit, on a fetch aborted with aborted; /api/log rejected in this state: Blocked by Web Inspector
+  walked  /sign-in / passkey first
+  walked  /sign-in / backup password
+  walked  /offline / served from the shell
+  walked  /sign-in / bounced from a protected route
+  walked  / / today, values on file
+  walked  /health / empty
+  walked  /train / empty
+  walked  /eat / empty
+  walked  /settings / four integrations, no passkey
+  walked  /no-such-address / not found
+  walked  /value/[id] / stored value f636c7bf-aee7-4127-b3b1-26b178ab378e
+  walked  /value/[id] / stored value demo_average
+  walked  /value/[id] / stored value demo_weight
+  walked  /value/[id] / stored value demo_energy
+  walked  /value/[id] / stored value demo_waist
+  walked  /value/[id] / stored value demo_steps
+  walked  /value/[id] / stored value demo_ldl
+  walked  /value/[id] / no such value
+  walked  /source/[id] / source record src_c47b7429-5f13-4278-a71b-60ac8f86ef87
+  walked  /source/[id] / source record demo_src_energy
+  walked  /source/[id] / source record demo_src_average
+  walked  /source/[id] / source record demo_src_ldl
+  walked  /source/[id] / source record demo_src_waist
+  walked  /source/[id] / source record demo_src_steps
+  walked  /source/[id] / source record demo_src_weight
+  walked  /source/[id] / no such source
+  walked  /value/[id] / correction refused by the range
+  walked  / quick log / loading
+  walked  / quick log / no waist measurement yet
+  walked  / quick log / the waist reading is days old
+  walked  / quick log / the answer carried no words
+  walked  / quick log / the fetch never reached the machine
+  walked  / / a write queued on this phone
+  walked  / / the queued write undone
+  walked  / quick log / the session removed mid-screen
+  walked  GET /api/log / no session, an API read
+  walked  GET /api/settings/integrations / no session, the integrations read
+  walked  POST /api/log / no session, a write
+  walked  POST /api/log / no anti-forgery header
+  walked  POST /api/log / no idempotency key
+  walked  POST /api/log / nothing to store
+  walked  POST /api/log / a metric Vernier does not keep
+  walked  POST /api/log / a rating outside one to five
+  walked  POST /api/log / a waist outside the band
+  walked  POST /api/log / a blank field
+  walked  POST /api/log / a value that is not a number
+  walked  POST /api/log / a correction with no number
+  walked  POST /api/log / a correction of a value that is not there
+  walked  POST /api/settings/integrations / an integration Vernier does not know
+  walked  POST /api/settings/integrations / an empty credential
+  walked  POST /api/diagnostics/launch / a launch report that is not one
+  walked  /manifest.webmanifest / installed
+  not walked  a screen behind a connected integration: 0 on this machine, so a string that renders only there is invisible to both checks
+  not walked  a screen behind a registered passkey: 0 on this machine, so a string that renders only there is invisible to both checks
+  not walked  a screen behind an open import question: 0 on this machine, so a string that renders only there is invisible to both checks
+rendered strings: every fragment on every surface resolves to a key.

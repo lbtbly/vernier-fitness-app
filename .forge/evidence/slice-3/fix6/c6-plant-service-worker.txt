@@ -1,0 +1,43 @@
+setup: the owner's database holds 7 measurement, 7 source_record, 1 measurement not seeded. Nothing in this run may lower it.
+
+Running 2 tests using 1 worker
+
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+the worker is active and controlling this page
+service worker targets: https://lamberts-mac-mini.tailda76d6.ts.net/sw.js
+worker probe of /healthz, origin reachable: HTTP 200
+worker probe of /healthz, origin taken away: FAILED: Failed to fetch
+worker probe of POST /api/log, origin taken away: FAILED: Failed to fetch
+host curl of /healthz while the browser is cut off: 200
+  ✓  1 [chrome-worker] › tests/e2e/service-worker.spec.ts:39:3 › the service worker › installs, controls the page, and loses the origin with the host still answering (1.4s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+cache intact: HTTP 200 text/html; charset=utf-8
+cache entries evicted: 33
+cache evicted: HTTP 503 text/plain
+  ✘  2 [chrome-worker] › tests/e2e/service-worker.spec.ts:143:3 › the service worker › answers an evicted cache with the catalogue's offline copy and not a bare word (1.2s)
+teardown: the owner's database holds 7 measurement, 7 source_record, 1 measurement not seeded.
+teardown: test-stack: stopped
+teardown: it held 7 measurement, 7 source_record, 1 measurement not seeded before the run, so nothing of the owner's was taken.
+
+
+  1) [chrome-worker] › tests/e2e/service-worker.spec.ts:143:3 › the service worker › answers an evicted cache with the catalogue's offline copy and not a bare word 
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected substring: "text/html"
+    Received string:    "text/plain"
+
+      183 |     );
+      184 |     expect(lastResort?.status()).toBe(503);
+    > 185 |     expect(lastResort?.headers()['content-type']).toContain('text/html');
+          |                                                   ^
+      186 |     expect(body).toContain(strings.offline.title);
+      187 |     expect(body).toContain(strings.offline.cardTitle);
+      188 |     expect(body).toContain(strings.offline.causeSuffix);
+        at /Users/lambertbouley/Claude/lbtbly-fitness-app/tests/e2e/service-worker.spec.ts:185:51
+
+    Error Context: test-results/service-worker-the-service-06fa9-ne-copy-and-not-a-bare-word-chrome-worker/error-context.md
+
+  1 failed
+    [chrome-worker] › tests/e2e/service-worker.spec.ts:143:3 › the service worker › answers an evicted cache with the catalogue's offline copy and not a bare word 
+  1 passed (4.7s)
