@@ -116,6 +116,13 @@ body{
   --tabbar-h:49px;
   --tabbar-pad:max(8px, env(safe-area-inset-bottom));
   --gutter:16px;
+  /*
+   * The two paddings the scroller puts above and below an immersive screen,
+   * named once. `.player[data-phase=work]` subtracts both from 100dvh to get
+   * its own height, and a number typed twice is a number that drifts.
+   */
+  --shell-top:max(var(--s2), env(safe-area-inset-top));
+  --immersive-bottom:max(var(--s4), env(safe-area-inset-bottom));
 }
 
 .app{
@@ -126,7 +133,7 @@ body{
 
 .app-scroll{
   flex:1;
-  padding-top:max(var(--s2), env(safe-area-inset-top));
+  padding-top:var(--shell-top);
   padding-bottom:calc(var(--tabbar-h) + var(--tabbar-pad) + var(--s5));
   padding-left:max(var(--gutter), env(safe-area-inset-left));
   padding-right:max(var(--gutter), env(safe-area-inset-right));
@@ -181,7 +188,7 @@ body{
  * player root. Supported since Safari 15.4 and Chrome 105, and this product
  * ships to one iPhone on iOS 18 and one Mac mini.
  */
-.app-scroll:has(.player){padding-bottom:max(var(--s4), env(safe-area-inset-bottom))}
+.app-scroll:has(.player){padding-bottom:var(--immersive-bottom)}
 
 /* ---------- type ---------- */
 
@@ -1495,18 +1502,38 @@ html[data-theme=light]{--media-plate:#FFFFFF}
  * fill has nothing to overflow: the box would grow again and the fix would look
  * applied while changing nothing.
  *
- * The chain above is pinned for the same reason. `.app` is `min-height:100dvh`
- * with an auto height, so a percentage height inside it depends on content that
- * depends on the percentage, and a browser is entitled to fall back to auto:
- * the rule would read as applied and do nothing at all. One definite height at
- * the top makes every height under it definite.
+ * AND THE HEIGHT IS THE PLAYER'S OWN, NOT A PERCENTAGE OF AN ANCESTOR.
+ *
+ * The first attempt handed `.app` a definite height through
+ * `.app:has(.player[data-phase=work])` and read it back as `height:100%` two
+ * boxes down. It measured as no change at all: on the run that followed, the
+ * work phase at 393x852 was 1121 px of document, which is exactly the sum of
+ * this column's children at their auto heights, and Set done sat at y923 to
+ * y1011 with 159 px of it below the fold. `.app-scroll:has(.player)` above did
+ * take, because that one is settled when the document is first styled; this one
+ * had to survive `data-phase` flipping from ready to work under it, and it did
+ * not. The same lesson as the icons at the top of this file: a rule that needs
+ * an ancestor to match is a rule that can quietly not match.
+ *
+ * So the two immersive phases carry their own height, in viewport units, keyed
+ * off nothing but themselves. `--shell-top` and `--immersive-bottom` are the
+ * paddings the scroller puts above and below this box, subtracted here and set
+ * there from the same two tokens, so the column is exactly one viewport tall
+ * and Set done cannot be pushed past the bottom edge by a photograph, a long
+ * movement name or a card a later slice adds.
+ *
+ * The `.app` rule stays. It is not what pins the button any more, and it costs
+ * nothing when it matches: 100dvh minus the same two paddings is the height the
+ * player already asks for.
  *
  * `ready` and `done` are deliberately not here. Neither carries a control that
  * has to stay put, and the finish screen is a long form that should scroll the
  * way every other form in this product scrolls.
  */
 .app:has(.player[data-phase=work]),.app:has(.player[data-phase=rest]){height:100dvh}
-.player[data-phase=work],.player[data-phase=rest]{height:100%}
+.player[data-phase=work],.player[data-phase=rest]{
+  height:calc(100dvh - var(--shell-top) - var(--immersive-bottom));
+}
 .player[data-phase=work] .fill,.player[data-phase=rest] .fill{min-height:0;overflow-y:auto}
 .player[data-phase=rest] .restring{min-height:0;overflow-y:auto}
 
