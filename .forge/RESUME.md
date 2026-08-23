@@ -2,105 +2,99 @@
 
 ## HANDOFF, 2026-08-23, session three. Read this, then PROCESS.md, then carry on.
 
-**Phase:** 8 BUILD and VERIFY, running. **ARMED.** The greenlight was not
-re-opened.
+**Phase:** 8 BUILD and VERIFY. **ARMED.** The greenlight was not re-opened.
 
-**Checked: 83 of 166**, from 41 when this session opened. Slices 1 to 9 are all
-built, merged and live on the origin. Wave B (10, 11, 12) is built and waiting
-on its branches. Nothing softened, no threshold moved, no line re-ruled.
+**Checked: 84 of 166**, from 41 when this session opened. **Slices 1 to 12 are
+built, merged, migrated and live on the origin.** Slice 13 is building. Nothing
+softened, no threshold moved.
+
+| | session start | now |
+|---|---|---|
+| rubric lines | 41 | 84 |
+| unit tests | 140 | 1039 |
+| migrations | 0006 | 0010 |
 
 ### In flight
 
-**Fix wave**, three builders in three worktrees, run `wf_95961e9d-773`:
-`fix-suite` (the red gate and the red suite), `fix-craft` (F42, F55, F79, C10,
-C11), `fix-checks` (R2, F62, F65, F66).
+- **Slice 13**, backup and restore, run `wf_ea3f6ec4-e36`, worktree
+  `13-backup`. It ends the standing no-backup risk.
+- A full `npm run test:e2e` on main, started after the stylesheet fix.
 
-### The two red states the fix wave must clear
+### Three ticks came off the board today and all three earned their way back
 
-1. **The gate is red.** `strings:rendered` finds one unkeyed fragment on
-   `/value/[id]`, "The number it should be", built as a two-branch template
-   conditioned on the unit so no single key can equal it.
-2. **The suite is red.** 95 passed, 14 failed, 1 skipped, **56 DID NOT RUN.**
-   `tests/e2e/ingest.spec.ts:158` asserts a generated boolean reads `'t'` where
-   Postgres renders `'true'`; serial mode then skips thirteen, so slice 6's
-   end-to-end suite has never executed on main.
+F23, F51 and F60 were un-ticked and ruled from nothing, because each rested on
+evidence that could not have been produced. F51's third direction had never
+been asked of the endpoint at all: `--no-bearer` empties an array and bash 3.2
+under `set -u` killed the fixture script before curl ran. F60's cross-table
+walk never reached psql: `scratchQuery` pasted SQL into the string `sh -c`
+runs, so `do $$` arrived as the shell's own pid. F23 was a real regression.
+All three now pass with their guards proven red first.
 
-### Open lines, 83 of them, and what each is waiting on
+That is instances thirteen and fourteen of this run's one class, and the first
+two found sitting **under** a green tick.
 
-| Slice | Open | Waiting on |
-|---|---|---|
-| 1 | F4, R1, C2 | **the owner's iPhone screenshot** |
-| 5 | F42 | fix-craft |
-| 5 | F44 | **the owner's Withings credential**, after slice 5 passes |
-| 6 | F55 | fix-craft and fix-suite |
-| 6 | F56 | **the owner's iPhone**, building the Shortcut |
-| 7 | F62, F65, C10, R2 | fix-checks and fix-craft |
-| 8 | F66, C11, F72, C9 | fix-checks, fix-craft, fix-suite |
-| 8, 9 | **F77, F82, F87, F89, C12** | **NOBODY HAS RULED THESE.** Not refused, not reached. |
-| 9 | F79, F88 | fix-craft |
-| 10 to 14 | the rest | built or not yet built |
+### The merge cost, measured
 
-**F77, F82, F87, F89 and C12 carry no evidence line and no defect line.** Slice
-8b's and slice 9's verifiers ran out of turns after recording what they had.
-An unchecked box that is not in DEFECTS.md loses the difference between refused
-and not reached, so those five need their own dispatch and must not be assumed
-either way.
+Six splices lost real code today. Five were caught by typecheck within minutes.
+The sixth shipped: a union tore `.seg button{` in half, CSS nesting swallowed
+the rest of the file, and **about 70 rules shipped prefixed `.seg button ` and
+matched nothing.** No static gate can see it and a brace count cannot either,
+because comments and content strings carry braces. A verifier measuring screens
+against their designs found it. Fixed, and the depth walk that locates this
+shape is worth keeping: blank comments and strings but keep their newlines.
 
-### Owner actions outstanding, in this order
+**If more parallel merges happen, add a CSS structural check to the gate.**
+Nothing in the six steps would have caught this.
 
-1. **The iPhone Settings screenshot.** Open Vernier from the Home Screen icon,
-   go to Settings, screenshot it. One image closes F4, R1 and C2: Settings
-   renders the application origin from config, so it carries C2's "no browser
-   chrome" and is the second-device response F4 and R1 name.
-2. **Withings developer credentials**, for F44, AFTER slice 5 passes.
-   RULING-DEMO-COLLISION section 4 says not before.
-3. **Build the Shortcut on the iPhone**, for F56. Two one-time settings first:
+### Open, 82 lines
+
+| Waiting on | Lines |
+|---|---|
+| **the owner's iPhone screenshot** | F4, R1, C2 |
+| **the owner's Withings credential**, after slice 5 passes | F44 |
+| **the owner's iPhone**, building the Shortcut | F56 |
+| a fix dispatch | F42, F55, F62, F65, F66, F72, F77, F79, F87, F88, F89, C9, C10, C11, C12, R2 |
+| never verified at all | slice 10's F90-F100 C13 R3, slice 11's F101-F112 C14, slice 12's F113-F123 C15 |
+| slice 13 | F124-F133, C16, R4 |
+| slice 14, the final full-scope pass | C17, C18, R5, R6, R7, R8, R9, R10, D1-D5 |
+
+Four defects the last verifier measured and named precisely:
+- **F77.** The pain rule's third limb, no week-to-week increase, is stated to
+  the owner on the capture screen and enforced nowhere. `painProblems()` is
+  imported only by its own unit test.
+- **F87.** The below-85-percent coverage branch is unreachable by construction:
+  an unmatched ingredient line is dropped before it becomes a recipe row, so
+  coverage is measured over the rows that survived matching and can never fall.
+- **F89, C12.** Both were downstream of the dead stylesheet. Re-rule after the
+  fix.
+
+### Owner actions, in this order
+
+1. **The iPhone Settings screenshot.** Home Screen icon, Settings, screenshot.
+   Closes F4, R1 and C2 together.
+2. **Withings developer credentials**, for F44, only after slice 5 passes.
+3. **Build the Shortcut on the iPhone**, for F56, after two one-time settings:
    Settings > Shortcuts > Advanced > Allow Sharing Large Amounts of Data, and
    Health > Sources > Shortcuts > allow read per type.
-4. Optional, low: two published `SharedShortcut` records named "Test" under his
-   Apple ID.
+4. Optional: two published `SharedShortcut` records named "Test".
 
-**Closed without him:** the VAPID pair already exists, so slice 12's preflight
-item needed nothing.
+Closed without him: the VAPID pair already existed, and `fra.traineddata` is
+installed on the volume and hash-verified.
 
-### What the parallel build cost and what it bought
+### His data
 
-Five slices built at once, then three, in git worktrees under
-`lbtbly-fitness-app-trees/`, managed by `scripts/worktree.sh`. It works. Three
-things it cost, all found the same afternoon rather than at the final pass:
+96 measurement rows before the last e2e run, 6 not seeded. **One is real**:
+`a7bf989c`, waist 101.5 cm, 2026-08-23 08:54:34, from his phone. **Five are
+fabricated ratings a verifier wrote to the live database at 14:29:47** and
+cannot be deleted, because `measurement` refuses DELETE. Both standing briefs
+now carry one rule: any walk that commits goes to scratch, and that overrides
+any dispatch line saying otherwise.
 
-- **Three bugs no worktree could catch**, because they were written against a
-  table that only exists once the merge numbers the migration: a PL/pgSQL
-  trigger that read `NEW.metric` before branching on the firing table and so
-  raised on every boot; a hand-written `any(ids)` that drizzle rendered as
-  `any(($1, $2))` so no recipe nutrition computed at all; and an ambiguous
-  column in the rendered-strings query.
-- **A recurring merge shape.** Git splices two sides between one shared opener
-  and one shared closer, so the second side's doc comment loses its `/**` and
-  the first side's construct loses its brace. It broke files in every merge and
-  typecheck caught every one. `icons.tsx` is rebuilt as HEAD plus the branch's
-  additions rather than repaired splice by splice.
-- **One lost verification dispatch.** A verifier ran 164 tool calls against
-  slice 5, hit `maxTurns: 150`, and recorded nothing at all. Now: `maxTurns:
-  400`, and **record each line as you finish it** is rule one in both standing
-  briefs. Four later verifiers also ended without structured verdicts and lost
-  nothing, because their ticks and defects were already on disk.
+An e2e run grew the table to 391 rows, all additions `source='demo'`,
+`seed=true`, written by the app's own seeding. Demonstration data, not his.
 
-### The defect class, twelfth instance, and the sharpest one yet
-
-`npm run compliance` was defined in `package.json` and called by nothing. It was
-wired into the gate this afternoon. It then passed while a verifier had planted
-"Your result is abnormal and you should see a doctor." in
-`explanation.unstated`, because that template is outside its walk. **Being in
-the gate is not the same as covering the line.**
-
-### Machine
-
-8 cores, 8 GB. Disk 88 percent, 24 GiB free after pruning 21 GB of Docker build
-cache and dropping the five merged wave A worktrees. **There is still no backup
-in the tree.** A `pg_dump` was taken before each migration and both are in
-`backups/`. The owner's live database holds 91 measurement rows, exactly one of
-them real: `a7bf989c`, waist 101.5 cm, 2026-08-23 08:54:34, from his phone.
+**There is still no backup in the tree.** `backups/` holds four `pg_dump` files
+taken by the lead before each migration. Slice 13 is what replaces them.
 
 ---
 
