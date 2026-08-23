@@ -246,6 +246,7 @@ export async function* dumpData(
   yield '-- every row goes back through json_populate_recordset, so the server that formatted\n';
   yield '-- each value is the server that parses it\n';
   yield 'begin;\n';
+  yield* emptyTables(tables);
   for (const table of tables) {
     yield* dumpTable(client, table, tally);
   }
@@ -261,6 +262,44 @@ export async function* dumpData(
     }
   }
   yield 'commit;\n';
+}
+
+/**
+ * Every table emptied before the first row is loaded, in ONE statement.
+ *
+ * WHY A LOAD CANNOT ASSUME AN EMPTY DATABASE. The schema section is the
+ * generated migrations concatenated, and six of those files end in an INSERT:
+ * the Withings connection row, the Google connection row, the consent row, the
+ * four reminder categories, the quiet window and thirteen built-in analytes.
+ * They carry ON CONFLICT DO NOTHING so a redeploy leaves the owner's own
+ * settings alone, which is right, and it means a freshly built restore target
+ * already holds those rows before the data section starts. Loading the
+ * archive's copy of the same primary keys on top raises a duplicate key, psql
+ * stops on it, and the restore dies with nothing in it. That is what F126
+ * found, on the first run this claim ever had.
+ *
+ * ONE STATEMENT AND NOT ONE PER TABLE. Postgres refuses TRUNCATE on a table
+ * another table references unless every referencing table is named in the same
+ * command, whether or not it holds a row. The dump plan is every base table the
+ * database has, so naming all of them satisfies that with no CASCADE, and
+ * CASCADE is exactly what must not be written here: it would reach a table the
+ * plan does not know about and empty it unseen.
+ *
+ * IT FIRES NO ROW TRIGGER. `measurement`, `health_sample`, `meal_entry`,
+ * `meal_entry_item` and `calendar_write` refuse DELETE by BEFORE DELETE
+ * trigger, and TRUNCATE is not DELETE. drizzle/0011_backup.sql names this as
+ * the second of the three doors through the append-only guarantee: a restore
+ * replaces a whole database rather than editing rows, and scripts/restore.mjs
+ * refuses the live one unless the operator types the phrase.
+ *
+ * The side effect worth having: the data section can be loaded twice and the
+ * database is the same afterwards.
+ */
+export function* emptyTables(tables: LiveTable[]): Generator<string> {
+  if (tables.length === 0) return;
+  yield '\n-- every table this file loads, emptied first, so the seed rows the schema\n';
+  yield '-- section inserts are replaced by the archive rather than collided with\n';
+  yield `truncate table ${tables.map((table) => qualify(table)).join(', ')};\n`;
 }
 
 /**
