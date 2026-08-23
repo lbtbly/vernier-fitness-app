@@ -310,3 +310,73 @@ const CALENDAR_VERBS: Record<string, string> = {
 export function calendarVerbLabel(verb: string): string {
   return CALENDAR_VERBS[verb] ?? verb;
 }
+
+const ALERT_SURFACES = strings.alerts.surfaces as Record<string, string>;
+const ALERT_CAUSES = strings.alerts.causes as Record<string, string>;
+
+/**
+ * Which surface an alert is about, in words.
+ *
+ * The same door every other token in this file goes through. `operator_alert`
+ * stores `withings` and `weekly_review`; the banner says "The Withings scale"
+ * and "The Sunday review", and neither sentence is written anywhere but the
+ * catalogue.
+ */
+export function alertTitle(surface: string): string {
+  return ALERT_SURFACES[surface] ?? strings.alerts.surfaces.machine;
+}
+
+/**
+ * Why it is wrong, with the numbers behind it on the same line.
+ *
+ * THREE SUBSYSTEMS FEED THIS AND ONE OF THEM IS NOT MINE. A withings failure
+ * token was already turned into a sentence by `withingsCauseLine` for the
+ * settings card, and a calendar one by `calendarCauseLine`. Both are consulted
+ * before the fallback, so a cause the owner has already read on one screen says
+ * the same thing on the other. A token nobody has words for is never printed:
+ * the surface's own sentence is used instead, because a person reading
+ * `invalid_grant` in a banner learns nothing.
+ */
+export function alertBody(cause: string, detail: Record<string, string | number>): string {
+  const own = ALERT_CAUSES[cause];
+  const known = own ?? withingsCauseLine(cause) ?? calendarCauseLine(cause);
+  const parts: string[] = [known ?? strings.alerts.causes.integration_failed];
+
+  if (typeof detail.directory === 'string' && detail.directory !== '') {
+    parts.push(strings.alerts.details.directory(detail.directory));
+  }
+  if (typeof detail.errno === 'string' && detail.errno !== '') {
+    parts.push(strings.alerts.details.errno(detail.errno));
+  }
+  if (typeof detail.hours === 'number' && typeof detail.threshold === 'number' && detail.hours > 0) {
+    parts.push(strings.alerts.details.hours(detail.hours, detail.threshold));
+  }
+  if (typeof detail.period === 'string' && detail.period !== '') {
+    parts.push(strings.alerts.details.period(detail.period));
+  }
+  return parts.join(' ');
+}
+
+/** The one action, named by where it goes. */
+export function alertAction(route: string): string {
+  return strings.alerts.action(routeName(route));
+}
+
+const ROUTE_NAMES: Record<string, string> = {
+  '/settings/data': strings.data.title,
+  '/settings': strings.settings.title,
+  '/settings/ai': strings.meals.consentScreenTitle,
+  '/settings/notifications': strings.push.title,
+  '/settings/shortcut': strings.shortcutGuide.title,
+  '/review': strings.review.title,
+};
+
+function routeName(route: string): string {
+  return ROUTE_NAMES[route] ?? strings.settings.title;
+}
+
+/** A category id, in words, for the delete control and the privacy document. */
+export function categoryLabel(id: string): string {
+  const labels = strings.data.categories as Record<string, string>;
+  return labels[id] ?? id;
+}

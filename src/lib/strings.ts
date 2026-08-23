@@ -4708,4 +4708,206 @@ export const strings = {
     remindersBody: (quiet: string) =>
       `A notification before each session you accepted, everything due in the same five minutes grouped into one, and ${quiet}. One button in it marks the item done.`,
   },
+  /**
+   * Screen 12 frame 3, "Data and backups", plus every word the archive, the
+   * export, the permanent delete and the operator alerts speak.
+   *
+   * The tokens below are database values: `causes` is keyed by what
+   * `backup_run.cause`, `job_run.detail` and an integration's own failure
+   * column store, and `surfaces` by the thing that broke. Nothing in this
+   * product writes one of those sentences into a column.
+   */
+  data: {
+    title: 'Data and backups',
+    sub: 'Your copy, your delete, and what this machine is doing',
+    open: 'Data and backups',
+    settingsCardBody:
+      'The nightly archive, a full export of everything you own, permanent deletion by category, and the state of this Mac mini.',
+
+    archiveTitle: 'Last backup',
+    archiveNever: 'No archive yet',
+    archiveNeverBody:
+      'The first one runs tonight at 03:00. You do not have to wait for it: Back up now writes one immediately.',
+    archiveRunning: 'Running now',
+    archiveEncrypted: (size: string) => `${size}, encrypted`,
+    archiveVerified: 'Integrity checked',
+    archiveUnverified: 'Not checked',
+    archiveFailedChip: 'Failed',
+    archiveDestination: 'Destination',
+    archiveDestinationFallback: 'On this machine',
+    archiveRetention: 'Retention',
+    archiveRetentionValue: (count: number) =>
+      count === 1 ? '1 archive' : `${count} archives`,
+    archiveRestoreTested: 'Restore tested',
+    archiveRestoreNever: 'Never',
+    archiveTables: (tables: number, rows: number) =>
+      `${tables} tables, ${rows.toLocaleString('en-GB')} rows`,
+    archiveRunNow: 'Back up now',
+    archiveRunning2: 'Writing the archive',
+    archiveGuide: 'Restore guide',
+    archiveList: 'Archives on this machine',
+    archiveListEmpty: 'Nothing here yet',
+    archiveDone: (name: string) => `Written: ${name}`,
+
+    restoreTitle: 'How a restore works',
+    restoreBody:
+      "Restoring runs from this Mac mini's own terminal, not from this screen, because the day you need it is the day this app may not start. It needs Node and Docker, both already here, and no other program at all.",
+    restoreVerify: 'Check an archive without changing anything:',
+    restoreInto: 'Rebuild it into a scratch database and compare the row counts:',
+    restoreLive: 'Restoring over your live database asks you to type a phrase first, at the terminal, and nowhere else.',
+    restoreDoc: 'The whole procedure is in docs/backup-restore.md.',
+
+    exportTitle: 'Export everything',
+    exportJson: 'JSON',
+    exportJsonBody: 'Every value with its source, confidence and correction history.',
+    exportJsonAction: 'Export JSON',
+    exportCsv: 'CSV',
+    exportCsvBody: 'One file per table, zipped, for a spreadsheet.',
+    exportCsvAction: 'Export CSV',
+    exportPdf: 'PDF summary',
+    exportPdfBody: 'A readable report of your trends and your latest panel.',
+    exportPdfAction: 'Export PDF',
+    exportNote: (tables: number) =>
+      `${tables} tables, everything you recorded. Your passkeys, your sign-in history and the sealed third-party credentials are not in it, and neither is the food table this app shipped with.`,
+    exportPreparing: 'Preparing your file',
+
+    machineTitle: 'This machine',
+    machineApp: 'App container',
+    machineDatabase: 'Database container',
+    machineRunning: (since: string) => `Running since ${since}`,
+    machineReachable: 'Reachable',
+    machineUnreachable: 'Not answering',
+    machineListening: 'Listening on',
+    machineOrigin: 'Reachable at',
+    machineRpId: 'Passkey RP ID',
+    machineDisk: 'Disk headroom',
+    machineDiskValue: (free: string, total: string) => `${free} free of ${total}`,
+    machineDiskUnknown: 'Not readable from inside the container',
+    machineArchive: 'Last archive',
+    machineRestore: 'Last restore check',
+    machineSync: 'Last successful sync',
+    machineNeverSynced: 'No successful sync yet',
+    machineThresholds: 'Warns at',
+    machineThresholdsValue: (disk: string, archiveHours: number, syncHours: number) =>
+      `under ${disk} free, an archive over ${archiveHours} hours old, a source quiet over ${syncHours} hours`,
+    machineNoCredential:
+      'No token, key or password value is on this screen. Status is a different permission level from the credential behind it, and this screen holds the line.',
+    machineNote:
+      'No LAN port is open and Funnel is off. Tailscale is the network barrier, never the authentication.',
+    machinePostgres: (version: string) => `PostgreSQL ${version}`,
+
+    deleteTitle: 'Delete permanently',
+    deleteBody:
+      'Removes every row of the category you choose from this Mac mini, and every file that belongs to it. Archives already written are not touched, so a restore can still bring it back.',
+    deleteChoose: 'What to delete',
+    deleteCount: (rows: number, tables: number) =>
+      rows === 1 ? `1 row across ${tables} tables` : `${rows.toLocaleString('en-GB')} rows across ${tables} tables`,
+    deleteEmpty: 'Nothing stored in this category yet',
+    deletePhraseLabel: (phrase: string) => `Type ${phrase} to confirm`,
+    deletePhraseHelp: 'No undo, no grace period, no soft delete.',
+    deleteAction: 'Delete permanently',
+    deleteWorking: 'Deleting',
+    deleteDone: (rows: number) =>
+      rows === 1 ? '1 row deleted. Nothing is left in this category.' : `${rows.toLocaleString('en-GB')} rows deleted. Nothing is left in this category.`,
+    deleteNothing: 'There was nothing stored in this category, so nothing was deleted.',
+    deleteRefused: 'That phrase does not match this category, so nothing was deleted.',
+    deleteHistory: 'What you have deleted',
+    deleteHistoryRow: (category: string, when: string, rows: number) =>
+      `${category}, ${when}: ${rows.toLocaleString('en-GB')} rows`,
+    deleteKept: 'Your account, your passkeys and the record of these deletions are never removed by this control.',
+
+    categories: {
+      body: 'Body measurements',
+      phone_health: 'Apple Health samples',
+      laboratory: 'Blood tests and documents',
+      training: 'Training',
+      nutrition: 'Meals, recipes and shopping',
+      assistant: 'Assistant history',
+      planning: 'Calendar, reminders and reviews',
+      account: 'Account and credentials',
+      sign_in_session: 'Sign-in sessions',
+      sign_in_challenge: 'Passkey ceremonies',
+      ingest_nonce: 'Ingest replay window',
+      audit: 'Sign-in and deletion audit',
+      operations: 'Machine records',
+      reference: 'Reference data this app shipped with',
+      archives: 'Encrypted archives',
+      everything: 'Everything above',
+    },
+
+    bloodPressureLabel: 'Blood pressure',
+    bloodPressureBody:
+      'There is no setting here because there is nothing to configure. The schema has no column for it, no import reads it, and any PDF row containing it is refused at extraction.',
+
+    loadingLabel: 'Reading the machine',
+    errorTitle: 'This screen did not load',
+    errorBody:
+      "Your data is untouched and last night's archive is unaffected. Nothing on this screen writes anything until you press a button on it.",
+    offlineTitle: 'Offline',
+    offlineBody:
+      'Backups, exports and deletion all run on the Mac mini, so they need the tailnet. Everything else in Vernier works from here.',
+    staleTitle: (when: string) => `Read at ${when}`,
+    staleBody: 'This is the last answer the machine gave. Reload to ask it again.',
+  },
+
+  /**
+   * The one banner and the one notification F133 asks for.
+   *
+   * `surfaces` is keyed by what broke and `causes` by why, both as the tokens
+   * the database stores. A cause with no key here falls back to the surface's
+   * own sentence rather than printing a token at a person.
+   */
+  alerts: {
+    bannerOne: (surface: string) => `${surface} needs you`,
+    bannerMany: (count: number) => `${count} things need you`,
+    action: (where: string) => `Open ${where}`,
+    cleared: 'Fixed',
+    raisedAt: (when: string) => `Since ${when}`,
+    notificationTitle: (surface: string) => `Vernier: ${surface}`,
+    historyTitle: 'What has gone wrong',
+    historyEmpty: 'Nothing has failed since this installation started',
+
+    surfaces: {
+      backup: 'The nightly backup',
+      machine: 'This machine',
+      weekly_review: 'The Sunday review',
+      daily_archive: 'The nightly backup',
+      reminders: 'Reminders',
+      withings: 'The Withings scale',
+      apple_health: 'The Apple Health shortcut',
+      google_calendar: 'Google Calendar',
+      mail_relay: 'Email reviews',
+      anthropic: 'The photo assistant',
+    },
+
+    causes: {
+      archive_failed: "Last night's archive did not finish, so there is no new copy of your data.",
+      never_archived: 'No archive has ever finished on this machine.',
+      archive_stale: 'The newest archive is older than it should be.',
+      not_configured: 'No backup folder is set, so the archive stayed on this Mac mini and nothing is synced off it.',
+      missing: 'The backup folder is not there, so the archive stayed on this Mac mini.',
+      not_a_directory: 'The backup path is not a folder, so the archive stayed on this Mac mini.',
+      not_writable: 'The backup folder refused the write, so the archive stayed on this Mac mini.',
+      probe_mismatch: 'The backup folder took the write and gave back something else, so the archive stayed on this Mac mini.',
+      destination_unavailable: 'The backup folder could not be used, so the archive stayed on this Mac mini.',
+      job_failed: 'A scheduled job failed and did not produce what it was for.',
+      'stale-timeout': 'A scheduled job stopped halfway through and the container restarted under it.',
+      integration_failed: 'This integration stopped working and has not synced since.',
+      dump_table_missing: 'The archive found a table in the app that the database does not have, and refused to write a partial copy.',
+      archive_truncated: 'The archive written last night is incomplete.',
+      archive_chunk_unauthenticated: 'The archive written last night does not verify, so it is not trustworthy.',
+      no_space: 'There is not enough room on the disk to write an archive.',
+    },
+
+    details: {
+      directory: (path: string) => `Folder: ${path}`,
+      hours: (hours: number, threshold: number) =>
+        `${hours} hours old, and it should be under ${threshold}.`,
+      period: (period: string) => `Period ${period}`,
+      attempt: (attempt: number) => `Attempt ${attempt} of 3`,
+      errno: (code: string) => `The filesystem answered ${code}.`,
+      quietHeld: 'Held until quiet hours end.',
+      noDevices: 'No device is subscribed, so this was shown here only.',
+    },
+  },
 } as const;

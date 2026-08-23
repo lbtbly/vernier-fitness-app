@@ -171,7 +171,7 @@ export type ArchiveHeader = {
 };
 
 function u8(bytes: Uint8Array): Buffer {
-  return Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  return Buffer.from(bytes.buffer as ArrayBuffer, bytes.byteOffset, bytes.byteLength);
 }
 
 /**
@@ -650,6 +650,76 @@ export function readTar(bytes: Uint8Array): TarMember[] {
     offset = start + size + padding(size);
   }
   return members;
+}
+
+export type TarScanEntry = { name: string; size: number; sha256: string };
+
+/**
+ * Walks a tar as it streams past, hashing each member without holding any of it.
+ *
+ * `readTar` needs the whole archive in memory, which is right for a manifest and
+ * wrong for the verification pass: an archive holding six months of meal photos
+ * is the one that must not be read into a Buffer to prove it is intact. This is
+ * the same format read as a state machine, so the check that runs after every
+ * single archive costs one chunk of memory whatever the archive weighs.
+ */
+export async function* scanTar(source: Chunked): AsyncGenerator<TarScanEntry> {
+  let held: Buffer<ArrayBufferLike> = Buffer.alloc(0);
+  let entry: { name: string; size: number; hash: ReturnType<typeof createHash>; read: number } | null =
+    null;
+  let skip = 0;
+  let done = false;
+
+  for await (const piece of source as AsyncIterable<Uint8Array>) {
+    held = held.length === 0 ? u8(piece) : Buffer.concat([held, u8(piece)]);
+    for (;;) {
+      if (done) break;
+      if (skip > 0) {
+        const take = Math.min(skip, held.length);
+        held = held.subarray(take);
+        skip -= take;
+        if (skip > 0) break;
+      }
+      if (entry) {
+        const want = entry.size - entry.read;
+        const take = Math.min(want, held.length);
+        if (take > 0) {
+          entry.hash.update(held.subarray(0, take));
+          entry.read += take;
+          held = held.subarray(take);
+        }
+        if (entry.read < entry.size) break;
+        yield { name: entry.name, size: entry.size, sha256: entry.hash.digest('hex') };
+        skip = padding(entry.size);
+        entry = null;
+        continue;
+      }
+      if (held.length < TAR_BLOCK) break;
+      const block = held.subarray(0, TAR_BLOCK);
+      held = held.subarray(TAR_BLOCK);
+      if (block.every((byte) => byte === 0)) {
+        done = true;
+        break;
+      }
+      const name = block.subarray(0, 100).toString('utf8').replace(/\0+$/, '');
+      const size = Number.parseInt(
+        block.subarray(124, 136).toString('ascii').replace(/[\0 ]+$/, '').trim() || '0',
+        8,
+      );
+      if (!Number.isFinite(size) || size < 0) {
+        throw new ArchiveError('tar_header_short', { member: name, claimed: size });
+      }
+      entry = { name, size, hash: createHash('sha256'), read: 0 };
+    }
+  }
+
+  if (entry !== null) {
+    throw new ArchiveError('tar_size_mismatch', {
+      member: entry.name,
+      claimed: entry.size,
+      actual: entry.read,
+    });
+  }
 }
 
 /** Everything a stream produced, as one buffer. For tests and small members. */
