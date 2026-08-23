@@ -627,19 +627,88 @@ test.describe('F83: four rules, four behaviours', () => {
     await page.goto('/eat/targets');
     await page.waitForLoadState('networkidle');
 
-    const stored = scratchQuery('select kind || %s || subject from dietary_rule order by kind'.replace('%s', "':'"));
+    const readStored = () =>
+      scratchQuery('select kind || %s || subject from dietary_rule order by kind'.replace('%s', "':'"));
+    const stored = readStored();
     console.log(`stored rules:\n${stored}`);
     expect(stored).toContain('exclusion:shellfish');
     expect(stored).toContain('intolerance:lactose');
     expect(stored).toContain('preference:nuts');
 
     const card = page.locator('[data-card="rules"]');
+    const seeded = await card.innerText();
+    console.log(`rules card as it ships:\n${seeded}`);
+    expect(seeded).toContain('Substituted');
+    expect(seeded).toContain('Omitted');
+    expect(seeded).toContain('Ranked');
+
+    /*
+     * THE FOURTH KIND IS ADDED THROUGH THE SCREEN, BECAUSE NOTHING SEEDS ONE.
+     *
+     * This block asserted "Refused" on the card as it ships. It never could:
+     * the three default rules are lactose, shellfish and nuts, which are the
+     * three GOAL.md section 11 names, and no allergy is among them. Seeding one
+     * would be this app inventing a health fact about its owner, which is the
+     * worse of the two fixes by a distance, so the rule is added the way the
+     * owner would add it: the kind select, the subject select, the button.
+     *
+     * A4's second standing rule, and it also makes this a stronger test than
+     * the one it replaces. The old one read a word off a card. This one puts a
+     * fourth kind through the shipped write path, reads the stored row back out
+     * of the database with its own kind on it, and then takes it away again
+     * through the shipped remove control.
+     *
+     * GOES RED IF: the select cannot reach `allergy`, the write path collapses
+     * a kind into another one, the card prints the same effect sentence for two
+     * kinds, or the removal leaves the row behind.
+     */
+    await page.selectOption('#rule-kind', 'allergy');
+    await page.selectOption('#rule-subject', 'gluten');
+    await page.locator('[data-control="add-rule"]').click();
+    await expect(page.locator('[data-rule-kind="allergy"]')).toBeVisible({ timeout: 20_000 });
+
+    const withAllergy = readStored();
+    console.log(`stored rules after adding one through the screen:\n${withAllergy}`);
+    expect(withAllergy).toContain('allergy:gluten');
+    // The other three are untouched, so a fourth kind is an addition and not a
+    // reclassification of something already there.
+    expect(withAllergy).toContain('exclusion:shellfish');
+    expect(withAllergy).toContain('intolerance:lactose');
+    expect(withAllergy).toContain('preference:nuts');
+    expect(withAllergy.trim().split('\n')).toHaveLength(4);
+
     const text = await card.innerText();
-    console.log(`rules card:\n${text}`);
+    console.log(`rules card with all four kinds on it:\n${text}`);
     expect(text).toContain('Refused');
     expect(text).toContain('Substituted');
     expect(text).toContain('Omitted');
     expect(text).toContain('Ranked');
+
+    /*
+     * FOUR VERBS, AND NO TWO OF THEM THE SAME SENTENCE. A screen that printed
+     * one effect line under four differently-labelled rules would pass every
+     * assertion above and would be exactly the collapse F83 forbids.
+     */
+    const effects = await page
+      .locator('[data-rule-kind]')
+      .evaluateAll((nodes) =>
+        nodes.map((node) => `${node.getAttribute('data-rule-kind')}=${node.querySelector('.note')!.textContent!.trim()}`),
+      );
+    for (const line of effects) console.log(`effect  ${line}`);
+    expect(effects).toHaveLength(4);
+    expect(new Set(effects.map((line) => line.split('=')[1])).size).toBe(4);
+
+    // And back out through the same screen, so this test leaves the scratch
+    // instance in the state it found it and the next one starts from the seed.
+    await page
+      .locator('[data-rule-kind="allergy"]')
+      .getByRole('button')
+      .click();
+    await expect(page.locator('[data-rule-kind="allergy"]')).toHaveCount(0, { timeout: 20_000 });
+    const afterRemoval = readStored();
+    console.log(`stored rules after removing it through the screen:\n${afterRemoval}`);
+    expect(afterRemoval).not.toContain('allergy:gluten');
+    expect(afterRemoval.trim().split('\n')).toHaveLength(3);
 
     // The database refuses a fifth kind, so the four cannot quietly become five.
     // The same stderr rule as the two above: a notice is read back with

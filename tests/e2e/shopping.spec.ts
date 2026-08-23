@@ -105,8 +105,58 @@ async function buildAWeek(page: Page) {
   console.log(`accepted ${accepted} of ${total} meals, one at a time`);
   expect(accepted).toBe(total);
 
+  /*
+   * THE CONFIRM IS CHECKED, NOT ASSUMED.
+   *
+   * This was one click and a `networkidle`, with nothing after it. When the
+   * confirm did not land, or landed and answered a refusal, this helper
+   * returned as if it had worked and the failure surfaced thirty seconds later
+   * as `waiting for locator('[data-aisle]')` on a screen two navigations away,
+   * with no plan state, no list row, no item count and no error text in the
+   * report. Two suite runs said only that.
+   *
+   * So every fact the shopping list is built out of is read back here, in the
+   * order it is produced, and printed. A zero is printed beside the population
+   * it came from, which is A4's first standing rule: "0 items" beside "7
+   * accepted meals over 5 recipes carrying 34 ingredient lines" is a diagnosis,
+   * and "0 items" on its own is a timeout.
+   *
+   * GOES RED IF: the confirm control does not commit the plan, the commit does
+   * not build a list, or the build produces a list with nothing in it.
+   */
   await page.locator('.stickybar .btn.primary').click();
   await page.waitForLoadState('networkidle');
+
+  // The error card the week draws when a post comes back refused. It is read
+  // first, because its text is the server's own sentence about what went wrong
+  // and every assertion below is downstream of it.
+  const failed = page.locator('[data-meal-week] [data-state="error"]');
+  if ((await failed.count()) > 0) {
+    console.log(`the week refused the confirm: ${(await failed.innerText()).replace(/\s+/g, ' ')}`);
+  }
+  expect(await failed.count(), 'confirming the week drew an error card').toBe(0);
+
+  const planState = scratchQuery('select id || %s || state from meal_plan'.replace('%s', "' -> '"));
+  console.log(`meal_plan after the confirm: ${planState.replace(/\n/g, ', ')}`);
+  expect(planState).toContain('confirmed');
+
+  const lists = scratchQuery('select count(*) from shopping_list');
+  const items = Number(scratchQuery('select count(*) from shopping_item'));
+  console.log(`the confirm built ${lists} list(s) holding ${items} item(s)`);
+  if (items === 0) {
+    // The population behind the zero, so the next reader does not have to guess
+    // which of the three joins came back empty.
+    console.log(`accepted meals and their recipes:\n${scratchQuery(
+      "select state || ' ' || recipe_id from planned_meal order by day_index, slot",
+    )}`);
+    console.log(`ingredient lines per recipe:\n${scratchQuery(
+      'select recipe_id || %s || count(*) from recipe_ingredient group by recipe_id order by recipe_id'.replace(
+        '%s',
+        "' has '",
+      ),
+    )}`);
+  }
+  expect(items).toBeGreaterThan(0);
 }
 
 test.describe('F88: one list, grouped by aisle, whose ticks survive a reload', () => {
