@@ -175,13 +175,22 @@ test('F94 with photo analysis off, no request is made and no ledger row is writt
    * The request the screen will not make, made anyway, with the switch off.
    * A disabled control proves nothing about a server, so this posts a real
    * photograph at the real endpoint and expects a refusal.
+   *
+   * THE TOKEN COMES OUT OF THE BROWSER'S JAR AND NOT OUT OF `document.cookie`.
+   * The anti-forgery cookie is HttpOnly, which is the whole point of it: no
+   * script on any origin can read it, including this one. Reading it there
+   * returned undefined, the header went out as the string "undefined", and the
+   * route refused for anti-forgery long before it ever looked at consent. So
+   * the assertion below passed over the thing it was written to prove and the
+   * test read a 403 as a 403. quick-log.spec.ts and notices.spec.ts already
+   * take the cookie from the context, which is the browser's own jar and the
+   * same value the shipped client sends.
    */
-  const csrf = await page.evaluate(() =>
-    document.cookie
-      .split('; ')
-      .find((pair) => pair.startsWith('vernier_csrf='))
-      ?.slice('vernier_csrf='.length),
-  );
+  const jar = new Map((await page.context().cookies()).map((cookie) => [cookie.name, cookie.value]));
+  const csrf = jar.get('vernier_csrf') ?? '';
+  console.log(`F94: cookies this browser holds: ${[...jar.keys()].join(', ')}`);
+  expect(csrf, 'the anti-forgery cookie the sign-in issued').not.toBe('');
+
   const answer = await page.evaluate(
     async ([token, bytes]) => {
       const form = new FormData();
@@ -201,13 +210,27 @@ test('F94 with photo analysis off, no request is made and no ledger row is writt
     [csrf, [...jpegWithGps(1092, 819)]] as const,
   );
 
+  console.log(`F94: the estimate route answered ${answer.status} ${answer.body}`);
   expect(answer.status).toBe(403);
+  // REFUSED FOR CONSENT, AND NOT FOR ANYTHING ELSE. Both are 403 and only one
+  // of them is evidence for this line. Without this the test goes green on a
+  // request that never reached the consent check.
+  expect(answer.body).not.toContain(strings.api.csrf.failed);
   expect(answer.body).toContain(strings.api.meals.consentOff);
 
   const after = Number(scratchQuery('select count(*) from usage_ledger'));
-  console.log(`F94: usage_ledger rows before ${before}, after ${after}, over the whole table`);
+  const calls = Number(scratchQuery('select count(*) from ai_call'));
+  console.log(
+    `F94: one estimate request made at /api/meals/estimate with photo analysis off. ` +
+      `usage_ledger ${before} rows before and ${after} after, over the whole table; ` +
+      `ai_call holds ${calls} row(s)`,
+  );
+  // What makes these two numbers mean something is the request above: a real
+  // 1092 px photograph, posted at the real route, with a token the server
+  // accepted. A run that reached the transport writes an ai_call row and a
+  // usage_ledger row in one transaction, so both would move.
   expect(after).toBe(before);
-  expect(Number(scratchQuery('select count(*) from ai_call'))).toBe(0);
+  expect(calls).toBe(0);
 
   // And the four switches move independently: turning one on leaves three off.
   await page.locator('[data-switch="menu_generation"]').click();

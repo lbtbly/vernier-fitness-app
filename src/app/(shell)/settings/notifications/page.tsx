@@ -57,9 +57,19 @@ export default async function NotificationsPage() {
 
       <ReminderSettings csrfToken={csrfToken} settings={settings} quiet={quiet} />
 
-      <p className="note centre" style={{ padding: '4px 20px 0' }}>
-        <Link href="/reminders">{strings.reminders.pendingTitle}</Link>
-      </p>
+      {/*
+       * A LINK IS A TARGET AND TAKES THE TARGET FLOOR. This was a bare anchor
+       * inside a note and drew 85 by 15 CSS pixels: under the 44 px DESIGN.md
+       * section 2b sets for everything interactive, and the one control on this
+       * screen that missed it. The shortcut settings screen ends the same way,
+       * with its navigation link as a `.btn block` inside `.actions`, so this
+       * one ends that way too.
+       */}
+      <div className="actions">
+        <Link className="btn block" href="/reminders">
+          {strings.reminders.pendingTitle}
+        </Link>
+      </div>
     </>
   );
 }

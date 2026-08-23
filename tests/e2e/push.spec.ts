@@ -216,20 +216,55 @@ test.describe('reminders', () => {
 
     // Typed, never filled. A field that cannot be typed into passed four rounds
     // of this suite once because fill() sets a whole value in one input event.
+    //
+    // FOCUS, NOT CLICK. A time input is segments inside a box that is wider
+    // than they are, and a click lands wherever the pointer lands: on the blank
+    // right-hand side of this one, where no segment is selected and every
+    // keystroke after it is dropped. Focusing selects the first segment, which
+    // is the hour, every time. `Control+a` went with the click; it selects
+    // nothing in a segmented control and only moved the state around.
+    //
+    // AND FOCUS ONCE, THEN THE KEYBOARD. `locator.press` focuses the element
+    // before every keystroke, and a segmented control re-entered between digits
+    // could read 2, 1, 3, 0 as four attempts at the hour rather than one hour
+    // and one minute. The keyboard sends to whatever holds focus already.
     const from = page.locator('#quiet-from');
-    await from.click();
-    await from.press('Control+a');
-    await from.pressSequentially('2130');
+    await from.focus();
+    for (const digit of ['2', '1', '3', '0']) await page.keyboard.press(digit);
+
+    /*
+     * THE CHECK THAT WAS MISSING, and it is the whole of why this line went red
+     * with the product working. The old test typed and saved without ever
+     * asking whether the field had taken the value. Every keystroke was
+     * dropped, the screen posted 22:00 back over 22:00, the row was written
+     * exactly as asked, and the assertion at the bottom read "unchanged" as
+     * "not stored" and blamed the wrong half of the product. If the digits do
+     * not land, this is where it goes red, and it says so.
+     */
+    await expect(from, 'the hour and minute a person typed').toHaveValue('21:30');
+
+    // The far side of the window, as the screen had it before the edit. Read
+    // rather than assumed, so this test says nothing about which value the seed
+    // happens to carry.
+    const until = (before ?? '').split('-')[1] ?? '';
+    expect(until).toMatch(/^([01]\d|2[0-3]):[0-5]\d$/);
 
     await page.locator('[data-setting-action="quiet"]').click();
+    // Saved, in the screen's own words, before anything is read back. A failed
+    // post renders the error card instead, and without this the reload below
+    // would read the old row and call it a storage failure.
+    await expect(page.locator('[data-saved="quiet"]')).toBeVisible();
     await page.waitForLoadState('networkidle');
     await page.reload();
     await page.waitForLoadState('networkidle');
 
     const after = await page.locator('[data-quiet-hours]').getAttribute('data-quiet-hours');
-    console.log(`quiet hours after: ${after}`);
+    console.log(`quiet hours before: ${before}, after a reload: ${after}`);
     expect(after).not.toBe(before);
-    expect(after?.startsWith('21:30')).toBe(true);
+    // TWO WALL CLOCKS AND NOT A DURATION: the far side of the window is
+    // untouched by an edit to the near side, so it is asserted whole rather
+    // than by its first five characters.
+    expect(after).toBe(`21:30-${until}`);
   });
 
   test('F117: a reminder carries the action that closes it, and the item state follows', async ({

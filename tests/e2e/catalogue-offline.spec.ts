@@ -1,5 +1,5 @@
 import { mkdirSync } from 'node:fs';
-import { expect, test } from './fixtures';
+import { expect, test, type Page } from './fixtures';
 import { mintSignInLink, projectRoot, query } from './host';
 
 /**
@@ -25,9 +25,48 @@ import { mintSignInLink, projectRoot, query } from './host';
 
 const CAPTURES = `${projectRoot}.forge/evidence/slice-8/captures`;
 
+/** How many demonstrations the worker must be holding before the origin goes. */
+const PRECACHED_FLOOR = 30;
+
 test.beforeAll(() => {
   mkdirSync(CAPTURES, { recursive: true });
 });
+
+/**
+ * Every demonstration the worker is holding, by path.
+ *
+ * THIS IS THE PRECONDITION, AND IT REPLACED A MUCH WEAKER ONE. What used to
+ * stand here was "at least five images decoded while the origin was up", which
+ * measured how many cards fit above the fold on a 393 px viewport: four of
+ * them, so F66 failed on a layout fact before it had taken the network away
+ * once. It also encoded the old design, where a demonstration reached the cache
+ * because the page had fetched it. The worker precaches all 44 at install now
+ * and the shell layout asks again on every document load, so what has to be
+ * true before going offline is that the CACHE is full, which is what this
+ * reads.
+ */
+async function precachedPaths(page: Page): Promise<string[]> {
+  return page.evaluate(async () => {
+    const names = (await caches.keys()).filter((name) => name.startsWith('vernier-media-'));
+    const paths: string[] = [];
+    for (const name of names) {
+      const cache = await caches.open(name);
+      for (const request of await cache.keys()) paths.push(new URL(request.url).pathname);
+    }
+    return paths;
+  });
+}
+
+/** The decoded width of the image on one card, or 0 when it drew nothing. */
+function drawnWidth(page: Page, index: number): Promise<number> {
+  return page
+    .locator('[data-movement]')
+    .nth(index)
+    .evaluate((node) => {
+      const image = node.querySelector('img');
+      return image === null ? 0 : (image as HTMLImageElement).naturalWidth;
+    });
+}
 
 test.describe('the catalogue offline', () => {
   test.describe.configure({ mode: 'serial' });
@@ -76,13 +115,21 @@ test.describe('the catalogue offline', () => {
       .toBe(true);
     console.log('the worker is active and controlling the catalogue');
 
-    // Let the images come through the worker, so they are in its cache.
+    /*
+     * THE CACHE, NOT THE FOLD. This waited for images to decode with the origin
+     * up and asked for five of them, which on a 393 px viewport is a question
+     * about how many cards fit above the fold: four do, so F66 went red on a
+     * layout fact having never taken the network away. What has to be true here
+     * is that the worker is HOLDING the demonstrations, which is a number about
+     * the product rather than about the viewport.
+     */
     await page.waitForLoadState('networkidle');
-    const decodedOnline = await page.locator('[data-movement] img').evaluateAll((nodes) =>
-      nodes.filter((node) => (node as HTMLImageElement).naturalWidth > 0).length,
-    );
-    console.log(`images decoded with the origin up: ${decodedOnline}`);
-    expect(decodedOnline).toBeGreaterThanOrEqual(5);
+    await expect
+      .poll(async () => (await precachedPaths(page)).length, { timeout: 60_000 })
+      .toBeGreaterThanOrEqual(PRECACHED_FLOOR);
+    const precached = await precachedPaths(page);
+    console.log(`demonstrations the worker is holding: ${precached.length}`);
+    console.log(`first five of them: ${precached.slice(0, 5).join(', ')}`);
 
     // Now take the origin away, from the page and from the worker.
     await context.route('**/*', (route) => route.abort('connectionfailed'));
@@ -100,18 +147,40 @@ test.describe('the catalogue offline', () => {
     await page.reload();
     await expect(page.locator('[data-movement]').first()).toBeVisible();
     const offlineCards = await page.locator('[data-movement]').count();
-    const decodedOffline = await page.locator('[data-movement] img').evaluateAll((nodes) =>
-      nodes
-        .filter((node) => (node as HTMLImageElement).naturalWidth > 0)
-        .map((node) => (node as HTMLImageElement).getAttribute('src')),
-    );
-    console.log(
-      `offline: ${offlineCards} cards, ${decodedOffline.length} images decoded, first five: ${decodedOffline
-        .slice(0, 5)
-        .join(', ')}`,
-    );
     expect(offlineCards).toBeGreaterThanOrEqual(30);
-    expect(decodedOffline.length).toBeGreaterThanOrEqual(5);
+
+    /*
+     * FIVE CARDS, EACH SCROLLED TO WITH NO ORIGIN AND EACH WAITED FOR.
+     *
+     * The cards carry loading=lazy, so an image is requested when it nears the
+     * viewport and not before. Counting what happened to have decoded on load
+     * counts the fold again, which is what this test kept doing to itself. Each
+     * of the first five is scrolled to, the way a person in a basement gym
+     * scrolls, and each one has to decode: `naturalWidth > 0` is the browser
+     * saying it read the bytes, and a card whose image failed still renders its
+     * alt text, its cue and its caption, so nothing weaker sees the difference.
+     */
+    const drawn: string[] = [];
+    for (let index = 0; index < 5; index += 1) {
+      await page.locator('[data-movement]').nth(index).scrollIntoViewIfNeeded();
+      await expect
+        .poll(() => drawnWidth(page, index), { timeout: 20_000 })
+        .toBeGreaterThan(0);
+      drawn.push(
+        await page
+          .locator('[data-movement]')
+          .nth(index)
+          .evaluate((node) => {
+            const image = node.querySelector('img') as HTMLImageElement | null;
+            const id = node.getAttribute('data-movement') ?? '';
+            return image === null
+              ? `${id} drew nothing`
+              : `${id} ${image.getAttribute('src')} ${image.naturalWidth}x${image.naturalHeight}`;
+          }),
+      );
+    }
+    console.log(`offline: ${offlineCards} cards. The five drawn with no origin:\n  ${drawn.join('\n  ')}`);
+    expect(drawn).toHaveLength(5);
 
     // The capture F66 asks for: five movement cards, offline.
     await page.locator('[data-movement]').nth(4).scrollIntoViewIfNeeded();
@@ -156,19 +225,18 @@ test.describe('the catalogue offline', () => {
     // document load, which is what repairs an install that happened on the
     // sign-in screen, so this waits for the cache to hold the whole manifest
     // rather than assuming either path won the race.
-    const cached = await page.evaluate(async () => {
-      const names = await caches.keys();
-      const media = names.filter((name) => name.startsWith('vernier-media-'));
-      const entries: string[] = [];
-      for (const name of media) {
-        const cache = await caches.open(name);
-        for (const request of await cache.keys()) entries.push(new URL(request.url).pathname);
-      }
-      return { names, entries };
-    });
-    console.log(`caches on the device: ${cached.names.join(', ')}`);
+    // It is polled rather than read once. A fill of 44 files runs inside the
+    // install event's waitUntil and again on every document load, and a single
+    // read taken while it is still running would fail a worker that was about
+    // to be right. The floor it has to reach is unchanged.
+    await expect
+      .poll(async () => (await precachedPaths(page)).length, { timeout: 60_000 })
+      .toBeGreaterThanOrEqual(PRECACHED_FLOOR);
+    const cachedNames = await page.evaluate(() => caches.keys());
+    const cached = { entries: await precachedPaths(page) };
+    console.log(`caches on the device: ${cachedNames.join(', ')}`);
     console.log(`demonstrations precached: ${cached.entries.length}`);
-    expect(cached.entries.length).toBeGreaterThanOrEqual(30);
+    expect(cached.entries.length).toBeGreaterThanOrEqual(PRECACHED_FLOOR);
 
     // NOTHING IS SCROLLED. Whatever decoded here decoded because it was on the
     // first screen, and every id that did not is a card this browser has never
