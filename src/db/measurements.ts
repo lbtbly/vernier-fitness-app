@@ -147,7 +147,6 @@ export async function storeMeasurement(input: WriteInput): Promise<WriteResult> 
   const stored = await candidatesFor(input.metric, input.measuredAt);
   const outcome = decideDedup(
     {
-      id: input.id,
       metric: input.metric,
       source: input.source,
       rawValue: input.rawValue,
@@ -561,7 +560,9 @@ export async function readLogSnapshot(timeZone: string): Promise<LogSnapshot> {
   const now = new Date();
   const [today, lastWaist, questions] = await Promise.all([
     readDay(now, timeZone),
-    readLatestOfMetric('waist'),
+    // The snapshot's own zone, so the day the sheet draws and the day the
+    // comparator resolves are one day and not two.
+    readLatestOfMetric('waist', timeZone),
     readOpenQuestions(),
   ]);
   const records = await readSourceRecordsFor(lastWaist ? [...today, lastWaist] : today);

@@ -64,7 +64,6 @@ describe('the deduplication decision', () => {
   it('calls the first reading of a day unique and stores it', () => {
     const outcome = decideDedup(
       {
-        id: 'incoming',
         metric: 'waist',
         source: 'manual',
         rawValue: '98.0',
@@ -80,7 +79,6 @@ describe('the deduplication decision', () => {
   it('drops the same fact arriving twice and names the row that was kept', () => {
     const outcome = decideDedup(
       {
-        id: 'incoming',
         metric: 'waist',
         source: 'manual',
         rawValue: '98.5',
@@ -97,7 +95,6 @@ describe('the deduplication decision', () => {
   it('keeps a device reading over a hand-typed one for the same day and names the loser', () => {
     const outcome = decideDedup(
       {
-        id: 'incoming',
         metric: 'weight',
         source: 'withings',
         rawValue: '85.9',
@@ -114,7 +111,6 @@ describe('the deduplication decision', () => {
   it('does not store a hand-typed reading over a device one for the same day', () => {
     const outcome = decideDedup(
       {
-        id: 'incoming',
         metric: 'weight',
         source: 'manual',
         rawValue: '86.0',
@@ -130,7 +126,6 @@ describe('the deduplication decision', () => {
   it('treats a different day as a different reading, in the zone it was taken in', () => {
     const outcome = decideDedup(
       {
-        id: 'incoming',
         metric: 'waist',
         source: 'manual',
         rawValue: '98.5',
@@ -154,7 +149,6 @@ describe('a re-import that disagrees with a correction', () => {
   it('is a question, not a decision, and it stores nothing', () => {
     const outcome = decideDedup(
       {
-        id: 'incoming',
         metric: 'waist',
         source: 'withings',
         rawValue: '92.2',
@@ -179,7 +173,6 @@ describe('a re-import that disagrees with a correction', () => {
     // quotes 92.2 tells the owner something untrue about his own data.
     const outcome = decideDedup(
       {
-        id: 'incoming',
         metric: 'waist',
         source: 'withings',
         rawValue: '92.2',
@@ -203,7 +196,6 @@ describe('a re-import that disagrees with a correction', () => {
   it('leaves a re-import that agrees with the correction alone', () => {
     const outcome = decideDedup(
       {
-        id: 'incoming',
         metric: 'waist',
         source: 'withings',
         rawValue: '99.2',

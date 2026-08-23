@@ -259,12 +259,6 @@ export type StoredCandidate = {
 };
 
 export type IncomingValue = {
-  /**
-   * The id this row will carry if it is stored. It is here because the
-   * comparator's last clause is the greater id, and a decision that cannot see
-   * the id cannot break a tie the same way the read layer will.
-   */
-  id: string;
   metric: string;
   source: Source;
   rawValue: string;

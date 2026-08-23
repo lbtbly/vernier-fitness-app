@@ -15,6 +15,7 @@ import {
   exchangeCode,
   fetchMeasures,
 } from '@/lib/withings/client';
+import { whatStands } from '@/lib/provenance';
 import { type DemoServerState, demoTransport } from '@/lib/withings/demo-dataset';
 import {
   type ImportPorts,
@@ -115,10 +116,18 @@ class Table {
       const held = heads.get(row.rootId);
       if (!held || row.correctionIndex > held.correctionIndex) heads.set(row.rootId, row);
     }
-    const found = new Map<string, StandingOnDay>();
+    // One row per day, chosen by the comparator every other resolution site
+    // uses, which is how `standingOnDays` chooses it. This double kept whichever
+    // row it happened to see first, and that is the coin toss A7 removed.
+    const perDay = new Map<string, StoredRow[]>();
     for (const head of heads.values()) {
       const key = dayKeyFor(head.metric, head.measuredAt, ZONE);
-      if (!found.has(key)) found.set(key, { id: head.id, source: head.source, rawValue: head.rawValue });
+      perDay.set(key, [...(perDay.get(key) ?? []), head]);
+    }
+    const found = new Map<string, StandingOnDay>();
+    for (const [key, held] of perDay) {
+      const head = whatStands(held, ZONE)!;
+      found.set(key, { id: head.id, source: head.source, rawValue: head.rawValue });
     }
     // Only the days this answer actually touches, the way the query does.
     const wanted = new Set(rows.map((row) => dayKeyFor(row.metric, row.measuredAt, ZONE)));
