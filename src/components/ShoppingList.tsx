@@ -183,6 +183,13 @@ export function ShoppingList({
                   className={item.deduction === 'none' ? 'item' : 'item off'}
                   key={item.id}
                   data-item={item.id}
+                  /*
+                   * The ingredient, on the row. The row id carries the
+                   * deduction, so it changes when a line becomes a deduction and
+                   * a test that followed the id lost the line at the moment it
+                   * was proving something about it.
+                   */
+                  data-alias={item.aliasId}
                   data-deduction={item.deduction}
                 >
                   {item.deduction === 'none' ? (

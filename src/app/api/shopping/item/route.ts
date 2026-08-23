@@ -3,6 +3,7 @@ import {
   addItem,
   clearStock,
   readItem,
+  rebuildListsHolding,
   setItemChecked,
   setItemQuantity,
   setItemRemoved,
@@ -91,8 +92,22 @@ export async function POST(request: Request) {
       } else {
         await clearStock(alias.id);
       }
+      /*
+       * And the list is rebuilt, because the cupboard is an input to it.
+       *
+       * F89 asks that an item marked in stock renders as visibly deducted.
+       * `deduction` is decided in `buildShoppingList` when the list is built, so
+       * writing `stock_item` and stopping left the line looking exactly as it
+       * did before the tap: measured on the scratch instance at box 5, none 32,
+       * stock 0 with the row already written. The rebuild is the shipped one and
+       * it keeps every tick and every adjusted quantity it can.
+       */
+      const rebuilt = await rebuildListsHolding(alias.id);
       return {
-        handled: { status: 200, body: { stock: { aliasId: alias.id, inStock: body.inStock } } },
+        handled: {
+          status: 200,
+          body: { stock: { aliasId: alias.id, inStock: body.inStock }, rebuilt: rebuilt.length },
+        },
         outcome: 'applied' as const,
       };
     }

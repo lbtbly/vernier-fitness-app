@@ -242,14 +242,34 @@ test.describe('F89: a deducted line is struck through, not removed', () => {
       })
       .toBe(1);
 
-    // Rebuild the list, which is what the confirm control does, and the line is
-    // deducted rather than gone.
-    await page.goto('/eat');
+    /*
+     * NO SECOND ACTION. THE TAP IS THE WHOLE OF IT.
+     *
+     * This used to navigate to /eat and click the sticky bar, described as
+     * "rebuild the list, which is what the confirm control does". It is not:
+     * once the plan is confirmed that control is a Link to /eat/shopping, so
+     * the click was a navigation and no shipped screen rebuilt anything. The
+     * line stayed a bought line, `shopping_item.deduction` stayed 'none', and
+     * the count below was passing on lines the recipe box had deducted rather
+     * than on the one just marked.
+     *
+     * The cupboard is an input to the list, so the write rebuilds it:
+     * `rebuildListsHolding` in src/db/shopping.ts, called from the route that
+     * takes the tap. What is asserted here is the screen the owner is already
+     * looking at, reloaded and nothing else.
+     *
+     * GOES RED IF: the rebuild is taken back out. The alias marked in stock is
+     * named, and its own row is the one read below, so a stock deduction on
+     * some other ingredient cannot stand in for it.
+     */
+    await page.reload();
     await page.waitForLoadState('networkidle');
-    await page.locator('.stickybar a.btn.primary, .stickybar button.btn.primary').first().click();
-    await page.waitForLoadState('networkidle');
-    await page.goto('/eat/shopping');
-    await page.waitForLoadState('networkidle');
+
+    const markedDeduction = scratchQuery(
+      `select deduction from shopping_item where alias_id = '${aliasId}' and removed = false`,
+    );
+    console.log(`the line marked in stock now reads deduction '${markedDeduction}'`);
+    expect(markedDeduction, 'the line the owner marked did not become a deduction').toBe('stock');
 
     const stockLines = Number(
       scratchQuery("select count(*) from shopping_item where deduction = 'stock'"),
@@ -259,13 +279,35 @@ test.describe('F89: a deducted line is struck through, not removed', () => {
     expect(totalLines).toBeGreaterThan(0);
     expect(stockLines).toBeGreaterThan(0);
 
-    const stock = page.locator('[data-deduction="stock"]').first();
+    const stock = page.locator(`[data-deduction="stock"][data-alias="${aliasId}"]`).first();
     await expect(stock).toBeVisible();
     await expect(stock).toHaveClass(/off/);
     await expect(stock.locator('[data-struck]')).toBeVisible();
     const text = await stock.innerText();
     console.log(`in-stock line:\n${text}`);
     expect(text).toContain('In stock');
+
+    // Struck through and dimmed, computed rather than declared. `.item.off` and
+    // `.item.off .name` shipped dead for a day, prefixed `.seg button` by a
+    // merge splice that tore `.seg button{` in half, so the row carried every
+    // data attribute this test reads and drew none of them.
+    const drawn = await stock.evaluate((node) => {
+      const name = node.querySelector('.name') as HTMLElement;
+      const struck = node.querySelector('[data-struck]') as HTMLElement;
+      return {
+        display: getComputedStyle(node).display,
+        minHeight: getComputedStyle(node).minHeight,
+        opacity: getComputedStyle(node).opacity,
+        nameLine: getComputedStyle(name).textDecorationLine,
+        struckLine: getComputedStyle(struck).textDecorationLine,
+      };
+    });
+    console.log(`the deducted row computes ${JSON.stringify(drawn)}`);
+    expect(drawn.display, 'the shopping row is not a row').toBe('flex');
+    expect(drawn.minHeight, 'screen 10 draws a 56 px row').toBe('56px');
+    expect(Number(drawn.opacity), 'a deducted line is dimmed').toBeLessThan(1);
+    expect(drawn.nameLine, 'the name of a deducted line is not struck through').toContain('line-through');
+    expect(drawn.struckLine, 'the original quantity is not struck through').toContain('line-through');
 
     await page.screenshot({ path: `${CAPTURES}/shopping-stock-deduction.png`, fullPage: true });
   });

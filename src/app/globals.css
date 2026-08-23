@@ -1390,8 +1390,10 @@ html[data-theme=light]{--media-plate:#FFFFFF}
 }
 .tap{min-width:var(--touch);min-height:var(--touch);display:flex;align-items:center;justify-content:center;flex:none}
 .tap svg{width:20px;height:20px;color:var(--text-3)}
-/* A deducted line stays on the list. Struck through, quieter, reason attached. */
-.item.off{opacity:.55}
+/* A deducted line stays on the list. Struck through, quieter, reason attached.
+ * .5 rather than .55, which is what 10-shopping-list.html line 48 writes. The
+ * heavier value had no sheet behind it and C12 is measured against that one. */
+.item.off{opacity:.5}
 .item.off .name{text-decoration:line-through}
 .item .was{text-decoration:line-through;color:var(--text-3)}
 
