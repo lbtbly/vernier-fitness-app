@@ -1,0 +1,17 @@
+[
+  {
+    "host": "www.youtube-nocookie.com",
+    "embeddingMode": "youtube_nocookie",
+    "reasonKey": "media.allowlist.nocookie"
+  },
+  {
+    "host": "www.youtube.com",
+    "embeddingMode": "youtube_nocookie",
+    "reasonKey": "media.allowlist.share"
+  },
+  {
+    "host": "youtu.be",
+    "embeddingMode": "youtube_nocookie",
+    "reasonKey": "media.allowlist.short"
+  }
+]

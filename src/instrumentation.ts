@@ -81,6 +81,21 @@ export async function register(): Promise<void> {
     console.error(`[vernier] nutrition seed did not run: ${(error as Error).message}`);
   }
 
+  // The movement catalogue, which is product data and not sample data. It runs
+  // on every boot whatever DEMO_MODE says, because F66 wants at least 30
+  // movements with cue text and a bundled demonstration on a REAL install, and
+  // a catalogue that exists only in demonstration mode is a catalogue the owner
+  // does not have. Idempotent: an upsert keyed on each movement's own id.
+  try {
+    const { ensureCatalogue } = await import('./db/catalogue');
+    const seeded = await ensureCatalogue();
+    console.log(
+      `[vernier] catalogue: ${seeded.movements} movement(s), ${seeded.media} media record(s), ${seeded.hosts} allowed host(s)`,
+    );
+  } catch (error) {
+    console.error(`[vernier] catalogue not seeded: ${(error as Error).message}`);
+  }
+
   // The demonstration seed, which loads only under DEMO_MODE=1 and refuses out
   // loud otherwise. It sits here, one line after the migration count, because
   // both facts belong in the same boot log: what the schema did and what the
@@ -98,5 +113,24 @@ export async function register(): Promise<void> {
     }
   } catch (error) {
     console.error(`[vernier] demo seed did not run: ${(error as Error).message}`);
+  }
+
+  // The training half of the demonstration, which needs the catalogue above it
+  // and the measurement series beside it: it proposes a week through the
+  // shipped proposer, so every cause on screen 06 names an input that is really
+  // in this database. Same rule as every other seed: DEMO_MODE=1 or nothing.
+  try {
+    const { seedTrainingDemo } = await import('./db/demo-training');
+    const { getConfig } = await import('./lib/config');
+    const result = await seedTrainingDemo(getConfig().timeZone);
+    if (result.ran) {
+      console.log(
+        `[vernier] training demo: ran, ${result.runs} run(s), ${result.sets} set(s), ${result.proposals} proposal(s)`,
+      );
+    } else {
+      console.log(`[vernier] training demo: refused, ${result.reason}`);
+    }
+  } catch (error) {
+    console.error(`[vernier] training demo did not run: ${(error as Error).message}`);
   }
 }

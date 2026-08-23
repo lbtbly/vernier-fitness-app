@@ -392,3 +392,71 @@ export function HomeIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+/** The swap arrows on the player's Replace control, from 07-session-player.html. */
+export function SwapIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} aria-hidden="true" focusable="false">
+      <path
+        d="M3.4 7h11.2M12 4.4 14.6 7 12 9.6M16.6 13H5.4M8 10.4 5.4 13 8 15.6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+/** Spoken cues on. */
+export function SoundIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} aria-hidden="true" focusable="false">
+      <path
+        d="M4 7.6h3.2L11 4.2v11.6L7.2 12.4H4z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M13.6 7.4a3.6 3.6 0 0 1 0 5.2M15.8 5.2a6.8 6.8 0 0 1 0 9.6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+/** Spoken cues muted. The visible cue does not change when this is on. */
+export function MuteIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} aria-hidden="true" focusable="false">
+      <path
+        d="M4 7.6h3.2L11 4.2v11.6L7.2 12.4H4z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M13.6 7.6 18 12M18 7.6l-4.4 4.4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+export function PlayIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} aria-hidden="true" focusable="false">
+      <path d="M6.5 4.2 15.5 10l-9 5.8z" fill="currentColor" />
+    </svg>
+  );
+}

@@ -308,6 +308,29 @@ export const strings = {
   api: {
     jsonBody: 'Expected a JSON body.',
 
+    /** Everything the training routes refuse, and what they say when they do. */
+    train: {
+      noKey: 'This write carried no idempotency key.',
+      noKeyDetail:
+        'A session write is keyed by the client UUID its outbox entry holds, so a phone that retries in a basement gym applies it once.',
+      bodyDetail: 'Nothing was written. Open the week again and repeat the action.',
+      unknownAction: 'That is not something this endpoint does.',
+      unknownActionDetail: 'Nothing was written, and the week is exactly as it was.',
+      notFound: 'That session is not here.',
+      notFoundDetail:
+        'It may have been rejected, or it belongs to a week that has passed. Nothing was changed.',
+      failed: 'The training write did not finish.',
+      failedDetail:
+        'Nothing was applied. What is on this phone is still on it and will upload when the Mac mini answers.',
+      readinessIncomplete: 'The screening answer is incomplete.',
+      readinessIncompleteDetail: 'All three questions are answered together or none of them is stored.',
+      mediaNeedsMovement: 'A media record names the movement it belongs to.',
+      mediaNeedsMovementDetail: 'Choose a movement and check the link again. Nothing was stored.',
+      hostUnreachable: 'The video host could not be reached from this machine.',
+      hostUnreachableDetail:
+        'Nothing was stored. The check runs from the Mac mini rather than from your phone, because the answer depends on where it is asked from.',
+    },
+
     session: {
       signInFirst: 'Sign in first.',
       signInFirstDetail:
@@ -2521,5 +2544,658 @@ export const strings = {
     creatinine: 'Creatinine',
     crp: 'C-reactive protein',
     ferritin: 'Ferritin',
+  },
+
+  /**
+   * The movement catalogue's words. The rows themselves are in
+   * `src/lib/catalogue.ts` and in the `movement` table, and they carry keys
+   * rather than sentences, so this is the one place a cue is written.
+   *
+   * Every cue is paraphrase and every cue is short on purpose. The technique
+   * references are named in `.forge/research/exercise-media.md` section 3 and
+   * none of them may be copied: NHS text is Open Government Licence but
+   * SHORTENING it flips the attribution rule, so an adapted cue carries the
+   * generic licence line and never cites the NHS as its source. The Royal
+   * Berkshire physiotherapy pack is the best per-movement reference in English
+   * and is copyright, so it is read and not quoted. Growing Stronger's pictures
+   * are public domain and its BOOK is copyright Tufts, so the GIFs are used and
+   * the wording is not.
+   */
+  movement: {
+    'wall-push-up': {
+      name: 'Wall push-up',
+      cue: "Stand an arm's length from the wall, hands at shoulder height. Bend the elbows until your nose is close to the wall, then push back. One straight line from head to heels.",
+    },
+    'push-up': {
+      name: 'Push-up',
+      cue: 'Hands under the shoulders, elbows tucked back rather than flared. Lower until the chest is a fist from the floor, then press up. Squeeze the glutes so the hips do not sag.',
+    },
+    'close-grip-push-up': {
+      name: 'Close-grip push-up',
+      cue: 'Hands narrow, thumbs almost touching. The elbows brush the ribs on the way down. Slower than it looks, and the triceps do most of it.',
+    },
+    'bench-dip': {
+      name: 'Bench dip',
+      cue: 'Hands on the chair edge behind you, fingers forward, feet out in front. Bend the elbows to about a right angle and press back up. Shoulders down, away from the ears.',
+    },
+    'triceps-dip': {
+      name: 'Triceps dip',
+      cue: 'Feet further out and legs straight, so more of you sits on your arms. Elbows point backwards, never out. Stop the set when the shoulders start to shrug.',
+    },
+    'chest-dip': {
+      name: 'Chest dip',
+      cue: 'On parallel bars, lean the chest forward a little. Lower until the upper arms are level with the floor, then press up. Shoulders stay down throughout.',
+    },
+    'wall-sit': {
+      name: 'Wall sit',
+      cue: 'Back flat to the wall, feet a stride out, slide down until the thighs are about level with the floor. Knees over the ankles, weight in the heels, breathing normally.',
+    },
+    'bodyweight-squat': {
+      name: 'Bodyweight squat',
+      cue: 'Feet about hip width. Sit back and down as if reaching for a chair: heels down, chest up, knees tracking over the toes. Two counts down, one up.',
+    },
+    'step-up': {
+      name: 'Step-up',
+      cue: 'Whole foot on the step, drive through that heel, stand tall at the top. Step down with control rather than dropping. The same number each side.',
+    },
+    lunge: {
+      name: 'Lunge',
+      cue: 'Step forward and lower until the front knee is about a right angle and the back knee is close to the floor. Trunk upright, no bend at the waist.',
+    },
+    'knee-extension': {
+      name: 'Knee extension',
+      cue: 'Sit tall in the chair. Straighten one knee until the leg is level, hold a beat, lower over three counts. No swinging.',
+    },
+    'pelvic-tilt': {
+      name: 'Pelvic tilt',
+      cue: 'On your back, knees bent. Flatten the low back into the mat by tilting the pelvis, hold for one breath, release. A small movement, and nothing lifts.',
+    },
+    'glute-bridge': {
+      name: 'Glute bridge',
+      cue: 'Feet flat, heels close to your seat. Squeeze the glutes and hamstrings and raise the hips to a straight line from shoulders to knees. Do not arch the back.',
+    },
+    'hamstring-curl': {
+      name: 'Hamstring curl',
+      cue: 'Hold the chair back. Bend one knee to bring the heel towards your seat with the thighs level, then lower over three counts.',
+    },
+    'hip-lift': {
+      name: 'Single-leg hip lift',
+      cue: 'The bridge with one foot off the mat. Keep the hips level: if one side drops, put the foot back down and finish the set on two.',
+    },
+    'hip-abduction': {
+      name: 'Hip abduction',
+      cue: 'On your side, legs straight and stacked. Raise the top leg to about 45 degrees with the toes pointing forward rather than up, then lower slowly.',
+    },
+    'calf-raise': {
+      name: 'Calf raise',
+      cue: 'Rise onto the balls of the feet, hold a beat at the top, lower over three counts until the heels touch. Hold something for balance if you need it.',
+    },
+    'donkey-calf-raise': {
+      name: 'Bent-over calf raise',
+      cue: 'Hinge forward with your hands on the chair and the hips high. Rise onto the balls of the feet from there, which puts more of you over the calves.',
+    },
+    'abdominal-brace': {
+      name: 'Abdominal brace',
+      cue: 'On your back, knees bent. Draw the navel gently towards the spine without holding your breath. Hold, then let go.',
+    },
+    'abdominal-curl': {
+      name: 'Abdominal curl',
+      cue: 'Knees bent, hands across the chest. Curl the shoulders off the mat until the shoulder blades clear it, then lower. The low back stays down.',
+    },
+    'dead-bug': {
+      name: 'Dead bug',
+      cue: 'On your back, arms up and knees over the hips. Lower one arm and the opposite leg towards the floor with the low back flat, return, then swap.',
+    },
+    crunch: {
+      name: 'Crunch',
+      cue: 'Curl up until the shoulder blades leave the mat, chin off the chest, and lower under control. Stop the set if the neck starts doing the work.',
+    },
+    'front-plank': {
+      name: 'Front plank',
+      cue: 'Elbows under the shoulders, one straight line from head to heels. Squeeze the glutes, brace the middle, breathe normally. Come down before the hips drop.',
+    },
+    'reverse-crunch': {
+      name: 'Reverse crunch',
+      cue: 'Knees bent over the hips. Curl the pelvis up so the hips lift a little off the mat, then lower slowly. The legs do not swing.',
+    },
+    'bicycle-crunch': {
+      name: 'Bicycle crunch',
+      cue: 'Shoulders off the mat. Bring one elbow towards the opposite knee while the other leg straightens, then alternate. Slow, not fast.',
+    },
+    'side-plank': {
+      name: 'Side plank',
+      cue: 'Elbow under the shoulder, hips stacked and lifted so the body makes one line. Bend the knees to make it easier. Both sides, same time.',
+    },
+    'lying-leg-raise': {
+      name: 'Lying leg raise',
+      cue: 'Legs straight, hands under your seat. Lower them until just before the low back lifts, then raise. That point is your range, and it moves.',
+    },
+    'mountain-climber': {
+      name: 'Mountain climber',
+      cue: 'From the top of a push-up, drive one knee towards the chest and back, then the other. Hips stay level and low, hands stay under the shoulders.',
+    },
+    'bird-dog': {
+      name: 'Bird dog',
+      cue: 'On hands and knees. Reach one arm forward and the opposite leg back until both are level with the trunk, hold a beat, swap. Nothing rotates.',
+    },
+    'floor-back-extension': {
+      name: 'Floor back extension',
+      cue: "Face down, arms by your sides. Lift the chest a hand's width off the mat looking at the floor, then lower. Small range, no crunching backwards.",
+    },
+    superman: {
+      name: 'Superman',
+      cue: 'Face down, arms ahead. Raise the arms, chest and legs together a little way, hold a beat, lower. Stop if the low back complains.',
+    },
+    'recovery-walk': {
+      name: 'Recovery walk',
+      cue: 'Brisk enough that you can still talk but not sing. Easy legs is the point of this one, not a workout in disguise.',
+    },
+    'treadmill-walk': {
+      name: 'Treadmill walk',
+      cue: 'Stand tall, look ahead, let the arms swing. Off the handrails once you are moving, and step to the sides to get on and off.',
+    },
+    'stationary-bike': {
+      name: 'Stationary bike',
+      cue: 'Set the saddle so the knee is almost straight at the bottom of the stroke. Steady cadence, and a resistance you can hold for the whole block.',
+    },
+    'treadmill-intervals': {
+      name: 'Treadmill intervals',
+      cue: 'A harder block, then an easy one, repeated. Ease off any time you cannot get out a few words.',
+    },
+    'jumping-jack': {
+      name: 'Jumping jack',
+      cue: 'Feet out and arms overhead, then back. Land softly through the whole foot. Step one foot out at a time if the jump is too much today.',
+    },
+    'high-knees': {
+      name: 'High knees',
+      cue: 'March or run on the spot, lifting each knee to about hip height. Land on the balls of the feet with the arms driving.',
+    },
+    burpee: {
+      name: 'Burpee',
+      cue: 'Squat, hands down, feet back to a plank, feet in, stand. Add the push-up or the jump when it feels easy, and leave the jump out if the knees object.',
+    },
+    'back-stretch': {
+      name: 'Back stretch',
+      cue: 'On your back, draw both knees gently towards the chest until the low back lengthens. Hold and breathe.',
+    },
+    'chest-stretch': {
+      name: 'Chest stretch',
+      cue: 'Hands behind the head, elbows wide, draw the shoulder blades together until the chest opens. Hold without arching the back.',
+    },
+    'hamstring-stretch': {
+      name: 'Hamstring stretch',
+      cue: 'Sit with one leg straight. Hinge forward from the hips with a long back until you feel it behind the thigh. Hold and breathe.',
+    },
+    'quad-stretch': {
+      name: 'Quad stretch',
+      cue: 'Stand tall holding a chair. Take one ankle behind you with the knees together and push the hip forward until you feel the front of the thigh.',
+    },
+    'toe-touch': {
+      name: 'Toe touch',
+      cue: 'Feet hip width, knees soft. Roll down towards the toes and let the head hang, then come up one vertebra at a time.',
+    },
+    'ankle-circle': {
+      name: 'Ankle circles',
+      cue: 'Lift one foot and draw slow circles with the toes, both directions. Small and controlled.',
+    },
+  },
+
+  /**
+   * The training week, screen 06.
+   *
+   * Every cause below names the input it acted on, because the panel's second
+   * finding is that one unexplained placement costs the whole plan its
+   * credibility. "Recommended" is a badge and says nothing; "you finished a
+   * session on 3 of the last 4 Mondays" is a reason and can be argued with.
+   */
+  trainWeek: {
+    label: (from: string, to: string) => `${from} to ${to}`,
+    nextWeek: 'Next week',
+    sessionCount: (count: number) => (count === 1 ? '1 session' : `${count} sessions`),
+    range: (low: number, high: number) => `your range is ${low} to ${high}`,
+    total: 'total',
+    duration: (minutes: number) => `${minutes} min`,
+    hoursAndMinutes: (hours: number, minutes: string) => `${hours} h ${minutes}`,
+    shape: (strength: number, cardio: number) =>
+      `${strength} full-body sessions and ${cardio} cardio, placed from the sessions you finished in the last 4 weeks.`,
+    when: (from: string, to: string, place: string) => `${from} to ${to} · ${place}`,
+    places: {
+      home: 'mat at home',
+      gym: 'gym',
+      outdoors: 'outdoors',
+    },
+    kinds: {
+      strength: 'Home strength',
+      cardio: 'Gym cardio',
+      intervals: 'Gym intervals',
+      walk: 'Recovery walk',
+    },
+    fullBody: 'Full body',
+    accept: 'Accept',
+    edit: 'Edit',
+    reject: 'Reject',
+    states: {
+      proposed: 'Not decided',
+      edited: 'Edited',
+      accepted: 'Accepted',
+      rejected: 'Rejected',
+    },
+    rejectedNote:
+      'Rejected. It will not be offered again this week, and the reason is kept so the app can tell whether this day never works or just this one.',
+    decided: (accepted: number, rejected: number) => `${accepted} accepted, ${rejected} rejected`,
+    undecided: (count: number) => `${count} still to decide`,
+    askAgain: 'Ask for a different week',
+    seeToday: "See today's plan",
+    footerNote:
+      'Accepted sessions appear on Today. Writing them into a calendar arrives with the calendar connection, and nothing reaches a calendar before you confirm the changes on screen.',
+    proposeTitle: 'No week proposed yet',
+    proposeBody:
+      'Three to five sessions are proposed at a time, two or three of them full body, with at least 48 hours between two sessions that load the same muscle. Each one carries the reason it was placed where it was, and each one is accepted on its own.',
+    propose: 'Propose next week',
+    proposing: 'Working out the week',
+    loadingLabel: 'Loading the proposed week',
+    errorTitle: 'The proposed week did not load',
+    errorBody: 'Everything already accepted is still on Today. Nothing was changed by this.',
+    offlineTitle: 'Offline',
+    offlineBody: (count: number) =>
+      count === 1
+        ? '1 decision is on this phone and will upload when the Mac mini is reachable.'
+        : `${count} decisions are on this phone and will upload when the Mac mini is reachable.`,
+    staleTitle: (days: number) => `This week was proposed ${days} days ago`,
+    staleBody:
+      'It was worked out from what you had done at the time. Ask for a different week and it is read again from today.',
+    learnedLabel: 'What the app learned',
+    learnedNone:
+      'Nothing yet. Move a session three times and the app starts proposing the day you moved it to, and stops asking about the one you moved it from.',
+    missedNote:
+      'Missing a session does not change the difficulty of the plan. Two missed in a month is normal and gets no message.',
+    cause: {
+      mostCompletedDay: (weekday: string, done: number, weeks: number) =>
+        `Placed on ${weekday}: you finished a session on this day in ${done} of the last ${weeks} weeks.`,
+      spacedFromPrevious: (hours: number, when: string) =>
+        `Placed ${hours} hours after ${when}, which loads the same muscles.`,
+      lowSteps: (lowDays: number, ofDays: number, floor: string) =>
+        `Added because you were under ${floor} steps on ${lowDays} of the last ${ofDays} days that have data.`,
+      noHistoryYet: (sessions: number) =>
+        `There is no history to read yet, so the week starts at ${sessions} sessions, which is where the guideline starts.`,
+      weeklyCardio: (minutes: number) =>
+        `One cardio session, because the weekly target is ${minutes} minutes of moderate work.`,
+      painDeload: (site: string) =>
+        `Volume is cut this week: you reported ${site} in two sessions running.`,
+      ownEdit: (when: string) => `You moved this to ${when}.`,
+    },
+    longerFact: (percent: number, longest: number) =>
+      `This session is ${percent}% longer than your longest in the last 30 days, which was ${longest} minutes.`,
+    longerNote:
+      'That is a fact about the length, not a risk. No trial has shown a progression rule that prevents injuries, so this app does not print a number that claims one.',
+    editTitle: 'Edit this session',
+    editStart: 'Start time',
+    editDuration: 'Duration',
+    editSave: 'Save this session',
+    editReject: 'Reject this session',
+    editNote:
+      'Your edit is remembered as a correction rather than a one-off. Three of the same correction changes what gets proposed.',
+    editSlotsNote:
+      'Times are the slots this kind of session is placed in. Reading your calendar for busy hours arrives with the calendar connection, so nothing here is marked busy yet.',
+    movements: (count: number) => `${count} movements`,
+    equipment: 'Equipment',
+    equipmentNone: 'Nothing but the floor',
+    startSession: 'Start this session',
+    back: 'Back',
+  },
+
+  /** Heart-rate guidance, and everything the app refuses to claim about it. */
+  intensity: {
+    label: 'Target range',
+    bands: {
+      light: 'Light',
+      moderate: 'Moderate',
+      vigorous: 'Vigorous',
+      nearMaximal: 'Near maximal',
+    },
+    range: (band: string, low: number, high: number) => `${band}, ${low} to ${high} bpm`,
+    openRange: (band: string, low: number) => `${band}, ${low} bpm and above`,
+    methodReserve: (resting: number, maximum: number) =>
+      `Worked out from your stored resting rate of ${resting} bpm and an estimated maximum of ${maximum}.`,
+    methodMaximum: (age: number, maximum: number) =>
+      `Worked out from an estimated maximum of ${maximum} at age ${age}. Store a resting heart rate and this switches to the method that fits you better.`,
+    error: (low: number, high: number) =>
+      `An estimate is wide: agreement limits are plus or minus ${low} to ${high} beats, which is enough to move a person across two bands. Read the range and never a single number.`,
+    drift: (minutes: number) =>
+      `Past ${minutes} minutes, heart rate drifts up on its own with no change in effort. Do not slow down to hold a number: use the talk test instead.`,
+    noTracking:
+      'This app does not read your heart rate, live or otherwise. These are numbers to aim at with a strap or a watch you already trust.',
+    talkTestLabel: 'The one check during the session',
+    talkTest: 'If you cannot get out a few words, ease off.',
+    talkTestModerate: 'Moderate means you can still talk, but not sing.',
+    talkTestVigorous: 'Vigorous means you cannot say more than a few words without pausing for breath.',
+  },
+
+  /** The 2-for-2 proposal, which is proposed and confirmed and never applied. */
+  progression: {
+    label: 'Ready to go up',
+    trigger: (over: number, first: string, second: string) =>
+      `You were ${over} or more reps over target on the last set on ${first}, and again on ${second}.`,
+    load: (from: string, to: string) => `Load ${to} kg, up from ${from} kg`,
+    reps: (from: number, to: number) => `Target ${to} reps, up from ${from}`,
+    hold: (from: number, to: number) => `Hold ${to} s, up from ${from} s`,
+    variation: (to: string) => `Move up to ${to}`,
+    convention:
+      'The trigger is a rule with evidence behind it. The size of the step is convention rather than a measurement: no trial establishes how much to add, so this is the smallest step the textbooks use, and you can change it.',
+    confirm: 'Apply this from the next session',
+    decline: 'Leave it where it is',
+    confirmed: (when: string) => `Applied on ${when}.`,
+    declined: 'Left where it is.',
+    emptyTitle: 'Nothing is ready to go up',
+    emptyBody:
+      'A movement advances when you go 2 or more reps past the target on the last set, in two sessions running. Progression is not required to get results, so a week with none of this in it is a normal week.',
+    blocked: (site: string) =>
+      `Nothing advances while ${site} has been reported in two sessions running. That movement cuts volume instead.`,
+  },
+
+  /** The session player, screen 07. */
+  player: {
+    title: 'Session',
+    start: 'Start the session',
+    startNote:
+      'The screen is kept awake and every time on this screen is read from the clock, so a call in the middle costs nothing.',
+    leave: 'Pause and leave',
+    block: (index: number, total: number) => `Block ${index} of ${total}`,
+    elapsed: (clock: string) => `${clock} elapsed`,
+    set: (index: number, total: number) => `Set ${index} of ${total}`,
+    setDone: 'Set done',
+    setState: {
+      done: (index: number, achieved: string) => `Set ${index} · ${achieved} done`,
+      now: (index: number) => `Set ${index} now`,
+      todo: (index: number) => `Set ${index}`,
+    },
+    reps: (count: number) => `${count} reps`,
+    seconds: (count: number) => `${count} s`,
+    minutes: (count: number) => `${count} min`,
+    load: 'Load',
+    bodyweight: 'Bodyweight',
+    lastWeek: 'Last week',
+    lastWeekLine: (sets: number, achieved: string, load: string) => `${load}, ${sets} x ${achieved}`,
+    lastWeekWithEffort: (sets: number, achieved: string, load: string, rir: number) =>
+      `${load}, ${sets} x ${achieved}, ${rir} on the effort question`,
+    lastWeekNone: 'No record of this movement yet, so this is the first one.',
+    easier: 'Easier',
+    harder: 'Harder',
+    replace: 'Replace',
+    rest: 'Rest',
+    restOf: (seconds: number) => `of ${seconds} seconds`,
+    addRest: (seconds: number) => `+${seconds} s`,
+    skipRest: 'Skip rest',
+    startSet: (index: number) => `Start set ${index}`,
+    next: 'Next',
+    nextMovement: (name: string, sets: number) => `Then ${name}, ${sets} sets`,
+    nextNone: 'That is the last block.',
+    spokenOn: 'Spoken cues on, tap to mute',
+    spokenOff: 'Spoken cues muted, tap to turn on',
+    spokenMutedNote: 'Muted, so nothing is spoken. Every cue is still on the screen.',
+    cueRestEnding: (seconds: number) => `${seconds} seconds left`,
+    cueSetStart: (name: string, target: string) => `${name}, ${target}`,
+    cueSessionDone: 'Session done',
+    cueLabel: 'Cue',
+    awake: 'The screen is being kept awake.',
+    notAwake:
+      'This browser will not keep the screen awake, so it may lock between sets. Tap the screen to bring it back: nothing is lost when it does.',
+    offlineNote:
+      'This session runs with no signal. What you log stays on the phone and uploads when the Mac mini is reachable.',
+    ringLabel: (done: number, total: number) => `${done} of ${total} sets done`,
+    restRingLabel: (remaining: number, total: number) =>
+      `Rest countdown, ${remaining} seconds left of ${total}`,
+    finishedTitle: 'Session done',
+    finishedSummary: (clock: string, blocks: number, sets: number) =>
+      `${clock} · ${blocks} blocks · ${sets} sets`,
+    finishedRing: 'Session complete, the ring is closed',
+    effortResistance: 'How many more reps could you have done on the last set',
+    effortResistanceNote:
+      'One question, answered 1 to 10. Ten is nothing left in the tank, nine is one more, eight is two more. It is logged for now and nothing is prescribed from it for the first four weeks.',
+    effortCardio: 'How hard was that, 0 to 10',
+    effortCardioNote:
+      'Zero is the effort of sitting and 10 is maximal effort. Moderate work is a 5 or a 6, and vigorous starts at a 7 or an 8.',
+    cdcSource:
+      'The 0 to 10 effort scale is from the CDC page "How to Measure Physical Activity Intensity", which is in the public domain and free on the agency website. The CDC does not endorse this app.',
+    painLabel: 'Any pain',
+    painSites: {
+      none: 'None',
+      knee: 'Knee',
+      shoulder: 'Shoulder',
+      back: 'Back',
+      hip: 'Hip',
+      ankle: 'Ankle',
+      elbow: 'Elbow',
+      other: 'Somewhere else',
+    },
+    painScore: 'How bad was it, 0 to 10',
+    painRule:
+      'Up to 5 out of 10 while you work is allowed, as long as it has gone by the next morning and is no worse than last week.',
+    painMorning: 'Had it gone by the next morning',
+    painMorningLater: 'Ask me in the morning',
+    painAboveCeiling: (ceiling: number) =>
+      `That is above the ${ceiling} out of 10 ceiling, so the next session cuts the volume on this movement rather than advancing it.`,
+    painNotSubsided:
+      'Pain still there the next morning means the last session was too much. The next one backs off.',
+    painRose: 'That is worse than last week at the same site, so nothing on it advances.',
+    painRepeated: (site: string) =>
+      `The same site two sessions running, so ${site} work is cut back and nothing on it advances.`,
+    painNote: 'Pain logged here changes next week, and the change says it was because of this.',
+    note: 'Anything else',
+    notePlaceholder: 'Optional.',
+    save: 'Save and finish',
+    saving: 'Saving',
+    savedNote:
+      'Saved on this phone. It uploads when the Mac mini is reachable. There is no prompt to rate anything, ever.',
+    replaceTitle: 'Replace this movement',
+    replaceBody: (load: string) => `Same muscles, same block length. Your ${load} carries over.`,
+    replaceBodyBodyweight: 'Same muscles, same block length.',
+    replaceEasier: 'Easier',
+    replaceHarder: 'Harder',
+    replaceSame: 'Same difficulty',
+    use: 'Use this',
+    remember: 'Remember this swap',
+    /*
+     * The sheet's own caption reads "Applies to every future session, not just
+     * tonight", and this build can only make half of that true: it rewrites
+     * every session already in the plan and ahead of now. A week proposed next
+     * month picks its movements again from the catalogue, so the wider promise
+     * would be an overclaim, and the copy says what the code does instead.
+     */
+    rememberNote: 'Applies to every session already in your plan, not only tonight.',
+    close: 'Close',
+    mediaMissing: 'No demonstration is bundled for this movement yet.',
+    emptyTitle: 'This session has no movements',
+    emptyBody:
+      'Nothing was written into it, which is a fault rather than a plan. Open the week and propose it again.',
+    errorTitle: 'This session did not load',
+    errorBody: 'Nothing was started and nothing was logged.',
+    loadingLabel: 'Loading the session',
+    notFoundTitle: 'That session is not here',
+    notFoundBody: 'It may have been rejected, or it belongs to a week that has passed.',
+  },
+
+  /** The screening gate. ACSM 2015, three inputs, and never PAR-Q+. */
+  readiness: {
+    title: 'Before the first session',
+    sub: 'Three questions from the screening algorithm in the 2015 update to the ACSM guidelines.',
+    activityLabel: 'Have you been doing planned exercise at least three days a week for the last three months',
+    activityActive: 'Yes, regularly',
+    activityInactive: 'No, not regularly',
+    diseaseLabel: 'Do you have known cardiovascular, metabolic or renal disease',
+    diseaseYes: 'Yes',
+    diseaseNo: 'No',
+    symptomsLabel: 'Do you have any of these, at rest or during activity',
+    symptoms: {
+      chestDiscomfort:
+        'Pain or discomfort in the chest, neck, jaw, arms or other areas that may result from ischaemia',
+      shortnessOfBreath: 'Shortness of breath at rest or with mild exertion',
+      dizziness: 'Dizziness or fainting',
+      orthopnea: 'Breathlessness lying flat, or waking at night short of breath',
+      ankleEdema: 'Ankle swelling',
+      palpitations: 'Palpitations or a racing heart',
+      claudication: 'Leg pain on walking that eases with rest',
+      murmur: 'A known heart murmur',
+      unusualFatigue: 'Unusual tiredness or breathlessness during your usual activities',
+    },
+    symptomsNone: 'None of these',
+    intensityLabel: 'How hard do you want to work',
+    intensityLightModerate: 'Light to moderate',
+    intensityVigorous: 'Vigorous',
+    save: 'Save this answer',
+    saving: 'Saving',
+    answeredOn: (when: string) => `Answered on ${when}.`,
+    retake: 'Answer these again',
+    outcomes: {
+      proceed:
+        'No clearance needed. Start where the plan starts and build from there.',
+      proceedGradually:
+        'Start at light to moderate work without clearance and build up gradually. Vigorous work is worth a word with a doctor first if you have been inactive.',
+      clearanceFirst:
+        'Speak to a doctor before starting. The plan stays here and nothing about it changes while you do.',
+    },
+    outcomeLabel: 'What that means',
+    notParq:
+      'These are the ACSM screening questions, not the PAR-Q+. That questionnaire may not be re-implemented as screens or built into an electronic form without written consent, so its wording is not in this app anywhere.',
+    stopRule:
+      'Stop any session if one of those appears while you are working. Pain with swelling, weakness and dark urine together is a same-day matter for a doctor.',
+    notAnswered: 'The screening questions have not been answered yet.',
+    notAnsweredBody:
+      'Three questions, once a year. The week is proposed either way, and the answer changes what the app is willing to suggest.',
+    answer: 'Answer them now',
+  },
+
+  /** The media provenance screen, and the editorial check on a pasted link. */
+  media: {
+    title: 'Movement media',
+    sub: 'Where every demonstration came from, and the list a link may be added from.',
+    bundledLabel: 'Bundled on this machine',
+    bundledNote: (count: number, size: string) =>
+      `${count} files, ${size} MB, served from this Mac mini and rendering with no signal at all.`,
+    author: 'Author or source',
+    licence: 'Licence',
+    verified: 'Verified',
+    mode: 'How it is shown',
+    modes: {
+      bundled: 'Bundled here',
+      youtube_nocookie: 'Privacy-enhanced embed',
+    },
+    kinds: {
+      still: 'Still',
+      animation: 'Animation',
+      video: 'Video',
+    },
+    addTitle: 'Add a video for a movement',
+    addBody:
+      'Paste a link. It is checked against the allowlist below, then checked with the host from this machine, and nothing is ever downloaded.',
+    urlLabel: 'Link',
+    urlPlaceholder: 'https://',
+    movementLabel: 'Which movement',
+    check: 'Check this link',
+    checking: 'Checking with the host',
+    accepted: (author: string) => `Accepted. The host names the author as ${author}.`,
+    savedTitle: 'Added',
+    refusedTitle: 'Refused',
+    refusals: {
+      notAUrl: 'That is not a link.',
+      hostNotAllowed:
+        'That host is not on the allowlist. Only the hosts listed below may be embedded, and the list is data you can change rather than something built into the app.',
+      noVideoId: 'That link carries no video in it.',
+      notEmbeddable:
+        'The owner of that video does not allow it to be embedded, or it is age restricted. The host does not say which.',
+      unavailable: 'That video is unavailable, removed, or blocked from here.',
+      notAVideoLink: 'The host did not recognise that as a video.',
+      noAuthor:
+        'The host named no author, so nothing was stored. A record with no author cannot be attributed, and the database refuses one.',
+    },
+    allowlistLabel: 'Hosts a link may come from',
+    allowlist: {
+      nocookie:
+        'The privacy-enhanced player. Measured on this machine: it sets no cookies on first load, where the ordinary host sets six.',
+      share: 'The ordinary watch link, accepted here and turned into a privacy-enhanced embed.',
+      short: 'The share shortener, accepted here and turned into a privacy-enhanced embed.',
+    },
+    embedNote:
+      'Video is never downloaded, never copied to this machine, never served through it and never covered over. The frame is fetched by this phone, from the host, with nothing drawn on top of it.',
+    offlineNote:
+      'An embed needs the internet and cannot be cached, which is why every movement carries a bundled still or animation first. Video is the optional third layer.',
+    attributionsLabel: 'Attributions',
+    attributionLine: (author: string, licence: string) => `${author}, ${licence}`,
+    licenceAndDate: (licence: string, when: string) => `${licence}, checked ${when}`,
+    everkinetic:
+      'Illustrations by Everkinetic, licensed CC BY-SA 4.0. Used unmodified, so they are a collection beside this app rather than an adaptation of it.',
+    cdc:
+      'Animations from the CDC "Growing Stronger" set, which are in the public domain and free on the agency website. The CDC does not endorse this app.',
+    commons: 'Individual files from Wikimedia Commons, each one attributed to its own author above.',
+    original: 'Three movements have no freely licensed demonstration anywhere, so this app drew its own.',
+    emptyTitle: 'No media yet',
+    emptyBody:
+      'The catalogue seeds itself on the first boot. If this is empty, the seed did not run and the boot log says why.',
+    errorTitle: 'The media list did not load',
+    errorBody: 'The bundled files are still on this machine and the catalogue still renders them.',
+    loadingLabel: 'Loading the media records',
+    open: 'Open the source',
+    count: (count: number) => `${count} records`,
+    staleTitle: (days: number) => `Last checked ${days} days ago`,
+    staleBody:
+      'A bundled file cannot rot, so this is a note rather than a fault. An embed can: the host is asked again on a schedule so a dead one shows up here rather than as a black rectangle mid-session.',
+  },
+
+  /** The movement catalogue screen. */
+  catalogue: {
+    title: 'Movements',
+    sub: 'Every movement the plan can ask for, with its cue and where its demonstration came from.',
+    count: (count: number) => `${count} movements`,
+    filterAll: 'All',
+    modalities: {
+      resistance: 'Strength',
+      cardio: 'Cardio',
+      mobility: 'Mobility',
+    },
+    target: (sets: number, target: string) => `${sets} sets of ${target}`,
+    rest: (seconds: number) => `${seconds} s rest`,
+    muscles: 'Loads',
+    equipment: 'Equipment',
+    equipmentNone: 'Nothing but the floor',
+    ladder: 'On the ladder',
+    ladderStep: (step: number) => `Step ${step}`,
+    easier: (name: string) => `Easier: ${name}`,
+    harder: (name: string) => `Harder: ${name}`,
+    emptyTitle: 'The catalogue is empty',
+    emptyBody:
+      'It is seeded on boot from the movement list in this build. An empty catalogue means the seed did not run, and the boot log says why.',
+    errorTitle: 'The catalogue did not load',
+    errorBody: 'The bundled demonstrations are still on this machine. Only this list failed.',
+    loadingLabel: 'Loading the catalogue',
+    offlineNote: 'Every demonstration here is bundled on this machine and renders with no signal.',
+    mediaFrom: (author: string) => `Demonstration by ${author}`,
+    mediaAlt: (name: string) => `Demonstration of the ${name}`,
+  },
+
+  /** Muscle names, so a column value never reaches a screen as a column value. */
+  muscles: {
+    chest: 'Chest',
+    triceps: 'Triceps',
+    shoulders: 'Shoulders',
+    back: 'Back',
+    lats: 'Lats',
+    quadriceps: 'Quadriceps',
+    hamstrings: 'Hamstrings',
+    glutes: 'Glutes',
+    calves: 'Calves',
+    core: 'Core',
+    obliques: 'Obliques',
+    'hip-abductors': 'Hip abductors',
+    'whole-body': 'Whole body',
+  },
+
+  /** Equipment names, same rule. */
+  equipment: {
+    mat: 'Mat',
+    chair: 'Chair',
+    step: 'Step',
+    'parallel bars': 'Parallel bars',
+    treadmill: 'Treadmill',
+    bike: 'Exercise bike',
   },
 } as const;
