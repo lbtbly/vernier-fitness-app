@@ -13,8 +13,8 @@ import {
   parseReference,
   refusedPages,
 } from '@/lib/lab-parse';
+import { refusalSentence } from '@/lib/display';
 import { BUILT_IN_ANALYTES } from '@/lib/labs';
-import { strings } from '@/lib/strings';
 import { PANEL_PAGE_TWO, panelPages, pageOf, scannedPage } from './lab-fixture';
 
 /**
@@ -156,7 +156,7 @@ describe('blood pressure, refused at extraction', () => {
     expect(read.refusals).toHaveLength(1);
     expect(pages).toEqual([2]);
 
-    const sentence = strings.labs.refusedBody(pages);
+    const sentence = refusalSentence(pages);
     expect(sentence).toContain('Page 2 holds');
     expect(sentence).not.toContain('Page 1');
     expect(sentence).not.toContain('Page 3');
@@ -174,11 +174,12 @@ describe('blood pressure, refused at extraction', () => {
       [{ page: 2, reason: 'blood_pressure' }],
     );
     expect(many).toEqual([2, 4]);
-    expect(strings.labs.refusedBody(many)).toContain('Pages 2 and 4 each hold');
+    expect(refusalSentence(many)).toContain('Pages 2 and 4 each hold');
+    expect(refusalSentence([2, 4, 7])).toContain('Pages 2, 4 and 7 each hold');
   });
 
   it('names no page at all when none was recorded', () => {
-    const sentence = strings.labs.refusedBody([]);
+    const sentence = refusalSentence([]);
     console.log(`no-page sentence: ${sentence}`);
     expect(sentence).not.toContain('Page');
     expect(sentence).toContain('not recorded');

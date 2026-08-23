@@ -14,6 +14,7 @@ import {
   WarnIcon,
 } from '@/components/icons';
 import { CSRF_HEADER } from '@/lib/cookie-names';
+import { refusalSentence } from '@/lib/display';
 import { analyteLabelOf, flagSentences, referenceLine, unitSymbol } from '@/lib/lab-display';
 import { isBlocked } from '@/lib/lab-parse';
 import { type ReviewDocument, type ReviewRow, canSave, reviewSections, tally } from '@/lib/lab-review';
@@ -263,7 +264,7 @@ export function LabReview({
         <div className="banner" data-banner="refused">
           <ShieldIcon />
           <div>
-            <b>{strings.labs.refusedTitle(review.refusals)}</b> {strings.labs.refusedBody(refusedPages)}
+            <b>{strings.labs.refusedTitle(review.refusals)}</b> {refusalSentence(refusedPages)}
           </div>
         </div>
       ) : null}

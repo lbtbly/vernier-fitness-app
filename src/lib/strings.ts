@@ -1996,23 +1996,28 @@ export const strings = {
      * THE PAGES THE REFUSALS WERE ACTUALLY ON, AND THE VERB AGREES WITH THE
      * LIST.
      *
-     * This took a string of every page in the document and read "Page 1, 2, 3
-     * holds a blood-pressure reading" on a three-page panel whose
-     * blood-pressure line was on page 2. Two things wrong in one sentence: the
-     * wrong pages, and a singular verb over a list. It takes the page numbers
-     * now, and it has a sentence for the case where none were recorded rather
-     * than a guess dressed up as a fact.
+     * One sentence took a string of every page in the document and read "Page
+     * 1, 2, 3 holds a blood-pressure reading" on a three-page panel whose
+     * blood-pressure line was on page 2. Two things wrong at once: the wrong
+     * pages, and a singular verb over a list.
+     *
+     * THREE KEYS RATHER THAN ONE FUNCTION WITH THREE BRANCHES, and the reason
+     * is the rendered check. scripts/rendered-strings.mjs probes a key that
+     * takes data by calling it with a sentinel, 0, 1, 2, 5 and a proxy, and
+     * none of those is an array of two, so two of the three branches would
+     * never be rendered into an anchor and the plural sentence would read as
+     * uncatalogued copy the first time a panel refused two pages. Each branch
+     * takes a scalar here and `refusalSentence` in src/lib/display.ts picks
+     * between them, which is where this product chooses words anyway.
      */
-    refusedBody: (pages: number[]) => {
-      if (pages.length === 0) {
-        return 'The page it was printed on was not recorded for this import. It was not extracted, it is not displayed here and it is not stored. This app has no field for it and never will.';
-      }
-      if (pages.length === 1) {
-        return `Page ${pages[0]} holds a blood-pressure reading. It was not extracted, it is not displayed here and it is not stored. This app has no field for it and never will.`;
-      }
-      const list = `${pages.slice(0, -1).join(', ')} and ${pages[pages.length - 1]}`;
-      return `Pages ${list} each hold a blood-pressure reading. They were not extracted, they are not displayed here and they are not stored. This app has no field for one and never will.`;
-    },
+    refusedNoPage:
+      'The page it was printed on was not recorded for this import. It was not extracted, it is not displayed here and it is not stored. This app has no field for it and never will.',
+    refusedOnePage: (page: number) =>
+      `Page ${page} holds a blood-pressure reading. It was not extracted, it is not displayed here and it is not stored. This app has no field for it and never will.`,
+    refusedManyPages: (pages: string) =>
+      `Pages ${pages} each hold a blood-pressure reading. They were not extracted, they are not displayed here and they are not stored. This app has no field for one and never will.`,
+    /** "2, 4 and 7". The conjunction is a word a person reads, so it has a key. */
+    refusedPageJoin: (pages: string, last: string) => `${pages} and ${last}`,
 
     needsEyes: (count: number) => `Needs your eyes, ${count}`,
     readCleanly: (count: number) => `Read cleanly, ${count}`,

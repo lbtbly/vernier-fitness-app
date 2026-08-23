@@ -205,6 +205,24 @@ export function targetLabel(unit: string, target: number): string {
 }
 
 /**
+ * The refusal banner's sentence, over the pages the parser actually refused on.
+ *
+ * C10. The screen built this list out of the page census, which is every page
+ * in the document, and announced "Page 1, 2, 3 holds a blood-pressure reading"
+ * on a three-page panel whose blood-pressure line was on page 2 alone. The
+ * pages are stored now; this turns them into English, with the verb agreeing
+ * with the list and a sentence for the document that recorded no page.
+ */
+export function refusalSentence(pages: number[]): string {
+  if (pages.length === 0) return strings.labs.refusedNoPage;
+  if (pages.length === 1) return strings.labs.refusedOnePage(pages[0]);
+  const last = pages[pages.length - 1];
+  return strings.labs.refusedManyPages(
+    strings.labs.refusedPageJoin(pages.slice(0, -1).join(', '), String(last)),
+  );
+}
+
+/**
  * Where an energy value came from, as a chip and as the sentence behind it.
  *
  * F79 IS THIS FUNCTION. The food screen rendered the "Computed energy" chip
