@@ -281,7 +281,12 @@ export function retentionToken(rule: RetentionRule): string {
     case 'archives':
       return `${rule.count}-archives`;
     case 'seconds': {
-      if (rule.seconds % 86400 === 0) return `${rule.seconds / 86400}-days`;
+      // Days only past two of them. `NONCE_TTL_HOURS` is 24 and the code that
+      // enforces it counts hours, so a token reading `1-days` would be a
+      // document disagreeing with the constant it is supposed to be quoting.
+      if (rule.seconds % 86400 === 0 && rule.seconds >= 2 * 86400) {
+        return `${rule.seconds / 86400}-days`;
+      }
       if (rule.seconds % 3600 === 0) return `${rule.seconds / 3600}-hours`;
       if (rule.seconds % 60 === 0) return `${rule.seconds / 60}-minutes`;
       return `${rule.seconds}-seconds`;
