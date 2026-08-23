@@ -2,14 +2,15 @@ import Link from 'next/link';
 import { EmptyState } from '@/components/EmptyState';
 import { ScreenTitle } from '@/components/ScreenTitle';
 import { ShoppingList, type ItemView } from '@/components/ShoppingList';
-import { nextWeekStart, readPlan } from '@/db/nutrition';
+import { nextWeekStart, readPlan, readPlanMeals } from '@/db/nutrition';
 import { readRules } from '@/db/nutrition';
 import { readListForPlan, readStock } from '@/db/shopping';
 import { getConfig } from '@/lib/config';
 import { AISLE_ORDER, aliasById } from '@/lib/food-aliases';
-import { longDate, shortDate } from '@/lib/format';
+import { daysBetween, longDate, shortDate } from '@/lib/format';
 import { quantityText } from '@/lib/shopping';
 import { strings } from '@/lib/strings';
+import { WarnIcon } from '@/components/icons';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: strings.nutrition.shoppingTitle };
@@ -61,6 +62,22 @@ export default async function ShoppingPage() {
       </>
     );
   }
+
+  /*
+   * The stale state: a list built before the last meal decision.
+   *
+   * Accepting one more meal after the list was built does not rebuild it, and
+   * it should not: the owner may already be in the shop with half of it ticked.
+   * What the screen owes him is to say that the list is behind the week, name
+   * how far behind, and offer the rebuild rather than doing it under him.
+   */
+  const meals = await readPlanMeals(plan.id);
+  const lastDecision = meals
+    .map((meal) => meal.decidedAt)
+    .filter((when): when is Date => when !== null)
+    .sort((left, right) => right.getTime() - left.getTime())[0];
+  const stale = lastDecision !== undefined && lastDecision.getTime() > list.builtAt.getTime();
+  const staleDays = stale ? Math.max(1, daysBetween(list.builtAt, new Date(), timeZone)) : 0;
 
   const stockByAlias = new Map(stock.map((holding) => [holding.aliasId, holding]));
   const dayLabel = (index: number) =>
@@ -133,6 +150,17 @@ export default async function ShoppingPage() {
   return (
     <>
       {title}
+      {stale ? (
+        <div className="banner w" data-state="stale">
+          <WarnIcon />
+          <div className="grow">
+            <p>
+              <b>{strings.nutrition.shoppingStaleTitle(staleDays)}</b>
+            </p>
+            <p className="note warn">{strings.nutrition.shoppingStaleBody}</p>
+          </div>
+        </div>
+      ) : null}
       <ShoppingList
         listId={list.listId}
         items={items}

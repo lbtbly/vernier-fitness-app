@@ -193,10 +193,14 @@ export async function writeTarget(
     hardFloorConfirmedAt: inputs.hardFloorConfirmed ? new Date() : null,
     updatedAt: new Date(),
   };
+  // The set is built from the same object the insert uses, minus the id it
+  // conflicts on. Spreading `undefined` into a set is not the same as leaving a
+  // column alone, and `created_at` is a fact about when this row first existed.
+  const { id: _id, ...changed } = values;
   const [row] = await db
     .insert(nutritionTarget)
     .values(values)
-    .onConflictDoUpdate({ target: nutritionTarget.id, set: { ...values, createdAt: undefined } })
+    .onConflictDoUpdate({ target: nutritionTarget.id, set: changed })
     .returning();
   return { verdict, row };
 }

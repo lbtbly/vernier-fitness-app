@@ -18,13 +18,16 @@ import { getConfig } from '@/lib/config';
 import { readCsrfToken } from '@/lib/csrf';
 import type { RuleSet } from '@/lib/dietary-rules';
 import { aliasById } from '@/lib/food-aliases';
-import { longDate, shortDate } from '@/lib/format';
+import { daysBetween, longDate, shortDate } from '@/lib/format';
 import type { MacroSet } from '@/lib/macros';
 import { DAYS_IN_WEEK } from '@/lib/menu-week';
 import { strings } from '@/lib/strings';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: strings.tabs.eat };
+
+/** How old a generated week has to be before the screen says so. */
+const STALE_AFTER_DAYS = 2;
 
 /**
  * The nutrition week, screen 08.
@@ -180,6 +183,20 @@ export default async function EatPage() {
     );
   }
 
+  /*
+   * The stale state, which on this screen is a week that is still on the page
+   * and no longer about the owner.
+   *
+   * A plan is generated against a target, and a target is computed against a
+   * weight. Two days later the weight has moved, so the figures under every day
+   * total are about a body that is not quite this one any more. That is not an
+   * error and nothing is broken, which is exactly why it needs saying: the
+   * warn chip carries the age, the line under it names the cause, and the fix
+   * is the Regenerate control already in the sticky bar.
+   */
+  const planAgeDays = daysBetween(plan.generatedAt, now, timeZone);
+  const stale = planAgeDays >= STALE_AFTER_DAYS;
+
   const [meals, recipes, snapshots] = await Promise.all([
     readPlanMeals(plan.id),
     readRecipes(),
@@ -247,6 +264,17 @@ export default async function EatPage() {
   return (
     <>
       {header}
+      {stale ? (
+        <div className="banner w" data-state="stale">
+          <WarnIcon />
+          <div className="grow">
+            <p>
+              <b>{strings.nutrition.weekStaleTitle(planAgeDays)}</b>
+            </p>
+            <p className="note warn">{strings.nutrition.weekStaleBody}</p>
+          </div>
+        </div>
+      ) : null}
       <div className="banner" data-card="rules">
         <InfoIcon />
         <p className="grow">
