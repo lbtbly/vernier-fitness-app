@@ -56,11 +56,19 @@ export type ParsedRecipe = {
  */
 const SPOON_GRAMS: Record<string, number> = { tbsp: 14, tablespoon: 14, tsp: 5, teaspoon: 5 };
 
+/**
+ * Lower case, one space between words, and the decimal separators kept.
+ *
+ * The dot and the comma stay because they are part of a number: stripping them
+ * turned "1.5 kg" into "1 5 kg" and the kilogram rule then read the 5, which is
+ * a recipe asking for five kilograms of potatoes. Found by the test that reads
+ * a decimal quantity, which is why that test is there.
+ */
 function normalise(text: string): string {
   return text
     .toLowerCase()
     .replace(/[‘’]/g, "'")
-    .replace(/[^a-z0-9'\s-]/g, ' ')
+    .replace(/[^a-z0-9'.,\s-]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 }
@@ -73,7 +81,11 @@ function singular(word: string): string {
 }
 
 function words(text: string): string[] {
-  return normalise(text).split(' ').filter(Boolean).map(singular);
+  return normalise(text)
+    .split(' ')
+    .map((word) => word.replace(/[.,]+$/, ''))
+    .filter(Boolean)
+    .map(singular);
 }
 
 /**
@@ -96,9 +108,18 @@ export function matchAlias(line: string): string | null {
     const score = hits / target.size;
     if (!best || score > best.score) best = { id: alias.id, score };
   }
-  // Half the alias's own words have to be in the line. A single shared word,
-  // "oil" against "olive oil", is a coincidence as often as it is a match.
-  return best && best.score >= 0.5 ? best.id : null;
+  /*
+   * MORE than half the alias's own words have to be in the line, which for a
+   * two-word alias means both of them. A single shared word is a coincidence as
+   * often as it is a match: "oil" scored 0.5 against "olive oil" and put fat in
+   * a recipe that had none.
+   *
+   * The cost is real and it is the right way round. A card line reading "150 g
+   * chicken" does not resolve to chicken breast, so it is counted as unresolved
+   * and the screen says one line was not counted. An unresolved line the owner
+   * can see beats a resolved line that is wrong.
+   */
+  return best && best.score > 0.5 ? best.id : null;
 }
 
 /**
