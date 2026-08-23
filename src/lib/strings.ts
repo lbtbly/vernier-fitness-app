@@ -4835,6 +4835,34 @@ export const strings = {
       everything: 'Everything above',
     },
 
+
+    /**
+     * The PDF, which is the one artifact of this product a person can hand to
+     * somebody else. Every sentence in it is here.
+     *
+     * IT MAKES NO CLINICAL CLAIM AND NAMES NONE. R2's boundary is that stating
+     * what a person's own number MEANS is a regulated purpose; this document
+     * reports what is stored, beside the interval the laboratory itself printed,
+     * and says so at the end in its own words.
+     */
+    reportTitle: 'Vernier health report',
+    reportSubtitle: (when: string) => `Prepared ${when} from what is stored on your Mac mini`,
+    reportBodyHeading: 'Body',
+    reportBodyEmpty: 'No body measurement is stored yet.',
+    reportLabsHeading: 'Latest blood test',
+    reportLabsEmpty: 'No laboratory result is stored yet.',
+    reportSource: (source: string, when: string) => `${source}, measured ${when}`,
+    reportReference: (interval: string) => `Your laboratory printed the interval ${interval}`,
+    reportConverted: (printed: string, factor: string, stored: string) =>
+      `Printed ${printed}, converted by ${factor}, stored as ${stored}`,
+    reportAboutHeading: 'What this document is',
+    reportAbout:
+      'A copy of what you recorded, with the source of every value beside it. It is not a medical document and it makes no clinical claim: where a reference interval is shown, it is the one your own laboratory printed on your own sheet.',
+    reportProvenance:
+      'Every value keeps the source it came from, and a correction never overwrites the reading it corrects. Where a day has no reading, this document says so rather than carrying the last one forward.',
+    reportFooter: 'Vernier, from your Mac mini',
+    reportFileName: (day: string) => `vernier-health-report-${day}.pdf`,
+
     bloodPressureLabel: 'Blood pressure',
     bloodPressureBody:
       'There is no setting here because there is nothing to configure. The schema has no column for it, no import reads it, and any PDF row containing it is refused at extraction.',
