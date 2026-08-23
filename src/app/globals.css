@@ -963,3 +963,36 @@ a.noticeline{min-height:var(--touch)}
  * box that no ancestor can scroll to.
  */
 .visually-hidden caption,.visually-hidden th,.visually-hidden td{white-space:nowrap}
+
+/*
+ * A numbered procedure, which the Shortcut guide is and nothing else in this
+ * app is.
+ *
+ * Ninety actions are not a paragraph. The owner reads one step, does it on the
+ * phone in his other hand, and comes back to find his place, so the number has
+ * to be findable without counting: it sits in the gutter, in tabular numerals,
+ * at the same weight as the action name it belongs to. The counter is CSS's
+ * rather than the markup's so the numbering can start anywhere, which is what
+ * lets Part C's steps carry the numbers the research gives them.
+ */
+.steps{list-style:none;counter-reset:none;margin-top:var(--s3)}
+.steps li{
+  display:grid;
+  grid-template-columns:26px 1fr;
+  gap:var(--s1) var(--s3);
+  padding:var(--s3) 0;
+  border-bottom:1px solid var(--line);
+}
+.steps li:last-child{border-bottom:0}
+.steps li::before{
+  content:attr(data-step);
+  grid-row:1 / span 2;
+  font-variant-numeric:tabular-nums;
+  font-size:var(--t-sub);
+  line-height:var(--t-head-lh);
+  color:var(--text-3);
+  text-align:right;
+}
+.steps li > .head{grid-column:2;margin:0}
+.steps li > .sub{grid-column:2}
+.steps li > .head + .sub{margin-top:var(--s1)}

@@ -146,6 +146,27 @@ export const TOKENS = [
   ['zone', /^[A-Z][A-Za-z]+(?:\/[A-Za-z_]+)+/],
   ['dotted identifier', /^[a-z][a-z0-9]*(?:\.[a-z0-9]+)+/],
   ['host', /^[a-z0-9][a-z0-9-]*(?:\.[a-z0-9-]+)+/],
+  /*
+   * A hash, printed on purpose. Slice 6's ingest diagnostics screen exists to
+   * show one: it prints a fixed canonical string and the 64 lower-case hex
+   * characters this machine computes for it, so the owner can run four shell
+   * lines with the secret from his shortcut and see whether the two agree. A
+   * digest is a value in the plainest sense, it has no words in it, and there
+   * is nothing about it to translate.
+   *
+   * It sits above `number` because `tokenAt` takes the FIRST shape that matches
+   * rather than the longest, and a digest beginning with a digit would
+   * otherwise be eaten as a number and leave its letters behind.
+   *
+   * It cannot swallow a phrase, and that is a property of the class rather than
+   * a hope. Thirty-two or more characters with no space in them, drawn only
+   * from 0 to 9 and a to f: reaching that length in English would need a word
+   * built from six letters and no others, and the tiler anchors at the start of
+   * a run, so a sentence opening "added" stops at its first letter outside the
+   * class. `machine identifier` was deleted from this list for exactly the
+   * opposite reason, that it accepted "sign-in" and "follow-up".
+   */
+  ['hash', /^[0-9a-f]{32,}/],
   ['number', /^[+-]?\d+(?:[.,:]\d+)*/],
 ];
 

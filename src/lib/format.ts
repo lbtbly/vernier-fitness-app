@@ -65,6 +65,27 @@ const PRECISION: Record<string, number> = {
   'µg/L': 0,
 };
 
+/**
+ * The same number with the same precision and NO thousands separator, for a
+ * value that is about to be stored rather than drawn.
+ *
+ * `formatNumber` groups, because "9,412 steps" is what a person reads. A stored
+ * `raw_value` is read back with `Number()` by every validator in
+ * `src/lib/provenance.ts` and by the next import that compares against it, and
+ * `Number('4,995')` is NaN. A day of hourly steps summing past a thousand went
+ * into the roll-up through `formatNumber`, came back refused as "not a number",
+ * and the day was dropped with a reason that named the wrong cause. Two
+ * functions, one precision table, and the difference stated where it is made.
+ */
+export function plainNumber(value: number, unit: string): string {
+  const digits = PRECISION[unit] ?? 1;
+  return new Intl.NumberFormat('en-GB', {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+    useGrouping: false,
+  }).format(value);
+}
+
 /** The number alone, grouped and fixed to its unit's precision. No unit on it. */
 export function formatNumber(value: number, unit: string): string {
   const digits = PRECISION[unit] ?? 1;
