@@ -2258,6 +2258,12 @@ export const strings = {
        * wording would teach the owner to expect something Google never says.
        */
       revokedDescription: 'Token has been expired or revoked.',
+      /**
+       * And what it answers a call made with a dead access token. Google's own
+       * wording again, for the same reason: a demonstration that invented the
+       * words would teach the owner to expect something Google never says.
+       */
+      invalidCredentials: 'Invalid Credentials',
     },
   },
 

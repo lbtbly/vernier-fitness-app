@@ -216,7 +216,10 @@ export function demoTransport(store: DemoStore, options: DemoOptions): Transport
     // The grant is dead, so the access token is refused and the refresh above
     // cannot renew it. One refresh, one refusal, and the client stops.
     if (fault === 'revoked') {
-      return { status: 401, body: { error: { code: 401, message: 'Invalid Credentials' } } };
+      return {
+        status: 401,
+        body: { error: { code: 401, message: strings.calendar.demo.invalidCredentials } },
+      };
     }
 
     const url = new URL(request.url);
