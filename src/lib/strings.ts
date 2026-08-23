@@ -1688,7 +1688,14 @@ export const strings = {
     replaceSame: 'Same difficulty',
     use: 'Use this',
     remember: 'Remember this swap',
-    rememberNote: 'Applies to every future session, not only tonight.',
+    /*
+     * The sheet's own caption reads "Applies to every future session, not just
+     * tonight", and this build can only make half of that true: it rewrites
+     * every session already in the plan and ahead of now. A week proposed next
+     * month picks its movements again from the catalogue, so the wider promise
+     * would be an overclaim, and the copy says what the code does instead.
+     */
+    rememberNote: 'Applies to every session already in your plan, not only tonight.',
     close: 'Close',
     mediaMissing: 'No demonstration is bundled for this movement yet.',
     emptyTitle: 'This session has no movements',
