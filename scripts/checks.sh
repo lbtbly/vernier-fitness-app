@@ -68,6 +68,7 @@ if [ "${FORGE_CHECKS_FULL:-0}" != "1" ] && [ -f "$STAMP" ]; then
   [ $(( NOW - THEN )) -lt "$DEBOUNCE" ] && exit 0
 fi
 
+RAN=0
 script_of() { python3 -c "import json;print(json.load(open('package.json')).get('scripts',{}).get('$1',''))" 2>/dev/null; }
 # An uncached eslint walks the whole tree on every call. --cache turns the
 # second call into a diff of the first, which is the single cheapest win here.
@@ -94,6 +95,7 @@ run() {
   fi
   # shellcheck disable=SC2086
   if OUT=$($PM run -s "$1" $2 2>&1); then
+    RAN=$(( RAN + 1 ))
     # The roster, printed by the gate that ran it, so "gate exit 0" in a
     # verification's evidence names its steps instead of implying them. Only on
     # the per-dispatch run: the per-edit one is a hook and says nothing when it
@@ -169,8 +171,13 @@ if [ "${FORGE_CHECKS_FULL:-0}" = "1" ]; then
       "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$TREE" >> .forge/.rendered-deferred 2>/dev/null
     echo "checks: strings:rendered DEFERRED. This is a worktree and the live origin" >&2
     echo "        serves main, so running it here would grade the wrong tree." >&2
-    echo "        Four checks ran, not five. Recorded in .forge/.rendered-deferred;" >&2
-    echo "        the merge runs it on main before this slice can be verified." >&2
+    # COUNTED, not asserted. This line said "four checks ran, not five" as a
+    # literal, and stayed saying it after `compliance` became the fifth. A gate
+    # that hardcodes how many steps it has is a gate that will one day report a
+    # number it did not run, which is the whole class this file exists to close.
+    echo "        $RAN of ${RAN}+1 ran; strings:rendered is the one that did not." >&2
+    echo "        Recorded in .forge/.rendered-deferred; the merge runs it on main" >&2
+    echo "        before this slice can be verified." >&2
     [ -d .forge ] && date +%s > "$STAMP" 2>/dev/null
     exit 0
   fi
