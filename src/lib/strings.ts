@@ -3725,7 +3725,8 @@ export const strings = {
     sentAt: (at: string) => `Sent at ${at}`,
     groupedInto: (count: number) => `Sent as one notification carrying ${count} items`,
     errorTitle: 'The reminder settings did not load',
-    errorBody: 'Reminders already scheduled are unaffected. Only this screen did not load.',
+    errorBody:
+      'Reminders already scheduled are unaffected. This screen is the one that did not load.',
     loadingLabel: 'Loading the reminder settings',
     offlineNote: 'These are the settings stored on this phone. Changing one needs the Mac mini.',
   },
@@ -3846,14 +3847,14 @@ export const strings = {
     calendarLabel: 'Calendar',
     calendarConnected: 'Google Calendar is connected',
     calendarConnectedBody:
-      'A session you accept here is written to the dedicated calendar only after you confirm the change, line by line, on the calendar screen. Nothing on this screen writes to it.',
+      'A session you accept here reaches the dedicated calendar once you have confirmed the change, line by line, on the calendar screen. Nothing on this screen writes to it.',
     calendarNotConnected: 'Google Calendar is not connected',
     calendarNotConnectedBody:
       'Once it is, the sessions you accept here are shown as a diff of exactly what would be created, moved and removed, and nothing is written until you confirm each line.',
     calendarConnect: 'Connect it in Settings',
 
     emailLabel: 'Email version',
-    emailChip: 'Preview only',
+    emailChip: 'Preview',
     emailPreviewBody:
       'The same summary is prepared as an email every Sunday at 20:00. No mail host is configured on this machine, so it stays in the local preview until one is.',
     emailConfigured: 'The mail relay is connected, so this summary is sent as well as shown here.',

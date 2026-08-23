@@ -128,6 +128,15 @@ const VERB = {
 export function buildMessage(input: MessageInput): string {
   const boundary = `vernier-${randomUUID()}`;
   const domain = input.from.split('@')[1] ?? 'localhost';
+  /*
+   * CRLF EVERYWHERE, INCLUDING INSIDE THE PARTS. The renderers join their own
+   * lines with a bare newline, because that is what a string of prose is, and a
+   * message carrying those is malformed on the wire whatever the headers say.
+   * `dotStuff` normalises again on the way out, and it is right to: a message
+   * that is only correct after one particular caller has touched it is a
+   * message that is wrong the first time anybody sends it another way.
+   */
+  const crlf = (value: string) => value.replace(/\r\n/g, '\n').replace(/\n/g, '\r\n');
   const lines = [
     `${HEADER.from}: ${input.from}`,
     `${HEADER.to}: ${input.to}`,
@@ -141,13 +150,13 @@ export function buildMessage(input: MessageInput): string {
     `${HEADER.contentType}: text/plain; charset=utf-8`,
     `${HEADER.encoding}: 8bit`,
     '',
-    input.text,
+    crlf(input.text),
     '',
     `--${boundary}`,
     `${HEADER.contentType}: text/html; charset=utf-8`,
     `${HEADER.encoding}: 8bit`,
     '',
-    input.html,
+    crlf(input.html),
     '',
     `--${boundary}--`,
     '',

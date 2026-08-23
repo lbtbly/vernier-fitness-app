@@ -1,5 +1,5 @@
-import { dayLabel, formatNumber, longDayLabel } from '@/lib/format';
-import { dayAfter } from '@/lib/local-time';
+import { dayLabel, formatNumber, longDate, longDayLabel } from '@/lib/format';
+import { dayAfter, localDayKey } from '@/lib/local-time';
 import { sleepLabel, sourceLabel } from '@/lib/display';
 import { strings } from '@/lib/strings';
 import {
@@ -227,7 +227,7 @@ function bodySection(facts: ReviewFacts): ReviewSection {
         label: strings.goal.label,
         value: `${formatNumber(facts.goal.targetValue, facts.goal.unit)} ${facts.goal.unit}`,
         absence: null,
-        note: goalNote(delta, facts.goal),
+        note: goalNote(delta, facts.goal, facts.timeZone),
         tone: 'neutral',
         noteTone: 'neutral',
       });
@@ -260,7 +260,14 @@ function bodySection(facts: ReviewFacts): ReviewSection {
     });
   }
 
-  const short = shortWindowNote(weightPresent, WEEK_DAYS);
+  /*
+   * The count sentence, but never over nothing. A week with no readings has
+   * already said "No reading this week" on the row itself, and adding "read
+   * from 0 days of 7" underneath it is a second way of saying absence where one
+   * was enough. The sentence exists for a figure that IS on the screen and was
+   * computed from a short window.
+   */
+  const short = weightPresent === 0 ? null : shortWindowNote(weightPresent, WEEK_DAYS);
   return {
     id: 'body',
     title: strings.review.sections.body,
@@ -276,9 +283,9 @@ function toneForChange(change: number, goal: Goal): 'neutral' | 'good' {
   return wantsDown === change < 0 ? 'good' : 'neutral';
 }
 
-function goalNote(delta: number, goal: Goal): string {
+function goalNote(delta: number, goal: Goal, timeZone: string): string {
   const target = formatNumber(goal.targetValue, goal.unit);
-  const when = longDayLabel(goal.targetAt.toISOString().slice(0, 10));
+  const when = longDayLabel(localDayKey(goal.targetAt, timeZone));
   if (Math.abs(delta) < ON_THE_LINE) return strings.goal.onTheLine(target, goal.unit, when);
   const size = formatNumber(Math.abs(delta), goal.unit);
   return delta < 0
@@ -324,7 +331,11 @@ function adherenceSection(facts: ReviewFacts): ReviewSection {
   ];
 
   for (const session of undone) {
-    const day = longDayLabel(session.plannedFor.toISOString().slice(0, 10));
+    // The weekday is on it, which is the shape DESIGN.md fixes for a date in a
+    // sentence, and it is read IN THE APP'S ZONE. A session at 00:30 Paris is
+    // the day before in UTC, and naming the wrong day for a session that did
+    // not happen is the one thing worse than not naming it.
+    const day = longDate(session.plannedFor, facts.timeZone);
     rows.push({
       id: `session-${session.id}`,
       label: session.title,
@@ -490,7 +501,7 @@ function wasHard(facts: ReviewFacts): string[] {
   const lines: string[] = [];
 
   for (const session of facts.sessions.filter((entry) => entry.state === 'missed')) {
-    const day = longDayLabel(session.plannedFor.toISOString().slice(0, 10));
+    const day = longDate(session.plannedFor, facts.timeZone);
     lines.push(
       session.cause.trim() === ''
         ? strings.review.wasHardSessionNoCause(day)
@@ -502,7 +513,9 @@ function wasHard(facts: ReviewFacts): string[] {
     lines.push(
       strings.review.wasHardStale(
         sourceLabel(stale.source),
-        stale.lastAt ? longDayLabel(stale.lastAt.toISOString().slice(0, 10)) : strings.review.noReading,
+        stale.lastAt
+          ? longDayLabel(localDayKey(stale.lastAt, facts.timeZone))
+          : strings.review.noReading,
       ),
     );
   }
@@ -573,7 +586,9 @@ function fixBanner(facts: ReviewFacts): { title: string; body: string } | null {
     title: strings.review.fixTitle,
     body: strings.review.fixStale(
       sourceLabel(worst.source),
-      worst.lastAt ? longDayLabel(worst.lastAt.toISOString().slice(0, 10)) : strings.review.noReading,
+      worst.lastAt
+        ? longDayLabel(localDayKey(worst.lastAt, facts.timeZone))
+        : strings.review.noReading,
     ),
   };
 }
