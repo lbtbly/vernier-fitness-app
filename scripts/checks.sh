@@ -47,6 +47,13 @@ else
 fi
 [ -n "$TREE" ] || TREE=${CLAUDE_PROJECT_DIR:-.}
 cd "$TREE" 2>/dev/null || exit 0
+# ABSOLUTE, before anything compares it. The fallback above can be ".", and a
+# "." tested against the primary tree's absolute path is not equal, so main
+# graded itself as a worktree and DEFERRED its own rendered check. That is this
+# run's failure class committed inside the fix for this run's failure class,
+# eight minutes after it was written. It was caught by running the gate both
+# ways rather than the one way that worked.
+TREE=$(pwd)
 [ -f package.json ] || exit 0
 PM=npm; [ -f pnpm-lock.yaml ] && PM=pnpm
 has() { python3 -c "import json;print('$1' in json.load(open('package.json')).get('scripts',{}))" 2>/dev/null | grep -q True; }

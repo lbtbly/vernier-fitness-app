@@ -25,21 +25,30 @@
     "sw:check": "node scripts/build-sw.mjs --check"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "0.120.0",
     "@simplewebauthn/browser": "13.3.0",
     "@simplewebauthn/server": "13.3.2",
+    "d3-scale": "4.0.2",
+    "d3-shape": "3.2.0",
     "drizzle-orm": "0.45.2",
     "next": "16.3.2",
+    "node-cron": "4.6.0",
     "pg": "8.23.0",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "unpdf": "1.8.1",
+    "web-push": "3.6.7"
   },
   "devDependencies": {
     "@eslint/eslintrc": "3.3.6",
     "@playwright/test": "1.62.1",
+    "@types/d3-scale": "4.0.9",
+    "@types/d3-shape": "3.2.0",
     "@types/node": "24.13.3",
     "@types/pg": "8.23.1",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.4",
+    "@types/web-push": "3.6.4",
     "drizzle-kit": "0.31.10",
     "eslint": "9.39.5",
     "eslint-config-next": "16.3.2",
