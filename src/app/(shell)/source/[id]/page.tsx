@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { SourceChip } from '@/components/SourceChip';
 import { ChevronIcon } from '@/components/icons';
+import { readEntryOfSourceRecord } from '@/db/meals';
 import { readMeasurementsOfSource, readSourceRecord, toView } from '@/db/measurements';
 import { getConfig } from '@/lib/config';
 import { metricLabel, sourceFieldLabel, sourceKindLabel, valueLabel } from '@/lib/display';
@@ -48,6 +49,16 @@ export default async function SourcePage({ params }: { params: Promise<{ id: str
 
   const rows = await readMeasurementsOfSource(record.id);
   const detail = (record.detail as Array<{ key: string; value: string }>) ?? [];
+  /*
+   * The photograph, on the record that carried it. Tap 2 of the walk F97
+   * measures lands here, and "reaches the photo and the model reply" means both
+   * are on this screen: the image above, the reply in the detail rows below.
+   *
+   * It is read from the meal entry rather than from the record, because the
+   * entry is what owns the file: a record with no entry behind it draws no
+   * image and says nothing, which is the same absence rule as everywhere else.
+   */
+  const entry = record.kind === 'model_reply' ? await readEntryOfSourceRecord(record.id) : undefined;
 
   return (
     <>
@@ -56,6 +67,13 @@ export default async function SourcePage({ params }: { params: Promise<{ id: str
         <h1>{sourceKindLabel(record.kind)}</h1>
         <p className="sub">{shortDateTime(record.occurredAt, timeZone)}</p>
       </header>
+
+      {entry?.photoId ? (
+        <div className="photo" data-photo="stored">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img alt={strings.meals.entryPhoto} src={`/api/meals/photo/${entry.photoId}`} />
+        </div>
+      ) : null}
 
       <section className="card">
         <div className="between">

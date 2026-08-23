@@ -1635,3 +1635,59 @@ html[data-theme=light]{--media-plate:#FFFFFF}
 .mediarow{display:flex;flex-direction:column;gap:2px;padding:10px 0;border-bottom:1px solid var(--line)}
 .mediarow:last-child{border-bottom:0}
 .mediarow .head{font-size:var(--t-body);line-height:var(--t-body-lh)}
+
+/* ---------- screen 09, the meal estimate ---------- */
+
+/*
+ * The photograph, at the geometry `09-meal-estimate.html` draws it: 200 px on
+ * the consent card, a rounded 14 px frame, the surface behind it so an empty
+ * frame is a frame and not a hole.
+ */
+.photo{
+  height:200px;
+  border-radius:14px;
+  background:var(--surface-2);
+  border:1px solid var(--line);
+  position:relative;
+  overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+}
+.photo img{width:100%;height:100%;object-fit:cover;display:block}
+.photo .ph{
+  display:flex;flex-direction:column;align-items:center;gap:var(--s2);
+  color:var(--text-3);font-size:var(--t-note);
+}
+.photo .ph svg{width:34px;height:34px}
+/* The size that will actually be sent, over the picture it describes. */
+.photo .tagline{
+  position:absolute;left:8px;bottom:8px;
+  background:rgba(0,0,0,.6);color:#F5F5F7;
+  border-radius:6px;padding:3px 7px;
+  font-size:11px;font-variant-numeric:tabular-nums;
+}
+
+/*
+ * The consent switch. 52 x 32 as the sheet draws it, inside a 44 px target,
+ * because DESIGN.md fixes the floor at 44 and a 32 px switch is under it.
+ */
+.switch{
+  width:52px;height:32px;min-width:52px;
+  border-radius:16px;
+  border:1px solid var(--line-2);
+  background:var(--surface-3);
+  position:relative;flex:none;cursor:pointer;padding:0;
+  margin:6px 0;
+  transition:background var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.switch[aria-checked=true]{background:var(--accent);border-color:var(--accent)}
+.switch .knob{
+  position:absolute;top:3px;left:3px;
+  width:24px;height:24px;border-radius:50%;
+  background:var(--text);
+  transition:transform var(--dur) var(--ease);
+}
+.switch[aria-checked=true] .knob{background:var(--accent-ink);transform:translateX(20px)}
+.switch:disabled{opacity:.5;cursor:default}
+@media (prefers-reduced-motion: reduce){
+  .switch,.switch .knob{transition:none}
+}

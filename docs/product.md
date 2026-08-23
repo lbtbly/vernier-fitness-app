@@ -125,5 +125,84 @@ the owner decides what to keep.
 
 ## Third-party terms
 
-Recorded here as slice 10 and slice 11 land. This section is a placeholder owned
-by those slices and R3 grades it; slice 7 does not write it.
+Written for slice 10, which is where the recipe box and the takeaway provider
+enter the product. Slice 11 adds the calendar to this section when it lands.
+
+Each claim below names the page that was consulted and the date it was read.
+Where a page refused an automated fetch, that is stated rather than papered
+over, because a terms position resting on a page nobody could open is not a
+position.
+
+### The recipe box, HelloFresh
+
+| Claim | Page consulted | Verified |
+|---|---|---|
+| No documented public or personal-use recipe API exists | HelloFresh terms of use, via the two secondary sources below; the terms page returned HTTP 403 to an automated fetch | 2026-08-21 |
+| Automated and bulk access is prohibited by the standard terms | `divisionby0.de/blog/2022-12-26--HelloFresh-RecipeDownloader`, `github.com/CNoetzel/HelloFresh-RecipeDownloader` | 2026-08-21 |
+
+**What Vernier does.** One artifact the owner already holds, parsed on this
+machine: a link he pastes, a PDF he downloaded from his own account, a
+photograph of his own recipe card, or ingredient lines he types. The four are
+implemented in `src/lib/recipe-box.ts` and read by `/api/meals/box`.
+
+**What Vernier does not do, and cannot.**
+
+- It stores no credential for the provider. There is no field, no column and no
+  encrypted blob: `integration_credential` holds Withings and Google, and
+  nothing in this repository writes a HelloFresh row to it.
+- It runs no crawler and no scheduled fetch. `node-cron` is used by slice 12 for
+  the Sunday review and by nothing else, and no scheduled job in this repository
+  names the provider.
+- **It does not fetch the pasted link either.** A link is read as a string: the
+  slug gives a candidate name and the URL is kept as the recipe's provenance.
+  Opening a socket to that host from a server is automated access, which is the
+  one thing the terms are unambiguous about, so this product does not do it and
+  the import screen says so.
+
+**The repository search that backs this.** `tests/unit/no-provider-access.test.ts`
+walks every file under `src/`, `scripts/` and `drizzle/`, prints the number of
+files it read, and fails if any of them names the provider's hostname outside a
+comment, or names it anywhere near a scheduler, a credential store or a fetch.
+It also fails if the search population is empty, because a clean walk over
+nothing reads exactly like a clean walk over everything.
+
+### The takeaway provider, Uber Eats
+
+| Claim | Page consulted | Verified |
+|---|---|---|
+| No public consumer API. The Marketplace and Direct APIs are partner-only, and scraping and bulk collection are prohibited | `uber.com/legal/en/document/?name=uber-eats-api-terms-of-use` | 2026-08-21 |
+| No documented deep-link format for the food product. Uber's deep-linking documentation covers Rides only | `developer.uber.com/docs/deep-linking` | 2026-08-21 |
+
+**What Vernier does.** It proposes two meals a week as DISH TYPES, chosen from
+eight this product authored, filtered by the owner's four dietary rules through
+the same `applyDietaryRules` the weekly menu uses, and ordered by how close each
+one sits to the energy the day leaves for that meal. The link opens the
+provider's own search page with the dish words in the query.
+
+**What Vernier does not do, and cannot.**
+
+- It constructs no item-level link, no restaurant link and no store identifier,
+  because no format for any of them is documented. The check constraint
+  `takeaway_proposal_link_is_a_search` in the migration refuses to store a URL
+  that is not a search page, so this is a property of the database and not of a
+  handler.
+- It stores no menu item, no price and no restaurant. There is no column for any
+  of them on `takeaway_proposal` or anywhere else in `src/db/schema.ts`.
+- Every energy figure it shows is computed from ANSES CIQUAL rows for the dish
+  type's own ingredients and is badged as an estimate. Where the rows are not
+  there it renders "unknown". No nutrition figure is ever taken from a menu,
+  because no menu is ever read.
+
+### Anthropic
+
+Not a scraping question, a data-minimisation one, and it is answered on the
+screen rather than here: `/settings/ai` names the four categories, what each one
+sends, and what each one never sends. With a category switched off no request is
+made for it at all, which `tests/unit/ai-consent.test.ts` proves by asserting an
+empty request log rather than a disabled control.
+
+A photograph is downscaled to 1092 px and re-encoded through a canvas on the
+phone before any request exists, which removes camera data and location by
+producing new pixels rather than by editing a metadata format. The server
+refuses a photograph that still carries either, and strips every remaining
+metadata segment before writing to the volume, so the stored file carries none.

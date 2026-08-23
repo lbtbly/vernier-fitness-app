@@ -1664,3 +1664,277 @@ export const readinessCheck = pgTable(
   },
   (table) => [index('readiness_check_answered').on(table.answeredAt)],
 );
+
+/**
+ * The four switches, in one row that always exists.
+ *
+ * F94's independence is four columns rather than one mode, because that is what
+ * independence means at the storage layer: there is no value of this row that
+ * turns two of them on together, and no code path that reads one and infers
+ * another. `consentOf` in src/lib/ai/consent.ts is the only reader and it maps
+ * a missing row to four falses, so an installation that has never opened the
+ * consent screen sends nothing.
+ */
+export const aiConsent = pgTable(
+  'ai_consent',
+  {
+    id: text('id').primaryKey(),
+    singleton: boolean('singleton').notNull().default(true),
+    photoAnalysis: boolean('photo_analysis').notNull().default(false),
+    menuGeneration: boolean('menu_generation').notNull().default(false),
+    healthExplanations: boolean('health_explanations').notNull().default(false),
+    calendarTitles: boolean('calendar_titles').notNull().default(false),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [uniqueIndex('ai_consent_singleton').on(table.singleton)],
+);
+
+/**
+ * One call to a model, and what came back.
+ *
+ * IT IS A HOLDING AND NOT A MEAL. `lab_document` next door is the precedent and
+ * the reasoning is identical: the reply has to be kept because it was paid for
+ * and because F97 asks the entry to reach it months later, and nothing about
+ * the owner's day is stored until he confirms. A row here is a record of a call
+ * that was made. It is not a meal, it is not energy eaten, it appears in no day
+ * total, and abandoning the estimate screen leaves it as the only trace, which
+ * is the honest one: the money was spent.
+ *
+ * `reply` is the text exactly as it arrived, unparsed. What the screen showed
+ * is derived from it and can be derived again, which is what makes the two-tap
+ * walk in F97 a walk to the model's own words rather than to this product's
+ * summary of them.
+ */
+export const aiCall = pgTable(
+  'ai_call',
+  {
+    id: text('id').primaryKey(),
+    /** One of the four consent categories. The switch that allowed it. */
+    purpose: text('purpose').notNull(),
+    /** 'demo' or 'live'. A demonstration reply is never read as a measurement. */
+    mode: text('mode').notNull(),
+    model: text('model').notNull(),
+    /** The photograph this call was about, when there was one. */
+    photoId: text('photo_id'),
+    /** What was sent, as lines a person can read: the system text and the question. */
+    request: jsonb('request').notNull(),
+    reply: text('reply').notNull(),
+    inputTokens: integer('input_tokens').notNull(),
+    outputTokens: integer('output_tokens').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index('ai_call_created').on(table.createdAt), index('ai_call_purpose').on(table.purpose)],
+);
+
+/**
+ * What each call cost, and what the ceiling is checked against.
+ *
+ * F98 says the usage rows are written IN THE SAME TRANSACTION as the result,
+ * and `writeCallAndLedger` in src/db/ai.ts is the only writer of either table:
+ * both inserts happen inside one `db.transaction`, so a reply that was received
+ * and a cost that was recorded cannot come apart. The failure that matters is
+ * the quiet one, where the reply is used, the ledger write fails, and the month
+ * under-reports every call it dropped.
+ *
+ * A REFUSED CALL IS A ROW TOO. `outcome` is 'charged' or
+ * 'refused_over_ceiling'. Without the second, a month in which the ceiling
+ * stopped six calls reads exactly like a month in which nobody tried, and the
+ * operator has no way to see the ceiling working.
+ */
+export const usageLedger = pgTable(
+  'usage_ledger',
+  {
+    id: text('id').primaryKey(),
+    /** "2026-08", in the app's own zone, which is what a month means here. */
+    monthKey: text('month_key').notNull(),
+    purpose: text('purpose').notNull(),
+    mode: text('mode').notNull(),
+    model: text('model').notNull(),
+    inputTokens: integer('input_tokens').notNull(),
+    outputTokens: integer('output_tokens').notNull(),
+    /**
+     * US dollars, at the rates configured when the call was made.
+     *
+     * Stored rather than derived, because a rate table is configuration and
+     * configuration changes: recomputing August at September's prices would
+     * rewrite a month that has already been invoiced.
+     */
+    costUsd: doublePrecision('cost_usd').notNull(),
+    outcome: text('outcome').notNull(),
+    callId: text('call_id').references(() => aiCall.id),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('usage_ledger_month').on(table.monthKey, table.createdAt),
+    index('usage_ledger_call').on(table.callId),
+  ],
+);
+
+/**
+ * One meal the owner actually ate, with its origin attached forever.
+ *
+ * THIS IS THE ROW F97 IS ABOUT. It carries `origin`, `confidence` and
+ * `sourceRecordId`, and 10-meals.sql refuses UPDATE and DELETE on the table
+ * outright, exactly as 0003 does for `measurement`. So a correction is an
+ * insert into the same chain or it does not happen, and a trigger refuses an
+ * insert whose corrects_id points at a row with a different origin or a
+ * different confidence. After three edits the entry still says estimate
+ * because there is no code path, present or future, that could make it say
+ * anything else.
+ *
+ * `source` is one of the same six the provenance spine uses and `confidence` is
+ * one of the same seven, which is amendment A3 implemented rather than
+ * paraphrased: a photo estimate the owner confirmed came from the owner, the
+ * model's involvement is a confidence and a record, and the six-source list did
+ * not need a seventh member.
+ *
+ * `kcalLow` and `kcalHigh` sit beside `kcal` because the range does not go away
+ * when the midpoint is stored. Screen 09 frame 3 draws both: "750 kcal, range
+ * 680 to 820".
+ */
+export const mealEntry = pgTable(
+  'meal_entry',
+  {
+    id: text('id').primaryKey(),
+    /** When it was eaten. Null on a frozen portion, which has not been. */
+    eatenAt: timestamp('eaten_at', { withTimezone: true }),
+    timeZone: text('time_zone').notNull(),
+    slot: text('slot').notNull(),
+    /** 'photo_estimate', 'typed', 'recipe_box' or 'planned'. */
+    origin: text('origin').notNull(),
+    /** 'eaten' or 'frozen'. A frozen portion is a row, not a deletion. */
+    state: text('state').notNull().default('eaten'),
+    source: text('source').notNull(),
+    confidence: text('confidence').notNull(),
+    kcal: doublePrecision('kcal'),
+    kcalLow: doublePrecision('kcal_low'),
+    kcalHigh: doublePrecision('kcal_high'),
+    proteinG: doublePrecision('protein_g'),
+    carbG: doublePrecision('carb_g'),
+    fatG: doublePrecision('fat_g'),
+    fibreG: doublePrecision('fibre_g'),
+    /** How many model items matched no food row. Counted, never quietly dropped. */
+    unresolvedCount: integer('unresolved_count').notNull().default(0),
+    coveragePct: doublePrecision('coverage_pct'),
+    recipeId: text('recipe_id').references(() => recipe.id),
+    photoId: text('photo_id'),
+    aiCallId: text('ai_call_id').references(() => aiCall.id),
+    sourceRecordId: text('source_record_id')
+      .notNull()
+      .references(() => sourceRecord.id),
+    importVersion: text('import_version').notNull(),
+    rootId: text('root_id').notNull(),
+    correctsId: text('corrects_id'),
+    correctionIndex: integer('correction_index').notNull().default(0),
+    correctionReason: text('correction_reason'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('meal_entry_eaten').on(table.eatenAt),
+    index('meal_entry_root').on(table.rootId, table.correctionIndex),
+    index('meal_entry_origin').on(table.origin),
+  ],
+);
+
+/**
+ * One line on one plate, as a range in grams.
+ *
+ * `gramsLow` and `gramsHigh` are the whole point and there is no `grams`
+ * column: a portion read off a photograph is an interval, and a schema with a
+ * single number in it is a schema that will have a bare point rendered from it
+ * eventually. `exactGrams` is set only when the owner weighed the thing, and
+ * that line stops being an estimate while the rest of the plate stays one.
+ *
+ * `aliasId` is not null on purpose. A model item that matched nothing in the
+ * alias list is counted on the entry and its words are on the source record; it
+ * never becomes a line with an invented identity.
+ */
+export const mealEntryItem = pgTable(
+  'meal_entry_item',
+  {
+    id: text('id').primaryKey(),
+    entryId: text('entry_id')
+      .notNull()
+      .references(() => mealEntry.id),
+    aliasId: text('alias_id').notNull(),
+    foodId: text('food_id').references(() => food.id),
+    gramsLow: doublePrecision('grams_low').notNull(),
+    gramsHigh: doublePrecision('grams_high').notNull(),
+    exactGrams: doublePrecision('exact_grams'),
+    /** 'photo', 'named_portion' or 'weighed'. What fixed the width of the band. */
+    evidence: text('evidence').notNull(),
+    position: integer('position').notNull(),
+  },
+  (table) => [index('meal_entry_item_entry').on(table.entryId, table.position)],
+);
+
+/**
+ * A recipe that arrived in a box, and the answer to the question its second
+ * portion asks.
+ *
+ * THE ANSWER IS STORED PER RECIPE, WHICH IS F90 IN ONE COLUMN. Two recipes of
+ * two portions produce four meals and two questions, and the answers are
+ * independent: tomorrow's lunch for one and the freezer for the other is a
+ * normal week and the schema has to be able to say it.
+ *
+ * `artifactKind` records which of the four lawful imports this came from: a
+ * link the owner pasted, a document he downloaded, a photograph of his own
+ * card, or lines he typed. There is no fifth kind and there is no credential
+ * column, because there is nothing to sign in to.
+ */
+export const recipeBoxItem = pgTable(
+  'recipe_box_item',
+  {
+    id: text('id').primaryKey(),
+    recipeId: text('recipe_id')
+      .notNull()
+      .references(() => recipe.id),
+    weekStart: timestamp('week_start', { withTimezone: true }).notNull(),
+    portions: integer('portions').notNull().default(2),
+    artifactKind: text('artifact_kind').notNull(),
+    /** 'next_day', 'moved' or 'frozen'. Null until the owner answers. */
+    secondPortionAnswer: text('second_portion_answer'),
+    answeredAt: timestamp('answered_at', { withTimezone: true }),
+    sourceRecordId: text('source_record_id')
+      .notNull()
+      .references(() => sourceRecord.id),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('recipe_box_item_week').on(table.weekStart),
+    unique('recipe_box_item_recipe_week').on(table.recipeId, table.weekStart),
+  ],
+);
+
+/**
+ * A takeaway slot: a KIND OF DISH, a search URL, and nothing else.
+ *
+ * WHAT IS NOT HERE IS THE POINT. No restaurant, no menu item, no price, no
+ * item identifier and no deep link, because none of those can be obtained
+ * lawfully: the provider has no public consumer API, no documented deep-link
+ * format, and terms that prohibit scraping. `dishId` is a token this product
+ * authored and its name is copy in the catalogue. `searchUrl` is the provider's
+ * own search page with the dish words in the query, which is a link any browser
+ * could be typed into.
+ *
+ * The energy band is computed from Anses rows for the alias set behind the dish
+ * type, badged as an estimate, and null when the rows are not there. It is
+ * never a figure taken from a menu, because no menu was read.
+ */
+export const takeawayProposal = pgTable(
+  'takeaway_proposal',
+  {
+    id: text('id').primaryKey(),
+    weekStart: timestamp('week_start', { withTimezone: true }).notNull(),
+    position: integer('position').notNull(),
+    dishId: text('dish_id').notNull(),
+    searchUrl: text('search_url').notNull(),
+    kcalLow: doublePrecision('kcal_low'),
+    kcalHigh: doublePrecision('kcal_high'),
+    /** The kcal the day leaves for this meal, which is what it was chosen against. */
+    budgetKcal: integer('budget_kcal'),
+    state: text('state').notNull().default('proposed'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [unique('takeaway_proposal_slot').on(table.weekStart, table.position)],
+);

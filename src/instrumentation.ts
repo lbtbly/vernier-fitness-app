@@ -26,6 +26,44 @@ export async function register(): Promise<void> {
     return;
   }
 
+  /*
+   * The model identifier, validated once, here, against the Models API. F98.
+   *
+   * It sits beside the master key rather than beside the seeds because it is
+   * the same kind of fact: something that has to be true before this app serves
+   * a screen. A retired snapshot found at 02:00 by a scheduled job is a silent
+   * outage. Found here it is a container that will not start, with the
+   * identifier it read printed in the log.
+   *
+   * In demonstration mode nothing is called and the log says so. Claiming to
+   * have validated a model against an API this installation never reaches would
+   * be the failure class this run keeps finding.
+   */
+  try {
+    const { readAiSettings } = await import('./lib/ai/mode');
+    const { validateModel } = await import('./lib/ai/model-check');
+    const settings = readAiSettings();
+    const transport =
+      settings.mode === 'demo'
+        ? (await import('./lib/ai/demo')).demoAiTransport()
+        : (await import('./lib/ai/transport')).networkAiTransport(settings.apiKey);
+    const verdict = await validateModel(settings, transport);
+    if (!verdict.ok) {
+      console.error(`[vernier] refusing to start: ${verdict.message}`);
+      host.exit?.(1);
+      return;
+    }
+    console.log(
+      verdict.checked
+        ? `[vernier] anthropic: live, model ${verdict.model} confirmed by the Models API`
+        : '[vernier] anthropic: demonstration, no key, no call, model not checked',
+    );
+  } catch (error) {
+    console.error(`[vernier] refusing to start: ${(error as Error).message}`);
+    host.exit?.(1);
+    return;
+  }
+
   if (process.env.SKIP_MIGRATIONS === '1') {
     console.log('[vernier] migrations: skipped, SKIP_MIGRATIONS=1');
     return;

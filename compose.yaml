@@ -63,6 +63,21 @@ services:
       WITHINGS_CLIENT_ID: ${WITHINGS_CLIENT_ID:-}
       WITHINGS_CLIENT_SECRET: ${WITHINGS_CLIENT_SECRET:-}
       WITHINGS_REDIRECT_URI: ${WITHINGS_REDIRECT_URI:-}
+      # Anthropic, the only metered cost in this build. The key reaches the
+      # container from the environment file and nowhere else: the last line of
+      # .forge/PREFLIGHT.md reads it back with printenv inside the container,
+      # and it could not have passed before this block existed.
+      #
+      # With no key the app runs the whole photo flow against the demonstration
+      # path. With no rate table a LIVE call is refused rather than made,
+      # because a ceiling that cannot price a call is not a ceiling.
+      ANTHROPIC_MODE: ${ANTHROPIC_MODE:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-}
+      ANTHROPIC_MONTHLY_CAP_USD: ${ANTHROPIC_MONTHLY_CAP_USD:-10}
+      ANTHROPIC_INPUT_USD_PER_MTOK: ${ANTHROPIC_INPUT_USD_PER_MTOK:-}
+      ANTHROPIC_OUTPUT_USD_PER_MTOK: ${ANTHROPIC_OUTPUT_USD_PER_MTOK:-}
+      ANTHROPIC_MAX_OUTPUT_TOKENS: ${ANTHROPIC_MAX_OUTPUT_TOKENS:-1024}
       # The connection string is assembled here so the app never needs to know
       # how the parts are stored.
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}

@@ -1,10 +1,15 @@
 import Link from 'next/link';
+import { BoxWeek, type BoxRecipe } from '@/components/BoxWeek';
 import { EmptyState } from '@/components/EmptyState';
 import { MacroLine } from '@/components/Macros';
 import { MealWeek, type DayCard, type MealCard } from '@/components/MealWeek';
 import { OfflineBanner } from '@/components/Queue';
 import { ScreenTitle } from '@/components/ScreenTitle';
+import { SourceChip } from '@/components/SourceChip';
+import { TakeawaySlots } from '@/components/TakeawaySlots';
 import { InfoIcon, WarnIcon } from '@/components/icons';
+import { readBoxItems, readProposals } from '@/db/box';
+import { readDayEntries } from '@/db/meals';
 import {
   DEFAULT_MAX_COOK_MINUTES,
   nextWeekStart,
@@ -18,8 +23,10 @@ import { getConfig } from '@/lib/config';
 import { readCsrfToken } from '@/lib/csrf';
 import type { RuleSet } from '@/lib/dietary-rules';
 import { aliasById } from '@/lib/food-aliases';
-import { daysBetween, longDate, shortDate } from '@/lib/format';
-import type { MacroSet } from '@/lib/macros';
+import { daysBetween, longDate, shortDate, time24 } from '@/lib/format';
+import { energyText, type MacroSet } from '@/lib/macros';
+import { dishName } from '@/lib/takeaway';
+import type { SecondPortionAnswer } from '@/lib/recipe-box';
 import { DAYS_IN_WEEK } from '@/lib/menu-week';
 import { strings } from '@/lib/strings';
 
@@ -47,6 +54,24 @@ const STALE_AFTER_DAYS = 2;
  * equation, the level and the band, and links to the screen that sets them.
  */
 
+/**
+ * The energy eaten today, or unknown.
+ *
+ * A null does not sum to zero here any more than it does on a meal row: a day
+ * holding one entry whose energy the food table cannot give is a day whose
+ * total is unknown, and printing the rest of it as if it were the whole would
+ * be the smoothing this product refuses. `addMacros` applies the same rule one
+ * level up.
+ */
+function eatenKcal(entries: { kcal: number | null }[]): number | null {
+  let total = 0;
+  for (const entry of entries) {
+    if (entry.kcal === null) return null;
+    total += entry.kcal;
+  }
+  return total;
+}
+
 /** The four rules, summarised over the week that was actually generated. */
 function ruleSentences(rules: RuleSet, lactoseFreeDays: number, preferredDays: number): string[] {
   const parts: string[] = [];
@@ -69,12 +94,19 @@ export default async function EatPage() {
   const weekStart = nextWeekStart(now, timeZone);
   const weekEnd = new Date(weekStart.getTime() + (DAYS_IN_WEEK - 1) * 86_400_000);
 
-  const [plan, target, rules, questions] = await Promise.all([
+  const [plan, target, rules, questions, eaten, boxItems, proposals, recipes] = await Promise.all([
     readPlan(weekStart),
     readTarget(),
     readRules(),
     readOpenQuestions(),
+    // What was actually eaten today, which is what screen 09 frame 3 draws at
+    // the top of this tab: the day, then the week under it.
+    readDayEntries(now, timeZone),
+    readBoxItems(weekStart),
+    readProposals(weekStart),
+    readRecipes(),
   ]);
+  const recipeById = new Map(recipes.map((view) => [view.id, view]));
 
   const rangeLabel = strings.nutrition.weekRange(
     shortDate(weekStart, timeZone),
@@ -147,6 +179,60 @@ export default async function EatPage() {
           actionHref="/eat/targets"
         />
       )}
+      <section className="card" data-card="today">
+        <div className="between" style={{ marginBottom: 'var(--s2)' }}>
+          <span className="lbl">{strings.meals.todayLabel}</span>
+          <span className="num sub" data-day-eaten="true">
+            {target
+              ? strings.meals.dayTotal(
+                  energyText(eatenKcal(eaten), 'estimated'),
+                  new Intl.NumberFormat('en-GB').format(target.kcalTarget),
+                )
+              : strings.meals.dayTotalNoTarget(energyText(eatenKcal(eaten), 'estimated'))}
+          </span>
+        </div>
+        {eaten.length === 0 ? (
+          <p className="sub" data-state="empty">
+            {strings.meals.dayEmptyBody}
+          </p>
+        ) : (
+          eaten.map((entry) => (
+            <Link
+              className="row value-link"
+              key={entry.id}
+              href={`/eat/entry/${entry.id}`}
+              data-entry={entry.id}
+              aria-label={strings.meals.openEntry(
+                strings.nutrition.slots[entry.slot as 'breakfast' | 'lunch' | 'dinner' | 'snack'],
+              )}
+            >
+              <span className="stack grow">
+                <span className="head">
+                  {strings.nutrition.slots[entry.slot as 'breakfast' | 'lunch' | 'dinner' | 'snack']}
+                </span>
+                <span className="note num">
+                  {strings.meals.entryLine(
+                    [
+                      entry.eatenAt ? time24(entry.eatenAt, timeZone) : '',
+                      `${energyText(entry.kcal, entry.confidence === 'estimated' ? 'estimated' : 'computed')} ${strings.units.kcal}`,
+                      entry.kcalLow !== null && entry.kcalHigh !== null
+                        ? strings.meals.entryRange(String(entry.kcalLow), String(entry.kcalHigh))
+                        : '',
+                    ].filter((part) => part !== ''),
+                  )}
+                </span>
+              </span>
+              <SourceChip source={entry.source} confidence={entry.confidence} />
+            </Link>
+          ))
+        )}
+        <div className="actions">
+          <Link className="btn primary block" href="/eat/estimate">
+            {strings.meals.photographMeal}
+          </Link>
+        </div>
+      </section>
+
       {questions.length > 0 ? (
         <div className="banner w" data-state="question">
           <WarnIcon />
@@ -167,10 +253,31 @@ export default async function EatPage() {
     </p>
   );
 
+  const boxRecipes: BoxRecipe[] = boxItems.map((item) => ({
+    recipeId: item.recipeId,
+    name: recipeById.get(item.recipeId)?.name ?? item.recipeId,
+    portions: item.portions,
+    answer: (item.secondPortionAnswer as SecondPortionAnswer | null) ?? null,
+  }));
+
+  const boxCard =
+    boxRecipes.length === 0 ? (
+      <EmptyState
+        label={strings.meals.boxTitle}
+        title={strings.meals.boxEmptyTitle}
+        body={strings.meals.boxEmptyBody}
+        actionLabel={strings.meals.boxImport}
+        actionHref="/eat/import"
+      />
+    ) : (
+      <BoxWeek recipes={boxRecipes} placedMeals={boxRecipes.length * 2} csrfToken={csrfToken} />
+    );
+
   if (!plan) {
     return (
       <>
         {header}
+        {boxCard}
         <EmptyState
           label={strings.tabs.eat}
           title={strings.nutrition.weekEmptyTitle}
@@ -197,12 +304,7 @@ export default async function EatPage() {
   const planAgeDays = daysBetween(plan.generatedAt, now, timeZone);
   const stale = planAgeDays >= STALE_AFTER_DAYS;
 
-  const [meals, recipes, snapshots] = await Promise.all([
-    readPlanMeals(plan.id),
-    readRecipes(),
-    readCurrentSnapshots(),
-  ]);
-  const recipeById = new Map(recipes.map((view) => [view.id, view]));
+  const [meals, snapshots] = await Promise.all([readPlanMeals(plan.id), readCurrentSnapshots()]);
   const snapshotById = new Map([...snapshots.values()].map((row) => [row.id, row]));
 
   const cards: MealCard[] = meals.map((meal) => {
@@ -286,6 +388,19 @@ export default async function EatPage() {
         csrfToken={csrfToken}
         maxCookMinutes={plan.maxCookMinutes ?? DEFAULT_MAX_COOK_MINUTES}
         confirmed={plan.state === 'confirmed'}
+      />
+      {boxCard}
+      <TakeawaySlots
+        slots={proposals.map((row) => ({
+          position: row.position,
+          dishId: row.dishId,
+          dishName: dishName(row.dishId),
+          searchUrl: row.searchUrl,
+          energy: row.kcalLow !== null && row.kcalHigh !== null ? { low: row.kcalLow, high: row.kcalHigh } : null,
+          budgetKcal: row.budgetKcal,
+        }))}
+        csrfToken={csrfToken}
+        canPropose={target !== null}
       />
       {footer}
     </>

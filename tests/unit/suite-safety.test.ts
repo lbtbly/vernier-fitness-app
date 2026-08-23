@@ -459,6 +459,33 @@ describe('the suite against the owner\'s installation', () => {
    *                           row printed beside it. The zero IS the claim: the
    *                           card counted the seed's ninety rows as readings
    *                           the scale delivered.
+   *   Slice 10 added one file and every member of the class in it was read
+   *   against the same question before it was written down here.
+   *
+   *   meals:209               REAL. `ai_call` at zero, on an instance where the
+   *                           same test has just posted a real photograph at the
+   *                           real endpoint and read back a 403. The table is
+   *                           written by every call that succeeds, and the next
+   *                           test in the file proves it non-zero, so an empty
+   *                           table here is a refusal and not an absent feature.
+   *   meals:274,275           REAL, and they are the point of F93. The subject
+   *                           is a file the same run put GPS into: the bytes
+   *                           going in are scanned first and asserted to CARRY
+   *                           a location, printed with their marker list, and
+   *                           only then is the stored file asserted to carry
+   *                           none. A scanner that found nothing at all fails
+   *                           twenty lines earlier.
+   *   meals:320               REAL. `meal_entry_item` after an estimate was
+   *                           abandoned, and the run prints the entry count
+   *                           before and after beside the `ai_call` count,
+   *                           which is asserted GREATER than zero on the same
+   *                           line. The screen that would have written those
+   *                           rows was rendered and walked.
+   *   meals:576               REAL. Refused ledger rows that carry a cost or an
+   *                           output token, on a table the same test prints in
+   *                           full and asserts contains a refusal. The subject
+   *                           is a filter over a population that is proven
+   *                           non-empty two lines above.
    */
   it('lets no assertion claim a zero over a population the surface cannot render', () => {
     // The one that was hollow. It is gone from /health and present on Today.
@@ -487,6 +514,7 @@ describe('the suite against the owner\'s installation', () => {
       ['session-player.spec.ts', 3],
       ['train-week.spec.ts', 4],
       ['settings-integrations.spec.ts', 1],
+      ['meals.spec.ts', 4],
     ]);
     // `toHaveCount(0, { timeout: 3_000 })` was invisible to this pattern until
     // slice 5 wrote one: the closing paren was required right after the zero, so
