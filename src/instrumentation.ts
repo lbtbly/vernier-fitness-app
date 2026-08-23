@@ -43,6 +43,44 @@ export async function register(): Promise<void> {
     return;
   }
 
+  // The food table and the recipe catalogue, which are reference data and not a
+  // demonstration of anything: the product cannot plan a meal without them, so
+  // they load on every boot and are not gated on DEMO_MODE.
+  //
+  // Both are idempotent by conflict, so the second boot writes nothing and no
+  // timestamp moves. Neither touches the network: drizzle/seed/foods.csv is
+  // committed and copied into the image beside the migrations, which is the
+  // whole reason a composition table is bundled rather than called.
+  //
+  // The snapshot refresh at the end never overwrites a stored figure. It
+  // compares each snapshot's source hash against the rows behind it and OPENS A
+  // QUESTION when they differ, which is F87's last clause and the quiet half of
+  // the unapproved-write risk: a recipe silently serving last month's macros is
+  // a wrong number nobody knows to look for.
+  try {
+    const { seedFoodTable } = await import('./db/foods');
+    const foods = await seedFoodTable();
+    console.log(
+      `[vernier] food table: ${foods.written} new row(s) from ${foods.read} read, ${foods.total} total`,
+    );
+
+    const { seedRecipeCatalogue, ensureAllSnapshots, refreshSnapshots } = await import('./db/recipes');
+    const catalogue = await seedRecipeCatalogue();
+    const snapshots = await ensureAllSnapshots();
+    const refreshed = await refreshSnapshots();
+    console.log(
+      `[vernier] recipes: ${catalogue.written} new of ${catalogue.recipes}, ` +
+        `${snapshots.written} snapshot(s) computed, ` +
+        `${refreshed.walked} walked and ${refreshed.questions} question(s) raised`,
+    );
+
+    const { seedDietaryRules } = await import('./db/nutrition');
+    const rules = await seedDietaryRules();
+    console.log(`[vernier] dietary rules: ${rules} new`);
+  } catch (error) {
+    console.error(`[vernier] nutrition seed did not run: ${(error as Error).message}`);
+  }
+
   // The demonstration seed, which loads only under DEMO_MODE=1 and refuses out
   // loud otherwise. It sits here, one line after the migration count, because
   // both facts belong in the same boot log: what the schema did and what the

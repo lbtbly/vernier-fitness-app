@@ -360,3 +360,35 @@ export function ShieldIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+/** The recipe box, on a line the box supplies. Chrome, never a colour. */
+export function BoxIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} aria-hidden="true" focusable="false">
+      <path
+        d="M2.6 6.4 10 3l7.4 3.4v7.2L10 17l-7.4-3.4z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      <path d="M2.6 6.4 10 9.8l7.4-3.4M10 9.8V17" fill="none" stroke="currentColor" strokeWidth="1.3" />
+    </svg>
+  );
+}
+
+/** The cupboard, on a line already in stock. */
+export function HomeIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} aria-hidden="true" focusable="false">
+      <path
+        d="M3.2 8.6 10 3.4l6.8 5.2V16a1 1 0 0 1-1 1H4.2a1 1 0 0 1-1-1z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      <path d="M8 17v-4.4h4V17" fill="none" stroke="currentColor" strokeWidth="1.4" />
+    </svg>
+  );
+}
