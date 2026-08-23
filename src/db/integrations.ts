@@ -1,6 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { getDb } from './client';
 import { integrationCredential } from './schema';
+import { WITHINGS_PROVIDER, readConnection } from './withings';
 import { openSecret, sealSecret } from '@/lib/master-key';
 import { strings } from '@/lib/strings';
 
@@ -55,6 +56,33 @@ export function isIntegrationProvider(value: string): value is IntegrationProvid
  */
 export type IntegrationState = 'connected' | 'disconnected' | 'error';
 
+/**
+ * THE LAST SUCCESSFUL SYNC HAS ONE SOURCE, AND FOR WITHINGS IT IS NOT THIS
+ * TABLE.
+ *
+ * The settings screen gave two answers to the one fact F42 names: the Withings
+ * card read "Last successful sync 23 Aug, 14:01" off `withings_connection`,
+ * where the importer writes it after a commit resolves, while the list on the
+ * same screen read `integration_credential.last_successful_sync_at`, which
+ * `markIntegrationSynced` only ever fills for the ingest provider and which is
+ * null on an installation with no credential row at all. Two columns, one fact,
+ * and the screen printed both.
+ *
+ * So the read is per provider, here, once. Withings keeps its own connection
+ * row and that row is the truth about it; everything else keeps the timestamp
+ * on its credential. Adding a provider with a state machine of its own means
+ * adding a line to this function rather than discovering the contradiction on a
+ * screen months later.
+ */
+export function lastSyncOf(
+  provider: string,
+  credential: { lastSuccessfulSyncAt: Date | null } | undefined,
+  withings: { lastSuccessfulSyncAt: Date | null } | null,
+): string | null {
+  if (provider === WITHINGS_PROVIDER) return withings?.lastSuccessfulSyncAt?.toISOString() ?? null;
+  return credential?.lastSuccessfulSyncAt?.toISOString() ?? null;
+}
+
 /** Exactly what the settings screen is allowed to know. No ciphertext, no length, no shape. */
 export type IntegrationView = {
   provider: string;
@@ -70,6 +98,7 @@ export async function describeIntegrations(): Promise<IntegrationView[]> {
   const db = getDb();
   const rows = await db.select().from(integrationCredential);
   const byProvider = new Map(rows.map((row) => [row.provider, row]));
+  const withings = await readConnection();
 
   return INTEGRATIONS.map((integration) => {
     const row = byProvider.get(integration.provider);
@@ -81,7 +110,7 @@ export async function describeIntegrations(): Promise<IntegrationView[]> {
       purpose: integration.purpose,
       scope: row?.scope ?? integration.scope,
       state,
-      lastSuccessfulSyncAt: row?.lastSuccessfulSyncAt?.toISOString() ?? null,
+      lastSuccessfulSyncAt: lastSyncOf(integration.provider, row, withings),
       lastError: row?.lastError ?? null,
     };
   });

@@ -6,6 +6,7 @@ import { FaceIcon, InfoIcon, WarnIcon } from '@/components/icons';
 import type { IntegrationView } from '@/db/integrations';
 import { CSRF_HEADER } from '@/lib/cookie-names';
 import { integrationStateLabel, sessionMethodLabel } from '@/lib/display';
+import { shortDateTime } from '@/lib/format';
 import { strings } from '@/lib/strings';
 
 /**
@@ -22,6 +23,15 @@ type Props = {
   method: string;
   expiresAt: string;
   csrfToken: string;
+  /**
+   * The installation's zone, because this list prints an instant.
+   *
+   * It carried the ISO string straight out of the view, which read as a
+   * timestamp and not as a time. It was invisible while the column it read was
+   * always null; the moment that column started answering, the screen would
+   * have printed 2026-08-23T12:01:30.000Z beside a card reading 23 Aug, 14:01.
+   */
+  timeZone: string;
 };
 
 export function OperatorPanel(props: Props) {
@@ -140,7 +150,9 @@ export function OperatorPanel(props: Props) {
               </div>
               <div className="note">
                 {strings.settings.lastSyncLabel}:{' '}
-                {integration.lastSuccessfulSyncAt ?? strings.settings.neverSynced}
+                {integration.lastSuccessfulSyncAt
+                  ? shortDateTime(new Date(integration.lastSuccessfulSyncAt), props.timeZone)
+                  : strings.settings.neverSynced}
               </div>
             </div>
             <div className="stack" style={{ alignItems: 'flex-end', gap: 'var(--s2)' }}>
