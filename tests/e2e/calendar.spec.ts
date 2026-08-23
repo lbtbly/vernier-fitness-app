@@ -237,15 +237,20 @@ test('F107. the diff shows counts, columns, causes and per-row confirmation, and
   // the diff has a genuine move in it with a cause naming the block. The row is
   // moved in the DATABASE rather than on screen, because the training week has
   // no control that puts a session on top of a meeting.
-  const thursday = scratchQuery(`
-    select to_char(date_trunc('week', now() + interval '7 days') + interval '3 days' + interval '18 hours 45 minutes',
-      'YYYY-MM-DD HH24:MI:SS')
-  `);
   const target = scratchQuery("select id from planned_session where state = 'planned' order by planned_for limit 1");
-  scratchQuery(
-    `update planned_session set planned_for = timestamptz '${thursday}+02' where id = '${target}'`,
+  // Thursday of next week at 18:45 in the app's own zone, written through
+  // `at time zone` rather than with an offset typed into the string, so this
+  // does not quietly move an hour on the last Sunday in October.
+  scratchQuery(`
+    update planned_session
+    set planned_for = (date_trunc('week', now() at time zone 'Europe/Paris')
+      + interval '10 days 18 hours 45 minutes') at time zone 'Europe/Paris'
+    where id = '${target}'
+  `);
+  const moved = scratchQuery(
+    `select to_char(planned_for at time zone 'Europe/Paris', 'Day DD Mon HH24:MI') from planned_session where id = '${target}'`,
   );
-  console.log(`session ${target} moved to ${thursday} local, inside the demonstration Thursday evening`);
+  console.log(`session ${target} moved to ${moved} local, inside the demonstration Thursday evening block`);
 
   await buildPlan(page);
   const rows = page.locator('[data-confirm-row]');

@@ -406,6 +406,23 @@ describe('the suite against the owner\'s installation', () => {
    *   train-week:409,432      REAL. Rows the two refusal probes left behind,
    *                           counted after Postgres printed its refusal, on a
    *                           table the same file lists thirty rows of.
+   *
+   *   Slice 11 added one file and all three members of the class in it were read
+   *   against the same question before they were written down here.
+   *
+   *   calendar:187,188        REAL, and they are the point of the slice. The
+   *                           events in the demonstration calendar and the rows
+   *                           in the write log, counted WHILE THE CONFIRM DIFF
+   *                           IS OPEN. Both tables can hold rows and do a few
+   *                           lines later, in the same test, after Apply: the
+   *                           run prints the diff's own row count first and then
+   *                           the event listing afterwards, so the zero is
+   *                           bracketed by a population on each side.
+   *   calendar:440            REAL. Stored Google credentials after an invalid
+   *                           grant. The same table held exactly one for that
+   *                           provider earlier in the same run, asserted at
+   *                           f101 step one, and the test prints the connection
+   *                           row beside the count.
    */
   it('lets no assertion claim a zero over a population the surface cannot render', () => {
     // The one that was hollow. It is gone from /health and present on Today.
@@ -433,6 +450,7 @@ describe('the suite against the owner\'s installation', () => {
       ['console-walk.spec.ts', 3],
       ['session-player.spec.ts', 2],
       ['train-week.spec.ts', 3],
+      ['calendar.spec.ts', 3],
     ]);
     // `toHaveCount(0, { timeout: 3_000 })` was invisible to this pattern until
     // slice 5 wrote one: the closing paren was required right after the zero, so

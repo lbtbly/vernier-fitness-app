@@ -9,16 +9,19 @@ import { authorizeUrl, scopesOf } from '@/lib/google/protocol';
  * CHARACTER, and neither of them holds a scope that can write to a calendar this
  * app did not create.
  *
- * Three documents and one array, compared as text rather than as meaning:
+ * Three documents and one array, compared as text rather than as meaning. Four
+ * sources, and a single character of difference between any two of them fails:
  *
  *   - `src/lib/google/scopes.ts`, which is what the request carries.
  *   - `.forge/research/google-calendar.md`, which read the strings off Google's
  *     own auth page on 2026-08-21 and is the reason they are these three.
  *   - `docs/google-calendar.md`, which is what the owner pastes into the Cloud
  *     console's Data access page.
+ *   - `SETUP.html`, which is the sheet he actually has open while he does it,
+ *     with a copy button beside the three.
  *
  * WHAT WOULD MAKE THIS GO RED. Adding a fourth scope anywhere. Reordering them.
- * A single character of difference in any of the three, including the `https`.
+ * One character out of place in any of the four, including the `https`.
  * Requesting `calendar` or `calendar.events`, which is the whole risk this line
  * exists to close, since either one grants write access to every calendar the
  * owner can touch.
@@ -49,24 +52,35 @@ function requestedBlock(path: string): string[] {
   return (wanted ?? '').split('\n').map((line) => line.trim()).filter((line) => line !== '');
 }
 
+/** The three the owner copies out of the setup sheet, in the order they are drawn. */
+function setupSheetBlock(): string[] {
+  const text = readFileSync(`${root}SETUP.html`, 'utf8');
+  const found = /<code id="gscopes">([^<]*)<\/code>/.exec(text);
+  return (found?.[1] ?? '').split(/\s+/).filter((entry) => entry !== '');
+}
+
 describe('F102, the scope list', () => {
-  it('is exactly three, in one order, and the code matches both documents', () => {
+  it('is exactly three, in one order, and the code matches all three documents', () => {
     const research = requestedBlock('.forge/research/google-calendar.md');
     const document = requestedBlock('docs/google-calendar.md');
+    const sheet = setupSheetBlock();
 
     console.log(`code:     ${GOOGLE_SCOPES.join('\n          ')}`);
     console.log(`research: ${research.join('\n          ')}`);
     console.log(`document: ${document.join('\n          ')}`);
+    console.log(`sheet:    ${sheet.join('\n          ')}`);
 
-    // The population beside the comparison: three blocks were found and none of
+    // The population beside the comparison: four lists were found and none of
     // them is empty, so this is not a walk over nothing.
     expect(GOOGLE_SCOPES.length).toBe(3);
     expect(research.length).toBe(3);
     expect(document.length).toBe(3);
+    expect(sheet.length).toBe(3);
 
     // CHARACTER FOR CHARACTER, in order.
     expect(research).toEqual([...GOOGLE_SCOPES]);
     expect(document).toEqual([...GOOGLE_SCOPES]);
+    expect(sheet).toEqual([...GOOGLE_SCOPES]);
     expect(SCOPE_PARAM).toBe(GOOGLE_SCOPES.join(' '));
   });
 
@@ -78,9 +92,10 @@ describe('F102, the scope list', () => {
       ...GOOGLE_SCOPES,
       ...requestedBlock('.forge/research/google-calendar.md'),
       ...requestedBlock('docs/google-calendar.md'),
+      ...setupSheetBlock(),
     ];
     console.log(`scope strings compared: ${everywhere.length}`);
-    expect(everywhere.length).toBe(9);
+    expect(everywhere.length).toBe(12);
 
     for (const forbidden of FORBIDDEN_SCOPES) {
       expect(everywhere).not.toContain(forbidden);

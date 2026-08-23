@@ -415,6 +415,25 @@ const DATA_QUERIES = [
    * way every other exemption here is: it comes out of the column.
    */
   ['food.table_version', 'select distinct table_version from food'],
+  /*
+   * What Google answered, stored raw, and printed on the settings card.
+   *
+   * F109 asks for the raw error body on screen rather than a summary of it,
+   * because `invalid_grant` and "Token has been expired or revoked." are two
+   * different facts and the second is the one that tells the owner what
+   * happened to him. Nobody in this repository authored that sentence: it
+   * arrives in an HTTP response from Google and is written to the column
+   * verbatim.
+   *
+   * `google_connection.last_error_kind` is deliberately NOT here, for the same
+   * reason `ingest_batch.outcome` is not: it is a token from a fixed set, the
+   * screen renders it through the catalogue's own lookup, and a raw token
+   * reaching a chip is exactly the defect this check exists to catch.
+   */
+  [
+    'google_connection.last_error_raw',
+    "select distinct last_error_raw from google_connection where last_error_raw is not null and last_error_raw <> ''",
+  ],
 ];
 
 let dataValues = 0;

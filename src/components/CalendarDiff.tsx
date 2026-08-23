@@ -312,6 +312,7 @@ export function CalendarDiff({
             <button
               type="button"
               className="btn block"
+              data-control="rebuild"
               disabled={busy !== null}
               onClick={() => void post({ action: 'plan' }, 'plan')}
             >
@@ -340,6 +341,30 @@ export function CalendarDiff({
             </button>
           </div>
         </section>
+      ) : null}
+
+      {/*
+        * WHEN IT WAS WORKED OUT, and one control to work it out again.
+        *
+        * A plan is a photograph of two calendars at one instant. Availability
+        * moves under it, so the screen says how old it is and offers to look
+        * again rather than leaving the owner to guess whether what he is about
+        * to apply is still true.
+        */}
+      {current && rows.length > 0 ? (
+        <div className="between" data-calendar="built-at" style={{ margin: '0 0 var(--s2)' }}>
+          <span className="note">{strings.calendar.builtAt(longDateTime(new Date(current.builtAt), timeZone))}</span>
+          <button
+            type="button"
+            className="btn quiet"
+            data-control="rebuild"
+            style={{ minHeight: 'var(--touch)', padding: '0 var(--s2)' }}
+            disabled={busy !== null}
+            onClick={() => void post({ action: 'plan' }, 'plan')}
+          >
+            {strings.calendar.rebuild}
+          </button>
+        </div>
       ) : null}
 
       {current && rows.length > 0 ? (

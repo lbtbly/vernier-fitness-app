@@ -47,13 +47,15 @@ export type GoogleFault = 'none' | 'outage' | 'revoked';
  * The callback path this build serves.
  *
  * TWO PRECEDENTS DISAGREED AND THIS IS THE ONE THAT WON. `src/lib/withings/mode.ts`
- * serves `/api/withings/callback`, and `.env.example` documents the Google one as
- * `/api/integrations/google/callback`. `.forge/PREFLIGHT.md` names a path for
- * Withings and names none for Google, so the only document the owner can read a
- * Google redirect URI off is `.env.example`, and that value has to match byte for
- * byte in the Cloud console, in the authorize call and in the token exchange. A
- * path that costs a round trip through somebody else's dashboard to change is
- * the one that stays; the shape of the Withings route is the one that moved.
+ * serves `/api/withings/callback`, so the shape of a callback route in this
+ * repository is `/api/<provider>/callback`. `SETUP.html` and `.env.example` both
+ * document the Google one as `/api/integrations/google/callback`, and SETUP.html
+ * is the sheet the owner has open while he types the value into a form on
+ * Google's website: it has to match byte for byte in the console, in the
+ * authorize call and in the token exchange, and changing it costs a round trip
+ * through somebody else's dashboard. `.forge/PREFLIGHT.md` names a path for
+ * Withings and names none for Google, so nothing pulls the other way. The
+ * documents win; the route shape is the one that moved.
  */
 export const CALLBACK_PATH = '/api/integrations/google/callback';
 
