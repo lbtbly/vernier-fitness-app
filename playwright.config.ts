@@ -48,7 +48,7 @@ export default defineConfig({
   projects: [
     {
       name: 'webkit-iphone',
-      testIgnore: /focus\.spec\.ts|service-worker\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|launch-report\.spec\.ts|notices\.spec\.ts|withings\.spec\.ts|ingest\.spec\.ts|labs-scratch\.spec\.ts|nutrition\.spec\.ts|shopping\.spec\.ts|catalogue-offline\.spec\.ts|train-week\.spec\.ts|session-player\.spec\.ts|console-walk\.spec\.ts/,
+      testIgnore: /focus\.spec\.ts|service-worker\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|launch-report\.spec\.ts|notices\.spec\.ts|withings\.spec\.ts|ingest\.spec\.ts|labs-scratch\.spec\.ts|nutrition\.spec\.ts|shopping\.spec\.ts|catalogue-offline\.spec\.ts|train-week\.spec\.ts|session-player\.spec\.ts|console-walk\.spec\.ts|calendar\.spec\.ts/,
       use: { ...devices['Desktop Safari'], viewport: { width: 393, height: 852 }, deviceScaleFactor: 3 },
     },
     {
@@ -163,12 +163,22 @@ export default defineConfig({
       // is written down: the wall-clock arithmetic under it is proven
       // engine-free in tests/unit/session-clock.test.ts.
       //
+      // calendar.spec.ts joined it in slice 11, and it is the same case again.
+      // Every test in it WRITES: a Google token, a dedicated calendar, events in
+      // it, planned sessions accepted through screen 06, plan rows and a
+      // permanent write log that refuses UPDATE and DELETE by trigger. It also
+      // restarts this instance three times, in three states the owner's install
+      // must never be put into: a calendar provider that cannot be reached, a
+      // grant that has been refused, and a live client id that is not real. The
+      // owner's connection is his own, and a spec that disconnected it would
+      // cost him a consent round trip to get back.
+      //
       // notices.spec.ts is the one exception and says so in its own header: it
       // injects the session the shipped recovery route minted with the Secure
       // attribute relaxed, so WebKit will carry it over loopback too, and it
       // grades its fold in both engines against one database.
       name: 'chrome-scratch',
-      testMatch: /launch-report\.spec\.ts|notices\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|withings\.spec\.ts|ingest\.spec\.ts|labs-scratch\.spec\.ts|nutrition\.spec\.ts|shopping\.spec\.ts|train-week\.spec\.ts|session-player\.spec\.ts|console-walk\.spec\.ts/,
+      testMatch: /launch-report\.spec\.ts|notices\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|withings\.spec\.ts|ingest\.spec\.ts|labs-scratch\.spec\.ts|nutrition\.spec\.ts|shopping\.spec\.ts|train-week\.spec\.ts|session-player\.spec\.ts|console-walk\.spec\.ts|calendar\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         channel: 'chrome',
