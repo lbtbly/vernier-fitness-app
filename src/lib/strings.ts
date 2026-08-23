@@ -2407,7 +2407,21 @@ export const strings = {
       `${pct}% of this recipe's mass resolved to a food row, which is under ${threshold}%. The energy is shown as a range because the rest could be anything.`,
     fibreShortfall: (pct: string) =>
       `Fibre resolved on ${pct}% of the mass, so the fibre figure is thinner than the others. It carries its own number for exactly that reason.`,
+    /**
+     * THREE CHIPS, BECAUSE THERE ARE THREE ANSWERS AND F79 IS ABOUT TELLING
+     * THEM APART.
+     *
+     * The screen printed the computed chip on every food, so a published 274
+     * kcal wore the same words, the same colour and the same border as a
+     * computed one and the marker marked nothing. `energy_source` holds
+     * `published`, `computed_atwater` or null, and each one gets its own line
+     * here. The dashed edge on the computed chip is DESIGN.md's mark for a
+     * number this app produced rather than received; origin never spends a
+     * semantic colour.
+     */
     computedEnergyChip: 'Computed energy',
+    publishedEnergyChip: 'Published energy',
+    noEnergyChip: 'No energy value',
     computedEnergyTitle: 'This energy was computed, not published',
     /**
      * F79's marker, in words, one tap from the number. Anses publishes an
@@ -2421,6 +2435,15 @@ export const strings = {
     computedEnergyCount: (computed: number, total: number) =>
       `${computed} of ${total} ingredients carry a computed energy.`,
     publishedEnergyBody: 'Every ingredient here carries an energy value Anses published.',
+    /**
+     * The same fact about ONE food rather than about a recipe's ingredients.
+     * The recipe sentence above shipped on the food screen, where it told the
+     * owner about ingredients on a page that has none.
+     */
+    publishedEnergyFoodBody:
+      'Anses publishes this energy value in the Ciqual table. Vernier stores it as printed and computes nothing from the nutrients below.',
+    noEnergyFoodBody:
+      'Anses publishes no energy value for this food, and its protein, carbohydrate or fat is missing too, so there was nothing to compute one from. The energy reads unknown here and never 0.',
     openProvenance: 'Where this number came from',
 
     snapshotLabel: 'Snapshot',
@@ -2755,6 +2778,12 @@ export const strings = {
     foodNotFoundBody: 'That food is not in this database. Nothing was deleted; the id does not exist.',
     foodNoFibreExample: 'A food with no fibre value',
     foodComputedExample: 'A food whose energy Vernier computed',
+    /**
+     * The other half of the pair. F79 is a comparison, so both sides of it are
+     * one tap from the screen that states the counts: a published energy and a
+     * computed one, side by side, each carrying its own chip.
+     */
+    foodPublishedExample: 'A food whose energy Anses published',
     foodExampleNone: 'Every food in the table carries this value, so there is no example to show.',
     dataSourcesEmptyTitle: 'The food table is empty',
     dataSourcesEmptyBody:

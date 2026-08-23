@@ -203,3 +203,45 @@ export function targetLabel(unit: string, target: number): string {
   if (unit === 'minute') return strings.player.minutes(target);
   return strings.player.reps(target);
 }
+
+/**
+ * Where an energy value came from, as a chip and as the sentence behind it.
+ *
+ * F79 IS THIS FUNCTION. The food screen rendered the "Computed energy" chip
+ * unconditionally, so `ciqual:1000`, whose 274 kcal Anses published, wore the
+ * identical chip, colour and background as `ciqual:1010`, whose energy this app
+ * worked out from its macronutrients. A marker that marks everything marks
+ * nothing.
+ *
+ * Three values, three answers, chosen here rather than in a component, for the
+ * same reason `sourceLabel` and `withingsStateLabel` are here: a column value
+ * must never reach a screen as a column value, and a branch written inline in a
+ * page is a branch nothing can test. `est` is the dashed edge, which is
+ * DESIGN.md's mark for a number this product produced rather than received.
+ */
+export type EnergyProvenance = { chip: string; body: string; className: string; flag: string };
+
+export function energyProvenance(energySource: string | null): EnergyProvenance {
+  if (energySource === 'computed_atwater') {
+    return {
+      chip: strings.nutrition.computedEnergyChip,
+      body: strings.nutrition.computedEnergyBody,
+      className: 'src est',
+      flag: 'computed_atwater',
+    };
+  }
+  if (energySource === 'published') {
+    return {
+      chip: strings.nutrition.publishedEnergyChip,
+      body: strings.nutrition.publishedEnergyFoodBody,
+      className: 'src',
+      flag: 'published',
+    };
+  }
+  return {
+    chip: strings.nutrition.noEnergyChip,
+    body: strings.nutrition.noEnergyFoodBody,
+    className: 'src',
+    flag: 'none',
+  };
+}
