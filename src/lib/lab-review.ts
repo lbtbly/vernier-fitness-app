@@ -95,6 +95,15 @@ export type ReviewDocument = {
   fileRemoved: boolean;
   hasFile: boolean;
   refusals: number;
+  /**
+   * The pages those refusals were on, ascending, each page once.
+   *
+   * The screen used to read this off the census, which is every page in the
+   * document, so a one-line refusal on page 2 of three was announced as
+   * "Page 1, 2, 3". Empty on a document written before the pages were stored,
+   * and the banner has a sentence for that rather than a guess.
+   */
+  refusalPages: number[];
   census: Array<{ page: number; characters: number; imageOnly: boolean }>;
   rows: ReviewRow[];
 };

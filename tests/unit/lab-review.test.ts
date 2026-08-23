@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { extractPanel } from '@/lib/lab-parse';
+import { extractPanel, refusedPages } from '@/lib/lab-parse';
 import {
   type ReviewDocument,
   type ReviewRow,
@@ -58,6 +58,7 @@ function reviewOf(): ReviewDocument {
     fileRemoved: false,
     hasFile: true,
     refusals: read.refusals.length,
+    refusalPages: refusedPages(read.refusals),
     census: read.census,
     rows,
   };

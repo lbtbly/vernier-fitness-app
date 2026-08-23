@@ -137,6 +137,26 @@ export type Refusal = {
   reason: 'blood_pressure';
 };
 
+/**
+ * The pages a set of refusals came from: ascending, each page once.
+ *
+ * IT IS A LIST OF PAGES AND NEVER A LIST OF REFUSALS. Two blood-pressure lines
+ * on page 2 are one page, because what the banner says is where to look on the
+ * owner's own paper, and "page 2, page 2" is not a place. The count of refusals
+ * is a separate number and the banner already prints it.
+ *
+ * This exists because the screen was deriving the list from the page census,
+ * which is every page in the document, and announcing a refusal on all three
+ * pages of a panel that had one on page 2.
+ */
+export function refusedPages(...groups: Refusal[][]): number[] {
+  const pages = new Set<number>();
+  for (const group of groups) {
+    for (const refusal of group) pages.add(refusal.page);
+  }
+  return [...pages].sort((left, right) => left - right);
+}
+
 export type PageCensus = {
   page: number;
   characters: number;

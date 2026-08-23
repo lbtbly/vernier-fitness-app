@@ -153,6 +153,8 @@ async function handle(request: Request) {
     storedPath: null,
     checksum: null,
     refusals: 0,
+    // A typed panel has no page to refuse anything on. Zero refusals, no pages.
+    refusalPages: [],
     census: [{ page: 1, characters: 0, imageOnly: false }],
     rows,
   });

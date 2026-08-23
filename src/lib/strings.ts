@@ -1992,8 +1992,27 @@ export const strings = {
 
     refusedTitle: (count: number) =>
       count === 1 ? 'One row was refused.' : `${count} rows were refused.`,
-    refusedBody: (pages: string) =>
-      `Page ${pages} holds a blood-pressure reading. It was not extracted, it is not displayed here and it is not stored. This app has no field for it and never will.`,
+    /**
+     * THE PAGES THE REFUSALS WERE ACTUALLY ON, AND THE VERB AGREES WITH THE
+     * LIST.
+     *
+     * This took a string of every page in the document and read "Page 1, 2, 3
+     * holds a blood-pressure reading" on a three-page panel whose
+     * blood-pressure line was on page 2. Two things wrong in one sentence: the
+     * wrong pages, and a singular verb over a list. It takes the page numbers
+     * now, and it has a sentence for the case where none were recorded rather
+     * than a guess dressed up as a fact.
+     */
+    refusedBody: (pages: number[]) => {
+      if (pages.length === 0) {
+        return 'The page it was printed on was not recorded for this import. It was not extracted, it is not displayed here and it is not stored. This app has no field for it and never will.';
+      }
+      if (pages.length === 1) {
+        return `Page ${pages[0]} holds a blood-pressure reading. It was not extracted, it is not displayed here and it is not stored. This app has no field for it and never will.`;
+      }
+      const list = `${pages.slice(0, -1).join(', ')} and ${pages[pages.length - 1]}`;
+      return `Pages ${list} each hold a blood-pressure reading. They were not extracted, they are not displayed here and they are not stored. This app has no field for one and never will.`;
+    },
 
     needsEyes: (count: number) => `Needs your eyes, ${count}`,
     readCleanly: (count: number) => `Read cleanly, ${count}`,

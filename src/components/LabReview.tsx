@@ -199,7 +199,13 @@ export function LabReview({
   const { needsEyes, readCleanly, decided } = reviewSections(review);
   const age = daysBetween(new Date(review.uploadedAt ?? now), new Date(now), timeZone);
   const stale = age >= STALE_AFTER_DAYS;
-  const refusedPages = review.census.map((page) => page.page).join(', ');
+  /*
+   * The pages the parser actually refused something on, read off the document
+   * rather than derived from the census. The census is every page in the file,
+   * so this line used to announce "Page 1, 2, 3 holds a blood-pressure reading"
+   * on a three-page panel whose blood-pressure line was on page 2 alone.
+   */
+  const refusedPages = review.refusalPages;
 
   return (
     <>
