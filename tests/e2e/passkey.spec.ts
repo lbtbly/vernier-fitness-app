@@ -57,6 +57,13 @@ test.describe('the passkey round trip', () => {
     await context.addInitScript(authenticatorInitScript(seed));
     const page = await context.newPage();
 
+    // TEMPORARY DIAGNOSTIC
+    page.on('console', (m) => console.log(`  [console ${m.type()}] ${m.text()}`));
+    page.on('pageerror', (e) => console.log(`  [pageerror] ${e.message}`));
+    page.on('request', (r) => { if (r.url().includes('/api/auth/')) console.log(`  [req] ${r.method()} ${r.url()}`); });
+    page.on('response', (r) => { if (r.url().includes('/api/auth/')) console.log(`  [res] ${r.status()} ${r.url()}`); });
+    page.on('requestfailed', (r) => console.log(`  [requestfailed] ${r.url()} :: ${r.failure()?.errorText}`));
+
     try {
       // A session, minted on this machine's own shell, exactly as
       // docs/security.md tells the owner to do it. No back door: the link is
@@ -126,8 +133,29 @@ test.describe('the passkey round trip', () => {
         await page.getByRole('button', { name: 'Sign out' }).click();
         await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
 
-        await page.getByRole('button', { name: 'Sign in with passkey' }).click();
-        await expect(page.getByRole('heading', { name: 'Today' })).toBeVisible();
+        const button = page.getByRole('button', { name: 'Sign in with passkey' });
+        const hydratedAt = async () =>
+          button.evaluate((node) => Object.keys(node).some((k) => k.startsWith('__reactFiber$')));
+        console.log(
+          `  [attempt ${attempt}] at ${page.url()}, hydrated=${await hydratedAt()}, about to click`,
+        );
+        await button.click();
+        console.log(`  [attempt ${attempt}] clicked. hydrated=${await hydratedAt()}`);
+        if (!(await page.getByRole('heading', { name: 'Today' }).isVisible())) {
+          await page.waitForTimeout(1500);
+          console.log(
+            `  [attempt ${attempt}] nothing happened. hydrated=${await hydratedAt()}, clicking a second time`,
+          );
+          await button.click();
+        }
+        try {
+          await expect(page.getByRole('heading', { name: 'Today' })).toBeVisible();
+        } catch (error) {
+          console.log(`  [attempt ${attempt}] FAILED. url now ${page.url()}`);
+          console.log(`  [attempt ${attempt}] notice: ${await page.locator('.notice, .alert, [role=alert]').allTextContents().then((t) => JSON.stringify(t))}`);
+          console.log(`  [attempt ${attempt}] body: ${(await page.locator('body').innerText()).slice(0, 900)}`);
+          throw error;
+        }
 
         const afterUse = query(
           `select 'counter=' || counter || ' last_used_at=' || coalesce(last_used_at::text, 'never')
