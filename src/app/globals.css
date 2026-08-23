@@ -1427,7 +1427,20 @@ html[data-theme=light]{--media-plate:#FFFFFF}
 .daylabel{margin:var(--s4) 0 var(--s2)}
 .mealrow{align-items:center}
 .mealrow .grow{min-width:0}
-.mealrow .head{font-size:var(--t-body);line-height:var(--t-body-lh);font-weight:600;margin:0}
+/*
+ * The meal title, which is a link and must not look like one.
+ *
+ * 08-nutrition-week.html draws it as plain text at weight 600 in the reading
+ * ink. The build makes it a link so a meal reaches its recipe, and this rule
+ * carried type and no colour, so it rendered in the engine's own link blue,
+ * underlined, measured at rgb(158,158,255) on all three viewports. The nearest
+ * precedent in this stylesheet is `.noticeline`, a link the design draws as a
+ * line of text, and it writes both declarations.
+ */
+.mealrow .head{
+  font-size:var(--t-body);line-height:var(--t-body-lh);font-weight:600;margin:0;
+  color:var(--text);text-decoration:none;
+}
 .daytotal{border-top:1px solid var(--line);margin-top:6px;padding-top:var(--s3)}
 
 .seg button[aria-pressed=true][data-decision=accept]{background:var(--good-soft);border-color:var(--good);color:var(--good)}

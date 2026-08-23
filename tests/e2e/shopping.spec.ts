@@ -348,6 +348,34 @@ test.describe('C12: the shopping list matches screen 10 at three viewports', () 
       await expect(page.locator('[data-card="counts"]')).toBeVisible();
       await expect(page.locator('[data-aisle]').first()).toBeVisible();
       await expect(page.locator('[data-deduction="box"]').first()).toBeVisible();
+
+      /*
+       * WHAT THE CAPTURE CANNOT FAIL ON, MEASURED, AT EVERY VIEWPORT.
+       *
+       * These three captures were taken and read while `.item`, `.item.off`,
+       * `.box`, `.tap` and `.qty` were all dead: a merge splice tore
+       * `.seg button{` in half on 2026-08-22 and every rule after it shipped as
+       * `.seg button <selector>`. The row computed display:block and
+       * min-height:0, so the checkbox, the name, the quantity and the two
+       * steppers stacked vertically at 393, 768 and 1280 while this test was
+       * green. Screen 10 draws one 56 px row.
+       *
+       * GOES RED IF: the stylesheet is torn again, or `.item` stops being a row.
+       */
+      const row = await page.locator('.item').first().evaluate((node) => {
+        const style = getComputedStyle(node);
+        return {
+          display: style.display,
+          minHeight: style.minHeight,
+          alignItems: style.alignItems,
+          height: `${Math.round(node.getBoundingClientRect().height)}px`,
+        };
+      });
+      console.log(`C12  ${viewport.name} the shopping row computes ${JSON.stringify(row)}`);
+      expect(row.display, 'the shopping row is not a row').toBe('flex');
+      expect(row.minHeight, 'screen 10 draws a 56 px row').toBe('56px');
+      expect(row.alignItems, 'the row does not centre what it holds').toBe('center');
+
       await page.screenshot({
         path: `${CAPTURES}/10-shopping-list-${viewport.name}.png`,
         fullPage: true,
