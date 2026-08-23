@@ -338,3 +338,5 @@ Eleven more slices of end-to-end coverage are about to be built on this suite, s
 ## Owner action outstanding, unrelated to the build
 
 While verifying whether a third party can sign an installable .shortcut file, the Apple Health research agent ran `shortcuts sign --mode anyone` twice on this Mac. That operation is the same one as "Copy iCloud Link", so it published two throwaway public SharedShortcut records named "Test" under lambert.bouley@gmail.com. They hold no personal data. Remove them in the Shortcuts app with Stop Sharing. This was a side effect of research, not part of the product, and it is recorded here so it does not get lost.
+
+checkpoint: 2026-08-23T08:25:29Z (SessionEnd)
