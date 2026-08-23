@@ -327,7 +327,18 @@ export function TrainWeek({
           <button
             type="button"
             className="btn quiet"
-            style={{ minHeight: 'var(--touch)', padding: 0 }}
+            /*
+             * Padding only. The height is the base.
+             *
+             * This carried `minHeight: var(--touch)`, 44 px, transcribed from
+             * 06-training-week.html line 202, which writes 32. DESIGN.md 2b
+             * resolves that contradiction against the sheets: the base is 48 px
+             * on every shell screen, and 44 is the floor a control may not go
+             * under rather than a size to choose. The padding stays at 0 so the
+             * label sits flush with the right edge of the row, which is what the
+             * sheet is drawing.
+             */
+            style={{ padding: 0 }}
             disabled={busy !== null}
             onClick={() => void post({ action: 'propose' }, null)}
           >
