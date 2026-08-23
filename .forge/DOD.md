@@ -423,7 +423,7 @@ advance, so the budget does not have to be re-argued once per slice.
 - [ ] **F89.** Items supplied by the recipe box and items marked in stock render
   as visibly deducted, showing the original quantity struck through, rather than
   disappearing from the list. Evidence: the capture with both cases present.
-- [ ] **F90.** Two recipe-box recipes of two portions each default into the week
+- [x] **F90.** Two recipe-box recipes of two portions each default into the week
   as four consumed meals, and each recipe asks separately whether the second
   portion is eaten the next day, moved to another meal, or frozen, with the answer
   stored per recipe. Evidence: the capture and the two stored answers.

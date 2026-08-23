@@ -1,100 +1,72 @@
 # Resume
 
-## HANDOFF, 2026-08-23, session three. Read this, then PROCESS.md, then carry on.
+## HANDOFF, 2026-08-24. Read this, then PROCESS.md, then carry on.
 
-**Phase:** 8 BUILD and VERIFY. **ARMED.** The greenlight was not re-opened.
+**Phase:** 8 VERIFY. **ARMED.** The greenlight was not re-opened.
 
-**Checked: 84 of 166**, from 41 when this session opened. **Slices 1 to 12 are
-built, merged, migrated and live on the origin.** Slice 13 is building. Nothing
-softened, no threshold moved.
+**Checked: 91 of 166.** All fourteen slices built, merged, migrated and live.
+13 migrations applied. Gate has SEVEN steps and all seven are green on main.
 
-| | session start | now |
+| | yesterday morning | now |
 |---|---|---|
-| rubric lines | 41 | 84 |
-| unit tests | 140 | 1039 |
-| migrations | 0006 | 0010 |
+| rubric lines | 41 | 91 |
+| unit tests | 140 | 1,177 |
+| e2e passed / failed / not run | 72 / 0 / 0 | 170 / 7 / 43 |
+| slices merged | 4 | 14 |
 
 ### In flight
 
-- **Slice 13**, backup and restore, run `wf_ea3f6ec4-e36`, worktree
-  `13-backup`. It ends the standing no-backup risk.
-- A full `npm run test:e2e` on main, started after the stylesheet fix.
+- **`wf_f9935be4-193`**, the FIRST verification of slices 10, 11, 12 and 13.
+  Fifty lines, none ever ruled. Serial on the one live origin.
+- **`slice/fix-round3`**, merged nowhere yet. It closes the last seven suite
+  failures. **Hold the merge until the verify run finishes**: merging rebuilds
+  the image underneath a running verifier.
 
-### Three ticks came off the board today and all three earned their way back
+### The thing to read twice
 
-F23, F51 and F60 were un-ticked and ruled from nothing, because each rested on
-evidence that could not have been produced. F51's third direction had never
-been asked of the endpoint at all: `--no-bearer` empties an array and bash 3.2
-under `set -u` killed the fixture script before curl ran. F60's cross-table
-walk never reached psql: `scratchQuery` pasted SQL into the string `sh -c`
-runs, so `do $$` arrived as the shell's own pid. F23 was a real regression.
-All three now pass with their guards proven red first.
+**The archive was never loadable.** F126 found `scripts/restore.mjs` exits 5 for
+two independent reasons: nothing under `drizzle/` creates
+`drizzle.__drizzle_migrations`, because drizzle-orm creates it in code inside
+`PgDialect.migrate`, while the dump keeps that table deliberately and restores
+it FIRST, so the data section's first insert met a database with no `drizzle`
+schema. And six migrations end in a seeded `INSERT ... ON CONFLICT DO NOTHING`,
+so the archive's copy of those primary keys collided on a fresh target.
 
-That is instances thirteen and fourteen of this run's one class, and the first
-two found sitting **under** a green tick.
+**F124 and F125 verify an archive. Nothing had ever loaded one.** That is the
+third claim in slice 13 found never to have been exercised, on the slice whose
+whole job is getting the owner's data back. Fixed on `slice/fix-round3`.
 
-### The merge cost, measured
+### Named and deliberately not done
 
-Six splices lost real code today. Five were caught by typecheck within minutes.
-The sixth shipped: a union tore `.seg button{` in half, CSS nesting swallowed
-the rest of the file, and **about 70 rules shipped prefixed `.seg button ` and
-matched nothing.** No static gate can see it and a brace count cannot either,
-because comments and content strings carry braces. A verifier measuring screens
-against their designs found it. Fixed, and the depth walk that locates this
-shape is worth keeping: blank comments and strings but keep their newlines.
+**F131 will fail on an empty population.** `testStackWithBackupDir` never sets
+`DEMO_MODE`, so `health_sample` is empty and `expect(before).toBeGreaterThan(0)`
+runs over nothing. One line fixes it, and it was left alone on purpose: turning
+the seed on changes the conditions F124, F125 and F126 run under.
 
-**If more parallel merges happen, add a CSS structural check to the gate.**
-Nothing in the six steps would have caught this.
+**F128, moderate risk.** Four backups in a loop 500 ms apart, and `archiveName`
+has one-second resolution, so two landing in the same second leave three
+archives after four and the retention assertion goes red.
 
-### Open, 82 lines
-
-| Waiting on | Lines |
-|---|---|
-| **the owner's iPhone screenshot** | F4, R1, C2 |
-| **the owner's Withings credential**, after slice 5 passes | F44 |
-| **the owner's iPhone**, building the Shortcut | F56 |
-| a fix dispatch | F42, F55, F62, F65, F66, F72, F77, F79, F87, F88, F89, C9, C10, C11, C12, R2 |
-| never verified at all | slice 10's F90-F100 C13 R3, slice 11's F101-F112 C14, slice 12's F113-F123 C15 |
-| slice 13 | F124-F133, C16, R4 |
-| slice 14, the final full-scope pass | C17, C18, R5, R6, R7, R8, R9, R10, D1-D5 |
-
-Four defects the last verifier measured and named precisely:
-- **F77.** The pain rule's third limb, no week-to-week increase, is stated to
-  the owner on the capture screen and enforced nowhere. `painProblems()` is
-  imported only by its own unit test.
-- **F87.** The below-85-percent coverage branch is unreachable by construction:
-  an unmatched ingredient line is dropped before it becomes a recipe row, so
-  coverage is measured over the rows that survived matching and can never fall.
-- **F89, C12.** Both were downstream of the dead stylesheet. Re-rule after the
-  fix.
+**F87 stays unprovable.** The below-85-percent coverage branch is unreachable
+because `importBoxRecipe` filters to matched lines before inserting, so
+`coveragePct` can never fall. The shipped test does not assert that branch, so
+it may pass while the line stays unprovable.
 
 ### Owner actions, in this order
 
-1. **The iPhone Settings screenshot.** Home Screen icon, Settings, screenshot.
-   Closes F4, R1 and C2 together.
-2. **Withings developer credentials**, for F44, only after slice 5 passes.
-3. **Build the Shortcut on the iPhone**, for F56, after two one-time settings:
-   Settings > Shortcuts > Advanced > Allow Sharing Large Amounts of Data, and
-   Health > Sources > Shortcuts > allow read per type.
-4. Optional: two published `SharedShortcut` records named "Test".
+1. **The iPhone Settings screenshot.** Closes F4, R1 and C2 together.
+2. **Withings credentials**, for F44, after slice 5 passes.
+3. **Build the Shortcut**, for F56.
 
-Closed without him: the VAPID pair already existed, and `fra.traineddata` is
-installed on the volume and hash-verified.
+Done by him already: the iCloud Drive grant for Docker Desktop, now recorded in
+PREFLIGHT with its cause, and the VAPID pair.
 
 ### His data
 
-96 measurement rows before the last e2e run, 6 not seeded. **One is real**:
-`a7bf989c`, waist 101.5 cm, 2026-08-23 08:54:34, from his phone. **Five are
-fabricated ratings a verifier wrote to the live database at 14:29:47** and
-cannot be deleted, because `measurement` refuses DELETE. Both standing briefs
-now carry one rule: any walk that commits goes to scratch, and that overrides
-any dispatch line saying otherwise.
-
-An e2e run grew the table to 391 rows, all additions `source='demo'`,
-`seed=true`, written by the app's own seeding. Demonstration data, not his.
-
-**There is still no backup in the tree.** `backups/` holds four `pg_dump` files
-taken by the lead before each migration. Slice 13 is what replaces them.
+391 measurement rows, 6 not seeded. **One is real**: `a7bf989c`, waist 101.5 cm,
+2026-08-23 08:54:34. **Five are fabricated ratings** a verifier wrote to the
+live database and that cannot be deleted. `backups/` holds six pg_dump files
+taken before each migration.
 
 ---
 
