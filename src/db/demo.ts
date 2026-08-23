@@ -89,7 +89,7 @@ type DemoRow = {
  * its printed 1.44 g/L and its factor beside the stored 3.72 mmol/L, because a
  * converted value never appears alone.
  */
-const DEMO_ROWS: DemoRow[] = [
+export const DEMO_ROWS: DemoRow[] = [
   {
     slug: 'weight',
     metric: 'weight',
@@ -328,7 +328,7 @@ function waistEntry(offset: number) {
  * Every row of the series, six weeks of it, with the six anchor rows above left
  * out because they are already written and their ids are already fixed.
  */
-function seriesRows(): SeriesRow[] {
+export function seriesRows(): SeriesRow[] {
   const rows: SeriesRow[] = [];
 
   const weightOffsets = Object.keys(WEIGHT_BY_DAY).map(Number).sort((a, b) => a - b);
@@ -438,6 +438,58 @@ function monthsOn(from: Date, months: number): Date {
  */
 function instantOf(anchor: string, row: DemoRow, timeZone: string): Date {
   return instantOnDay(dayAfter(anchor, -row.daysAgo), row.atHour, row.atMinute, timeZone);
+}
+
+/**
+ * ---------------------------------------------------------------------------
+ * THE DEMONSTRATION FILLS ABSENCE AND YIELDS TO MEASUREMENT.
+ *
+ * `.forge/AMENDMENTS.md` A7, clause 1. The seed writes a metric only while that
+ * metric has no row with `seed = false`. Once the owner's scale, his tape or a
+ * laboratory has delivered one real reading of something, the seed stops
+ * writing that something, for ever, in the anchor rows, in the six weeks and in
+ * the daily continuation alike.
+ *
+ * WHY, AND WHY THIS AND NOT A DELETION. `decideDedup` ranks a real source above
+ * the seed and stores the real row, and `measurement` refuses DELETE, so the
+ * seeded row stays. That is correct and it is not the problem. The problem was
+ * a seed that kept writing a fabricated weight at 06:52 every morning for the
+ * rest of the installation's life, onto days that now hold measurements, each
+ * one carrying the frozen sentence "Nothing else described this metric on this
+ * day". Stopping the writer is the only fix that removes nothing.
+ *
+ * WHAT IT DOES NOT TOUCH. Other metrics, which keep seeding while they have no
+ * real reading: the six weeks of weight stay alive under the seven-day average
+ * on the morning the real scale first connects, and the chart does not go blank
+ * and refill. And an empty database, where the set below is empty and nothing
+ * changes at all, which is where F25's evidence and the C6 floor are taken.
+ * ---------------------------------------------------------------------------
+ */
+
+/** Every metric this database already holds a measured, unseeded row for. */
+async function measuredMetrics(): Promise<Set<string>> {
+  const db = getDb();
+  const rows = await db
+    .selectDistinct({ metric: measurement.metric })
+    .from(measurement)
+    .where(eq(measurement.seed, false));
+  return new Set(rows.map((row) => row.metric));
+}
+
+/**
+ * The rows of a seed batch that may still be written, which is all of them
+ * until a metric has real data and none of that metric afterwards.
+ *
+ * Both callers derive their source records from what comes back rather than
+ * from what went in, so a skipped metric writes no Withings-shaped source
+ * record either. That is not a nicety: `readFreshness` counts those records,
+ * and F43 is the line that pays for one written on a day no scale spoke.
+ */
+export function withoutMeasuredMetrics<T extends { metric: string }>(
+  rows: T[],
+  measured: ReadonlySet<string>,
+): T[] {
+  return rows.filter((row) => !measured.has(row.metric));
 }
 
 export type SeededRows = {
@@ -577,7 +629,7 @@ type ContinuedRow = {
 };
 
 /** Everything one calendar day after the anchor holds, ready to be written. */
-function rowsForDay(day: number, on: string, today: number): ContinuedRow[] {
+export function rowsForDay(day: number, on: string, today: number): ContinuedRow[] {
   const rows: ContinuedRow[] = [];
 
   const weight = weightOnDay(day);
@@ -716,11 +768,14 @@ async function continueDemoSeries(today: string, timeZone: string): Promise<void
   if (days <= 0) return;
   const filled = Number(await readMeta(FILLED_KEY) ?? '0');
 
+  // One query per run, read once here and once in `seedDemoData`. A7 clause 1.
+  const measured = await measuredMetrics();
+
   // Back far enough to catch the days the phone's silence has since released.
   const from = Math.max(1, filled - PHONE_SILENT_DAYS);
   for (let day = from; day <= days; day += 1) {
     const on = dayAfter(anchor, day);
-    const rows = rowsForDay(day, on, days);
+    const rows = withoutMeasuredMetrics(rowsForDay(day, on, days), measured);
 
     const records = new Map<string, ContinuedRow>();
     for (const row of rows) if (!records.has(row.recordId)) records.set(row.recordId, row);
@@ -839,8 +894,13 @@ export async function seedDemoData(timeZone: string): Promise<SeedResult> {
   // today for an installation that has never been seeded at all.
   const anchor = await resolveAnchorDay(timeZone);
 
+  // One query per run, read once here and once in the continuation. Every
+  // metric in it is skipped in the six anchor rows, in the six-week series and
+  // in the daily continuation. A7 clause 1.
+  const measured = await measuredMetrics();
+
   let written = 0;
-  for (const row of DEMO_ROWS) {
+  for (const row of withoutMeasuredMetrics(DEMO_ROWS, measured)) {
     const id = `${DEMO_ID_PREFIX}${row.slug}`;
     const sourceRecordId = `${DEMO_ID_PREFIX}src_${row.slug}`;
     const measuredAt = instantOf(anchor, row, timeZone);
@@ -889,7 +949,7 @@ export async function seedDemoData(timeZone: string): Promise<SeedResult> {
     written += inserted.length;
   }
 
-  written += await seedSeries(anchor, timeZone);
+  written += await seedSeries(anchor, timeZone, measured);
   written += await seedSessions(anchor, timeZone);
   await seedGoal(anchor, timeZone);
 
@@ -908,9 +968,13 @@ export async function seedDemoData(timeZone: string): Promise<SeedResult> {
  * carries the shape it stands in for, and `seed` is true on both. The composite
  * foreign key refuses any row that gets one of those two wrong.
  */
-async function seedSeries(anchor: string, timeZone: string): Promise<number> {
+async function seedSeries(
+  anchor: string,
+  timeZone: string,
+  measured: ReadonlySet<string>,
+): Promise<number> {
   const db = getDb();
-  const rows = seriesRows();
+  const rows = withoutMeasuredMetrics(seriesRows(), measured);
   const records = new Map<string, SeriesRow>();
   for (const row of rows) if (!records.has(row.sourceRecordId)) records.set(row.sourceRecordId, row);
 

@@ -22,6 +22,8 @@
  * than no line.
  */
 
+import { compareStanding } from '@/lib/provenance';
+
 /** A day in the app's own zone, as 'YYYY-MM-DD'. The key every series is indexed by. */
 export function dayKey(date: Date, timeZone: string): string {
   return new Intl.DateTimeFormat('en-CA', {
@@ -71,15 +73,20 @@ export type Day = { at: string; reading: Reading | null };
  * the chart joining 7 August to 12 August with a straight line, which is the
  * carried-forward reading this product refuses to draw.
  *
- * When a day holds more than one reading the latest wins. Deduplication has
- * already decided what stands; this is only the render picking one column.
+ * When a day holds more than one reading, `compareStanding` says which one
+ * stands, and it is the same comparator the write layer and every other read
+ * uses. This line used to be `reading.measuredAt > held.measuredAt`: latest
+ * instant, rank never consulted. The seed writes weight at a fixed 06:52, so a
+ * real weigh-in at 06:30 lost its own column to a fabrication, silently, and
+ * every figure on the weight card is computed off the column rather than off
+ * the rows. `.forge/AMENDMENTS.md` A7.
  */
 export function dailySeries(readings: Reading[], keys: string[], timeZone: string): Day[] {
   const byDay = new Map<string, Reading>();
   for (const reading of readings) {
     const on = dayKey(reading.measuredAt, timeZone);
     const held = byDay.get(on);
-    if (!held || reading.measuredAt.getTime() > held.measuredAt.getTime()) byDay.set(on, reading);
+    if (!held || compareStanding(reading, held, timeZone) < 0) byDay.set(on, reading);
   }
   return keys.map((on) => ({ at: on, reading: byDay.get(on) ?? null }));
 }
@@ -292,4 +299,59 @@ export function freshnessOf(source: string, lastAt: Date | null, now: Date): Fre
   if (!lastAt) return { source, lastAt: null, hours: null, stale: false };
   const hours = Math.floor((now.getTime() - lastAt.getTime()) / 3_600_000);
   return { source, lastAt, hours, stale: hours >= STALE_HOURS };
+}
+
+/** What one source has landed, split by the column Postgres computes from it. */
+export type SourceSamples = {
+  /** The newest sample this source really delivered. */
+  measuredAt: Date | null;
+  /** The newest sample the demonstration seed wrote in this source's shape. */
+  seededAt: Date | null;
+};
+
+export type SourceFreshness = Freshness & {
+  /** The integration's own state, when there is a credential row for it. */
+  state: string | null;
+  lastError: string | null;
+};
+
+/**
+ * How old a source's newest sample is, with the demonstration yielding to
+ * measurement exactly as it does everywhere else. `.forge/AMENDMENTS.md` A7.
+ *
+ * THE DEFECT THIS CLOSES, WHICH IS F43'S. Freshness was `max(measured_at)`
+ * grouped by `source_record.source`, and the seed writes a Withings-shaped
+ * source record every morning: `source: 'withings'`, `kind: 'sync_batch'`,
+ * marked `seed`. So on a demonstration install Withings read fresh every day
+ * the seed ran, whether or not a scale existed, and "name the stale Withings
+ * data by cause with the adapter unreachable" could not be produced at all. The
+ * fix is the cause and not the string: a seeded row is not a delivery, so once
+ * a source has delivered anything real, only its real samples answer for it.
+ *
+ * WHY THE SEEDED SAMPLE IS NOT SIMPLY IGNORED. Until a source has delivered
+ * once, the demonstration is the only story there is, and the story includes
+ * the phone that stopped four days ago, which is where the stale chip F34 is
+ * ticked on can actually be seen. The demonstration fills absence and yields to
+ * measurement. That is one rule, and this is its third layer.
+ *
+ * The integration's own last successful sync still counts beside the sample,
+ * because a sync that returned nothing new is still a sync, and the fresher of
+ * the two is the truth.
+ */
+export function freshnessOfSource(
+  source: string,
+  samples: SourceSamples,
+  credential: { lastSuccessfulSyncAt: Date | null; state: string | null; lastError: string | null } | null,
+  now: Date,
+): SourceFreshness {
+  const delivered = samples.measuredAt ?? samples.seededAt;
+  const candidates = [delivered, credential?.lastSuccessfulSyncAt ?? null].filter(
+    (date): date is Date => date instanceof Date,
+  );
+  const lastAt = candidates.length === 0 ? null : new Date(Math.max(...candidates.map((at) => at.getTime())));
+  return {
+    ...freshnessOf(source, lastAt, now),
+    state: credential?.state ?? null,
+    lastError: credential?.lastError ?? null,
+  };
 }

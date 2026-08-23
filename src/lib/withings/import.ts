@@ -1,4 +1,4 @@
-import { type Source, PRECEDENCE } from '@/lib/provenance';
+import { type Source, outranks } from '@/lib/provenance';
 import type { CallCounters, MeasureResult, RequestLine } from '@/lib/withings/client';
 import type { HarvestedGroup, HarvestedRow } from '@/lib/withings/codes';
 
@@ -74,12 +74,13 @@ export function decideRow(
     //    this day. Precedence decides, and an equal rank means the row that is
     //    already here stays: an append-only store cannot take the loser back
     //    out, so the tie has to be broken in favour of what is committed.
-    if (standing) {
-      const mine = PRECEDENCE[incoming.source] ?? 0;
-      const theirs = PRECEDENCE[standing.source as Source] ?? 0;
-      if (mine <= theirs) {
-        return { kind: 'duplicate', keptId: standing.id, because: 'day_taken' };
-      }
+    //
+    //    That rule is `outranks` in `src/lib/provenance.ts` and it is no longer
+    //    spelled out here. The ruling named this copy a sixth copy in the
+    //    making, and two copies of one rule is exactly how the write layer and
+    //    the read layer came to disagree. `.forge/AMENDMENTS.md` A7.
+    if (standing && !outranks(incoming.source, standing.source)) {
+      return { kind: 'duplicate', keptId: standing.id, because: 'day_taken' };
     }
     return { kind: 'insert' };
   }

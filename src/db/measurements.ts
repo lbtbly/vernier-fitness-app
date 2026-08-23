@@ -11,7 +11,9 @@ import {
   decideDedup,
   orderChain,
   sameDay,
+  whatStands,
 } from '@/lib/provenance';
+import { getConfig } from '@/lib/config';
 import type { LogSnapshot, MeasurementView } from '@/lib/measurement-view';
 import { strings } from '@/lib/strings';
 
@@ -145,6 +147,7 @@ export async function storeMeasurement(input: WriteInput): Promise<WriteResult> 
   const stored = await candidatesFor(input.metric, input.measuredAt);
   const outcome = decideDedup(
     {
+      id: input.id,
       metric: input.metric,
       source: input.source,
       rawValue: input.rawValue,
@@ -365,30 +368,49 @@ export async function readCurrentValues(limit = 40): Promise<MeasurementRow[]> {
  * same thing while six rows existed and stopped being it the moment a six-week
  * series landed: twelve rows of weight, one per morning, under a label saying
  * "on file". One row per metric is what that label always meant.
+ *
+ * Which one per metric is `compareStanding`, not the clock. On a day holding
+ * both a seeded reading and a measured one this card used to print the
+ * fabricated weight with a Demonstration chip while the measured weight sat in
+ * the table unshown, which is the archive answering the wrong question.
+ * `.forge/AMENDMENTS.md` A7.
  */
-export async function readLatestPerMetric(): Promise<MeasurementRow[]> {
+export async function readLatestPerMetric(
+  timeZone: string = getConfig().timeZone,
+): Promise<MeasurementRow[]> {
   const rows = await readCurrentValues(400);
-  const byMetric = new Map<string, MeasurementRow>();
+  const byMetric = new Map<string, MeasurementRow[]>();
   for (const row of rows) {
-    const held = byMetric.get(row.metric);
-    if (!held || row.measuredAt.getTime() > held.measuredAt.getTime()) byMetric.set(row.metric, row);
+    const held = byMetric.get(row.metric) ?? [];
+    held.push(row);
+    byMetric.set(row.metric, held);
   }
-  return [...byMetric.values()].sort(
-    (left, right) => right.measuredAt.getTime() - left.measuredAt.getTime(),
-  );
+  return [...byMetric.values()]
+    .map((held) => whatStands(held, timeZone)!)
+    .sort((left, right) => right.measuredAt.getTime() - left.measuredAt.getTime());
 }
 
-/** The last value of one metric, corrections applied. Null when there has never been one. */
-export async function readLatestOfMetric(metric: string): Promise<MeasurementRow | null> {
+/**
+ * The last value of one metric, corrections applied. Null when there has never
+ * been one.
+ *
+ * This is what the quick-log sheet opens its waist control from, so a seeded
+ * reading winning the day here is the number the owner steps up and down from.
+ * The comparator decides, then the chain resolves.
+ */
+export async function readLatestOfMetric(
+  metric: string,
+  timeZone: string = getConfig().timeZone,
+): Promise<MeasurementRow | null> {
   const db = getDb();
   const rows = await db
     .select()
     .from(measurement)
     .where(eq(measurement.metric, metric))
     .orderBy(desc(measurement.measuredAt))
-    .limit(12);
-  if (rows.length === 0) return null;
-  const newest = rows[0];
+    .limit(24);
+  const newest = whatStands(rows, timeZone);
+  if (!newest) return null;
   const chain = await readChain(newest.rootId);
   return orderChain(chain).at(-1) ?? newest;
 }

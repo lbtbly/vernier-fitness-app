@@ -1,7 +1,9 @@
 import { and, asc, eq, gte, inArray, lte, sql } from 'drizzle-orm';
 import { getDb } from './client';
 import { integrationCredential, measurement, sourceRecord } from './schema';
-import { type Freshness, type Reading, freshnessOf } from '@/lib/trend';
+import { getConfig } from '@/lib/config';
+import { whatStands } from '@/lib/provenance';
+import { type Reading, type SourceFreshness, freshnessOfSource } from '@/lib/trend';
 
 /**
  * What the trend screens read: a metric's readings over a window, and how old
@@ -121,8 +123,18 @@ export async function readTrends(
   return out;
 }
 
-/** The last reading of one metric, whenever it was, corrections applied. */
-export async function readLastReading(metric: string): Promise<Reading | null> {
+/**
+ * The last reading of one metric, whenever it was, corrections applied.
+ *
+ * The fifth site the ruling names. `heads()` sorts by instant and this took the
+ * last of that sort, so a seeded reading written at 06:52 answered over a
+ * measured one taken at 06:30 the same morning. `compareStanding` decides it
+ * now, the same way the other four do. `.forge/AMENDMENTS.md` A7.
+ */
+export async function readLastReading(
+  metric: string,
+  timeZone: string = getConfig().timeZone,
+): Promise<Reading | null> {
   const db = getDb();
   const rows = await db
     .select({
@@ -140,7 +152,7 @@ export async function readLastReading(metric: string): Promise<Reading | null> {
     .orderBy(sql`${measurement.measuredAt} desc`)
     .limit(24);
   const usable = rows.filter((row): row is ReadingRow & { value: number } => row.value !== null);
-  return heads(usable).at(-1) ?? null;
+  return whatStands(heads(usable), timeZone) ?? null;
 }
 
 /**
@@ -154,11 +166,7 @@ export async function readLastReading(metric: string): Promise<Reading | null> {
  */
 export const SYNCING_SOURCES = ['withings', 'apple_health_shortcut'] as const;
 
-export type SourceFreshness = Freshness & {
-  /** The integration's own state, when there is a credential row for it. */
-  state: string | null;
-  lastError: string | null;
-};
+export type { SourceFreshness };
 
 /**
  * How old each syncing source's newest sample is.
@@ -169,18 +177,39 @@ export type SourceFreshness = Freshness & {
  * the source is alive, so the fresher of the two is the truth. Both are read
  * back out of the database rather than remembered in the process, because a
  * restart must not make a dead source look alive.
+ *
+ * THE SEEDED HALF IS COUNTED SEPARATELY, and F43 is why. `source_record.source`
+ * is the shape a row stands in for, and the demonstration seed writes a
+ * Withings-shaped record every morning, so this query used to report a scale
+ * that does not exist as fresh. It now reads the two maxima apart, the measured
+ * one and the seeded one, and `freshnessOfSource` decides which answers. The
+ * decision is there rather than here so the unit suite can grade it without
+ * Postgres, the same way `commitBatch` takes its writer as an argument.
  */
 export async function readFreshness(now: Date): Promise<SourceFreshness[]> {
   const db = getDb();
   const samples = await db
-    .select({ origin: sourceRecord.source, last: sql<string | null>`max(${measurement.measuredAt})` })
+    .select({
+      origin: sourceRecord.source,
+      measured: sql<string | null>`max(${measurement.measuredAt}) filter (where not ${measurement.seed})`,
+      seeded: sql<string | null>`max(${measurement.measuredAt}) filter (where ${measurement.seed})`,
+    })
     .from(measurement)
     .innerJoin(sourceRecord, eq(sourceRecord.id, measurement.sourceRecordId))
     .groupBy(sourceRecord.source);
   const credentials = await db.select().from(integrationCredential);
 
   const lastSample = new Map(
-    samples.map((row) => [row.origin, row.last ? new Date(row.last) : null] as const),
+    samples.map(
+      (row) =>
+        [
+          row.origin,
+          {
+            measuredAt: row.measured ? new Date(row.measured) : null,
+            seededAt: row.seeded ? new Date(row.seeded) : null,
+          },
+        ] as const,
+    ),
   );
   // The credential table names the provider; the provenance spine names the
   // source. One is `apple_health` and the other `apple_health_shortcut`, and
@@ -191,15 +220,12 @@ export async function readFreshness(now: Date): Promise<SourceFreshness[]> {
   };
 
   return SYNCING_SOURCES.map((source) => {
-    const credential = credentials.find((row) => row.provider === providerOf[source]);
-    const candidates = [lastSample.get(source) ?? null, credential?.lastSuccessfulSyncAt ?? null].filter(
-      (date): date is Date => date instanceof Date,
+    const credential = credentials.find((row) => row.provider === providerOf[source]) ?? null;
+    return freshnessOfSource(
+      source,
+      lastSample.get(source) ?? { measuredAt: null, seededAt: null },
+      credential,
+      now,
     );
-    const lastAt = candidates.length === 0 ? null : new Date(Math.max(...candidates.map((d) => d.getTime())));
-    return {
-      ...freshnessOf(source, lastAt, now),
-      state: credential?.state ?? null,
-      lastError: credential?.lastError ?? null,
-    };
   });
 }

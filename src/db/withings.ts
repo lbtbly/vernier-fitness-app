@@ -4,7 +4,7 @@ import { getDb } from './client';
 import { importQuestion, integrationCredential, measurement, sourceRecord, withingsConnection } from './schema';
 import { renderDedupReason } from './measurements';
 import { openSecret, sealSecret } from '@/lib/master-key';
-import { type Confidence, type Source, IMPORT_VERSION } from '@/lib/provenance';
+import { type Confidence, type Source, IMPORT_VERSION, whatStands } from '@/lib/provenance';
 import { strings } from '@/lib/strings';
 import type { TokenBundle } from '@/lib/withings/client';
 import { type HarvestedRow, METRIC_OF_TYPE, isAllowedType } from '@/lib/withings/codes';
@@ -486,6 +486,14 @@ export async function lookupExternalKeys(
  *
  * Chain heads only, and every source rather than this one: what the decision
  * needs to know is what a person reading the chart would see for that day.
+ *
+ * WHICH HEAD, when a day already holds more than one, is `compareStanding` and
+ * not the order the rows came back in. It was `if (!found.has(key))`, so the
+ * incumbent this import measured itself against was whichever row Postgres
+ * returned first, and on a collision day that is a coin toss between the seeded
+ * reading and the measured one. "What a person reading the chart would see" is
+ * a question the chart now answers with one comparator, so this asks the same
+ * one. `.forge/AMENDMENTS.md` A7.
  */
 export async function standingOnDays(
   rows: HarvestedRow[],
@@ -518,11 +526,14 @@ export async function standingOnDays(
     const standing = heads.get(row.rootId);
     if (!standing || row.correctionIndex > standing.correctionIndex) heads.set(row.rootId, row);
   }
+  const perDay = new Map<string, (typeof held)[number][]>();
   for (const row of heads.values()) {
     const key = dayKeyFor(row.metric, row.measuredAt, timeZone);
-    if (!found.has(key)) {
-      found.set(key, { id: row.id, source: row.source, rawValue: row.rawValue });
-    }
+    perDay.set(key, [...(perDay.get(key) ?? []), row]);
+  }
+  for (const [key, rows] of perDay) {
+    const row = whatStands(rows, timeZone)!;
+    found.set(key, { id: row.id, source: row.source, rawValue: row.rawValue });
   }
   return found;
 }
