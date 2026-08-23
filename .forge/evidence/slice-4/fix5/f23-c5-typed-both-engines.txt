@@ -1,0 +1,73 @@
+F23 and C5, the waist field, typed one character at a time in both engines.
+Extracted from .forge/evidence/slice-4/fix5/e2e-suite.txt, the full end-to-end run.
+
+Every trace line below is the field read back after ONE keypress: the key, what
+the field held after it, and where the caret sat. The trace the verifier recorded
+on the old build, for the same four keys, was:
+    "9" -> "9.0" caret 3   "9" -> "9.1" caret 3   "." -> "9.1"   "0" -> "9.1"
+
+F23  chrome the empty card reads: No waist measurement yetTape at the navel, standing, breathing out. Same spot each time matters more than the exact number.
+F23  chrome the value reads "--" and holds "", which is blank and not zero
+F23  chrome both stepper controls are refused while the field is blank
+C5   chrome the waist field measures 130x52 px
+F23  chrome first-ever "9" -> "9" caret 1
+F23  chrome first-ever "9" -> "99" caret 2
+F23  chrome first-ever "." -> "99." caret 3
+F23  chrome first-ever "0" -> "99.0" caret 4
+F23  chrome a first-ever waist committed in 3 taps from Today
+F23  chrome stored: 99.0 cm
+F23  chrome with a measurement on file one tap moves it to 99.5
+F23  chrome a tap at the right edge puts the caret at 4
+F23  chrome clearing   "Backspace" -> "99." caret 3
+F23  chrome clearing   "Backspace" -> "99" caret 2
+F23  chrome clearing   "Backspace" -> "9" caret 1
+F23  chrome clearing   "Backspace" -> "" caret 0
+F23  chrome correction "9" -> "9" caret 1
+F23  chrome correction "1" -> "91" caret 2
+F23  chrome correction "." -> "91." caret 3
+F23  chrome correction "4" -> "91.4" caret 4
+F23  chrome the corrected reading stored as 91.4 cm manual, over 2 waist rows, both kept, because this table appends
+F23  webkit the empty card reads: No waist measurement yetTape at the navel, standing, breathing out. Same spot each time matters more than the exact number.
+F23  webkit the value reads "--" and holds "", which is blank and not zero
+F23  webkit both stepper controls are refused while the field is blank
+C5   webkit the waist field measures 133x52 px
+F23  webkit first-ever "9" -> "9" caret 1
+F23  webkit first-ever "9" -> "99" caret 2
+F23  webkit first-ever "." -> "99." caret 3
+F23  webkit first-ever "0" -> "99.0" caret 4
+F23  webkit a first-ever waist committed in 3 taps from Today
+F23  webkit stored: 99.0 cm
+F23  webkit with a measurement on file one tap moves it to 99.5
+F23  webkit a tap at the right edge puts the caret at 4
+F23  webkit clearing   "Backspace" -> "99." caret 3
+F23  webkit clearing   "Backspace" -> "99" caret 2
+F23  webkit clearing   "Backspace" -> "9" caret 1
+F23  webkit clearing   "Backspace" -> "" caret 0
+F23  webkit correction "9" -> "9" caret 1
+F23  webkit correction "1" -> "91" caret 2
+F23  webkit correction "." -> "91." caret 3
+F23  webkit correction "4" -> "91.4" caret 4
+F23  webkit the corrected reading stored as 91.4 cm manual, over 2 waist rows, both kept, because this table appends
+C5   chrome the last stored waist is 98.5 cm, and 91.4 is typed over it
+C5   chrome mid-read   "9" -> "9" caret 1
+C5   chrome mid-read   "1" -> "91" caret 2
+C5   chrome mid-read   "." -> "91." caret 3
+C5   chrome mid-read   "4" -> "91.4" caret 4
+C5   chrome the read landed saying "Last 98.5 cm, 20 Aug" and the field still reads 91.4
+C5   chrome and 91.4 is what reached the database
+C5   webkit the last stored waist is 98.5 cm, and 91.4 is typed over it
+C5   webkit mid-read   "9" -> "9" caret 1
+C5   webkit mid-read   "1" -> "91" caret 2
+C5   webkit mid-read   "." -> "91." caret 3
+C5   webkit mid-read   "4" -> "91.4" caret 4
+C5   webkit the read landed saying "Last 98.5 cm, 20 Aug" and the field still reads 91.4
+C5   webkit and 91.4 is what reached the database
+
+The waist field measured at three viewports, C5 target walk, quick-log.spec.ts:
+--- 393 px ---  52 px  34px  Waist in centimetres
+--- 768 px ---  52 px  34px  Waist in centimetres
+--- 1280 px ---  52 px  34px  Waist in centimetres
+
+Every target inside the sheet clears the 44 px floor at all three viewports. The
+field is named by its label because it carries no text of its own, and the walk
+reads inputs at all, which is how 133x40 went four rounds unmeasured.

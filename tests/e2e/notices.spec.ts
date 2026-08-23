@@ -14,6 +14,7 @@ import {
   waitForScratch,
 } from './host';
 import { strings } from '../../src/lib/strings';
+import { longDate } from '../../src/lib/format';
 
 /**
  * F27, amended, and the class of defect it turned out to be.
@@ -38,7 +39,7 @@ import { strings } from '../../src/lib/strings';
  * There are four elements above the trend and each states its number where it is
  * built:
  *
- *   header.title      63 px   fixed type on a fixed padding
+ *   header.title      63 px   one line at every date its formatter can produce
  *   .banner.queue     one line, clamped in the stylesheet, at any queue depth
  *   details.notices   one summary row, clamped, whatever it holds
  *   section.card.day  the session row plus the pair a write replaces
@@ -102,6 +103,35 @@ const ONE_QUIET_ANCHOR = 196;
 /** Counts the notice copy has to hold at, read through the shipped function. */
 const COUNTS = [1, 2, 3, 5, 9, 42, 999_999];
 
+/**
+ * Every date the title above "Today" can carry: seven weekdays by twelve
+ * months, 84 of them, each on a two-digit day so the widest form of each is the
+ * one measured.
+ *
+ * Produced by the shipped formatter over real dates rather than written out, so
+ * a change to `longDate` is a change to this list. `header.title` renders
+ * `longDate(now)` in its label, which is what the last report missed when it
+ * called that element's height "fixed type, no data reaches it". Data reaches
+ * it. The bound is that no date the formatter can produce makes it a second
+ * line.
+ */
+function everyTitleDate(): string[] {
+  const labels: string[] = [];
+  const seen = new Set<string>();
+  const day = new Date(Date.UTC(2026, 0, 20));
+  for (let index = 0; index < 400; index += 1) {
+    if (day.getUTCDate() >= 20) {
+      const key = `${day.getUTCDay()}-${day.getUTCMonth()}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        labels.push(longDate(day, 'Europe/Paris'));
+      }
+    }
+    day.setUTCDate(day.getUTCDate() + 1);
+  }
+  return labels;
+}
+
 type Measured = {
   state: string;
   engine: Engine;
@@ -122,6 +152,8 @@ type Measured = {
   regionByCount: Record<string, number>;
   /** The offline line's height at 1 and at 999999 queued entries. */
   queueByCount: Record<string, number>;
+  /** The title's height at every date label the shipped formatter can produce. */
+  titleByLabel: Record<string, number>;
 };
 
 test.describe.configure({ mode: 'serial' });
@@ -272,9 +304,10 @@ async function measure(
   page: import('@playwright/test').Page,
   noticeCopy: string[],
   queueCopy: string[],
+  titleLabels: string[],
 ): Promise<Omit<Measured, 'state' | 'engine'>> {
   return page.evaluate(
-    ({ counts, notices, queues }) => {
+    ({ counts, notices, queues, labels }) => {
       const round = (value: number) => Math.round(value);
       const trend = document.querySelector('[data-chart="today-weight"]')!.getBoundingClientRect();
       const trendBottom = round(trend.bottom + window.scrollY);
@@ -301,7 +334,8 @@ async function measure(
 
       const region = document.querySelector('[data-notices]') as HTMLDetailsElement | null;
       const queue = document.querySelector('.banner.queue') as HTMLElement | null;
-      const title = document.querySelector('header.title')!.getBoundingClientRect();
+      const titleHeader = document.querySelector('header.title')!;
+      const title = titleHeader.getBoundingClientRect();
       const day = document.querySelector('.card.day')!;
       const dayStyle = getComputedStyle(day);
       const adherence = document.querySelector('.card.adherence')?.getBoundingClientRect() ?? null;
@@ -330,6 +364,24 @@ async function measure(
         queueLine.innerHTML = queueWas;
       }
 
+      // The title's height against every date its own formatter can produce.
+      //
+      // DATA REACHES THIS ELEMENT, which the last report got wrong: the label
+      // above "Today" is `longDate(now)`, so the bound is not "fixed type with
+      // nothing in it" but "one line of fixed type at every label there is".
+      // Every one of the 84 is written into the shipped node and the header is
+      // re-measured, the same way the notice region and the offline line are.
+      const titleByLabel: Record<string, number> = {};
+      const dateLabel = titleHeader.querySelector('.lbl');
+      const dateWas = dateLabel?.textContent ?? '';
+      if (dateLabel) {
+        for (const text of labels) {
+          dateLabel.textContent = text;
+          titleByLabel[text] = round(titleHeader.getBoundingClientRect().height);
+        }
+        dateLabel.textContent = dateWas;
+      }
+
       return {
         scrollY: window.scrollY,
         trendBottom,
@@ -345,9 +397,10 @@ async function measure(
         cardGap: Number.parseFloat(dayStyle.marginBottom),
         regionByCount,
         queueByCount,
+        titleByLabel,
       };
     },
-    { counts: COUNTS, notices: noticeCopy, queues: queueCopy },
+    { counts: COUNTS, notices: noticeCopy, queues: queueCopy, labels: titleLabels },
   );
 }
 
@@ -467,6 +520,7 @@ test('F27. every element above the trend is bounded, the maxima sum inside 715, 
   const readings: Measured[] = [];
   const noticeCopy = COUNTS.map((count) => strings.notices.summary(count));
   const queueCopy = COUNTS.map((count) => `${strings.todayLog.queueTitle} ${strings.todayLog.queueBody(count)}`);
+  const titleDates = everyTitleDate();
 
   /**
    * The five states F27 names, in the order they are cheapest to build. Each
@@ -559,7 +613,7 @@ test('F27. every element above the trend is bounded, the maxima sum inside 715, 
           await page.waitForLoadState('networkidle');
           if (state.inPage) await state.inPage(page, context);
 
-          const read = await measure(page, noticeCopy, queueCopy);
+          const read = await measure(page, noticeCopy, queueCopy, titleDates);
           readings.push({ state: state.name, engine, ...read });
 
           console.log(
@@ -639,10 +693,23 @@ test('F27. every element above the trend is bounded, the maxima sum inside 715, 
   console.log(`F27  offline line, every height measured at queue depths ${COUNTS.join(', ')}: ${[...queueHeights].join(', ')}`);
   expect([...queueHeights], 'the offline line height depends on the queue depth').toHaveLength(1);
 
-  // The title, which takes its height from fixed type on fixed padding.
+  // The title, at every date it can carry.
+  //
+  // DATA REACHES THIS ELEMENT and the last report said it did not. Its label is
+  // `longDate(now)`, so the bound is not "fixed type with nothing in it": it is
+  // that no date the formatter can produce takes the header to a second line.
+  // All 84 are written into the shipped node and the header re-measured, the
+  // same treatment the notice region and the offline line get.
   const titles = new Set(readings.map((reading) => reading.title));
-  console.log(`F27  title header, every height measured: ${[...titles].join(', ')}`);
-  expect([...titles], 'the title height depends on something').toHaveLength(1);
+  for (const reading of readings) {
+    for (const label of titleDates) titles.add(reading.titleByLabel[label]);
+  }
+  console.log(
+    `F27  title header, every height measured over ${titleDates.length} date labels ` +
+      `x ${readings.length} readings: ${[...titles].join(', ')}`,
+  );
+  expect(titleDates, 'the date catalogue is not seven weekdays by twelve months').toHaveLength(84);
+  expect([...titles], 'the title height depends on the date in it').toHaveLength(1);
 
   // The day card, at its smallest count of rows and at its largest: the plan's
   // three rows, and the session row beside a write carrying all six values with
@@ -664,25 +731,35 @@ test('F27. every element above the trend is bounded, the maxima sum inside 715, 
   const titleMax = Math.max(...readings.map((reading) => reading.title));
   const queueMax = Math.max(...queueHeights);
   const regionMax = Math.max(...regionHeights);
-  // What the weight card spends above its own chart, which is the last thing
-  // between the day card and the trend. Measured rather than assumed.
+  // What the weight card spends above its own chart, measured from the card's
+  // own top rather than from the day card's bottom.
+  //
+  // FROM ITS BOTTOM IT WAS 177, AND 12 OF THAT WAS THE GAP THE SUM ALREADY
+  // COUNTS. The card's own contribution is 165: its label, its headline and the
+  // margin above the chart. The correction is 12 px on the total and it is the
+  // difference between an arithmetic that adds up and one that adds a card gap
+  // twice, which is exactly the kind of slack nobody can spend.
   const weightAbove = Math.max(
     ...readings.map((reading) => {
-      const day = reading.above.find((element) => element.what.includes('card.day'))!;
-      return reading.trendBottom - day.bottom;
+      const card = reading.above[reading.above.length - 1];
+      return reading.trendBottom - card.top;
     }),
   );
   const chrome = Math.min(...readings.map((reading) => reading.above[0].top));
-  const sum = chrome + titleMax + CARD_GAP + queueMax + CARD_GAP + regionMax + CARD_GAP + dayMax + weightAbove;
+  // Three junctions carry a card gap and one does not: the offline line sits
+  // directly under the title with no margin between them, measured at 71 to 71
+  // on every reading. The three are queue to region, region to day card, and
+  // day card to weight card.
+  const sum = chrome + titleMax + queueMax + CARD_GAP + regionMax + CARD_GAP + dayMax + CARD_GAP + weightAbove;
 
   console.log('\nF27  the maxima, and their sum');
   console.log(`F27    scroll padding above the title      ${String(chrome).padStart(4)} px`);
-  console.log(`F27    header.title                        ${String(titleMax).padStart(4)} px  fixed type, fixed padding`);
+  console.log(`F27    header.title                        ${String(titleMax).padStart(4)} px  one line at every one of ${titleDates.length} date labels`);
   console.log(`F27    .banner.queue                       ${String(queueMax).padStart(4)} px  one clamped line at any queue depth`);
   console.log(`F27    details.notices                     ${String(regionMax).padStart(4)} px  one clamped summary row whatever it holds`);
   console.log(`F27    section.card.day                    ${String(dayMax).padStart(4)} px  the session row plus the pair a write replaces`);
   console.log(`F27    the weight card above its chart     ${String(weightAbove).padStart(4)} px  label, headline and the chart's own margin`);
-  console.log(`F27    three card gaps at ${CARD_GAP} px           ${String(CARD_GAP * 3).padStart(4)} px`);
+  console.log(`F27    three card gaps at ${CARD_GAP} px           ${String(CARD_GAP * 3).padStart(4)} px  the fourth junction has none`);
   console.log(`F27    sum                                 ${String(sum).padStart(4)} px  against a fold of ${FOLD} px`);
   expect(sum, 'the maxima do not sum inside the fold').toBeLessThanOrEqual(FOLD);
 
@@ -719,7 +796,8 @@ test('F24 and C5. the offline line is neutral, one line, under the title, with t
         await expect(line).toBeVisible();
         const read = await line.evaluate((node) => {
           const style = getComputedStyle(node);
-          const title = document.querySelector('header.title')!.getBoundingClientRect();
+          const titleHeader = document.querySelector('header.title')!;
+      const title = titleHeader.getBoundingClientRect();
           const firstCard = document.querySelector('.card')!.getBoundingClientRect();
           const box = node.getBoundingClientRect();
           return {

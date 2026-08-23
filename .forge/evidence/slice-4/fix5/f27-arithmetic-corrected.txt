@@ -1,0 +1,32 @@
+F27  readings: 10
+F27  card padding 16 px and card gap 12 px on every reading, measured on the shipped screen
+F27  notice region, every height measured at counts 1, 2, 3, 5, 9, 42, 999999: 46
+F27  offline line, every height measured at queue depths 1, 2, 3, 5, 9, 42, 999999: 39
+F27  title header, every height measured over 84 date labels x 10 readings: 63
+F27  day card in nothing-raised: 294, 294 px
+F27  day card in every-source-quiet: 294, 294 px
+F27  day card in open-import-question: 294, 294 px
+F27  day card in offline-with-entries-queued: 294, 294 px
+F27  day card in after-one-quick-log-all-six: 322, 322 px
+F27  day card measured from 294 px at its smallest to 322 px at its largest
+
+F27  the maxima, and their sum
+F27    scroll padding above the title         8 px
+F27    header.title                          63 px  one line at every one of 84 date labels
+F27    .banner.queue                         39 px  one clamped line at any queue depth
+F27    details.notices                       46 px  one clamped summary row whatever it holds
+F27    section.card.day                     322 px  the session row plus the pair a write replaces
+F27    the weight card above its chart      165 px  label, headline and the chart's own margin
+F27    three card gaps at 12 px             36 px  the fourth junction has none
+F27    sum                                  679 px  against a fold of 715 px
+F27  the deepest the trend reached in any state or engine: 679 px
+
+  ✓  1 [chrome-scratch] › tests/e2e/notices.spec.ts:519:1 › F27. every element above the trend is bounded, the maxima sum inside 715, and the trend clears the fold in five states and both engines (44.4s)
+teardown: the owner's database holds 91 measurement, 39 source_record, 1 measurement not seeded.
+teardown: its device signals read standalone_seen=true@2026-08-22 16:13:55.795+02/2026-08-22 20:28:20.543872+02/unattributed, wake_lock_available=true@2026-08-22 16:13:55.804+02/2026-08-22 16:13:55.804748+02/unattributed.
+teardown: test-stack: stopped
+teardown: it held 91 measurement, 39 source_record, 1 measurement not seeded before the run, so nothing of the owner's was taken.
+
+  1 passed (48.6s)
+
+[exited with code 0]
