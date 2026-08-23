@@ -1984,6 +1984,38 @@ export const strings = {
   },
 
   /**
+   * THE CONFIRM DIFF, and it is its own block because the component is shared.
+   *
+   * `src/components/ConfirmDiff.tsx` is rendered by the training week and by the
+   * calendar write, which is C14, so its words cannot live under either surface's
+   * key: copy filed under `calendar` and drawn on screen 06 is a catalogue that
+   * has stopped describing where its strings appear. What is here is what the
+   * component itself draws. What each surface says around it stays with the
+   * surface.
+   */
+  confirm: {
+    summaryLabel: 'Summary',
+    added: 'added',
+    moved: 'moved',
+    removed: 'removed',
+    groupAdded: 'Added',
+    groupMoved: 'Moved',
+    groupRemoved: 'Removed',
+    selectedChip: (chosen: number, total: number) => `${chosen} of ${total} selected`,
+    /** C15 asks the list to state its own length as a number before it is scrolled. */
+    rowCount: (rows: number) =>
+      rows === 1 ? '1 change is listed below' : `${rows} changes are listed below`,
+    beforeLabel: 'Calendar now',
+    afterLabel: 'Calendar after',
+    columnEmpty: 'Nothing in this window',
+    acceptLabel: 'Apply this change',
+    rejectLabel: 'Hold this one back',
+    acceptRemovalLabel: 'Delete it from the calendar',
+    keepLabel: 'Keep it in the calendar',
+    removalNote: 'Removals start unselected. You opt in to a delete, never out of it.',
+  },
+
+  /**
    * Google Calendar, and the confirm diff that stands in front of every write.
    *
    * THE COPY IS THE CONTROL HERE, not decoration on top of one. The panel's
@@ -2102,19 +2134,6 @@ export const strings = {
     /* ---------------- the confirm diff ---------------- */
     diffTitle: 'Confirm the changes',
     diffSub: 'Nothing is written yet.',
-    summaryLabel: 'Summary',
-    added: 'added',
-    moved: 'moved',
-    removed: 'removed',
-    groupAdded: 'Added',
-    groupMoved: 'Moved',
-    groupRemoved: 'Removed',
-    selectedChip: (chosen: number, total: number) => `${chosen} of ${total} selected`,
-    rowCount: (rows: number) =>
-      rows === 1 ? '1 change is listed below' : `${rows} changes are listed below`,
-    beforeLabel: 'Calendar now',
-    afterLabel: 'Calendar after',
-    columnEmpty: 'Nothing in this window',
     writtenWhereLabel: 'Written where',
     writtenWhere: (name: string) =>
       `Calendar ${name} only. Nothing is written to your own calendar, ever.`,
@@ -2127,12 +2146,7 @@ export const strings = {
     apply: (count: number) => (count === 1 ? 'Apply 1 change' : `Apply ${count} changes`),
     applyNone: 'Nothing selected yet',
     applying: 'Writing',
-    removalNote: 'Removals start unselected. You opt in to a delete, never out of it.',
     undoStays: 'Undo stays on this screen after the write, and in the log below for ever.',
-    acceptLabel: 'Apply this change',
-    rejectLabel: 'Hold this one back',
-    acceptRemovalLabel: 'Delete it from the calendar',
-    keepLabel: 'Keep it in the calendar',
     when: (day: string, from: string, to: string) => `${day}, ${from} to ${to}`,
     whenShort: (day: string, time: string) => `${day}, ${time}`,
 

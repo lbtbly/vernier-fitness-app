@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { ConfirmDiff } from '@/components/ConfirmDiff';
 import { CloseIcon, EditIcon, OkIcon, SparkIcon } from '@/components/icons';
 import { longDate, time24 } from '@/lib/format';
 import { strings } from '@/lib/strings';
@@ -177,27 +178,48 @@ export function TrainWeek({
         </div>
       ) : null}
 
-      {week.map((row) => (
-        <section className="card" key={row.id} data-proposal={row.id} data-state={row.state}>
-          <div className="between" style={{ alignItems: 'flex-start' }}>
-            <div className="stack grow">
-              <span className="lbl">{longDate(new Date(row.plannedFor), timeZone)}</span>
-              <span className="head" style={{ marginTop: '2px' }}>
-                {KINDS[row.kind] ?? row.kind}, {strings.trainWeek.duration(row.durationMinutes)}
-              </span>
-              <span className="sub num">
-                {strings.trainWeek.when(
-                  time24(new Date(row.plannedFor), timeZone),
-                  time24(endOf(row), timeZone),
-                  PLACES[row.place] ?? row.place,
-                )}
-              </span>
-            </div>
-            {/*
-              * Accept, edit, reject. Three controls on one row and no fourth
-              * anywhere on this screen: there is no button that decides more
-              * than the card it sits in.
-              */}
+      {/*
+        * THE SHARED CONFIRM COMPONENT, WITH THIS SCREEN'S ROWS IN IT.
+        *
+        * C14: the training week and the calendar write render the same
+        * component. Counts first at metric size in the order added, moved,
+        * removed; rows grouped by verb; each one carrying the cause it was
+        * placed on; per-row confirmation. What differs is the rows and the
+        * footer, and the footer differs by rubric rather than by taste: F72
+        * forbids any control on this screen that commits the whole week, so this
+        * surface keeps its own bottom bar below and never passes an Apply
+        * button into the component's footer slot.
+        *
+        * The proposals are all additions to the plan, so the moved and removed
+        * counts are zero here and the groups they would head are not drawn. A
+        * rejection is an addition held back rather than a removal, and the
+        * per-row state chip below says which.
+        */}
+      <ConfirmDiff
+        label={strings.trainWeek.nextWeek}
+        counts={{ added: week.length, moved: 0, removed: 0 }}
+        chip={strings.confirm.selectedChip(accepted, week.length)}
+        rowCountLine={strings.confirm.rowCount(week.length)}
+        rows={week.map((row) => ({
+          id: row.id,
+          verb: 'added' as const,
+          label: longDate(new Date(row.plannedFor), timeZone),
+          title: `${KINDS[row.kind] ?? row.kind}, ${strings.trainWeek.duration(row.durationMinutes)}`,
+          when: strings.trainWeek.when(
+            time24(new Date(row.plannedFor), timeZone),
+            time24(endOf(row), timeZone),
+            PLACES[row.place] ?? row.place,
+          ),
+          cause: row.cause,
+          selected: row.state === 'accepted',
+          attrs: { 'data-proposal': row.id, 'data-state': row.state },
+          /*
+           * Accept, edit, reject. Three controls on one row and no fourth
+           * anywhere on this screen: there is no button that decides more than
+           * the card it sits in. They replace the component's own pair because
+           * this surface has a third control the calendar write does not.
+           */
+          controls: (
             <div className="seg" role="group" aria-label={KINDS[row.kind] ?? row.kind}>
               <button
                 type="button"
@@ -229,60 +251,58 @@ export function TrainWeek({
                 <CloseIcon />
               </button>
             </div>
-          </div>
-
-          <p className="reason" data-cause>
-            {row.cause}
-          </p>
-
-          {row.fullBody ? (
-            <div className="chips" style={{ marginTop: '10px' }}>
-              <span className="chip">{strings.trainWeek.fullBody}</span>
-              <span className="chip">{strings.trainWeek.movements(row.movements.length)}</span>
-            </div>
-          ) : null}
-
-          {/*
-            * The plain fact about the length, when there is one. A percentage
-            * and the minutes it was measured against, and no risk number
-            * anywhere near it: the 10 percent rule as injury prevention was
-            * falsified in a 532-person randomised trial at P=.90, and no trial
-            * has ever shown a progression rule that prevents injuries.
-            */}
-          {row.percentLonger !== null && row.longestMinutes !== null ? (
-            <div className="stack" style={{ marginTop: '10px' }} data-length-fact={row.percentLonger}>
-              <span className="sub">
-                {strings.trainWeek.longerFact(row.percentLonger, row.longestMinutes)}
-              </span>
-              <span className="note">{strings.trainWeek.longerNote}</span>
-            </div>
-          ) : null}
-
-          {row.state === 'rejected' ? (
-            <p className="note" style={{ marginTop: '10px' }}>
-              {strings.trainWeek.rejectedNote}
-            </p>
-          ) : null}
-
-          <div className="between" style={{ marginTop: '10px' }}>
-            <span className="chip">{STATES[row.state] ?? row.state}</span>
-            {row.state === 'accepted' ? (
+          ),
+          outcome: STATES[row.state] ?? row.state,
+          after:
+            row.state === 'accepted' ? (
               <Link className="btn quiet" href={`/train/session/${row.id}`}>
                 {strings.trainWeek.startSession}
               </Link>
-            ) : null}
-          </div>
+            ) : null,
+          extra: (
+            <>
+              {row.fullBody ? (
+                <div className="chips" style={{ marginTop: '10px' }}>
+                  <span className="chip">{strings.trainWeek.fullBody}</span>
+                  <span className="chip">{strings.trainWeek.movements(row.movements.length)}</span>
+                </div>
+              ) : null}
 
-          {failure && failure.id === row.id ? (
-            <div className="card error" data-state="error" style={{ marginTop: '10px', marginBottom: 0 }}>
-              <div className="head" style={{ marginTop: 0 }}>
-                {strings.trainWeek.errorTitle}
-              </div>
-              <p className="sub">{failure.detail}</p>
-            </div>
-          ) : null}
-        </section>
-      ))}
+              {/*
+                * The plain fact about the length, when there is one. A
+                * percentage and the minutes it was measured against, and no risk
+                * number anywhere near it: the 10 percent rule as injury
+                * prevention was falsified in a 532-person randomised trial at
+                * P=.90, and no trial has ever shown a progression rule that
+                * prevents injuries.
+                */}
+              {row.percentLonger !== null && row.longestMinutes !== null ? (
+                <div className="stack" style={{ marginTop: '10px' }} data-length-fact={row.percentLonger}>
+                  <span className="sub">
+                    {strings.trainWeek.longerFact(row.percentLonger, row.longestMinutes)}
+                  </span>
+                  <span className="note">{strings.trainWeek.longerNote}</span>
+                </div>
+              ) : null}
+
+              {row.state === 'rejected' ? (
+                <p className="note" style={{ marginTop: '10px' }}>
+                  {strings.trainWeek.rejectedNote}
+                </p>
+              ) : null}
+
+              {failure && failure.id === row.id ? (
+                <div className="card error" data-state="error" style={{ marginTop: '10px', marginBottom: 0 }}>
+                  <div className="head" style={{ marginTop: 0 }}>
+                    {strings.trainWeek.errorTitle}
+                  </div>
+                  <p className="sub">{failure.detail}</p>
+                </div>
+              ) : null}
+            </>
+          ),
+        }))}
+      />
 
       <div className="card flat" style={{ borderStyle: 'dashed' }}>
         <div className="between" style={{ marginBottom: '6px' }}>

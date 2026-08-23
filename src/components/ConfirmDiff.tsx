@@ -36,6 +36,8 @@ export type ConfirmVerb = 'added' | 'moved' | 'removed';
 export type ConfirmRow = {
   id: string;
   verb: ConfirmVerb;
+  /** The small label above the title, where a surface uses one. The day, usually. */
+  label?: string | null;
   /** What is changing: the session, or the calendar itself. */
   title: string;
   /** When it lands, rendered by the caller in the app's zone. */
@@ -78,9 +80,9 @@ export type ConfirmColumns = {
 export type ConfirmCounts = { added: number; moved: number; removed: number };
 
 const GROUPS: Array<{ verb: ConfirmVerb; label: string }> = [
-  { verb: 'added', label: strings.calendar.groupAdded },
-  { verb: 'moved', label: strings.calendar.groupMoved },
-  { verb: 'removed', label: strings.calendar.groupRemoved },
+  { verb: 'added', label: strings.confirm.groupAdded },
+  { verb: 'moved', label: strings.confirm.groupMoved },
+  { verb: 'removed', label: strings.confirm.groupRemoved },
 ];
 
 export function ConfirmDiff({
@@ -124,19 +126,19 @@ export function ConfirmDiff({
             <span className="metric good" data-count="added">
               {counts.added}
             </span>
-            <span className="note">{strings.calendar.added}</span>
+            <span className="note">{strings.confirm.added}</span>
           </div>
           <div className="stack">
             <span className="metric" data-count="moved">
               {counts.moved}
             </span>
-            <span className="note">{strings.calendar.moved}</span>
+            <span className="note">{strings.confirm.moved}</span>
           </div>
           <div className="stack">
             <span className="metric warn" data-count="removed">
               {counts.removed}
             </span>
-            <span className="note">{strings.calendar.removed}</span>
+            <span className="note">{strings.confirm.removed}</span>
           </div>
         </div>
         {rowCountLine ? (
@@ -235,6 +237,7 @@ function ConfirmRowCard({
     >
       <div className="between" style={{ alignItems: 'flex-start' }}>
         <div className="stack grow">
+          {row.label ? <span className="lbl">{row.label}</span> : null}
           <span className="strong">{removal ? <s>{row.title}</s> : row.title}</span>
           <span className="sub num" data-confirm-when>
             {row.wasWhen ? (
@@ -253,7 +256,7 @@ function ConfirmRowCard({
               className="ok"
               data-decision="accept"
               aria-pressed={row.selected}
-              aria-label={removal ? strings.calendar.acceptRemovalLabel : strings.calendar.acceptLabel}
+              aria-label={removal ? strings.confirm.acceptRemovalLabel : strings.confirm.acceptLabel}
               disabled={row.busy || row.settled || !onToggle}
               onClick={() => onToggle?.(row.id, true)}
             >
@@ -264,7 +267,7 @@ function ConfirmRowCard({
               className="no"
               data-decision="reject"
               aria-pressed={!row.selected}
-              aria-label={removal ? strings.calendar.keepLabel : strings.calendar.rejectLabel}
+              aria-label={removal ? strings.confirm.keepLabel : strings.confirm.rejectLabel}
               disabled={row.busy || row.settled || !onToggle}
               onClick={() => onToggle?.(row.id, false)}
             >
@@ -282,7 +285,7 @@ function ConfirmRowCard({
 
       {removal && onToggle ? (
         <p className="note warn" style={{ marginTop: '8px' }} data-removal-note>
-          {strings.calendar.removalNote}
+          {strings.confirm.removalNote}
         </p>
       ) : null}
 

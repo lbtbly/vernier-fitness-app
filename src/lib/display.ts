@@ -240,9 +240,9 @@ export function calendarOutcomeLabel(outcome: string): string {
 }
 
 const CALENDAR_VERBS: Record<string, string> = {
-  added: strings.calendar.groupAdded,
-  moved: strings.calendar.groupMoved,
-  removed: strings.calendar.groupRemoved,
+  added: strings.confirm.groupAdded,
+  moved: strings.confirm.groupMoved,
+  removed: strings.confirm.groupRemoved,
   undo: strings.calendar.undone,
 };
 

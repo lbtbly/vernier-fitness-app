@@ -120,9 +120,9 @@ export function CalendarDiff({
 
   const columns: ConfirmColumns | null = current
     ? {
-        beforeLabel: strings.calendar.beforeLabel,
-        afterLabel: strings.calendar.afterLabel,
-        emptyLabel: strings.calendar.columnEmpty,
+        beforeLabel: strings.confirm.beforeLabel,
+        afterLabel: strings.confirm.afterLabel,
+        emptyLabel: strings.confirm.columnEmpty,
         before: beforeColumn(current.beforeEvents).map((entry) => ({
           id: entry.eventId,
           title: entry.title,
@@ -344,12 +344,12 @@ export function CalendarDiff({
 
       {current && rows.length > 0 ? (
         <ConfirmDiff
-          label={strings.calendar.summaryLabel}
+          label={strings.confirm.summaryLabel}
           counts={counts}
           rows={confirmRows}
           columns={columns}
-          chip={open ? strings.calendar.selectedChip(chosen, rows.length) : null}
-          rowCountLine={strings.calendar.rowCount(rows.length)}
+          chip={open ? strings.confirm.selectedChip(chosen, rows.length) : null}
+          rowCountLine={strings.confirm.rowCount(rows.length)}
           onToggle={
             open
               ? (id, next) =>
@@ -481,7 +481,7 @@ function whenLine(
 ): string {
   const start = afterStart ?? beforeStart;
   const end = afterEnd ?? beforeEnd;
-  if (!start) return strings.calendar.columnEmpty;
+  if (!start) return strings.confirm.columnEmpty;
   if (!end) {
     return strings.calendar.whenShort(
       shortDate(new Date(start), timeZone),
