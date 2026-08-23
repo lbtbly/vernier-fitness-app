@@ -1474,6 +1474,42 @@ html[data-theme=light]{--media-plate:#FFFFFF}
 .player .fill{flex:1;display:flex;flex-direction:column}
 .player .spacer{flex:1;min-height:var(--s3)}
 
+/*
+ * SET DONE IS ON THE SCREEN, BY CONSTRUCTION, NOT BY LUCK.
+ *
+ * The work phase is a header, a demonstration photograph, the movement, the
+ * open set, the target range and three transport buttons, and at 393x852 that
+ * adds up to about 890 px. So the column grew past the viewport and the 88 px
+ * control the owner needs mid-set sat at y771 to y859, seven pixels of it below
+ * the bottom edge, with the tab bar drawn across the rest of it. Removing the
+ * bar stopped the tap going to /train. It did not put the button on the screen.
+ *
+ * These two phases are exactly one viewport tall now and the middle scrolls
+ * inside itself, which is what screen 07 draws: a phone frame with a filler
+ * that gives and a button pinned under it. What the owner touches mid-set
+ * cannot be pushed off the bottom by a photograph, a long movement name or a
+ * card a later slice adds, because none of them are in the same box any more.
+ *
+ * `min-height:0` is what makes it real. A flex item defaults to min-height:auto,
+ * which refuses to shrink below its content, and without it `overflow-y` on the
+ * fill has nothing to overflow: the box would grow again and the fix would look
+ * applied while changing nothing.
+ *
+ * The chain above is pinned for the same reason. `.app` is `min-height:100dvh`
+ * with an auto height, so a percentage height inside it depends on content that
+ * depends on the percentage, and a browser is entitled to fall back to auto:
+ * the rule would read as applied and do nothing at all. One definite height at
+ * the top makes every height under it definite.
+ *
+ * `ready` and `done` are deliberately not here. Neither carries a control that
+ * has to stay put, and the finish screen is a long form that should scroll the
+ * way every other form in this product scrolls.
+ */
+.app:has(.player[data-phase=work]),.app:has(.player[data-phase=rest]){height:100dvh}
+.player[data-phase=work],.player[data-phase=rest]{height:100%}
+.player[data-phase=work] .fill,.player[data-phase=rest] .fill{min-height:0;overflow-y:auto}
+.player[data-phase=rest] .restring{min-height:0;overflow-y:auto}
+
 /* One bar per block, done, now and to come. */
 .blocks{display:flex;gap:4px;margin-bottom:14px;list-style:none}
 .blocks li{flex:1;height:5px;border-radius:3px;background:var(--surface-3);display:block}

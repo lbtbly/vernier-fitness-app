@@ -406,6 +406,25 @@ describe('the suite against the owner\'s installation', () => {
    *   train-week:409,432      REAL. Rows the two refusal probes left behind,
    *                           counted after Postgres printed its refusal, on a
    *                           table the same file lists thirty rows of.
+   *
+   *   The craft-defect pass added one member and one file, and both were read
+   *   against the same question before they were written down.
+   *
+   *   session-player           REAL. Tab bar elements on the session player,
+   *   (the tab bar count)      which screen 07 draws none of. The same test
+   *                           counts the bar's five links on /train first and
+   *                           asserts that count, so a build where the bar
+   *                           never renders anywhere fails on the line above
+   *                           rather than passing on this one. That is exactly
+   *                           the trap: "nothing covers Set done" is also true
+   *                           of a screen with no tab bar in the product at all.
+   *   settings-integrations   REAL. Measurements carrying the identifier
+   *   (external_key)          Withings issues, over a population of
+   *                           demonstration rows counted and asserted greater
+   *                           than zero two lines above, with the connection
+   *                           row printed beside it. The zero IS the claim: the
+   *                           card counted the seed's ninety rows as readings
+   *                           the scale delivered.
    */
   it('lets no assertion claim a zero over a population the surface cannot render', () => {
     // The one that was hollow. It is gone from /health and present on Today.
@@ -431,7 +450,8 @@ describe('the suite against the owner\'s installation', () => {
       ['nutrition.spec.ts', 5],
       ['shopping.spec.ts', 1],
       ['console-walk.spec.ts', 3],
-      ['session-player.spec.ts', 2],
+      ['session-player.spec.ts', 3],
+      ['settings-integrations.spec.ts', 1],
       ['train-week.spec.ts', 3],
     ]);
     // `toHaveCount(0, { timeout: 3_000 })` was invisible to this pattern until

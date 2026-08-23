@@ -471,6 +471,77 @@ test.describe('C11, the player matches screen 07', () => {
     await page.screenshot({ path: `${CAPTURES}/c11-completion.png`, fullPage: true });
   });
 
+  /**
+   * THE WORST DEFECT THIS SLICE CLOSED, AS A TEST.
+   *
+   * At 393x852 the tab bar covered Set done: the control measured y771 to y859
+   * in an 852 px viewport, the bar sat at y795 to y852, `elementFromPoint` at
+   * the button's centre returned the bar's own glyph, and a real tap there
+   * navigated to /train and ended the session. Screen 07 draws no tab bar on
+   * any of its four frames.
+   *
+   * Three claims, at every viewport, and the last one is a real tap rather than
+   * a locator click, because a locator click finds the element wherever it is
+   * and would have passed on the shipped build.
+   *
+   * AND IT PRINTS THE POPULATION FIRST. "No tab bar over the button" also holds
+   * on a build where the tab bar never renders at all, so the bar is counted on
+   * the screen the player is reached from: five links there, none here.
+   */
+  test('nothing is drawn over Set done, and the tab bar is not on this screen', async ({ page }) => {
+    await signIn(page);
+    const id = await acceptedSessionId(page);
+
+    await page.goto('/train');
+    await page.waitForLoadState('networkidle');
+    const barOnTrain = await page.locator('.tabbar a').count();
+    console.log(`tab bar on /train: ${barOnTrain} links`);
+    expect(barOnTrain).toBe(5);
+
+    for (const viewport of VIEWPORTS) {
+      await page.setViewportSize({ width: viewport.width, height: viewport.height });
+      await page.goto(`/train/session/${id}`);
+      await page.locator('[data-action="start"]').click();
+      await expect(page.locator('[data-phase="work"]')).toBeVisible();
+
+      const barOnPlayer = await page.locator('.tabbar').count();
+      console.log(`${viewport.name}: tab bar elements on the player: ${barOnPlayer}`);
+      expect(barOnPlayer).toBe(0);
+
+      const probe = await page.locator('[data-action="set-done"]').evaluate((node) => {
+        const box = node.getBoundingClientRect();
+        const x = Math.round(box.left + box.width / 2);
+        const y = Math.round(box.top + box.height / 2);
+        const hit = document.elementFromPoint(x, y);
+        return {
+          x,
+          y,
+          top: Math.round(box.top),
+          bottom: Math.round(box.bottom),
+          height: Math.round(box.height),
+          viewport: window.innerHeight,
+          hit: hit ? `${hit.tagName.toLowerCase()}.${hit.getAttribute('class') ?? ''}` : 'nothing',
+          hitIsTheButton: hit !== null && (hit === node || node.contains(hit)),
+        };
+      });
+      console.log(
+        `${viewport.name}: set done y${probe.top} to y${probe.bottom} of ${probe.viewport}, ` +
+          `${probe.height} px tall, point (${probe.x}, ${probe.y}) hits ${probe.hit}`,
+      );
+      expect(probe.height).toBeGreaterThanOrEqual(88);
+      // Wholly inside the viewport, so it is reachable without scrolling.
+      expect(probe.top).toBeGreaterThanOrEqual(0);
+      expect(probe.bottom).toBeLessThanOrEqual(probe.viewport);
+      expect(probe.hitIsTheButton).toBe(true);
+
+      // The tap itself, at that point, with the mouse rather than the locator.
+      await page.mouse.click(probe.x, probe.y);
+      await expect(page.locator('[data-phase="rest"]')).toBeVisible();
+      expect(page.url()).toContain(`/train/session/${id}`);
+      console.log(`${viewport.name}: the tap landed on the set, still at ${page.url()}`);
+    }
+  });
+
   test('screen 07 at three viewports', async ({ page }) => {
     await signIn(page);
     const id = await acceptedSessionId(page);

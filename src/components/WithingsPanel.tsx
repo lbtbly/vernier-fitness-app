@@ -145,7 +145,7 @@ export function WithingsPanel(props: Props) {
         <dl>
           <div className="field">
             <dt>{strings.withings.lastSync}</dt>
-            <dd className="num">
+            <dd className="num" data-withings-last-sync="true">
               {busy ? (
                 <span className="skel" style={{ width: '112px' }} />
               ) : (
@@ -155,7 +155,7 @@ export function WithingsPanel(props: Props) {
           </div>
           <div className="field">
             <dt>{strings.withings.readingsStored}</dt>
-            <dd className="num">
+            <dd className="num" data-withings-imported="true">
               {busy ? <span className="skel" style={{ width: '48px' }} /> : view.importedRows}
             </dd>
           </div>

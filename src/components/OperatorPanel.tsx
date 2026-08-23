@@ -141,14 +141,14 @@ export function OperatorPanel(props: Props) {
       <section className="card">
         <span className="lbl">{strings.settings.integrationsTitle}</span>
         {integrations.map((integration) => (
-          <div className="row" key={integration.provider}>
+          <div className="row" key={integration.provider} data-integration={integration.provider}>
             <div className="grow stack">
               <div className="head">{integration.name}</div>
               <div className="note">{integration.purpose}</div>
               <div className="note">
                 {strings.settings.scopeLabel}: <span className="mono">{integration.scope}</span>
               </div>
-              <div className="note">
+              <div className="note" data-integration-last-sync="true">
                 {strings.settings.lastSyncLabel}:{' '}
                 {integration.lastSuccessfulSyncAt
                   ? shortDateTime(new Date(integration.lastSuccessfulSyncAt), props.timeZone)
