@@ -113,10 +113,50 @@ test('F36. connect, import, sync and status all complete with no client id and n
     'withings|sync_batch|t',
   );
 
-  // ---- the same import again. Same row count.
+  // ---- the same import again.
+  //
+  // NOT "the same row count", which is what this asserted and what it could
+  // never get. `importOnce` advances the demonstration account from its initial
+  // state to its revised state after the first historical import, exactly as a
+  // real Withings account does when a measure is re-weighed and re-sent, so the
+  // second pass sees five revised measures and appends five corrections. The
+  // assertion read 333 against 328 on every run, and because this file is
+  // serial the seven tests behind it, F38, F39, both halves of F42, F43, A2 and
+  // A1, never executed at all. A flat total would have meant a revision never
+  // arrives, which is the opposite of what F40 asks this pipeline to do.
+  //
+  // WHAT A RE-IMPORT MUST NOT DO IS DUPLICATE, so that is what is asserted. No
+  // second original for a measure already held, no new chain, and every row the
+  // second pass added is a correction of a row that was already there. It goes
+  // red the moment the importer writes a measure twice.
+  const chainsBefore = Number(scratchQuery('select count(distinct root_id) from measurement'));
+  const originalsBefore = Number(
+    scratchQuery('select count(*) from measurement where correction_index = 0'),
+  );
+  const revisionsBefore = Number(
+    scratchQuery('select count(*) from measurement where correction_index > 0'),
+  );
   await page.getByRole('button', { name: /import the history/i }).click();
   await expect(page.getByText(/readings stored out of/i)).toBeVisible({ timeout: 60_000 });
-  expect(Number(scratchQuery('select count(*) from measurement'))).toBe(stored);
+
+  const afterSecond = Number(scratchQuery('select count(*) from measurement'));
+  const chainsAfter = Number(scratchQuery('select count(distinct root_id) from measurement'));
+  const originalsAfter = Number(
+    scratchQuery('select count(*) from measurement where correction_index = 0'),
+  );
+  const revisionsAfter = Number(
+    scratchQuery('select count(*) from measurement where correction_index > 0'),
+  );
+  const appended = afterSecond - stored;
+  console.log(
+    `the second historical import: ${stored} rows became ${afterSecond}, ` +
+      `${chainsBefore} chains became ${chainsAfter}, ${originalsBefore} originals became ${originalsAfter}, ` +
+      `${revisionsBefore} revision(s) became ${revisionsAfter}, so it appended ${appended} row(s) ` +
+      'and every one of them is a revision of a measure already stored',
+  );
+  expect(chainsAfter).toBe(chainsBefore);
+  expect(originalsAfter).toBe(originalsBefore);
+  expect(revisionsAfter - revisionsBefore).toBe(appended);
 
   // ---- incremental sync
   await page.getByRole('button', { name: /^sync now$/i }).click();
