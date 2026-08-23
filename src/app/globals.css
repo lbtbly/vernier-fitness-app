@@ -379,6 +379,16 @@ body{
  * Eleven sheets agree on this one, including 00-patterns.html.
  */
 .btn.icon{width:var(--touch);height:var(--touch);min-height:var(--touch);padding:0;flex:none}
+/*
+ * The destructive action, from 12-settings-integrations.html frame 3: an alert
+ * BORDER and alert text, never an alert fill. Colour is state here, and a
+ * filled red button would read as the accented action of the screen while
+ * being the one thing on it that cannot be undone. The accent on that sheet
+ * sits on Back up now, which is what the owner came to do.
+ */
+.btn.danger{border-color:var(--alert);color:var(--alert);background:transparent}
+.btn.danger svg{color:var(--alert)}
+.btn:disabled{opacity:.45;cursor:default}
 
 .skel{
   background:var(--surface-2);

@@ -308,6 +308,27 @@ export const strings = {
   api: {
     jsonBody: 'Expected a JSON body.',
 
+    /** The archive, the export and the permanent delete, when they refuse. */
+    data: {
+      unknownCategory: 'That is not a category this app can delete.',
+      unknownCategoryDetail:
+        'Nothing was deleted. Choose one of the categories on the Data and backups screen.',
+      phraseMismatch: 'That phrase does not match the category you chose.',
+      phraseMismatchDetail:
+        'Nothing was deleted. The phrase is the word delete followed by the category name, and it is checked again by the database itself.',
+      deleteFailed: 'The deletion did not finish.',
+      deleteFailedDetail:
+        'Nothing partial is left behind: the whole thing runs in one transaction, so either every row of the category went or none of it did.',
+      archiveFailed: 'The archive did not finish.',
+      archiveFailedDetail:
+        'The Data and backups screen names the cause. Your data is untouched: an archive only ever reads.',
+      archiveRunning: 'An archive is already running.',
+      archiveRunningDetail: 'Wait for it to finish. Two at once would write the same file twice.',
+      exportFailed: 'The export did not finish.',
+      exportFailedDetail:
+        'Nothing was changed by this: an export only ever reads. Try it again, and if it fails twice the Data and backups screen will say what the machine is doing.',
+    },
+
     /** Everything the training routes refuse, and what they say when they do. */
     train: {
       noKey: 'This write carried no idempotency key.',
@@ -4756,6 +4777,16 @@ export const strings = {
     restoreInto: 'Rebuild it into a scratch database and compare the row counts:',
     restoreLive: 'Restoring over your live database asks you to type a phrase first, at the terminal, and nowhere else.',
     restoreDoc: 'The whole procedure is in docs/backup-restore.md.',
+    /**
+     * The two commands, keyed, because a command printed on a screen is a
+     * string a person reads and copies. The archive name is interpolated so the
+     * line the owner copies names the file he actually has.
+     */
+    restoreVerifyCommand: (name: string) => `node scripts/restore.mjs verify ${name}`,
+    restoreIntoCommand: (name: string, database: string) =>
+      `node scripts/restore.mjs restore ${name} --into ${database}`,
+    restoreCheckDatabase: 'vernier_restore_check',
+    archiveNamePattern: 'vernier-*.archive',
 
     exportTitle: 'Export everything',
     exportJson: 'JSON',
@@ -4790,6 +4821,8 @@ export const strings = {
     machineThresholds: 'Warns at',
     machineThresholdsValue: (disk: string, archiveHours: number, syncHours: number) =>
       `under ${disk} free, an archive over ${archiveHours} hours old, a source quiet over ${syncHours} hours`,
+    /** The dashed card 12-settings-integrations.html frame 1 draws, on frame 3's screen. */
+    neverShownTitle: 'What this screen never shows',
     machineNoCredential:
       'No token, key or password value is on this screen. Status is a different permission level from the credential behind it, and this screen holds the line.',
     machineNote:
@@ -4862,6 +4895,17 @@ export const strings = {
       'Every value keeps the source it came from, and a correction never overwrites the reading it corrects. Where a day has no reading, this document says so rather than carrying the last one forward.',
     reportFooter: 'Vernier, from your Mac mini',
     reportFileName: (day: string) => `vernier-health-report-${day}.pdf`,
+
+    /**
+     * File sizes, which are the one place this product prints a unit that is
+     * not kg, cm, km, kcal or g. They are keyed like everything else so the
+     * rendered-output check can find them, and there are four rather than one
+     * because "0.04 MB" is not how a person reads forty kilobytes.
+     */
+    sizeBytes: (size: string) => `${size} bytes`,
+    sizeKb: (size: string) => `${size} kB`,
+    sizeMb: (size: string) => `${size} MB`,
+    sizeGb: (size: string) => `${size} GB`,
 
     bloodPressureLabel: 'Blood pressure',
     bloodPressureBody:

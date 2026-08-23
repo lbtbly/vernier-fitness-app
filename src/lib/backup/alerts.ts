@@ -90,6 +90,18 @@ export type AlertFacts = {
  */
 export const ARCHIVE_STALE_HOURS = 36;
 
+/**
+ * How little room may be left on the volumes before the console says so.
+ *
+ * Ten gibibytes. An archive is the database plus the media volume, so the
+ * headroom that matters is a multiple of one archive rather than a percentage
+ * of a disk whose size this container cannot influence. It is stated on the
+ * screen beside the number it judges, which is what F132 asks of a threshold:
+ * a warn chip whose rule is not written next to it is a colour nobody can
+ * check.
+ */
+export const DISK_WARN_BYTES = 10 * 1024 * 1024 * 1024;
+
 /** The one action for each surface. A route this app serves, always. */
 export const ALERT_ROUTES: Record<string, string> = {
   backup: '/settings/data',

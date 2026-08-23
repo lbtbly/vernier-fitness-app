@@ -380,3 +380,19 @@ export function categoryLabel(id: string): string {
   const labels = strings.data.categories as Record<string, string>;
   return labels[id] ?? id;
 }
+
+/**
+ * A number of bytes, in the unit a person would say it in.
+ *
+ * Powers of a thousand rather than of 1024, because macOS has reported storage
+ * that way since 2009 and the owner reads this number beside what Finder tells
+ * him about the same folder. One decimal place above a kilobyte, none below,
+ * and the unit comes from the catalogue like every other word on the screen.
+ */
+export function fileSize(bytes: number): string {
+  if (!Number.isFinite(bytes) || bytes < 0) return strings.data.sizeBytes('0');
+  if (bytes < 1000) return strings.data.sizeBytes(String(Math.round(bytes)));
+  if (bytes < 1_000_000) return strings.data.sizeKb((bytes / 1000).toFixed(1));
+  if (bytes < 1_000_000_000) return strings.data.sizeMb((bytes / 1_000_000).toFixed(1));
+  return strings.data.sizeGb((bytes / 1_000_000_000).toFixed(1));
+}
