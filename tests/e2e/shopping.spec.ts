@@ -1,8 +1,9 @@
 import { mkdirSync } from 'node:fs';
-import { expect, retypeInto, test, type Page } from './fixtures';
+import { countWhenDrawn, expect, retypeInto, test, type Page } from './fixtures';
 import {
   ensureScratchOwner,
   projectRoot,
+  scratchAttempt,
   scratchQuery,
   scratchSignInLink,
   testStack,
@@ -89,8 +90,12 @@ async function buildAWeek(page: Page) {
   await page.waitForLoadState('networkidle');
 
   // Accept every meal, one at a time, which is the only way this product has.
+  //
+  // `countWhenDrawn` rather than `count`, because /eat has a loading.tsx and
+  // `networkidle` fires while the skeleton is still the screen. This counted 0
+  // against a page that read "Building next week".
   const rows = page.locator('[data-meal]');
-  const total = await rows.count();
+  const total = await countWhenDrawn(rows);
   expect(total).toBeGreaterThan(0);
   for (let index = 0; index < total; index += 1) {
     await rows.nth(index).locator('[data-control="accept"]').click();
@@ -114,7 +119,12 @@ test.describe('F88: one list, grouped by aisle, whose ticks survive a reload', (
     await page.goto('/eat/shopping');
     await page.waitForLoadState('networkidle');
 
-    const aisles = await page.locator('[data-aisle]').evaluateAll((nodes) =>
+    // /eat/shopping has a loading.tsx of its own, and `evaluateAll` reads the
+    // document once with no wait, exactly as `count` does. The wait first, so
+    // an empty array here means an empty list rather than an early look.
+    const aisleGroups = page.locator('[data-aisle]');
+    await countWhenDrawn(aisleGroups);
+    const aisles = await aisleGroups.evaluateAll((nodes) =>
       nodes.map((node) => node.getAttribute('data-aisle')),
     );
     const items = Number(scratchQuery('select count(*) from shopping_item'));
@@ -266,7 +276,12 @@ test.describe('F89: a deducted line is struck through, not removed', () => {
     await page.waitForLoadState('networkidle');
     // The database refuses it as well as the route, so no future handler can
     // tick a line the box already brought.
-    const refusal = scratchQuery(
+    // `scratchAttempt` rather than `scratchQuery`, for the same reason
+    // withings.spec.ts and demo-seed.spec.ts already reach for it: a `raise
+    // notice` goes to stderr, and `scratchQuery` returns stdout, which for a
+    // DO block is the word "DO" and nothing else. The refusal being read back
+    // here would never have been in the string.
+    const refusal = scratchAttempt(
       `do $$ begin
          begin
            update shopping_item set checked = true where deduction <> 'none';

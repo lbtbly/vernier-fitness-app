@@ -231,7 +231,31 @@ test('F39. no blood pressure reached the database, over a population that carrie
       from source_record limit 1
   `);
   console.log(`the database answered a direct blood pressure insert with: ${refused}`);
-  expect(refused).toContain('measurement_no_blood_pressure');
+  /*
+   * TWO NETS STAND IN FRONT OF THIS COLUMN NOW, AND THE NEWER ONE SPEAKS.
+   *
+   * This line was written against the CHECK constraint 0008 added. The
+   * laboratory wave then put `measurement_refuses_blood_pressure` on the same
+   * table, and a BEFORE ROW trigger runs before any constraint on the row is
+   * evaluated, so what Postgres says is the trigger's own sentence and the
+   * constraint's name is nowhere in it. Measured at a psql prompt on the
+   * scratch database: 'ERROR: blood pressure is refused at extraction and has
+   * no field in this database, CONTEXT: PL/pgSQL function
+   * refuse_blood_pressure()'.
+   *
+   * So the refusal is read for either net by name, and the CHECK is asserted to
+   * still exist rather than assumed to be what answered. That is stricter than
+   * the single line it replaces: dropping the constraint used to be invisible
+   * behind the trigger, and now it is a failure with the constraint's name in
+   * it.
+   */
+  expect(refused).toMatch(/measurement_no_blood_pressure|refuse_blood_pressure/);
+  expect(
+    scratchQuery(
+      "select count(*) from pg_constraint where conname = 'measurement_no_blood_pressure'",
+    ),
+    'the CHECK behind the trigger has been dropped, so one net refuses this now and not two',
+  ).toBe('1');
   expect(Number(scratchQuery("select count(*) from measurement where id = 'bp-probe'"))).toBe(0);
 });
 

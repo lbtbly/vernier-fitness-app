@@ -113,6 +113,15 @@ echo "ingest-fixture: canonical string, six lines:"
 printf '%s\n' "$CANONICAL" | sed 's/^/    /'
 echo "ingest-fixture: digest $DIGEST"
 
+# The array below expands as `${AUTH[@]+"${AUTH[@]}"}`, and scripts/recovery.sh
+# already writes it that way for the same reason. Under `set -u` on bash 3.2,
+# which is the bash on this Mac and the bash the suite reaches, expanding an
+# empty array is an unbound variable and the script dies before it sends
+# anything. --no-bearer is the one mode that empties it, so the single
+# demonstration that flag exists for could never run: F51 asked this endpoint
+# for its answer to a caller with no Authorization header at all and got a dead
+# shell instead of a 401.
+#
 # --fail is deliberately NOT set. Every outcome of this endpoint carries a body
 # with a message in it, and the message is the point: swallowing it on a non-2xx
 # would hide the one thing this script exists to show.
@@ -121,7 +130,7 @@ AUTH=(-H "Authorization: Bearer ${INGEST_TOKEN}")
 
 HTTP=$(curl -sS -o /tmp/ingest-fixture-body.json -w '%{http_code}' \
   -X POST "$URL/api/ingest/health" \
-  "${AUTH[@]}" \
+  ${AUTH[@]+"${AUTH[@]}"} \
   -H 'Content-Type: application/json' \
   -H "X-Ingest-Key-Id: $KEY_ID" \
   -H "X-Ingest-Timestamp: $STAMP" \

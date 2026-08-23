@@ -170,6 +170,34 @@ export async function clickWhenLive(control: Locator, timeout = 15_000): Promise
 }
 
 /**
+ * How many of a repeated row there are, asked after the first one exists.
+ *
+ * `locator.count()` is the one read in this API that does not wait. It returns
+ * what the document holds at the instant it is called, so a count taken as a
+ * gate is a gate that opens on whatever happened to be painted.
+ *
+ * THAT IS THE WHOLE OF THE NUTRITION AND SHOPPING FAILURES. Both walk the same
+ * path: generate a week, `router.push('/eat')`, wait for the URL, wait for
+ * `networkidle`, then count `[data-meal]`. `/eat` has a `loading.tsx`, so the
+ * screen at that moment is the skeleton, and `networkidle` says nothing about
+ * whether React has committed the tree that replaced it. Both counted 0 and
+ * failed on `toBeGreaterThan(0)` while the week was on its way. The proof is in
+ * the two failure snapshots side by side: shopping asserts immediately after
+ * counting and its page still reads "Building next week"; nutrition runs three
+ * `scratchQuery` calls out to docker first, and by the time it asserts the week
+ * is fully drawn behind it.
+ *
+ * IT DOES NOT SOFTEN ANYTHING. The count that comes back is still the real
+ * count and every assertion on it stands; a screen that draws no rows at all
+ * fails here, inside the budget, naming the selector it waited for, instead of
+ * returning a zero that reads like a product with an empty week.
+ */
+export async function countWhenDrawn(rows: Locator, timeout = 30_000): Promise<number> {
+  await rows.first().waitFor({ state: 'attached', timeout });
+  return rows.count();
+}
+
+/**
  * The same window, through a field rather than a button, and it loses the
  * owner's typing rather than his tap.
  *

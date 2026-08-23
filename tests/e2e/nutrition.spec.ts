@@ -1,8 +1,9 @@
 import { mkdirSync } from 'node:fs';
-import { expect, retypeInto, test, type Page } from './fixtures';
+import { countWhenDrawn, expect, retypeInto, test, type Page } from './fixtures';
 import {
   ensureScratchOwner,
   projectRoot,
+  scratchAttempt,
   scratchQuery,
   scratchSignInLink,
   testStack,
@@ -213,8 +214,10 @@ test.describe('F86 and C12: the week generates, and each meal is decided on its 
     await page.waitForURL(/\/eat$/);
     await page.waitForLoadState('networkidle');
 
+    // `countWhenDrawn` rather than `count`: /eat has a loading.tsx, and
+    // `networkidle` fires while the skeleton is still the screen.
     const meals = page.locator('[data-meal]');
-    const count = await meals.count();
+    const count = await countWhenDrawn(meals);
     const breakfasts = Number(
       scratchQuery("select count(*) from planned_meal where slot = 'breakfast'"),
     );
@@ -237,7 +240,7 @@ test.describe('F86 and C12: the week generates, and each meal is decided on its 
     await page.waitForLoadState('networkidle');
 
     const rows = page.locator('[data-meal]');
-    const total = await rows.count();
+    const total = await countWhenDrawn(rows);
     expect(total).toBeGreaterThan(0);
     for (let index = 0; index < total; index += 1) {
       const row = rows.nth(index);
@@ -477,7 +480,12 @@ test.describe('F87: the versioned snapshot and its two coverage numbers', () => 
     const recipeId = scratchQuery('select recipe_id from planned_meal order by day_index limit 1');
     // The database refuses the overwrite outright. This is the half of F87 that
     // no handler can be trusted with, so it is asserted against Postgres.
-    const refusal = scratchQuery(
+    // `scratchAttempt` rather than `scratchQuery`, for the same reason
+    // withings.spec.ts and demo-seed.spec.ts already reach for it: a `raise
+    // notice` goes to stderr, and `scratchQuery` returns stdout, which for a
+    // DO block is the word "DO" and nothing else. The refusal being read back
+    // here would never have been in the string.
+    const refusal = scratchAttempt(
       `do $$ begin
          begin
            update recipe_nutrition set per_serving_kcal = 1 where recipe_id = '${recipeId}';
@@ -634,7 +642,9 @@ test.describe('F83: four rules, four behaviours', () => {
     expect(text).toContain('Ranked');
 
     // The database refuses a fifth kind, so the four cannot quietly become five.
-    const refusal = scratchQuery(
+    // The same stderr rule as the two above: a notice is read back with
+    // `scratchAttempt`, never with `scratchQuery`.
+    const refusal = scratchAttempt(
       `do $$ begin
          begin
            insert into dietary_rule (id, kind, subject) values ('x', 'dislike', 'nuts');
