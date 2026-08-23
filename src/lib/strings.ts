@@ -3702,6 +3702,15 @@ export const strings = {
       menu: (weekOf: string) => `The menu for the week of ${weekOf} is waiting`,
       missingData: (source: string, since: string) => `${source} has sent nothing since ${since}`,
     },
+    /** The sentence under the line, which is a notification's body when it is alone. */
+    details: {
+      session: (place: string) => `At ${place}. Tap Done once it is finished.`,
+      sessionNoPlace: 'Tap Done once it is finished.',
+      measurements: 'One weigh-in and one tape measure. Both take under a minute.',
+      menu: 'Confirm it and the shopping list is built from what you accepted.',
+      missingData: (source: string) =>
+        `Run one sync and ${source} fills the gap in the trend rather than leaving a hole in it.`,
+    },
     manyTitle: (count: number) => `${count} things to do`,
     manyBody: (lines: string[]) => `${lines.join('. ')}.`,
     doneTitle: 'Marked done',
@@ -3769,17 +3778,41 @@ export const strings = {
     steps: 'Steps',
     stepsDaily: (value: string) => `${value} a day`,
     sleepNightly: 'Sleep a night',
-    mealsLogged: 'Days with a food log',
-    mealsLoggedCount: (days: number, of: number) => `${days} of ${of} days`,
-    calories: 'Calories on the days logged',
-    caloriesTarget: (value: string) => `target ${value}`,
+    mealsDecided: 'Meals decided',
+    mealsDecidedCount: (decided: number, of: number) => `${decided} of ${of}`,
+    dailyTarget: 'Daily calorie target',
+    dailyTargetValue: (kcal: string) => `${kcal} kcal`,
+    noTarget: 'No target is set yet',
+    noPlan: 'No menu was generated for this week',
     setsLogged: (sets: number, movements: number) => `${sets} sets across ${movements} movements`,
     noSets: 'No sets were logged',
     nothingRecorded: 'Nothing was recorded',
 
+    /** The two paragraphs, each line derived from a fact and never from a mood. */
     wentWellNone:
       'This is the first week with anything in it, so there is nothing to compare against yet. Next Sunday there will be.',
+    wentWellSessions: (done: number) =>
+      done === 1 ? 'One session happened this week.' : `${done} sessions happened this week.`,
+    wentWellWeightToward: (size: string, target: string) =>
+      `The 7-day average moved ${size} kg towards ${target} kg.`,
+    wentWellWaist: (when: string) =>
+      `Waist was measured on ${when}, so the second line on the chart has a point this week.`,
+    wentWellSets: (sets: number) =>
+      `${sets} sets were logged, so next week's loads come from what you actually did.`,
     wasHardNone: 'Nothing in this week asks for a change.',
+    wasHardSession: (day: string, cause: string) => `${day} did not happen. ${cause}`,
+    wasHardSessionNoCause: (day: string) =>
+      `${day} did not happen, and nothing was recorded about why.`,
+    wasHardStale: (source: string, since: string) =>
+      `${source} has sent nothing since ${since}, so the numbers here are read from fewer days than a week.`,
+    wasHardShortWindow: (label: string, have: number, of: number) =>
+      `${label} is read from ${have} days of ${of}. Read it loosely.`,
+    wasHardNoMenu: 'No menu was generated for this week, so there is nothing to read back about food.',
+
+    /** The one banner. Out of date is what --warn is for, and it is the only thing here that gets it. */
+    fixTitle: 'One thing to fix before next week.',
+    fixStale: (source: string, since: string) =>
+      `${source} has sent nothing since ${since}. One sync brings the numbers back.`,
 
     proposalNote: 'Each block is decided on its own. Accepting one says nothing about the others.',
     proposalAccept: 'Accept',

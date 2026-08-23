@@ -115,6 +115,31 @@ export async function register(): Promise<void> {
     console.error(`[vernier] demo seed did not run: ${(error as Error).message}`);
   }
 
+  // The two schedules, and the two things a boot owes before either can tick.
+  //
+  // ORDER MATTERS AND IT IS INSIDE startScheduler. A run still marked running
+  // from a process that no longer exists is cleared first, because it would
+  // otherwise hold its period against every tick that followed it, silently,
+  // forever. Then the catch-up: a container that was off across Sunday claims
+  // that period here, once, and a container that was on finds it already done.
+  //
+  // The claim is what makes this safe to call from every process that boots.
+  // Nothing here asks whether it is the only one; it takes the period or it
+  // does not, and Postgres arbitrates.
+  try {
+    const { startScheduler } = await import('./lib/scheduler');
+    const started = await startScheduler();
+    const caughtUp = started.caughtUp
+      .map((outcome) => `${outcome.periodStart}:${outcome.reason}`)
+      .join(', ');
+    console.log(
+      `[vernier] scheduler: 2 schedule(s), ${started.stale} stale run(s) cleared, ` +
+        `${started.caughtUp.length} period(s) caught up${caughtUp === '' ? '' : ` (${caughtUp})`}`,
+    );
+  } catch (error) {
+    console.error(`[vernier] scheduler did not start: ${(error as Error).message}`);
+  }
+
   // The training half of the demonstration, which needs the catalogue above it
   // and the measurement series beside it: it proposes a week through the
   // shipped proposer, so every cause on screen 06 names an input that is really
