@@ -147,23 +147,24 @@ export async function catchUpOnBoot(now: Date): Promise<RunOutcome[]> {
 }
 
 /**
- * Starts the two schedules, and clears anything the last process left running.
+ * Starts the two schedules, clears anything the last process left running, and
+ * sets the catch-up going behind them.
  *
- * Returns the tasks so a caller can stop them, and so the boot log can say how
- * many are actually scheduled rather than implying it.
+ * Returns the count of schedules it really registered, so the boot log states a
+ * number it has rather than implying one.
  */
-export async function startScheduler(): Promise<{
-  stale: number;
-  caughtUp: RunOutcome[];
-  stop: () => void;
-}> {
+export async function startScheduler(): Promise<{ stale: number; schedules: number; stop: () => void }> {
   const { timeZone } = getConfig();
   const now = new Date();
 
-  // FIRST, because a period held by a process that no longer exists would block
-  // the catch-up below and every tick after it, silently, forever.
+  /*
+   * FIRST, AND AWAITED. A period held by a process that no longer exists would
+   * block the catch-up below and every tick after it, silently, forever. It is
+   * two statements against one indexed row, so the boot pays for it and the
+   * decision is made once, with the whole picture, rather than by whichever
+   * tick happened to notice.
+   */
   const stale = await failStaleRuns(now);
-  const caughtUp = await catchUpOnBoot(now);
 
   const cron = (await import('node-cron')).default;
   // cron counts Sunday as 0; this app counts Monday as 0, the same index
@@ -189,9 +190,35 @@ export async function startScheduler(): Promise<{
     { timezone: timeZone },
   );
 
+  /*
+   * AND THE CATCH-UP IS NOT AWAITED, DELIBERATELY.
+   *
+   * It reads six tables, assembles a review and may hand a message to a mail
+   * relay with a twenty-second timeout on it. `register()` runs before the
+   * first request is served, so awaiting that would be a container sitting
+   * silent while a relay decides whether to answer, and F1 counts the seconds
+   * to healthy. Nothing is lost by letting it run behind: the claim is what
+   * makes it happen exactly once, and a claim taken a second after boot is the
+   * same claim.
+   *
+   * Its outcome is logged where it finishes rather than in the boot line,
+   * because a boot line that reported a result it had not waited for would be
+   * a check that passes by not checking.
+   */
+  void catchUpOnBoot(now)
+    .then((outcomes) => {
+      const named = outcomes.map((outcome) => `${outcome.periodStart}:${outcome.reason}`).join(', ');
+      console.log(
+        `[vernier] scheduler catch-up: ${outcomes.length} period(s)${named === '' ? '' : ` (${named})`}`,
+      );
+    })
+    .catch((error: unknown) => {
+      console.error(`[vernier] scheduler catch-up did not run: ${(error as Error).message}`);
+    });
+
   return {
     stale: stale.length,
-    caughtUp,
+    schedules: 2,
     stop: () => {
       void weekly.stop();
       void sweep.stop();

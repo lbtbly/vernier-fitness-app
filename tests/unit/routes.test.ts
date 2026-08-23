@@ -106,6 +106,22 @@ describe('the route table', () => {
       '/api/measurements',
       '/labs/2026-08-21',
       '/anything-invented-in-slice-9',
+      // Slice 12. Every one of these carries or reads something that belongs to
+      // the owner: a device that agreed to be told things, the settings that
+      // decide what it is told, a week read back, and the email that carries
+      // it. None of them is on PUBLIC_PATHS or GATE_PATHS, so all of them are
+      // protected by the default rather than by anybody remembering.
+      '/review',
+      '/review/next',
+      '/review/email',
+      '/reminders',
+      '/settings/notifications',
+      '/api/push/subscribe',
+      '/api/push/status',
+      '/api/push/test',
+      '/api/push/done',
+      '/api/reminders',
+      '/api/review',
     ]) {
       expect(classifyRoute(path)).toBe('protected');
       expect(isOpenRoute(path)).toBe(false);
