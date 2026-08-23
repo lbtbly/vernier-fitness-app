@@ -129,7 +129,24 @@ const REGISTRATION = `(async () => {
     scriptURL: registration.active ? registration.active.scriptURL : null,
     controller: navigator.serviceWorker.controller ? navigator.serviceWorker.controller.scriptURL : null,
     cached: (await caches.keys()),
-    shellEntries: (await (await caches.open((await caches.keys())[0])).keys()).map((request) => new URL(request.url).pathname).sort(),
+    // BY NAME, NOT BY POSITION. This read the first cache Cache Storage
+    // happened to return, which was the shell while there was only one. F66
+    // added a second, named for the media manifest's own hash, holding 44
+    // demonstrations, and an evidence line that prints whichever came back
+    // first is an evidence line that means nothing. Both are reported, each
+    // with its own count.
+    shellEntries: await (async () => {
+      const shell = (await caches.keys()).find((name) => name.startsWith('vernier-shell-'));
+      if (!shell) return [];
+      const entries = await (await caches.open(shell)).keys();
+      return entries.map((request) => new URL(request.url).pathname).sort();
+    })(),
+    mediaEntries: await (async () => {
+      const media = (await caches.keys()).filter((name) => name.startsWith('vernier-media-'));
+      let held = 0;
+      for (const name of media) held += (await (await caches.open(name)).keys()).length;
+      return held;
+    })(),
   };
 })()`;
 
@@ -203,7 +220,8 @@ async function main() {
       console.log(`run: ${warm ? 'warm, /offline opened while online' : 'cold, /offline never opened'}`);
       console.log(`worker scope: ${before.scope}`);
       console.log(`worker script: ${before.scriptURL}, state ${before.active}`);
-      console.log(`precached: ${before.shellEntries.join(' ')}`);
+      console.log(`precached shell: ${before.shellEntries.join(' ')}`);
+      console.log(`precached demonstrations: ${before.mediaEntries}, caches ${before.cached.join(' ')}`);
 
       // A route the owner really opened. Its document and the chunks it pulled
       // both went through the worker, so both are in the cache.

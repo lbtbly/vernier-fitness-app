@@ -9,13 +9,14 @@ import {
   isBloodPressureLine,
   isBlocked,
   linesOf,
+  looksLikeGarbledValue,
   nonWhitespaceCount,
   parseReference,
   refusedPages,
 } from '@/lib/lab-parse';
 import { refusalSentence } from '@/lib/display';
 import { BUILT_IN_ANALYTES } from '@/lib/labs';
-import { PANEL_PAGE_TWO, panelPages, pageOf, scannedPage } from './lab-fixture';
+import { GARBLED_PAGE, PANEL_PAGE_TWO, panelPages, pageOf, scannedPage } from './lab-fixture';
 
 /**
  * The parser, against a French laboratory sheet built from layout rather than
@@ -118,6 +119,85 @@ describe('reading a French laboratory sheet', () => {
     // a doubt about the reading rather than as a fact about the catalogue.
     expect(isBlocked(apo.flags)).toBe(false);
     expect(apo.confidence).toBeGreaterThanOrEqual(CONFIDENCE_THRESHOLD);
+  });
+});
+
+/**
+ * F62, and the row that used to vanish.
+ *
+ * A sheet printing HbA1c as "5,4Q" produced NO ROW. The value scan wanted a
+ * cell that parsed as a number or read as a censored limit, found neither, and
+ * skipped the line whole: no row on the review, no flag, no blocked save, and
+ * a banner saying two rows were read from a file that printed three. F62 says a
+ * value that is ambiguous is flagged and cannot be saved without an explicit
+ * decision, and the owner cannot correct what he cannot see.
+ */
+describe('a garbled digit, which must be seen rather than dropped', () => {
+  function garbled() {
+    return extractPanel({
+      pages: [pageOf(1, GARBLED_PAGE)],
+      catalogue: BUILT_IN_ANALYTES,
+      knownUnits: UNITS,
+    });
+  }
+
+  it('reads every line the sheet printed, including the two it cannot parse', () => {
+    const read = garbled();
+    // The population, printed, because a count is evidence only beside what it
+    // walked. It would go red if either garbled line were skipped: that is the
+    // defect this test exists for, and it read 2 rows out of 3 before the fix.
+    console.log(
+      `lab-parse: ${read.rows.length} rows off a three-result sheet: ` +
+        read.rows.map((row) => `${row.printedLabel}=${row.printedValue}`).join(', '),
+    );
+    expect(read.rows).toHaveLength(3);
+    expect(read.rows.map((row) => row.printedValue)).toEqual(['0,97', '5,4Q', 'l86']);
+  });
+
+  it('flags the garbled row, blocks it, and names what the sheet printed', () => {
+    const row = garbled().rows.find((entry) => entry.analyte === 'hba1c')!;
+    // Named, not summarised. The characters on the screen are the characters on
+    // the paper, or the owner has nothing to compare.
+    expect(row.printedValue).toBe('5,4Q');
+    expect(row.printedUnit).toBe('%');
+    expect(row.flags).toContain('value_ambiguous');
+    expect(row.flags).toContain('low_confidence');
+    expect(row.confidence).toBeLessThan(CONFIDENCE_THRESHOLD);
+    expect(isBlocked(row.flags)).toBe(true);
+  });
+
+  it('leaves the clean row on the same sheet exactly as it was', () => {
+    // The one way this fix could have made the parser worse: a fallback that
+    // stole the value cell from a line that reads cleanly. It would go red if
+    // the garbled scan ran before the number scan rather than after it.
+    const glucose = garbled().rows.find((entry) => entry.analyte === 'fasting_glucose')!;
+    expect(glucose.printedValue).toBe('0,97');
+    expect(glucose.printedUnit).toBe('g/L');
+    expect(glucose.confidence).toBe(1);
+    expect(isBlocked(glucose.flags)).toBe(false);
+  });
+
+  it('knows a garbled number from a word, a date, a page marker and a limit', () => {
+    // The shape, stated as examples. Each false case is a cell that really
+    // appears on a laboratory sheet, and reading one as a result is how a
+    // review fills with rows nobody printed.
+    for (const text of ['5,4Q', 'l86', '1O,2', '13.Q', '9,2*']) {
+      expect(looksLikeGarbledValue(text), text).toBe(true);
+    }
+    for (const text of [
+      '1,44',
+      '62',
+      '< 3',
+      '12/08/2026',
+      '08:15',
+      'Page 1 sur 3',
+      '12 - 64',
+      'g/L',
+      '',
+      'methode immunoturbidimetrie 2',
+    ]) {
+      expect(looksLikeGarbledValue(text), text).toBe(false);
+    }
   });
 });
 

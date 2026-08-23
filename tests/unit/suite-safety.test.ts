@@ -373,6 +373,20 @@ describe('the suite against the owner\'s installation', () => {
    *                           proves the surface rendered the refusal. The
    *                           population is the upload that was just made.
    *   labs-scratch:541        REAL. It filters a list of every visible control
+   *   labs-scratch F65        GONE, and it was the one hollow pair in this file.
+   *                           The refusal branch asserted `measurementCount()`
+   *                           was 0 and `scratchLabFiles()` was `[]`, which
+   *                           reads as "nothing was stored" and is not what it
+   *                           measured: this spec is serial and F59, F61 and
+   *                           both F62 tests store rows and leave documents on
+   *                           the volume before F65 runs, so the two zeros could
+   *                           only ever hold when the tests before them had done
+   *                           nothing. Both now compare against the counts read
+   *                           at the top of the same test, which is the claim
+   *                           that was meant: this upload stored nothing new and
+   *                           took its own bytes with it. Two members left the
+   *                           class and the inventory below went from 6 to 4.
+   *   labs-scratch:511        REAL. It filters a list of every visible control
    *                           on the screen, and the rows and control groups are
    *                           counted and printed at each of three viewports on
    *                           the lines above.
@@ -466,7 +480,7 @@ describe('the suite against the owner\'s installation', () => {
       ['ingest.spec.ts', 2],
       ['suite-privilege.spec.ts', 1],
       ['withings.spec.ts', 5],
-      ['labs-scratch.spec.ts', 6],
+      ['labs-scratch.spec.ts', 4],
       ['nutrition.spec.ts', 6],
       ['shopping.spec.ts', 1],
       ['console-walk.spec.ts', 3],

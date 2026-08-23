@@ -1,3 +1,8 @@
+ALTER TABLE "lab_document" ADD COLUMN "refusal_pages" integer[] DEFAULT '{}' NOT NULL;
+--> statement-breakpoint
+-- ---------------------------------------------------------------------------
+-- fix-craft, appended on merge. Written in its own worktree, numbered here.
+-- ---------------------------------------------------------------------------
 -- Slice fix-craft. Pending DDL, applied on merge, in order, by the lead.
 --
 -- One column, and it exists because a screen was naming the wrong pages.

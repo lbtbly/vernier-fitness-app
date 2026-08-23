@@ -65,5 +65,12 @@ numbered defect list, each defect one line: where, what, which rubric line.
 A defect you cannot reproduce is reported as unverified, never dropped and
 never guessed at. Guessing costs a night; reporting costs a line.
 
+NEVER WRITE TO THE OWNER'S LIVE DATABASE. Any walk that commits goes to the
+scratch instance, and that overrides any dispatch line telling you to walk a
+flow "as a write". A verifier following such a line on 2026-08-23 left five
+fabricated ratings in the owner's health record permanently, because
+`measurement` refuses DELETE by design. If a line cannot be proven anywhere but
+the live origin, stop and say so in your verdict rather than writing.
+
 Never edit source files; DOD.md's checkboxes are the one exception. Never
 soften a line. Never grade work you produced.

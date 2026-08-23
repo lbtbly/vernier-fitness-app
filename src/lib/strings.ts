@@ -2088,6 +2088,15 @@ export const strings = {
     conversionLine: (printed: string, factor: string, stored: string) =>
       `Printed ${printed}, x ${factor}, stored ${stored}. All three are kept.`,
     noConversion: (printed: string) => `Printed ${printed} and stored as printed.`,
+    /*
+     * F62. A row whose value could not be read says so where the conversion
+     * line would be, and it never says "stored as printed": nothing was
+     * converted and nothing is stored. The printed characters are quoted back
+     * exactly as the sheet set them, because the owner corrects this row by
+     * holding the paper next to the screen.
+     */
+    valueUnreadable: (printed: string) =>
+      `Printed ${printed}, and those characters are not a number. Nothing is converted and nothing is stored until you type what the sheet shows.`,
     sameNumber:
       'These two symbols are the same number here. Choosing one records the choice, it does not convert anything.',
 

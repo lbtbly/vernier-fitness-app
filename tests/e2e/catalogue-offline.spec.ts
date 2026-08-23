@@ -122,6 +122,136 @@ test.describe('the catalogue offline', () => {
     await context.setOffline(false);
   });
 
+  test('a movement never scrolled into view renders with the origin gone', async ({
+    page,
+    context,
+  }) => {
+    test.setTimeout(180_000);
+    // WHAT WOULD MAKE THIS RED: a worker that caches a demonstration when the
+    // page fetches it rather than at install. The cards carry loading=lazy, so
+    // a card the owner never scrolled past while online was never fetched, has
+    // no cache entry, and offline its image decodes to 0 by 0 pixels. That was
+    // the shipped behaviour: 6 of 44 rendered offline and the other 38 did not.
+    await page.goto(mintSignInLink());
+    await page.goto('/train/catalogue');
+    await expect(page.locator('[data-movement]').first()).toBeVisible();
+
+    await expect
+      .poll(
+        () =>
+          page.evaluate(async () => {
+            const registration = await navigator.serviceWorker.getRegistration();
+            return Boolean(registration?.active);
+          }),
+        { timeout: 60_000 },
+      )
+      .toBe(true);
+    await page.reload();
+    await expect
+      .poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller)), { timeout: 30_000 })
+      .toBe(true);
+
+    // The precache runs inside the install event's waitUntil, so an active
+    // worker has already finished it. The shell layout asks again on every
+    // document load, which is what repairs an install that happened on the
+    // sign-in screen, so this waits for the cache to hold the whole manifest
+    // rather than assuming either path won the race.
+    const cached = await page.evaluate(async () => {
+      const names = await caches.keys();
+      const media = names.filter((name) => name.startsWith('vernier-media-'));
+      const entries: string[] = [];
+      for (const name of media) {
+        const cache = await caches.open(name);
+        for (const request of await cache.keys()) entries.push(new URL(request.url).pathname);
+      }
+      return { names, entries };
+    });
+    console.log(`caches on the device: ${cached.names.join(', ')}`);
+    console.log(`demonstrations precached: ${cached.entries.length}`);
+    expect(cached.entries.length).toBeGreaterThanOrEqual(30);
+
+    // NOTHING IS SCROLLED. Whatever decoded here decoded because it was on the
+    // first screen, and every id that did not is a card this browser has never
+    // asked the origin for.
+    await page.waitForLoadState('networkidle');
+    const seenOnline = await page.locator('[data-movement]').evaluateAll((nodes) =>
+      nodes
+        .filter((node) => {
+          const image = node.querySelector('img');
+          return image !== null && (image as HTMLImageElement).naturalWidth > 0;
+        })
+        .map((node) => node.getAttribute('data-movement') ?? ''),
+    );
+    const allCards = await page
+      .locator('[data-movement]')
+      .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-movement') ?? ''));
+    const neverSeen = allCards.filter((id) => !seenOnline.includes(id));
+    console.log(
+      `${allCards.length} cards, ${seenOnline.length} decoded without scrolling, ` +
+        `${neverSeen.length} never requested while online`,
+    );
+    // The population this test rests on. An empty one would make everything
+    // below vacuous, which is the failure this run keeps finding.
+    expect(neverSeen.length).toBeGreaterThan(0);
+
+    // Now the origin goes away, from the page and from the worker.
+    await context.route('**/*', (route) => route.abort('connectionfailed'));
+    await context.setOffline(true);
+    const reachable = await page.evaluate(async () => {
+      try {
+        const response = await fetch('/healthz', { method: 'HEAD', cache: 'no-store' });
+        return response.ok;
+      } catch {
+        return false;
+      }
+    });
+    expect(reachable, 'the origin must really be gone before an offline capture means anything').toBe(
+      false,
+    );
+
+    await page.reload();
+    await expect(page.locator('[data-movement]').first()).toBeVisible();
+
+    // The card the browser has never asked for, scrolled to for the first time
+    // with no network at all.
+    const target = neverSeen[neverSeen.length - 1];
+    const card = page.locator(`[data-movement="${target}"]`);
+    await card.scrollIntoViewIfNeeded();
+    await expect
+      .poll(
+        () =>
+          card.evaluate((node) => {
+            const image = node.querySelector('img');
+            return image === null ? 0 : (image as HTMLImageElement).naturalWidth;
+          }),
+        { timeout: 20_000 },
+      )
+      .toBeGreaterThan(0);
+    const drawn = await card.evaluate((node) => {
+      const image = node.querySelector('img') as HTMLImageElement | null;
+      return image === null ? '' : `${image.getAttribute('src')} ${image.naturalWidth}x${image.naturalHeight}`;
+    });
+    console.log(`offline, never scrolled to while online: ${target} drew ${drawn}`);
+    await card.screenshot({ path: `${CAPTURES}/f66-never-seen-card-offline.png` });
+
+    // And then the whole catalogue, walked to the bottom with the origin still
+    // gone, so the claim is 44 of 44 rather than one lucky card.
+    for (let index = 0; index < allCards.length; index += 4) {
+      await page.locator('[data-movement]').nth(index).scrollIntoViewIfNeeded();
+      await page.waitForTimeout(120);
+    }
+    await page.locator('[data-movement]').last().scrollIntoViewIfNeeded();
+    await page.waitForTimeout(500);
+    const decodedOffline = await page.locator('[data-movement] img').evaluateAll((nodes) =>
+      nodes.filter((node) => (node as HTMLImageElement).naturalWidth > 0).length,
+    );
+    console.log(`offline: ${decodedOffline} of ${allCards.length} demonstrations decoded`);
+    expect(decodedOffline).toBe(allCards.length);
+
+    await context.unroute('**/*');
+    await context.setOffline(false);
+  });
+
   test('every card names the author of the picture on it', async ({ page }) => {
     await page.goto(mintSignInLink());
     await page.goto('/train/catalogue');

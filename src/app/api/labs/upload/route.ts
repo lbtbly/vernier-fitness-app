@@ -94,6 +94,14 @@ async function handle(request: Request) {
   const id = newDocumentId();
   const checksum = await writeDocument(id, bytes);
 
+  // KEPT BEFORE ANYTHING READS THE FILE. pdf.js transfers the buffer it is
+  // handed: measured on the three-page fixture, `bytes.byteLength` goes from
+  // 4599 to 0 during `extractTextItems`, and every rasterise after that reads
+  // an empty document. Optical recognition needs the real bytes and the only
+  // moment they are certainly still here is now. It costs one copy of a file
+  // this route already caps at 25 MB.
+  const forRecognition = new Uint8Array(bytes);
+
   let pages: PageItems[];
   try {
     const extracted = await extractTextItems(bytes);
@@ -117,7 +125,7 @@ async function handle(request: Request) {
 
   let opticalPages: PageItems[] = [];
   if (imageOnly.length > 0) {
-    const outcome = await recognisePages(bytes, imageOnly);
+    const outcome = await recognisePages(forRecognition, imageOnly);
     if (!outcome.available) {
       await removeDocument(id);
       console.error(`[vernier] lab ${id}: optical recognition ${outcome.reason}, ${outcome.detail}`);
