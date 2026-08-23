@@ -17,6 +17,13 @@
 #   scripts/test-stack.sh down          stop and remove it
 #   scripts/test-stack.sh url           print its origin
 #
+# SCRATCH_BACKUP_DIR mounts a host directory at /app/backups and tells the app a
+# destination is configured, which is how the archive's CONFIGURED destination is
+# proven on an instance whose rows nobody would miss. Left unset there is no
+# mount and no configured directory, so the same instance proves the FALLBACK and
+# the alert that names it. F127 needs both, and neither may be produced by taking
+# the owner's own iCloud folder away.
+#
 # It runs the same image as the live app, on the same Docker network, against a
 # separate database inside the same Postgres. The owner's database, the owner's
 # container and the published port on 3000 are never touched.
@@ -105,6 +112,9 @@ start() {
     -e GOOGLE_DEMO_FAULT="${GOOGLE_DEMO_FAULT:-none}" \
     -e DATABASE_URL="$(scratch_url)" \
     -e MASTER_KEY="$key" \
+    -e BACKUP_DIR="${SCRATCH_BACKUP_DIR:+/app/backups}" \
+    -e BACKUP_RETENTION_DAYS="${SCRATCH_BACKUP_RETENTION:-30}" \
+    ${SCRATCH_BACKUP_DIR:+-v "${SCRATCH_BACKUP_DIR}:/app/backups"} \
     -p "127.0.0.1:${PORT}:3000" \
     "$IMAGE" >/dev/null
 }

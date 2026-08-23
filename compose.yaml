@@ -98,12 +98,38 @@ services:
       # how the parts are stored.
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       MASTER_KEY: ${MASTER_KEY}
+      # The nightly archive, slice 13.
+      #
+      # BACKUP_DIR is the path ON THIS MAC, and the app never writes to it
+      # directly: it writes to BACKUP_MOUNT and NAMES this path, because an
+      # alert reading "cannot write to /app/backups" tells the owner nothing he
+      # can act on and F127 asks for the path and the cause. With it unset the
+      # archive lands in the local fallback inside the storage volume and the
+      # machine status screen says so.
+      #
+      # BACKUP_PASSPHRASE is optional and blank here on purpose. With no value
+      # the archive key is derived from MASTER_KEY, which is already 32 random
+      # bytes outside the repository, so the first archive can be written the
+      # day this ships rather than after somebody generates a second secret.
+      BACKUP_DIR: ${BACKUP_DIR:-}
+      BACKUP_MOUNT: /app/backups
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-30}
+      BACKUP_PASSPHRASE: ${BACKUP_PASSPHRASE:-}
     ports:
       # 127.0.0.1 only. Tailscale Serve is the network barrier; the LAN address
       # must refuse the connection, which is F3.
       - "127.0.0.1:3000:3000"
     volumes:
       - storage:/app/storage
+      # The archive destination, bind mounted from the host so an encrypted file
+      # lands in iCloud Drive and is carried off this machine. Quoted, because an
+      # iCloud Drive path has spaces in it and the short syntax splits on colons.
+      #
+      # With BACKUP_DIR unset this resolves to ./backups beside this file, which
+      # is a real directory and a real place to write. The app still calls that a
+      # fallback and still raises the alert, because what F127 is about is
+      # whether the destination the owner CONFIGURED took the write.
+      - "${BACKUP_DIR:-./backups}:/app/backups"
     healthcheck:
       # node:24-slim carries no curl. Node's own fetch is always there.
       test:

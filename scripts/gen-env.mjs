@@ -50,6 +50,16 @@ const SETTINGS = [
     value: 'demo',
     note: 'Google Calendar transport. demo runs picker, availability, calendar, diff, write and undo with no client id and no network, live opens a socket. See .env.example.',
   },
+  {
+    key: 'BACKUP_RETENTION_DAYS',
+    value: '30',
+    note: 'How many daily archives to keep. Counted as archives, so four runs in one afternoon leave the last three. See .env.example.',
+  },
+  {
+    key: 'BACKUP_MOUNT',
+    value: '/app/backups',
+    note: 'Where the container writes the archive. The mount point compose creates for BACKUP_DIR, never a path on this Mac. See .env.example.',
+  },
 ];
 
 function generate(key) {

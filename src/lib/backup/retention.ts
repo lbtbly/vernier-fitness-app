@@ -1,6 +1,5 @@
 import { readdir, rm, stat } from 'node:fs/promises';
 import { join } from 'node:path';
-import { DEFAULT_ARCHIVE_RETENTION } from './categories';
 
 /**
  * What an archive is called, and which ones go when there are too many.
@@ -19,6 +18,19 @@ import { DEFAULT_ARCHIVE_RETENTION } from './categories';
  * on the last Sunday in October, which is a collision on the one night a year
  * nobody would think to test.
  */
+
+/**
+ * How many daily archives are kept when the environment says nothing.
+ *
+ * IT IS DECLARED HERE, WHERE IT IS ENFORCED, AND AGAIN IN
+ * `src/lib/backup/categories.ts`, WHERE THE PRIVACY DOCUMENT READS IT. That is
+ * two constants, deliberately, and `tests/unit/privacy-retention.test.ts` fails
+ * when they disagree. The alternative is an import, and an import here would
+ * make this module unloadable by `scripts/restore.mjs`: Node's type stripping
+ * resolves no extensionless relative specifier, and a restore that needs a
+ * bundler is a restore that does not work on the morning it is needed.
+ */
+export const DEFAULT_ARCHIVE_RETENTION = 30;
 
 export const ARCHIVE_PREFIX = 'vernier-';
 export const ARCHIVE_SUFFIX = '.archive';

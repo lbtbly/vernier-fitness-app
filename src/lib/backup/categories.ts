@@ -70,6 +70,13 @@ export type DataCategory = {
  * number here, and the retention pass counts ARCHIVES: F128 runs four times in
  * one afternoon with retention set to 3 and expects three files left, which an
  * age-based sweep would fail while doing nothing wrong.
+ *
+ * THE SAME NUMBER IS DECLARED IN `src/lib/backup/retention.ts`, WHICH IS WHERE
+ * IT IS ENFORCED, and `tests/unit/privacy-retention.test.ts` fails when the two
+ * disagree. Two constants and a test, rather than an import, because an import
+ * would tie this file to another one and both of these have to be loadable by a
+ * plain `node` with nothing but type stripping: this one by
+ * `scripts/compliance.mjs` and that one by `scripts/restore.mjs`.
  */
 export const DEFAULT_ARCHIVE_RETENTION = 30;
 
