@@ -236,39 +236,39 @@ advance, so the budget does not have to be re-argued once per slice.
   an initial historical import lands, and the status screen shows a real last-sync
   time. Evidence: three captures. Sibling: F36, which proves the same pipeline with
   no client identifier.
-- [ ] **F45.** A well-formed batch with a matching digest, a timestamp inside 300
+- [x] **F45.** A well-formed batch with a matching digest, a timestamp inside 300
   seconds and an unseen nonce is accepted, and the response counts accepted and
   duplicate rows separately. Evidence: the request and the response.
-- [ ] **F46.** The same batch sent again returns the stored response and writes no
+- [x] **F46.** The same batch sent again returns the stored response and writes no
   new row; a batch failing on digest, on timestamp age or on a reused nonce returns
   a distinct named error for each of the three. Evidence: four requests, four
   responses, and the row count unchanged across all four.
-- [ ] **F47.** Rows deduplicate on a synthesised key behind a unique index: an
+- [x] **F47.** Rows deduplicate on a synthesised key behind a unique index: an
   overlapping 48-hour window sent three times leaves the row count unchanged after
   the first. Evidence: three row counts.
-- [ ] **F48.** A batch containing any metric type matching "blood pressure"
+- [x] **F48.** A batch containing any metric type matching "blood pressure"
   case-insensitively, or either HealthKit blood-pressure symbol, is rejected 422
   with a named forbidden-type error for the whole batch, and no row is written.
   Five string variants are asserted. Evidence: five responses and five row counts.
-- [ ] **F49.** A series whose parallel arrays differ in length is rejected with a
+- [x] **F49.** A series whose parallel arrays differ in length is rejected with a
   named length error identifying the series, before any write. Evidence: the
   response and the row count.
-- [ ] **F50.** A timestamp with no numeric offset is rejected with a named format
+- [x] **F50.** A timestamp with no numeric offset is rejected with a named format
   error, and a trailing `Z` is accepted only when the offset is genuinely zero.
   Evidence: three requests covering offset present, offset absent, and zero offset.
-- [ ] **F51.** The ingest credential authorises ingest and nothing else, in both
+- [x] **F51.** The ingest credential authorises ingest and nothing else, in both
   directions: presenting it where a session is expected reaches no authenticated
   route, and a valid session without it is refused at the ingest endpoint.
   Evidence: two responses.
-- [ ] **F52.** The ingest credential is displayed exactly once at creation, stored
+- [x] **F52.** The ingest credential is displayed exactly once at creation, stored
   as a hash, and revocable; a revoked credential is refused on the next request.
   Evidence: the creation capture, the stored row, and the request before and after
   revocation.
-- [ ] **F53.** Every ingest response, success or failure, carries a plain-English
+- [x] **F53.** Every ingest response, success or failure, carries a plain-English
   message field, and a fixture batch plus a recorded command in the repository
   exercises the whole path with no iPhone present. Evidence: the fixture run and
   five error-path messages.
-- [ ] **F54.** The ingest diagnostics screen prints a fixed canonical string, the
+- [x] **F54.** The ingest diagnostics screen prints a fixed canonical string, the
   digest the server computes for it with the live credential, and the command to
   reproduce it, so a mismatch is visible rather than silent. Evidence: the capture
   and a deliberately mismatched comparison.
