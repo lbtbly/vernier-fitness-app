@@ -33,6 +33,17 @@ One builder, stabilising before slice 5. Four items: add the missing `lint` scri
 2. **Decide about the fabricated waist row `f636c7bf-aee7-4127-b3b1-26b178ab378e`**, 99.0 cm, manual, not seed, before slice 5 imports real Withings history. It is the only non-seed row on the install and becomes indistinguishable from real waist history the moment that runs. Removal needs a truncate and re-seed at a psql prompt, which is the capability slice 3 deliberately removed from the suite.
 3. Optional, low: two published `SharedShortcut` records named "Test" under his Apple ID, from a research probe. Remove via Stop Sharing in the Shortcuts app.
 
+### Two guards that would not have caught a real loss, and the one that did not
+
+The stabilisation agent reported the 2026-08-23 five-table clear as an unattributed data loss. **It was the owner, on the lead's written instruction**, removing the fabricated waist row before slice 5 put real history beside it. Attributed and closed in DEFECTS.md.
+
+Its two structural findings survive the attribution and are the useful part:
+
+1. **`measurement_append_only` is a row-level trigger, and TRUNCATE fires no row-level trigger.** The append-only guarantee this run built holds against UPDATE, DELETE and upsert, and does not hold against TRUNCATE. That is by design and it is the owner's deliberate escape hatch, but it means the strongest guarantee in the schema has one documented way past it.
+2. **The census compares totals, so it cannot see a replacement.** All three stability runs printed "nothing of the owner's was taken" while the five tables had in fact been emptied, because the seed refilled 90 rows a second later and the owner logged a waist at 08:54:34. True of the count, false of the data. A census that counts rows cannot detect a clear followed by a refill; it needs identities or a high-water mark.
+
+**And there is no backup in the tree.** Slice 13 ships backup and restore. Until it does, the only copy of anything real is the running database.
+
 ### The defect class to carry into every remaining slice
 
 **Five instances of a check that passes by not checking**, four found by a verifier attacking the check rather than the code, none by the suite: an offline test with service workers blocked; a string checker never wired into the gate; an assertion over an empty population; `fill()` instead of typing, which hid an unusable field for four rounds; and a `lint` step that does not exist. When a check is green, ask what it would take for it to be red.
