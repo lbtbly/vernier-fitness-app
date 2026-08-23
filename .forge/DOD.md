@@ -280,34 +280,34 @@ advance, so the budget does not have to be re-argued once per slice.
   48-hour batch and its notification reports the stored count. Evidence: a capture
   of the notification and the matching server row counts. Sibling: F53, which
   proves the same path from a fixture with no iPhone.
-- [ ] **F57.** The manual lab form stores a panel covering at least fasting
+- [x] **F57.** The manual lab form stores a panel covering at least fasting
   glucose, HbA1c, total cholesterol, HDL, LDL, non-HDL, triglycerides, ALT, AST,
   GGT, creatinine or eGFR, CRP and ferritin, each with result, unit, reference
   interval, date and confidence, all with source `manual`. Evidence: the stored
   panel.
-- [ ] **F58.** Uploading a lab document extracts analyte, result, unit, reference
+- [x] **F58.** Uploading a lab document extracts analyte, result, unit, reference
   interval, date and confidence per row and stores nothing until a row is
   explicitly accepted: abandoning the review leaves zero rows. Evidence: the
   extraction capture and the row count before and after abandonment.
-- [ ] **F59.** Rows are accepted, edited or rejected one at a time behind an
+- [x] **F59.** Rows are accepted, edited or rejected one at a time behind an
   explicit save. Nothing saves on change and no control commits all rows at once:
   accepting row 3 of a twenty-two row panel stores row 3 and leaves the other
   twenty-one absent. Evidence: the row counts and a capture of the screen.
-- [ ] **F60.** A lab document containing blood pressure produces a named refusal
+- [x] **F60.** A lab document containing blood pressure produces a named refusal
   on the review screen that does not print the refused value, and no
   blood-pressure row exists anywhere afterwards. Evidence: the capture and a query
   across every table.
-- [ ] **F61.** A converted value renders the printed original, the conversion
+- [x] **F61.** A converted value renders the printed original, the conversion
   factor and the stored value on one line, and the stored row keeps all three.
   Evidence: the capture and the row.
 - [ ] **F62.** A row whose extraction confidence is below the stated threshold, or
   whose value is ambiguous, is flagged and cannot be saved without an explicit
   decision. Evidence: a fixture with a deliberately garbled digit, the flag, and
   the blocked save.
-- [ ] **F63.** At the moment of validation the owner is asked whether to keep or
+- [x] **F63.** At the moment of validation the owner is asked whether to keep or
   delete the source document, and choosing delete removes the file from the volume.
   Evidence: the prompt capture and a directory listing before and after.
-- [ ] **F64.** Trends render for all thirteen named analytes, and a fourteenth
+- [x] **F64.** Trends render for all thirteen named analytes, and a fourteenth
   analyte is added through the interface with no source file modified. Evidence:
   the thirteen charts, the added analyte, and `git status` clean.
 - [ ] **F65.** A document whose pages carry fewer than 100 non-whitespace
