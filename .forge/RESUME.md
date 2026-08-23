@@ -88,6 +88,35 @@ It is permanent: `measurement` refuses DELETE, and that refusal is a guarantee t
 
 Two things follow. The row is now a standing test of the guarantee, so every future run must leave it alone. And it is a fabricated measurement in a health record whose whole point is provenance, so it should be removed before the owner logs real waist measurements, by a deliberate operator action rather than by a test. Offered to the owner on 2026-08-22; awaiting his word.
 
+## The gate reported four checks and ran three. 2026-08-23.
+
+**There is no `lint` script in `package.json`.** `scripts/checks.sh` calls it, it stands down silently, and it has never run once. Every "four-check gate, exit 0" recorded in this run's evidence, and every one the lead relayed, was three checks reported as four.
+
+This is the fifth instance of one failure class in this run: **a check that passes by not checking.**
+1. An offline test that ran with service workers blocked, so no worker existed to be offline.
+2. A string checker that existed in `package.json` and had never been wired into the gate.
+3. A test asserting a zero over an empty population.
+4. `fill()` instead of typing, which set a whole value in one input event and passed over a field that could not be typed into for four rounds.
+5. This one.
+
+The pattern is worth carrying into every remaining slice: **when a check is green, ask what it would take for it to be red.** Four of the five were found by a verifier attacking the check rather than the code, and none by the suite.
+
+The stabilisation dispatch is required to make the gate fail loudly when a step it names is missing, rather than standing down.
+
+## The suite degraded across the same dispatch
+
+Four full runs on one tree: 72 passed, then 71, then 70, then 66 with five serial siblings unrun. Three separate specs now fail intermittently.
+
+**The passkey failure has stopped being a flake.** Five consecutive failures at the second authentication, three isolated, one after an app restart, `webauthn_credential` at 0 rows before and after each, and **no request reaching the origin at all**, so the ceremony dies in the page before it posts. F9 is a ticked line. If the product regressed, F9 is wrong and must be un-ticked, not quietly repaired.
+
+**F31's chart link is unclickable**: the average series' dot now covers the newest weight dot, so the two-tap walk cannot start. Also a ticked line, also defect 50 arriving.
+
+R7 is now the largest single risk to finishing the run. The stabilisation dispatch must show three consecutive clean full runs before slice 5 starts.
+
+## The owner's goal date was left wrong on the live install
+
+76.0 kg on 2027-06-30 where the seed writes 2027-03-30. An F29 test died before its own restore. The value is right, the date is three months out, it is demonstration data, and the repair is two taps on the Health goal form rather than SQL.
+
 ## F27 passes at the fifth attempt. 41 of 166.
 
 The rebuild against A5 held. Every element above the trend carries a stated maximum bounded by construction: title 63, offline line 39, notice region 46, day card 322, weight card 165, three gaps 36, padding 8. Sum 679 against 715, at section 3's 16 and 12 geometry, so the fold is not bought by compression. Adherence opens at 1051 with the trend ending at 600.
