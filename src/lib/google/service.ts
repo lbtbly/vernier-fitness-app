@@ -120,7 +120,7 @@ export async function openRun(): Promise<RunContext> {
 
   const transport =
     settings.mode === 'demo'
-      ? demoTransport(demoStore(), { timeZone: config.timeZone })
+      ? demoTransport(demoStore(), { timeZone: config.timeZone, fault: settings.fault })
       : networkTransport((next) => {
           failure = next;
         });

@@ -19,7 +19,29 @@ export type GoogleSettings = {
   redirectUri: string;
   /** True when the environment names a mode explicitly rather than being read. */
   declared: boolean;
+  /**
+   * What the recorded Google is doing wrong, and it is a demonstration control
+   * rather than a test hook.
+   *
+   * Two rubric lines describe a provider misbehaving, and the honest way to show
+   * either is to make it misbehave rather than to mock the answer:
+   *
+   *   `outage`  every calendar call comes back the way a socket that never
+   *             opened comes back, so the real fallback to stored availability
+   *             runs and the screen names the cause.
+   *   `revoked` the refresh answers `invalid_grant`, so the permanent refusal
+   *             runs: the token is deleted, the connection is disconnected with
+   *             the raw body, background reads stop and nothing is retried.
+   *
+   * The alternative for the first is taking this machine's network away, which
+   * would take the rest of the app with it and prove nothing about this path.
+   * The alternative for the second is revoking a real grant, which needs a real
+   * Google account this run does not have.
+   */
+  fault: GoogleFault;
 };
+
+export type GoogleFault = 'none' | 'outage' | 'revoked';
 
 /**
  * The callback path this build serves.
@@ -74,7 +96,13 @@ export function readGoogleSettings(appUrl?: string): GoogleSettings {
     clientSecret,
     redirectUri,
     declared: declaredMode === 'live' || declaredMode === 'demo',
+    fault: readFault(),
   };
+}
+
+function readFault(): GoogleFault {
+  const declared = trimmed('GOOGLE_DEMO_FAULT').toLowerCase();
+  return declared === 'outage' || declared === 'revoked' ? declared : 'none';
 }
 
 /** True when the live mode is selected but the pair it needs is not there. */

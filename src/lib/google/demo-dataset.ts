@@ -78,6 +78,21 @@ export type DemoOptions = {
   timeZone: string;
   /** Which refresh token the fixture treats as revoked, for the invalid_grant path. */
   revokedRefreshToken?: string;
+  /**
+   * What the recorded Google is doing wrong, if anything.
+   *
+   * `outage` answers every calendar call with status 0 and no body, which is
+   * exactly what `networkTransport` returns when a socket never opens, so what
+   * runs above this line is the real unreachable path rather than a second one
+   * written for a demonstration. The token endpoint still answers, because a
+   * provider that cannot be reached and a grant that has been refused are
+   * different states and the screens say different things about them.
+   *
+   * `revoked` answers every refresh with `invalid_grant` and every calendar call
+   * with 401, which is the shape of a grant the owner revoked in his Google
+   * account: the access token stops working and the refresh cannot renew it.
+   */
+  fault?: 'none' | 'outage' | 'revoked';
 };
 
 type Busy = { calendarId: string; start: string; end: string };
@@ -180,9 +195,29 @@ export function demoCalendarList(): Record<string, unknown> {
  */
 export function demoTransport(store: DemoStore, options: DemoOptions): Transport {
   const revoked = options.revokedRefreshToken ?? DEMO_REVOKED_REFRESH_TOKEN;
+  const fault = options.fault ?? 'none';
 
   return async (request: TransportRequest): Promise<TransportAnswer> => {
-    if (request.url === TOKEN_URL) return token(request, revoked);
+    if (request.url === TOKEN_URL) {
+      if (fault === 'revoked' && (request.form ?? {}).grant_type === 'refresh_token') {
+        return {
+          status: 400,
+          body: {
+            error: 'invalid_grant',
+            error_description: strings.calendar.demo.revokedDescription,
+          },
+        };
+      }
+      return token(request, revoked);
+    }
+
+    // The socket never opened. The same answer `networkTransport` gives.
+    if (fault === 'outage') return { status: 0, body: null };
+    // The grant is dead, so the access token is refused and the refresh above
+    // cannot renew it. One refresh, one refusal, and the client stops.
+    if (fault === 'revoked') {
+      return { status: 401, body: { error: { code: 401, message: 'Invalid Credentials' } } };
+    }
 
     const url = new URL(request.url);
     const path = url.pathname.replace('/calendar/v3', '');
