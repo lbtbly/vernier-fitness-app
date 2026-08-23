@@ -54,8 +54,9 @@ export const PUBLIC_PREFIXES: string[] = ['/_next/', '/icons/'];
 
 /**
  * The gate itself. These cannot require a session, because they are what
- * issues one. They refuse instead: no credential, no session, and the answer is
- * 401, 403 or 429 with nothing set and nothing written.
+ * issues one, or because they carry a credential of their own. They refuse
+ * instead: no credential, no session, and the answer is 401, 403, 409, 413,
+ * 422 or 429 with nothing set and nothing written.
  */
 export const GATE_PATHS: string[] = [
   '/api/auth/bootstrap',
@@ -63,6 +64,24 @@ export const GATE_PATHS: string[] = [
   '/api/auth/passkey/authentication/options',
   '/api/auth/passkey/authentication/verify',
   '/sign-in/recover',
+  /*
+   * The Apple Health ingest endpoint, and it is in this class for the mirror of
+   * the reason the four above are.
+   *
+   * They cannot require a session because they are what issues one. This cannot
+   * require a session because it carries its OWN credential: an iPhone shortcut
+   * posting through Get Contents of URL has no cookie jar, no anti-forgery
+   * token and no way to sign in. It presents a bearer token and a keyed digest,
+   * and this class's rule is exactly the one that fits: never a session, and an
+   * unauthenticated caller is refused with nothing set and nothing written.
+   *
+   * F51 runs in both directions and neither is a special case of the other.
+   * This endpoint reads no cookie at all, so a live browser session buys nothing
+   * at it and is refused like a stranger. The ingest token is not a session, so
+   * presenting it on any other route reaches nothing. Both are properties of the
+   * code rather than of this list, and both are tested.
+   */
+  '/api/ingest/health',
 ];
 
 export function classifyRoute(pathname: string): RouteClass {
@@ -104,7 +123,13 @@ const NO_COOKIE_PATHS: string[] = [
   '/manifest.webmanifest',
   '/favicon.ico',
 ];
-const NO_COOKIE_PREFIXES: string[] = ['/_next/', '/icons/', '/api/diagnostics/'];
+/*
+ * `/api/ingest/` is here because the caller is an iPhone shortcut with no
+ * cookie jar. Setting a cookie on a response nothing can store is noise at
+ * best, and at worst it invites somebody later to read one on that route, which
+ * would be the ambient authority the bearer token exists to avoid.
+ */
+const NO_COOKIE_PREFIXES: string[] = ['/_next/', '/icons/', '/api/diagnostics/', '/api/ingest/'];
 
 export function shouldIssueCsrfCookie(pathname: string): boolean {
   if (NO_COOKIE_PATHS.includes(pathname)) return false;

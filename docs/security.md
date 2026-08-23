@@ -127,3 +127,59 @@ third-party credential in the database is encrypted with it.
 
 Losing the key means the stored third-party credentials are gone. Reconnect each
 integration from Settings; nothing else in the database depends on it.
+
+## The Apple Health ingest credential, and what its digest does not cover
+
+`POST /api/ingest/health` is the one route in this app that authenticates
+something other than the owner's browser. An iPhone shortcut posting through
+`Get Contents of URL` has no cookie jar, cannot sign in, and cannot perform
+OAuth: Apple's own guide says so. So it carries a credential of its own.
+
+**Two values, stored two different ways, and the difference is deliberate.**
+
+- The **ingest token** goes in the `Authorization` header. The database holds
+  its SHA-256 and nothing else, so a stolen backup is not a working credential.
+  It is shown once, at creation, and no screen, endpoint or log line can read it
+  back.
+- The **signing secret** builds the digest. It is sealed with `MASTER_KEY` in
+  `integration_credential`, beside every other third-party secret, because the
+  server has to recompute the digest from it on every request and the
+  diagnostics screen has to print the digest it computes for a fixed string. A
+  value the server must reproduce cannot be stored as a hash.
+
+The recoverable half opens nothing on its own: every request needs the bearer
+token too, and that one is not recoverable from anywhere.
+
+**The digest is not an HMAC and this app does not call it one.** It is two
+SHA-256 passes: `inner = SHA256(secret | canonical)`, then
+`digest = SHA256(secret | inner)`. Two, because a single hash of a secret
+followed by a message is open to length extension; the second pass runs over a
+fixed-length input, which closes it. A real HMAC is not buildable in Shortcuts
+without an undocumented `data:text/html` trick Apple owes nothing to, and the
+secret sits in plaintext inside the shortcut either way, so it would buy less
+than it looks like.
+
+**What the digest covers:** the request's identity, its key, its timestamp, its
+nonce and its declared window, recomputed server-side from the parsed body and
+the request headers and compared in constant time. It never trusts a canonical
+string the client supplies.
+
+**What it does not cover: the body bytes.** The Shortcut never sees the bytes
+its own JSON serialiser produces, so it cannot hash them. Body integrity comes
+from TLS, which here is Tailscale Serve HTTPS on the tailnet, never Funnel and
+never a LAN port. That is a real limit and it is written down rather than left
+for a reader to assume otherwise.
+
+**The nonce is not a secret.** Shortcuts has no UUID action and `Random Number`
+is not documented as a CSPRNG, so the nonce is a timestamp and two random runs.
+Its only job is uniqueness, and uniqueness is enforced by a unique index that
+remembers every nonce for 24 hours, never by entropy. Someone who guesses the
+next nonce gains nothing: he still needs the token and a matching digest, and a
+nonce already in the table is refused on arrival.
+
+**The token is readable by anyone holding the unlocked phone,** because it lives
+in a `Text` action inside the shortcut. That is stated rather than hidden. It is
+why the token opens the ingest endpoint and nothing else, in both directions:
+presenting it anywhere a session is expected reaches nothing, and a live browser
+session cannot post a batch. Rotation is two steps: revoke in Settings, paste
+the new pair into the shortcut.

@@ -57,6 +57,23 @@ describe('the route table', () => {
     }
   });
 
+  it('calls the health ingest endpoint the gate, and nothing beside it', () => {
+    // It carries its own credential. A shortcut posting from Get Contents of
+    // URL has no cookie jar and cannot sign in, so it presents a bearer token
+    // and a keyed digest instead. Same class, same rule, and the same refusal
+    // of an unauthenticated caller.
+    expect(classifyRoute('/api/ingest/health')).toBe('gate');
+    expect(shouldIssueCsrfCookie('/api/ingest/health')).toBe(false);
+
+    // BY NAME, NEVER BY NAMESPACE. This goes red the day somebody writes
+    // /api/ingest/anything and expects it to inherit the opening, which is the
+    // hole /api/diagnostics/launch shipped through once already.
+    for (const path of ['/api/ingest/withings', '/api/ingest', '/api/ingest/health/replay']) {
+      expect(classifyRoute(path)).toBe('protected');
+      expect(isOpenRoute(path)).toBe(false);
+    }
+  });
+
   it('protects everything else, including a route nobody has written yet', () => {
     for (const path of [
       '/',

@@ -969,6 +969,21 @@ const unreachableBranches = [
   ['a screen behind a connected integration', "select count(*) from integration_credential where state = 'connected'"],
   ['a screen behind a registered passkey', 'select count(*) from webauthn_credential'],
   ['a screen behind an open import question', "select count(*) from import_question where state = 'open'"],
+  /*
+   * Slice 6 adds two, and both are named rather than discovered.
+   *
+   * The ingest diagnostics screen has two shapes: with no credential it draws
+   * its empty state, which is what a fresh machine renders and what this walk
+   * reads; with one it draws the canonical string, the digest and the arrivals
+   * log. The second is walked by tests/e2e/ingest.spec.ts against the scratch
+   * instance, where a credential is created through the shipped screen.
+   *
+   * The Shortcut guide is walked in full either way: it is prose and a metric
+   * table, and the only live thing on it is one line naming this installation's
+   * own endpoint.
+   */
+  ['the diagnostics screen with a live credential', 'select count(*) from ingest_credential where live'],
+  ['the diagnostics screen with an arrival on it', 'select count(*) from ingest_batch'],
 ];
 
 const kindsBehindAValue = db(
@@ -1081,6 +1096,24 @@ async function walk() {
 
   await page.goto('/settings');
   await readSurface(page, '/settings', 'four integrations, no passkey');
+
+  // The two screens slice 6 added under Settings.
+  //
+  // The guide is the longest single surface in this product, about a hundred
+  // and thirty strings of procedure, and it names Apple's own actions. If one
+  // of those names were written inline in the component rather than keyed, no
+  // source scanner would ever call `Get Details of Health Sample` a sentence:
+  // it opens on a capital and it is four words of a proper noun. This walk is
+  // what catches it, and a surface not walked is a surface not checked.
+  //
+  // Diagnostics is walked in whatever state this installation is in. With no
+  // ingest credential it draws its empty state, which is the state a fresh
+  // machine is in and the one nothing else here reads.
+  await page.goto('/settings/shortcut');
+  await readSurface(page, '/settings/shortcut', 'the shortcut guide');
+
+  await page.goto('/settings/ingest');
+  await readSurface(page, '/settings/ingest', 'ingest diagnostics');
 
   await page.goto('/no-such-address');
   await readSurface(page, '/no-such-address', 'not found');

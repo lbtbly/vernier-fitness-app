@@ -12,16 +12,26 @@ import { StaleCause, StaleChip, staleNotice } from '@/components/StaleNotice';
 import { WaistChart, WeightChart } from '@/components/WeightChart';
 import { ChevronIcon, SyncIcon } from '@/components/icons';
 import { recordRequestOrigin } from '@/db/diagnostics';
+import { readLastAcceptedBatch } from '@/db/ingest';
 import { readLatestPerMetric, readOpenQuestions, readSourceRecordsFor, toView } from '@/db/measurements';
 import { TODAY_RANGE, readAdherenceScreen, readBodyScreen, readSignalScreen } from '@/db/screens';
 import { getConfig } from '@/lib/config';
 import { readCsrfToken } from '@/lib/csrf';
 import { metricLabel, sleepLabel, valueLabel } from '@/lib/display';
-import { dayLabel, daysBetween, formatNumber, longDate, shortDate, shortDateTime, time24 } from '@/lib/format';
+import {
+  dayLabel,
+  daysBetween,
+  formatNumber,
+  hoursBetween,
+  longDate,
+  shortDate,
+  shortDateTime,
+  time24,
+} from '@/lib/format';
 import { LAB_METRICS } from '@/lib/provenance';
 import { readRequestOrigin } from '@/lib/request-origin';
 import { strings } from '@/lib/strings';
-import { AVERAGE_WINDOW, type Day, dayKey } from '@/lib/trend';
+import { AVERAGE_WINDOW, type Day, STALE_HOURS, dayKey } from '@/lib/trend';
 
 export const metadata = { title: strings.today.title };
 export const dynamic = 'force-dynamic';
@@ -122,13 +132,14 @@ export default async function TodayPage() {
     });
   }
 
-  const [body, signals, plan, rows, questions, csrfToken] = await Promise.all([
+  const [body, signals, plan, rows, questions, csrfToken, lastIngest] = await Promise.all([
     readBodyScreen(TODAY_RANGE),
     readSignalScreen(TODAY_RANGE),
     readAdherenceScreen(),
     readLatestPerMetric(),
     readOpenQuestions(),
     readCsrfToken(),
+    readLastAcceptedBatch(),
   ]);
   const records = await readSourceRecordsFor(rows);
   const values = rows.map((row) => toView(row, records));
@@ -163,6 +174,10 @@ export default async function TodayPage() {
   const vo2 = lastOf(signals.series.get('vo2_max') ?? []);
   const phone = body.freshness.find((source) => source.source === 'apple_health_shortcut');
   const scale = body.freshness.find((source) => source.source === 'withings');
+  // Hours, never calendar days: 36 falls inside a day boundary, so an age
+  // rounded to days cannot be checked at 35 and again at 37.
+  const ingestAgeHours = lastIngest ? hoursBetween(lastIngest.receivedAt, now) : null;
+  const ingestStale = ingestAgeHours === null || ingestAgeHours >= STALE_HOURS;
 
   // What Today has to raise above its first card. The region bounds the room
   // they take; each notice decides what it says.
@@ -547,6 +562,46 @@ export default async function TodayPage() {
             <span className="note">{strings.signals.vo2Empty}</span>
           )}
         </div>
+        {/*
+          * F55's line, and it is here whether or not anything is wrong.
+          *
+          * The panel's first finding is that silence is the failure mode, and
+          * that the owner should never be the one who has to notice an absence.
+          * A timestamp he reads every morning is what turns "I think the phone
+          * is sending" into a fact. Past the 36 hours F34 fixes it takes the
+          * warn treatment and says how long it has been, so the app notices for
+          * him rather than waiting for him to spot a flat chart four days late.
+          *
+          * It reads the accepted-batch log rather than the freshness figure
+          * beside it. They are close but not the same thing: freshness takes
+          * the later of the newest sample and the last successful sync, and
+          * this line has to say when a batch actually landed.
+          */}
+        <div
+          className="row"
+          data-signal="ingest"
+          data-ingest-state={lastIngest === null ? 'never' : ingestStale ? 'warn' : 'ok'}
+        >
+          <span className="grow">{strings.signals.lastIngestLabel}</span>
+          {lastIngest ? (
+            <>
+              <span className={ingestStale ? 'num warn' : 'num'}>
+                {shortDateTime(lastIngest.receivedAt, timeZone)}
+              </span>
+              <span className={ingestStale ? 'note num warn' : 'note num'}>
+                {ingestAgeHours !== null && ingestAgeHours < 48
+                  ? strings.signals.lastIngestAgeHours(ingestAgeHours)
+                  : strings.signals.lastIngestAgeDays(Math.floor((ingestAgeHours ?? 0) / 24))}
+              </span>
+            </>
+          ) : (
+            <span className="note warn">{strings.signals.lastIngestNever}</span>
+          )}
+        </div>
+        {lastIngest === null ? (
+          <p className="note warn">{strings.signals.lastIngestNeverBody}</p>
+        ) : null}
+
         {phone?.stale && phone.lastAt ? (
           <div className="row" data-signal="absent">
             <span className="grow mut">

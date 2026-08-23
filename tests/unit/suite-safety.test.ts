@@ -292,6 +292,18 @@ describe('the suite against the owner\'s installation', () => {
    *                           lines above, and it closing is what puts Undo and
    *                           Edit back in the accessibility tree.
    *   notices.spec.ts:583     REAL. The scroll offset again, and F27 turns on it.
+   *   ingest.spec.ts:178      REAL. `duplicates` is a field of the route's own
+   *                           answer, on the first arrival of a batch into an
+   *                           emptied table, and the `accepted` count beside it
+   *                           is asserted equal to the fixture's own row count.
+   *                           A zero here is the claim that nothing was already
+   *                           stored, over a population the same line prints.
+   *   ingest.spec.ts:205      REAL. `accepted` on the second, third and fourth
+   *                           run of an overlapping window. `duplicates` is
+   *                           asserted greater than zero on the same response,
+   *                           and the row counts before and after all four runs
+   *                           are printed and compared. A run that had reached
+   *                           nothing at all would fail on the duplicates.
    *   suite-privilege:67      REAL. Every refused statement is printed with the
    *                           answer Postgres gave it.
    *   this file               REAL. Both offender lists print what they walked.
@@ -313,6 +325,7 @@ describe('the suite against the owner\'s installation', () => {
       ['trend-scratch.spec.ts', 5],
       ['today.spec.ts', 6],
       ['notices.spec.ts', 3],
+      ['ingest.spec.ts', 2],
       ['suite-privilege.spec.ts', 1],
     ]);
     const zeroish = /toHaveCount\(0\)|\.toBe\(0\)|toEqual\(\[\]\)|toHaveLength\(0\)|not\.toBeVisible\(|toBeHidden\(/;
