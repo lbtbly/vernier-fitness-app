@@ -117,6 +117,7 @@ export function SessionPlayer({
   const [painScore, setPainScore] = useState<number | null>(null);
   const [painMorning, setPainMorning] = useState<boolean | null>(null);
   const [note, setNote] = useState('');
+  const [remember, setRemember] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   /**
@@ -207,11 +208,26 @@ export function SessionPlayer({
     };
   }, []);
 
+  /**
+   * One write, into the outbox, and the screen does not wait for it.
+   *
+   * THE ENTRY'S ID AND THE RUN'S ID ARE TWO DIFFERENT THINGS. The entry id is
+   * the client UUID that keys the queue record and travels as the
+   * Idempotency-Key; the run id is the row every set of this session points at.
+   * An earlier version of this function overwrote the second with the first,
+   * which sent the start under one id and every set under another, and the sets
+   * would have been refused by the foreign key on `set_log.run_id`. The body's
+   * own `runId` wins here, and `start()` is the one caller that sets it.
+   */
   async function send(body: Record<string, unknown>) {
-    const id = crypto.randomUUID();
-    await enqueue({ id, url: '/api/train/session', body: { ...body, runId: runId || id } });
+    const entryId = crypto.randomUUID();
+    await enqueue({
+      id: entryId,
+      url: '/api/train/session',
+      body: { runId: runId || entryId, ...body },
+    });
     void flushOutbox({ force: true });
-    return id;
+    return entryId;
   }
 
   /**
@@ -349,6 +365,21 @@ export function SessionPlayer({
   function swap(toId: string) {
     const replacement = movementOf(toId);
     if (!replacement || !current) return;
+    const from = current.movementId;
+    /*
+     * "Remember this swap", from screen 07 frame 3, and it means what it says:
+     * every session still ahead of the owner that holds the movement he just
+     * replaced takes the replacement, and every session behind him is left
+     * exactly as it happened. It goes through the outbox like every other write
+     * here, so making the decision mid-set in a basement gym costs nothing.
+     */
+    if (remember) {
+      void enqueue({
+        id: crypto.randomUUID(),
+        url: '/api/train/week',
+        body: { action: 'substitute', fromMovementId: from, toMovementId: toId },
+      }).then(() => flushOutbox({ force: true }));
+    }
     setMovements((entries) =>
       entries.map((entry, index) =>
         index === run.cursor.movementIndex
@@ -1011,6 +1042,30 @@ export function SessionPlayer({
                     </button>
                   </div>
                 ))}
+              {/*
+                * The one thing on this sheet that outlives tonight, and it is
+                * off by default: a swap made because the backpack shifted is
+                * not a decision about February.
+                */}
+              <div className="card tight" style={{ borderStyle: 'dashed', background: 'transparent' }}>
+                <div className="between">
+                  <div className="stack grow">
+                    <span>{strings.player.remember}</span>
+                    <span className="note">{strings.player.rememberNote}</span>
+                  </div>
+                  <button
+                    type="button"
+                    role="switch"
+                    className={remember ? 'btn primary' : 'btn'}
+                    aria-checked={remember}
+                    aria-label={strings.player.remember}
+                    data-action="remember-swap"
+                    onClick={() => setRemember((current) => !current)}
+                  >
+                    {remember ? strings.readiness.diseaseYes : strings.readiness.diseaseNo}
+                  </button>
+                </div>
+              </div>
               <p className="note centre">{strings.media.embedNote}</p>
             </div>
           </div>

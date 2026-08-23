@@ -56,13 +56,27 @@ export default async function TrainPage() {
   const weekStart = upcomingWeekStart(now, timeZone);
   const csrfToken = await readCsrfToken();
 
-  const [proposals, progressions, readiness, resting, painReports] = await Promise.all([
-    readProposals(weekStart),
-    readProgressions('proposed'),
-    readLatestReadiness(),
-    readRestingHeartRate(),
-    readPainReports(4),
-  ]);
+  let proposals: Awaited<ReturnType<typeof readProposals>> = [];
+  let progressions: Awaited<ReturnType<typeof readProgressions>> = [];
+  let readiness: Awaited<ReturnType<typeof readLatestReadiness>> = null;
+  let resting: number | null = null;
+  let painReports: Awaited<ReturnType<typeof readPainReports>> = [];
+  let failed = false;
+  try {
+    [proposals, progressions, readiness, resting, painReports] = await Promise.all([
+      readProposals(weekStart),
+      readProgressions('proposed'),
+      readLatestReadiness(),
+      readRestingHeartRate(),
+      readPainReports(4),
+    ]);
+  } catch (error) {
+    // Screen 00's error state, on this screen, rather than the shell's own
+    // boundary: an error names the failure and says what still works, and what
+    // still works here is everything already accepted, which is on Today.
+    console.error(`[vernier] train week read failed: ${(error as Error).message}`);
+    failed = true;
+  }
 
   const rows: PlanRow[] = proposals.map((proposal) => ({
     id: proposal.id,
@@ -129,6 +143,22 @@ export default async function TrainPage() {
       />
 
       <OfflineBanner />
+
+      {failed ? (
+        <div className="card error" data-state="error">
+          <div className="between">
+            <span className="lbl">{strings.trainWeek.nextWeek}</span>
+            <span className="chip a">{strings.error.title}</span>
+          </div>
+          <div className="head">{strings.trainWeek.errorTitle}</div>
+          <p className="sub">{strings.trainWeek.errorBody}</p>
+          <div className="actions">
+            <Link className="btn block" href="/train">
+              {strings.common.retry}
+            </Link>
+          </div>
+        </div>
+      ) : null}
 
       {/* ---------- the screening gate, when it is due ---------- */}
       {screeningDue ? (

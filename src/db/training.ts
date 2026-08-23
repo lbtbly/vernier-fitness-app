@@ -385,6 +385,40 @@ export async function proposeNextWeek(now: Date, timeZone: string): Promise<Prop
   return { weekStart, written };
 }
 
+/**
+ * A substitution the owner asked to keep, applied to the sessions still ahead
+ * of him and to nothing behind him.
+ *
+ * Screen 07's replace sheet offers "Remember this swap. Applies to every future
+ * session, not just tonight", and this is what makes that sentence true rather
+ * than a promise. It writes `substituted_for` beside the new movement, so the
+ * original is kept as a fact about the plan and the next proposal can read it.
+ * A session that has already happened is never touched: what was done was done.
+ */
+export async function rememberSubstitution(
+  fromMovementId: string,
+  toMovementId: string,
+  now: Date,
+): Promise<number> {
+  const db = getDb();
+  const ahead = await db
+    .select({ id: sessionProposal.id })
+    .from(sessionProposal)
+    .where(and(inArray(sessionProposal.state, ['proposed', 'edited', 'accepted']), gte(sessionProposal.plannedFor, now)));
+  if (ahead.length === 0) return 0;
+  const changed = await db
+    .update(sessionMovement)
+    .set({ movementId: toMovementId, substitutedFor: fromMovementId })
+    .where(
+      and(
+        eq(sessionMovement.movementId, fromMovementId),
+        inArray(sessionMovement.proposalId, ahead.map((row) => row.id)),
+      ),
+    )
+    .returning({ id: sessionMovement.id });
+  return changed.length;
+}
+
 export type Decision = 'accept' | 'reject';
 
 /**

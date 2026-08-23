@@ -4,8 +4,10 @@ import {
   editProposal,
   proposeNextWeek,
   readProposals,
+  rememberSubstitution,
   upcomingWeekStart,
 } from '@/db/training';
+import { movementOf } from '@/lib/catalogue';
 import { getConfig } from '@/lib/config';
 import { csrfFailure } from '@/lib/csrf';
 import { ok, refuse, sessionOrRefusal } from '@/lib/gate';
@@ -55,7 +57,14 @@ async function handle(request: Request) {
   const key = request.headers.get(HEADER)?.trim();
   if (!key) return refuse(400, strings.api.train.noKey, strings.api.train.noKeyDetail);
 
-  let body: { action?: unknown; id?: unknown; plannedFor?: unknown; durationMinutes?: unknown };
+  let body: {
+    action?: unknown;
+    id?: unknown;
+    plannedFor?: unknown;
+    durationMinutes?: unknown;
+    fromMovementId?: unknown;
+    toMovementId?: unknown;
+  };
   try {
     body = (await request.json()) as typeof body;
   } catch {
@@ -108,6 +117,28 @@ async function handle(request: Request) {
             proposals: await readProposals(decided.weekStart),
           } as Record<string, unknown>,
         },
+      };
+    }
+
+    if (action === 'substitute') {
+      const from = typeof body.fromMovementId === 'string' ? body.fromMovementId : '';
+      const to = typeof body.toMovementId === 'string' ? body.toMovementId : '';
+      if (!movementOf(from) || !movementOf(to)) {
+        return {
+          outcome: 'refused' as const,
+          handled: {
+            status: 422,
+            body: {
+              error: strings.api.train.unknownAction,
+              detail: strings.api.train.bodyDetail,
+            } as Record<string, unknown>,
+          },
+        };
+      }
+      const changed = await rememberSubstitution(from, to, new Date());
+      return {
+        outcome: 'applied' as const,
+        handled: { status: 200, body: { changed } as Record<string, unknown> },
       };
     }
 
