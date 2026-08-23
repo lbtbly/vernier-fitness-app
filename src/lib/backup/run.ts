@@ -127,11 +127,22 @@ export async function walkStorage(root: string, exclude: string[] = []): Promise
   return found.sort((left, right) => left.name.localeCompare(right.name));
 }
 
+/**
+ * The volume's files as tar members, each opened only when it is reached.
+ *
+ * `createReadStream` opens its descriptor as soon as it is constructed, so
+ * mapping every file to one up front would hold a descriptor per file for the
+ * whole run. A volume with ten thousand meal photographs on it would exhaust
+ * the process's limit before the first byte was written. An async generator's
+ * body does not run until it is iterated, which is what makes this lazy.
+ */
 function storageTarEntries(entries: StorageEntry[]): TarEntry[] {
   return entries.map((entry) => ({
     name: entry.name,
     size: entry.size,
-    body: createReadStream(entry.path),
+    body: (async function* () {
+      yield* createReadStream(entry.path);
+    })(),
   }));
 }
 
@@ -223,7 +234,12 @@ export async function runArchive(input: {
   // Both destinations refused. There is nowhere to put an archive, and that is
   // a failed run rather than a fallback: saying "written to the fallback" about
   // a file that does not exist is the shape of lie this whole slice is against.
-  if (destination.kind === 'fallback' && ['missing', 'not_writable', 'not_a_directory', 'probe_mismatch'].includes(destination.cause) && destination.detail.fallback === destination.path && destination.detail.errno) {
+  //
+  // It is `usable` and not a reading of the cause, because the cause of a
+  // WORKING fallback is the configured destination's failure: the two states
+  // carry the same token and the same errno and differ only in whether the
+  // second directory took the probe.
+  if (!destination.usable) {
     return (
       (await finishBackupRun(run.id, {
         outcome: 'failed',
@@ -279,10 +295,21 @@ export async function runArchive(input: {
       );
       databaseName = String(meta.rows[0]?.db ?? '');
       postgres = String(meta.rows[0]?.version ?? '');
-      const applied = await client
-        .query('select count(*)::int as n from drizzle.__drizzle_migrations')
-        .catch(() => ({ rows: [{ n: 0 }] }));
-      migrations = Number(applied.rows[0]?.n ?? 0);
+      /*
+       * TWO STATEMENTS, AND THE FIRST ONE IS WHY. A count against a table that
+       * does not exist raises, and a raise inside a transaction poisons it: the
+       * dump that followed would fail with "current transaction is aborted"
+       * and the cause would be a swallowed catch three lines up. So the
+       * existence is asked first, with a function that answers null rather than
+       * raising.
+       */
+      const ledger = await client.query(
+        "select to_regclass('drizzle.__drizzle_migrations') is not null as present",
+      );
+      if (ledger.rows[0]?.present === true) {
+        const applied = await client.query('select count(*)::int as n from drizzle.__drizzle_migrations');
+        migrations = Number(applied.rows[0]?.n ?? 0);
+      }
 
       dataDigest = await writeMember(
         join(temporary, DATA_MEMBER),

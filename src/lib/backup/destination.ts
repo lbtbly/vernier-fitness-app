@@ -36,6 +36,17 @@ export type DestinationCause =
 
 export type Destination = {
   kind: 'configured' | 'fallback';
+  /**
+   * Whether the directory named by `path` can actually take the archive.
+   *
+   * False only when BOTH destinations refused, which is a failed run and not a
+   * fallback: reporting "written to the fallback" about a file that does not
+   * exist is the shape of lie this whole slice is against. It is a field rather
+   * than something the caller infers from the cause, because the cause of a
+   * WORKING fallback is the configured destination's failure and the two read
+   * identically from outside.
+   */
+  usable: boolean;
   /** The directory the bytes are written to, as this process sees it. */
   path: string;
   /** The directory as the OWNER knows it. The host path when there is one. */
@@ -122,6 +133,7 @@ export async function resolveDestination(input: {
   if (probe.ok) {
     return {
       kind: 'configured',
+      usable: true,
       path: input.mount,
       displayPath: configuredHost,
       cause: '',
@@ -146,13 +158,21 @@ async function fallBackTo(
     // tried, rather than throwing an ENOENT out of a stream two functions later.
     return {
       kind: 'fallback',
+      usable: false,
       path,
       displayPath: path,
       cause: probe.cause,
       detail: { ...detail, ...probe.detail, fallback: path },
     };
   }
-  return { kind: 'fallback', path, displayPath: path, cause, detail: { ...detail, fallback: path } };
+  return {
+    kind: 'fallback',
+    usable: true,
+    path,
+    displayPath: path,
+    cause,
+    detail: { ...detail, fallback: path },
+  };
 }
 
 /** Free bytes on the filesystem holding a path, or null when it cannot be read. */

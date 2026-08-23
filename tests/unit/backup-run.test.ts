@@ -107,6 +107,34 @@ describe('the destination', () => {
     expect((await stat(destination.path)).isDirectory()).toBe(true);
   });
 
+  it('tells a working fallback from a run with nowhere to write', async () => {
+    // The two states carry the SAME cause and the SAME errno, and the only
+    // difference is whether the second directory took the probe. A caller that
+    // read the cause to tell them apart would report an archive written to a
+    // fallback that refused it, which is the one lie this module must not tell.
+    const working = await resolveDestination({
+      mount: join(root, 'gone'),
+      hostPath: '/Users/owner/CloudDocs/Vernier',
+      fallback: join(root, 'fallback'),
+    });
+    expect(working.kind).toBe('fallback');
+    expect(working.usable).toBe(true);
+
+    // A file where the fallback directory would be, so it can be neither used
+    // nor created.
+    const blocked = join(root, 'fallback-is-a-file');
+    await writeFile(blocked, 'in the way');
+    const nowhere = await resolveDestination({
+      mount: join(root, 'gone'),
+      hostPath: '/Users/owner/CloudDocs/Vernier',
+      fallback: blocked,
+    });
+    console.log(`nowhere to write: cause ${nowhere.cause}, usable ${nowhere.usable}`);
+    expect(nowhere.kind).toBe('fallback');
+    expect(nowhere.usable).toBe(false);
+    expect(working.cause).toBe('missing');
+  });
+
   it('says so when no destination is configured at all', async () => {
     const destination = await resolveDestination({
       mount: join(root, 'unused'),
