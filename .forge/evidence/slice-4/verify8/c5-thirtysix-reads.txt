@@ -1,0 +1,37 @@
+engine | viewport | state | opacity | ancestry | sheet w/x | foot pad-top | Save margin | Save below divider | Save min-h | card padding | actions | targets walked | under 44
+chrome | 393x852 | stale | 1 | body < html | 393/0 | 12px | 0px | 12 | 52px | stale=16px | none | 26 | 0
+chrome | 393x852 | loaded | 1 | body < html | 393/0 | 12px | 0px | 12 | 52px | none | none | 26 | 0
+chrome | 393x852 | loading | 1 | body < html | 393/0 | 12px | 0px | 12 | 52px | loading=16px | none | 26 | 0
+chrome | 393x852 | error | 1 | body < html | 393/0 | 12px | 0px | 12 | 52px | error=16px | error mt 12px drawn 12px Try again 52px min 52px | 27 | 0
+chrome | 393x852 | offline | 1 | body < html | 393/0 | 12px | 0px | 12 | 52px | error=16px | error mt 12px drawn 12px Try again 52px min 52px | 27 | 0
+chrome | 393x852 | empty | 1 | body < html | 393/0 | 12px | 0px | 12 | 52px | empty=16px | none | 26 | 0
+chrome | 768x1024 | stale | 1 | body < html | 720/24 | 12px | 0px | 12 | 52px | stale=16px | none | 26 | 0
+chrome | 768x1024 | loaded | 1 | body < html | 720/24 | 12px | 0px | 12 | 52px | none | none | 26 | 0
+chrome | 768x1024 | loading | 1 | body < html | 720/24 | 12px | 0px | 12 | 52px | loading=16px | none | 26 | 0
+chrome | 768x1024 | error | 1 | body < html | 720/24 | 12px | 0px | 12 | 52px | error=16px | error mt 12px drawn 12px Try again 52px min 52px | 27 | 0
+chrome | 768x1024 | offline | 1 | body < html | 720/24 | 12px | 0px | 12 | 52px | error=16px | error mt 12px drawn 12px Try again 52px min 52px | 27 | 0
+chrome | 768x1024 | empty | 1 | body < html | 720/24 | 12px | 0px | 12 | 52px | empty=16px | none | 26 | 0
+chrome | 1280x900 | stale | 1 | body < html | 720/280 | 12px | 0px | 12 | 52px | stale=16px | none | 26 | 0
+chrome | 1280x900 | loaded | 1 | body < html | 720/280 | 12px | 0px | 12 | 52px | none | none | 26 | 0
+chrome | 1280x900 | loading | 1 | body < html | 720/280 | 12px | 0px | 12 | 52px | loading=16px | none | 26 | 0
+chrome | 1280x900 | error | 1 | body < html | 720/280 | 12px | 0px | 12 | 52px | error=16px | error mt 12px drawn 12px Try again 52px min 52px | 27 | 0
+chrome | 1280x900 | offline | 1 | body < html | 720/280 | 12px | 0px | 12 | 52px | error=16px | error mt 12px drawn 12px Try again 52px min 52px | 27 | 0
+chrome | 1280x900 | empty | 1 | body < html | 720/280 | 12px | 0px | 12 | 52px | empty=16px | none | 26 | 0
+webkit | 393x852 | stale | 1 | body < html | 393/0 | 12px | 0px | 12 | 52px | stale=16px | none | 26 | 0
+webkit | 393x852 | loaded | 1 | body < html | 393/0 | 12px | 0px | 12 | 52px | stale=16px | none | 26 | 0
+webkit | 393x852 | loading | 1 | body < html | 393/0 | 12px | 0px | 12 | 52px | loading=16px | none | 26 | 0
+webkit | 393x852 | error | 1 | body < html | 393/0 | 12px | 0px | 12 | 52px | error=16px | error mt 12px drawn 12px Try again 52px min 52px | 27 | 0
+webkit | 393x852 | offline | 1 | body < html | 393/0 | 12px | 0px | 12 | 52px | error=16px | error mt 12px drawn 12px Try again 52px min 52px | 27 | 0
+webkit | 393x852 | empty | 1 | body < html | 393/0 | 12px | 0px | 12 | 52px | empty=16px | none | 26 | 0
+webkit | 768x1024 | stale | 1 | body < html | 720/24 | 12px | 0px | 12 | 52px | stale=16px | none | 26 | 0
+webkit | 768x1024 | loaded | 1 | body < html | 720/24 | 12px | 0px | 12 | 52px | none | none | 26 | 0
+webkit | 768x1024 | loading | 1 | body < html | 720/24 | 12px | 0px | 12 | 52px | loading=16px | none | 26 | 0
+webkit | 768x1024 | error | 1 | body < html | 720/24 | 12px | 0px | 12 | 52px | error=16px | error mt 12px drawn 12px Try again 52px min 52px | 27 | 0
+webkit | 768x1024 | offline | 1 | body < html | 720/24 | 12px | 0px | 12 | 52px | error=16px | error mt 12px drawn 12px Try again 52px min 52px | 27 | 0
+webkit | 768x1024 | empty | 1 | body < html | 720/24 | 12px | 0px | 12 | 52px | empty=16px | none | 26 | 0
+webkit | 1280x900 | stale | 1 | body < html | 720/280 | 12px | 0px | 12 | 52px | stale=16px | none | 26 | 0
+webkit | 1280x900 | loaded | 1 | body < html | 720/280 | 12px | 0px | 12 | 52px | stale=16px | none | 26 | 0
+webkit | 1280x900 | loading | 1 | body < html | 720/280 | 12px | 0px | 12 | 52px | loading=16px | none | 26 | 0
+webkit | 1280x900 | error | 1 | body < html | 720/280 | 12px | 0px | 12 | 52px | error=16px | error mt 12px drawn 12px Try again 52px min 52px | 27 | 0
+webkit | 1280x900 | offline | 1 | body < html | 720/280 | 12px | 0px | 12 | 52px | error=16px | error mt 12px drawn 12px Try again 52px min 52px | 27 | 0
+webkit | 1280x900 | empty | 1 | body < html | 720/280 | 12px | 0px | 12 | 52px | empty=16px | none | 26 | 0

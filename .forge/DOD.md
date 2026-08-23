@@ -633,7 +633,7 @@ their interaction detail in `.forge/wireframes/`, and the standards skill.
   password second, the one-time owner creation, and the host-unreachable state.
   Every interactive element shows a 2 px focus outline at 2 px offset. Evidence:
   three captures plus a keyboard-traversal capture.
-- [ ] **C5.** Quick log matches screen 03 at three viewports, presented as a sheet
+- [x] **C5.** Quick log matches screen 03 at three viewports, presented as a sheet
   with 44 px minimum targets, and the loading, empty, error, offline and stale
   states render with the geometry defined once on screen 00. Evidence: three
   captures plus five state captures overlaid on the screen-00 geometry.

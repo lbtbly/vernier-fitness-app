@@ -1,0 +1,35 @@
+The quick-log sheet, Tab walked to exhaustion in Chrome at 393x852 on the
+shipped build, sheet raised from Today, 40 stops recorded.
+
+Stops 0 to 25 are inside the sheet: close, the two stepper hands, the waist
+field, twenty rating buttons, the note and Save. Stop 26 leaves the dialog.
+14 of the 40 stops are outside it, including Today's own Quick log button and
+every card link on the screen behind the scrim. Escape does not close the sheet:
+one .sheet element still present after the key.
+
+This is NOT a C5 clause. C5 names screen 03, the sheet presentation, the 44 px
+floor and the five states on screen 00's geometry, and every one of those is
+proven. C4's focus clause names sign-in and is ticked. No line in DOD.md
+requires a focus trap or an Escape binding on a dialog, so this is recorded as a
+finding rather than ruled against a line, and it is not a reason to hold C5.
+
+It is worth carrying because the portal moved the dialog to the end of body,
+after the tab bar, so the order it escapes in changed even though nothing
+visual did. The condition itself predates the portal.
+
+The walk, verbatim:
+
+tab stops walked: 40, outside the sheet: 14
+ 0: sheet  button Close the quick log
+ 1: sheet  button Down half a centimetre
+ 2: sheet  input  Waist in centimetres
+ 3: sheet  button Up half a centimetre
+ 4-23: sheet  the twenty rating buttons, Energy 1-5, Fatigue 1-5, Hunger 1-5,
+       Satiety after eating 1-5
+24: sheet  textarea Note
+25: sheet  button Save
+26: OUTSIDE body
+27: OUTSIDE summary One source has gone quiet.
+28: OUTSIDE button Quick log
+29-39: OUTSIDE the eleven card links on Today
+Escape pressed: .sheet count after it, 1
