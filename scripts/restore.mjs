@@ -6,6 +6,7 @@
 //   node scripts/restore.mjs restore <archive> --into <database> [--record]
 //                                                  [--record-into <database>]
 //   node scripts/restore.mjs corrupt <archive> --mode truncate|reorder|flip --out <path>
+//   node scripts/restore.mjs frames <archive>
 //
 // --container <name> reads the archive secret out of a container other than the
 // compose app service. The end-to-end suite uses it for the scratch instance.
@@ -39,7 +40,11 @@ const projectRoot = resolve(here, '..');
 
 const {
   ArchiveError,
+  DAMAGE_MODES,
+  damageArchive,
   decryptArchive,
+  isDamageMode,
+  readFrames,
   readTar,
   scanTar,
   collect,
@@ -472,45 +477,58 @@ async function readPhrase(expected) {
  * archive that has only ever been read whole has not been tested. The damage is
  * done here rather than by hand so the evidence is one command per case and the
  * same three cases are reproducible a year from now.
+ *
+ * THE ARITHMETIC IS NOT HERE ANY MORE. It was, and it carried a rule that a
+ * swap needs four chunks, which no archive this instance writes has: this
+ * command exited 2 on every run and F125 failed before one verification had
+ * happened. `damageArchive` in src/lib/backup/archive.ts owns the frame
+ * arithmetic now, and tests/unit/archive-damage.test.ts drives it over archives
+ * of one, two and twelve chunks with no docker and no database. What is left
+ * here is reading the file, writing the file, and printing what was done.
  */
 async function corrupt(name, options) {
+  const mode = options.mode ?? '';
+  if (!isDamageMode(mode)) {
+    fail(EXIT.usage, `the mode is ${DAMAGE_MODES.join(', ')}, not "${mode}"`);
+  }
+
   const found = await resolveArchive(name);
   const whole = await readFile(found.path);
-  const out = options.out ?? `${found.path}.${options.mode}`;
+  const out = options.out ?? `${found.path}.${mode}`;
 
-  const frames = [];
-  let offset = 48;
-  while (offset + 5 <= whole.length) {
-    const length = whole.readUInt32BE(offset);
-    const final = whole.readUInt8(offset + 4) === 1;
-    frames.push({ start: offset, end: offset + 5 + length + 16 });
-    if (final) break;
-    offset = offset + 5 + length + 16;
-  }
-  if (frames.length < 4 && options.mode === 'reorder') {
-    fail(EXIT.usage, 'this archive has too few chunks to reorder two of them');
+  const damage = damageArchive(whole, mode);
+  if (!damage.ok) {
+    fail(
+      EXIT.usage,
+      `this archive holds ${damage.frames} chunk(s) and a swap needs ${damage.needs}. ` +
+        'Back up an installation with more in it, or use truncate or flip.',
+    );
   }
 
-  let damaged;
-  if (options.mode === 'truncate') {
-    damaged = whole.subarray(0, frames[Math.max(1, frames.length - 2)].start);
-  } else if (options.mode === 'reorder') {
-    damaged = Buffer.from(whole);
-    const a = whole.subarray(frames[0].start, frames[0].end);
-    const b = whole.subarray(frames[1].start, frames[1].end);
-    b.copy(damaged, frames[0].start);
-    a.copy(damaged, frames[0].start + b.length);
-  } else if (options.mode === 'flip') {
-    damaged = Buffer.from(whole);
-    const at = frames[Math.min(1, frames.length - 1)].start + 9;
-    damaged[at] ^= 0x40;
-  } else {
-    fail(EXIT.usage, 'the mode is truncate, reorder or flip');
-  }
-
-  await writeFile(out, damaged);
+  await writeFile(out, damage.bytes);
   if (found.cleanup) await rm(found.cleanup, { recursive: true, force: true });
-  say(`${options.mode.padEnd(9)} ${whole.length} bytes in, ${damaged.length} bytes out, written to ${out}`);
+  say(
+    `${mode.padEnd(9)} ${whole.length} bytes in, ${damage.bytes.length} bytes out, ` +
+      `${damage.frames} chunk(s), damaged at byte ${damage.at}, written to ${out}`,
+  );
+  // The code `verify` has to come back with. Printed so the three runs read as
+  // one record: what was broken, where, and what the reader is expected to say.
+  say(`expect    ${damage.expect}`);
+}
+
+/** The frame layout of an archive, for a person looking at one by hand. */
+async function frames(name) {
+  const found = await resolveArchive(name);
+  const whole = await readFile(found.path);
+  const listed = readFrames(whole);
+  say(`archive   ${found.path}`);
+  say(`chunks    ${listed.length}`);
+  for (const frame of listed) {
+    say(
+      `  ${String(frame.sequence).padStart(4)}  start ${String(frame.start).padStart(10)}  ` +
+        `${String(frame.length).padStart(9)} bytes${frame.final ? '  final' : ''}`,
+    );
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -555,15 +573,17 @@ try {
   else if (command === 'verify') await verify(flags.name ?? '');
   else if (command === 'restore') await restore(flags.name ?? '', flags);
   else if (command === 'corrupt') await corrupt(flags.name ?? '', flags);
+  else if (command === 'frames') await frames(flags.name ?? '');
   else {
     process.stderr.write(
       [
-        'restore: the commands are list, verify, restore and corrupt.',
+        'restore: the commands are list, verify, restore, corrupt and frames.',
         '',
         '  node scripts/restore.mjs list',
         '  node scripts/restore.mjs verify <archive>',
         '  node scripts/restore.mjs restore <archive> --into <database> [--record] [--storage-into <path>]',
         '  node scripts/restore.mjs corrupt <archive> --mode truncate|reorder|flip --out <path>',
+        '  node scripts/restore.mjs frames <archive>',
         '',
         'An <archive> is a file name or a path. A bare name is looked for in the',
         'configured backup directory, then in ./backups, then inside the container.',

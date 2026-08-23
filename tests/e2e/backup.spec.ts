@@ -155,15 +155,36 @@ test('F125. a truncated, a reordered and a byte-flipped archive each exit non-ze
     lines.push(`whole      exit ${good.status}`);
     expect(good.status).toBe(0);
 
+    // The population beside the three failures: how many chunks this archive
+    // actually holds. The swap used to be guarded by a rule that it needs four
+    // of them, this instance writes two or three, and the guard refused before
+    // one verification ran. A run that prints the count cannot hide that again.
+    const layout = restoreScript('frames', source);
+    console.log(layout.output.trim());
+    expect(layout.status).toBe(0);
+    const chunks = Number(/^chunks\s+(\d+)$/m.exec(layout.stdout)?.[1] ?? 0);
+    expect(chunks).toBeGreaterThanOrEqual(2);
+
     for (const mode of ['truncate', 'reorder', 'flip'] as const) {
       const out = join(damaged, `${mode}.archive`);
       const made = restoreScript('corrupt', source, '--mode', mode, '--out', out);
-      expect(made.status).toBe(0);
+      console.log(made.output.trim());
+      expect(made.status, `making the ${mode} copy`).toBe(0);
+      // The tool says which code it expects the reader to raise. Asserting the
+      // two agree is what stops a damaged file failing for a reason nobody
+      // chose: bytes cut at the wrong offset still fail, and would still be
+      // read as proof of something they do not prove.
+      const expected = /^expect\s+(\S+)$/m.exec(made.stdout)?.[1] ?? '';
+      expect(expected, `the ${mode} copy names the code it expects`).toMatch(
+        /^archive_(truncated|chunk_unauthenticated)$/,
+      );
+
       const verified = restoreScript('verify', out);
       const named = verified.stderr.trim().split('\n').at(-1) ?? '';
       lines.push(`${mode.padEnd(10)} exit ${verified.status}  ${named}`);
       expect(verified.status).not.toBe(0);
       expect(named).toMatch(/archive_(truncated|chunk_unauthenticated)/);
+      expect(named, `the ${mode} copy failed for the reason it was broken in`).toContain(expected);
     }
     console.log(lines.join('\n'));
     expect(lines[1]).toContain('archive_truncated');

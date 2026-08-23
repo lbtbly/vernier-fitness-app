@@ -744,3 +744,167 @@ export function digestsMatch(left: string, right: string): boolean {
   if (a.length !== b.length) return false;
   return timingSafeEqual(a, b);
 }
+
+// ---------------------------------------------------------------------------
+// The three deliberate corruptions F125 is proven by.
+// ---------------------------------------------------------------------------
+
+/**
+ * WHY THIS LIVES HERE AND NOT IN scripts/restore.mjs. It lived in the script,
+ * as twenty lines carrying a rule that reordering two chunks needs four of
+ * them. A swap needs two. Every archive the scratch instance writes is two or
+ * three chunks long, so `corrupt --mode reorder` exited 2 on every run and F125
+ * failed at the line that MAKES the damaged copy, before one verification had
+ * happened. The arithmetic that decides where to cut, what to swap and which
+ * byte to flip is the thing that has to be right, so it sits beside the reader
+ * whose codes it names, where tests/unit/archive-damage.test.ts drives it over
+ * archives of one, two and many chunks with no docker and no database.
+ *
+ * NOTHING BELOW ENCRYPTS. It reads frame boundaries out of a sealed archive and
+ * rearranges bytes, deliberately: damage that went back through the writer
+ * would be damage the writer authenticated, and an authenticated corruption is
+ * not a corruption.
+ */
+
+export const DAMAGE_MODES = ['truncate', 'reorder', 'flip'] as const;
+
+export type DamageMode = (typeof DAMAGE_MODES)[number];
+
+export function isDamageMode(value: string): value is DamageMode {
+  return (DAMAGE_MODES as readonly string[]).includes(value);
+}
+
+/** One chunk's place in a file: where its header starts and where its tag ends. */
+export type ArchiveFrame = {
+  sequence: number;
+  /** The first byte of the frame header. */
+  start: number;
+  /** The first byte of the ciphertext. */
+  bodyStart: number;
+  /** One past the last byte of the authentication tag. */
+  end: number;
+  /** Ciphertext length, tag excluded. */
+  length: number;
+  final: boolean;
+};
+
+/**
+ * Every frame in a whole archive, walked the way the reader walks it.
+ *
+ * It refuses with the reader's own codes rather than returning a short list.
+ * A partial walk is how a damaged file gets damaged twice: a cut made at a
+ * boundary this guessed wrong would fail for a reason nobody chose, and F125
+ * is about failing for the reason the file was broken in.
+ */
+export function readFrames(archive: Uint8Array): ArchiveFrame[] {
+  const bytes = u8(archive);
+  if (bytes.length < HEADER_BYTES) {
+    throw new ArchiveError('archive_header_short', { claimed: HEADER_BYTES, actual: bytes.length });
+  }
+
+  const frames: ArchiveFrame[] = [];
+  let offset = HEADER_BYTES;
+  let sequence = 0;
+  for (;;) {
+    if (offset + FRAME_HEADER_BYTES > bytes.length) {
+      throw new ArchiveError('archive_frame_short', {
+        sequence,
+        claimed: FRAME_HEADER_BYTES,
+        actual: bytes.length - offset,
+      });
+    }
+    const length = bytes.readUInt32BE(offset);
+    const final = bytes.readUInt8(offset + FRAME_HEADER_BYTES - 1) === 1;
+    if (length > MAX_CHUNK_BYTES) {
+      throw new ArchiveError('archive_chunk_size_invalid', { sequence, claimed: length });
+    }
+    const end = offset + FRAME_HEADER_BYTES + length + TAG_BYTES;
+    if (end > bytes.length) {
+      throw new ArchiveError('archive_truncated', { sequence, claimed: end, actual: bytes.length });
+    }
+    frames.push({ sequence, start: offset, bodyStart: offset + FRAME_HEADER_BYTES, end, length, final });
+    sequence += 1;
+    if (final) break;
+    offset = end;
+  }
+  return frames;
+}
+
+export type Damage = {
+  ok: true;
+  mode: DamageMode;
+  bytes: Buffer;
+  /** How many chunks the whole archive held, which is what makes a swap possible. */
+  frames: number;
+  /** The byte offset the damage was done at, for the record the script prints. */
+  at: number;
+  /** The code the reader must refuse these bytes with. */
+  expect: 'archive_truncated' | 'archive_chunk_unauthenticated';
+};
+
+/** The one case that cannot be produced: two chunks swapped in a one-chunk archive. */
+export type DamageRefusal = { ok: false; reason: 'too_few_chunks'; frames: number; needs: number };
+
+/**
+ * A deliberately damaged copy of a whole archive.
+ *
+ * TRUNCATE cuts at the start of the last frame when there is more than one, so
+ * every frame still in the file authenticates and only the missing final flag
+ * says the file is incomplete. That is the cut a per-part checksum cannot see.
+ * A one-chunk archive has no such boundary, so the cut lands inside its only
+ * frame, which then announces a length that never arrives.
+ *
+ * REORDER swaps the first two frames whole, headers and tags with them. The
+ * nonce and the AAD both carry the sequence, so a chunk read at a position it
+ * was not written at fails its tag wherever it lands, and the two frames need
+ * not be the same length because the file is rebuilt rather than overwritten in
+ * place. That length assumption is what limited this to archives of four
+ * chunks or more.
+ *
+ * FLIP turns one bit in the LAST frame, in its ciphertext where it has any and
+ * in its tag where it does not. The last rather than the first because a reader
+ * that stopped authenticating once it had enough bytes to answer would still
+ * pass a flip in chunk 0.
+ */
+export function damageArchive(archive: Uint8Array, mode: DamageMode): Damage | DamageRefusal {
+  const whole = u8(archive);
+  const frames = readFrames(whole);
+  const last = frames[frames.length - 1];
+
+  if (mode === 'truncate') {
+    const at = frames.length > 1 ? last.start : last.end - TAG_BYTES;
+    return {
+      ok: true,
+      mode,
+      bytes: Buffer.from(whole.subarray(0, at)),
+      frames: frames.length,
+      at,
+      expect: 'archive_truncated',
+    };
+  }
+
+  if (mode === 'reorder') {
+    if (frames.length < 2) {
+      return { ok: false, reason: 'too_few_chunks', frames: frames.length, needs: 2 };
+    }
+    const [first, second] = frames;
+    return {
+      ok: true,
+      mode,
+      bytes: Buffer.concat([
+        whole.subarray(0, first.start),
+        whole.subarray(second.start, second.end),
+        whole.subarray(first.start, first.end),
+        whole.subarray(second.end),
+      ]),
+      frames: frames.length,
+      at: first.start,
+      expect: 'archive_chunk_unauthenticated',
+    };
+  }
+
+  const at = last.length > 0 ? last.bodyStart + Math.floor(last.length / 2) : last.end - 1;
+  const bytes = Buffer.from(whole);
+  bytes[at] ^= 0x40;
+  return { ok: true, mode, bytes, frames: frames.length, at, expect: 'archive_chunk_unauthenticated' };
+}
