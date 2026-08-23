@@ -80,6 +80,23 @@ function card(page: Page) {
   return page.locator('[data-google]');
 }
 
+/**
+ * Connect, INSIDE the Google card.
+ *
+ * Two integration cards sit on the settings screen and both of them offer a
+ * button called "Connect the demonstration account": the Withings card names
+ * the scale and this one names the calendar, and each says what it does inside
+ * a card headed by the provider it belongs to. So the page-wide role query this
+ * used to be matched two buttons and Playwright refused to guess, which is
+ * Playwright doing its job. The card marks itself with `data-google` and the
+ * rest of this file already reads it that way.
+ */
+function connectDemo(page: Page) {
+  return page
+    .locator('section[data-google]')
+    .getByRole('button', { name: /connect the demonstration account/i });
+}
+
 function events(): number {
   return Number(scratchQuery('select count(*) from google_demo_event'));
 }
@@ -92,7 +109,7 @@ function writes(): number {
 async function connectAndChoose(page: Page) {
   await openSettings(page);
   if ((await card(page).getAttribute('data-google')) === 'disconnected') {
-    await page.getByRole('button', { name: /connect the demonstration account/i }).click();
+    await connectDemo(page).click();
     await expect(card(page)).toHaveAttribute('data-google', 'demo', { timeout: 30_000 });
   }
   await page.locator('[data-control="choose-calendars"]').click();
@@ -150,7 +167,7 @@ test('F101. the whole flow runs with no client identifier: picker, busy, calenda
   await page.screenshot({ path: `${CAPTURES}/f101-1-disconnected.png`, fullPage: true });
 
   // ---- 1. connect
-  await page.getByRole('button', { name: /connect the demonstration account/i }).click();
+  await connectDemo(page).click();
   await expect(card(page)).toHaveAttribute('data-google', 'demo', { timeout: 30_000 });
   await page.screenshot({ path: `${CAPTURES}/f101-2-connected.png`, fullPage: true });
   expect(
