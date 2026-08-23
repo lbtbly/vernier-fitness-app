@@ -1,0 +1,11 @@
+--- after the fixes ---
+$ npm run -s lint
+exit 0
+
+$ FORGE_CHECKS_FULL=1 bash scripts/checks.sh   (per-dispatch, unthrottled)
+checks: typecheck ran and passed
+checks: lint ran and passed
+checks: strings ran and passed
+checks: sw:check ran and passed
+checks: strings:rendered ran and passed
+gate exit 0

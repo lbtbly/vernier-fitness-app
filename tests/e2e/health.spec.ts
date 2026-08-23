@@ -1,5 +1,5 @@
 import { mkdirSync } from 'node:fs';
-import { expect, test, type Page } from './fixtures';
+import { clickWhenLive, expect, fillWhenLive, test, type Page } from './fixtures';
 import { mintSignInLink, projectRoot, query } from './host';
 
 /**
@@ -37,14 +37,20 @@ async function signIn(page: Page) {
   await page.waitForLoadState('networkidle');
 }
 
-/** Where the goal line ends on the right of the body chart, to one decimal. */
-async function trajectoryEnd(page: Page): Promise<number> {
-  return Number(
-    await page
-      .locator('[data-chart="health-body"] line[stroke-dasharray="5 5"]')
-      .first()
-      .getAttribute('y2'),
-  );
+/**
+ * Where the goal line runs on the body chart, both ends of it.
+ *
+ * Both ends, and not just y2, because the domain is computed from the readings
+ * AND the goal corridor: move the goal and the whole scale moves with it, so
+ * two different goals can put y2 on the same pixel. That is not a hypothesis.
+ * On 2026-08-22 at 23:47 this read 79.9 before and 79.9 after and failed a line
+ * the product had met, leaving the goal edited because the restore was still
+ * three statements away. A pair of coordinates aliasing at once is a chart that
+ * did not redraw.
+ */
+async function trajectory(page: Page): Promise<string> {
+  const line = page.locator('[data-chart="health-body"] line[stroke-dasharray="5 5"]').first();
+  return `${await line.getAttribute('y1')},${await line.getAttribute('y2')}`;
 }
 
 test.describe('screen 04, Health', () => {
@@ -295,47 +301,61 @@ test.describe('screen 04, Health', () => {
     const originalDate = stored[1].trim();
     console.log(`F29  the stored goal is ${originalValue} kg on ${originalDate}`);
 
-    // Visible on Today, in words, with its target and its date.
-    await page.goto('/');
-    const onToday = (await page.locator('[data-goal-line="today"]').textContent())!.trim();
-    console.log(`F29  Today says: ${onToday}`);
-    expect(onToday).toContain(originalValue.toFixed(1));
+    // The restore lives in a finally, and that is the point of this shape. This
+    // test edits the owner's own goal on his own installation, so an assertion
+    // that fails between the edit and the restore leaves demonstration data
+    // reading a number the owner never chose. It did: a failure at 23:47 on
+    // 2026-08-22 left 2027-06-30 standing where the seed writes 2027-03-30, and
+    // nothing in the run put it back. Whatever happens above, the goal goes
+    // home.
+    try {
+      // Visible on Today, in words, with its target and its date.
+      await page.goto('/');
+      const onToday = (await page.locator('[data-goal-line="today"]').textContent())!.trim();
+      console.log(`F29  Today says: ${onToday}`);
+      expect(onToday).toContain(originalValue.toFixed(1));
 
-    await page.goto('/health');
-    const before = await trajectoryEnd(page);
-    await page.screenshot({ path: `${CAPTURES}/f29-goal-before.png`, fullPage: true });
+      await page.goto('/health');
+      const before = await trajectory(page);
+      await page.screenshot({ path: `${CAPTURES}/f29-goal-before.png`, fullPage: true });
 
-    // Editable from Health: change both fields and save.
-    await page.locator('#goal-value').fill('74.0');
-    await page.locator('#goal-date').fill('2027-06-30');
-    await page.getByRole('button', { name: 'Save the goal', exact: true }).click();
-    await page.locator('[data-goal="saved"]').waitFor();
-    await page.waitForLoadState('networkidle');
+      // Editable from Health: change both fields and save. Through the live
+      // field rather than the painted one: a fill that lands before React owns
+      // the input is reverted by hydration, silently, and the save that follows
+      // writes whatever the server had put there.
+      await fillWhenLive(page.locator('#goal-value'), '74.0');
+      await fillWhenLive(page.locator('#goal-date'), '2027-06-30');
+      await clickWhenLive(page.getByRole('button', { name: 'Save the goal', exact: true }));
+      await page.locator('[data-goal="saved"]').waitFor();
+      await page.waitForLoadState('networkidle');
 
-    const after = await trajectoryEnd(page);
-    console.log(`F29  the trajectory ends at y=${before} before and y=${after} after`);
-    expect(after).not.toBe(before);
-    const changed = (await page.locator('[data-goal-line="health"]').textContent())!.trim();
-    console.log(`F29  Health now says: ${changed}`);
-    expect(changed).toContain('74.0');
-    await page.screenshot({ path: `${CAPTURES}/f29-goal-after.png`, fullPage: true });
+      const after = await trajectory(page);
+      console.log(`F29  the trajectory runs y1,y2 ${before} before and ${after} after`);
+      expect(after).not.toBe(before);
+      const changed = (await page.locator('[data-goal-line="health"]').textContent())!.trim();
+      console.log(`F29  Health now says: ${changed}`);
+      expect(changed).toContain('74.0');
+      await page.screenshot({ path: `${CAPTURES}/f29-goal-after.png`, fullPage: true });
 
-    // And Today redrew on its next load, which is the "within one page load"
-    // half of the line: nothing is cached, the line is arithmetic over two
-    // points and is computed where it is drawn.
-    await page.goto('/');
-    const todayAfter = (await page.locator('[data-goal-line="today"]').textContent())!.trim();
-    console.log(`F29  Today now says: ${todayAfter}`);
-    expect(todayAfter).toContain('74.0');
-
-    // Put it back, through the same form, and check the database agrees.
-    await page.goto('/health');
-    await page.locator('#goal-value').fill(originalValue.toFixed(1));
-    await page.locator('#goal-date').fill(originalDate);
-    await page.getByRole('button', { name: 'Save the goal', exact: true }).click();
-    await page.locator('[data-goal="saved"]').waitFor();
-    const restored = query('select target_value, to_char(target_at, \'YYYY-MM-DD\') from goal');
-    console.log(`F29  restored to ${restored}`);
-    expect(restored.trim()).toBe(`${originalValue}|${originalDate}`);
+      // And Today redrew on its next load, which is the "within one page load"
+      // half of the line: nothing is cached, the line is arithmetic over two
+      // points and is computed where it is drawn.
+      await page.goto('/');
+      const todayAfter = (await page.locator('[data-goal-line="today"]').textContent())!.trim();
+      console.log(`F29  Today now says: ${todayAfter}`);
+      expect(todayAfter).toContain('74.0');
+    } finally {
+      // Put it back, through the same form, and check the database agrees.
+      await page.goto('/health');
+      await fillWhenLive(page.locator('#goal-value'), originalValue.toFixed(1));
+      await fillWhenLive(page.locator('#goal-date'), originalDate);
+      await clickWhenLive(page.getByRole('button', { name: 'Save the goal', exact: true }));
+      await page.locator('[data-goal="saved"]').waitFor();
+      const restored = query('select target_value, to_char(target_at, \'YYYY-MM-DD\') from goal');
+      console.log(`F29  restored to ${restored}`);
+      expect(restored.trim(), 'the owner\'s goal is not what this test found').toBe(
+        `${originalValue}|${originalDate}`,
+      );
+    }
   });
 });

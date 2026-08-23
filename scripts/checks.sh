@@ -59,7 +59,14 @@ run() {
     return 2
   fi
   # shellcheck disable=SC2086
-  OUT=$($PM run -s "$1" $2 2>&1) && return 0
+  if OUT=$($PM run -s "$1" $2 2>&1); then
+    # The roster, printed by the gate that ran it, so "gate exit 0" in a
+    # verification's evidence names its steps instead of implying them. Only on
+    # the per-dispatch run: the per-edit one is a hook and says nothing when it
+    # is happy.
+    [ "${FORGE_CHECKS_FULL:-0}" = "1" ] && echo "checks: $1 ran and passed"
+    return 0
+  fi
   RC=$?
   # Ask the PROCESS, not the prose. 127 is the shell's "binary not found",
   # which is what a half-installed tree produces; a check that ran and failed

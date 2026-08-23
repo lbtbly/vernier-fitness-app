@@ -1,0 +1,78 @@
+The fourth gate step, wired for the first time in this project's life.
+
+scripts/checks.sh has named `lint` since slice 1. package.json never defined
+it, run() answered `has lint || return 0`, and every "gate exit 0" this run
+recorded was three checks reported as four.
+
+--- a gate that names a step it cannot run now fails, and says which ---
+$ (lint removed from package.json) bash scripts/checks.sh
+checks: this gate names "lint" and package.json defines no such script.
+        A step that cannot run is not a step that passed. Define it or
+        stop naming it here; there is no third answer.
+GATE EXIT=2
+
+--- what the first run of the new step found ---
+22 problems: 20 errors, 2 warnings, over src/, tests/, scripts/ and
+.claude/workflows/. Every one is fixed below or carries a written reason.
+
+
+/Users/lambertbouley/Claude/lbtbly-fitness-app/.claude/workflows/persona-panel.js
+  62:58  error  'i' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/lambertbouley/Claude/lbtbly-fitness-app/eslint.config.mjs
+  13:1  warning  Assign array to a variable before exporting as module default  import/no-anonymous-default-export
+
+/Users/lambertbouley/Claude/lbtbly-fitness-app/scripts/build-sw.mjs
+  203:13  error  'opensAt' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/lambertbouley/Claude/lbtbly-fitness-app/scripts/progress.mjs
+    22:7   error  'safeDir' is assigned a value but never used. Allowed unused vars must match /^_/u       @typescript-eslint/no-unused-vars
+   303:5   error  'resumeTop' is never reassigned. Use 'const' instead                                     prefer-const
+   595:7   error  'shotMax' is assigned a value but never used. Allowed unused vars must match /^_/u       @typescript-eslint/no-unused-vars
+   635:7   error  'routeShotMax' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   642:7   error  'untied' is assigned a value but never used. Allowed unused vars must match /^_/u        @typescript-eslint/no-unused-vars
+   672:5   error  'listening' is never reassigned. Use 'const' instead                                     prefer-const
+   675:26  error  Strings must use singlequote                                                             quotes
+   813:5   error  'inPlayLabel' is never reassigned. Use 'const' instead                                   prefer-const
+  1088:11  error  'tok' is never reassigned. Use 'const' instead                                           prefer-const
+
+/Users/lambertbouley/Claude/lbtbly-fitness-app/src/components/OperatorPanel.tsx
+  120:5  warning  Do not use `window.location.assign()` to navigate to internal Next.js pages. Use `redirect()` in the render phase, or `useRouter().push()` in Client Components' event handlers instead. See: https://nextjs.org/docs/messages/no-location-assign-relative-destination  @next/next/no-location-assign-relative-destination
+
+/Users/lambertbouley/Claude/lbtbly-fitness-app/src/components/QuickLog.tsx
+   10:32  error  'LoggedValue' is defined but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-unused-vars
+  392:20  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/lambertbouley/Claude/lbtbly-fitness-app/src/components/QuickLog.tsx:392:20
+  390 |
+  391 |   useEffect(() => {
+> 392 |     if (open) void read();
+      |                    ^^^^ Avoid calling setState() directly within an effect
+  393 |   }, [open, read]);
+  394 |
+  395 |   // Raised from the waist card, which is screen 02's Measure control. A fresh  react-hooks/set-state-in-effect
+
+/Users/lambertbouley/Claude/lbtbly-fitness-app/src/components/WeightChart.tsx
+   30:3  error  'AVERAGE_WINDOW' is defined but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+  110:9  error  'labels' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/lambertbouley/Claude/lbtbly-fitness-app/tests/e2e/fixtures.ts
+  111:11  error  React Hook "use" is called in function "context" that is neither a React function component nor a custom React Hook function. React component names must start with an uppercase letter. React Hook names must start with the word "use"  react-hooks/rules-of-hooks
+
+/Users/lambertbouley/Claude/lbtbly-fitness-app/tests/unit/password.test.ts
+  42:28  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+/Users/lambertbouley/Claude/lbtbly-fitness-app/tests/unit/suite-safety.test.ts
+   38:7   error  'SUITE_ROLE' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  296:51  error  Strings must use singlequote                                                           quotes
+  301:29  error  Strings must use singlequote                                                           quotes
+
+✖ 22 problems (20 errors, 2 warnings)
+  7 errors and 0 warnings potentially fixable with the `--fix` option.
+

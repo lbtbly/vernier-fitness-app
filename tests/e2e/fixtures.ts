@@ -3,6 +3,8 @@ import {
   type Browser,
   type BrowserContext,
   type BrowserContextOptions,
+  expect as baseExpect,
+  type Locator,
   type Page,
 } from '@playwright/test';
 // The driver package rather than the test runner's re-export. The runner's
@@ -114,6 +116,73 @@ export const test = base.extend({
 
 export { expect } from '@playwright/test';
 export type { BrowserContext, Locator, Page } from '@playwright/test';
+
+/**
+ * Click a control whose behaviour arrives with the JavaScript, and wait for the
+ * behaviour first.
+ *
+ * WHAT THIS IS FOR. Every screen here is server-rendered, so the sign-in
+ * button, the quick-log control and the tab bar are all in the first HTML
+ * response: painted, visible, enabled, and inert. React attaches their handlers
+ * afterwards. Playwright's actionability check reads visible, enabled and
+ * stable and is satisfied by the inert copy, so a click that lands in that
+ * window is delivered to the DOM, does nothing at all, and leaves no trace:
+ * no request, no console error, no notice on the screen. The assertion that
+ * follows then waits sixty seconds for a page that was never asked to change.
+ *
+ * That is the whole of passkey.spec.ts's flake, reproduced and read rather than
+ * re-run: registration succeeds, sign-out succeeds, the click on "Sign in with
+ * passkey" produces no POST to /api/auth/passkey/authentication/options, and
+ * 1.5 seconds later the same button is live. It cost five consecutive failures,
+ * three of them isolated, and it is not the passkey path: every ceremony that
+ * was actually started in the reproduction run finished at 200 with the counter
+ * held at 0.
+ *
+ * WHY THE FIBER KEY. React writes `__reactFiber$<random>` onto every host
+ * element it owns, at hydration, in production builds as well as development.
+ * It is the condition itself rather than a proxy for it. `networkidle`, which
+ * is what the rest of this suite reaches for, is a proxy: it can be reached
+ * before hydration and long after it, and it is the thing that made this look
+ * like timing luck for five runs.
+ *
+ * IT FAILS RATHER THAN RETRIES. A control that never comes alive inside the
+ * budget is a real defect on a screen whose only action is that button, and it
+ * says so with the control's name in the message. Nothing here clicks twice.
+ */
+export async function waitUntilLive(control: Locator, timeout = 15_000): Promise<Locator> {
+  await control.waitFor({ state: 'visible', timeout });
+  await baseExpect
+    .poll(
+      () => control.evaluate((node) => Object.keys(node).some((key) => key.startsWith('__reactFiber$'))),
+      {
+        timeout,
+        intervals: [50],
+        message:
+          'the control is painted and inert: React has not attached its handler, so nothing done to it reaches the app',
+      },
+    )
+    .toBe(true);
+  return control;
+}
+
+export async function clickWhenLive(control: Locator, timeout = 15_000): Promise<void> {
+  await (await waitUntilLive(control, timeout)).click();
+}
+
+/**
+ * The same window, through a field rather than a button, and it loses the
+ * owner's typing rather than his tap.
+ *
+ * `fill` on a server-rendered React input sets the DOM value and fires an input
+ * event nobody is listening to yet. Hydration then re-renders the field from
+ * the state React was given, which is what the server put there, and the typing
+ * is gone with no error and nothing on screen. F29's restore did exactly that:
+ * it filled 76.0 into a field that reverted to 74.0, saved, got a 200 and its
+ * "Saved" note, and left the owner's goal at the test's own number.
+ */
+export async function fillWhenLive(control: Locator, text: string, timeout = 15_000): Promise<void> {
+  await (await waitUntilLive(control, timeout)).fill(text);
+}
 
 /**
  * The same walk in both engines, from inside one test.

@@ -1,0 +1,1094 @@
+suite-role: vernier_suite is current on the owner's database.
+  role vernier_suite: superuser false, createdb false, createrole false, bypassrls false
+  grant app_meta SELECT
+  grant auth_attempt INSERT,SELECT
+  grant device_observation SELECT
+  grant goal SELECT
+  grant idempotency_key SELECT
+  grant import_question SELECT
+  grant integration_credential SELECT
+  grant measurement SELECT
+  grant owner SELECT
+  grant planned_session SELECT
+  grant recovery_grant INSERT,SELECT
+  grant request_origin SELECT
+  grant session SELECT
+  grant source_record SELECT
+  grant webauthn_challenge SELECT
+  grant webauthn_credential SELECT
+  grant write_request SELECT
+  execute suite_forget_passkey(credential text)
+setup: the owner's database holds 91 measurement, 39 source_record, 1 measurement not seeded. Nothing in this run may lower it.
+setup: its device signals read standalone_seen=true@2026-08-22 16:13:55.795+02/2026-08-22 20:28:20.543872+02/unattributed, wake_lock_available=true@2026-08-22 16:13:55.804+02/2026-08-22 16:13:55.804748+02/unattributed. Nothing in this run may write them.
+
+Running 73 tests using 1 worker
+
+first attempt: 201 {"ownerId":"757da4b3-37a2-4102-8c29-3791a9ad9b4b","displayName":"Owner","created":true}
+second attempt: 409 {"error":"The owner account already exists.","detail":"Vernier holds exactly one account and it is created once. Sign in with your passkey or the backup password."}
+bootstrap | success | the owner account was created
+bootstrap | refused | the owner account already exists
+bootstrap | refused | the owner account already exists
+CREATE UNIQUE INDEX owner_singleton ON public.owner USING btree (singleton)
+  ✓   1 [webkit-iphone] › tests/e2e/bootstrap.spec.ts:15:3 › first run › creates the owner once and refuses the second attempt with 409 (3.7s)
+  ✓   2 [webkit-iphone] › tests/e2e/bootstrap.spec.ts:61:3 › first run › refuses a password that is too weak, and creates nothing (3.1s)
+route table against https://lamberts-mac-mini.tailda76d6.ts.net, 24 routes on disk
+
+GET  /                                            protected 307  refused  redirected to sign-in (307)
+POST /api/auth/bootstrap                          gate      403  refused  refuses an unauthenticated request
+POST /api/auth/passkey/authentication/options     gate      403  refused  refuses an unauthenticated request
+POST /api/auth/passkey/authentication/verify      gate      403  refused  refuses an unauthenticated request
+POST /api/auth/passkey/registration/options       protected 401  refused  401 with no session
+POST /api/auth/passkey/registration/verify        protected 401  refused  401 with no session
+POST /api/auth/password                           gate      403  refused  refuses an unauthenticated request
+POST /api/auth/sign-out                           protected 401  refused  401 with no session
+GET  /api/diagnostics/device                      public    200  open     answers without a session, as it must
+POST /api/diagnostics/launch                      protected 401  refused  401 with no session
+POST /api/goal                                    protected 401  refused  401 with no session
+GET  /api/log                                     protected 401  refused  401 with no session
+POST /api/log                                     protected 401  refused  401 with no session
+GET  /api/settings/integrations                   protected 401  refused  401 with no session
+POST /api/settings/integrations                   protected 401  refused  401 with no session
+GET  /eat                                         protected 307  refused  redirected to sign-in (307)
+GET  /health                                      protected 307  refused  redirected to sign-in (307)
+GET  /healthz                                     public    200  open     answers without a session, as it must
+GET  /manifest.webmanifest                        public    200  open     answers without a session, as it must
+GET  /offline                                     public    200  open     answers without a session, as it must
+GET  /settings                                    protected 307  refused  redirected to sign-in (307)
+GET  /sign-in                                     public    200  open     answers without a session, as it must
+GET  /sign-in/recover                             gate      401  refused  refuses an unauthenticated request
+GET  /source/[id]                                 protected 307  refused  redirected to sign-in (307)
+GET  /train                                       protected 307  refused  redirected to sign-in (307)
+GET  /value/[id]                                  protected 307  refused  redirected to sign-in (307)
+
+GET  /favicon.ico                                 shell     200  open     static shell
+GET  /icons/apple-touch-icon-180.png              shell     200  open     static shell
+GET  /icons/favicon-32.png                        shell     200  open     static shell
+GET  /icons/icon-192.png                          shell     200  open     static shell
+GET  /icons/icon-512.png                          shell     200  open     static shell
+GET  /icons/vernier-mark.svg                      shell     200  open     static shell
+GET  /sw.js                                       shell     200  open     static shell
+
+33 requests, 0 failing. Public routes answer, gate routes refuse, everything else needs a session.
+
+  ✓   3 [webkit-iphone] › tests/e2e/boundary.spec.ts:14:3 › the route table › every route answers what it should to a caller with no session (388ms)
+  ✓   4 [webkit-iphone] › tests/e2e/boundary.spec.ts:26:3 › the route table › a document redirects and an API path answers 401 (547ms)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+no anti-forgery header: 403 {"error":"Anti-forgery check failed.","detail":"This request carried no x-vernier-csrf header. Nothing was written."}
+stored row: withings | connected | user.metrics | V+mNeuHLVtehhHFkXp9QBmv4jiIeRLxAs/+ZUQ== | sHsmZk5IO-m18Rsy
+  ✓   5 [webkit-iphone] › tests/e2e/boundary.spec.ts:54:3 › the credential boundary › settings renders state, scope and last sync, and never the credential (2.5s)
+the owner's device signals before: standalone_seen=true@2026-08-22 16:13:55.795+02/2026-08-22 20:28:20.543872+02/unattributed, wake_lock_available=true@2026-08-22 16:13:55.804+02/2026-08-22 16:13:55.804748+02/unattributed
+launch reports raised by the sign-in screen: 0
+navigator.webdriver in this browser: false
+display-mode standalone in this browser: true
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+launch reports this worker answered itself: 1
+the owner's device signals after: standalone_seen=true@2026-08-22 16:13:55.795+02/2026-08-22 20:28:20.543872+02/unattributed, wake_lock_available=true@2026-08-22 16:13:55.804+02/2026-08-22 16:13:55.804748+02/unattributed
+  ✓   6 [webkit-iphone] › tests/e2e/boundary.spec.ts:156:1 › C2. this suite cannot report a launch to the owner's install, whatever the page claims (3.1s)
+gate  52px  16px  Sign in with passkey
+gate  52px  16px  Use the backup password
+  ✓   7 [webkit-iphone] › tests/e2e/button-geometry.spec.ts:33:1 › the gate keeps its 52 px escalation (353ms)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+/  48px  16px  Quick log
+/  48px  16px  Measure
+/  48px  16px  Run the shortcut on the iPhone
+/settings  48px  16px  Save the credential
+/settings  48px  16px  Add a passkey on this device
+/settings  48px  16px  Sign out
+/health  48px  16px  Save the goal
+/train  48px  16px  Set up the owner account
+/eat  48px  16px  Set up the owner account
+operator panel quiet buttons: [{"label":"Sign out","classes":"btn quiet block","minHeight":"48px","height":"0px","fontSize":"16px"}]
+  ✓   8 [webkit-iphone] › tests/e2e/button-geometry.spec.ts:44:1 › every shell button sits on the 48 px, 16 px base (2.6s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+icon buttons: [{"label":"Close the quick log","classes":"btn icon","minHeight":"44px","height":"44px","fontSize":"16px"}]
+  ✓   9 [webkit-iphone] › tests/e2e/button-geometry.spec.ts:70:1 › an icon button is 44 square, which is the floor and not the target (1.3s)
+test-stack: ready at http://127.0.0.1:3101
+  ✓  10 [webkit-iphone] › tests/e2e/demo-seed.spec.ts:37:3 › the demonstration seed › writes nothing at all with demonstration mode off (3.3s)
+test-stack: ready at http://127.0.0.1:3101
+the seed wrote 89 measurement(s); the series holds 89
+the seed wrote weight on 38 distinct days, and left 4 out
+demo_src_weight reads: withings | sync_batch | 1184 | seed=true
+the six shapes the seed stands in for:
+apple_health_shortcut | shortcut_payload | seed=true
+demo | demo_record | seed=true
+derived | derivation | seed=true
+lab_pdf | lab_page | seed=true
+manual | manual_entry | seed=true
+withings | sync_batch | seed=true
+rows found by the id prefix: 37, rows found by the column: 37
+  ✓  11 [webkit-iphone] › tests/e2e/demo-seed.spec.ts:49:3 › the demonstration seed › marks every row it writes, in both tables, and keeps the six shapes (3.5s)
+test-stack: ready at http://127.0.0.1:3101
+test-stack: ready at http://127.0.0.1:3101
+the anchor is 2026-08-10 and the continuation has filled 13 day(s) past it
+the newest weight reading: 2026-08-23 06:52 | true
+weight readings on 22 of the last 30 days
+the shortcut last sent a batch 4 day(s) ago
+the last 28 days hold 13 planned, 11 completed, 2 missed
+sessions still planned on a day that has passed: 0
+test-stack: ready at http://127.0.0.1:3101
+a second boot on the same day: 121 rows before, 121 after
+  ✓  12 [webkit-iphone] › tests/e2e/demo-seed.spec.ts:136:3 › the demonstration seed › brings its own series up to the day it is read (8.0s)
+measurement.seed is_generated: ALWAYS
+a withings reading pointed at a seeded record:
+ERROR:  insert or update on table "measurement" violates foreign key constraint "measurement_seed_matches_source_record"
+DETAIL:  Key (source_record_id, seed)=(demo_src_weight, f) is not present in table "source_record".
+a demonstration reading pointed at a real record:
+ERROR:  insert or update on table "measurement" violates foreign key constraint "measurement_seed_matches_source_record"
+DETAIL:  Key (source_record_id, seed)=(real-batch, t) is not present in table "source_record".
+  ✓  13 [webkit-iphone] › tests/e2e/demo-seed.spec.ts:203:3 › the demonstration seed › refuses, in the database, a real row wearing a seeded record or the reverse (710ms)
+  ✓  14 [webkit-iphone] › tests/e2e/gate.spec.ts:51:3 › screen 01, the gate › renders passkey first and password second at three viewports (1.0s)
+  ✓  15 [webkit-iphone] › tests/e2e/gate.spec.ts:94:3 › screen 01, the gate › shows the password field when the owner asks for it (361ms)
+  ✓  16 [webkit-iphone] › tests/e2e/gate.spec.ts:113:3 › screen 01, the gate › names the cause when the machine is not answering (394ms)
+  ✓  17 [webkit-iphone] › tests/e2e/gate.spec.ts:136:3 › screen 01, first run › renders the one-time owner creation at three viewports (727ms)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+F31  one chart holds 26 weight readings and 5 waist readings
+F31  hatched bands: [{"x":"164.5","y":"14"},{"x":"164.5","y":"148"}]
+F31  tap 1 reached /value/f636c7bf-aee7-4127-b3b1-26b178ab378e
+F31  tap 2 reached /source/src_c47b7429-5f13-4278-a71b-60ac8f86ef87
+F31  a weight dot reached /value/demo_weight_on_2026-08-23
+F31  and its source /source/demo_src_weight_on_2026-08-23
+  ✓  18 [webkit-iphone] › tests/e2e/health.spec.ts:57:3 › screen 04, Health › F31. weight and waist share one axis, and a point reaches its source in two taps (3.1s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+F32  present: {"steps":"9,412","sleep":"7 h 04","resting heart rate":"58 bpm","recovery":"46 ms","VO2 max":"38.4"}
+  ✓  19 [webkit-iphone] › tests/e2e/health.spec.ts:112:3 › screen 04, Health › F32. five signals render their value, and none of them renders zero (2.3s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+F33  7 days: screen "3 of 3", database 3 of 3
+F33  28 days: screen "11 of 13", database 11 of 13
+  ✓  20 [webkit-iphone] › tests/e2e/health.spec.ts:136:3 › screen 04, Health › F33. adherence is a count over its denominator and matches the seed (2.5s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+C8  / today-weight: role=img, 30 data rows in 3 columns
+C8      title: Weight, the last 30 days
+C8      desc:  Daily readings as unconnected dots, the seven-day average as the solid line, and the goal trajectory dashed inside its corridor. Days with no reading are hatched and are never joined up.
+C8  / today-waist: role=img, 30 data rows in 3 columns
+C8      title: Waist, the last 30 days
+C8      desc:  Waist measurements, joined between the readings that exist. A tape measure is used about once a week by one person in one place, so two readings a week apart are two comparable measurements and are drawn joined; nothing between them is invented.
+C8  /health health-body: role=img, 30 data rows in 3 columns
+C8      title: Weight and waist, the last 30 days
+C8      desc:  Weight above and waist below, on one time axis. Weight carries its seven-day average and the goal trajectory; waist is measured by hand and is drawn as the readings it has. The days the scale went quiet are hatched in both bands.
+C8  /health health-steps: role=img, 30 data rows in 3 columns
+C8      title: Steps, the last 30 days
+C8      desc:  One bar per day. A day the phone sent nothing has no bar and is hatched, never a bar of zero.
+C8  /health health-sleep: role=img, 30 data rows in 3 columns
+C8      title: Sleep, the last 30 nights
+C8      desc:  One bar per night. A night the watch did not record has no bar and is hatched, never a bar of zero.
+C8  /health health-heart: role=img, 30 data rows in 3 columns
+C8      title: Resting heart rate, the last 30 days
+C8      desc:  Resting heart rate, one point per reading, joined only between the readings that exist.
+C8  charts walked: 6 (/ today-weight, / today-waist, /health health-body, /health health-steps, /health health-sleep, /health health-heart)
+C8  what hides it from the eye and not from the tree: {"display":"table","visibility":"visible","ariaHidden":null,"wrapperClipPath":"inset(50%)","wrapperOverflow":"hidden","wrapperPosition":"absolute"}
+C8  the weight table exposes 31 rows and 60 cells to the tree
+C8  what the accessibility tree holds, first twelve lines:
+C8      - table "Every stored weight reading behind this chart, with its date.":
+C8        - caption: Every stored weight reading behind this chart, with its date.
+C8        - rowgroup:
+C8          - row "Date Value Source":
+C8            - columnheader "Date"
+C8            - columnheader "Value"
+C8            - columnheader "Source"
+C8        - rowgroup:
+C8          - row "25 Jul 88.4 kg Withings":
+C8            - rowheader "25 Jul"
+C8            - cell "88.4 kg"
+C8            - cell "Withings"
+C8  rows reading "No reading": 8, which is the gap spoken
+  ✓  21 [webkit-iphone] › tests/e2e/health.spec.ts:160:3 › screen 04, Health › C8. every chart carries a hidden table, a title and a description (3.4s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+C7  393x852 accented actions: 1, Save the goal
+C7  393x852 origin chips: 3, none semantic
+C7  768x1024 accented actions: 1, Save the goal
+C7  768x1024 origin chips: 3, none semantic
+C7  1280x800 accented actions: 1, Save the goal
+C7  1280x800 origin chips: 3, none semantic
+  ✓  22 [webkit-iphone] › tests/e2e/health.spec.ts:266:3 › screen 04, Health › C7. Health matches screen 04 at three viewports with one accented action (3.6s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+F29  the stored goal is 76 kg on 2027-03-30
+F29  Today says: 0.1 kg below the line to 76.0 kg on 30 Mar.
+F29  the trajectory runs y1,y2 45.3,81.1 before and 41,72 after
+F29  Health now says: 0.5 kg below the line to 74.0 kg on 30 Jun.
+F29  Today now says: 0.5 kg below the line to 74.0 kg on 30 Jun.
+F29  restored to 76|2027-03-30
+  ✓  23 [webkit-iphone] › tests/e2e/health.spec.ts:296:3 › screen 04, Health › F29. the goal is visible on Today, editable from Health, and redraws (2.7s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+SIDEWAYS  393x852 Today    scrollWidth 393, clientWidth 393
+SIDEWAYS      overflowing: table ends at 470, 438 px wide
+SIDEWAYS      overflowing: caption ends at 470, 438 px wide
+SIDEWAYS      overflowing: thead ends at 470, 438 px wide
+SIDEWAYS      overflowing: tr ends at 470, 438 px wide
+SIDEWAYS      overflowing: tbody ends at 470, 438 px wide
+SIDEWAYS  393x852 Health   scrollWidth 393, clientWidth 393
+SIDEWAYS      overflowing: table ends at 470, 438 px wide
+SIDEWAYS      overflowing: caption ends at 470, 438 px wide
+SIDEWAYS      overflowing: thead ends at 470, 438 px wide
+SIDEWAYS      overflowing: tr ends at 470, 438 px wide
+SIDEWAYS      overflowing: tbody ends at 470, 438 px wide
+SIDEWAYS  393x852 Train    scrollWidth 393, clientWidth 393
+SIDEWAYS  393x852 Eat      scrollWidth 393, clientWidth 393
+SIDEWAYS  393x852 Settings scrollWidth 393, clientWidth 393
+SIDEWAYS  393x852 a value  scrollWidth 393, clientWidth 393
+SIDEWAYS  393x852 a source scrollWidth 393, clientWidth 393
+SIDEWAYS  393x852 quick log scrollWidth 393, clientWidth 393
+SIDEWAYS  768x1024 Today    scrollWidth 768, clientWidth 768
+SIDEWAYS  768x1024 Health   scrollWidth 768, clientWidth 768
+SIDEWAYS  768x1024 Train    scrollWidth 768, clientWidth 768
+SIDEWAYS  768x1024 Eat      scrollWidth 768, clientWidth 768
+SIDEWAYS  768x1024 Settings scrollWidth 768, clientWidth 768
+SIDEWAYS  768x1024 a value  scrollWidth 768, clientWidth 768
+SIDEWAYS  768x1024 a source scrollWidth 768, clientWidth 768
+SIDEWAYS  768x1024 quick log scrollWidth 768, clientWidth 768
+SIDEWAYS  1280x800 Today    scrollWidth 1280, clientWidth 1280
+SIDEWAYS  1280x800 Health   scrollWidth 1280, clientWidth 1280
+SIDEWAYS  1280x800 Train    scrollWidth 1280, clientWidth 1280
+SIDEWAYS  1280x800 Eat      scrollWidth 1280, clientWidth 1280
+SIDEWAYS  1280x800 Settings scrollWidth 1280, clientWidth 1280
+SIDEWAYS  1280x800 a value  scrollWidth 1280, clientWidth 1280
+SIDEWAYS  1280x800 a source scrollWidth 1280, clientWidth 1280
+SIDEWAYS  1280x800 quick log scrollWidth 1280, clientWidth 1280
+  ✓  24 [webkit-iphone] › tests/e2e/layout.spec.ts:66:3 › the layout does not scroll sideways › no screen is wider than the viewport at any of the three sizes (16.3s)
+  -  25 [webkit-iphone] › tests/e2e/layout.spec.ts:124:3 › the layout does not scroll sideways › every chart table is still in the platform accessibility tree
+stored row under the right key: xOs2QQmIkI5FhqTvpfTE28JzCwmIK5EMPHdxzQ== | sHsmZk5IO-m18Rsy
+test-stack: ready at http://127.0.0.1:3101
+test-stack: running under a master key that did not write the stored rows
+check under the wrong key: 500 {"error":"The stored credential will not open.","detail":"MASTER_KEY does not decrypt the stored withings credential: the row was written under key sHsmZk5IO-m18Rsy and the running key is -k7EijV0WX6J7Bps. The key in the environment differs from the one this row was written with. Nothing is returned and nothing is overwritten. Restore the original key, or delete the row and connect the integration again."}
+  ✓  26 [webkit-iphone] › tests/e2e/master-key.spec.ts:20:3 › the master key › encrypts a credential, then refuses to open it under a different key (5.8s)
+test-stack: booting with no master key, in the foreground, so the refusal is visible
+▲ Next.js 16.3.2
+- Local:         http://localhost:3000
+- Network:       http://0.0.0.0:3000
+✓ Ready in 0ms
+✓ Running next.config took 0.5ms
+[vernier] refusing to start: MASTER_KEY is not set. Vernier will not start without it: every third-party credential in the database is encrypted with it, and starting without it would mean writing the next one in the clear. Set MASTER_KEY in the environment file at the project root to 32 random bytes in base64url and restart the stack.
+test-stack: the container exited with code 1
+test-stack: ready at http://127.0.0.1:3101
+  ✓  27 [webkit-iphone] › tests/e2e/master-key.spec.ts:79:3 › the master key › refuses to start at all when the key is absent, and creates no owner (2.9s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+after the recovery link, the browser is at https://lamberts-mac-mini.tailda76d6.ts.net/
+the settings screen was read with 0 passkey(s) already registered
+stored credential row: id=vernierSuitezSJNe-LSVL6UfmqfaA67OCA49LSU public_key_bytes=77 counter=0 transports=internal,hybrid device_type=multiDevice backed_up=true aaguid=00000000-0000-0000-0000-000000000000 label=This device
+diagnostics: passkeyRegistered true, first observed 2026-08-23T06:30:57.501Z
+after sign-in 1: counter=0 last_used_at=2026-08-23 08:30:58.02+02
+after sign-in 2: counter=0 last_used_at=2026-08-23 08:30:59.274+02
+forgot 1 credential(s), 0 left, signal cleared
+device_observation: passkey_registered was absent before this test and is absent after it
+  ✓  28 [webkit-iphone] › tests/e2e/passkey.spec.ts:40:3 › the passkey round trip › registers, then authenticates twice on a counter that never moves (4.4s)
+vernier_suite: superuser=false createdb=false createrole=false bypassrls=false replication=false
+  ✓  29 [webkit-iphone] › tests/e2e/suite-privilege.spec.ts:49:3 › the grants the suite reaches the owner's database through › is not a superuser and cannot become one (220ms)
+  truncate measurement, source_record cascade  ->  ERROR:  permission denied for table measurement
+  delete from measurement  ->  ERROR:  permission denied for table measurement
+  insert into measurement (id) values (1)  ->  ERROR:  permission denied for table measurement
+  update measurement set raw_value = 1  ->  ERROR:  permission denied for table measurement
+  truncate source_record cascade  ->  ERROR:  permission denied for table source_record
+  delete from source_record  ->  ERROR:  permission denied for table source_record
+  update owner set display_name = 1  ->  ERROR:  permission denied for table owner
+  delete from owner  ->  ERROR:  permission denied for table owner
+  delete from webauthn_credential  ->  ERROR:  permission denied for table webauthn_credential
+  update webauthn_credential set counter = 0  ->  ERROR:  permission denied for table webauthn_credential
+  delete from device_observation  ->  ERROR:  permission denied for table device_observation
+  delete from integration_credential  ->  ERROR:  permission denied for table integration_credential
+  truncate session  ->  ERROR:  permission denied for table session
+  update auth_attempt set outcome = 1  ->  ERROR:  permission denied for table auth_attempt
+  delete from auth_attempt  ->  ERROR:  permission denied for table auth_attempt
+  truncate auth_attempt  ->  ERROR:  permission denied for table auth_attempt
+  update recovery_grant set expires_at = now()  ->  ERROR:  permission denied for table recovery_grant
+  delete from recovery_grant  ->  ERROR:  permission denied for table recovery_grant
+  truncate recovery_grant  ->  ERROR:  permission denied for table recovery_grant
+  ✓  30 [webkit-iphone] › tests/e2e/suite-privilege.spec.ts:60:3 › the grants the suite reaches the owner's database through › is refused every write on every table, by Postgres, by name (1.9s)
+writes granted: auth_attempt INSERT | recovery_grant INSERT
+  ✓  31 [webkit-iphone] › tests/e2e/suite-privilege.spec.ts:70:3 › the grants the suite reaches the owner's database through › holds exactly two INSERTs and one function, and nothing else (205ms)
+ERROR:  suite_forget_passkey refuses AAAAnotoneofours: only a credential the suite minted, marked vernierSuite, may be forgotten here
+CONTEXT:  PL/pgSQL function suite_forget_passkey(text) line 7 at RAISE
+forgot 0 credential(s), 0 left, signal cleared
+  ✓  32 [webkit-iphone] › tests/e2e/suite-privilege.spec.ts:94:3 › the grants the suite reaches the owner's database through › may forget only a credential the suite itself minted (206ms)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+F27  session       bottom 220 px, fold 715
+F27  meals         bottom 264 px, fold 715
+F27  needsLogging  bottom 324 px, fold 715
+F27  weightTrend   bottom 580 px, fold 715
+F27  adherence opens at 1031 px, the trend ends at 580 px
+F27  Today's card padding 16 px, card gap 12 px
+  ✓  33 [webkit-iphone] › tests/e2e/today.spec.ts:88:3 › screen 02, Today › F27. the four things fit above the fold at 393x852, with adherence below the trend (2.4s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+F28  daily dots at r=2.1: 26
+F28  average paths: [{"width":"2.6","cap":"round","dash":"4 4","window":"short"},{"width":"2.6","cap":"round","dash":null,"window":"whole"},{"width":"2.6","cap":"round","dash":"4 4","window":"short"},{"width":"2.6","cap":"round","dash":null,"window":"whole"}]
+F28  goal line stroke-width 1.5, dash 5 5
+F28  gridline labels: 85 kg, 87 kg, 89 kg
+  ✓  34 [webkit-iphone] › tests/e2e/today.spec.ts:147:3 › screen 02, Today › F28. the chart carries the weights DESIGN.md fixes (1.3s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+F30  hatched band x=164.5 width=43.2
+F30  the range is labelled: 9 Aug to 12 Aug
+F30  daily dots inside the band: 0
+F30  4 average paths, none crossing and none inside
+F30  Last week's average used 4 days of 7.
+F30  average paths drawn on a short window: 2
+  ✓  35 [webkit-iphone] › tests/e2e/today.spec.ts:195:3 › screen 02, Today › F30. absence is drawn, and the line does not cross it (1.4s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+F35  / headline figures: 86.3 kg | 99.0 cm
+F35  the last scale reading is 86.1 kg
+F35  the daily reading renders at 12px, the headline at 34px
+F35  /health headline figures: 86.3 kg | 99.0 cm | 9,412 | 7 h 04 | 58 bpm
+F35  the last scale reading is 86.1 kg
+F35  Percentages and weights from the scale move with hydration. Read the 28-day direction, not today.
+  ✓  36 [webkit-iphone] › tests/e2e/today.spec.ts:257:3 › screen 02, Today › F35. no daily body-composition reading is the headline (2.8s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+C7  393x852 accented actions: 1, Quick log
+C7  393x852 origin chips: 13, none semantic
+C7  768x1024 accented actions: 1, Quick log
+C7  768x1024 origin chips: 13, none semantic
+C7  1280x800 accented actions: 1, Quick log
+C7  1280x800 origin chips: 13, none semantic
+  ✓  37 [webkit-iphone] › tests/e2e/today.spec.ts:302:3 › screen 02, Today › C7. Today matches screen 02 at three viewports with one accented action (4.1s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+C9  surfaces walked (9):
+C9    / at 393x852
+C9    /health at 393x852
+C9    the quick-log sheet at 393x852
+C9    / at 768x1024
+C9    /health at 768x1024
+C9    the quick-log sheet at 768x1024
+C9    / at 1280x800
+C9    /health at 1280x800
+C9    the quick-log sheet at 1280x800
+C9  not walked: the session player, which slice 8 builds
+C9  console errors: 0, failed requests: 0
+  ✓  38 [webkit-iphone] › tests/e2e/today.spec.ts:335:1 › C9. no console error and no failed request across Today, Health and the quick log (7.3s)
+statuses: 401, 401, 401, 401, 401, 429, 429
+  attempt 1: 4 attempts left, then a 60 second pause.
+  attempt 2: 3 attempts left, then a 60 second pause.
+  attempt 3: 2 attempts left, then a 60 second pause.
+  attempt 4: 1 attempt left, then a 60 second pause.
+  attempt 5: Sign-in is paused for 60 seconds.
+  attempt 6: Five failures inside 60 seconds pauses sign-in. Wait 60 seconds and try again. A correct password will not open it any sooner.
+  attempt 7: Five failures inside 60 seconds pauses sign-in. Wait 60 seconds and try again. A correct password will not open it any sooner.
+rate-limited | refused by the rate limiter, 60 seconds left in the window
+rate-limited | refused by the rate limiter, 60 seconds left in the window
+failure | the backup password did not match
+failure | the backup password did not match
+failure | the backup password did not match
+failure | the backup password did not match
+failure | the backup password did not match
+  ✓  39 [webkit-iphone] › tests/e2e/zz-rate-limit.spec.ts:18:3 › the rate limiter › pauses sign-in after five failures and writes one row per attempt (735ms)
+recovery: the lockout window is clear. 5 failure(s) inside it are now ignored and still on the record.
+recovery: the lockout window is clear. 6 failure(s) inside it are now ignored and still on the record.
+  ✓  40 [webkit-iphone] › tests/e2e/zz-rate-limit.spec.ts:68:3 › the rate limiter › clears from the host shell, appending a row rather than editing one (678ms)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+the worker is active and controlling this page
+service worker targets: https://lamberts-mac-mini.tailda76d6.ts.net/sw.js
+worker probe of /healthz, origin reachable: HTTP 200
+worker probe of /healthz, origin taken away: FAILED: Failed to fetch
+worker probe of POST /api/log, origin taken away: FAILED: Failed to fetch
+host curl of /healthz while the browser is cut off: 200
+  ✓  41 [chrome-worker] › tests/e2e/service-worker.spec.ts:39:3 › the service worker › installs, controls the page, and loses the origin with the host still answering (1.6s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+cache intact: HTTP 200 text/html; charset=utf-8
+cache entries evicted: 19
+cache evicted: HTTP 503 text/html; charset=utf-8
+  ✓  42 [chrome-worker] › tests/e2e/service-worker.spec.ts:143:3 › the service worker › answers an evicted cache with the catalogue's offline copy and not a bare word (884ms)
+signals before: none
+an iPhone user agent, no browser, no session: 401 {"error":"Sign in first.","detail":"This endpoint needs the owner session, and the cookie on this request names none."}
+the same with a ticket it made up: 401 {"error":"Sign in first.","detail":"This endpoint needs the owner session, and the cookie on this request names none."}
+the same with no user agent at all: 401 {"error":"Sign in first.","detail":"This endpoint needs the owner session, and the cookie on this request names none."}
+  ✓  43 [chrome-scratch] › tests/e2e/launch-report.spec.ts:113:3 › the launch report › refuses a bare fetch with no session, whatever it puts in a header (238ms)
+last_reported_at before: never
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+a session, a real ticket, and no anti-forgery header: 403 {"error":"Anti-forgery check failed.","detail":"This request carried no x-vernier-csrf header. Nothing was written."}
+a token that does not match: 403 {"error":"Anti-forgery check failed.","detail":"The anti-forgery token does not match the one issued to this browser. Nothing was written."}
+  ✓  44 [chrome-scratch] › tests/e2e/launch-report.spec.ts:144:3 › the launch report › refuses a post with no anti-forgery token and writes nothing (582ms)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+two booleans and nothing else: 400 {"error":"That is not a launch report.","detail":"This endpoint records two things the browser reports at launch: whether Vernier opened from the Home Screen, and whether this device can keep the screen awake. A report carries those two answers, whether the browser is being driven, and the ticket the page it came from was served with. Nothing else is stored here."}
+three booleans and no ticket: 400 {"error":"That is not a launch report.","detail":"This endpoint records two things the browser reports at launch: whether Vernier opened from the Home Screen, and whether this device can keep the screen awake. A report carries those two answers, whether the browser is being driven, and the ticket the page it came from was served with. Nothing else is stored here."}
+  ✓  45 [chrome-scratch] › tests/e2e/launch-report.spec.ts:173:3 › the launch report › refuses a report that is not the shape the shipped client sends (366ms)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+a ticket of the right shape that nobody minted: 200 {"recorded":false,"reason":"That launch report did not come from a launch of Vernier.","detail":"Every page Vernier renders for a signed-in session carries a ticket, and the launch report sends it back. This report carried one this server did not mint, or one minted for another session, or one older than a quarter of an hour. Nothing was stored."}
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+another session's ticket: 200 {"recorded":false,"reason":"That launch report did not come from a launch of Vernier.","detail":"Every page Vernier renders for a signed-in session carries a ticket, and the launch report sends it back. This report carried one this server did not mint, or one minted for another session, or one older than a quarter of an hour. Nothing was stored."}
+  ✓  46 [chrome-scratch] › tests/e2e/launch-report.spec.ts:201:3 › the launch report › refuses a ticket this server did not mint, and one minted for another session (580ms)
+signals before: none
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+the launch this suite's browser raised: 200 {"recorded":false,"reason":"A driven browser cannot report a launch.","detail":"This row is read back as evidence that Vernier opened from the Home Screen on the owner's phone, so it is only written by a browser a person is holding. Nothing was stored. Point the run at the scratch instance on 127.0.0.1:3101 instead."}
+navigator.webdriver in this browser: true
+  ✓  47 [chrome-scratch] › tests/e2e/launch-report.spec.ts:231:3 › the launch report › refuses this suite's own browser and leaves the signals where they were (1.4s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+a headless agent claiming it is not driven: 200 {"recorded":false,"reason":"A driven browser cannot report a launch.","detail":"This row is read back as evidence that Vernier opened from the Home Screen on the owner's phone, so it is only written by a browser a person is holding. Nothing was stored. Point the run at the scratch instance on 127.0.0.1:3101 instead."}
+  ✓  48 [chrome-scratch] › tests/e2e/launch-report.spec.ts:262:3 › the launch report › refuses a headless user agent even when the body claims otherwise (512ms)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+a Safari user agent claiming a Home Screen launch: 200 {"recorded":false,"reason":"A Home Screen launch cannot be reported from a desktop.","detail":"This row is read back as evidence that Vernier opened from the Home Screen icon on the owner's iPhone, and the browser reporting this launch says it is running on a desktop. Nothing was stored. A launch that reports no Home Screen is recorded as usual."}
+  ✓  49 [chrome-scratch] › tests/e2e/launch-report.spec.ts:288:3 › the launch report › refuses a Home Screen launch reported from a desktop, Safari user agent and all (499ms)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+navigator.webdriver in this browser: false
+the launch it raised: 200 {"recorded":false,"reason":"A Home Screen launch cannot be reported from a desktop.","detail":"This row is read back as evidence that Vernier opened from the Home Screen icon on the owner's iPhone, and the browser reporting this launch says it is running on a desktop. Nothing was stored. A launch that reports no Home Screen is recorded as usual."}
+  ✓  50 [chrome-scratch] › tests/e2e/launch-report.spec.ts:315:3 › the launch report › refuses a driven browser that has overwritten the flag it tells on itself with (757ms)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+an honest report: 200 {"recorded":true,"signals":{"standalone_seen":false},"reportedFrom":null}
+what the endpoint says it stored: {"standalone_seen":false}
+signals after: standalone_seen=false@unattributed
+  ✓  51 [chrome-scratch] › tests/e2e/launch-report.spec.ts:353:3 › the launch report › writes an honest report and says what the row reads afterwards (352ms)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+
+F27  state nothing-raised: 0 quiet source(s), 0 open question(s)
+F27  nothing-raised               chrome trend ends  542 px, fold 715, scrollY 0
+F27    above the trend     8..  71  h   63  header.title
+F27    above the trend    71.. 365  h  294  section.card.day
+F27    above the trend   377.. 722  h  345  section.card
+F27    title 63  offline line -  notice region - (0)  day card 294  card padding 16  card gap 12
+F27  nothing-raised               webkit trend ends  542 px, fold 715, scrollY 0
+F27    above the trend     8..  71  h   63  header.title
+F27    above the trend    71.. 365  h  294  section.card.day
+F27    above the trend   377.. 722  h  345  section.card
+F27    title 63  offline line -  notice region - (0)  day card 294  card padding 16  card gap 12
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+
+F27  state every-source-quiet: 2 quiet source(s), 0 open question(s)
+F27  every-source-quiet           chrome trend ends  600 px, fold 715, scrollY 0
+F27    above the trend     8..  71  h   63  header.title
+F27    above the trend    71.. 117  h   46  details.notices.banner.w
+F27    above the trend   129.. 423  h  294  section.card.day
+F27    above the trend   435.. 844  h  409  section.card
+F27    title 63  offline line -  notice region 46 (1)  day card 294  card padding 16  card gap 12
+F27  every-source-quiet           webkit trend ends  600 px, fold 715, scrollY 0
+F27    above the trend     8..  71  h   63  header.title
+F27    above the trend    71.. 117  h   46  details.notices.banner.w
+F27    above the trend   129.. 423  h  294  section.card.day
+F27    above the trend   435.. 844  h  409  section.card
+F27    title 63  offline line -  notice region 46 (1)  day card 294  card padding 16  card gap 12
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+
+F27  state open-import-question: 2 quiet source(s), 1 open question(s)
+F27  open-import-question         chrome trend ends  600 px, fold 715, scrollY 0
+F27    above the trend     8..  71  h   63  header.title
+F27    above the trend    71.. 117  h   46  details.notices.banner.w
+F27    above the trend   129.. 423  h  294  section.card.day
+F27    above the trend   435.. 844  h  409  section.card
+F27    title 63  offline line -  notice region 46 (2)  day card 294  card padding 16  card gap 12
+F27  open-import-question         webkit trend ends  600 px, fold 715, scrollY 0
+F27    above the trend     8..  71  h   63  header.title
+F27    above the trend    71.. 117  h   46  details.notices.banner.w
+F27    above the trend   129.. 423  h  294  section.card.day
+F27    above the trend   435.. 844  h  409  section.card
+F27    title 63  offline line -  notice region 46 (2)  day card 294  card padding 16  card gap 12
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+
+F27  state offline-with-entries-queued: 2 quiet source(s), 1 open question(s)
+F27  offline-with-entries-queued  chrome trend ends  651 px, fold 715, scrollY 0
+F27    above the trend     8..  71  h   63  header.title
+F27    above the trend    71.. 110  h   39  div.banner.queue
+F27    above the trend   122.. 168  h   46  details.notices.banner.w
+F27    above the trend   180.. 474  h  294  section.card.day
+F27    above the trend   486.. 895  h  409  section.card
+F27    title 63  offline line 39  notice region 46 (2)  day card 294  card padding 16  card gap 12
+F27    the offline line reads: Offline. 1 entry saved on this phone.
+F27  offline-with-entries-queued  webkit trend ends  651 px, fold 715, scrollY 0
+F27    above the trend     8..  71  h   63  header.title
+F27    above the trend    71.. 110  h   39  div.banner.queue
+F27    above the trend   122.. 168  h   46  details.notices.banner.w
+F27    above the trend   180.. 474  h  294  section.card.day
+F27    above the trend   486.. 895  h  409  section.card
+F27    title 63  offline line 39  notice region 46 (2)  day card 294  card padding 16  card gap 12
+F27    the offline line reads: Offline. 1 entry saved on this phone.
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+
+F27  state after-one-quick-log-all-six: 2 quiet source(s), 1 open question(s)
+F27  after-one-quick-log-all-six  chrome trend ends  679 px, fold 715, scrollY 0
+F27    above the trend     8..  71  h   63  header.title
+F27    above the trend    71.. 110  h   39  div.banner.queue
+F27    above the trend   122.. 168  h   46  details.notices.banner.w
+F27    above the trend   180.. 502  h  322  section.card.day
+F27    above the trend   514.. 923  h  409  section.card
+F27    title 63  offline line 39  notice region 46 (2)  day card 322  card padding 16  card gap 12
+F27    the offline line reads: Offline. 1 entry saved on this phone.
+F27  after-one-quick-log-all-six  webkit trend ends  679 px, fold 715, scrollY 0
+F27    above the trend     8..  71  h   63  header.title
+F27    above the trend    71.. 110  h   39  div.banner.queue
+F27    above the trend   122.. 168  h   46  details.notices.banner.w
+F27    above the trend   180.. 502  h  322  section.card.day
+F27    above the trend   514.. 923  h  409  section.card
+F27    title 63  offline line 39  notice region 46 (2)  day card 322  card padding 16  card gap 12
+F27    the offline line reads: Offline. 1 entry saved on this phone.
+
+F27  readings: 10
+F27  card padding 16 px and card gap 12 px on every reading, measured on the shipped screen
+F27  notice region, every height measured at counts 1, 2, 3, 5, 9, 42, 999999: 46
+F27  offline line, every height measured at queue depths 1, 2, 3, 5, 9, 42, 999999: 39
+F27  title header, every height measured over 84 date labels x 10 readings: 63
+F27  day card in nothing-raised: 294, 294 px
+F27  day card in every-source-quiet: 294, 294 px
+F27  day card in open-import-question: 294, 294 px
+F27  day card in offline-with-entries-queued: 294, 294 px
+F27  day card in after-one-quick-log-all-six: 322, 322 px
+F27  day card measured from 294 px at its smallest to 322 px at its largest
+
+F27  the maxima, and their sum
+F27    scroll padding above the title         8 px
+F27    header.title                          63 px  one line at every one of 84 date labels
+F27    .banner.queue                         39 px  one clamped line at any queue depth
+F27    details.notices                       46 px  one clamped summary row whatever it holds
+F27    section.card.day                     322 px  the session row plus the pair a write replaces
+F27    the weight card above its chart      165 px  label, headline and the chart's own margin
+F27    three card gaps at 12 px             36 px  the fourth junction has none
+F27    sum                                  679 px  against a fold of 715 px
+F27  the deepest the trend reached in any state or engine: 679 px
+
+  ✓  52 [chrome-scratch] › tests/e2e/notices.spec.ts:519:1 › F27. every element above the trend is bounded, the maxima sum inside 715, and the trend clears the fold in five states and both engines (36.2s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+F24  chrome the line reads: Offline. 1 entry saved on this phone.
+F24  chrome colour rgb(245, 245, 247), background rgb(28, 28, 31), warn class false, inside the notice region false, under the title true
+F24  webkit the line reads: Offline. 1 entry saved on this phone.
+F24  webkit colour rgb(245, 245, 247), background rgb(28, 28, 31), warn class false, inside the notice region false, under the title true
+  ✓  53 [chrome-scratch] › tests/e2e/notices.spec.ts:776:1 › F24 and C5. the offline line is neutral, one line, under the title, with the count on it (6.3s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+F23  chrome the empty card reads: No waist measurement yetTape at the navel, standing, breathing out. Same spot each time matters more than the exact number.
+F23  chrome the value reads "--" and holds "", which is blank and not zero
+F23  chrome both stepper controls are refused while the field is blank
+C5   chrome the waist field measures 130x52 px
+F23  chrome first-ever "9" -> "9" caret 1
+F23  chrome first-ever "9" -> "99" caret 2
+F23  chrome first-ever "." -> "99." caret 3
+F23  chrome first-ever "0" -> "99.0" caret 4
+F23  chrome a first-ever waist committed in 3 taps from Today
+F23  chrome stored: 99.0 cm
+F23  chrome with a measurement on file one tap moves it to 99.5
+F23  chrome a tap at the right edge puts the caret at 4
+F23  chrome clearing   "Backspace" -> "99." caret 3
+F23  chrome clearing   "Backspace" -> "99" caret 2
+F23  chrome clearing   "Backspace" -> "9" caret 1
+F23  chrome clearing   "Backspace" -> "" caret 0
+F23  chrome correction "9" -> "9" caret 1
+F23  chrome correction "1" -> "91" caret 2
+F23  chrome correction "." -> "91." caret 3
+F23  chrome correction "4" -> "91.4" caret 4
+F23  chrome the corrected reading stored as 91.4 cm manual, over 2 waist rows, both kept, because this table appends
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+F23  webkit the empty card reads: No waist measurement yetTape at the navel, standing, breathing out. Same spot each time matters more than the exact number.
+F23  webkit the value reads "--" and holds "", which is blank and not zero
+F23  webkit both stepper controls are refused while the field is blank
+C5   webkit the waist field measures 133x52 px
+F23  webkit first-ever "9" -> "9" caret 1
+F23  webkit first-ever "9" -> "99" caret 2
+F23  webkit first-ever "." -> "99." caret 3
+F23  webkit first-ever "0" -> "99.0" caret 4
+F23  webkit a first-ever waist committed in 3 taps from Today
+F23  webkit stored: 99.0 cm
+F23  webkit with a measurement on file one tap moves it to 99.5
+F23  webkit a tap at the right edge puts the caret at 4
+F23  webkit clearing   "Backspace" -> "99." caret 3
+F23  webkit clearing   "Backspace" -> "99" caret 2
+F23  webkit clearing   "Backspace" -> "9" caret 1
+F23  webkit clearing   "Backspace" -> "" caret 0
+F23  webkit correction "9" -> "9" caret 1
+F23  webkit correction "1" -> "91" caret 2
+F23  webkit correction "." -> "91." caret 3
+F23  webkit correction "4" -> "91.4" caret 4
+F23  webkit the corrected reading stored as 91.4 cm manual, over 2 waist rows, both kept, because this table appends
+  ✓  54 [chrome-scratch] › tests/e2e/notices.spec.ts:902:1 › F23 and C5. a first-ever waist commits in six taps or fewer, from a blank field and not from zero (15.3s)
+C5   chrome the last stored waist is 98.5 cm, and 91.4 is typed over it
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+C5   chrome mid-read   "9" -> "9" caret 1
+C5   chrome mid-read   "1" -> "91" caret 2
+C5   chrome mid-read   "." -> "91." caret 3
+C5   chrome mid-read   "4" -> "91.4" caret 4
+C5   chrome the read landed saying "Last 98.5 cm, 20 Aug" and the field still reads 91.4
+C5   chrome and 91.4 is what reached the database
+C5   webkit the last stored waist is 98.5 cm, and 91.4 is typed over it
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+C5   webkit mid-read   "9" -> "9" caret 1
+C5   webkit mid-read   "1" -> "91" caret 2
+C5   webkit mid-read   "." -> "91." caret 3
+C5   webkit mid-read   "4" -> "91.4" caret 4
+C5   webkit the read landed saying "Last 98.5 cm, 20 Aug" and the field still reads 91.4
+C5   webkit and 91.4 is what reached the database
+  ✓  55 [chrome-scratch] › tests/e2e/notices.spec.ts:1084:1 › C5. a waist typed while the snapshot read is in flight survives the answer landing (19.8s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+waist: 3 taps from Today
+energy: 3 taps from Today
+fatigue: 3 taps from Today
+hunger: 3 taps from Today
+satiety: 3 taps from Today
+note: 3 taps from Today
+waist=3 energy=3 fatigue=3 hunger=3 satiety=3 note=3
+energy 4 point manual reported
+fatigue 2 point manual reported
+hunger 3 point manual reported
+note Slept badly. Left knee fine. text manual reported
+satiety 4 point manual reported
+waist 99.0 cm manual measured_manual
+  ✓  56 [chrome-scratch] › tests/e2e/quick-log.spec.ts:166:3 › the quick log › commits each of the six in six taps or fewer from Today (6.3s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+queued offline: {"id":"f6a3e0f1-4976-4012-a779-ccc193968d73","url":"/api/log","method":"POST","headers":{"content-type":"application/json"},"body":"{\"measuredAt\":\"2026-08-23T06:33:09.983Z\",\"timeZone\":\"Europe/Paris\",\"values\":[{\"id\":\"38a939bf-1e63-4c96-a96d-585a1d92207a\",\"metric\":\"waist\",\"rawValue\":\"98.5\"},{\"id\":\"a62affb1-6bf5-4f46-a317-65f5da0ceaa2\",\"metric\":\"energy\",\"rawValue\":\"2\"}]}","createdAt":1787466789983,"attempts":0,"nextAttemptAt":0,"lastError":null,"parked":false}
+Today with the sheet closed reads: Offline. 1 entry saved on this phone.
+the queue after the origin came back: [{"attempts":1,"waitMs":1500.58935546875,"lastError":"Failed to fetch"}]
+replay answered 201
+request log for f6a3e0f1-4976-4012-a779-ccc193968d73:
+applied
+replayed
+  ✓  57 [chrome-scratch] › tests/e2e/quick-log.spec.ts:240:3 › the quick log › commits offline, shows the queue, and replays exactly once (4.7s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+original eb9adfe1-d296-4ede-9365-5e6fb87c23e0 = 99.0
+edit 1 through the screen: 99.0 corrected to 92.2
+edit 2 through the screen: 92.2 corrected to 98.5
+edit 3 through the screen: 98.5 corrected to 99.2
+the chain after three edits through the screen:
+0 | 99.0 | original
+1 | 92.2 | Edit 1
+2 | 98.5 | Edit 2
+3 | 99.2 | Edit 3
+the links:
+0 corrects nothing
+1 corrects eb9adfe1-d296-4ede-9365-5e6fb87c23e0
+2 corrects bd0a6aba-f59f-42be-8ec5-9800dcdcd7d0
+3 corrects efd92d17-6c75-41eb-8005-01a6006d4634
+  ✓  58 [chrome-scratch] › tests/e2e/quick-log.spec.ts:379:3 › the quick log › appends three corrections through the value screen and keeps the original readable (4.4s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+what the value screen says about a word where a number belongs:
+Correct this valueFailedThat correction was not stored.ninety-seven is not a number, so it was not stored. The value on file has not moved and nothing was written.Try again
+correcting a 1-to-5 rating to "99": 422 A rating is a whole number from 1 to 5.
+correcting a 1-to-5 rating to "-4.7": 422 A rating is a whole number from 1 to 5.
+correcting a 1-to-5 rating to "3.5": 422 A rating is a whole number from 1 to 5.
+correcting a 1-to-5 rating to "0": 422 A rating is a whole number from 1 to 5.
+correcting a 1-to-5 rating to "": 422 Type the number it should be and save again. The original is kept either way.
+correcting a 1-to-5 rating to "ninety-seven": 422 ninety-seven is not a number, so it was not stored.
+the reason stored on the correction: Corrects the reading demo_energy, which stays readable.
+a write whose every value is refused: 422 Every value in it was refused and each one carries its reason. Fix them and save again; nothing was written.
+  ✓  59 [chrome-scratch] › tests/e2e/quick-log.spec.ts:461:3 › the quick log › refuses a correction the metric does not allow, and draws it as an error card (4.6s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+the just-logged card while queued:
+Waist 98.5 cm, fatigue 2Saved 08:33, on this phoneQueuedUndoEdit
+entries left in the outbox after Undo: 0
+the just-logged card once it has uploaded:
+Waist 98.5 cm, hunger 3Saved 08:33StoredCorrect it
+the card labels on Today: ["Your day","Adherence","On file"]
+  ✓  60 [chrome-scratch] › tests/e2e/quick-log.spec.ts:571:3 › the quick log › undoes a queued write, and offers a correction rather than a deletion once it has uploaded (4.7s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+demo_src_health_d11|apple_health_shortcut|shortcut_payload
+demo_src_health_d13|apple_health_shortcut|shortcut_payload
+demo_src_health_d14|apple_health_shortcut|shortcut_payload
+demo_src_health_d15|apple_health_shortcut|shortcut_payload
+demo_src_health_d16|apple_health_shortcut|shortcut_payload
+demo_src_health_d17|apple_health_shortcut|shortcut_payload
+demo_src_health_d20|apple_health_shortcut|shortcut_payload
+demo_src_health_d25|apple_health_shortcut|shortcut_payload
+demo_src_health_d18|apple_health_shortcut|shortcut_payload
+demo_src_health_d32|apple_health_shortcut|shortcut_payload
+demo_src_health_d28|apple_health_shortcut|shortcut_payload
+demo_src_health_d24|apple_health_shortcut|shortcut_payload
+demo_src_steps|apple_health_shortcut|shortcut_payload
+demo_src_health_d9|apple_health_shortcut|shortcut_payload
+demo_src_health_d10|apple_health_shortcut|shortcut_payload
+demo_src_health_d12|apple_health_shortcut|shortcut_payload
+demo_src_health_d40|apple_health_shortcut|shortcut_payload
+demo_src_health_d5|apple_health_shortcut|shortcut_payload
+demo_src_health_d6|apple_health_shortcut|shortcut_payload
+demo_src_health_d7|apple_health_shortcut|shortcut_payload
+demo_src_health_d8|apple_health_shortcut|shortcut_payload
+demo_src_energy|demo|demo_record
+demo_src_average|derived|derivation
+demo_src_ldl|lab_pdf|lab_page
+src_9bea4d99-491f-4480-a0b1-79167ee3574b|manual|manual_entry
+demo_src_waist|manual|manual_entry
+demo_src_waist_d10|manual|manual_entry
+demo_src_waist_d17|manual|manual_entry
+demo_src_waist_d24|manual|manual_entry
+demo_src_waist_d31|manual|manual_entry
+demo_src_waist_d38|manual|manual_entry
+demo_src_weight_w5|withings|sync_batch
+demo_src_weight_w4|withings|sync_batch
+demo_src_weight_w3|withings|sync_batch
+demo_src_weight_w2|withings|sync_batch
+demo_src_weight_w1|withings|sync_batch
+demo_src_weight_w0|withings|sync_batch
+demo_src_weight|withings|sync_batch
+source apple_health_shortcut (shortcut_payload) rendered by src/app/(shell)/source/[id]/page.tsx
+source demo (demo_record) rendered by src/app/(shell)/source/[id]/page.tsx
+source derived (derivation) rendered by src/app/(shell)/source/[id]/page.tsx
+source lab_pdf (lab_page) rendered by src/app/(shell)/source/[id]/page.tsx
+source manual (manual_entry) rendered by src/app/(shell)/source/[id]/page.tsx
+source withings (sync_batch) rendered by src/app/(shell)/source/[id]/page.tsx
+  ✓  61 [chrome-scratch] › tests/e2e/quick-log.spec.ts:669:3 › the quick log › walks from a value to its source in two taps, for all six sources (2.9s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+before the disagreeing write:
+a2b2b082-ad56-4399-8423-fb87f9a77c86|99.2|manual|1
+b123f644-1c34-406e-abf8-e91066d24372|99.0|manual|0
+demo_average|86.4|demo|0
+demo_energy|4|demo|0
+demo_hrv_d11|44|demo|0
+demo_hrv_d18|42|demo|0
+demo_hrv_d25|41|demo|0
+demo_hrv_d4|46|demo|0
+demo_ldl|1.44|demo|0
+demo_resting_heart_rate_d12|58|demo|0
+demo_resting_heart_rate_d16|60|demo|0
+demo_resting_heart_rate_d20|59|demo|0
+demo_resting_heart_rate_d24|61|demo|0
+demo_resting_heart_rate_d28|60|demo|0
+demo_resting_heart_rate_d32|61|demo|0
+demo_resting_heart_rate_d4|58|demo|0
+demo_resting_heart_rate_d8|59|demo|0
+demo_sleep_minutes_d10|456|demo|0
+demo_sleep_minutes_d11|389|demo|0
+demo_sleep_minutes_d12|412|demo|0
+demo_sleep_minutes_d13|375|demo|0
+demo_sleep_minutes_d14|438|demo|0
+demo_sleep_minutes_d15|407|demo|0
+demo_sleep_minutes_d16|421|demo|0
+demo_sleep_minutes_d17|396|demo|0
+demo_sleep_minutes_d4|424|demo|0
+demo_sleep_minutes_d5|391|demo|0
+demo_sleep_minutes_d6|447|demo|0
+demo_sleep_minutes_d7|402|demo|0
+demo_sleep_minutes_d8|368|demo|0
+demo_sleep_minutes_d9|431|demo|0
+demo_steps|9412|demo|0
+demo_steps_d10|12088|demo|0
+demo_steps_d11|8455|demo|0
+demo_steps_d12|10231|demo|0
+demo_steps_d13|7619|demo|0
+demo_steps_d14|9044|demo|0
+demo_steps_d15|11760|demo|0
+demo_steps_d16|8302|demo|0
+demo_steps_d17|9587|demo|0
+demo_steps_d5|7830|demo|0
+demo_steps_d6|11204|demo|0
+demo_steps_d7|8617|demo|0
+demo_steps_d8|9903|demo|0
+demo_steps_d9|6742|demo|0
+demo_vo2_max_d12|38.4|demo|0
+demo_vo2_max_d40|37.6|demo|0
+demo_waist|98.5|demo|0
+demo_waist_d10|99|demo|0
+demo_waist_d17|99.4|demo|0
+demo_waist_d24|99.8|demo|0
+demo_waist_d31|100.3|demo|0
+demo_waist_d38|100.7|demo|0
+demo_weight|85.9|demo|0
+demo_weight_d1|86.5|demo|0
+demo_weight_d14|87.3|demo|0
+demo_weight_d15|87.2|demo|0
+demo_weight_d16|87.5|demo|0
+demo_weight_d17|87.4|demo|0
+demo_weight_d18|87.6|demo|0
+demo_weight_d19|87.5|demo|0
+demo_weight_d2|86.3|demo|0
+demo_weight_d20|87.8|demo|0
+demo_weight_d21|87.7|demo|0
+demo_weight_d22|87.9|demo|0
+demo_weight_d23|87.8|demo|0
+demo_weight_d24|88.1|demo|0
+demo_weight_d25|88|demo|0
+demo_weight_d26|88.2|demo|0
+demo_weight_d27|88.1|demo|0
+demo_weight_d28|88.4|demo|0
+demo_weight_d29|88.3|demo|0
+demo_weight_d3|86.6|demo|0
+demo_weight_d30|88.5|demo|0
+demo_weight_d31|88.4|demo|0
+demo_weight_d32|88.6|demo|0
+demo_weight_d33|88.5|demo|0
+demo_weight_d34|88.8|demo|0
+demo_weight_d35|88.7|demo|0
+demo_weight_d36|88.9|demo|0
+demo_weight_d37|88.8|demo|0
+demo_weight_d38|89|demo|0
+demo_weight_d39|88.9|demo|0
+demo_weight_d4|86.4|demo|0
+demo_weight_d40|89.1|demo|0
+demo_weight_d41|89|demo|0
+demo_weight_d5|86.5|demo|0
+demo_weight_d6|86.6|demo|0
+demo_weight_d7|87.1|demo|0
+demo_weight_d8|86.8|demo|0
+demo_weight_d9|87.1|demo|0
+the disagreeing write answered 200: [{"id":"q_b74cfd91-b09b-4265-b125-99345dccd049","metric":"waist"}]
+after:
+a2b2b082-ad56-4399-8423-fb87f9a77c86|99.2|manual|1
+b123f644-1c34-406e-abf8-e91066d24372|99.0|manual|0
+demo_average|86.4|demo|0
+demo_energy|4|demo|0
+demo_hrv_d11|44|demo|0
+demo_hrv_d18|42|demo|0
+demo_hrv_d25|41|demo|0
+demo_hrv_d4|46|demo|0
+demo_ldl|1.44|demo|0
+demo_resting_heart_rate_d12|58|demo|0
+demo_resting_heart_rate_d16|60|demo|0
+demo_resting_heart_rate_d20|59|demo|0
+demo_resting_heart_rate_d24|61|demo|0
+demo_resting_heart_rate_d28|60|demo|0
+demo_resting_heart_rate_d32|61|demo|0
+demo_resting_heart_rate_d4|58|demo|0
+demo_resting_heart_rate_d8|59|demo|0
+demo_sleep_minutes_d10|456|demo|0
+demo_sleep_minutes_d11|389|demo|0
+demo_sleep_minutes_d12|412|demo|0
+demo_sleep_minutes_d13|375|demo|0
+demo_sleep_minutes_d14|438|demo|0
+demo_sleep_minutes_d15|407|demo|0
+demo_sleep_minutes_d16|421|demo|0
+demo_sleep_minutes_d17|396|demo|0
+demo_sleep_minutes_d4|424|demo|0
+demo_sleep_minutes_d5|391|demo|0
+demo_sleep_minutes_d6|447|demo|0
+demo_sleep_minutes_d7|402|demo|0
+demo_sleep_minutes_d8|368|demo|0
+demo_sleep_minutes_d9|431|demo|0
+demo_steps|9412|demo|0
+demo_steps_d10|12088|demo|0
+demo_steps_d11|8455|demo|0
+demo_steps_d12|10231|demo|0
+demo_steps_d13|7619|demo|0
+demo_steps_d14|9044|demo|0
+demo_steps_d15|11760|demo|0
+demo_steps_d16|8302|demo|0
+demo_steps_d17|9587|demo|0
+demo_steps_d5|7830|demo|0
+demo_steps_d6|11204|demo|0
+demo_steps_d7|8617|demo|0
+demo_steps_d8|9903|demo|0
+demo_steps_d9|6742|demo|0
+demo_vo2_max_d12|38.4|demo|0
+demo_vo2_max_d40|37.6|demo|0
+demo_waist|98.5|demo|0
+demo_waist_d10|99|demo|0
+demo_waist_d17|99.4|demo|0
+demo_waist_d24|99.8|demo|0
+demo_waist_d31|100.3|demo|0
+demo_waist_d38|100.7|demo|0
+demo_weight|85.9|demo|0
+demo_weight_d1|86.5|demo|0
+demo_weight_d14|87.3|demo|0
+demo_weight_d15|87.2|demo|0
+demo_weight_d16|87.5|demo|0
+demo_weight_d17|87.4|demo|0
+demo_weight_d18|87.6|demo|0
+demo_weight_d19|87.5|demo|0
+demo_weight_d2|86.3|demo|0
+demo_weight_d20|87.8|demo|0
+demo_weight_d21|87.7|demo|0
+demo_weight_d22|87.9|demo|0
+demo_weight_d23|87.8|demo|0
+demo_weight_d24|88.1|demo|0
+demo_weight_d25|88|demo|0
+demo_weight_d26|88.2|demo|0
+demo_weight_d27|88.1|demo|0
+demo_weight_d28|88.4|demo|0
+demo_weight_d29|88.3|demo|0
+demo_weight_d3|86.6|demo|0
+demo_weight_d30|88.5|demo|0
+demo_weight_d31|88.4|demo|0
+demo_weight_d32|88.6|demo|0
+demo_weight_d33|88.5|demo|0
+demo_weight_d34|88.8|demo|0
+demo_weight_d35|88.7|demo|0
+demo_weight_d36|88.9|demo|0
+demo_weight_d37|88.8|demo|0
+demo_weight_d38|89|demo|0
+demo_weight_d39|88.9|demo|0
+demo_weight_d4|86.4|demo|0
+demo_weight_d40|89.1|demo|0
+demo_weight_d41|89|demo|0
+demo_weight_d5|86.5|demo|0
+demo_weight_d6|86.6|demo|0
+demo_weight_d7|87.1|demo|0
+demo_weight_d8|86.8|demo|0
+demo_weight_d9|87.1|demo|0
+the question that was raised instead: 99.2 vs 92.2 | open
+  ✓  62 [chrome-scratch] › tests/e2e/quick-log.spec.ts:712:3 › the quick log › raises a question rather than overwriting a correction (4.0s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+--- 393 px ---
+  44 px  16px  Close the quick log
+  60 px  13.3333px  Down half a centimetre
+  52 px  34px  Waist in centimetres
+  60 px  13.3333px  Up half a centimetre
+  52 px  17px  Energy, 1 of 5
+  52 px  17px  Energy, 2 of 5
+  52 px  17px  Energy, 3 of 5
+  52 px  17px  Energy, 4 of 5
+  52 px  17px  Energy, 5 of 5
+  52 px  17px  Fatigue, 1 of 5
+  52 px  17px  Fatigue, 2 of 5
+  52 px  17px  Fatigue, 3 of 5
+  52 px  17px  Fatigue, 4 of 5
+  52 px  17px  Fatigue, 5 of 5
+  52 px  17px  Hunger, 1 of 5
+  52 px  17px  Hunger, 2 of 5
+  52 px  17px  Hunger, 3 of 5
+  52 px  17px  Hunger, 4 of 5
+  52 px  17px  Hunger, 5 of 5
+  52 px  17px  Satiety after eating, 1 of 5
+  52 px  17px  Satiety after eating, 2 of 5
+  52 px  17px  Satiety after eating, 3 of 5
+  52 px  17px  Satiety after eating, 4 of 5
+  52 px  17px  Satiety after eating, 5 of 5
+  80 px  15px  Note
+  52 px  16px  Save
+--- 768 px ---
+  44 px  16px  Close the quick log
+  60 px  13.3333px  Down half a centimetre
+  52 px  34px  Waist in centimetres
+  60 px  13.3333px  Up half a centimetre
+  52 px  17px  Energy, 1 of 5
+  52 px  17px  Energy, 2 of 5
+  52 px  17px  Energy, 3 of 5
+  52 px  17px  Energy, 4 of 5
+  52 px  17px  Energy, 5 of 5
+  52 px  17px  Fatigue, 1 of 5
+  52 px  17px  Fatigue, 2 of 5
+  52 px  17px  Fatigue, 3 of 5
+  52 px  17px  Fatigue, 4 of 5
+  52 px  17px  Fatigue, 5 of 5
+  52 px  17px  Hunger, 1 of 5
+  52 px  17px  Hunger, 2 of 5
+  52 px  17px  Hunger, 3 of 5
+  52 px  17px  Hunger, 4 of 5
+  52 px  17px  Hunger, 5 of 5
+  52 px  17px  Satiety after eating, 1 of 5
+  52 px  17px  Satiety after eating, 2 of 5
+  52 px  17px  Satiety after eating, 3 of 5
+  52 px  17px  Satiety after eating, 4 of 5
+  52 px  17px  Satiety after eating, 5 of 5
+  80 px  15px  Note
+  52 px  16px  Save
+--- 1280 px ---
+  44 px  16px  Close the quick log
+  60 px  13.3333px  Down half a centimetre
+  52 px  34px  Waist in centimetres
+  60 px  13.3333px  Up half a centimetre
+  52 px  17px  Energy, 1 of 5
+  52 px  17px  Energy, 2 of 5
+  52 px  17px  Energy, 3 of 5
+  52 px  17px  Energy, 4 of 5
+  52 px  17px  Energy, 5 of 5
+  52 px  17px  Fatigue, 1 of 5
+  52 px  17px  Fatigue, 2 of 5
+  52 px  17px  Fatigue, 3 of 5
+  52 px  17px  Fatigue, 4 of 5
+  52 px  17px  Fatigue, 5 of 5
+  52 px  17px  Hunger, 1 of 5
+  52 px  17px  Hunger, 2 of 5
+  52 px  17px  Hunger, 3 of 5
+  52 px  17px  Hunger, 4 of 5
+  52 px  17px  Hunger, 5 of 5
+  52 px  17px  Satiety after eating, 1 of 5
+  52 px  17px  Satiety after eating, 2 of 5
+  52 px  17px  Satiety after eating, 3 of 5
+  52 px  17px  Satiety after eating, 4 of 5
+  52 px  17px  Satiety after eating, 5 of 5
+  80 px  15px  Note
+  52 px  16px  Save
+  ✓  63 [chrome-scratch] › tests/e2e/quick-log.spec.ts:795:3 › the quick log against screen 03 › matches screen 03 at three viewports, with 44 px targets or better (4.8s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+stale chip reads: Demo, 3 days old
+loaded sheet reads: 99.0 cm, 0 age chip(s)
+loading skeletons: 3
+error card reads: WaistThis screen failed to loadYour last measurements did not loadFailed to fetch The sheet still saves: a write goes to this phone first and uploads when the Mac mini answers.Try again
+offline banner reads: Saved on this phone 1 entry is waiting to upload. It keeps the time you typed it, not the time it arrives.
+sheet width and left, per state: loaded 393/0, loading 393/0, error 393/0, offline 393/0
+empty card reads: No waist measurement yetTape at the navel, standing, breathing out. Same spot each time matters more than the exact number.
+  ✓  64 [chrome-scratch] › tests/e2e/quick-log.spec.ts:851:3 › the quick log against screen 03 › draws loading, empty, error, offline and stale on screen 00 geometry (7.9s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+with no snapshot: up enabled false, down enabled false
+and it says: Your last measurement did not load, so there is nothing to step from. Type the number.
+the queue holds 1 entry(s): {"measuredAt":"2026-08-23T06:33:53.232Z","timeZone":"Europe/Paris","values":[{"id":"1a9e9f1e-48b6-4348-be40-137c2817e91d","metric":"energy","rawValue":"4"}]}
+  ✓  65 [chrome-scratch] › tests/e2e/quick-log.spec.ts:993:3 › the quick log tells the truth about what it queued › refuses to step a waist it has no reading to step from, and says why (3.1s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+the refusal reads: That entry was not savedWaist is stored between 30 and 250 cm. Nothing outside that is a measurement.Nothing was put on this phone and nothing was sent. Change what is named here and save again.
+entries in the queue after the refusal: 0
+  ✓  66 [chrome-scratch] › tests/e2e/quick-log.spec.ts:1055:3 › the quick log tells the truth about what it queued › refuses a value the flush would refuse, at the moment it is typed (4.9s)
+owner rows: 1
+  id: 4364cf58-1721-4564-a627-b32e86fedbf5 name: Owner created: 2026-08-23T06:33:50.112Z
+  password: argon2id m=19456 t=2 p=1 tag=32 set: 2026-08-23T06:33:50.112Z
+passkeys: 0
+failed attempts inside the 60 second window: 0 of 5 allowed
+last five attempts:
+  2026-08-23T06:33:55.171Z recovery success | signed in with a one-time grant minted on the host shell
+  2026-08-23T06:33:52.060Z recovery success | signed in with a one-time grant minted on the host shell
+  2026-08-23T06:33:50.116Z bootstrap success | the owner account was created
+  ✓  67 [chrome-scratch] › tests/e2e/recovery.spec.ts:40:3 › local recovery › reads the state of the account from the host shell (133ms)
+recovery: the backup password is set. Argon2id m=19456 t=2 p=1, 16-byte nonce, stored on the owner row.
+the owner row after the reset: argon2id m=19456 t=2 p=1 tag=32 nonce_bytes=16
+password | success | signed in with the backup password
+recovery | success | the backup password was reset from the host shell
+recovery: the lockout window is clear. 1 failure(s) inside it are now ignored and still on the record.
+  ✓  68 [chrome-scratch] › tests/e2e/recovery.spec.ts:48:3 › local recovery › sets a new backup password, and it signs in on a browser holding no passkey (2.0s)
+test-stack: ready at http://127.0.0.1:3101
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+F32  cards on the screen: goal, activity, sleep, heart
+F32  steps: No step counts storedSteps arrive from a shortcut on the iPhone. Until one does, this stays empty rather than showing a zero you did not walk.Open integrations
+F32  sleep: No sleep storedSleep duration arrives with the same shortcut. A night the watch did not record stays absent here and is never padded out.Open integrations
+F32  resting heart rate: No resting heart rate storedResting heart rate arrives once a day with the same shortcut. Nothing is estimated in the meantime.Open integrations
+F32  recovery: Not stored. Heart rate variability arrives from the watch.
+F32  VO2 max: Not stored. The watch estimates it every few weeks.
+F32  figures reading zero anywhere on the screen: 0
+  ✓  69 [chrome-scratch] › tests/e2e/trend-scratch.spec.ts:98:1 › F32. with nothing stored, all five signals name their own absence and none renders zero (2.6s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+landed stale-thirty-seven: the newest phone sample is now 37 hours old
+F34  at 37 hours the chip reads "Health, 37 hours old" and the cause reads "The iPhone shortcut last sent a batch on 21 Aug, 19:34."
+F34  hatched ranges on the activity chart: 1
+landed stale-thirty-five: the newest phone sample is now 35 hours old
+F34  at 35 hours the warn chip count is 0
+F34  on Today at 35 hours: 0 notice region(s), 0 quiet-source notice(s)
+F34  and the chart still hatches what is missing: 0 range(s)
+landed stale-fresh: the newest phone sample is now 0 hours old
+F34  after a fresh sample the warn chip count is 0
+  ✓  70 [chrome-scratch] › tests/e2e/trend-scratch.spec.ts:142:1 › F34. a source is stale past thirty-six hours, and the chip clears when a fresher sample lands (5.2s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+SIDEWAYS  393x852 Today    scrollWidth 393, clientWidth 393
+SIDEWAYS      overflowing: table ends at 470, 438 px wide
+SIDEWAYS      overflowing: caption ends at 470, 438 px wide
+SIDEWAYS      overflowing: thead ends at 468, 434 px wide
+SIDEWAYS      overflowing: tr ends at 468, 434 px wide
+SIDEWAYS      overflowing: th ends at 468, 160 px wide
+SIDEWAYS  393x852 Health   scrollWidth 393, clientWidth 393
+SIDEWAYS      overflowing: table ends at 470, 438 px wide
+SIDEWAYS      overflowing: caption ends at 470, 438 px wide
+SIDEWAYS      overflowing: thead ends at 468, 434 px wide
+SIDEWAYS      overflowing: tr ends at 468, 434 px wide
+SIDEWAYS      overflowing: th ends at 468, 160 px wide
+SIDEWAYS  393x852 Train    scrollWidth 393, clientWidth 393
+SIDEWAYS  393x852 Eat      scrollWidth 393, clientWidth 393
+SIDEWAYS  393x852 Settings scrollWidth 393, clientWidth 393
+SIDEWAYS  393x852 a value  scrollWidth 393, clientWidth 393
+SIDEWAYS  393x852 a source scrollWidth 393, clientWidth 393
+SIDEWAYS  393x852 quick log scrollWidth 393, clientWidth 393
+SIDEWAYS  768x1024 Today    scrollWidth 768, clientWidth 768
+SIDEWAYS  768x1024 Health   scrollWidth 768, clientWidth 768
+SIDEWAYS  768x1024 Train    scrollWidth 768, clientWidth 768
+SIDEWAYS  768x1024 Eat      scrollWidth 768, clientWidth 768
+SIDEWAYS  768x1024 Settings scrollWidth 768, clientWidth 768
+SIDEWAYS  768x1024 a value  scrollWidth 768, clientWidth 768
+SIDEWAYS  768x1024 a source scrollWidth 768, clientWidth 768
+SIDEWAYS  768x1024 quick log scrollWidth 768, clientWidth 768
+SIDEWAYS  1280x800 Today    scrollWidth 1280, clientWidth 1280
+SIDEWAYS  1280x800 Health   scrollWidth 1280, clientWidth 1280
+SIDEWAYS  1280x800 Train    scrollWidth 1280, clientWidth 1280
+SIDEWAYS  1280x800 Eat      scrollWidth 1280, clientWidth 1280
+SIDEWAYS  1280x800 Settings scrollWidth 1280, clientWidth 1280
+SIDEWAYS  1280x800 a value  scrollWidth 1280, clientWidth 1280
+SIDEWAYS  1280x800 a source scrollWidth 1280, clientWidth 1280
+SIDEWAYS  1280x800 quick log scrollWidth 1280, clientWidth 1280
+  ✓  71 [chrome-layout] › tests/e2e/layout.spec.ts:66:3 › the layout does not scroll sideways › no screen is wider than the viewport at any of the three sizes (18.8s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+TREE  /: 2 table(s) in the platform tree, 62 rows, 60 row headers, 120 cells
+TREE      expects a table named: Every stored weight reading behind this chart, with its date.
+TREE      expects a table named: Every stored waist measurement behind this chart, with its date.
+TREE  /: cells reading "No reading": 174
+TREE  /health: 5 table(s) in the platform tree, 155 rows, 150 row headers, 300 cells
+TREE      expects a table named: Every stored weight reading behind this chart, with its date.
+TREE      expects a table named: Every stored waist measurement behind this chart, with its date.
+TREE      expects a table named: Every stored step count behind this chart, with its date.
+TREE      expects a table named: Every stored night of sleep behind this chart, with its date.
+TREE      expects a table named: Every stored resting heart rate behind this chart, with its date.
+TREE  /health: cells reading "No reading": 504
+TREE  tables read out of the platform tree: 7
+  ✓  72 [chrome-layout] › tests/e2e/layout.spec.ts:124:3 › the layout does not scroll sideways › every chart table is still in the platform accessibility tree (3.6s)
+focus traversal: 3 stops of 3 interactive elements
+  input.input: 2px solid rgb(143, 196, 255) at 2px
+  button.btn primary block: 2px solid rgb(143, 196, 255) at 2px
+  button.btn quiet block: 2px solid rgb(143, 196, 255) at 2px
+  ✓  73 [chrome-keyboard] › tests/e2e/focus.spec.ts:32:1 › every interactive element on the gate carries a 2 px focus outline at 2 px offset (559ms)
+teardown: the owner's database holds 91 measurement, 39 source_record, 1 measurement not seeded.
+teardown: its device signals read standalone_seen=true@2026-08-22 16:13:55.795+02/2026-08-22 20:28:20.543872+02/unattributed, wake_lock_available=true@2026-08-22 16:13:55.804+02/2026-08-22 16:13:55.804748+02/unattributed.
+teardown: test-stack: stopped
+teardown: it held 91 measurement, 39 source_record, 1 measurement not seeded before the run, so nothing of the owner's was taken.
+
+  1 skipped
+  72 passed (5.1m)
