@@ -48,7 +48,7 @@ export default defineConfig({
   projects: [
     {
       name: 'webkit-iphone',
-      testIgnore: /focus\.spec\.ts|service-worker\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|absence-scratch\.spec\.ts|launch-report\.spec\.ts|notices\.spec\.ts|withings\.spec\.ts|ingest\.spec\.ts|labs-scratch\.spec\.ts|nutrition\.spec\.ts|shopping\.spec\.ts|catalogue-offline\.spec\.ts|train-week\.spec\.ts|session-player\.spec\.ts|console-walk\.spec\.ts|settings-integrations\.spec\.ts|meals\.spec\.ts|calendar\.spec\.ts|review\.spec\.ts|push\.spec\.ts|backup\.spec\.ts/,
+      testIgnore: /focus\.spec\.ts|service-worker\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|absence-scratch\.spec\.ts|credential-boundary\.spec\.ts|launch-report\.spec\.ts|notices\.spec\.ts|withings\.spec\.ts|ingest\.spec\.ts|labs-scratch\.spec\.ts|nutrition\.spec\.ts|shopping\.spec\.ts|catalogue-offline\.spec\.ts|train-week\.spec\.ts|session-player\.spec\.ts|console-walk\.spec\.ts|settings-integrations\.spec\.ts|meals\.spec\.ts|calendar\.spec\.ts|review\.spec\.ts|push\.spec\.ts|backup\.spec\.ts/,
       use: { ...devices['Desktop Safari'], viewport: { width: 393, height: 852 }, deviceScaleFactor: 3 },
     },
     {
@@ -101,6 +101,14 @@ export default defineConfig({
       // body signals in it, and a phone source whose newest sample is exactly
       // thirty-five and then exactly thirty-seven hours old. Both mean writing
       // rows, and `measurement` refuses DELETE, so they belong here.
+      //
+      // credential-boundary.spec.ts joined it on 2026-08-23, and its own guard
+      // is what sent it. It saves a credential through the shipped settings form
+      // and presses Disconnect, which deletes it, and it refused to run at the
+      // live origin the day slice 5 stored a real Withings credential there. The
+      // route table and C2 stay in boundary.spec.ts at that origin, because what
+      // they prove is about that installation; what this proves is about the
+      // build, and it needs a credential nobody would miss.
       //
       // absence-scratch.spec.ts joined it after the owner's install stopped
       // being able to show absence at all. F30's evidence rested on the four
@@ -209,7 +217,7 @@ export default defineConfig({
       // attribute relaxed, so WebKit will carry it over loopback too, and it
       // grades its fold in both engines against one database.
       name: 'chrome-scratch',
-      testMatch: /launch-report\.spec\.ts|absence-scratch\.spec\.ts|notices\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|withings\.spec\.ts|ingest\.spec\.ts|labs-scratch\.spec\.ts|nutrition\.spec\.ts|shopping\.spec\.ts|train-week\.spec\.ts|session-player\.spec\.ts|console-walk\.spec\.ts|settings-integrations\.spec\.ts|meals\.spec\.ts|calendar\.spec\.ts|review\.spec\.ts|push\.spec\.ts|backup\.spec\.ts/,
+      testMatch: /launch-report\.spec\.ts|absence-scratch\.spec\.ts|credential-boundary\.spec\.ts|notices\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|withings\.spec\.ts|ingest\.spec\.ts|labs-scratch\.spec\.ts|nutrition\.spec\.ts|shopping\.spec\.ts|train-week\.spec\.ts|session-player\.spec\.ts|console-walk\.spec\.ts|settings-integrations\.spec\.ts|meals\.spec\.ts|calendar\.spec\.ts|review\.spec\.ts|push\.spec\.ts|backup\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         channel: 'chrome',

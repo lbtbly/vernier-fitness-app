@@ -213,6 +213,23 @@ export function appLogs(lines = 400): string {
   });
 }
 
+/**
+ * The scratch instance's own log, for the specs that write a credential.
+ *
+ * F16's clause is that no credential value reaches a log line, and the way to
+ * ask that is to enter one and then read the log of the container that took it.
+ * The container is this one, because the secret was entered here.
+ */
+export function scratchLogs(lines = 400): string {
+  // Both streams, merged by the shell. `docker logs` writes the container's
+  // stderr to stderr, and a helper that read stdout alone would search half a
+  // log and report the half it read as the whole of it.
+  return execFileSync('bash', ['-c', `docker logs ${SCRATCH_CONTAINER} --tail ${Number(lines)} 2>&1`], {
+    cwd: projectRoot,
+    encoding: 'utf8',
+  });
+}
+
 /** One use, ten minutes, minted on this machine. */
 export function mintSignInLink(): string {
   return recovery('link', '10').split('\n').at(-1)!.trim();
