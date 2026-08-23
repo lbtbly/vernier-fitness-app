@@ -500,3 +500,326 @@ export const writeRequest = pgTable(
   },
   (table) => [index('write_request_key').on(table.key)],
 );
+
+/**
+ * ---------------------------------------------------------------------------
+ * Training. Slice 8.
+ *
+ * The catalogue, the media that demonstrates it, the proposed week, the runs of
+ * the player and what the owner reported afterwards. Ten tables, and the rules
+ * that matter are in the columns rather than in a handler: a media row with no
+ * author cannot be written, a proposal is a row with a state and never an
+ * applied change, and nothing anywhere stores a workload ratio, a readiness
+ * score or a number about injury risk.
+ * ---------------------------------------------------------------------------
+ */
+
+/**
+ * One movement. The catalogue is 44 of them and it is seeded from
+ * `src/lib/catalogue.ts` at boot, not by hand, so the rows and the module the
+ * proposer reads cannot drift.
+ *
+ * `nameKey` and `cueKey` are catalogue keys and not words. A cue is copy the
+ * product authored, C6 says wherever in the shipped tree it was written, and a
+ * database row is in the shipped tree: `src/db/demo.ts` learned that one the
+ * expensive way and this table is built on the same rule.
+ */
+export const movement = pgTable(
+  'movement',
+  {
+    id: text('id').primaryKey(),
+    nameKey: text('name_key').notNull(),
+    cueKey: text('cue_key').notNull(),
+    modality: text('modality').notNull(),
+    pattern: text('pattern').notNull(),
+    muscles: text('muscles').array().notNull().default([]),
+    equipment: text('equipment').array().notNull().default([]),
+    /** Where it sits on its pattern's ladder. Lower is easier. */
+    step: integer('step').notNull(),
+    unit: text('unit').notNull(),
+    sets: integer('sets').notNull(),
+    low: integer('low').notNull(),
+    high: integer('high').notNull(),
+    restSeconds: integer('rest_seconds').notNull(),
+    effortScale: text('effort_scale').notNull(),
+    loadable: boolean('loadable').notNull().default(false),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index('movement_pattern').on(table.pattern, table.step)],
+);
+
+/**
+ * One piece of media, and every column F67 names is here and NOT NULL.
+ *
+ * `author` is the one that matters. A CC BY-SA image whose creator is unknown
+ * cannot be complied with, and 87 of wger's 365 images are exactly that; a
+ * 1,746-image aggregator set is infringing and has no author to record at all.
+ * The rule that keeps both out is one word in one column, and it is enforced
+ * three times over: the fetch script refuses a source naming no author, this
+ * column is NOT NULL, and a check constraint in
+ * `drizzle/pending/08-train.sql` refuses a blank one, which is what NOT NULL
+ * alone would let through.
+ *
+ * `embeddingMode` is `bundled` for a file in this repository and
+ * `youtube_nocookie` for a video the browser fetches for itself. There is no
+ * third mode and there is no local copy of a video: downloading one is
+ * forbidden by Developer Policies III.E in the plainest words in the document.
+ */
+export const movementMedia = pgTable(
+  'movement_media',
+  {
+    id: text('id').primaryKey(),
+    movementId: text('movement_id')
+      .notNull()
+      .references(() => movement.id),
+    /** Where it came from: the file page, the raw path, or the watch URL. */
+    url: text('url').notNull(),
+    /** The author, or the source that stands as one. Never null, never blank. */
+    author: text('author').notNull(),
+    licence: text('licence').notNull(),
+    licenceUrl: text('licence_url').notNull().default(''),
+    attributionUrl: text('attribution_url').notNull().default(''),
+    embeddingMode: text('embedding_mode').notNull(),
+    kind: text('kind').notNull(),
+    /** The path this app serves it from, empty for an embed. */
+    localPath: text('local_path').notNull().default(''),
+    /** The day the source was asked, by a script, not typed by a person. */
+    verifiedAt: timestamp('verified_at', { withTimezone: true }).notNull(),
+    bytes: integer('bytes').notNull().default(0),
+    checksum: text('checksum').notNull().default(''),
+    addedAt: timestamp('added_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('movement_media_movement').on(table.movementId),
+    unique('movement_media_url').on(table.movementId, table.url),
+  ],
+);
+
+/**
+ * The embedding allowlist, as data. One row per host the editorial screen will
+ * accept a link from, seeded from `src/data/media-allowlist.json`.
+ *
+ * It is a table and not a constant because F68 asks for an allowlist held as
+ * data: a list compiled into a comparison is one the owner cannot inspect,
+ * cannot extend and cannot audit, and the refusal it produces cannot name which
+ * row it failed.
+ */
+export const mediaAllowlist = pgTable('media_allowlist', {
+  host: text('host').primaryKey(),
+  embeddingMode: text('embedding_mode').notNull(),
+  /** The catalogue key of the sentence saying why this host is on the list. */
+  reasonKey: text('reason_key').notNull(),
+  addedAt: timestamp('added_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+/**
+ * One proposed session. A row with a state, never an applied change.
+ *
+ * Accepting one writes a `planned_session`, which is what Today reads and what
+ * adherence counts against. Rejecting one writes `rejected` here and touches
+ * nothing else, which is the half of F72 that a single Accept-the-week control
+ * would destroy.
+ *
+ * `cause` is the rendered sentence, frozen at write time the way `dedup_reason`
+ * is, and `causeKey` is the key it was rendered from so a later reading knows
+ * which rule placed it.
+ */
+export const sessionProposal = pgTable(
+  'session_proposal',
+  {
+    id: text('id').primaryKey(),
+    /** The Monday the week starts on, as a day key: "2026-08-24". */
+    weekStart: text('week_start').notNull(),
+    position: integer('position').notNull(),
+    plannedFor: timestamp('planned_for', { withTimezone: true }).notNull(),
+    durationMinutes: integer('duration_minutes').notNull(),
+    kind: text('kind').notNull(),
+    place: text('place').notNull(),
+    cause: text('cause').notNull(),
+    causeKey: text('cause_key').notNull(),
+    fullBody: boolean('full_body').notNull().default(false),
+    /**
+     * The plain fact about this session's length: how much longer than the
+     * longest in the past 30 days, and what that longest was. A percentage and
+     * a number of minutes. There is no risk attached to either and no ratio is
+     * stored anywhere in this schema.
+     */
+    percentLonger: integer('percent_longer'),
+    longestMinutes: integer('longest_minutes'),
+    state: text('state').notNull().default('proposed'),
+    decidedAt: timestamp('decided_at', { withTimezone: true }),
+    plannedSessionId: text('planned_session_id').references(() => plannedSession.id),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    seed: boolean('seed').notNull().default(false),
+  },
+  (table) => [
+    index('session_proposal_week').on(table.weekStart, table.position),
+    unique('session_proposal_slot').on(table.weekStart, table.position),
+  ],
+);
+
+/** One movement inside a proposed session, in the order the player runs it. */
+export const sessionMovement = pgTable(
+  'session_movement',
+  {
+    id: text('id').primaryKey(),
+    proposalId: text('proposal_id')
+      .notNull()
+      .references(() => sessionProposal.id),
+    position: integer('position').notNull(),
+    movementId: text('movement_id')
+      .notNull()
+      .references(() => movement.id),
+    sets: integer('sets').notNull(),
+    /** The rep target, or the hold in seconds, or the minutes of work. */
+    target: integer('target').notNull(),
+    loadKg: doublePrecision('load_kg'),
+    restSeconds: integer('rest_seconds').notNull(),
+    /**
+     * The movement this one replaced, when the owner swapped mid-session. The
+     * original is kept rather than overwritten: a substitution is a fact about
+     * the session and the next proposal reads it.
+     */
+    substitutedFor: text('substituted_for'),
+  },
+  (table) => [
+    index('session_movement_proposal').on(table.proposalId, table.position),
+    unique('session_movement_slot').on(table.proposalId, table.position),
+  ],
+);
+
+/**
+ * One run of the player. Started when the owner taps start, finished when he
+ * taps finish, and derived from wall-clock instants at both ends so a phone
+ * call in the middle costs nothing.
+ *
+ * `screenAwake` records whether the Wake Lock was actually granted. It is
+ * evidence and never a claim: a browser that refuses it makes the player say so
+ * in a banner rather than pretend the screen will stay on.
+ */
+export const sessionRun = pgTable(
+  'session_run',
+  {
+    id: text('id').primaryKey(),
+    proposalId: text('proposal_id').references(() => sessionProposal.id),
+    plannedSessionId: text('planned_session_id').references(() => plannedSession.id),
+    startedAt: timestamp('started_at', { withTimezone: true }).notNull(),
+    finishedAt: timestamp('finished_at', { withTimezone: true }),
+    state: text('state').notNull().default('running'),
+    screenAwake: boolean('screen_awake').notNull().default(false),
+    seed: boolean('seed').notNull().default(false),
+  },
+  (table) => [index('session_run_started').on(table.startedAt)],
+);
+
+/**
+ * One set, as it was actually performed. This is the table the 2-for-2 trigger
+ * reads and the table "last week" is drawn from, so it holds what was asked for
+ * as well as what was done: a set of 12 against a target of 10 is the fact, and
+ * 12 alone is half of it.
+ */
+export const setLog = pgTable(
+  'set_log',
+  {
+    id: text('id').primaryKey(),
+    runId: text('run_id')
+      .notNull()
+      .references(() => sessionRun.id),
+    movementId: text('movement_id')
+      .notNull()
+      .references(() => movement.id),
+    setIndex: integer('set_index').notNull(),
+    target: integer('target').notNull(),
+    achieved: integer('achieved').notNull(),
+    loadKg: doublePrecision('load_kg'),
+    /** Reps in reserve, 1 to 10, or null when the question was not asked. */
+    rir: integer('rir'),
+    completedAt: timestamp('completed_at', { withTimezone: true }).notNull(),
+  },
+  (table) => [
+    index('set_log_movement').on(table.movementId, table.completedAt),
+    unique('set_log_slot').on(table.runId, table.movementId, table.setIndex),
+  ],
+);
+
+/**
+ * What the owner reported after the work, asked once, after the last set.
+ *
+ * Effort is reps in reserve for resistance and the CDC public-domain 0 to 10
+ * relative intensity scale for cardio. Pain is the Silbernagel rule: the score
+ * during, whether it had gone by the next morning, and the site, which is a
+ * catalogue key rather than free text because the same site twice running is
+ * what deloads the movement and two spellings of "knee" would break that.
+ */
+export const sessionReport = pgTable(
+  'session_report',
+  {
+    id: text('id').primaryKey(),
+    runId: text('run_id')
+      .notNull()
+      .references(() => sessionRun.id)
+      .unique(),
+    effortScale: text('effort_scale').notNull(),
+    effort: integer('effort'),
+    painSite: text('pain_site').notNull().default('none'),
+    painScore: integer('pain_score'),
+    /** Null until the morning after, when the app asks the one follow-up question. */
+    painSubsidedByMorning: boolean('pain_subsided_by_morning'),
+    note: text('note').notNull().default(''),
+    recordedAt: timestamp('recorded_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index('session_report_pain').on(table.painSite, table.recordedAt)],
+);
+
+/**
+ * A proposed advancement. Proposed, never applied.
+ *
+ * The trigger is the 2-for-2 rule and it is defensible; the SIZE of the step is
+ * convention, which the screen says in its own words beside the number. The two
+ * sessions that fired it are kept in `trigger` so the card can name them, and
+ * so a proposal the owner declines can still be read back a month later.
+ */
+export const progressionProposal = pgTable(
+  'progression_proposal',
+  {
+    id: text('id').primaryKey(),
+    movementId: text('movement_id')
+      .notNull()
+      .references(() => movement.id),
+    lever: text('lever').notNull(),
+    fromLoadKg: doublePrecision('from_load_kg'),
+    toLoadKg: doublePrecision('to_load_kg'),
+    fromTarget: integer('from_target').notNull(),
+    toTarget: integer('to_target').notNull(),
+    toMovementId: text('to_movement_id'),
+    state: text('state').notNull().default('proposed'),
+    trigger: jsonb('trigger').notNull(),
+    proposedAt: timestamp('proposed_at', { withTimezone: true }).notNull().defaultNow(),
+    decidedAt: timestamp('decided_at', { withTimezone: true }),
+    seed: boolean('seed').notNull().default(false),
+  },
+  (table) => [index('progression_proposal_state').on(table.state, table.proposedAt)],
+);
+
+/**
+ * One answer to the screening gate: the three ACSM 2015 inputs, the symptoms
+ * that were reported, and the referral decision that follows from them.
+ *
+ * There is no score in this table. That paper's output is a referral decision
+ * and nothing else, and a number derived from it would be this product
+ * inventing a measurement it does not have.
+ */
+export const readinessCheck = pgTable(
+  'readiness_check',
+  {
+    id: text('id').primaryKey(),
+    activity: text('activity').notNull(),
+    knownDisease: boolean('known_disease').notNull(),
+    symptoms: text('symptoms').array().notNull().default([]),
+    desiredIntensity: text('desired_intensity').notNull(),
+    outcome: text('outcome').notNull(),
+    because: text('because').notNull(),
+    answeredAt: timestamp('answered_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index('readiness_check_answered').on(table.answeredAt)],
+);
