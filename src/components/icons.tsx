@@ -303,3 +303,60 @@ export function ChevronIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+/**
+ * Screen 05's three, lifted from .forge/wireframes/05-labs-review.html so the
+ * shipped review and the approved sheet draw the same shapes. `aria-hidden`
+ * like every other glyph here: the control around them carries the name, and a
+ * title inside an svg would be a second spoken string with no key.
+ */
+export function EditIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} aria-hidden="true" focusable="false">
+      <path
+        d="M4 16.5h3.2l8.6-8.6-3.2-3.2L4 13.3v3.2z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function TrashIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} aria-hidden="true" focusable="false">
+      <path
+        d="M4.4 6h11.2M8 6V4.4h4V6M6 6l.7 10.4h6.6L14 6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function ShieldIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} aria-hidden="true" focusable="false">
+      <path
+        d="M10 2.6 16.4 5v5.4c0 3.6-2.6 6-6.4 7-3.8-1-6.4-3.4-6.4-7V5z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M7 10.2 9.2 12.4l4-4.4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}

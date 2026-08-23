@@ -946,3 +946,157 @@ a.noticeline{min-height:var(--touch)}
  * box that no ancestor can scroll to.
  */
 .visually-hidden caption,.visually-hidden th,.visually-hidden td{white-space:nowrap}
+
+/* --------------------------------------------------------------------------
+ * Screen 05, the labs review. Copied from .forge/wireframes/05-labs-review.html
+ * with section 2b's resolutions applied: the base button is 48 px and 16 px,
+ * `.btn.quiet` carries all three declarations, and `.btn svg` is 20 px. Those
+ * three already live above; what is here is what only this screen draws.
+ * -------------------------------------------------------------------------- */
+
+/*
+ * One extracted row. It is a card in its own right rather than a `.row` inside
+ * one, because each one carries a decision and its own controls and the border
+ * is what says which state it is in: `--warn` while it waits on the owner,
+ * `--good` once it is stored, faded once it is rejected.
+ *
+ * Colour is state here and never origin, which is DESIGN.md's third
+ * un-improvisable decision. The source chip on a stored value stays neutral
+ * chrome on every other screen and does not appear on these rows at all,
+ * because nothing on this screen has a source yet.
+ */
+.lrow{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:var(--r-md);
+  padding:12px 14px;
+  margin-bottom:var(--s2);
+}
+.lrow.attn{border-color:var(--warn)}
+.lrow.done{border-color:var(--good)}
+.lrow.rej{opacity:.55}
+.lrow .name{font-weight:600}
+
+/*
+ * The conversion note, and the one line F61 turns on: printed original, factor,
+ * stored value, together, never the converted number alone. Tabular numerals so
+ * the three line up under each other down a panel of twenty-two.
+ */
+.conv{
+  font-size:var(--t-note);
+  line-height:1.5;
+  color:var(--text-2);
+  background:var(--surface-2);
+  border:1px solid var(--line);
+  border-radius:var(--r-sm);
+  padding:7px 9px;
+  margin-top:var(--s2);
+  font-variant-numeric:tabular-nums;
+}
+.conv + .conv{margin-top:6px}
+.conv b{color:var(--text);font-weight:600}
+
+/*
+ * The per-row control group: save, edit, reject. 44 px square, which is 2b's
+ * floor for an icon button, and each one carries its own accessible name with
+ * the analyte in it so a screen reader reading down the panel never hears
+ * "Save" twenty-two times with nothing to tell them apart.
+ */
+.seg{display:flex;gap:6px;flex:none}
+.seg button{
+  width:var(--touch);height:var(--touch);
+  border-radius:10px;
+  border:1px solid var(--line-2);
+  background:var(--surface-2);
+  color:var(--text-2);
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+.seg button svg{width:20px;height:20px}
+.seg button:disabled{opacity:.4;cursor:default}
+.seg button[aria-pressed=true].ok{background:var(--good-soft);border-color:var(--good);color:var(--good)}
+.seg button[aria-pressed=true].no{background:var(--alert-soft);border-color:var(--alert);color:var(--alert)}
+.seg button.ed[aria-current=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+
+/* The unit picker on the edit screen. One row of options, 44 px tall. */
+.pick{display:flex;gap:6px;flex-wrap:wrap}
+.pick button{
+  flex:1 1 auto;min-width:80px;min-height:var(--touch);
+  border-radius:10px;
+  border:1px solid var(--line-2);
+  background:var(--surface-2);
+  color:var(--text-2);
+  font:inherit;font-size:var(--t-body);
+  cursor:pointer;
+}
+.pick button[aria-pressed=true]{
+  background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600;
+}
+
+/*
+ * The printed excerpt. Monospaced because it is a quotation of a table and the
+ * columns only read as columns in a fixed pitch. Every line in it went through
+ * the blood-pressure test again on the way here, so nothing this box can draw
+ * is a refused line.
+ */
+.pdf{
+  background:var(--surface-2);
+  border:1px solid var(--line-2);
+  border-radius:var(--r-sm);
+  padding:10px;
+  font-family:var(--font-mono);
+  font-size:11px;
+  line-height:1.7;
+  color:var(--text-2);
+  white-space:pre-wrap;
+  overflow-x:auto;
+}
+.pdf mark{
+  background:var(--accent-soft);
+  color:var(--text);
+  border-radius:3px;
+  padding:1px 3px;
+  box-shadow:inset 0 0 0 1px var(--accent);
+}
+
+/*
+ * The review footer. It COUNTS and it does not commit: its one action opens the
+ * keep-or-delete question. F59 and DESIGN.md section 5 both say no control
+ * commits a panel, and the sheet's "Save 18 rows" is the one place the
+ * wireframe disagrees with them.
+ */
+.stickybar{
+  position:sticky;bottom:0;
+  margin:var(--s3) calc(var(--s4) * -1) 0;
+  padding:12px var(--s4) var(--s5);
+  background:var(--surface);
+  border-top:1px solid var(--line);
+}
+.stickybar .btn{min-height:48px}
+
+/* The labs screens sit inside the shell scroller and need room under the footer. */
+.labs-scroll{padding-bottom:var(--s8)}
+.lab-head{display:flex;align-items:center;gap:10px;padding:var(--s2) 0 10px}
+.lab-head .grow{min-width:0}
+.lab-head .title-line{
+  font-size:var(--t-title);line-height:var(--t-title-lh);
+  letter-spacing:var(--t-title-ls);font-weight:700;
+}
+.filefield{display:block}
+.filefield input[type=file]{
+  display:block;width:100%;min-height:48px;
+  border:1px dashed var(--line-2);border-radius:var(--r-md);
+  background:var(--surface-2);color:var(--text);
+  font:inherit;font-size:var(--t-body);padding:11px 12px;
+}
+.filefield input[type=file]:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+/* One analyte row on the manual form: a name, then three fields under it. */
+.manualrow{
+  border-bottom:1px solid var(--line);
+  padding:var(--s3) 0;
+}
+.manualrow:last-of-type{border-bottom:0}
+.manualrow .fields{display:flex;gap:var(--s2);margin-top:var(--s2)}
+.manualrow .fields .input{font-size:16px}
+.manualrow .fields label{flex:1 1 0;min-width:0}

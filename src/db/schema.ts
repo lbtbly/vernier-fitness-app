@@ -333,6 +333,22 @@ export const measurement = pgTable(
     /** Null on an original. A correction says why in the owner's own words. */
     correctionReason: text('correction_reason'),
     /**
+     * The reference interval the laboratory printed beside this result, and the
+     * text it printed it as.
+     *
+     * F57 names the interval as one of the five things a stored analyte carries.
+     * The two numbers are what a screen reads and what a later slice could sort
+     * on; the text is what the owner checks against his own paper, because
+     * "< 5" and "0 to 5" are not the same claim and a parse that flattened them
+     * would be inventing a lower bound the sheet never printed.
+     *
+     * Null everywhere else. A waist measurement has no reference interval and
+     * storing a zero for one is exactly the smoothing this product refuses.
+     */
+    referenceLow: doublePrecision('reference_low'),
+    referenceHigh: doublePrecision('reference_high'),
+    referenceText: text('reference_text'),
+    /**
      * The demonstration marker, and no writer gets a say in it. The database
      * computes it from the source, so a seeded row cannot be written without
      * it and a real row cannot claim it. `where seed` reads the same here as
@@ -499,4 +515,117 @@ export const writeRequest = pgTable(
     at: timestamp('at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [index('write_request_key').on(table.key)],
+);
+
+/**
+ * ---------------------------------------------------------------------------
+ * The laboratory panel. Slice 7.
+ *
+ * Two tables and one rule between them: NOTHING IN `measurement` UNTIL A ROW IS
+ * EXPLICITLY ACCEPTED. `lab_document` holds the review, which is a holding and
+ * says so on the screen; `measurement` holds what the owner accepted, which is
+ * the only thing this product treats as true.
+ * ---------------------------------------------------------------------------
+ */
+
+/**
+ * The analyte catalogue, and it is a TABLE rather than a constant on purpose.
+ *
+ * F64 asks for a fourteenth analyte added through the interface with no source
+ * file modified and `git status` clean, and a catalogue compiled into the image
+ * cannot do that. The thirteen are seeded by drizzle/pending/07-blood.sql from
+ * the rules in `src/lib/labs.ts`, and anything the owner adds while reviewing a
+ * panel lands here beside them with `built_in` false.
+ *
+ * `built_in` is not decoration. The label of a seeded analyte is copy this
+ * repository wrote and has a key in `strings.metrics`; the label of an added one
+ * is a word the owner typed, and the closed-world string check on main reads it
+ * out of this column as data exactly the way it reads a correction reason. One
+ * boolean is what tells those two apart, the same way `seed` does on
+ * `measurement`.
+ *
+ * `printed` holds the accepted printed units and their factors as ordered rows
+ * of `{ unit, factor }`. `reference_low` and `reference_high` are the general
+ * adult range the explanation quotes, and `source_url` is the public page it
+ * cites. Every one of the three is data because R2 requires the explanation to
+ * carry them and a fourteenth analyte has to be able to carry its own.
+ */
+export const labAnalyte = pgTable(
+  'lab_analyte',
+  {
+    key: text('key').primaryKey(),
+    label: text('label').notNull(),
+    unit: text('unit').notNull(),
+    printed: jsonb('printed').notNull(),
+    low: doublePrecision('low').notNull(),
+    high: doublePrecision('high').notNull(),
+    referenceLow: doublePrecision('reference_low'),
+    referenceHigh: doublePrecision('reference_high'),
+    sourceUrl: text('source_url').notNull(),
+    /** Normalised name fragments a sheet may print. Matched longest first. */
+    aliases: text('aliases').array().notNull().default([]),
+    /** Where it sits in the catalogue, on the review screen and in the trend list. */
+    position: integer('position').notNull(),
+    builtIn: boolean('built_in').notNull().default(false),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index('lab_analyte_position').on(table.position)],
+);
+
+/**
+ * One imported document and the review it is holding.
+ *
+ * `extraction` is the candidate rows: what the parser read, what the owner has
+ * decided about each one, and which measurement each accepted row became. It is
+ * a HOLDING and the screen says so in those words. It is not the store: a row in
+ * here has no value in `measurement`, appears in no trend, is counted by no
+ * chart and is deleted whole when the review is abandoned, which is what makes
+ * F58's "abandoning the review leaves zero rows" true of this table as well as
+ * of the one that matters.
+ *
+ * `stored_path` is the file on the volume, relative to the storage root, and it
+ * goes null the moment the owner chooses to delete. `file_removed` is the
+ * separate fact that the bytes are gone: a document typed in by hand never had a
+ * file, and a document whose file was deleted did, so one nullable path cannot
+ * carry both answers. F63 reads the directory before and after, and this row is
+ * what the screen reads.
+ *
+ * NO BLOOD PRESSURE REACHES THIS TABLE. `refusals` is a count and a page number
+ * and nothing else: the parser drops a blood-pressure line before any row is
+ * built, so there is no field here for the value and no field for the label
+ * either. F60 asks for a query across every table and this is the table it would
+ * have been in.
+ */
+export const labDocument = pgTable(
+  'lab_document',
+  {
+    id: text('id').primaryKey(),
+    /** The name the owner's own file carried, or the empty string for a typed panel. */
+    fileName: text('file_name').notNull(),
+    byteSize: bigint('byte_size', { mode: 'number' }).notNull(),
+    pageCount: integer('page_count').notNull(),
+    /** `text`, `ocr` or `manual`. How the rows in this review were produced. */
+    mode: text('mode').notNull(),
+    /** `review`, `validated` or `abandoned`. */
+    state: text('state').notNull().default('review'),
+    /** As the header printed it, or null. Every row inherits it unless edited. */
+    panelDate: timestamp('panel_date', { withTimezone: true }),
+    /** As the sheet names itself. The owner's document, not this product's words. */
+    laboratory: text('laboratory').notNull().default(''),
+    storedPath: text('stored_path'),
+    checksum: text('checksum'),
+    fileRemoved: boolean('file_removed').notNull().default(false),
+    /** `kept`, `deleted`, or null while the question has not been asked yet. */
+    retention: text('retention'),
+    retentionAt: timestamp('retention_at', { withTimezone: true }),
+    /** How many lines were refused at extraction. A count, never a value. */
+    refusals: integer('refusals').notNull().default(0),
+    /** Non-whitespace characters per page, and whether each page was image only. */
+    census: jsonb('census').notNull(),
+    /** The candidate rows and their decisions. A holding, never a store. */
+    extraction: jsonb('extraction').notNull(),
+    uploadedAt: timestamp('uploaded_at', { withTimezone: true }).notNull().defaultNow(),
+    validatedAt: timestamp('validated_at', { withTimezone: true }),
+  },
+  (table) => [index('lab_document_state').on(table.state, table.uploadedAt)],
 );

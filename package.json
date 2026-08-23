@@ -22,7 +22,8 @@
     "strings": "node scripts/strings.mjs --check",
     "strings:rendered": "node scripts/rendered-strings.mjs",
     "sw": "node scripts/build-sw.mjs",
-    "sw:check": "node scripts/build-sw.mjs --check"
+    "sw:check": "node scripts/build-sw.mjs --check",
+    "compliance": "node scripts/compliance.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.120.0",

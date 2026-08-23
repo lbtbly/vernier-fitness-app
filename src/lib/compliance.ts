@@ -214,10 +214,22 @@ export type ExplanationParts = {
 
 export const PROFESSIONAL_WORDS = ['doctor', 'laboratory', 'pharmacist', 'nurse'];
 
-export function explanationFaults(parts: ExplanationParts): string[] {
+export function explanationFaults(
+  parts: ExplanationParts,
+  /**
+   * Whether this analyte has a published general range at all.
+   *
+   * An analyte the owner added while reviewing a panel has none, and saying so
+   * is the honest answer: the sheet's own interval is the only one on screen.
+   * Requiring a number in that sentence would push the code towards printing
+   * the laboratory's interval as if it were a published population range, which
+   * is a claim nobody made.
+   */
+  options: { hasPublishedRange: boolean } = { hasPublishedRange: true },
+): string[] {
   const faults: string[] = [];
   if (parts.context.trim() === '') faults.push('no-context');
-  if (!/\d/.test(parts.context)) faults.push('context-states-no-range');
+  if (options.hasPublishedRange && !/\d/.test(parts.context)) faults.push('context-states-no-range');
   if (parts.laboratory.trim() === '') faults.push('no-laboratory-interval-note');
   if (parts.stores.trim() === '') faults.push('no-stores-not-reads-note');
   if (parts.invitation.trim() === '') faults.push('no-invitation');

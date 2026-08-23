@@ -372,14 +372,12 @@ export function columnsOf(lines: Line[], tolerance = 4): number[] {
  * conversion note under each flagged row does.
  */
 export function confidenceOf(parts: {
-  analyteMatched: boolean;
   valueParsed: boolean;
   unitKnown: boolean;
   referenceParsed: boolean;
   optical: boolean;
 }): number {
   let confidence = 1;
-  if (!parts.analyteMatched) confidence -= 0.15;
   if (!parts.valueParsed) confidence -= 0.5;
   if (!parts.unitKnown) confidence -= 0.3;
   if (!parts.referenceParsed) confidence -= 0.05;
@@ -394,6 +392,16 @@ export function confidenceOf(parts: {
 export type ExtractInput = {
   pages: PageItems[];
   catalogue: AnalyteRule[];
+  /**
+   * Every unit symbol the string catalogue holds a key for.
+   *
+   * It is an argument because this module stays dependency free, and it is
+   * needed because a row whose analyte is NEW has no accepted-unit list of its
+   * own: the only rule left is that the symbol has to be one this product can
+   * render with a key. A sheet printing something exotic flags the row rather
+   * than painting an uncatalogued word on a screen, which is C6's whole line.
+   */
+  knownUnits?: string[];
   /** True when these items came from optical recognition rather than a text layer. */
   optical?: boolean;
 };
@@ -425,18 +433,26 @@ export function extractPanel(input: ExtractInput): Panel {
     // The header, read before the refused lines are dropped so a date printed
     // above a refused reading is still found, and read only from lines that
     // carry no result of their own.
+    // The header. A date is taken from a line that both CARRIES one and names
+    // itself as a sampling or issue date, because a reference interval reading
+    // "10 - 40" and a footer reading "page 1 / 3" are also lines with numbers on
+    // them. Only if no such line exists does the first date on the page stand in,
+    // and a row with no date at all is flagged rather than dated by guesswork.
+    let anyDate: string | null = null;
     for (const line of lines) {
       if (isBloodPressureLine(line)) continue;
-      if (panelDate === null) {
-        const normalised = normaliseLabel(line.text);
-        if (/(prelevement|preleve|date|edite le|le)/.test(normalised)) {
-          panelDate = findDate(line.text);
+      const found = findDate(line.text);
+      if (found !== null) {
+        if (anyDate === null) anyDate = found;
+        if (panelDate === null && /(prelevement|preleve|date|edite|effectue|realise)/.test(normaliseLabel(line.text))) {
+          panelDate = found;
         }
       }
       if (laboratory === '' && /laboratoire|laboratory/i.test(line.text)) {
         laboratory = line.text.trim();
       }
     }
+    if (panelDate === null) panelDate = anyDate;
 
     for (const [index, line] of lines.entries()) {
       if (isBloodPressureLine(line)) continue;
@@ -464,9 +480,12 @@ export function extractPanel(input: ExtractInput): Panel {
       const analyte = analyteOfLabel(label, input.catalogue);
       const valueParsed = parseFrenchNumber(printedValue) !== null;
       const censored = isCensored(printedValue);
+      const knownUnits = input.knownUnits ?? [];
       const unitKnown =
         printedUnit !== '' &&
-        (analyte === null || analyte.printed.some((entry) => entry.unit === printedUnit));
+        (analyte === null
+          ? knownUnits.includes(printedUnit)
+          : analyte.printed.some((entry) => entry.unit === printedUnit));
 
       // An empty column and a page with no unit column at all are different
       // facts, and only the layout knows which one this is. Screen 05's GGT row
@@ -486,8 +505,14 @@ export function extractPanel(input: ExtractInput): Panel {
       if (!reference) flags.push('reference_missing');
       if (optical) flags.push('optical_recognition');
 
+      // Confidence is about how cleanly the LINE was read and never about
+      // whether the catalogue happens to hold the analyte. A label read
+      // perfectly off a sheet that names something new is a perfect read of a
+      // new thing: it carries `new_analyte`, which is a fact and not a doubt,
+      // and screen 05 draws it as "Read cleanly, but new" with its save control
+      // live. Penalising it here would have blocked the one row the wireframe
+      // is explicit about not blocking.
       const confidence = confidenceOf({
-        analyteMatched: analyte !== null,
         valueParsed: valueParsed && !censored,
         unitKnown,
         referenceParsed: reference !== null,

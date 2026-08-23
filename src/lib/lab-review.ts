@@ -28,14 +28,44 @@
  */
 
 import { type ExtractedRow, isBlocked } from './lab-parse';
+import { type AnalyteRule, convertPrinted, parseFrenchNumber } from './labs';
 
 /** What the owner has done with one extracted row. Nothing else is a state. */
 export const ROW_DECISIONS = ['waiting', 'saved', 'rejected'] as const;
 
 export type RowDecision = (typeof ROW_DECISIONS)[number];
 
+/**
+ * The conversion, worked out BEFORE the row is stored so the review screen can
+ * draw it while the owner is deciding.
+ *
+ * F61 asks for the printed original, the factor and the stored value on one
+ * line and for the stored row to keep all three. The stored row keeps them in
+ * `raw_value`, `raw_unit`, `conversion_factor`, `value` and `unit`; this is the
+ * same three shown to the owner before he commits, because a conversion he only
+ * sees afterwards is a conversion he was not asked about.
+ *
+ * Null when the printed unit already is the stored unit, or names the same
+ * quantity: U/L and IU/L are the same number and drawing "x 1" between them
+ * would dress a naming choice up as arithmetic.
+ */
+export type Converted = { value: number; unit: string; factor: number | null };
+
+export function previewConversion(
+  analyte: AnalyteRule | null,
+  printedValue: string,
+  printedUnit: string,
+): Converted | null {
+  if (!analyte || printedUnit === '') return null;
+  const number = parseFrenchNumber(printedValue);
+  if (number === null) return null;
+  return convertPrinted(analyte, number, printedUnit);
+}
+
 /** One row of the review as it is held, decided and rendered. */
 export type ReviewRow = ExtractedRow & {
+  /** What this row would store, shown while it is still only a candidate. */
+  converted: Converted | null;
   decision: RowDecision;
   /** The measurement this row became, once it was saved. Null until then. */
   measurementId: string | null;
@@ -49,6 +79,7 @@ export type ReviewRow = ExtractedRow & {
 
 export type ReviewDocument = {
   id: string;
+  uploadedAt: string;
   fileName: string;
   byteSize: number;
   pageCount: number;
@@ -100,16 +131,38 @@ export type RowWrite = {
 export function rowsInWrite(body: unknown): number {
   if (typeof body !== 'object' || body === null) return 0;
   const record = body as Record<string, unknown>;
-  // Any plural field is counted at its own length. A caller that invents
-  // `rows: [...]` gets the length of it back and a refusal naming that length,
-  // rather than having the field ignored and one row silently written.
-  for (const plural of ['rows', 'ordinals', 'entries', 'values']) {
+  let counted = typeof record.ordinal === 'number' && Number.isInteger(record.ordinal) ? 1 : 0;
+  // Any plural field is counted at its own length and ADDED, never ignored. A
+  // field that is ignored is a field somebody adds a loop for later, and the
+  // loop writes rows nobody reviewed.
+  for (const plural of PLURAL_FIELDS) {
     const value = record[plural];
-    if (Array.isArray(value)) return value.length;
-    if (value !== undefined) return 2;
+    if (Array.isArray(value)) counted += value.length;
+    else if (value !== undefined) counted += 2;
   }
-  if (record.all === true || record.acceptAll === true) return 2;
-  return typeof record.ordinal === 'number' && Number.isInteger(record.ordinal) ? 1 : 0;
+  if (record.all === true || record.acceptAll === true) counted += 2;
+  return counted;
+}
+
+/** The field names a batch would arrive under. Named once, checked twice. */
+const PLURAL_FIELDS = ['rows', 'ordinals', 'entries', 'values'] as const;
+
+/**
+ * Is this body the single-row shape at all, whatever it counts to.
+ *
+ * The count above answers "how many" and this answers "what kind", and the
+ * route asks both. A body carrying `rows: [3]` counts to one and is still a
+ * batch request with one element in it: this route does not serve batches, so a
+ * batch of one is refused like a batch of twenty-two rather than accepted
+ * because it happened to be short. That is the case a Save All control would
+ * degrade to the first time somebody tested it with one row selected.
+ */
+export function isSingleRowShape(body: unknown): boolean {
+  if (typeof body !== 'object' || body === null) return false;
+  const record = body as Record<string, unknown>;
+  if (PLURAL_FIELDS.some((plural) => record[plural] !== undefined)) return false;
+  if (record.all !== undefined || record.acceptAll !== undefined) return false;
+  return typeof record.ordinal === 'number' && Number.isInteger(record.ordinal);
 }
 
 /** Can this row be saved as it stands, or does it need a decision first. */

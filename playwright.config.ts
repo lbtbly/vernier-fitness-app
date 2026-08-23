@@ -48,7 +48,7 @@ export default defineConfig({
   projects: [
     {
       name: 'webkit-iphone',
-      testIgnore: /focus\.spec\.ts|service-worker\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|launch-report\.spec\.ts|notices\.spec\.ts/,
+      testIgnore: /focus\.spec\.ts|service-worker\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|launch-report\.spec\.ts|notices\.spec\.ts|labs-scratch\.spec\.ts/,
       use: { ...devices['Desktop Safari'], viewport: { width: 393, height: 852 }, deviceScaleFactor: 3 },
     },
     {
@@ -96,6 +96,13 @@ export default defineConfig({
       // thirty-five and then exactly thirty-seven hours old. Both mean writing
       // rows, and `measurement` refuses DELETE, so they belong here.
       //
+      // labs-scratch.spec.ts joined it in slice 7, and it is the clearest case
+      // yet. Every test in it writes rows into `measurement`, which refuses
+      // DELETE, and one of them deletes a file off a storage volume to prove
+      // F63. The owner's install holds the only copy of anything real in this
+      // product and backup does not ship until slice 13, so a laboratory import
+      // is graded against an installation whose rows nobody would miss.
+      //
       // launch-report.spec.ts joined it after the same lesson arrived through a
       // different door. It used to be a describe block in boundary.spec.ts,
       // driven at the live origin, and every run moved device_observation on
@@ -118,7 +125,7 @@ export default defineConfig({
       // attribute relaxed, so WebKit will carry it over loopback too, and it
       // grades its fold in both engines against one database.
       name: 'chrome-scratch',
-      testMatch: /launch-report\.spec\.ts|notices\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts/,
+      testMatch: /launch-report\.spec\.ts|notices\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|labs-scratch\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         channel: 'chrome',

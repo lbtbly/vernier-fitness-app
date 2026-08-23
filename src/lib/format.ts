@@ -63,6 +63,20 @@ const PRECISION: Record<string, number> = {
   'mmol/L': 2,
   'g/L': 2,
   'µg/L': 0,
+  // The laboratory units slice 7 stores. Precision follows what a French sheet
+  // actually prints: two places on a concentration, none on an enzyme activity,
+  // one on a percentage. A stored value that renders 62.0 where the sheet said
+  // 62 is a number the owner cannot check against his own paper.
+  '%': 1,
+  'U/L': 0,
+  'IU/L': 0,
+  'UI/L': 0,
+  'µkat/L': 2,
+  'µmol/L': 0,
+  'mg/L': 1,
+  'mg/dL': 1,
+  'ng/mL': 0,
+  'µg/dL': 1,
 };
 
 /** The number alone, grouped and fixed to its unit's precision. No unit on it. */
