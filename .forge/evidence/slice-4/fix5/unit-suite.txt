@@ -3,31 +3,26 @@
 
  ✓ tests/unit/suite-safety.test.ts > the suite against the owner's installation > reaches the owner's database only as the role that cannot write it 1ms
  ✓ tests/unit/suite-safety.test.ts > the suite against the owner's installation > hands scripts/recovery.sh the same role, in the one place it is called 0ms
- ✓ tests/unit/suite-safety.test.ts > the suite against the owner's installation > lets no spec open a connection, a container or the recovery script of its own 9ms
+ ✓ tests/unit/suite-safety.test.ts > the suite against the owner's installation > lets no spec open a connection, a container or the recovery script of its own 12ms
  ✓ tests/unit/suite-safety.test.ts > the suite against the owner's installation > keeps the destructive helper pointed at the scratch database by name 0ms
- ✓ tests/unit/suite-safety.test.ts > the suite against the owner's installation > lets no spec report a launch at the owner's install 1ms
- ✓ tests/unit/suite-safety.test.ts > the suite against the owner's installation > lets no spec open a browsing context outside the harness that holds the launch report 2ms
- ✓ tests/unit/suite-safety.test.ts > the suite against the owner's installation > grants that role no way to edit or remove anything, anywhere 1ms
- ✓ tests/unit/suite-safety.test.ts > the suite against the owner's installation > lets no assertion claim a zero over a population the surface cannot render 2ms
- ✓ tests/unit/rate-limit.test.ts > the sign-in rate limiter > lets the first five failures through and counts them down 2ms
- ✓ tests/unit/rate-limit.test.ts > the sign-in rate limiter > locks on the fifth failure inside the window 0ms
- ✓ tests/unit/rate-limit.test.ts > the sign-in rate limiter > refuses a correct password while the window is open, which is the point 0ms
- ✓ tests/unit/rate-limit.test.ts > the sign-in rate limiter > opens again exactly when the oldest failure that still counts falls out 0ms
- ✓ tests/unit/rate-limit.test.ts > the sign-in rate limiter > never returns a pause longer than the window 0ms
- ✓ tests/unit/master-key.test.ts > the master key > refuses to boot when it is absent, with a named error 2ms
+ ✓ tests/unit/suite-safety.test.ts > the suite against the owner's installation > lets no spec report a launch at the owner's install 5ms
+ ✓ tests/unit/suite-safety.test.ts > the suite against the owner's installation > lets no spec open a browsing context outside the harness that holds the launch report 15ms
+ ✓ tests/unit/suite-safety.test.ts > the suite against the owner's installation > grants that role no way to edit or remove anything, anywhere 2ms
+ ✓ tests/unit/suite-safety.test.ts > the suite against the owner's installation > lets no assertion claim a zero over a population the surface cannot render 7ms
+ ✓ tests/unit/master-key.test.ts > the master key > refuses to boot when it is absent, with a named error 3ms
  ✓ tests/unit/master-key.test.ts > the master key > refuses a key that is not 32 bytes, naming what it read 1ms
- ✓ tests/unit/master-key.test.ts > the master key > passes its own encrypt and decrypt self test at boot 3ms
- ✓ tests/unit/master-key.test.ts > the master key > round trips a credential 0ms
- ✓ tests/unit/master-key.test.ts > the master key > stores no plaintext anywhere in the sealed record 3ms
- ✓ tests/unit/master-key.test.ts > the master key > fails loudly under a different key, and never returns an empty value 1ms
- ✓ tests/unit/master-key.test.ts > the master key > refuses a ciphertext moved from one integration row into another 1ms
- ✓ tests/unit/master-key.test.ts > the master key > refuses a tampered ciphertext rather than returning something 1ms
- ✓ tests/unit/master-key.test.ts > the master key > fingerprints two keys differently, which is how a mismatch is named 1ms
- ✓ tests/unit/provenance.test.ts > the six sources > is exactly six, and estimate is not one of them 2ms
- ✓ tests/unit/provenance.test.ts > the six sources > names an import version, so a row read back knows what wrote it 0ms
- ✓ tests/unit/provenance.test.ts > the six sources > gives the quick log six metrics and every one of them a unit 0ms
- ✓ tests/unit/provenance.test.ts > the deduplication decision > calls the first reading of a day unique and stores it 1ms
- ✓ tests/unit/provenance.test.ts > the deduplication decision > drops the same fact arriving twice and names the row that was kept 36ms
+ ✓ tests/unit/master-key.test.ts > the master key > passes its own encrypt and decrypt self test at boot 8ms
+ ✓ tests/unit/master-key.test.ts > the master key > round trips a credential 3ms
+ ✓ tests/unit/master-key.test.ts > the master key > stores no plaintext anywhere in the sealed record 8ms
+ ✓ tests/unit/master-key.test.ts > the master key > fails loudly under a different key, and never returns an empty value 0ms
+ ✓ tests/unit/master-key.test.ts > the master key > refuses a ciphertext moved from one integration row into another 0ms
+ ✓ tests/unit/master-key.test.ts > the master key > refuses a tampered ciphertext rather than returning something 0ms
+ ✓ tests/unit/master-key.test.ts > the master key > fingerprints two keys differently, which is how a mismatch is named 0ms
+ ✓ tests/unit/provenance.test.ts > the six sources > is exactly six, and estimate is not one of them 11ms
+ ✓ tests/unit/provenance.test.ts > the six sources > names an import version, so a row read back knows what wrote it 1ms
+ ✓ tests/unit/provenance.test.ts > the six sources > gives the quick log six metrics and every one of them a unit 1ms
+ ✓ tests/unit/provenance.test.ts > the deduplication decision > calls the first reading of a day unique and stores it 2ms
+ ✓ tests/unit/provenance.test.ts > the deduplication decision > drops the same fact arriving twice and names the row that was kept 45ms
  ✓ tests/unit/provenance.test.ts > the deduplication decision > keeps a device reading over a hand-typed one for the same day and names the loser 0ms
  ✓ tests/unit/provenance.test.ts > the deduplication decision > does not store a hand-typed reading over a device one for the same day 0ms
  ✓ tests/unit/provenance.test.ts > the deduplication decision > treats a different day as a different reading, in the zone it was taken in 0ms
@@ -49,11 +44,25 @@
  ✓ tests/unit/provenance.test.ts > what Vernier will store > stores a free note with no number rather than a zero 0ms
  ✓ tests/unit/provenance.test.ts > what Vernier will store > refuses a blank field on every metric, and never stores it as zero 0ms
  ✓ tests/unit/provenance.test.ts > what Vernier will store > refuses a metric it has never heard of 0ms
- ✓ tests/unit/provenance.test.ts > what Vernier will store > gives every metric a band, so no writer can be the one without a rule 0ms
- ✓ tests/unit/trend.test.ts > a daily series keeps the days that are not there > an empty day is a column with no reading, never a dropped column 5ms
- ✓ tests/unit/trend.test.ts > a daily series keeps the days that are not there > no value is carried forward into a day that has none 5ms
- ✓ tests/unit/trend.test.ts > a gap is three days or more > four missing days are one gap, named by its first and last date 5ms
- ✓ tests/unit/trend.test.ts > a gap is three days or more > two missing days are not a gap, and three are 1ms
+ ✓ tests/unit/provenance.test.ts > what Vernier will store > gives every metric a band, so no writer can be the one without a rule 3ms
+ ✓ tests/unit/chart.test.ts > the weights are the ones DESIGN.md fixes > a daily dot is 2.1, the average 2.6, the goal 1.5 dashed 5 5 1ms
+ ✓ tests/unit/chart.test.ts > a dot exists only where a reading does > twenty-six dots for thirty days with a four-day gap 1ms
+ ✓ tests/unit/chart.test.ts > a dot exists only where a reading does > no dot lands inside the gap band 0ms
+ ✓ tests/unit/chart.test.ts > the average is broken across the gap, not bridged > there is more than one path, which is what a break means 0ms
+ ✓ tests/unit/chart.test.ts > the average is broken across the gap, not bridged > no path has a point inside the gap band 0ms
+ ✓ tests/unit/chart.test.ts > the average is broken across the gap, not bridged > no path spans the gap end to end 0ms
+ ✓ tests/unit/chart.test.ts > the average is broken across the gap, not bridged > a short window is drawn dashed and a whole one solid 0ms
+ ✓ tests/unit/chart.test.ts > the goal line and its corridor > the corridor is half a kilogram either side of the line 0ms
+ ✓ tests/unit/chart.test.ts > gridlines land on whole units > every line is a whole number 0ms
+ ✓ tests/unit/chart.test.ts > gridlines land on whole units > a domain rounded out reaches whole numbers on both sides 0ms
+ ✓ tests/unit/chart.test.ts > a bar exists only where a day has a count > a day with nothing sent draws no bar at all, not a bar of zero 1ms
+ ✓ tests/unit/chart.test.ts > a bar exists only where a day has a count > the silence at the end of a series is one band reaching the right edge 1ms
+ ✓ tests/unit/chart.test.ts > a bar exists only where a day has a count > a series that runs to today has no trailing band 0ms
+ ✓ tests/unit/chart.test.ts > the time axis > the first day sits on the left edge and the last on the right 0ms
+ ✓ tests/unit/trend.test.ts > a daily series keeps the days that are not there > an empty day is a column with no reading, never a dropped column 4ms
+ ✓ tests/unit/trend.test.ts > a daily series keeps the days that are not there > no value is carried forward into a day that has none 4ms
+ ✓ tests/unit/trend.test.ts > a gap is three days or more > four missing days are one gap, named by its first and last date 6ms
+ ✓ tests/unit/trend.test.ts > a gap is three days or more > two missing days are not a gap, and three are 3ms
  ✓ tests/unit/trend.test.ts > a rolling average states the window it actually had > seven of seven is solid 0ms
  ✓ tests/unit/trend.test.ts > a rolling average states the window it actually had > five or six of seven is dashed and still carries its count 0ms
  ✓ tests/unit/trend.test.ts > a rolling average states the window it actually had > below five days it is not drawn at all, and the mean is still known 0ms
@@ -68,18 +77,32 @@
  ✓ tests/unit/trend.test.ts > the demonstration seed, computed by hand > the average sits a tenth of a kilogram under the line to 76.0 0ms
  ✓ tests/unit/trend.test.ts > the demonstration seed continues itself > the trend goes on falling at about half a kilogram a week 0ms
  ✓ tests/unit/trend.test.ts > the demonstration seed continues itself > a day the scale sent nothing is a day with no reading, never a zero 0ms
- ✓ tests/unit/trend.test.ts > the demonstration seed continues itself > every thirty-day window holds a hole of three days or more 9ms
- ✓ tests/unit/trend.test.ts > the demonstration seed continues itself > the trailing seven days always hold a reading, so no screen empties out 4ms
+ ✓ tests/unit/trend.test.ts > the demonstration seed continues itself > every thirty-day window holds a hole of three days or more 6ms
+ ✓ tests/unit/trend.test.ts > the demonstration seed continues itself > the trailing seven days always hold a reading, so no screen empties out 3ms
  ✓ tests/unit/trend.test.ts > the demonstration seed continues itself > the tape comes out once a week and the waist keeps falling 0ms
- ✓ tests/unit/trend.test.ts > the demonstration seed continues itself > the phone sends steps and sleep every day it sends anything 6ms
+ ✓ tests/unit/trend.test.ts > the demonstration seed continues itself > the phone sends steps and sleep every day it sends anything 5ms
  ✓ tests/unit/trend.test.ts > the demonstration seed continues itself > the training week plans fourteen in twenty-eight and misses two 0ms
- ✓ tests/unit/trend.test.ts > adherence is a count over its denominator > two of three over seven days, eleven of fourteen over twenty-eight 7ms
+ ✓ tests/unit/trend.test.ts > adherence is a count over its denominator > two of three over seven days, eleven of fourteen over twenty-eight 5ms
  ✓ tests/unit/trend.test.ts > adherence is a count over its denominator > the denominator counts what was planned, not what was done 2ms
  ✓ tests/unit/trend.test.ts > a source is stale at thirty-six hours, and not at thirty-five > thirty-five hours is fresh 0ms
  ✓ tests/unit/trend.test.ts > a source is stale at thirty-six hours, and not at thirty-five > thirty-seven hours is stale, and the age is in hours 0ms
  ✓ tests/unit/trend.test.ts > a source is stale at thirty-six hours, and not at thirty-five > a source that has never sent anything is absent, not stale 0ms
- ✓ tests/unit/password.test.ts > the backup password > hashes with Argon2id at the parameters the rubric names 35ms
- ✓ tests/unit/password.test.ts > the backup password > gives every owner a different nonce, so two identical passwords do not share a tag 89ms
+ ✓ tests/unit/password.test.ts > the backup password > hashes with Argon2id at the parameters the rubric names 50ms
+ ✓ tests/unit/password.test.ts > the backup password > gives every owner a different nonce, so two identical passwords do not share a tag 61ms
+ ✓ tests/unit/tokens.test.ts > session and anti-forgery tokens > mints 32 bytes and never the same value twice 2ms
+ ✓ tests/unit/tokens.test.ts > session and anti-forgery tokens > stores a hash, not the token 1ms
+ ✓ tests/unit/tokens.test.ts > session and anti-forgery tokens > matches only an identical token, and survives a length mismatch 0ms
+ ✓ tests/unit/launch-ticket.test.ts > the launch ticket > accepts the ticket it just minted for the session it minted it for 2ms
+ ✓ tests/unit/launch-ticket.test.ts > the launch ticket > refuses a ticket minted for another session 0ms
+ ✓ tests/unit/launch-ticket.test.ts > the launch ticket > refuses everything a caller could type instead of a ticket 1ms
+ ✓ tests/unit/launch-ticket.test.ts > the launch ticket > refuses a ticket the running key did not mint 0ms
+ ✓ tests/unit/launch-ticket.test.ts > the launch ticket > refuses one older than its window, and one dated in the future 0ms
+ ✓ tests/unit/launch-ticket.test.ts > the launch ticket > mints a different value every minted second, so one is not the other 0ms
+ ✓ tests/unit/launch-report.test.ts > who may report a launch > turns away a browser that says it is being driven, whatever it is called 1ms
+ ✓ tests/unit/launch-report.test.ts > who may report a launch > turns away an automation runtime that names itself, whatever the body claims 1ms
+ ✓ tests/unit/launch-report.test.ts > who may report a launch > lets the browsers the owner actually holds report 0ms
+ ✓ tests/unit/launch-report.test.ts > what could have come from a Home Screen icon > refuses a standalone claim from every desktop, this suite's WebKit included 1ms
+ ✓ tests/unit/launch-report.test.ts > what could have come from a Home Screen icon > lets the phone the whole line is about report 0ms
  ✓ tests/unit/routes.test.ts > the route table > opens exactly the five things an unauthenticated visitor may have 1ms
  ✓ tests/unit/routes.test.ts > the route table > opens the diagnostics read by name, and not the write beside it 0ms
  ✓ tests/unit/routes.test.ts > the route table > calls the sign-in endpoints the gate, because they cannot need a session 0ms
@@ -87,50 +110,27 @@
  ✓ tests/unit/routes.test.ts > the route table > is not fooled by a trailing slash 0ms
  ✓ tests/unit/routes.test.ts > the route table > answers an API path with a status and a document with a redirect 0ms
  ✓ tests/unit/routes.test.ts > the route table > leaves the liveness, offline, worker and diagnostics responses cookie free 0ms
- ✓ tests/unit/launch-ticket.test.ts > the launch ticket > accepts the ticket it just minted for the session it minted it for 2ms
- ✓ tests/unit/launch-ticket.test.ts > the launch ticket > refuses a ticket minted for another session 0ms
- ✓ tests/unit/launch-ticket.test.ts > the launch ticket > refuses everything a caller could type instead of a ticket 1ms
- ✓ tests/unit/launch-ticket.test.ts > the launch ticket > refuses a ticket the running key did not mint 0ms
- ✓ tests/unit/launch-ticket.test.ts > the launch ticket > refuses one older than its window, and one dated in the future 0ms
- ✓ tests/unit/launch-ticket.test.ts > the launch ticket > mints a different value every minted second, so one is not the other 0ms
- ✓ tests/unit/chart.test.ts > the weights are the ones DESIGN.md fixes > a daily dot is 2.1, the average 2.6, the goal 1.5 dashed 5 5 2ms
- ✓ tests/unit/chart.test.ts > a dot exists only where a reading does > twenty-six dots for thirty days with a four-day gap 1ms
- ✓ tests/unit/chart.test.ts > a dot exists only where a reading does > no dot lands inside the gap band 0ms
- ✓ tests/unit/chart.test.ts > the average is broken across the gap, not bridged > there is more than one path, which is what a break means 0ms
- ✓ tests/unit/chart.test.ts > the average is broken across the gap, not bridged > no path has a point inside the gap band 1ms
- ✓ tests/unit/chart.test.ts > the average is broken across the gap, not bridged > no path spans the gap end to end 0ms
- ✓ tests/unit/chart.test.ts > the average is broken across the gap, not bridged > a short window is drawn dashed and a whole one solid 0ms
- ✓ tests/unit/chart.test.ts > the goal line and its corridor > the corridor is half a kilogram either side of the line 1ms
- ✓ tests/unit/chart.test.ts > gridlines land on whole units > every line is a whole number 0ms
- ✓ tests/unit/chart.test.ts > gridlines land on whole units > a domain rounded out reaches whole numbers on both sides 0ms
- ✓ tests/unit/chart.test.ts > a bar exists only where a day has a count > a day with nothing sent draws no bar at all, not a bar of zero 2ms
- ✓ tests/unit/chart.test.ts > a bar exists only where a day has a count > the silence at the end of a series is one band reaching the right edge 1ms
- ✓ tests/unit/chart.test.ts > a bar exists only where a day has a count > a series that runs to today has no trailing band 0ms
- ✓ tests/unit/chart.test.ts > the time axis > the first day sits on the left edge and the last on the right 0ms
- ✓ tests/unit/tokens.test.ts > session and anti-forgery tokens > mints 32 bytes and never the same value twice 3ms
- ✓ tests/unit/tokens.test.ts > session and anti-forgery tokens > stores a hash, not the token 1ms
- ✓ tests/unit/tokens.test.ts > session and anti-forgery tokens > matches only an identical token, and survives a length mismatch 0ms
+ ✓ tests/unit/rate-limit.test.ts > the sign-in rate limiter > lets the first five failures through and counts them down 3ms
+ ✓ tests/unit/rate-limit.test.ts > the sign-in rate limiter > locks on the fifth failure inside the window 0ms
+ ✓ tests/unit/rate-limit.test.ts > the sign-in rate limiter > refuses a correct password while the window is open, which is the point 0ms
+ ✓ tests/unit/rate-limit.test.ts > the sign-in rate limiter > opens again exactly when the oldest failure that still counts falls out 0ms
+ ✓ tests/unit/rate-limit.test.ts > the sign-in rate limiter > never returns a pause longer than the window 0ms
+ ✓ tests/unit/password.test.ts > the backup password > verifies the right password and refuses the wrong one 170ms
  ✓ tests/unit/recovery-parameters.test.ts > the Argon2id parameters, in both places that hold them > hashes a recovery password at exactly the cost the app hashes at 1ms
  ✓ tests/unit/recovery-parameters.test.ts > the Argon2id parameters, in both places that hold them > stores on the owner row the same numbers it hashed with 0ms
  ✓ tests/unit/recovery-parameters.test.ts > the Argon2id parameters, in both places that hold them > tells the operator the cost it actually used 0ms
  ✓ tests/unit/recovery-parameters.test.ts > the Argon2id parameters, in both places that hold them > holds the app to the floor F10 names, so agreeing on a weaker cost is not a pass 0ms
- ✓ tests/unit/password.test.ts > the backup password > verifies the right password and refuses the wrong one 140ms
- ✓ tests/unit/launch-report.test.ts > who may report a launch > turns away a browser that says it is being driven, whatever it is called 1ms
- ✓ tests/unit/launch-report.test.ts > who may report a launch > turns away an automation runtime that names itself, whatever the body claims 0ms
- ✓ tests/unit/launch-report.test.ts > who may report a launch > lets the browsers the owner actually holds report 0ms
- ✓ tests/unit/launch-report.test.ts > what could have come from a Home Screen icon > refuses a standalone claim from every desktop, this suite's WebKit included 0ms
- ✓ tests/unit/launch-report.test.ts > what could have come from a Home Screen icon > lets the phone the whole line is about report 0ms
- ✓ tests/unit/password.test.ts > the backup password > reads its parameters from the row and not from the constants 65ms
- ✓ tests/unit/password.test.ts > the backup password > refuses an algorithm it does not verify, rather than returning false quietly 25ms
+ ✓ tests/unit/password.test.ts > the backup password > reads its parameters from the row and not from the constants 67ms
+ ✓ tests/unit/password.test.ts > the backup password > refuses an algorithm it does not verify, rather than returning false quietly 26ms
  ✓ tests/unit/password.test.ts > the backup password > states every reason a password is refused 1ms
- ✓ tests/unit/format.test.ts > dates and times > renders the two shapes DESIGN.md fixes and no third one 16ms
+ ✓ tests/unit/format.test.ts > dates and times > renders the two shapes DESIGN.md fixes and no third one 40ms
  ✓ tests/unit/format.test.ts > dates and times > renders times 24 hour, with no meridiem anywhere 2ms
  ✓ tests/unit/format.test.ts > dates and times > reads Paris, not the instant, when the two disagree about the day 0ms
  ✓ tests/unit/format.test.ts > dates and times > counts days as calendar days in the app zone 2ms
- ✓ tests/unit/format.test.ts > units > is metric, with the precision the unit deserves and no more 5ms
+ ✓ tests/unit/format.test.ts > units > is metric, with the precision the unit deserves and no more 4ms
  ✓ tests/unit/format.test.ts > units > names every unit in the catalogue rather than in a component 0ms
  ✓ tests/unit/format.test.ts > units > renders a rating as a rating and a note as itself, never as a number with a unit 1ms
- ✓ tests/unit/format.test.ts > a timezone-shifted run renders identical dates > is byte identical from Paris, Auckland and Los Angeles 344ms
+ ✓ tests/unit/format.test.ts > a timezone-shifted run renders identical dates > is byte identical from Paris, Auckland and Los Angeles 352ms
  ✓ tests/unit/webauthn-counter.test.ts > the signature counter > accepts a synced passkey reporting zero, over and over 1ms
  ✓ tests/unit/webauthn-counter.test.ts > the signature counter > stores what the authenticator reported and never synthesises an increment 0ms
  ✓ tests/unit/webauthn-counter.test.ts > the signature counter > still refuses a replay from an authenticator that does count 0ms
@@ -144,6 +144,6 @@
 
  Test Files  15 passed (15)
       Tests  140 passed (140)
-   Start at  23:33:44
-   Duration  846ms (transform 485ms, setup 0ms, import 1.25s, tests 895ms, environment 2ms)
+   Start at  07:51:42
+   Duration  857ms (transform 508ms, setup 0ms, import 1.32s, tests 1.00s, environment 1ms)
 
