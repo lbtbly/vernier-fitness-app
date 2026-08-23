@@ -3635,6 +3635,19 @@ export const strings = {
     /** The one sentence the demonstration reply carries back about the plate. */
     demoNote:
       'A salmon fillet, roast potatoes and green beans, with visible oil on the potatoes.',
+    /**
+     * What the model recognised, said in this product's own words.
+     *
+     * The model's own sentence is stored and is one tap further on, on the
+     * source screen, which is where F97 puts it. What the estimate screen says
+     * is composed here from the food names in the catalogue, so the screen a
+     * decision is made on carries no text this build cannot account for.
+     */
+    saw: (names: string[]) =>
+      names.length === 1
+        ? `Claude named 1 item on the plate: ${names[0]}.`
+        : `Claude named ${names.length} items on the plate: ${names.join(', ')}.`,
+    sawNothing: 'Claude named nothing this food table recognises.',
     rangeNote:
       'Portions come from plate size, so treat them as ranges. Set an exact weight on any line and that line stops being an estimate.',
     grams: (low: number, high: number) => `${low} to ${high} g`,

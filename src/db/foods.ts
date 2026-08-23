@@ -3,6 +3,8 @@ import { join } from 'node:path';
 import { and, asc, count, eq, inArray, isNull, sql } from 'drizzle-orm';
 import { getDb } from './client';
 import { food } from './schema';
+import { aliasById, aliasFoodId } from '@/lib/food-aliases';
+import type { FoodFacts } from '@/lib/recipe-nutrition';
 
 /**
  * The food table: 3,483 rows of ANSES CIQUAL 2025, seeded at boot from a file
@@ -215,5 +217,41 @@ export async function readFoodTableFacts(): Promise<FoodTableFacts> {
     tableVersion: version?.tableVersion ?? null,
     nullFibreExample: noFibre?.id ?? null,
     computedExample: computedRow?.id ?? null,
+  };
+}
+
+/**
+ * Every food row behind a set of aliases, in one read, as the sum wants them.
+ *
+ * It lives here rather than in a route because two routes and the takeaway
+ * proposal all need it, and because a route file exports handlers. Slice 9's
+ * `resolveIngredients` does the same job for a recipe's own ingredient rows;
+ * this one starts from aliases, which is what a plate read off a photograph
+ * gives you.
+ */
+export async function aliasFoodLookup(
+  aliasIds: string[],
+): Promise<(aliasId: string) => FoodFacts | null> {
+  const ids: string[] = [];
+  for (const aliasId of aliasIds) {
+    const alias = aliasById(aliasId);
+    if (alias) ids.push(aliasFoodId(alias));
+  }
+  const rows = await readFoods(ids);
+  return (aliasId: string) => {
+    const alias = aliasById(aliasId);
+    if (!alias) return null;
+    const row = rows.get(aliasFoodId(alias));
+    if (!row) return null;
+    return {
+      id: row.id,
+      source: row.source,
+      kcal100g: row.kcal100g,
+      proteinG: row.proteinG,
+      carbG: row.carbG,
+      fatG: row.fatG,
+      fibreG: row.fibreG,
+      energySource: row.energySource,
+    };
   };
 }
