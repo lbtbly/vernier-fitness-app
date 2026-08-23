@@ -37,6 +37,25 @@ export type ParsedLine = {
   raw: string;
 };
 
+/**
+ * The lines that become `recipe_ingredient` rows: every line with a weight,
+ * named or not.
+ *
+ * THIS IS F87's DENOMINATOR AND IT IS A FUNCTION SO IT CAN BE GRADED. The
+ * import used to keep only lines that had BOTH a weight and an alias, so a card
+ * reading "200 g samphire, 300 g potatoes" stored one row. Coverage is resolved
+ * mass over total mass and total mass was summed over the stored rows, so it
+ * read 100 percent over three fifths of the food, and the below-85-percent
+ * branch F87 asks for could not fire on any input at all.
+ *
+ * A line with no weight is still not stored. That is not the same omission: a
+ * share of a total needs a total, and a line with no grams is on neither side
+ * of it. The unmatched count reported to the import screen still counts both.
+ */
+export function storableLines(lines: ParsedLine[]): ParsedLine[] {
+  return lines.filter((line) => line.grams !== null);
+}
+
 export type ParsedRecipe = {
   name: string;
   servings: number;

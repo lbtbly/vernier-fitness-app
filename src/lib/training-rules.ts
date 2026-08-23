@@ -258,9 +258,87 @@ export function painProblems(current: PainReport, lastWeek: PainReport | null): 
 }
 
 /**
+ * The report the week-to-week limb is read against: the same site, in the week
+ * before the week the current report sits in.
+ *
+ * SEVEN TO FOURTEEN DAYS, AND BOUNDED AT BOTH ENDS. Silbernagel's rule is that
+ * pain "was not allowed to increase from week to week", which is a comparison
+ * with last week and not with the last time this site ever hurt. An unbounded
+ * "most recent earlier report at this site" would compare a knee today against
+ * a knee in March and call five months of recovery an increase.
+ *
+ * The most recent report inside that window, because at three to five sessions
+ * a week there can be several. Taking the most recent is the literal reading of
+ * week against week; taking the worst would make a bad Monday last week excuse
+ * a worse Monday this week, and taking the best would flag half the weeks in a
+ * normal training block.
+ */
+export function lastWeekAtSameSite(
+  reports: PainReport[],
+  current: PainReport,
+): PainReport | null {
+  if (current.site === 'none') return null;
+  const from = current.at.getTime() - 14 * 86_400_000;
+  const to = current.at.getTime() - 7 * 86_400_000;
+  return (
+    [...reports]
+      .filter(
+        (report) =>
+          report.site === current.site &&
+          report.at.getTime() >= from &&
+          report.at.getTime() <= to,
+      )
+      .sort((left, right) => right.at.getTime() - left.at.getTime())[0] ?? null
+  );
+}
+
+/** Why the app is backing off, and the site it is backing off on. */
+export type PainVerdict = {
+  site: string;
+  reason: PainProblem | 'repeatedSite';
+};
+
+/**
+ * THE WHOLE PAIN RULE, IN ONE ANSWER, AND IT IS THE ONLY THING THAT DECIDES.
+ *
+ * The player states four sentences to the owner as he logs a session: up to 5
+ * of 10 during is allowed, it has to be gone by the next morning, it must be no
+ * worse than last week, and the same site twice running cuts the volume. Three
+ * of those four were stated and enforced nowhere. `painProblems` existed, was
+ * correct, was tested, and was imported by exactly one file in this repository:
+ * its own unit test. Everything that actually decides read `repeatedSite` and
+ * nothing else, so a knee that went from 2 to 5 in a week, or one that was
+ * still there in the morning, advanced the movement anyway.
+ *
+ * So the rule has one entry point now and both deciding paths call it: the week
+ * proposer, which cuts volume, and the advancement sweep, which refuses to
+ * propose. Backing off stays the only automatic action in this file. What
+ * changed is that it reads the whole rule instead of a quarter of it.
+ *
+ * The order is precedence, bluntest first, because the owner gets one sentence
+ * and it should be the one that explains the most. Two reports at the same site
+ * outranks a single bad one.
+ */
+export function painVerdict(reports: PainReport[]): PainVerdict | null {
+  const ordered = [...reports].sort((left, right) => left.at.getTime() - right.at.getTime());
+  const repeated = repeatedSite(ordered);
+  if (repeated) return { site: repeated, reason: 'repeatedSite' };
+
+  const current = ordered[ordered.length - 1];
+  if (!current || current.site === 'none') return null;
+
+  const problems = painProblems(current, lastWeekAtSameSite(ordered.slice(0, -1), current));
+  for (const reason of ['aboveCeiling', 'notSubsided', 'roseFromLastWeek'] as const) {
+    if (problems.includes(reason)) return { site: current.site, reason };
+  }
+  return null;
+}
+
+/**
  * The same site twice running, which deloads and never advances. Grade [C],
  * and it is deliberately blunt: two reports at the knee is the app backing off
- * without being asked, which is the one automatic action in this whole file.
+ * without being asked. It is one limb of the rule above and never the whole of
+ * it; `painVerdict` is what anything outside this file asks.
  */
 export function repeatedSite(reports: PainReport[]): string | null {
   const ordered = [...reports].sort((left, right) => left.at.getTime() - right.at.getTime());
@@ -287,7 +365,7 @@ export function deloadSets(sets: number): number {
 
 /** Does this movement advance at all, given what pain has been reported. */
 export function advancementBlocked(reports: PainReport[]): boolean {
-  return repeatedSite(reports) !== null;
+  return painVerdict(reports) !== null;
 }
 
 /**

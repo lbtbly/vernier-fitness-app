@@ -214,11 +214,11 @@ export function appLogs(lines = 400): string {
 }
 
 /**
- * The scratch instance's own log, for the specs that write a credential.
+ * The scratch container's log, both streams.
  *
- * F16's clause is that no credential value reaches a log line, and the way to
- * ask that is to enter one and then read the log of the container that took it.
- * The container is this one, because the secret was entered here.
+ * Added by the geometry pass and lost for a moment at the merge, because the
+ * other branch's host.ts was taken wholesale to get its consolidation of the
+ * CASCADE truncate. typecheck named the missing export immediately.
  */
 export function scratchLogs(lines = 400): string {
   // Both streams, merged by the shell. `docker logs` writes the container's
@@ -443,39 +443,6 @@ export async function ensureScratchOwner(): Promise<void> {
 }
 
 /**
- * The provenance spine, emptied, on the scratch instance and nowhere else.
- *
- * ONE COPY OF THE STATEMENT, WHICH IS THE WHOLE POINT OF THIS FUNCTION.
- * The five table names were written out in four places. Slice 10 added
- * meal_entry.source_record and recipe_box_item.source_record, Postgres began
- * refusing the statement with 'cannot truncate a table referenced in a foreign
- * key constraint', and one of the four copies was fixed. The other three were
- * not: on 2026-08-23 the suite lost F27's whole fold walk in notices.spec.ts and
- * C5's five-state walk in quick-log.spec.ts, both dying on the same sentence
- * from the same list, a day after it had been fixed once.
- *
- * A hand-maintained list of tables is a list that goes stale on the next slice,
- * and four hand-maintained copies go stale one at a time. CASCADE follows the
- * graph the database already knows: the statement names the roots and lets
- * Postgres find the rest, and it lives here once.
- *
- * AND IT NAMES THE DATABASE IT TAKES. `scratchQuery` connects to
- * vernier_scratch by name, not to whatever POSTGRES_DB happens to be, so there
- * is no timing, no ordering and no environment in which this reaches the
- * owner's install.
- *
- * GOES RED IF: a later slice adds a table referencing these and this stops
- * clearing it. The count printed by every caller's own census is what shows
- * that, which is why each spec prints its population rather than trusting this
- * to have worked.
- */
-export function truncateScratchProvenance(): void {
-  scratchQuery(
-    'truncate measurement, source_record, import_question, idempotency_key, write_request cascade',
-  );
-}
-
-/**
  * A clean provenance spine plus the demonstration seed, on the scratch
  * instance, which is the state the quick-log suite starts every destructive
  * test from.
@@ -496,6 +463,40 @@ export function truncateScratchProvenance(): void {
  * database is gone rather than better guarded: it counted rows that predated
  * the run, and a row written through the shipped quick log a second later
  * counted as the run's own and was taken. The owner watched one die.
+ */
+export function truncateScratchProvenance(): void {
+  // CASCADE, and the list is derived rather than written out.
+  //
+  // This named five tables. Slice 10 then added meal_entry.source_record and
+  // recipe_box_item.source_record, so Postgres began refusing the whole
+  // statement with 'cannot truncate a table referenced in a foreign key
+  // constraint'. labs-scratch.spec.ts died in beforeAll, taking F58 to F63's
+  // only end-to-end walk with it, and quick-log.spec.ts calls this at the top
+  // of every test including F23's own tap-count evidence. The suite went from
+  // 143 passed to 127 and nothing in it said why.
+  //
+  // A hand-maintained list of tables is a list that goes stale on the next
+  // slice. CASCADE follows the graph the database already knows, and the
+  // statement below names the roots and lets Postgres find the rest.
+  //
+  // AND IT LIVES IN ONE PLACE. CASCADE was added here on the last fix pass and
+  // the same statement stayed written out by hand in three other spots:
+  // `anchorScratchDemo` below and two tests inside quick-log.spec.ts. All three
+  // kept failing on the same foreign key for the same reason, which is what a
+  // copy of a statement is for. There is one copy now and everything calls it.
+  //
+  // GOES RED IF: a later slice adds a table referencing these and this stops
+  // clearing it. The count printed by every caller's own census is what shows
+  // that, which is why each spec prints its population rather than trusting
+  // this to have worked.
+  scratchQuery(
+    'truncate measurement, source_record, import_question, idempotency_key, write_request cascade',
+  );
+}
+
+/**
+ * The same clearing, plus the restart that re-seeds, which is the state the
+ * quick-log suite starts every destructive test from.
  */
 export function resetScratchProvenance(): void {
   truncateScratchProvenance();

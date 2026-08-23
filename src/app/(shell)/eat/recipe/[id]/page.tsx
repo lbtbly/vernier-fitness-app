@@ -98,8 +98,11 @@ export default async function RecipePage({
   const meals = plan ? await readPlanMeals(plan.id) : [];
   const meal = mealId ? (meals.find((entry) => entry.id === mealId) ?? null) : null;
 
-  const dairyLine = view.ingredients.find((line) => aliasById(line.aliasId)?.lactoseFree);
-  const dairyAlias = dairyLine ? aliasById(dairyLine.aliasId) : null;
+  const aliasOf = (line: { aliasId: string | null }) =>
+    line.aliasId === null ? null : aliasById(line.aliasId);
+
+  const dairyLine = view.ingredients.find((line) => aliasOf(line)?.lactoseFree);
+  const dairyAlias = dairyLine ? aliasOf(dairyLine) : null;
   const freeFromAlias = dairyAlias?.lactoseFree ? aliasById(dairyAlias.lactoseFree) : null;
 
   const active = meal?.lactoseFree && freeFrom ? freeFrom : base;
@@ -110,7 +113,7 @@ export default async function RecipePage({
 
   const foodIds = view.ingredients
     .map((line) => {
-      const alias = aliasById(line.aliasId);
+      const alias = aliasOf(line);
       return alias ? aliasFoodId(alias) : null;
     })
     .filter((value): value is string => value !== null);
@@ -276,17 +279,25 @@ export default async function RecipePage({
       <section className="card" data-card="ingredients">
         <span className="lbl">{strings.nutrition.ingredients}</span>
         {view.ingredients.map((line) => {
-          const alias = aliasById(line.aliasId);
+          const alias = aliasOf(line);
           const foodId = alias ? aliasFoodId(alias) : null;
           const row = foodId ? foods.get(foodId) : undefined;
           return (
-            <div className="row" key={line.id} data-ingredient={line.aliasId}>
+            <div
+              className="row"
+              key={line.id}
+              data-ingredient={line.aliasId ?? 'unnamed'}
+              data-named={alias ? 'true' : 'false'}
+            >
               <div className="stack grow">
                 <span>
                   {alias
                     ? strings.nutrition.ingredientLine(String(line.grams), aliasName(alias))
-                    : line.aliasId}
+                    : strings.nutrition.ingredientUnnamed(String(line.grams))}
                 </span>
+                {line.aliasId === null ? (
+                  <span className="note">{strings.nutrition.ingredientUnnamedNote}</span>
+                ) : null}
                 {row ? (
                   <span className="note num">
                     {row.nameFr}

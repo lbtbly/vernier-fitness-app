@@ -1,9 +1,9 @@
 import { expect, test, typeKeyByKey, typedSoFar, type BrowserContext, type Page } from './fixtures';
 import {
+  truncateScratchProvenance,
   ensureScratchOwner,
   resetScratchProvenance,
   scratchQuery,
-  truncateScratchProvenance,
   scratchSignInLink,
   testStackWithDemoMode,
   waitForScratch,

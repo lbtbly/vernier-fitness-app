@@ -240,7 +240,18 @@ export async function readPool(): Promise<{
     id: view.id,
     cookMinutes: view.cookMinutes,
     slot: view.slot,
-    ingredients: view.ingredients.map((line) => ({ aliasId: line.aliasId, grams: line.grams })),
+    /*
+     * The named lines only, and that is the same set the rules have always
+     * seen. A recipe box import can now carry a line the parser weighed and
+     * could not name, which F87 needs in the coverage denominator; a dietary
+     * rule cannot ask whether an ingredient with no name carries an allergen,
+     * so it is filtered here rather than passed in as a line that answers no to
+     * every question. Nothing changes for the rules: before this, an unnamed
+     * line was not stored at all.
+     */
+    ingredients: view.ingredients
+      .filter((line): line is typeof line & { aliasId: string } => line.aliasId !== null)
+      .map((line) => ({ aliasId: line.aliasId, grams: line.grams })),
     kcal: snapshots.get(`${view.id}|base`)?.perServingKcal ?? null,
   }));
   return { recipes, snapshots, pool };
@@ -437,6 +448,15 @@ export async function readWantedIngredients(planId: string): Promise<
     const view = byId.get(meal.recipeId);
     if (!view) continue;
     for (const line of view.ingredients) {
+      /*
+       * A line with no alias is not shopped for, and it cannot be: it has no
+       * name, no aisle and no unit, so there is nothing to write on a list. A
+       * recipe box import can carry one, because F87 needs its weight in the
+       * coverage denominator, and it is skipped here rather than turned into a
+       * row nobody could find in a shop. `buildShoppingList` already reports
+       * the other half of this, an alias the food layer does not know.
+       */
+      if (line.aliasId === null) continue;
       const alias = aliasById(line.aliasId);
       const aliasId =
         meal.lactoseFree && alias?.lactoseFree ? alias.lactoseFree : line.aliasId;

@@ -87,7 +87,20 @@ test('F36. connect, import, sync and status all complete with no client id and n
   await page.screenshot({ path: `${CAPTURES}/f36-1-disconnected.png`, fullPage: true });
 
   // ---- connect
-  await page.getByRole('button', { name: /connect the demonstration account/i }).click();
+  //
+  // SCOPED TO THE WITHINGS CARD, not to the page. Slice 12 put Google Calendar
+  // on this same screen with the same button label, `strings.google.connectDemo`
+  // and `strings.withings.connectDemo` are the same eight words, and Playwright
+  // stopped the run on a strict mode violation rather than pick one. Because
+  // this file is serial that took F36 and the seven tests behind it with it.
+  //
+  // The card locator already exists for exactly this reason: find the card by
+  // its own marker, then the control inside it.
+  //
+  // GOES RED IF: the Withings card stops rendering a connect control at all, or
+  // renders one whose accessible name is not the catalogue line. It no longer
+  // goes red when a fourth integration lands on the screen, which is the change.
+  await card(page).getByRole('button', { name: /connect the demonstration account/i }).click();
   await expect(card(page)).toHaveAttribute('data-withings', 'demo', { timeout: 30_000 });
   await page.screenshot({ path: `${CAPTURES}/f36-2-connected.png`, fullPage: true });
   expect(Number(scratchQuery('select count(*) from integration_credential'))).toBe(1);
@@ -267,12 +280,27 @@ test('F42. the status screen shows the state, the last sync and a test button, a
 
   await expect(card(page)).toHaveAttribute('data-withings', 'demo');
   await expect(page.locator('[data-withings-state]')).toHaveText(/demonstration/i);
-  await expect(page.getByText(/last successful sync/i)).toBeVisible();
-  await expect(page.getByRole('button', { name: /^test$/i })).toBeVisible();
+
+  /*
+   * SCOPED TO THE CARD, AND THE POPULATION IS PRINTED.
+   *
+   * "Last successful sync" is on this screen five times: once on the Withings
+   * card and once on each of the four rows of the integration list. A page-wide
+   * `getByText` is a strict mode violation against all five, which is the whole
+   * shape of the fact F42 is about. So the card is asked for its own label and
+   * the count of every label on the screen is printed beside it.
+   *
+   * GOES RED IF: the card stops printing the label, or prints it more than once.
+   */
+  const labelsOnScreen = await page.getByText(/last successful sync/i).count();
+  console.log(`"Last successful sync" appears ${labelsOnScreen} times on this screen`);
+  expect(labelsOnScreen).toBeGreaterThan(1);
+  await expect(card(page).getByText(/last successful sync/i)).toBeVisible();
+  await expect(card(page).getByRole('button', { name: /^test$/i })).toBeVisible();
 
   // The test button asks and writes nothing.
   const before = Number(scratchQuery('select count(*) from measurement'));
-  await page.getByRole('button', { name: /^test$/i }).click();
+  await card(page).getByRole('button', { name: /^test$/i }).click();
   await expect(page.getByText(/the connection answered/i)).toBeVisible({ timeout: 30_000 });
   expect(Number(scratchQuery('select count(*) from measurement'))).toBe(before);
   await page.screenshot({ path: `${CAPTURES}/f42-status.png`, fullPage: true });
@@ -362,7 +390,7 @@ test('F42. the four states the status screen has to show, each captured', async 
     await openSettings(page);
     await expect(card(page)).toHaveAttribute('data-withings', name);
     await expect(page.locator('[data-withings-state]')).toHaveText(new RegExp(word, 'i'));
-    await expect(page.getByText(/last successful sync/i)).toBeVisible();
+    await expect(card(page).getByText(/last successful sync/i)).toBeVisible();
     console.log(`state ${name} rendered as ${await page.locator('[data-withings-state]').innerText()}`);
 
     /*

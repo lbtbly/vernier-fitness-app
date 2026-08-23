@@ -1,6 +1,6 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { clickWhenLive, expect, test, type Page } from './fixtures';
+import { clickWhenLive, countWhenDrawn, expect, test, type Page } from './fixtures';
 import {
   ensureScratchOwner,
   projectRoot,
@@ -82,17 +82,39 @@ test('F58. an upload extracts rows and stores nothing, and abandoning leaves zer
 
   await uploadPanel(page, panelPdf());
 
-  // What came out of the file, per row, with analyte, result, unit, interval,
-  // date and confidence all on screen.
-  const rows = await page.locator('[data-row]').count();
-  const confidences = await page.locator('[data-confidence]').count();
+  /*
+   * WHAT CAME OUT OF THE FILE, PER ROW, AND WHERE IT CAME OUT.
+   *
+   * `count()` reads the document once with no wait, exactly as it does on the
+   * shopping list, and `/health/labs/[id]` sits inside `health/labs/loading.tsx`
+   * so the skeleton is the screen for as long as the route takes. The failure
+   * this replaces was a bare `Received: 0` with nothing beside it: no document
+   * row count, no route answer, no way to tell a screen that drew nothing from
+   * a route that stored nothing. The two need different fixes.
+   *
+   * So the holding is read out of the database FIRST, then the screen is waited
+   * on. If the route stored rows and the screen shows none, the numbers say so
+   * in the same line.
+   *
+   * GOES RED IF: the extraction stops reading the panel, or the review screen
+   * stops drawing what the extraction stored. Either way it now names which.
+   */
   const held = Number(scratchQuery('select count(*) from lab_document'));
+  const stored = Number(
+    scratchQuery('select coalesce(jsonb_array_length(extraction), 0) from lab_document limit 1'),
+  );
+  console.log(`F58  the review holding: ${held} document(s) carrying ${stored} extracted row(s)`);
+  expect(held).toBe(1);
+  expect(stored, 'the upload route stored a document with no rows in it').toBeGreaterThanOrEqual(12);
+
+  const rows = await countWhenDrawn(page.locator('[data-row]'));
+  const confidences = await page.locator('[data-confidence]').count();
   const after = measurementCount();
-  console.log(`F58  extracted ${rows} rows, ${confidences} confidences, ${held} review holding(s)`);
+  console.log(`F58  the screen drew ${rows} rows and ${confidences} confidences`);
   console.log(`F58  measurement rows after the extraction: ${after}`);
+  expect(rows, 'the screen drew fewer rows than the review holds').toBe(stored);
   expect(rows).toBeGreaterThanOrEqual(12);
   expect(confidences).toBe(rows);
-  expect(held).toBe(1);
   // A zero beside the population it covered: twelve or more rows were read and
   // not one of them reached the table.
   expect(after).toBe(before);

@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 import {
   CDC_MAX,
@@ -17,7 +19,9 @@ import {
   advancementBlocked,
   deloadSets,
   lastSetsPerSession,
+  lastWeekAtSameSite,
   painProblems,
+  painVerdict,
   prescribesFromEffort,
   proposeAdvancement,
   repeatedSite,
@@ -233,6 +237,127 @@ describe('the pain rule, from Silbernagel 2007', () => {
 
   test('no pain reported is no problem at all', () => {
     expect(painProblems(report('none', 0, null, 0), report('knee', 4, true, 7))).toEqual([]);
+  });
+
+  /*
+   * THE THIRD LIMB, IN THE PATH THAT ACTUALLY DECIDES.
+   *
+   * `painProblems` was correct, was tested by every case above, and was
+   * imported by exactly one file in this repository: this one. Everything that
+   * decided anything read `repeatedSite`, so the sentence the player states to
+   * the owner while he logs the session, "no worse than last week", was a
+   * promise nothing kept. The tests above graded a function nobody called.
+   *
+   * `painVerdict` is the single entry point now, and the two deciding paths
+   * call it: the week proposer cuts volume, the advancement sweep refuses to
+   * propose. These cases grade the wiring rather than the arithmetic.
+   *
+   * GOES RED IF: a limb stops blocking, the week window loses either end, or
+   * the precedence order changes so the owner is told the smaller reason.
+   */
+  //
+  // A CLEAN SESSION SITS BETWEEN THE TWO KNEES IN EVERY CASE BELOW, AND THAT IS
+  // THE ONLY SHAPE THE THIRD LIMB EVER FIRES IN. Two knee reports back to back
+  // are the same site twice running, which outranks everything and is the limb
+  // that already worked. What the week-to-week limb catches is the knee that
+  // hurt last Monday, was quiet on Wednesday, and came back worse this Monday:
+  // no two consecutive reports, no ceiling breach, gone by the morning, and a
+  // movement that used to advance straight through it.
+  test('a knee worse than last week blocks advancement and names the limb', () => {
+    const reports = [report('knee', 2, true, 8), report('none', 0, null, 4), report('knee', 4, true, 1)];
+    expect(repeatedSite(reports), 'this case must not be the two-in-a-row limb').toBeNull();
+    expect(painVerdict(reports)).toEqual({ site: 'knee', reason: 'roseFromLastWeek' });
+    expect(advancementBlocked(reports)).toBe(true);
+  });
+
+  test('the same knee at the same score week on week is not an increase', () => {
+    const reports = [report('knee', 4, true, 8), report('none', 0, null, 4), report('knee', 4, true, 1)];
+    expect(painVerdict(reports)).toBeNull();
+    expect(advancementBlocked(reports)).toBe(false);
+  });
+
+  test('past the ceiling blocks advancement on its own, with nothing before it', () => {
+    expect(painVerdict([report('knee', 7, true, 0)])).toEqual({
+      site: 'knee',
+      reason: 'aboveCeiling',
+    });
+  });
+
+  test('still there the next morning blocks advancement on its own', () => {
+    expect(painVerdict([report('knee', 3, false, 0)])).toEqual({
+      site: 'knee',
+      reason: 'notSubsided',
+    });
+  });
+
+  test('the same site twice running outranks the single-session limbs', () => {
+    const reports = [report('knee', 3, true, 4), report('knee', 8, false, 1)];
+    expect(painVerdict(reports)).toEqual({ site: 'knee', reason: 'repeatedSite' });
+  });
+
+  test('a knee five months ago is not last week, however much worse today is', () => {
+    // The unbounded version of this comparison would call five months of
+    // recovery a week-to-week increase and cut the volume for it.
+    const reports = [report('knee', 1, true, 150), report('none', 0, null, 4), report('knee', 5, true, 0)];
+    expect(painVerdict(reports)).toBeNull();
+    expect(lastWeekAtSameSite([report('knee', 1, true, 150)], report('knee', 5, true, 0))).toBeNull();
+  });
+
+  test('the report it compares against is the one in the week before, and only that one', () => {
+    const current = report('knee', 4, true, 0);
+    const earlier = [
+      report('knee', 9, true, 20),
+      report('knee', 2, true, 9),
+      report('knee', 3, true, 8),
+      report('knee', 1, true, 2),
+    ];
+    // 9 and 8 days back are both inside the window, 20 is before it and 2 is
+    // inside this week. The most recent of the two in the window is the 8.
+    const chosen = lastWeekAtSameSite(earlier, current);
+    expect(chosen?.duringScore).toBe(3);
+  });
+
+  test('a clean week says nothing at all, which is the ordinary case', () => {
+    expect(painVerdict([report('none', 0, null, 3), report('none', 0, null, 0)])).toBeNull();
+    expect(painVerdict([])).toBeNull();
+  });
+});
+
+/**
+ * THE RULE IS IMPORTED BY SOMETHING THAT DECIDES.
+ *
+ * This is the check that would have caught F77 four verifications ago and did
+ * not exist. `painProblems` was exported, correct and tested, and the only file
+ * in the repository that imported it was its own unit test, so the third limb
+ * of a safety rule the product states on screen was enforced nowhere and every
+ * test above it passed.
+ *
+ * So the wiring is asserted rather than assumed: the two paths that decide are
+ * named, read off disk, and each one has to import the entry point. The list of
+ * files is printed, because a walk over an empty file list reads exactly like a
+ * walk that found nothing wrong.
+ *
+ * GOES RED IF: a deciding path stops reading the rule, which is the shape the
+ * defect had, or one of these files is renamed without this list following it.
+ */
+describe('the pain rule is wired into what decides', () => {
+  const src = new URL('../../src/', import.meta.url).pathname;
+  const deciders = [
+    // Cuts the volume on next week's proposal.
+    'db/training.ts',
+    // Refuses to draw a progression card while the rule is speaking.
+    'app/(shell)/train/page.tsx',
+  ];
+
+  test('both deciding paths read painVerdict, not one limb of it', () => {
+    for (const relative of deciders) {
+      const source = readFileSync(join(src, relative), 'utf8');
+      console.log(`${relative}: ${source.length} bytes read`);
+      expect(source.length).toBeGreaterThan(0);
+      expect(source, `${relative} does not read the pain rule at all`).toContain('painVerdict');
+    }
+    console.log(`${deciders.length} deciding path(s) checked: ${deciders.join(', ')}`);
+    expect(deciders.length).toBeGreaterThan(0);
   });
 });
 

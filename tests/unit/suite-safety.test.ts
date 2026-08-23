@@ -340,6 +340,26 @@ describe('the suite against the owner\'s installation', () => {
    *                           the ingredient lines walked and the shellfish
    *                           recipes the catalogue holds, both asserted above
    *                           zero on every generation.
+   *   nutrition (F83)         REAL. The allergy rule row, counted after it has
+   *                           been REMOVED through the shipped remove control,
+   *                           in a test that adds it through the shipped kind
+   *                           and subject selects three assertions earlier and
+   *                           asserts the same locator VISIBLE there. The
+   *                           database is read on both sides of the zero: four
+   *                           stored rules before the removal, three after, both
+   *                           printed. A surface that cannot render a rule row
+   *                           fails at the visible assertion long before it
+   *                           reaches this one.
+   *   shopping (F88)          REAL, and it is the diagnosis rather than the
+   *                           line. The week's error card, counted after the
+   *                           confirm control is clicked, and its text is
+   *                           PRINTED FIRST when the count is not zero. That
+   *                           card is the same element `[data-state="error"]`
+   *                           the meal week draws for every refused post, and
+   *                           the three assertions under it read the plan state,
+   *                           the list row and the item count out of the
+   *                           database. A screen that never rendered would fail
+   *                           those, not this.
    *   shopping:208            REAL. `.boxtap` is the tick control every bought
    *                           line on that screen renders, and the same test
    *                           asserts the deducted row itself visible with its
@@ -619,8 +639,8 @@ describe('the suite against the owner\'s installation', () => {
       ['suite-privilege.spec.ts', 1],
       ['withings.spec.ts', 5],
       ['labs-scratch.spec.ts', 4],
-      ['nutrition.spec.ts', 6],
-      ['shopping.spec.ts', 1],
+      ['nutrition.spec.ts', 7],
+      ['shopping.spec.ts', 2],
       ['console-walk.spec.ts', 3],
       ['session-player.spec.ts', 3],
       ['train-week.spec.ts', 4],

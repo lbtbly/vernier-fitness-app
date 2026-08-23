@@ -11,6 +11,7 @@ import {
   type StockHolding,
   type WantedLine,
 } from '@/lib/shopping';
+import { RECIPE_CATALOGUE } from '@/lib/recipe-catalogue';
 import { strings } from '@/lib/strings';
 
 /**
@@ -186,5 +187,98 @@ describe('the three counts at the head of the list', () => {
     const counts = countList([{ deduction: 'box', checked: true, removed: false }]);
     expect(counts.inTrolley).toBe(0);
     expect(counts.deducted).toBe(1);
+  });
+});
+
+/**
+ * THE WHOLE SHIPPED CATALOGUE, THROUGH THE BUILDER, AGAINST THE COLUMNS.
+ *
+ * F88's end-to-end walk builds a week, confirms it and reads the list back, and
+ * when it came back empty the report said only `waiting for
+ * locator('[data-aisle]')`. Nothing in the unit suite could have caught a
+ * catalogue entry that cannot become a `shopping_item` row, because every test
+ * above builds a list out of two or three hand-written lines.
+ *
+ * So this one takes every ingredient of every recipe the product actually
+ * ships, puts them all through the same builder, and checks each item against
+ * the four CHECK constraints `shopping_item` carries in 0007_wave_a.sql. A row
+ * that violates one of them does not become a refused line: the whole insert
+ * throws inside the confirm route, the route answers 500, and the owner gets an
+ * empty shopping list with no line missing from it, which is the failure that
+ * says the least about itself of any in this product.
+ *
+ * It also refuses an unknown alias, because an ingredient the alias layer does
+ * not name is bought by nobody: it is silently absent from the list and the
+ * only trace is a string in a response body no screen reads.
+ *
+ * GOES RED IF: a recipe names an alias that does not exist, an alias in `count`
+ * loses its noun, a pack size or an item weight goes to zero so a quantity
+ * rounds to nothing, or an alias lands in an aisle the shopping screen does not
+ * draw. Each of those ships a catalogue the product cannot shop from.
+ */
+describe('every recipe this product ships can become a shopping list', () => {
+  test('all of it at once, checked against the columns the rows have to fit', () => {
+    const wanted: WantedLine[] = [];
+    RECIPE_CATALOGUE.forEach((entry, index) => {
+      for (const ingredient of entry.ingredients) {
+        wanted.push({
+          aliasId: ingredient.aliasId,
+          grams: ingredient.grams,
+          plannedMealId: `${entry.id}@${index}`,
+          boxSupplied: ingredient.boxSupplied === true,
+          dayIndex: index % 7,
+        });
+      }
+    });
+
+    const { items, unknownAliases } = buildShoppingList(wanted, []);
+    // The population, printed beside every count below it.
+    console.log(
+      `${RECIPE_CATALOGUE.length} recipes, ${wanted.length} ingredient lines, ` +
+        `${items.length} shopping lines, ${unknownAliases.length} unknown alias(es)`,
+    );
+    expect(RECIPE_CATALOGUE.length).toBeGreaterThan(0);
+    expect(wanted.length).toBeGreaterThan(0);
+    expect(items.length).toBeGreaterThan(0);
+    expect(unknownAliases, `recipes name aliases that do not exist: ${unknownAliases.join(', ')}`)
+      .toEqual([]);
+
+    const faults: string[] = [];
+    for (const item of items) {
+      // shopping_item_unit_is_known
+      if (!['g', 'kg', 'count'].includes(item.unit)) {
+        faults.push(`${item.aliasId}: unit ${item.unit} is not one the column takes`);
+      }
+      // shopping_item_quantities_are_positive
+      if (!(item.quantity > 0)) faults.push(`${item.aliasId}: quantity ${item.quantity}`);
+      if (!(item.neededQuantity > 0)) faults.push(`${item.aliasId}: needed ${item.neededQuantity}`);
+      // shopping_item_count_names_its_noun
+      if ((item.unit === 'count') !== (item.countNoun !== null)) {
+        faults.push(`${item.aliasId}: unit ${item.unit} with noun ${String(item.countNoun)}`);
+      }
+      // shopping_item_deduction_is_known
+      if (!['none', 'box', 'stock'].includes(item.deduction)) {
+        faults.push(`${item.aliasId}: deduction ${item.deduction}`);
+      }
+      // And the screen only draws the aisles it was given, so a line in any
+      // other aisle exists in the database and on no page.
+      if (!AISLE_ORDER.includes(item.aisle)) {
+        faults.push(`${item.aliasId}: aisle ${item.aisle} is not drawn by the shopping screen`);
+      }
+    }
+    for (const fault of faults) console.log(`fault  ${fault}`);
+    expect(faults).toEqual([]);
+
+    // And the noun a count line carries is a catalogue key, never the word, so
+    // the constraint being satisfied is not the same as the screen having words
+    // to print.
+    const counted = items.filter((item) => item.unit === 'count');
+    console.log(`${counted.length} of ${items.length} lines are counted rather than weighed`);
+    for (const item of counted) {
+      expect(
+        Object.keys(strings.nutrition.countNouns),
+        `${item.aliasId} counts in "${item.countNoun}", which is not a catalogued noun`,
+      ).toContain(item.countNoun);
+    }
   });
 });

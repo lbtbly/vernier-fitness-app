@@ -43,7 +43,8 @@ export type FoodFacts = {
 };
 
 export type IngredientLine = {
-  aliasId: string;
+  /** Null on a line the parser weighed and could not name. It still has mass. */
+  aliasId: string | null;
   grams: number;
   /** The resolved food row, or null when nothing in the table matched. */
   food: FoodFacts | null;
@@ -97,7 +98,7 @@ export function sourceHash(lines: IngredientLine[]): string {
     const food = line.food;
     digest.update(
       [
-        line.aliasId,
+        line.aliasId ?? '',
         line.grams.toFixed(3),
         food?.id ?? '',
         food?.kcal100g ?? '',

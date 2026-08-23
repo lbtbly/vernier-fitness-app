@@ -1798,12 +1798,15 @@ export const strings = {
   /**
    * The Shortcut guide: the document the owner follows on the iPhone.
    *
-   * EVERY ACTION NAME HERE IS THE NAME THE ACTION ACTUALLY HAS, taken from
-   * `.forge/research/apple-health-shortcut.md`, which read them out of Apple's
-   * own shipped action definitions rather than out of a blog. A guide naming an
-   * action that does not exist is worse than no guide: it sends a person
-   * hunting through a picker for forty minutes for something Apple never
-   * shipped, and it is the failure this feature is measured against.
+   * EVERY ACTION NAME HERE CARRIES ITS OWN EVIDENCE, taken from
+   * `.forge/research/apple-health-shortcut.md`. Twelve of the fourteen were read
+   * out of Apple's own shipped action definitions rather than out of a blog, and
+   * sections 1, 2 and 4 of that note carry an identifier for each. The two that
+   * were not are `unverifiedActions` below, and the screen prints them under a
+   * heading that says so. A guide naming an action that does not exist is worse
+   * than no guide: it sends a person hunting through a picker for forty minutes
+   * for something Apple never shipped, and it is the failure this feature is
+   * measured against.
    *
    * The tone is a person talking to a person who is holding a phone. It says
    * how long it takes, it says out loud that the repetition is expected, and it
@@ -1851,8 +1854,19 @@ export const strings = {
       { slug: 'vo2_max', label: 'VO2 Max, or Cardio Fitness', group: 'Not grouped' },
       { slug: 'sleep', label: 'Sleep', group: 'Not grouped' },
     ],
+    /**
+     * THE THREE DERIVED LABELS, AND THEY ARE THE THREE THAT ARE IN THE TABLE.
+     *
+     * This sentence said four and named Cycling Distance among them. Cycling
+     * Distance is derived in the research table, and it is not one of the ten
+     * rows this guide ships, so the note pointed the owner at a row that is not
+     * there and then miscounted its own list. Research section 1.6 marks
+     * exactly three of the ten shipped labels derived rather than observed:
+     * Resting Heart Rate, Heart Rate Variability and VO2 Max. Those three, and
+     * the count is three.
+     */
     metricsUncertain:
-      "Four of those labels were read off Apple's SDK rather than seen in the picker: Resting Heart Rate, Heart Rate Variability, VO2 Max and Cycling Distance. Search the picker for them rather than scrolling a category tree, and if VO2 Max is not there, look for Cardio Fitness, which is what the Health app renamed it to.",
+      "Three of those labels were read off Apple's SDK rather than seen in the picker: Resting Heart Rate, Heart Rate Variability and VO2 Max. Search the picker for them rather than scrolling a category tree, and if VO2 Max is not there, look for Cardio Fitness, which is what the Health app renamed it to.",
 
     partALabel: 'Part A. One block per metric, nine actions, ten times',
     partANote:
@@ -1962,6 +1976,27 @@ export const strings = {
       'Add the shortcut to the Home Screen, so a run by hand is always one tap away.',
       'Do not add it to Siri. A Siri-invoked shortcut gets about fifteen seconds and this one needs longer.',
     ],
+
+    /**
+     * THE TWO ACTION NAMES THIS RUN COULD NOT VERIFY, SAID OUT LOUD.
+     *
+     * The rest of this guide names actions that were read out of Apple's own
+     * shipped action definitions: research sections 1, 2 and 4 carry an
+     * identifier for every one of them, `is.workflow.actions.hash` and the rest.
+     * `Show Notification` and `Run Shortcut` appear only inside the build recipe
+     * in section 8, with no identifier and no evidence mark, and the guide
+     * printed both in the same type as the twelve that were verified. A guide
+     * that presents an unchecked name as a checked one is the same failure as a
+     * guide that invents one: the owner hunts a picker for it and does not know
+     * he is hunting for a guess.
+     *
+     * The metric table already had this shape for its derived picker labels, so
+     * this follows it rather than inventing a second pattern.
+     */
+    unverifiedLabel: 'Two of these names were not checked against Apple',
+    unverifiedActions: ['Show Notification', 'Run Shortcut'],
+    unverifiedBody:
+      'Every other action in this guide was read out of the definitions Apple ships, identifier and all. These two were not: they come from the build recipe rather than from a verified list. Search the action list for each one and take the closest match. The first is the step that prints what this machine answered, and the second is the only action the automation holds. Nothing else in the run depends on either name being exact.',
 
     lockedLabel: 'Why it will sometimes not run, and what actually helps',
     lockedBody:
@@ -2959,6 +2994,18 @@ export const strings = {
     ingredients: 'Ingredients',
     ingredientLine: (grams: string, name: string) => `${grams} g ${name}`,
     ingredientUnresolved: 'Not counted. No food table row matches this ingredient.',
+    /**
+     * A line the parser weighed and could not name.
+     *
+     * The screen printed `line.aliasId` here, which was a machine token
+     * rendered to a person, and it printed nothing at all once an unnamed line
+     * could exist. The weight is real and it is what the coverage shortfall is
+     * made of, so it is stated: the mass is on the screen and the fact that
+     * nothing is known about it is beside it.
+     */
+    ingredientUnnamed: (grams: string) => `${grams} g, not recognised`,
+    ingredientUnnamedNote:
+      'The card listed this and Vernier could not tell what it was. Its weight still counts against the mass covered below, which is why that figure is not 100%.',
     /** Where a recipe's numbers came from, one word per provenance value. */
     provenance: {
       computed_ciqual: 'Computed from Anses Ciqual rows',
@@ -3677,6 +3724,12 @@ export const strings = {
         `One cardio session, because the weekly target is ${minutes} minutes of moderate work.`,
       painDeload: (site: string) =>
         `Volume is cut this week: you reported ${site} in two sessions running.`,
+      painCeiling: (site: string) =>
+        `Volume is cut this week: ${site} went past the 5 out of 10 ceiling last session.`,
+      painMorning: (site: string) =>
+        `Volume is cut this week: ${site} was still there the next morning.`,
+      painRose: (site: string) =>
+        `Volume is cut this week: ${site} was worse than it had been the week before.`,
       ownEdit: (when: string) => `You moved this to ${when}.`,
     },
     longerFact: (percent: number, longest: number) =>
@@ -3746,6 +3799,17 @@ export const strings = {
       'A movement advances when you go 2 or more reps past the target on the last set, in two sessions running. Progression is not required to get results, so a week with none of this in it is a normal week.',
     blocked: (site: string) =>
       `Nothing advances while ${site} has been reported in two sessions running. That movement cuts volume instead.`,
+    /*
+     * One sentence per limb of the pain rule, because the owner is owed the
+     * reason and not just the refusal. The player states all four of these to
+     * him as he logs the session; this is where the app says it meant them.
+     */
+    blockedCeiling: (site: string) =>
+      `Nothing advances while ${site} is past the 5 out of 10 ceiling. That movement cuts volume instead.`,
+    blockedMorning: (site: string) =>
+      `Nothing advances while ${site} is still there the next morning. That movement cuts volume instead.`,
+    blockedRose: (site: string) =>
+      `Nothing advances while ${site} is worse than it was last week. That movement cuts volume instead.`,
   },
 
   /** The session player, screen 07. */

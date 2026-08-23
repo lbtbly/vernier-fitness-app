@@ -12,13 +12,17 @@ export const dynamic = 'force-dynamic';
 /**
  * The Shortcut guide, F55. The document the owner follows on his iPhone.
  *
- * EVERY ACTION NAME ON THIS SCREEN IS THE NAME THE ACTION ACTUALLY HAS. They
- * come out of `.forge/research/apple-health-shortcut.md`, which read them from
- * Apple's own shipped action definitions and localization tables rather than
- * from a blog post. A guide naming an action that does not exist is worse than
- * no guide at all: it sends a person hunting a picker for forty minutes for
- * something Apple never shipped, and it is the failure this feature is measured
- * against.
+ * EVERY ACTION NAME ON THIS SCREEN CARRIES ITS OWN EVIDENCE. Twelve of the
+ * fourteen come out of `.forge/research/apple-health-shortcut.md` sections 1, 2
+ * and 4, which read them from Apple's own shipped action definitions and
+ * localization tables rather than from a blog post, identifier and all. Two,
+ * `Show Notification` and `Run Shortcut`, appear only in that note's build
+ * recipe with no identifier and no evidence mark, and the `unverified` card
+ * below names both and says so. A guide naming an action that does not exist is
+ * worse than no guide at all: it sends a person hunting a picker for forty
+ * minutes for something Apple never shipped, and it is the failure this feature
+ * is measured against. A guide printing a guess in the same type as a checked
+ * name is the same failure one step quieter.
  *
  * IT IS A SCREEN AND NOT A MARKDOWN FILE ON PURPOSE. The owner reads it on the
  * phone he is building the shortcut on, beside the token and the secret he has
@@ -236,6 +240,32 @@ export default async function ShortcutGuidePage() {
             </li>
           ))}
         </ol>
+      </section>
+
+      {/*
+        * F55's second uncertainty note, and it sits under the two parts that
+        * carry the two names.
+        *
+        * The metric table above already tells the owner which picker labels
+        * were derived rather than seen. This does the same for the two action
+        * names this run could not check against Apple's shipped definitions,
+        * because printing them in the same type as the twelve that were checked
+        * is a claim the research does not support. Each name carries its own
+        * marker so the count on this card and the list under it cannot drift.
+        */}
+      <section className="card" data-card="unverified" style={{ borderStyle: 'dashed' }}>
+        <div className="between">
+          <span className="lbl">{guide.unverifiedLabel}</span>
+          <WarnIcon />
+        </div>
+        {guide.unverifiedActions.map((action) => (
+          <div className="row" key={action} data-unverified-action={action}>
+            <span className="head grow">{action}</span>
+          </div>
+        ))}
+        <p className="sub" style={{ marginTop: 'var(--s2)' }}>
+          {guide.unverifiedBody}
+        </p>
       </section>
 
       {/*

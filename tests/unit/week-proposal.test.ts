@@ -46,7 +46,7 @@ function input(overrides: Partial<WeekInput> = {}): WeekInput {
     timeZone: ZONE,
     history: [],
     steps: [],
-    repeatedPainSite: null,
+    painBlock: null,
     now: NOW,
     ...overrides,
   };
@@ -197,13 +197,54 @@ describe('every row carries the cause it was placed on', () => {
   });
 
   test('a repeated pain site changes the cause on the strength sessions and names the site', () => {
-    const week = proposeWeek(input({ history: historyOf([0, 2, 5]), repeatedPainSite: 'knee' }));
+    const week = proposeWeek(
+      input({
+        history: historyOf([0, 2, 5]),
+        painBlock: { site: 'knee', reason: 'repeatedSite' },
+      }),
+    );
     const strength = week.filter((session) => session.kind === 'strength');
     expect(strength.length).toBeGreaterThan(0);
     for (const session of strength) {
       expect(session.cause.key).toBe('painDeload');
       expect(session.cause.params.site).toBe('knee');
     }
+  });
+
+  /*
+   * EACH LIMB OF THE PAIN RULE CARRIES ITS OWN CAUSE, AND F72 IS WHY.
+   *
+   * Every proposed row states the input it was placed on in plain words. All
+   * four limbs used to render "you reported knee in two sessions running",
+   * because there was one cause key: a week cut back because the knee got worse
+   * than last week would have told the owner about two sessions that did not
+   * happen. A cause that names the wrong input is worse than no cause, because
+   * he checks it against his own memory and finds it wrong.
+   *
+   * GOES RED IF: two limbs collapse onto one key again.
+   */
+  test('each limb of the pain rule names its own reason on the strength sessions', () => {
+    const expected: Array<[string, string]> = [
+      ['repeatedSite', 'painDeload'],
+      ['aboveCeiling', 'painCeiling'],
+      ['notSubsided', 'painMorning'],
+      ['roseFromLastWeek', 'painRose'],
+    ];
+    const keys = new Set<string>();
+    for (const [reason, key] of expected) {
+      const week = proposeWeek(
+        input({ history: historyOf([0, 2, 5]), painBlock: { site: 'knee', reason } }),
+      );
+      const strength = week.filter((session) => session.kind === 'strength');
+      expect(strength.length).toBeGreaterThan(0);
+      for (const session of strength) {
+        expect(session.cause.key, `${reason} rendered as ${session.cause.key}`).toBe(key);
+        expect(session.cause.params.site).toBe('knee');
+      }
+      keys.add(key);
+    }
+    // Four reasons, four keys, so nothing here passed by two of them agreeing.
+    expect(keys.size).toBe(expected.length);
   });
 });
 

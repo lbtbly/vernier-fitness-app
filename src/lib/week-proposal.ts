@@ -51,9 +51,27 @@ export type CauseKey =
   | 'lowSteps'
   | 'noHistoryYet'
   | 'weeklyCardio'
-  | 'painDeload';
+  /*
+   * Four pain causes rather than one, because F72 asks every row to name the
+   * input it was placed on in plain words. "Volume is cut this week: you
+   * reported knee in two sessions running" is a reason; the same sentence
+   * printed over a knee that simply got worse than last week is a reason for
+   * something that did not happen.
+   */
+  | 'painDeload'
+  | 'painCeiling'
+  | 'painMorning'
+  | 'painRose';
 
 export type Cause = { key: CauseKey; params: Record<string, string | number> };
+
+/** One reason, one cause key. A reason with no key of its own is a lie by default. */
+export function painCauseKey(reason: string): CauseKey {
+  if (reason === 'aboveCeiling') return 'painCeiling';
+  if (reason === 'notSubsided') return 'painMorning';
+  if (reason === 'roseFromLastWeek') return 'painRose';
+  return 'painDeload';
+}
 
 export type ProposedSession = {
   /** Position in the week, 0 first. Stable across a rejection. */
@@ -78,8 +96,14 @@ export type WeekInput = {
   history: Array<{ at: Date; minutes: number; completed: boolean; muscles: string[] }>;
   /** The last seven days of step readings that exist. An absent day is absent. */
   steps: Array<{ at: Date; value: number }>;
-  /** The site reported twice running, or null. Deloads and never advances. */
-  repeatedPainSite: string | null;
+  /**
+   * What the pain rule says, whole, or null when it says nothing. Deloads and
+   * never advances.
+   *
+   * This was `repeatedPainSite`, one limb of a four-part rule, and the other
+   * three were stated on the capture screen and enforced nowhere.
+   */
+  painBlock: { site: string; reason: string } | null;
   now: Date;
 };
 
@@ -301,9 +325,10 @@ export function proposeWeek(input: WeekInput): ProposedSession[] {
       place: PLACE[want.kind],
       movementIds: want.movementIds,
       fullBody: isFullBody(want.movementIds),
-      cause: input.repeatedPainSite && want.kind === 'strength'
-        ? { key: 'painDeload', params: { site: input.repeatedPainSite } }
-        : cause,
+      cause:
+        input.painBlock && want.kind === 'strength'
+          ? { key: painCauseKey(input.painBlock.reason), params: { site: input.painBlock.site } }
+          : cause,
       length: sessionLengthFact(
         durationMinutes,
         input.history.map((session) => ({ minutes: session.minutes, at: session.at })),

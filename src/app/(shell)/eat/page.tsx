@@ -354,8 +354,12 @@ export default async function EatPage() {
       .filter((meal) => {
         const view = recipeById.get(meal.recipeId);
         return (
-          view?.ingredients.some((line) =>
-            rules.preference.some((subject) => aliasById(line.aliasId)?.allergens.includes(subject)),
+          view?.ingredients.some(
+            (line) =>
+              line.aliasId !== null &&
+              rules.preference.some((subject) =>
+                aliasById(line.aliasId as string)?.allergens.includes(subject),
+              ),
           ) ?? false
         );
       })
