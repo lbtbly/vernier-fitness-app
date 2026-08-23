@@ -612,3 +612,67 @@ export function postScratchIngest(input: {
   rmSync(reportPath, { force: true });
   return report;
 }
+
+/**
+ * The laboratory files on the SCRATCH instance's storage volume, names only.
+ *
+ * F63 asks for a directory listing before and after a delete, and the listing
+ * has to come off the filesystem rather than out of the database: those two
+ * disagreeing is the interesting case and a helper that read the row would hide
+ * it. It runs inside the scratch container by name, like every other write in
+ * this file, and the owner's volume is never read or touched by the suite.
+ *
+ * It lives here rather than in the spec that wants it for the same reason every
+ * other command does: one file in this suite reaches for a container, and a spec
+ * that spawns its own is a failing unit test before anyone reads its arguments.
+ */
+export function scratchLabFiles(): string[] {
+  const listed = execFileSync(
+    'docker',
+    ['exec', SCRATCH_CONTAINER, 'sh', '-c', 'ls -1 /app/storage/labs 2>/dev/null || true'],
+    { cwd: projectRoot, encoding: 'utf8' },
+  ).trim();
+  return listed === '' ? [] : listed.split('\n').map((name) => name.trim()).filter(Boolean);
+}
+
+/**
+ * The whole of the scratch database asked one question: does any table, any
+ * column, anywhere, hold something that reads as a blood-pressure value.
+ *
+ * F60 asks for "a query across every table", and a query naming the three tables
+ * somebody remembered is not that. This walks `information_schema` for every
+ * text and json column in the public schema and searches all of them, so a
+ * column added next year is covered without anybody editing this helper. It
+ * returns the matches, and the only passing answer is none.
+ */
+export function scratchBloodPressureSearch(): string {
+  return scratchQuery(`
+    do $$
+    declare
+      column_row record;
+      found bigint;
+    begin
+      create temporary table if not exists bp_matches (place text, sample text) on commit preserve rows;
+      delete from bp_matches;
+      for column_row in
+        select table_name, column_name
+        from information_schema.columns
+        where table_schema = 'public'
+          and data_type in ('text','character varying','json','jsonb')
+      loop
+        execute format(
+          'insert into bp_matches select %L, left(%I::text, 120) from %I where %I::text ~* %L',
+          column_row.table_name || '.' || column_row.column_name,
+          column_row.column_name,
+          column_row.table_name,
+          column_row.column_name,
+          '(mmhg|tension arterielle|pression arterielle|blood pressure|systolic|diastolic|128/82)'
+        );
+      end loop;
+      select count(*) into found from bp_matches;
+      raise notice 'blood pressure matches: %', found;
+    end
+    $$;
+    select coalesce(string_agg(place || ' = ' || sample, ' | '), 'none') from bp_matches
+  `);
+}

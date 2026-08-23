@@ -7,14 +7,16 @@ import { SourceChip } from '@/components/SourceChip';
 import { HeartChart, SleepChart, StepsChart } from '@/components/SignalCharts';
 import { StaleCause, StaleChip } from '@/components/StaleNotice';
 import { BodyChart } from '@/components/WeightChart';
+import { LabTrend } from '@/components/LabTrend';
 import { ChevronIcon } from '@/components/icons';
-import { readLatestPerMetric, readSourceRecordsFor, toView } from '@/db/measurements';
+import { readAnalyteSeries, readAnalytes, readOpenReviews } from '@/db/labs';
 import { DEFAULT_RANGE, RANGES, readBodyScreen, readSignalScreen } from '@/db/screens';
 import { getConfig } from '@/lib/config';
 import { readCsrfToken } from '@/lib/csrf';
-import { metricLabel, sleepLabel, valueLabel } from '@/lib/display';
-import { dayLabel, formatNumber, longDate, shortDate } from '@/lib/format';
-import { LAB_METRICS } from '@/lib/provenance';
+import { sleepLabel } from '@/lib/display';
+import { dayLabel, formatNumber, longDate, shortDate, shortDateTime } from '@/lib/format';
+import { analyteLabel } from '@/lib/lab-display';
+import type { ReviewRow } from '@/lib/lab-review';
 import { strings } from '@/lib/strings';
 import { AVERAGE_WINDOW, type Day } from '@/lib/trend';
 
@@ -93,15 +95,34 @@ export default async function HealthPage({
   const asked = Number((await searchParams).range ?? DEFAULT_RANGE);
   const range = (RANGES as readonly number[]).includes(asked) ? asked : DEFAULT_RANGE;
 
-  const [body, signals, rows, csrfToken] = await Promise.all([
+  const [body, signals, csrfToken, analytes, openReviews] = await Promise.all([
     readBodyScreen(range),
     readSignalScreen(range),
-    readLatestPerMetric(),
     readCsrfToken(),
+    readAnalytes(),
+    readOpenReviews(),
   ]);
-  const records = await readSourceRecordsFor(rows);
-  const values = rows.map((row) => toView(row, records));
-  const labValues = values.filter((view) => (LAB_METRICS as readonly string[]).includes(view.metric));
+  /*
+   * The lab archive, which is the half of this screen DESIGN.md's information
+   * architecture gives to Health: every trend on one screen, and the blood
+   * panels among them.
+   *
+   * The catalogue is read from the database rather than from a list in source,
+   * so an analyte the owner adds while reviewing a panel gets a trend on the
+   * next render with no source file touched. That is F64, and it is the reason
+   * `lab_analyte` is a table.
+   *
+   * An analyte with no stored value draws its own absence and never a flat line
+   * at zero. A panel is a point, not a day, so these charts are not on the daily
+   * axis the body charts use: two panels six months apart are two comparable
+   * measurements and the space between them is not a gap in a series, it is the
+   * six months in which nobody took blood.
+   */
+  const analyteSeries = await readAnalyteSeries(analytes.map((analyte) => analyte.key));
+  const withReadings = analytes.filter((analyte) => (analyteSeries.get(analyte.key) ?? []).length > 0);
+  const withoutReadings = analytes.filter(
+    (analyte) => (analyteSeries.get(analyte.key) ?? []).length === 0,
+  );
 
   const { summary, goal, weightDays, waistDays, now } = body;
   const unit = goal?.unit ?? 'kg';
@@ -441,32 +462,84 @@ export default async function HealthPage({
         {scale?.stale ? <StaleCause freshness={scale} timeZone={timeZone} /> : null}
       </section>
 
-      {/* ---------- the stored blood panel ---------- */}
-      {labValues.length > 0 ? (
-        <section className="card" data-card="panel">
-          <div className="between">
-            <span className="lbl">
-              {strings.panel.label(shortDate(new Date(labValues[0].measuredAt), timeZone))}
+      {/* ---------- the blood panels: one trend per analyte ---------- */}
+      <div className="between" style={{ margin: 'var(--s6) 0 var(--s2)' }}>
+        <span className="lbl">{strings.labs.trendsLabel}</span>
+        <SourceChip source="lab_pdf" />
+      </div>
+
+      {/*
+        * A review left open is a thing waiting on the owner, and silence is the
+        * failure mode this product was built against. It is named here rather
+        * than left to be rediscovered on the labs screen.
+        */}
+      {openReviews.map((review) => (
+        <Link
+          className="card tight row value-link"
+          key={review.id}
+          href={`/health/labs/${review.id}`}
+          data-open-review={review.id}
+        >
+          <span className="grow stack">
+            <span className="strong">{strings.labs.inReviewLabel}</span>
+            <span className="note num">
+              {strings.labs.inReviewCount(
+                (review.extraction as ReviewRow[]).length,
+                shortDateTime(review.uploadedAt, timeZone),
+              )}
             </span>
-            <SourceChip source="lab_pdf" />
-          </div>
-          {labValues.map((view) => {
-            const label = valueLabel(view);
-            return (
-              <Link className="row value-link" key={view.id} href={`/value/${view.id}`}>
-                <span className="grow">{metricLabel(view.metric)}</span>
-                <span className="num">
-                  {label.number} {label.unit}
-                </span>
-                <ChevronIcon className="ch" />
-              </Link>
-            );
-          })}
+          </span>
+          <ChevronIcon className="ch" />
+        </Link>
+      ))}
+
+      {withReadings.length === 0 ? (
+        <EmptyState
+          label={strings.labs.trendsLabel}
+          title={strings.labs.archiveEmptyTitle}
+          body={strings.labs.archiveEmptyBody}
+          actionLabel={strings.labs.openLabs}
+          actionHref="/health/labs"
+        />
+      ) : (
+        <>
+          {withReadings.map((analyte) => (
+            <LabTrend
+              key={analyte.key}
+              id={`health-analyte-${analyte.key}`}
+              analyte={analyte}
+              readings={analyteSeries.get(analyte.key) ?? []}
+              timeZone={timeZone}
+            />
+          ))}
+          {/*
+            * Absence drawn as absence. An analyte the catalogue holds and the
+            * panels never carried says so in one row and gets no chart, because
+            * a chart with no points is a shape that reads like data.
+            */}
+          {withoutReadings.length > 0 ? (
+            <section className="card empty" data-card="analytes-empty">
+              <span className="lbl">{strings.labs.trendsLabel}</span>
+              {withoutReadings.map((analyte) => (
+                <div className="row" key={analyte.key} data-analyte-empty={analyte.key}>
+                  <span className="grow note">{strings.labs.trendEmpty(analyteLabel(analyte))}</span>
+                </div>
+              ))}
+            </section>
+          ) : null}
+          <p className="note" style={{ marginTop: 'var(--s2)' }}>
+            {strings.labs.trendsNote}
+          </p>
           <p className="note" style={{ marginTop: 'var(--s2)' }}>
             {strings.panel.note}
           </p>
-        </section>
-      ) : null}
+          <div className="actions">
+            <Link className="btn block" href="/health/labs">
+              {strings.labs.openLabs}
+            </Link>
+          </div>
+        </>
+      )}
 
       <p className="note centre" style={{ padding: '4px 16px 0' }}>
         {strings.health.closing}

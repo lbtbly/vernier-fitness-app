@@ -13,6 +13,7 @@ import { WaistChart, WeightChart } from '@/components/WeightChart';
 import { ChevronIcon, SyncIcon } from '@/components/icons';
 import { recordRequestOrigin } from '@/db/diagnostics';
 import { readLastAcceptedBatch } from '@/db/ingest';
+import { readAnalytes } from '@/db/labs';
 import { readLatestPerMetric, readOpenQuestions, readSourceRecordsFor, toView } from '@/db/measurements';
 import { TODAY_RANGE, readAdherenceScreen, readBodyScreen, readSignalScreen } from '@/db/screens';
 import { getConfig } from '@/lib/config';
@@ -28,13 +29,25 @@ import {
   shortDateTime,
   time24,
 } from '@/lib/format';
-import { LAB_METRICS } from '@/lib/provenance';
 import { readRequestOrigin } from '@/lib/request-origin';
 import { strings } from '@/lib/strings';
 import { AVERAGE_WINDOW, type Day, STALE_HOURS, dayKey } from '@/lib/trend';
 
 export const metadata = { title: strings.today.title };
 export const dynamic = 'force-dynamic';
+
+/**
+ * The most rows Today's blood-panel card will ever draw, whatever the owner
+ * stores.
+ *
+ * Amendment A5: an element inside a fixed budget either names every element
+ * that spends it, or carries a maximum fixed by construction and states it as a
+ * number. This card sits below the weight trend and spends none of the 715
+ * pixels F27 counts, and this constant is what keeps that true of a screen
+ * somebody reorders later. Four rows plus one summary line, and thirteen
+ * analytes do not make it fourteen rows tall.
+ */
+const PANEL_ROWS_ON_TODAY = 4;
 
 /**
  * Today, screen 02.
@@ -143,7 +156,23 @@ export default async function TodayPage() {
   ]);
   const records = await readSourceRecordsFor(rows);
   const values = rows.map((row) => toView(row, records));
-  const labValues = values.filter((view) => (LAB_METRICS as readonly string[]).includes(view.metric));
+  /*
+   * The blood panel card, and the maximum it may be.
+   *
+   * Which metrics are laboratory values is read from the catalogue rather than
+   * from a list in source, because slice 7 lets the owner add a fourteenth
+   * analyte through the interface and a compiled list could not know about it.
+   *
+   * AND THE CARD IS BOUNDED BY CONSTRUCTION, WHICH F27 REQUIRES OF ANY ELEMENT
+   * THAT COULD GROW. It used to hold one row because one analyte existed. With
+   * thirteen seeded and a fourteenth possible its height would be a count of
+   * the owner's data, so it draws at most PANEL_ROWS_ON_TODAY and states the
+   * remainder as one line. It sits below the weight trend either way and spends
+   * none of the 715 pixels above the fold; the cap is here so that stays true
+   * of a screen somebody reorders later.
+   */
+  const analyteKeys = new Set((await readAnalytes()).map((analyte) => analyte.key));
+  const labValues = values.filter((view) => analyteKeys.has(view.metric));
 
   const { summary, goal, weightDays, waistDays } = body;
   const now = body.now;
@@ -636,7 +665,7 @@ export default async function TodayPage() {
             </span>
             <SourceChip source="lab_pdf" />
           </div>
-          {labValues.map((view) => {
+          {labValues.slice(0, PANEL_ROWS_ON_TODAY).map((view) => {
             const label = valueLabel(view);
             return (
               <Link className="row value-link" key={view.id} href={`/value/${view.id}`}>
@@ -648,6 +677,14 @@ export default async function TodayPage() {
               </Link>
             );
           })}
+          {labValues.length > PANEL_ROWS_ON_TODAY ? (
+            <Link className="row value-link" href="/health">
+              <span className="grow note">
+                {strings.labs.seeAllOnHealth(labValues.length - PANEL_ROWS_ON_TODAY)}
+              </span>
+              <ChevronIcon className="ch" />
+            </Link>
+          ) : null}
           <p className="note" style={{ marginTop: 'var(--s2)' }}>
             {strings.panel.note}
           </p>

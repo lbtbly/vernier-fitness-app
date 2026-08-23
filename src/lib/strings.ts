@@ -599,6 +599,83 @@ export const strings = {
       ownerExists: 'The owner account already exists. Vernier holds exactly one, and it is created once.',
     },
 
+    /**
+     * The laboratory routes, and the refusals screen 05 renders in screen 00's
+     * error card. Every one of them names a cause and a next step, and none of
+     * them prints a value it refused.
+     */
+    labs: {
+      noFile: 'No file arrived with that upload.',
+      noFileDetail: 'Choose a PDF and try again. Nothing was stored.',
+      notAPdf: 'That file is not a PDF.',
+      notAPdfDetail:
+        'Vernier reads laboratory PDFs on this machine. A photograph or a screenshot has to be saved as a PDF first.',
+      tooLarge: (megabytes: number) => `That file is larger than ${megabytes} MB.`,
+      tooLargeDetail:
+        'A laboratory panel is a few hundred kilobytes. Nothing was written to the volume.',
+      unreadable: 'That PDF could not be read.',
+      unreadableDetail:
+        'The file arrived whole but its structure could not be parsed. Nothing was stored and the file was not kept.',
+      nothingFound: 'No result rows were found in that document.',
+      nothingFoundDetail:
+        'Every line was read and none of them held an analyte, a number and a unit together. The file was not kept and nothing was stored.',
+      recogniserAbsent: 'This page has no text layer and optical recognition is not installed.',
+      recogniserAbsentDetail:
+        'The page was detected as an image rather than as text. Rather than store rows it cannot read, Vernier stopped. Install the recogniser on the Mac mini and open the file again; every other page of this document was left alone and nothing was stored.',
+      languageDataAbsent: 'This page has no text layer and the French language data is missing.',
+      languageDataAbsentDetail:
+        'Optical recognition reads French from a data file on the storage volume and will not download one. Put fra.traineddata in the tessdata folder of the volume and open the file again. Nothing was stored.',
+      recognitionFailed: 'Optical recognition could not read that page.',
+      recognitionFailedDetail:
+        'The page was rendered and the recogniser stopped on it. Nothing was stored, and the other pages of this document were left as they were.',
+      noSuchDocument: 'No such review.',
+      noSuchDocumentDetail:
+        'That review is not in this database. It was either abandoned or already validated, and nothing was left behind.',
+      noSuchRow: (ordinal: number) => `Row ${ordinal} is not in this review.`,
+      noSuchRowDetail: 'The review may have been reloaded since. Open it again. Nothing was stored.',
+      alreadyDecided: 'That row has already been decided.',
+      alreadyDecidedDetail:
+        'A row is saved or rejected once. Nothing was written a second time and the stored value has not moved.',
+      /**
+       * The refusal that makes the whole screen honest. It is raised when a
+       * request carries anything that would apply more than one row, and it
+       * names the number it counted rather than the rows, because naming the
+       * rows would be the batch this refusal exists to prevent.
+       */
+      oneRowPerWrite: (counted: number) =>
+        `That request would have stored ${counted} rows and this route stores one.`,
+      oneRowPerWriteDetail:
+        'Every laboratory row is accepted, edited or rejected on its own, behind its own control. There is no request shape that commits a panel, and nothing was written.',
+      blocked: 'That row is waiting on a decision.',
+      blockedDetail:
+        'It is flagged, so it cannot be saved as it stands. Open it, correct what is flagged, and save it from there. Nothing was stored.',
+      valueRefused: 'That value was not stored.',
+      unknownAnalyte: 'No analyte was named for that row.',
+      unknownUnit: (unit: string) => `${unit} is not a unit this analyte accepts.`,
+      blank: 'The result field is empty.',
+      censored: 'The sheet printed a limit rather than a number.',
+      censoredDetail:
+        'A limit is not a measurement. Type the number you want stored, or reject the row. Nothing is stored on a guess.',
+      notANumber: (text: string) => `${text} is not a number.`,
+      outOfBand: (name: string, low: string, high: string, unit: string) =>
+        `${name} is stored between ${low} and ${high} ${unit}. That value is outside the band, so nothing was written.`,
+      analyteNeedsName: 'A new analyte needs a name before it can be saved.',
+      analyteNeedsNameDetail:
+        'Type the name the sheet prints. It joins your catalogue with the unit and the interval you give it here.',
+      retentionNeeded: 'That review has not been told what to do with the file.',
+      retentionNeededDetail:
+        'Keep it or delete it. Both consequences are on the screen and neither is a default.',
+      cannotAbandon: (saved: number) =>
+        saved === 1
+          ? 'One row from this review is already stored, so the review cannot be abandoned.'
+          : `${saved} rows from this review are already stored, so the review cannot be abandoned.`,
+      cannotAbandonDetail:
+        'A stored value keeps a link to the page it was printed on. Finish the review instead and choose whether to keep the file.',
+      failed: 'That laboratory request failed.',
+      failedDetail:
+        'Nothing was stored. The rest of the app is unaffected and the review is still open.',
+    },
+
     masterKey: {
       missing: (name: string, detail: string) =>
         `${name} is ${detail}. Vernier will not start without it: every third-party credential in the database is encrypted with it, and starting without it would mean writing the next one in the clear. Set ${name} in the environment file at the project root to 32 random bytes in base64url and restart the stack.`,
@@ -1537,7 +1614,7 @@ export const strings = {
   /** The stored blood panel, read here and validated on screen 05. */
   panel: {
     label: (when: string) => `Blood panel, ${when}`,
-    note: 'Reference intervals come from the laboratory sheet. This app explains what an analyte measures and never tells you what your result means for you. Take questions to your doctor.',
+    note: 'Reference intervals come from the laboratory sheet. This app explains what an analyte measures and never reads the number for you. Take questions to your doctor.',
   },
 
   /**
@@ -1573,6 +1650,245 @@ export const strings = {
   },
 
   /**
+   * Screen 05, the curator's screen, and the most careful copy in this product.
+   *
+   * Two rules run through all of it. Nothing is stored until a row is accepted,
+   * so every sentence on the review says what has and has not happened rather
+   * than implying it. And R2: an explanation gives general reference-range
+   * context, cites a public source and invites a professional, and never says
+   * anything about what the owner's own number means. MDCG 2025-4 and the June
+   * 2025 revision of MDCG 2019-11 Rule 11 make the stated intended purpose the
+   * classification test, so that purpose is stated in docs/product.md and
+   * enforced here by `npm run compliance`, which renders every template below
+   * and fails on one banned phrase.
+   */
+  labs: {
+    title: 'Blood tests',
+    sub: 'Your panels, the analytes on them, and a review that stores nothing until you say so',
+
+    archiveLabel: 'Panels on file',
+    archiveEmptyTitle: 'No blood panel stored yet',
+    archiveEmptyBody:
+      'Drop a laboratory PDF here and it is read on this machine, row by row, with nothing stored until you accept a row. Or type a panel in by hand.',
+    inReviewLabel: 'Waiting in review',
+    inReviewCount: (rows: number, when: string) => `${rows} rows read, ${when}`,
+    openReview: 'Open the review',
+    panelOn: (when: string) => `Panel of ${when}`,
+    panelStored: (count: number) => (count === 1 ? '1 value stored' : `${count} values stored`),
+    fileKept: 'File kept on the Mac mini',
+    fileDeleted: 'File deleted at your request',
+    fileNever: 'Typed by hand, no file',
+
+    uploadLabel: 'A laboratory PDF',
+    uploadNote:
+      'Read on this Mac mini with no network call. Nothing is sent to Claude and nothing leaves the machine.',
+    uploadAction: 'Choose a PDF',
+    uploading: 'Reading the file',
+    uploadingNote: 'Extraction runs locally. A three-page panel takes a few seconds.',
+    manualAction: 'Type a panel in by hand',
+    manualLabel: 'No PDF',
+    manualNote:
+      'The same review screen, filled in by you. Each row still saves on its own, and nothing is stored until you save it.',
+
+    reviewTitle: 'Review the panel',
+    reviewFile: (name: string, pages: number) =>
+      pages === 1 ? `${name}, 1 page` : `${name}, ${pages} pages`,
+    reviewManualFile: 'Typed in by hand',
+    cancelImport: 'Cancel the import',
+    backToReview: 'Back to the review',
+    nothingStoredTitle: 'Nothing is stored yet.',
+    nothingStoredBody: (rows: number) =>
+      `${rows} rows read from the file, held in this review only. Cancelling leaves nothing behind.`,
+    panelHeader: (when: string, laboratory: string) =>
+      laboratory === ''
+        ? `Panel date read as ${when}.`
+        : `Panel date read as ${when}, laboratory ${laboratory}.`,
+    panelHeaderNoDate: 'No panel date was printed where this app looks for one.',
+
+    refusedTitle: (count: number) =>
+      count === 1 ? 'One row was refused.' : `${count} rows were refused.`,
+    refusedBody: (pages: string) =>
+      `Page ${pages} holds a blood-pressure reading. It was not extracted, it is not displayed here and it is not stored. This app has no field for it and never will.`,
+
+    needsEyes: (count: number) => `Needs your eyes, ${count}`,
+    readCleanly: (count: number) => `Read cleanly, ${count}`,
+    decidedLabel: (count: number) => `Decided, ${count}`,
+    moreCleanly: (count: number) =>
+      `${count} more read cleanly. Each one still saves on its own control.`,
+
+    chipReady: 'Ready',
+    chipLowConfidence: 'Low confidence',
+    chipNewAnalyte: 'New analyte',
+    chipSaved: 'Saved',
+    chipRejected: 'Rejected',
+    confidenceOf: (percent: number) => `Confidence ${percent}%`,
+    referenceRange: (low: string, high: string) => `ref ${low} to ${high}`,
+    referenceBelow: (high: string) => `ref below ${high}`,
+    referenceAbove: (low: string) => `ref above ${low}`,
+    referenceNone: 'no interval printed',
+
+    acceptRow: (name: string) => `Save ${name} to your panel`,
+    editRow: (name: string) => `Edit ${name} before saving`,
+    rejectRow: (name: string) => `Reject ${name}`,
+    savedAt: (when: string) => `Saved at ${when}`,
+    rejectedAt: (when: string) => `Rejected at ${when}. It is not offered again for this file.`,
+    correctedAt: (when: string) => `Corrected by you and saved at ${when}`,
+    seePage: (page: number) => `See page ${page}`,
+    decideFirst: 'Decide this row before it can be saved',
+    readCleanlyButNew: 'Read cleanly, but new to your catalogue',
+
+    /** Why a row is waiting, one sentence per flag, in the owner's language. */
+    flags: {
+      low_confidence:
+        'The parse of this line was not clean enough to store without you looking at it.',
+      unit_missing:
+        'No unit was printed on this line. The app will not guess which one the sheet meant.',
+      unit_unknown:
+        'The unit printed on this line is not one this analyte accepts, so nothing has been converted.',
+      value_censored:
+        'The sheet printed a limit rather than a number. A limit is not a measurement and is never stored as one.',
+      value_ambiguous:
+        'The characters read here are not a number. Optical recognition returns 13.Q for 13.0 often enough that this is never assumed.',
+      reference_missing: 'No reference interval was printed beside this result.',
+      date_missing: 'No sample date was found for this row.',
+      new_analyte:
+        'Not in your catalogue. Saving it adds the analyte and starts its trend from this panel.',
+      optical_recognition:
+        'This page carried no text layer and was read by optical recognition, so every row from it waits for you.',
+    },
+    unitColumnBlank: 'The unit column exists on this page and this line left it empty.',
+    conversionLine: (printed: string, factor: string, stored: string) =>
+      `Printed ${printed}, x ${factor}, stored ${stored}. All three are kept.`,
+    noConversion: (printed: string) => `Printed ${printed} and stored as printed.`,
+    sameNumber:
+      'These two symbols are the same number here. Choosing one records the choice, it does not convert anything.',
+
+    rowTitle: (ordinal: number, total: number) => `row ${ordinal} of ${total}`,
+    asPrinted: (page: number) => `As printed, page ${page}`,
+    resultLabel: 'Result',
+    unitLabel: 'Unit',
+    referenceLabel: 'Reference interval',
+    referenceLowLabel: 'Reference low',
+    referenceHighLabel: 'Reference high',
+    sampleDateLabel: 'Sample date',
+    sampleDateNote: (zone: string) => `Read in ${zone}, as the laboratory printed it.`,
+    analyteNameLabel: 'What the sheet calls it',
+    analyteNameNote:
+      'Saving under a name your catalogue does not hold adds that analyte and starts its trend here.',
+    saveThisRow: 'Save this row',
+    rejectThisRow: 'Reject this row',
+    saving: 'Saving',
+    storedTitle: 'What gets stored',
+    storedBody:
+      'The value you approve, the unit you picked, the printed original, the confidence at extraction, the file and page it came from, and the time you decided.',
+    storedNote:
+      'A later import that disagrees with this row becomes a question. It does not overwrite what you decided.',
+
+    footerCounts: (saved: number, waiting: number, rejected: number) =>
+      `${saved} saved, ${waiting} waiting on you, ${rejected} rejected`,
+    footerNote:
+      'Each row saves on its own control. There is no control here that stores more than one.',
+    finishReview: 'Finish and decide about the file',
+
+    finishTitle: (count: number) => (count === 1 ? '1 row saved' : `${count} rows saved`),
+    finishBody: (when: string, names: string) =>
+      `Panel of ${when}. Your trends now include ${names}.`,
+    finishBodyNone: (when: string) =>
+      `Panel of ${when}. Nothing from this file was stored, and the rows go with the review.`,
+    andOthers: (count: number) => `and ${count} others`,
+    summaryAccepted: 'Accepted',
+    summaryCorrected: 'Corrected by you',
+    summaryRejected: 'Rejected',
+    summaryRefused: 'Refused at extraction',
+    summaryRefusedValue: 'blood pressure',
+    summaryWaiting: 'Left waiting',
+
+    fileLabel: 'The file itself',
+    fileSize: (megabytes: string, pages: number) =>
+      pages === 1
+        ? `${megabytes} MB, 1 page, on the Mac mini`
+        : `${megabytes} MB, ${pages} pages, on the Mac mini`,
+    keepIt: 'Keep it',
+    keepNote:
+      'Stays in the storage volume, included in the nightly backup, and every value above keeps a two-tap link to its page.',
+    deleteIt: 'Delete it now',
+    deleteNote:
+      'The saved values stay. The printed originals stay. The link to the page goes, and that cannot be undone.',
+    retentionAsk: 'Keep this file, or delete it?',
+    retentionAskNote: 'Retention is a decision, not a default. This is the moment it is asked.',
+    kept: 'Kept on the Mac mini.',
+    deleted: 'Deleted from the volume.',
+    whatLeftLabel: 'What left this machine',
+    whatLeftBody:
+      'Nothing. Extraction ran on the Mac mini and Claude was not called for this import.',
+    backToHealth: 'Back to Health',
+
+    censusLabel: 'Characters read per page',
+    censusRow: (page: number, characters: number) => `Page ${page}: ${characters}`,
+    censusImageOnly: (page: number, characters: number) =>
+      `Page ${page}: ${characters}, under the threshold, so it went to optical recognition.`,
+    censusThreshold: (threshold: number) =>
+      `A page carrying fewer than ${threshold} non-whitespace characters holds no text layer and is read as an image.`,
+
+    manualTitle: 'Type a panel in',
+    manualSub: 'Result, unit, reference interval and date, per analyte. Nothing is stored here.',
+    manualDateLabel: 'Sample date',
+    manualBuild: 'Build the review',
+    manualNothing: 'Fill at least one analyte before building the review.',
+    manualRowNote: 'Leave an analyte blank to leave it off the panel.',
+    manualAddAnalyte: 'An analyte not on this list',
+    manualAddAnalyteNote:
+      'Type its name, its unit and the interval the sheet printed. It joins your catalogue when the row is saved.',
+
+    trendsLabel: 'Blood panel trends',
+    /*
+     * "One trend per analyte you have stored" was the first draft, and
+     * `npm run compliance` refused it: "you have" is on the banned list because
+     * it is how a sentence starts telling somebody what is wrong with them. The
+     * phrase is innocent here and the list is right to be blunt about it, so the
+     * copy moved rather than the rule. That is the check earning its place on
+     * the day it was written.
+     */
+    trendsNote:
+      'One trend per analyte with a stored panel. A panel is a point, not a line, so two panels a year apart are two points and nothing is drawn between them.',
+    trendTitle: (name: string) => `${name}, every stored panel`,
+    trendDesc:
+      'One point per stored panel, in the order they were sampled. Nothing is interpolated between two panels and no value is carried forward.',
+    trendCaption: (name: string) => `Stored ${name} values by sample date`,
+    trendEmpty: (name: string) => `No ${name} stored yet.`,
+    analyteCount: (count: number) => `${count} analytes in your catalogue`,
+    openLabs: 'Open blood tests',
+    seeAllOnHealth: (count: number) => `and ${count} more on Health`,
+
+    /**
+     * R2's templates, and the only thing this product ever says about an
+     * analyte. Five parts, none of which takes a result as an argument, so
+     * there is nowhere for a verdict about the owner to be written even by
+     * accident. `npm run compliance` renders all five for every analyte in the
+     * catalogue and fails on one banned phrase.
+     */
+    explanation: {
+      between: (label: string, low: string, high: string, unit: string) =>
+        `General adult reference ranges published for ${label} run from ${low} to ${high} ${unit}.`,
+      below: (label: string, high: string, unit: string) =>
+        `General adult reference ranges published for ${label} sit under ${high} ${unit}.`,
+      above: (label: string, low: string, unit: string) =>
+        `General adult reference ranges published for ${label} start at ${low} ${unit}.`,
+      unstated: (label: string) =>
+        `No general adult reference range is published on this screen for ${label}, so the interval on the sheet is the only one here.`,
+      laboratoryWins:
+        'Reference intervals differ between laboratories and between methods, so the interval printed on the sheet belongs with the number beside it.',
+      storesNotReads:
+        'Vernier stores the number, keeps the printed original beside it and draws the trend. It does not read the number and it does not say what the number means.',
+      professional:
+        'Take the question to the doctor who ordered the panel, or to the laboratory that issued the sheet.',
+      source: (url: string) =>
+        `Reference ranges here follow MedlinePlus Medical Tests, published by the U.S. National Library of Medicine: ${url}`,
+      heading: 'What this analyte measures',
+    },
+  },
+
+  /**
    * The unit as a sentence names it, which is not always the suffix a value
    * prints. A rating prints "4 of 5", and asking for "the number it should be,
    * in of 5" is what interpolating a display suffix into prose produces. The
@@ -1594,6 +1910,19 @@ export const strings = {
     'mmol/L': 'mmol/L',
     'g/L': 'g/L',
     'µg/L': 'µg/L',
+    /* The laboratory units, kept as the sheet prints them. C6 allows the
+       printed laboratory unit and nothing else, so each symbol has a key here
+       rather than being concatenated onto a number in a component. */
+    '%': '%',
+    'U/L': 'U/L',
+    'IU/L': 'IU/L',
+    'UI/L': 'UI/L',
+    'µkat/L': 'µkat/L',
+    'µmol/L': 'µmol/L',
+    'mg/L': 'mg/L',
+    'mg/dL': 'mg/dL',
+    'ng/mL': 'ng/mL',
+    'µg/dL': 'µg/dL',
     text: '',
   },
 
@@ -1613,6 +1942,16 @@ export const strings = {
     'mmol/L': 'mmol/L',
     'g/L': 'g/L',
     'µg/L': 'µg/L',
+    '%': '%',
+    'U/L': 'U/L',
+    'IU/L': 'IU/L',
+    'UI/L': 'UI/L',
+    'µkat/L': 'µkat/L',
+    'µmol/L': 'µmol/L',
+    'mg/L': 'mg/L',
+    'mg/dL': 'mg/dL',
+    'ng/mL': 'ng/mL',
+    'µg/dL': 'µg/dL',
     text: '',
   },
 
@@ -1630,6 +1969,22 @@ export const strings = {
     hrv: 'Heart rate variability',
     vo2_max: 'VO2 max',
     weight_average_7d: 'Weight, 7-day average',
+    /* The thirteen analytes slice 7 seeds into `lab_analyte`. Their labels are
+       words a person reads, so they are keys here; a fourteenth analyte the
+       owner adds carries the name HE typed and comes out of the database, which
+       is data rather than copy and is excused by provenance. */
+    fasting_glucose: 'Fasting glucose',
+    hba1c: 'HbA1c',
+    total_cholesterol: 'Total cholesterol',
+    hdl_cholesterol: 'HDL cholesterol',
     ldl_cholesterol: 'LDL cholesterol',
+    non_hdl_cholesterol: 'Non-HDL cholesterol',
+    triglycerides: 'Triglycerides',
+    alt: 'ALT',
+    ast: 'AST',
+    ggt: 'GGT',
+    creatinine: 'Creatinine',
+    crp: 'C-reactive protein',
+    ferritin: 'Ferritin',
   },
 } as const;

@@ -313,6 +313,24 @@ describe('the suite against the owner\'s installation', () => {
    *                           nothing at all would fail on the duplicates.
    *   suite-privilege:67      REAL. Every refused statement is printed with the
    *                           answer Postgres gave it.
+   *   labs-scratch:109        REAL. The review holding is counted non-zero
+   *                           twelve lines above, on the same instance, before
+   *                           the abandon that is expected to take it to zero.
+   *   labs-scratch:130,137    REAL, and they are the point of the slice. Both
+   *                           filter a list the same run counted and printed:
+   *                           `writes.length` is asserted greater than zero and
+   *                           the control count is logged, so an empty screen
+   *                           fails before either filter is reached. What is
+   *                           being defended is that NO control on a screen full
+   *                           of controls writes more than one row.
+   *   labs-scratch:339,340    REAL. The refusal branch of F65, and both zeros
+   *                           sit under an `expect(refused).toBeVisible()` that
+   *                           proves the surface rendered the refusal. The
+   *                           population is the upload that was just made.
+   *   labs-scratch:511        REAL. It filters a list of every visible control
+   *                           on the screen, and the rows and control groups are
+   *                           counted and printed at each of three viewports on
+   *                           the lines above.
    *   this file               REAL. Both offender lists print what they walked.
    */
   it('lets no assertion claim a zero over a population the surface cannot render', () => {
@@ -334,6 +352,7 @@ describe('the suite against the owner\'s installation', () => {
       ['notices.spec.ts', 4],
       ['ingest.spec.ts', 2],
       ['suite-privilege.spec.ts', 1],
+      ['labs-scratch.spec.ts', 6],
     ]);
     const zeroish = /toHaveCount\(0\)|\.toBe\(0\)|toEqual\(\[\]\)|toHaveLength\(0\)|not\.toBeVisible\(|toBeHidden\(/;
     const counted: string[] = [];
