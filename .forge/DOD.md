@@ -392,7 +392,7 @@ advance, so the budget does not have to be re-argued once per slice.
   naming it; a target below 1500 kcal is blocked until explicitly confirmed on a
   screen that recommends a professional; a planned loss above 0.89 kg per week is
   refused and the nearest compliant rate is offered. Evidence: three captures.
-- [ ] **F82.** Every meal and recipe shows energy, protein, carbohydrate, fat and
+- [x] **F82.** Every meal and recipe shows energy, protein, carbohydrate, fat and
   fibre with no decimal place on any macronutrient, energy rounded to the nearest
   10 when computed from ingredients and to the nearest 25 when estimated. Evidence:
   captures of one computed and one estimated meal.
