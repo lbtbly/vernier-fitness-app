@@ -64,6 +64,19 @@ export const NUTRITION = {
   coverageRangeThresholdPct: 85,
   /** Lucassen 2021 band for an estimate with no reference object. */
   photoEstimateBand: { low: 0.75, high: 1.35 },
+  /**
+   * The band once the owner has named the portion himself, from the same table
+   * in the research: a picked portion is minus 15 to plus 15, against minus 25
+   * to plus 35 for a photograph alone. Evidence narrows a band and never closes
+   * it. Only a weighed line has no band at all.
+   */
+  namedPortionBand: { low: 0.85, high: 1.15 },
+  /**
+   * The grid an estimated portion in grams is snapped to. Ten grams, for the
+   * same reason energy snaps to 25 and a macronutrient to 5: a grid finer than
+   * the error is theatre.
+   */
+  roundPortionEstimatedG: 10,
 } as const;
 
 /**

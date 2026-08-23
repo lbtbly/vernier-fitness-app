@@ -637,6 +637,18 @@ export const strings = {
         `The stored password names algorithm ${algorithm}, and this build verifies argon2id only.`,
       databaseSilent: (attempts: number, detail: string) =>
         `Postgres did not answer after ${attempts} attempts: ${detail}`,
+      /**
+       * The three ways the model identifier can stop this container from
+       * starting. Each one names the value it read and what to do about it,
+       * because these are read off a container log at the moment the app will
+       * not come up, which is the worst possible moment for a vague sentence.
+       */
+      noModel:
+        'ANTHROPIC_MODE is live and ANTHROPIC_MODEL is empty. Set the model identifier in the environment file, or set ANTHROPIC_MODE=demo to run the photo flow with no key.',
+      unknownModel: (model: string) =>
+        `The Models API does not know ${model}. That identifier has been retired or was never one. Read the current identifier off the models page, put it in ANTHROPIC_MODEL and restart.`,
+      modelUnverified: (model: string, status: string, detail: string) =>
+        `The Models API would not confirm ${model}: HTTP ${status}, ${detail}. Vernier refuses to serve a Send button it cannot price or address. Check ANTHROPIC_API_KEY and this machine's route to the API, or set ANTHROPIC_MODE=demo.`,
     },
 
     storage: {
@@ -764,6 +776,75 @@ export const strings = {
       noBodyDetail:
         'A target needs a weight, a height, an age and a sex. Log a weight first; nothing is estimated in its place.',
       refused: 'The target was not stored.',
+    },
+
+    /**
+     * The meal routes: the photo estimate, the entry it becomes, the recipe
+     * box import and the consent that governs all of them.
+     *
+     * Every one of these names what was NOT written, because the whole of F96
+     * is that nothing is stored until the owner confirms, and a refusal that
+     * leaves the owner unsure whether a row landed is a refusal that fails the
+     * line it was written for.
+     */
+    meals: {
+      bodyDetail: 'Open the Eat screen and try again. Nothing was written.',
+      consentOff: 'Photo analysis is switched off.',
+      consentOffDetail:
+        'No request was made and nothing was stored. Turn photo analysis on in Settings, or type the meal.',
+      noPhoto: 'No photo arrived with that request.',
+      noPhotoDetail: 'Choose a photo and try again. Nothing was sent and nothing was stored.',
+      notAJpeg: 'That file is not a JPEG.',
+      notAJpegDetail:
+        'The photo is re-encoded to JPEG on the phone before it is sent, so a file that is not one did not come through that path. Nothing was sent.',
+      tooLarge: (megabytes: number) => `That photo is larger than ${megabytes} MB.`,
+      tooLargeDetail:
+        'A photo re-encoded at 1092 px is a few hundred kilobytes. Nothing was sent and nothing was stored.',
+      carriesMetadata: 'That photo still carries camera data.',
+      carriesMetadataDetail:
+        'It was refused before anything left this machine, because re-encoding on the phone is what removes the location and it did not happen here. Nothing was sent.',
+      wrongSize: (px: number) => `That photo is not ${px} px on its long edge.`,
+      wrongSizeDetail:
+        'The phone resizes and re-encodes before it uploads. A photo that arrives at another size did not go through that step, so it was refused. Nothing was sent.',
+      unreadableReply: 'The model answered with something this product could not read.',
+      unreadableReplyDetail:
+        'Nothing was stored. The photo is still on screen, and typing the meal is one tap away.',
+      providerUnreachable: 'Claude could not be reached from this machine.',
+      providerUnreachableDetail:
+        'Nothing was stored and nothing was charged. The week, the shopping list and every trend are unaffected.',
+      noModel: 'No model identifier is configured.',
+      noModelDetail:
+        'ANTHROPIC_MODEL is empty, so this installation does not know what to call. Nothing was sent.',
+      noEntry: 'There is no such meal entry.',
+      noEntryDetail: 'It was never stored, or this screen is older than the database.',
+      noHolding: 'That estimate is no longer on this machine.',
+      noHoldingDetail:
+        'Nothing was stored when it was made, which is the point of it. Photograph the meal again.',
+      badPortion: 'That portion was not stored.',
+      badPortionDetail: 'Give a weight in grams between 1 and 3000. Nothing was written.',
+      badEnergy: 'That energy was not stored.',
+      badEnergyDetail: 'Give a whole number of kilocalories between 0 and 5000. Nothing was written.',
+      noItems: 'A meal entry needs at least one item.',
+      noItemsDetail: 'Add something to the plate, or discard the estimate. Nothing was written.',
+      badImport: 'That recipe could not be read from what you gave.',
+      badImportDetail:
+        'Nothing was stored. Type the ingredient lines instead, one per line, and the parser reads those.',
+      badArtifact: 'That is not an artifact this product parses.',
+      badArtifactDetail:
+        'A link, a PDF, a photograph or typed lines. Nothing was fetched and nothing was stored.',
+      linkUnreachable: 'That page could not be read from this machine.',
+      linkUnreachableDetail:
+        'It was asked once, now, because you pasted it. Nothing is scheduled and nothing was stored. Save the page as a PDF and upload it instead.',
+      badAnswer: 'That is not an answer to the second-portion question.',
+      badAnswerDetail:
+        'The answer is eaten tomorrow, moved to another meal, or frozen. Nothing was written.',
+      noRecipe: 'There is no such imported recipe.',
+      noRecipeDetail: 'It was never stored, or this screen is older than the database.',
+      badCategory: 'That is not one of the four things Claude may do.',
+      badCategoryDetail:
+        'Photo analysis, menu generation, health explanations and calendar event titles. Nothing was changed.',
+      failed: 'The meal write did not finish.',
+      failedDetail: 'Nothing was applied and the day is exactly as it was.',
     },
 
     shopping: {
@@ -1178,6 +1259,26 @@ export const strings = {
       'source.field.questions': 'Questions raised',
       'source.field.refusedByStorage': 'Refused by the store',
       'source.field.envelopeStatus': 'Envelope status',
+      /**
+       * What one photo estimate carried, on the source screen. Tap 2 of the
+       * provenance walk lands here, and F97 asks it to reach the photo and the
+       * model reply, so both are rows on this record: the photo is drawn above
+       * the list and the reply is read out of these fields.
+       */
+      'source.field.model': 'Model',
+      'source.field.photoSize': 'Photo, as sent',
+      'source.field.question': 'The question asked',
+      'source.field.modelNote': 'What the model replied',
+      'source.field.returnedRange': 'The range it produced',
+      'source.field.confirmedValue': 'What you confirmed',
+      'source.field.inputTokens': 'Input tokens',
+      'source.field.outputTokens': 'Output tokens',
+      'source.field.costUsd': 'What this call cost, USD',
+      'source.field.artifact': 'Artifact',
+      'source.field.artifactKind': 'Read from',
+      'source.field.linesRead': 'Ingredient lines read',
+      'source.field.linesMatched': 'Lines matched to a food',
+      'source.field.portions': 'Portions on the card',
     },
     allSourcesLabel: 'Sources, one chip each',
     allSourcesNote:
@@ -3453,5 +3554,310 @@ export const strings = {
     'parallel bars': 'Parallel bars',
     treadmill: 'Treadmill',
     bike: 'Exercise bike',
+  },
+
+  /**
+   * Screen 09, the recipe box, the takeaway slots and the consent that governs
+   * all three.
+   *
+   * Two sentences run through everything here. A photograph gives a range and
+   * never a number, because only 35 percent of image-based portion estimates
+   * land within 25 percent of the truth. And the origin of an estimate survives
+   * the save, the correction and every later edit, because an estimate that
+   * quietly becomes a fact is worse than no estimate at all.
+   */
+  meals: {
+    /* The consent screen, before the first send. */
+    consentTitle: 'Send this photo to Claude?',
+    consentContext: (slot: string, when: string) => `${slot}, ${when}`,
+    leaves: 'What leaves this machine',
+    stays: 'What does not',
+    sends: {
+      photo: 'The photo above',
+      mealContext: 'Three words of context',
+      question: 'The question',
+      recipeNames: 'The names of the recipes in the week',
+      targets: 'Your calorie and macronutrient targets',
+      rules: 'Your allergies, intolerances and exclusions',
+      analyteName: 'The name of the analyte and its unit',
+      unit: 'Nothing else off the sheet',
+      sessionKind: 'The kind of session and how long it is',
+      duration: 'Nothing about how it went',
+    },
+    sendDetail: {
+      photo: (px: number) => `${px} px on the long edge, no location`,
+      mealContext: 'lunch, weekday, at home',
+      question: 'identify foods and portions',
+      recipeNames: 'names only, never a photo',
+      targets: 'the numbers, not how they were computed',
+      rules: 'the four rules, as tokens',
+      analyteName: 'the name, never your result',
+      unit: 'no number, no date, no reference range',
+      sessionKind: 'strength, 45 minutes',
+      duration: 'no set, no load, no heart rate',
+    },
+    neverSent: {
+      identity: 'Your name, age, weight or waist',
+      labResults: 'Any lab result or health history',
+      location: 'Location, device, other photos',
+      credentials: 'Any credential',
+    },
+    neverSentDetail: 'stays here',
+    goesTo: 'Goes to',
+    goesToValue: 'Anthropic API, over TLS',
+    sentFrom: 'Sent from',
+    sentFromValue: 'the Mac mini, not the phone',
+    callCost: 'This call costs about',
+    monthToDate: 'This month',
+    monthOf: (spent: string, cap: string) => `${spent} of ${cap} USD`,
+    costUnknown: 'not priced yet',
+    sendIt: 'Send it',
+    typeInstead: 'Type the meal instead',
+    askEveryTime: 'Ask every time',
+    askEveryTimeNote: 'Turn it off in Settings, not here.',
+
+    /* The photo step itself. */
+    photoTitle: 'Photograph the meal',
+    photoBody:
+      'The photo is resized to 1092 px on its long edge and re-encoded on this phone before anything is sent, which is what removes the camera data and the location.',
+    choosePhoto: 'Choose a photo',
+    photoPreparing: 'Preparing the photo',
+    photoReady: (width: number, height: number, kb: number) =>
+      `${width} x ${height} · ${kb} kB · camera data removed`,
+    photoRejectedTitle: 'That photo was not sent',
+    photoRejectedBody:
+      'It still carried camera data after being re-encoded, so nothing left this machine. Choose the photo from the camera roll rather than from a share sheet and try again.',
+
+    /* The estimate, as ranges. */
+    estimateTitle: 'Check the estimate',
+    estimateChip: 'Estimate',
+    demoChip: 'Demonstration',
+    /** The one sentence the demonstration reply carries back about the plate. */
+    demoNote:
+      'A salmon fillet, roast potatoes and green beans, with visible oil on the potatoes.',
+    rangeNote:
+      'Portions come from plate size, so treat them as ranges. Set an exact weight on any line and that line stops being an estimate.',
+    grams: (low: number, high: number) => `${low} to ${high} g`,
+    gramsExact: (grams: number) => `${grams} g, weighed`,
+    editPortion: (item: string) => `Edit the ${item} portion`,
+    removeItem: (item: string) => `Remove the ${item}`,
+    addMissed: 'Add something it missed',
+    addItemLabel: 'What was on the plate',
+    addGramsLabel: 'Roughly how much, in grams',
+    addItem: 'Add it',
+    weighLabel: (item: string) => `Weighed ${item}, in grams`,
+    weighSave: 'Use the weighed amount',
+    totals: 'Totals',
+    totalsRange: (low: string, high: string, unit: string) => `${low} to ${high} ${unit}`,
+    saveNote: (mid: string) =>
+      `Saving keeps the middle of each range, ${mid} kcal, and keeps the range beside it.`,
+    saveEntry: (mid: string) => `Save ${mid} kcal as this meal`,
+    discard: 'Discard the estimate',
+    notAFactTitle: 'This does not become a fact',
+    notAFactBody:
+      'The entry stays badged as an estimate for as long as it exists, in the day view, in the week totals and in any export. Editing it does not scrub the origin.',
+    nothingStoredYet: 'Nothing is stored yet. Leaving this screen writes no row.',
+    unresolved: (count: number) =>
+      count === 1
+        ? '1 item has no food table row, so it is not counted in the totals.'
+        : `${count} items have no food table row, so they are not counted in the totals.`,
+
+    /* The saved entry, and the walk back to what produced it. */
+    entryTitle: 'The meal entry',
+    entryOrigin: 'Origin',
+    entryOrigins: {
+      photo_estimate: 'Photo, Claude vision',
+      typed: 'Typed by you',
+      recipe_box: 'Recipe box',
+      planned: 'From the week you accepted',
+    },
+    entryEstimatedAt: 'Estimated',
+    entryCorrected: 'You corrected',
+    entryModel: 'Model',
+    entryPhoto: 'Photo',
+    entryPhotoKept: 'kept on the Mac mini',
+    openPhotoAndReply: 'Open the photo and the reply',
+    openEntry: (name: string) => `Open ${name}`,
+    entryRange: (low: string, high: string) => `range ${low} to ${high}`,
+    entryLine: (parts: string[]) => parts.join(' · '),
+    correctEntry: 'Correct this entry',
+    correctEnergyLabel: 'The energy it should be, in kcal',
+    correctReasonLabel: 'Why, in your own words',
+    saveCorrection: 'Save the correction',
+    correctionHistory: 'Correction history',
+    noCorrection: 'No correction on this entry.',
+    correctionRow: (from: string, to: string) => `${to} kcal, was ${from} kcal`,
+    correctionBy: (when: string, reason: string) => `Corrected by you, ${when}. ${reason}`,
+    stillAnEstimate: 'Still an estimate, after every edit.',
+    entryNotFound: 'No such entry',
+    entryNotFoundBody:
+      'That meal entry is not in this database. Nothing was deleted; the id does not exist.',
+    photoNotFound: 'The photo behind this entry is not on the volume.',
+
+    /* The day card on Eat. */
+    todayLabel: 'Today',
+    dayTotal: (eaten: string, target: string) => `${eaten} of ${target} kcal`,
+    dayTotalNoTarget: (eaten: string) => `${eaten} kcal eaten`,
+    notEaten: 'Not eaten',
+    plannedChip: 'Planned',
+    dayEmptyTitle: 'Nothing logged today',
+    dayEmptyBody: 'Photograph a meal or type one, and it lands here with its origin attached.',
+    photographMeal: 'Photograph a meal',
+
+    /* The recipe box. */
+    boxTitle: 'Recipe box',
+    boxSub: 'Two recipes of two portions, imported from something you already hold.',
+    boxEmptyTitle: 'No box week imported',
+    boxEmptyBody:
+      'Vernier never signs in to a recipe box and never fetches from one on a schedule. Paste a link, upload the card, photograph it or type it, and this machine parses that one artifact.',
+    boxImport: 'Import a recipe',
+    boxImportTitle: 'Import one recipe',
+    boxImportSub: 'One artifact you already hold, parsed on this machine.',
+    boxMethods: {
+      link: 'Paste a link',
+      document: 'Upload the card',
+      photo: 'Photograph the card',
+      manual: 'Type it in',
+    },
+    boxMethodNotes: {
+      link: 'The page is read once, now, because you asked for it. Nothing is scheduled and no credential is stored.',
+      document:
+        'A PDF you downloaded from your own account. It is read on this machine by the same parser the laboratory sheets use.',
+      photo:
+        'A photo of your own recipe card. It is read on this machine, and the ingredient lines are typed rather than guessed.',
+      manual: 'Type the name, the portions and the ingredients. Nothing leaves this machine at all.',
+    },
+    boxLinkLabel: 'The link you copied',
+    boxTextLabel: 'The ingredient lines, one per line',
+    boxNameLabel: 'What the recipe is called',
+    boxServingsLabel: 'How many portions the card says',
+    boxImportAction: 'Import it',
+    boxParsed: (name: string, lines: number) =>
+      lines === 1 ? `${name}, 1 ingredient line read` : `${name}, ${lines} ingredient lines read`,
+    boxUnmatched: (count: number) =>
+      count === 1
+        ? '1 line matched no food, so it is not counted.'
+        : `${count} lines matched no food, so they are not counted.`,
+    boxImported: (name: string, portions: number) =>
+      portions === 1 ? `${name}, 1 portion` : `${name}, ${portions} portions`,
+    boxPlaced: (meals: number, recipes: number) =>
+      `${meals} meals placed from ${recipes} recipes of 2 portions.`,
+    secondPortionTitle: (name: string) => `The second portion of ${name}`,
+    secondPortionBody:
+      'Two portions, one of you. Say what happens to the second one and this week changes to match.',
+    secondPortionAnswers: {
+      next_day: 'Eaten tomorrow',
+      moved: 'Moved to another meal',
+      frozen: 'Frozen for later',
+    },
+    secondPortionAnswerNotes: {
+      next_day: 'The same meal slot, the next day.',
+      moved: 'Moved to the next free dinner in this week.',
+      frozen: 'It leaves this week and the day total drops by one portion.',
+    },
+    secondPortionStored: (name: string, answer: string) => `${name}: ${answer}.`,
+    secondPortionWaiting: (name: string) => `${name} is waiting on your answer.`,
+    secondPortionAsk: (name: string) => `Answer for ${name}`,
+
+    /* The takeaway slots. */
+    takeawayTitle: 'Takeaway, twice this week',
+    takeawaySub:
+      'Dish types that fit your targets and your rules. Vernier holds no menu and no price.',
+    takeawayEmptyTitle: 'No takeaway proposed yet',
+    takeawayEmptyBody:
+      'A target and your rules are what the proposal is computed from. Set a target and two slots appear here.',
+    takeawayOpen: (dish: string) => `Search for ${dish}`,
+    takeawaySearchNote:
+      'The link opens a search page. Vernier constructs no link to a restaurant or an item, because no such link is documented.',
+    takeawayEnergy: (low: string, high: string) => `about ${low} to ${high} kcal`,
+    takeawayEnergyUnknown: 'energy unknown until you log what you ate',
+    takeawayWhy: (kcal: string) => `Inside the ${kcal} kcal this meal has to sit in.`,
+    takeawayNoMenu: 'No menu item, no price and no restaurant is stored by this product.',
+    dishes: {
+      'grilled-chicken-salad': 'Grilled chicken salad',
+      'poke-bowl-salmon': 'Salmon poke bowl',
+      'chicken-shawarma-plate': 'Chicken shawarma plate',
+      'falafel-mezze': 'Falafel mezze',
+      'vegetable-curry-rice': 'Vegetable curry with rice',
+      'grilled-fish-vegetables': 'Grilled fish with vegetables',
+      'lentil-soup-bread': 'Lentil soup with bread',
+      'roast-chicken-potatoes': 'Roast chicken with potatoes',
+    },
+
+    /* States, five of them, on every surface this slice ships. */
+    loadingLabel: 'Reading the plate',
+    errorTitle: 'The estimate did not come back',
+    errorBodyRest:
+      'Photo estimation is the only thing that stopped. Typing a meal, the week, the shopping list and every trend keep working.',
+    offlineTitle: 'Offline.',
+    offlineBody:
+      'A photo estimate needs the Mac mini and the Mac mini needs a network. Type the meal instead and it commits on this phone.',
+    staleTitle: (days: number) =>
+      days === 1 ? 'This estimate is 1 day old' : `This estimate is ${days} days old`,
+    staleBody:
+      'It was saved against the food table as it stood then, and that is what it still says.',
+    unavailableTitle: 'Claude is not answering',
+    unavailableBody:
+      'Photo estimation is the only thing that stops. Typing a meal, the plan, the shopping list and every trend keep working. Vernier names which one broke and does not pretend the rest is affected.',
+
+    /* Consent, as the settings screen renders it. */
+    consentScreenTitle: 'What Claude may do',
+    consentScreenSub:
+      'Four things, four switches. Each one names exactly what leaves this machine before it is switched on, and with a switch off no request is made at all.',
+    categories: {
+      photo_analysis: 'Photo analysis',
+      menu_generation: 'Menu generation',
+      health_explanations: 'Health explanations',
+      calendar_titles: 'Calendar event titles',
+    },
+    categoryBodies: {
+      photo_analysis:
+        'A photograph of a meal, resized on the phone, with three words of context and one question.',
+      menu_generation: 'The names of recipes already in this product, your targets and your four rules.',
+      health_explanations:
+        'The name of an analyte and its unit. Never a result, never a date, never a reference range.',
+      calendar_titles: 'The kind of session and how long it is. Never how it went.',
+    },
+    categoryOff: 'Off. No request is made for this.',
+    categoryOn: 'On.',
+    toggleOn: (category: string) => `Turn ${category} on`,
+    toggleOff: (category: string) => `Turn ${category} off`,
+    consentRefusedTitle: 'That is switched off',
+    consentRefusedBody:
+      'Photo analysis is off, so nothing was sent and nothing was stored. Turn it on in Settings, or type the meal.',
+    modeLabel: 'Mode',
+    modeDemo: 'Demonstration, no key, no call',
+    modeLive: 'Live, calls the Anthropic API',
+    modelLabel: 'Model',
+    modelUnvalidated: 'Not validated. This installation makes no call.',
+    capLabel: 'Monthly ceiling',
+    spentLabel: 'Spent this month',
+    ledgerTitle: 'Every call this month',
+    ledgerEmpty: 'No call has been made this month.',
+    ledgerTokens: (input: number, output: number) => `${input} in, ${output} out`,
+    ledgerRefused: 'Refused before it was sent',
+    ceilingReachedTitle: 'The monthly ceiling stopped this call',
+    ceilingReachedBody: (spent: string, preflight: string, cap: string) =>
+      `${spent} USD is spent this month and this call would cost up to ${preflight} USD, which crosses the ${cap} USD ceiling. Nothing was sent. Raise the ceiling in the environment file, or wait for the month to turn.`,
+    noRatesTitle: 'This call was not priced, so it was not made',
+    noRatesBody:
+      'ANTHROPIC_INPUT_USD_PER_MTOK and ANTHROPIC_OUTPUT_USD_PER_MTOK are empty, so the monthly ceiling cannot be enforced. Read the two rates off the pricing page, put them in the environment file and restart. Nothing was sent.',
+
+    /*
+     * The question this product asks Claude, and the shape it asks for back.
+     *
+     * It is in the catalogue rather than in a module because it is words this
+     * product wrote, the consent screen quotes it, and the source record stores
+     * it, so the owner can read exactly what left his machine. A prompt hidden
+     * in code is a prompt nobody can audit.
+     */
+    prompt: {
+      system:
+        'You are looking at one photograph of one meal on a plate. Name each food you can see and give a rough weight in grams for each. Answer with JSON only, in the shape {"items":[{"alias":"","text":"","grams":0}],"note":""}. Put the closest identifier from the list of food identifiers in "alias", or an empty string when none of them fits. Put the plain English name of the food in "text". Put your best single guess of the cooked weight in grams in "grams". Put one sentence about what you can see in "note". Do not give calories, do not give a range, and do not add any text outside the JSON.',
+      aliasList: (ids: string[]) => `Food identifiers: ${ids.join(', ')}.`,
+      user: (slot: string) =>
+        `This is ${slot}, eaten at home on a weekday. What is on the plate and roughly how much?`,
+      questionSummary: 'identify foods and portions',
+    },
   },
 } as const;
