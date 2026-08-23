@@ -117,6 +117,12 @@ export function OperatorPanel(props: Props) {
   async function onSignOut() {
     setBusy(true);
     await send('/api/auth/sign-out', {});
+    // A document load, not router.push(), and not by accident. The client
+    // router caches the RSC payload of every screen this session rendered, and
+    // pushing to /sign-in leaves the owner's weight, waist and goal sitting in
+    // that cache on a machine he just signed out of. The passkey branch above
+    // reloads for the same reason.
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination
     window.location.assign('/sign-in');
   }
 

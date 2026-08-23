@@ -200,7 +200,9 @@ function stringsIn(source) {
       continue;
     }
     if (character === '`') {
-      const opensAt = index;
+      // No opensAt here: a template is pushed chunk by chunk and every chunk
+      // carries its own position, so the backtick's own index is never a line
+      // this scan reports.
       let at = index + 1;
       let chunk = '';
       let chunkAt = at;

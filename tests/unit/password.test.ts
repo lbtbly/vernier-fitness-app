@@ -1,3 +1,4 @@
+import { argon2Sync } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import {
   ARGON2ID_PARAMETERS,
@@ -39,7 +40,6 @@ describe('the backup password', () => {
       ...hashPassword('unused'),
     };
     const nonce = Buffer.from(cheaper.passwordNonce, 'base64');
-    const { argon2Sync } = require('node:crypto') as typeof import('node:crypto');
     const tag = argon2Sync('argon2id', {
       message: Buffer.from('written under an older cost 3!', 'utf8'),
       nonce,

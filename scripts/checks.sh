@@ -45,7 +45,19 @@ case "$(script_of lint)" in
 esac
 
 run() {
-  has "$1" || return 0
+  # A step this file NAMES and package.json does not define is a hole in the
+  # gate, not an absence to route around. `lint` was named here from slice 1 and
+  # never defined, so `has lint` was false on every run of this project's life,
+  # this function returned 0, and four verifications recorded "gate exit 0" for
+  # a gate that ran three of its four steps. Reporting success for a check that
+  # did not run is the same defect as a test that passes by not testing, which
+  # this run has now hit four separate times. So it fails, and it says which one.
+  if ! has "$1"; then
+    echo "checks: this gate names \"$1\" and package.json defines no such script." >&2
+    echo "        A step that cannot run is not a step that passed. Define it or" >&2
+    echo "        stop naming it here; there is no third answer." >&2
+    return 2
+  fi
   # shellcheck disable=SC2086
   OUT=$($PM run -s "$1" $2 2>&1) && return 0
   RC=$?

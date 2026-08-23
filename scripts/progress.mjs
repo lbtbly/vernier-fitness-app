@@ -14,22 +14,6 @@ if (!existsSync('.forge')) process.exit(0)
 const read = f => { try { return readFileSync(f, 'utf8') } catch { return '' } }
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 const trunc = (s, n) => s.length > n ? s.slice(0, n - 3) + '...' : s
-// Recursive, because captures get filed per slice. Slice 1 wrote eleven of them
-// into .forge/shots/slice1/ and a flat readdir returned the single string
-// "slice1", so the screenmap counted zero captures for the whole run and said
-// so confidently. A counter that reads a directory name as a file is the same
-// defect class as a sweep that reports clean over an empty set.
-const safeDir = (d, depth = 4) => {
-  let out = []
-  let entries
-  try { entries = readdirSync(d, { withFileTypes: true }) } catch { return [] }
-  for (const e of entries) {
-    if (e.isDirectory()) { if (depth > 0) out = out.concat(safeDir(`${d}/${e.name}`, depth - 1)) }
-    else out.push(e.name)
-  }
-  return out
-}
-
 const brief = read('.forge/BRIEF.md')
 const design = read('.forge/DESIGN.md')
 const dod = read('.forge/DOD.md')
@@ -300,7 +284,7 @@ for (const l of failingLines) (failBySlice[sliceOf[l.id]] ||= []).push(l)
 const debtBySlice = {}
 for (const l of unrecorded) (debtBySlice[sliceOf[l.id]] ||= []).push(l)
 
-let resumeTop = resume.split('\n').filter(l => /^(Last phase|Current slice|Next action)/i.test(l))
+const resumeTop = resume.split('\n').filter(l => /^(Last phase|Current slice|Next action)/i.test(l))
   .map(l => { const m = l.match(/^([^:]+):\s*(.*)$/); return m ? [m[1], m[2]] : ['', l] })
 if (!resumeTop.length) {
   const flat = t => t.replace(/[*_`]/g, '').replace(/\s+/g, ' ').trim()
@@ -592,7 +576,6 @@ const screenMap = screens.map(sc => {
     state: caps.length ? 'cap' : (slice && slice === curSlice ? 'bld' : 'pln'),
   }
 })
-const shotMax = Math.max(1, ...screenMap.map(s => s.shots))
 const screensSeen = screenMap.filter(s => s.state === 'cap').length
 // Captures the run filed that no screen can claim. Honest residue, not an
 // accusation: a capture proving a rubric line about rate limiting belongs to
@@ -632,14 +615,12 @@ const sitemap = []
     sitemap.push({ ...n, screen: sc || null, shots: caps.length, cover: coverOf(caps) })
   }
 }
-const routeShotMax = Math.max(1, ...sitemap.map(s => s.shots))
 // Every designed screen the tree does not already draw. Keyed off what was
 // actually rendered, not off whether a route was computed, so a screen can
 // never fall between the two lists.
 const drawnScreens = new Set(sitemap.map(n => n.screen && n.screen.n).filter(Boolean))
 const unrouted = screenMap.filter(s => !drawnScreens.has(s.n))
 const tied = new Set(screenMap.map(s => s.route).filter(Boolean))
-const untied = routesInTree.filter(r => !tied.has(r))
 
 // ------------------------------------------------------------- environments
 // Where to go and look at the thing. The board said what had been built and
@@ -669,10 +650,10 @@ for (const m of read('package.json').matchAll(/-p\s+(\d{2,5})/g)) localPorts.add
 
 // Liveness. One lsof for every local port at once, and no network call at all
 // for them. This renders on every subagent stop, so nothing here may be slow.
-let listening = new Set()
+const listening = new Set()
 if (localPorts.size) {
   try {
-    const out = execSync("lsof -nP -iTCP -sTCP:LISTEN 2>/dev/null", { encoding: 'utf8', timeout: 2500 })
+    const out = execSync('lsof -nP -iTCP -sTCP:LISTEN 2>/dev/null', { encoding: 'utf8', timeout: 2500 })
     for (const m of out.matchAll(/:(\d+)\s+\(LISTEN\)/g)) listening.add(m[1])
   } catch {}
 }
@@ -810,7 +791,7 @@ const wtTitle = worktrees.length
 
 // In play: the current slice's not-yet-verified lines, else newest evidenced.
 let inPlay = (sliceIds[curSlice] || []).map(id => byId[id]).filter(l => l && l.state !== 'verified')
-let inPlayLabel = inPlay.length ? `In play · slice ${curSlice}` : 'Recently proven'
+const inPlayLabel = inPlay.length ? `In play · slice ${curSlice}` : 'Recently proven'
 if (!inPlay.length) {
   inPlay = [...evidenced].reverse().map(id => byId[id]).filter(Boolean).slice(0, 8)
 }
@@ -1085,7 +1066,7 @@ try {
         live = Date.now() - s.mtimeMs < 120000
       } catch {}
       const ck = `${sd}/agent-${id}.jsonl`
-      let tok = tokCache[ck] && tokCache[ck].tok || 0
+      const tok = tokCache[ck] && tokCache[ck].tok || 0
       let model = tokCache[ck] && tokCache[ck].model || ''
       if (!model) {
         // Files scanned before model capture existed: read the head once.

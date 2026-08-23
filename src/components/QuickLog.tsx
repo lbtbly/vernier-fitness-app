@@ -7,7 +7,7 @@ import { SourceChip } from '@/components/SourceChip';
 import { ChevronIcon, CloseIcon, MinusIcon, PlusIcon, UndoIcon, WarnIcon } from '@/components/icons';
 import { valueLabel } from '@/lib/display';
 import { daysBetween, longDate, shortDate, time24 } from '@/lib/format';
-import { type JustLogged, type LoggedValue, setJustLogged } from '@/lib/just-logged';
+import { type JustLogged, setJustLogged } from '@/lib/just-logged';
 import type { LogSnapshot, MeasurementView } from '@/lib/measurement-view';
 import { carryTheCaughtObject, messageOf } from '@/lib/platform-cause';
 import {
@@ -389,6 +389,12 @@ export function QuickLog({
   }, [timeZone]);
 
   useEffect(() => {
+    // The rule is right in general and wrong here. read() sets the loading
+    // state on its first line, synchronously, and that is the point: the sheet
+    // paints its skeleton the instant it is raised rather than a frame after
+    // the fetch resolves. C5 holds a capture of that state. One extra render
+    // per raise is what it costs.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (open) void read();
   }, [open, read]);
 

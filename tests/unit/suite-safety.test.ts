@@ -67,11 +67,17 @@ describe('the suite against the owner\'s installation', () => {
       (match) => `${match[1]} ${match[2]}`,
     );
     expect(connections.length).toBeGreaterThan(0);
+    // And the name behind that interpolation. Every assertion below reads the
+    // literal `${SUITE_ROLE}`, so host.ts could rebind it to the owner role and
+    // the whole file would still be green.
+    expect(host, 'host.ts no longer binds the suite role to vernier_suite').toContain(
+      `export const SUITE_ROLE = '${SUITE_ROLE}'`,
+    );
     const live = connections.filter((line) => line.includes('$POSTGRES_DB'));
     expect(live.length).toBeGreaterThan(0);
     for (const connection of live) {
       expect(connection, 'a live connection opened as something other than the suite role').toContain(
-        `\${SUITE_ROLE}`,
+        '${SUITE_ROLE}',
       );
     }
     // The bootstrap superuser is still how the SCRATCH database is written, and
@@ -293,12 +299,12 @@ describe('the suite against the owner\'s installation', () => {
   it('lets no assertion claim a zero over a population the surface cannot render', () => {
     // The one that was hollow. It is gone from /health and present on Today.
     const trend = readFileSync(join(e2e, 'trend-scratch.spec.ts'), 'utf8');
-    const onHealth = trend.slice(0, trend.indexOf("await openToday(page)"));
+    const onHealth = trend.slice(0, trend.indexOf('await openToday(page)'));
     expect(
       onHealth,
       'the notice region is counted on a page that cannot render it',
     ).not.toContain("locator('[data-notices]')");
-    expect(trend).toContain("await openToday(page)");
+    expect(trend).toContain('await openToday(page)');
 
     // And the inventory, held. A member the sweep has not read is a failure.
     const known = new Map<string, number>([

@@ -59,7 +59,7 @@ const cast = await agent(
   { label: 'personas', phase: 'Personas', schema: PERSONAS_SCHEMA },
 )
 
-const interviews = (await parallel(cast.personas.map((p, i) => () =>
+const interviews = (await parallel(cast.personas.map((p) => () =>
   agent(
     `You are interviewing this persona about the goal in .forge/BRIEF.md ` +
     `(read it first). Persona: ${p.name} (${p.kind}). Context: ${p.context}. ` +

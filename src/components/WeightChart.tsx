@@ -27,7 +27,6 @@ import { sourceLabel } from '@/lib/display';
 import { dayLabel, formatNumber } from '@/lib/format';
 import { strings } from '@/lib/strings';
 import {
-  AVERAGE_WINDOW,
   GOAL_CORRIDOR,
   type Day,
   type Goal,
@@ -63,11 +62,6 @@ function tableRows(days: Day[], unit: string): ChartRow[] {
       : null,
     source: day.reading ? sourceLabel(day.reading.origin) : null,
   }));
-}
-
-function goalLabels(goal: Goal | null) {
-  if (!goal) return null;
-  return { target: formatNumber(goal.targetValue, goal.unit), unit: goal.unit };
 }
 
 function dayAsDate(key: string): Date {
@@ -107,7 +101,6 @@ export function WeightChart({
 
   const geometry = goal ? goalGeometry(goal, firstDay, lastDay, domain, box) : null;
   const head = averageHead(average, domain, box, days.length);
-  const labels = goalLabels(goal);
 
   return (
     <ChartFrame

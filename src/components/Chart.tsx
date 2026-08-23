@@ -295,7 +295,13 @@ export function DailyDots({ dots, href }: { dots: Dot[]; href: (id: string) => s
  */
 export function AverageLine({ segments }: { segments: PathSegment[] }) {
   return (
-    <g data-average-segments={segments.length}>
+    // Decoration, not a target. The average is drawn after the daily dots so it
+    // reads as the loudest object, which also puts it above them for the
+    // pointer: a 2.6 px stroke crossing a dot, or the head landing on top of
+    // one, took the tap that belonged to the reading underneath. F31 promises a
+    // point reaches its source in two taps, so the walk has to survive the
+    // hierarchy. Nothing here links anywhere, so nothing here is clickable.
+    <g data-average-segments={segments.length} pointerEvents="none">
       {segments.map((segment, index) => (
         <path
           key={`${index}-${segment.d.slice(0, 12)}`}
@@ -322,6 +328,7 @@ export function AverageHead({ x, y }: { x: number; y: number }) {
       fill="var(--chart-avg)"
       stroke="var(--surface)"
       strokeWidth="2"
+      pointerEvents="none"
     />
   );
 }
