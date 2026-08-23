@@ -3239,3 +3239,6 @@
 2026-08-23T10:29:17Z | a1b7fffaba51a2e6c | stopped | 68s
 2026-08-23T10:30:58Z | a8117ac7c12403f17 | stopped | 101s
 2026-08-23T10:32:36Z | a9547e64f1be4c9b3 | stopped | 98s
+2026-08-23T10:33:44Z | a781b37d57c9979c2 | stopped | 68s
+2026-08-23T10:34:12Z | verifier | stopped | 28s
+2026-08-23T10:34:55Z | a0bb9531043e34363 | stopped | 43s
