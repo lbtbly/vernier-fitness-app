@@ -54,14 +54,6 @@ export const strings = {
       'Three to five sessions are proposed each week, each one carrying the reason it was placed where it was, and each one accepted on its own.',
   },
 
-  eat: {
-    title: 'Eat',
-    sub: 'The nutrition week, meal estimates and the shopping list',
-    emptyTitle: 'No meals planned yet',
-    emptyBody:
-      'Breakfasts, weekday lunches and home dinners are planned against your calorie and macro targets, and the shopping list follows from them.',
-  },
-
   settings: {
     title: 'Settings',
     sub: 'The operator surface: integrations, consent, backup and machine state',
@@ -1330,7 +1322,6 @@ export const strings = {
       shellfish: 'shellfish',
       lactose: 'lactose',
       nuts: 'nuts',
-      pork: 'pork',
       gluten: 'gluten',
     },
 
@@ -1448,11 +1439,40 @@ export const strings = {
 
     targetsTitle: 'Targets',
     targetsSub: 'Where the daily calorie and macro figures come from',
+    targetEmptyTitle: 'No daily target yet',
+    targetEmptyBody:
+      'A target is computed from the Mifflin-St Jeor equation and an activity level from the published 1.40 to 1.90 bands. Nothing is planned against a number this app invented.',
+    /** The chip on the card a changed ingredient source raises. */
+    questionChip: 'Waiting on you',
     equationLabel: 'Equation',
     equationName: 'Mifflin-St Jeor, 1990',
     equationCitation:
       'Mifflin MD, St Jeor ST, Hill LA, Scott BJ, Daugherty SA, Koh YO. A new predictive equation for resting energy expenditure in healthy individuals. Am J Clin Nutr 1990;51:241-247.',
     restingLabel: 'Estimated resting needs',
+    /**
+     * The four facts Mifflin-St Jeor needs, asked for by name.
+     *
+     * Sex is asked because the equation has two forms and the constant differs
+     * by 166 kcal between them, and because the hard floor differs too. It is
+     * asked once, it is stored on the target row beside the answer it produced,
+     * and nothing else in this product reads it.
+     */
+    sexLabel: 'Sex, which the equation has two forms for',
+    sexMale: 'Male',
+    sexFemale: 'Female',
+    ageLabel: 'Age in years',
+    heightLabel: 'Height in centimetres',
+    weightLabel: 'Weight in kilograms',
+    weightFrom: (source: string, when: string) => `Filled from your ${source} reading on ${when}.`,
+    weightNone: 'No weight is stored yet, so type the one you want the target computed against.',
+    yourRules: 'Your rules',
+    yourRulesNote:
+      'Four kinds, four behaviours, and nothing resolves one as another. An allergy is refused, an intolerance is substituted, an exclusion is omitted and a preference only changes what is reached for first.',
+    addRule: 'Add a rule',
+    removeRule: (kind: string, subject: string) => `Remove the ${subject} ${kind}`,
+    ruleLine: (kind: string, subject: string) => `${kind}: ${subject}`,
+    chooseKind: 'Which kind',
+    chooseSubject: 'What it covers',
     activityLabel: 'Activity level',
     activityBandNote:
       'The four levels below are the FAO/WHO/UNU 2004 physical activity level bands, 1.40 to 1.90. The 1.2 rung every online calculator starts at has no primary source and sits below the floor for any adult who walks.',
@@ -1493,6 +1513,8 @@ export const strings = {
     rateRefusedBody: (requested: string, ceiling: string, weight: string) =>
       `${requested} kg a week is faster than one percent of your body weight, which at ${weight} kg is ${ceiling} kg a week. Nothing was written and no plan was generated.`,
     rateOffer: (ceiling: string) => `Use ${ceiling} kg a week instead`,
+    rateCeiling: (ceiling: string, weight: string) =>
+      `The fastest this app will plan for you at ${weight} kg is ${ceiling} kg a week, which is one percent of your body weight.`,
     deficitAboveCap: (deficit: string, cap: number) =>
       `The deficit is ${deficit} kcal a day, over the ${cap} kcal a day the guidance tops out at.`,
 

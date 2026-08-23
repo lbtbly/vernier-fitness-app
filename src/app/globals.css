@@ -946,3 +946,120 @@ a.noticeline{min-height:var(--touch)}
  * box that no ancestor can scroll to.
  */
 .visually-hidden caption,.visually-hidden th,.visually-hidden td{white-space:nowrap}
+
+/* ---------------------------------------------------------------------------
+ * Eat: the nutrition week, the meal and the shopping list.
+ *
+ * Copied from .forge/wireframes/08-nutrition-week.html and 10-shopping-list.html
+ * so the shipped screens and the approved sheets draw the same shapes. Where
+ * the two sheets disagree with 00-patterns.html on button geometry, DESIGN.md
+ * section 2b settles it and the screens win: 48 px base, 44 px floor on an icon
+ * control, and 28 px checkbox glyphs inside 56 px rows.
+ * ------------------------------------------------------------------------- */
+
+.macro{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  font-size:var(--t-note);
+  line-height:var(--t-note-lh);
+  color:var(--text-2);
+  font-variant-numeric:tabular-nums;
+}
+.macro b{color:var(--text);font-weight:600}
+/* An unknown nutrient is drawn as a word, in the quiet ink, never as a zero. */
+.macro .unknown{color:var(--text-3);font-weight:400}
+
+/* Accept, edit and reject, one meal at a time. Three 44 px targets, the floor
+ * DESIGN.md 2b fixes for an icon control, side by side inside a 56 px row. */
+.seg{display:flex;gap:6px;flex:none}
+.seg button{
+  width:var(--touch);height:var(--touch);
+  border-radius:10px;
+  border:1px solid var(--line-2);
+  background:var(--surface-2);
+  color:var(--text-2);
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+.seg button svg{width:20px;height:20px}
+.seg button:disabled{opacity:.5;cursor:default}
+.seg button[aria-pressed=true].ok{background:var(--good-soft);border-color:var(--good);color:var(--good)}
+.seg button[aria-pressed=true].ed{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.seg button[aria-pressed=true].no{background:var(--alert-soft);border-color:var(--alert);color:var(--alert)}
+
+.stickybar{
+  position:sticky;
+  bottom:0;
+  margin:0 calc(var(--s4) * -1);
+  padding:var(--s3) var(--s4) var(--s4);
+  background:var(--surface);
+  border-top:1px solid var(--line);
+}
+.stickybar .between{margin-bottom:10px}
+
+.card.pad{padding:var(--s4)}
+
+/* One shopping line. 56 px, because it is read with a trolley in one hand. */
+.item{
+  display:flex;gap:var(--s3);align-items:center;
+  min-height:56px;padding:6px 0;
+  border-bottom:1px solid var(--line);
+}
+.item:last-child{border-bottom:0}
+.item .name{font-size:var(--t-body);line-height:var(--t-body-lh)}
+.box{
+  width:28px;height:28px;border-radius:8px;
+  border:1.8px solid var(--line-2);
+  flex:none;display:flex;align-items:center;justify-content:center;
+  background:transparent;cursor:pointer;color:transparent;
+  padding:0;
+}
+.box svg{width:18px;height:18px}
+.box[aria-checked=true]{background:var(--good);border-color:var(--good);color:var(--accent-ink)}
+/* The 28 px glyph sits inside a 44 px target. The glyph is the drawing; the
+ * target is the thing a thumb has to hit, and DESIGN.md fixes it at 44. */
+.boxtap{
+  min-width:var(--touch);min-height:var(--touch);
+  display:flex;align-items:center;justify-content:center;flex:none;
+  background:transparent;border:0;padding:0;cursor:pointer;
+}
+.tap{min-width:var(--touch);min-height:var(--touch);display:flex;align-items:center;justify-content:center;flex:none}
+.tap svg{width:20px;height:20px;color:var(--text-3)}
+/* A deducted line stays on the list. Struck through, quieter, reason attached. */
+.item.off{opacity:.55}
+.item.off .name{text-decoration:line-through}
+.item .was{text-decoration:line-through;color:var(--text-3)}
+
+.qty{display:flex;align-items:center;gap:2px;flex:none}
+.qty button{
+  width:var(--touch);height:var(--touch);border-radius:10px;
+  border:1px solid var(--line-2);background:var(--surface-2);color:var(--text);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;
+}
+.qty button svg{width:18px;height:18px}
+.qty button:disabled{opacity:.4;cursor:default}
+.qty .v{min-width:64px;text-align:center;font-variant-numeric:tabular-nums;font-weight:600}
+
+.bars{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--surface-3);margin:10px 0 6px}
+.bars i{display:block;height:100%}
+.bars i.done{background:var(--good)}
+.bars i.left{background:var(--chart-daily)}
+.bars i.cut{background:var(--surface-3)}
+
+/* The activity-level picker on Targets, and the meal picker beside it. */
+.pick{display:flex;flex-direction:column;gap:var(--s2)}
+.pick button{
+  min-height:56px;padding:10px 14px;border-radius:12px;
+  border:1px solid var(--line-2);background:var(--surface-2);color:var(--text);
+  font:inherit;font-size:var(--t-body);cursor:pointer;text-align:left;
+  display:flex;flex-direction:column;gap:2px;
+}
+.pick button[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent)}
+.pick .note{margin:0}
+
+.daylabel{margin:var(--s4) 0 var(--s2)}
+.mealrow{align-items:center}
+.mealrow .grow{min-width:0}
+.mealrow .head{font-size:var(--t-body);line-height:var(--t-body-lh);font-weight:600;margin:0}
+.daytotal{border-top:1px solid var(--line);margin-top:6px;padding-top:var(--s3)}

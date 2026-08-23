@@ -292,6 +292,33 @@ describe('the suite against the owner\'s installation', () => {
    *                           lines above, and it closing is what puts Undo and
    *                           Edit back in the accessibility tree.
    *   notices.spec.ts:583     REAL. The scroll offset again, and F27 turns on it.
+   *   nutrition:148, 179      REAL. `[data-card="preview"]` is drawn by the very
+   *                           same component whenever the verdict is `allowed`,
+   *                           and the same locator is asserted VISIBLE two tests
+   *                           earlier and again three lines later, after the
+   *                           compliant rate is accepted. Its absence is the
+   *                           whole of the refusal.
+   *   nutrition:152           REAL. `[data-control="confirm-below-floor"]` is a
+   *                           control this component really renders, on the
+   *                           blocked card, and the test below asserts it
+   *                           VISIBLE there. Asserting it absent on the
+   *                           rate-refusal card is the line: a refused rate has
+   *                           no confirmation that unlocks it and a blocked
+   *                           floor does.
+   *   nutrition:183           REAL. A count of target rows, taken after a walk
+   *                           that typed a whole body into the form and got a
+   *                           block, and the test above it stores a row through
+   *                           the same screen and asserts the count is 1.
+   *   nutrition:396           REAL. F84's zero, and the same console line prints
+   *                           the ingredient lines walked and the shellfish
+   *                           recipes the catalogue holds, both asserted above
+   *                           zero on every generation.
+   *   shopping:206            REAL. `.boxtap` is the tick control every bought
+   *                           line on that screen renders, and the same test
+   *                           asserts the deducted row itself visible with its
+   *                           quantity struck through. A deducted line has
+   *                           nothing to tick, which is why the control is gone
+   *                           and the row is not.
    *   suite-privilege:67      REAL. Every refused statement is printed with the
    *                           answer Postgres gave it.
    *   this file               REAL. Both offender lists print what they walked.
@@ -314,6 +341,8 @@ describe('the suite against the owner\'s installation', () => {
       ['today.spec.ts', 6],
       ['notices.spec.ts', 3],
       ['suite-privilege.spec.ts', 1],
+      ['nutrition.spec.ts', 5],
+      ['shopping.spec.ts', 1],
     ]);
     const zeroish = /toHaveCount\(0\)|\.toBe\(0\)|toEqual\(\[\]\)|toHaveLength\(0\)|not\.toBeVisible\(|toBeHidden\(/;
     const counted: string[] = [];

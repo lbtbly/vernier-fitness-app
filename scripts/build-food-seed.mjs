@@ -44,6 +44,17 @@ import { inflateRawSync } from 'node:zlib';
 const here = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(here, '..');
 
+/*
+ * The conversion factors, imported rather than copied.
+ *
+ * Node reads the TypeScript module directly, the way scripts/strings.mjs reads
+ * the string catalogue, so the seed and the app cannot end up disagreeing about
+ * what a kilocalorie is. A second copy of these seven numbers in this file is
+ * exactly the kind of drift that would show up months later as a food whose
+ * energy changed when nothing else did.
+ */
+const { atwaterEnergy } = await import(join(projectRoot, 'src', 'lib', 'nutrition.ts'));
+
 const SOURCE = join(projectRoot, 'var', 'ciqual', 'Table Ciqual 2025_FR_2025_11_03.xlsx');
 const OUT = join(projectRoot, 'drizzle', 'seed', 'foods.csv');
 const TABLE_VERSION = 'ciqual-2025-11-03';
@@ -180,38 +191,6 @@ function readCell(text) {
   const parsed = Number(numeric);
   if (!Number.isFinite(parsed)) return { value: null, censored: false };
   return { value: censored ? 0 : parsed, censored };
-}
-
-/**
- * EU Regulation 1169/2011 Annex XIV conversion factors, in kcal per gram.
- *
- * The same basis CIQUAL uses for its own published energy, which is why a
- * computed value here is consistent with a published one next to it rather
- * than a second opinion in a different currency.
- */
-const ATWATER = {
-  protein: 4,
-  carbohydrate: 4,
-  polyols: 2.4,
-  fat: 9,
-  fibre: 2,
-  alcohol: 7,
-  organicAcid: 3,
-};
-
-export function atwaterEnergy(parts) {
-  const { protein, carb, fat, fibre, polyols, alcohol, organicAcids } = parts;
-  if (protein === null || carb === null || fat === null) return null;
-  const availableCarb = Math.max(0, carb - (polyols ?? 0));
-  return (
-    ATWATER.protein * protein +
-    ATWATER.carbohydrate * availableCarb +
-    ATWATER.polyols * (polyols ?? 0) +
-    ATWATER.fat * fat +
-    ATWATER.fibre * (fibre ?? 0) +
-    ATWATER.alcohol * (alcohol ?? 0) +
-    ATWATER.organicAcid * (organicAcids ?? 0)
-  );
 }
 
 /** A CSV field. Quoted only when it has to be, so the file stays small. */

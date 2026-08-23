@@ -106,6 +106,7 @@ begin
       using errcode = 'restrict_violation';
   end if;
   if new.recipe_id is distinct from old.recipe_id
+     or new.variant is distinct from old.variant
      or new.version is distinct from old.version
      or new.per_serving_kcal is distinct from old.per_serving_kcal
      or new.per_serving_protein_g is distinct from old.per_serving_protein_g
@@ -135,9 +136,20 @@ create trigger recipe_nutrition_no_overwrite
   before update or delete on recipe_nutrition
   for each row execute function recipe_nutrition_is_append_only();
 
--- Exactly one live snapshot per recipe. Drizzle has no partial unique index.
+-- Exactly one live snapshot per recipe and variant. Drizzle has no partial
+-- unique index, and the variant is part of the key: the base figures and the
+-- lactose-free figures are two current snapshots of one recipe, not two
+-- versions of one snapshot.
 create unique index if not exists recipe_nutrition_one_current
-  on recipe_nutrition (recipe_id) where superseded_at is null;
+  on recipe_nutrition (recipe_id, variant) where superseded_at is null;
+
+do $$
+begin
+  if not exists (select 1 from pg_constraint where conname = 'recipe_nutrition_variant_is_known') then
+    alter table recipe_nutrition add constraint recipe_nutrition_variant_is_known
+      check (variant in ('base', 'lactose_free'));
+  end if;
+end $$;
 
 do $$
 begin

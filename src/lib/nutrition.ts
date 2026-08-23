@@ -66,6 +66,41 @@ export const NUTRITION = {
   photoEstimateBand: { low: 0.75, high: 1.35 },
 } as const;
 
+/**
+ * The energy a food carries, computed from its macronutrients.
+ *
+ * Used in two places and defined in one: `scripts/build-food-seed.mjs` fills in
+ * the rows Anses publishes no energy for, and the unit test grades the factors
+ * against the regulation. A second copy in the script is how the seed and the
+ * app end up disagreeing about what a kilocalorie is.
+ *
+ * Returns null when a macronutrient is missing, because a sum with an unknown
+ * term is unknown and not smaller. That is the same rule the recipe sum
+ * applies, one level up.
+ */
+export function atwaterEnergy(parts: {
+  protein: number | null;
+  carb: number | null;
+  fat: number | null;
+  fibre: number | null;
+  polyols: number | null;
+  alcohol: number | null;
+  organicAcids: number | null;
+}): number | null {
+  const { protein, carb, fat, fibre, polyols, alcohol, organicAcids } = parts;
+  if (protein === null || carb === null || fat === null) return null;
+  const availableCarb = Math.max(0, carb - (polyols ?? 0));
+  return (
+    ATWATER.protein * protein +
+    ATWATER.carbohydrate * availableCarb +
+    ATWATER.polyols * (polyols ?? 0) +
+    ATWATER.fat * fat +
+    ATWATER.fibre * (fibre ?? 0) +
+    ATWATER.alcohol * (alcohol ?? 0) +
+    ATWATER.organicAcid * (organicAcids ?? 0)
+  );
+}
+
 export type Sex = 'male' | 'female';
 
 export type PalLevel = 'sedentary' | 'light' | 'active' | 'veryActive';

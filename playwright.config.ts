@@ -48,7 +48,7 @@ export default defineConfig({
   projects: [
     {
       name: 'webkit-iphone',
-      testIgnore: /focus\.spec\.ts|service-worker\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|launch-report\.spec\.ts|notices\.spec\.ts/,
+      testIgnore: /focus\.spec\.ts|service-worker\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|launch-report\.spec\.ts|notices\.spec\.ts|nutrition\.spec\.ts|shopping\.spec\.ts/,
       use: { ...devices['Desktop Safari'], viewport: { width: 393, height: 852 }, deviceScaleFactor: 3 },
     },
     {
@@ -105,6 +105,15 @@ export default defineConfig({
       // evidence of a device, so the suite writes it here, where nobody will
       // ever read it as evidence of anything.
       //
+      // nutrition.spec.ts and shopping.spec.ts joined it in slice 9, and they
+      // are the largest arrivals so far. Everything those two grade is a write:
+      // a target row, a generated week, twenty-six meal decisions, a confirmed
+      // plan, a ticked box, an adjusted quantity and an item marked in stock.
+      // The owner's install holds his own rules, his own target and whatever
+      // week he accepted on Sunday, and driving either file at the live origin
+      // would overwrite all of it on every run. C12's six captures come from
+      // here for that reason, which is written down rather than discovered.
+      //
       // Chrome, because that instance answers on plain loopback HTTP and the
       // session cookie is Secure. WebKit refuses a Secure cookie from an http
       // origin, 127.0.0.1 and localhost alike, so a WebKit run of this file
@@ -118,7 +127,7 @@ export default defineConfig({
       // attribute relaxed, so WebKit will carry it over loopback too, and it
       // grades its fold in both engines against one database.
       name: 'chrome-scratch',
-      testMatch: /launch-report\.spec\.ts|notices\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts/,
+      testMatch: /launch-report\.spec\.ts|notices\.spec\.ts|nutrition\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|shopping\.spec\.ts|trend-scratch\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         channel: 'chrome',

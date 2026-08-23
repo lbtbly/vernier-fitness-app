@@ -647,6 +647,19 @@ export const recipeNutrition = pgTable(
     recipeId: text('recipe_id')
       .notNull()
       .references(() => recipe.id),
+    /**
+     * 'base', or 'lactose_free' when this snapshot was computed from the
+     * free-from alternatives instead of the dairy items.
+     *
+     * F85 says choosing the alternative recomputes the meal's macronutrients,
+     * and this is where the recomputed set lives. It is a stored snapshot like
+     * any other, with its own coverage and its own hash, rather than a number
+     * derived at render: the plant dessert that replaces fromage blanc carries
+     * no published fibre, so the swap moves the fibre coverage as well as the
+     * figures, and that has to be a fact on a row rather than an arithmetic
+     * accident in a component.
+     */
+    variant: text('variant').notNull().default('base'),
     version: integer('version').notNull(),
     computedAt: timestamp('computed_at', { withTimezone: true }).notNull().defaultNow(),
     perServingKcal: doublePrecision('per_serving_kcal'),
@@ -665,8 +678,8 @@ export const recipeNutrition = pgTable(
     supersededAt: timestamp('superseded_at', { withTimezone: true }),
   },
   (table) => [
-    unique('recipe_nutrition_version').on(table.recipeId, table.version),
-    index('recipe_nutrition_current').on(table.recipeId, table.supersededAt),
+    unique('recipe_nutrition_version').on(table.recipeId, table.variant, table.version),
+    index('recipe_nutrition_current').on(table.recipeId, table.variant, table.supersededAt),
   ],
 );
 
@@ -872,7 +885,18 @@ export const shoppingItem = pgTable(
   },
   (table) => [
     index('shopping_item_list').on(table.listId, table.aisle, table.position),
-    unique('shopping_item_alias').on(table.listId, table.aliasId),
+    /*
+     * One line per ingredient PER DEDUCTION, not one line per ingredient.
+     *
+     * Salmon arrives twice in a real week: three fillets the recipe box brings
+     * on Monday and one the owner buys for Friday. Screen 10 draws that as two
+     * lines, a bought one and a struck-through one, and it is right to: folding
+     * them into a single line would mean either buying four fillets and wasting
+     * three, or showing one line whose quantity is a subtraction the owner
+     * cannot see. F89 is about seeing the deduction, so the deduction gets its
+     * own row.
+     */
+    unique('shopping_item_alias').on(table.listId, table.aliasId, table.deduction),
   ],
 );
 
