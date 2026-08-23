@@ -946,3 +946,265 @@ a.noticeline{min-height:var(--touch)}
  * box that no ancestor can scroll to.
  */
 .visually-hidden caption,.visually-hidden th,.visually-hidden td{white-space:nowrap}
+
+/* ---------- training, screens 06 and 07 ---------- */
+
+/*
+ * THE MEDIA PLATE, AND WHY IT IS LIGHT IN BOTH THEMES.
+ *
+ * Every bundled demonstration is white-background artwork: the Everkinetic SVGs
+ * paint a full-canvas white rectangle under dark line art, and the CDC Growing
+ * Stronger GIFs are colour cartoons on white. Two treatments were possible and
+ * only one of them is honest. Inverting in CSS, which
+ * .forge/research/exercise-media.md section 2.8 recommends as the way to get a
+ * dark-mode treatment without creating a derivative, works on the line art and
+ * turns the colour animations into negatives. So the media sits on a plate
+ * instead: a light surface in both themes, dimmed a step in dark so it is not a
+ * torch in a basement gym, with the artwork drawn on it at its own colours.
+ *
+ * Nothing about the file is modified, so no adapted material is created and the
+ * share-alike obligation never attaches to anything but the file itself.
+ */
+html[data-theme=dark]{--media-plate:#E4E4E9}
+html[data-theme=light]{--media-plate:#FFFFFF}
+
+.demo{
+  position:relative;
+  display:block;
+  margin:0 0 var(--s3);
+  border-radius:14px;
+  overflow:hidden;
+  background:var(--media-plate);
+  border:1px solid var(--line);
+}
+.demo img{
+  display:block;
+  width:100%;
+  height:168px;
+  object-fit:contain;
+  padding:8px;
+}
+.demo.small img{height:96px;padding:6px}
+.demo figcaption{
+  padding:6px 10px;
+  font-size:10.5px;
+  line-height:1.4;
+  color:var(--text-2);
+  background:var(--surface-2);
+  border-top:1px solid var(--line);
+}
+.demo.empty{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:96px;
+  background:var(--surface-2);
+  border-style:dashed;
+}
+
+/*
+ * The embedded player, which nothing is ever drawn over.
+ *
+ * The Required Minimum Functionality forbids overlays, frames or any visual
+ * element in front of an embedded player, including its controls, and forbids
+ * obscuring any part of it. So the rep counter, the set timer and the rest
+ * clock sit BESIDE this box and never on it: there is no scrim rule, no crop,
+ * no custom play chrome and no positioned child in this block, and there must
+ * never be one. The 16:9 box is above the 200x200 minimum the same document
+ * sets.
+ */
+.embed{
+  display:block;
+  width:100%;
+  aspect-ratio:16 / 9;
+  min-height:200px;
+  border:0;
+  border-radius:14px;
+  background:#000;
+}
+
+/* The three per-session controls on screen 06. 44 px square, the floor. */
+.seg{display:flex;gap:6px;flex:none}
+.seg button{
+  width:var(--touch);
+  height:var(--touch);
+  border-radius:10px;
+  border:1px solid var(--line-2);
+  background:var(--surface-2);
+  color:var(--text-2);
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.seg button svg{width:20px;height:20px}
+.seg button[aria-pressed=true][data-decision=accept]{background:var(--good-soft);border-color:var(--good);color:var(--good)}
+.seg button[aria-pressed=true][data-decision=edit]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.seg button[aria-pressed=true][data-decision=reject]{background:var(--alert-soft);border-color:var(--alert);color:var(--alert)}
+.seg button:disabled{opacity:.5;cursor:default}
+
+/* The cause, in the owner's language, under the row it explains. */
+.reason{
+  font-size:var(--t-note);
+  color:var(--text-2);
+  line-height:1.5;
+  background:var(--surface-2);
+  border-radius:var(--r-sm);
+  padding:9px 11px;
+  margin-top:10px;
+}
+
+/* Screen 06 frame 2's time and duration slots. */
+.slot{display:flex;gap:var(--s2);margin-bottom:var(--s2)}
+.slot button{
+  flex:1;
+  min-height:56px;
+  border-radius:var(--r-md);
+  border:1px solid var(--line-2);
+  background:var(--surface-2);
+  color:var(--text);
+  font:inherit;
+  font-size:14px;
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:2px;
+  font-variant-numeric:tabular-nums;
+}
+.slot button[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+
+/* The sticky footer on screen 06, which counts and never commits. */
+.stickyfoot{
+  position:sticky;
+  bottom:0;
+  margin:0 calc(var(--gutter) * -1);
+  padding:var(--s3) var(--gutter) var(--s4);
+  background:var(--surface);
+  border-top:1px solid var(--line);
+  z-index:10;
+}
+
+/* ---------- the session player, screen 07 ---------- */
+
+/*
+ * 56 px on everything you touch mid-set and 88 px on the one you touch most.
+ * DESIGN.md section 2b: sweaty hands, mid-set, no second attempt. C11 measures
+ * all three of these numbers on the shipped screen.
+ */
+.player .btn{min-height:56px;font-size:16px;border-radius:14px}
+.player .btn.icon{width:48px;height:48px;min-height:48px;border-radius:14px}
+.player .btn.setdone{
+  min-height:88px;
+  font-size:22px;
+  font-weight:700;
+  border-radius:18px;
+  letter-spacing:-.01em;
+}
+.player .grid3{display:flex;gap:var(--s2)}
+.player .grid3 .btn{flex:1;font-size:14px;min-height:56px}
+
+.player{display:flex;flex-direction:column;min-height:100%}
+.player .hdr{display:flex;align-items:center;gap:10px;padding:6px 0 10px}
+.player .fill{flex:1;display:flex;flex-direction:column}
+.player .spacer{flex:1;min-height:var(--s3)}
+
+/* One bar per block, done, now and to come. */
+.blocks{display:flex;gap:4px;margin-bottom:14px;list-style:none}
+.blocks li{flex:1;height:5px;border-radius:3px;background:var(--surface-3);display:block}
+.blocks li[data-block=done]{background:var(--good)}
+.blocks li[data-block=now]{background:var(--accent)}
+
+.move{font-size:var(--t-display);line-height:var(--t-display-lh);letter-spacing:var(--t-display-ls);font-weight:700}
+
+/* The set figure and the load, side by side, at 26 px as screen 07 sets them. */
+.setfig{font-size:26px;line-height:30px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+
+.chip.now{color:var(--accent);border-color:var(--accent);background:var(--accent-soft);font-weight:600}
+
+/* The rest countdown: the biggest thing on the phone, read at arm's length. */
+.restring{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding-bottom:var(--s3)}
+.restring svg{width:220px;height:220px;display:block}
+.restring text{
+  font-family:var(--font);
+  font-size:var(--t-timer);
+  letter-spacing:var(--t-timer-ls);
+  font-weight:700;
+  fill:var(--text);
+  font-variant-numeric:tabular-nums;
+}
+.restring .track{stroke:var(--surface-3)}
+.restring .run{stroke:var(--accent)}
+
+/*
+ * THE ONE MOMENT OF MOTION IN THIS PRODUCT.
+ *
+ * DESIGN.md section 4: the completion ring closes and fills over 900 ms, once,
+ * at the end of a session, and it is the only motion beyond the 120 to 200 ms
+ * fades and translates anywhere in the app. It belongs here because finishing a
+ * session is the only moment the owner has completed something.
+ *
+ * `--dur-slow` is the token and it is 900 ms. The dash offset animates from the
+ * full circumference to zero, which is a ring closing rather than a spinner.
+ */
+.doneRing{display:flex;flex-direction:column;align-items:center;padding:16px 0 8px}
+.doneRing svg{width:150px;height:150px}
+.doneRing .track{stroke:var(--surface-3)}
+.doneRing .run{
+  stroke:var(--good);
+  stroke-dasharray:427;
+  stroke-dashoffset:0;
+  animation:ring-close var(--dur-slow) var(--ease) 1;
+}
+.doneRing .tick{
+  stroke:var(--good);
+  stroke-dasharray:60;
+  stroke-dashoffset:0;
+  animation:ring-tick var(--dur-slow) var(--ease) 1;
+}
+@keyframes ring-close{from{stroke-dashoffset:427}to{stroke-dashoffset:0}}
+@keyframes ring-tick{0%{stroke-dashoffset:60}60%{stroke-dashoffset:60}100%{stroke-dashoffset:0}}
+@media (prefers-reduced-motion: reduce){
+  .doneRing .run,.doneRing .tick{animation:none}
+}
+
+/* The 0-to-10 and 1-to-10 answers, five to a row, 56 px targets. */
+.scale10{display:flex;gap:5px;flex-wrap:wrap}
+.scale10 button{
+  flex:1;
+  min-width:56px;
+  height:56px;
+  border-radius:var(--r-md);
+  border:1px solid var(--line-2);
+  background:var(--surface-2);
+  color:var(--text-2);
+  font:inherit;
+  font-size:var(--t-head);
+  font-variant-numeric:tabular-nums;
+  cursor:pointer;
+}
+.scale10 button[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+
+/* Where it hurt, if anywhere. Chips, 48 px, wrapping. */
+.pick{display:flex;gap:6px;flex-wrap:wrap}
+.pick button{
+  min-height:48px;
+  padding:0 14px;
+  border-radius:var(--r-md);
+  border:1px solid var(--line-2);
+  background:var(--surface-2);
+  color:var(--text-2);
+  font:inherit;
+  font-size:var(--t-body);
+  cursor:pointer;
+}
+.pick button[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+
+/* The catalogue grid: one card per movement, two up past the phone. */
+.movements{display:grid;grid-template-columns:1fr;gap:var(--s3)}
+@media (min-width: 700px){.movements{grid-template-columns:1fr 1fr}}
+
+.mediarow{display:flex;flex-direction:column;gap:2px;padding:10px 0;border-bottom:1px solid var(--line)}
+.mediarow:last-child{border-bottom:0}
+.mediarow .head{font-size:var(--t-body);line-height:var(--t-body-lh)}

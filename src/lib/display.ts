@@ -134,3 +134,44 @@ export function sleepLabel(minutes: number): string {
   const whole = Math.max(0, Math.round(minutes));
   return strings.signals.sleepDuration(Math.floor(whole / 60), String(whole % 60).padStart(2, '0'));
 }
+
+const MOVEMENT_COPY = strings.movement as Record<string, { name: string; cue: string }>;
+
+/**
+ * A movement's name and its cue text, from the catalogue.
+ *
+ * `src/lib/catalogue.ts` and the `movement` table both hold `nameKey` and
+ * `cueKey` rather than words, so this is the one place either becomes English.
+ * Same shape as `metricLabel` and `sourceLabel` above, for the same reason: a
+ * column value must never reach a screen as a column value.
+ */
+export function movementName(id: string): string {
+  return MOVEMENT_COPY[id]?.name ?? id;
+}
+
+export function movementCue(id: string): string {
+  return MOVEMENT_COPY[id]?.cue ?? '';
+}
+
+const MUSCLE_LABELS = strings.muscles as Record<string, string>;
+
+export function muscleLabel(muscle: string): string {
+  return MUSCLE_LABELS[muscle] ?? muscle;
+}
+
+const EQUIPMENT_LABELS = strings.equipment as Record<string, string>;
+
+export function equipmentLabel(item: string): string {
+  return EQUIPMENT_LABELS[item] ?? item;
+}
+
+/**
+ * What one set of a movement asks for, in its own unit: reps, a hold in
+ * seconds, or minutes of work. One function, so the catalogue screen, the week
+ * card and the open set all read the same words.
+ */
+export function targetLabel(unit: string, target: number): string {
+  if (unit === 'second') return strings.player.seconds(target);
+  if (unit === 'minute') return strings.player.minutes(target);
+  return strings.player.reps(target);
+}
