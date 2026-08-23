@@ -4,6 +4,7 @@ import {
   dayKeyOf,
   importBoxRecipe,
   readBoxItem,
+  readBoxItems,
   secondPortionInstant,
 } from '@/db/box';
 import { correctEntry, readDayEntries, readEntryItems, readRecentEntries } from '@/db/meals';
@@ -13,7 +14,7 @@ import { getConfig } from '@/lib/config';
 import { csrfFailure } from '@/lib/csrf';
 import { ok, refuse, sessionOrRefusal } from '@/lib/gate';
 import { recogniseImageLines } from '@/lib/lab-ocr';
-import { localDayKey } from '@/lib/local-time';
+import { dayAfter, instantOnDay, localDayKey } from '@/lib/local-time';
 import {
   type ArtifactKind,
   ARTIFACT_KINDS,
@@ -219,6 +220,19 @@ async function importParsed(input: {
   const { timeZone } = getConfig();
   const now = new Date();
   const { weekStart, firstDayKey } = weekOf(now, timeZone);
+
+  /*
+   * Two days per recipe, in the order they were imported.
+   *
+   * The first box recipe cooks on the Monday and its second portion falls on
+   * the Tuesday; the second cooks on the Wednesday. Without the offset both
+   * recipes would land on the same evening, which is two dinners on one plate
+   * and a week nobody could eat. It is arithmetic on the count of what is
+   * already there rather than a stored index, so importing a third recipe puts
+   * it after the second without anybody renumbering anything.
+   */
+  const already = await readBoxItems(weekStart);
+  const firstDay = dayAfter(firstDayKey, already.length * 2);
   const servings = Number.isFinite(input.servings) ? Math.min(8, Math.max(1, Math.round(input.servings))) : 2;
   const lines = parseIngredientLines(input.lines);
 
@@ -229,7 +243,7 @@ async function importParsed(input: {
     originRef: input.originRef,
     lines,
     weekStart,
-    firstDayKey,
+    firstDayKey: firstDay,
     timeZone,
     sourceRecord: {
       id: `src_box_${crypto.randomUUID()}`,
@@ -266,6 +280,30 @@ async function importParsed(input: {
 }
 
 /**
+ * The next evening this week with no dinner already on it.
+ *
+ * "Moved to another meal" has to mean somewhere the owner is not already
+ * eating something else, and with two box recipes two days apart the day after
+ * next is exactly where the other recipe cooks. So this walks forward and takes
+ * the first free evening, which is what the answer's own note promises.
+ *
+ * It walks at most six days and falls back to two days on, because a week where
+ * every evening is taken is a week where any answer is a compromise and moving
+ * it silently to next month would be worse than putting it beside one meal.
+ */
+async function nextFreeDinner(firstDayKey: string, exceptEntryId: string, timeZone: string) {
+  for (let ahead = 2; ahead <= 6; ahead += 1) {
+    const candidate = instantOnDay(dayAfter(firstDayKey, ahead), 19, 30, timeZone);
+    const onThatDay = await readDayEntries(candidate, timeZone);
+    const taken = onThatDay.some(
+      (entry) => entry.slot === 'dinner' && entry.id !== exceptEntryId,
+    );
+    if (!taken) return candidate;
+  }
+  return instantOnDay(dayAfter(firstDayKey, 2), 19, 30, timeZone);
+}
+
+/**
  * The answer to one recipe's second-portion question.
  *
  * Storing the answer and moving the portion happen together: the answer is a
@@ -283,7 +321,7 @@ async function answer(body: Record<string, unknown>) {
   }
 
   const now = new Date();
-  const { weekStart, firstDayKey } = weekOf(now, timeZone);
+  const { weekStart } = weekOf(now, timeZone);
   const item = await readBoxItem(recipeId, weekStart);
   if (!item) return refuse(404, strings.api.meals.noRecipe, strings.api.meals.noRecipeDetail);
 
@@ -304,7 +342,16 @@ async function answer(body: Record<string, unknown>) {
     return ok({ answer: value, moved: false });
   }
 
-  const instant = secondPortionInstant(firstDayKey, value, timeZone);
+  /*
+   * THIS RECIPE'S OWN FIRST DAY, off its own first portion, not the week's.
+   * Two recipes sit two days apart, so a second portion computed from the week
+   * start would move one of them onto the other one's evening.
+   */
+  const firstDay = mine[0].eatenAt ? dayKeyOf(mine[0].eatenAt, timeZone) : localDayKey(now, timeZone);
+  const instant =
+    value === 'moved'
+      ? await nextFreeDinner(firstDay, second.id, timeZone)
+      : secondPortionInstant(firstDay, value, timeZone);
   const items = await readEntryItems(second.id);
   const outcome = await correctEntry({
     entryId: second.id,

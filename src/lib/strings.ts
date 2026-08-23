@@ -3765,7 +3765,7 @@ export const strings = {
     },
     secondPortionAnswerNotes: {
       next_day: 'The same meal slot, the next day.',
-      moved: 'Moved to the next free dinner in this week.',
+      moved: 'Moved to the next evening this week with nothing else on it.',
       frozen: 'It leaves this week and the day total drops by one portion.',
     },
     secondPortionStored: (name: string, answer: string) => `${name}: ${answer}.`,
