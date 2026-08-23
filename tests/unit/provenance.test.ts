@@ -108,6 +108,52 @@ describe('the deduplication decision', () => {
     expect(outcome.reason.params.value).toBe('86.0');
   });
 
+  it('stores a second hand-typed reading of the same day and names the one before it', () => {
+    /*
+     * The owner measured his waist, read the tape again and typed a different
+     * number into the same sheet. That is a second act, not the same fact
+     * arriving twice, and dropping it lost the correction while the sheet
+     * reported a save. It shipped that way from slice 5 to slice 9 and it is
+     * what took F23's own end-to-end walk red: 91.4 typed, 99.0 stored.
+     *
+     * WHAT WOULD MAKE THIS GO RED. Ranking a hand-typed reading equal to what
+     * already stands and stopping there, which is what `outranks` does and what
+     * every source that DELIVERS should get. The clause under test is the one
+     * that says a person is not a delivery.
+     */
+    const outcome = decideDedup(
+      {
+        metric: 'waist',
+        source: 'manual',
+        rawValue: '91.4',
+        measuredAt: new Date('2026-08-21T16:40:00Z'),
+        timeZone: PARIS,
+      },
+      [stored({ id: 'first-reading', rawValue: '99.0' })],
+    );
+    expect(outcome.decision).toBe('kept_over_duplicate');
+    expect(outcome.store).toBe(true);
+    expect(outcome.reason.key).toBe('measuredAgain');
+    expect(outcome.reason.params.value).toBe('99.0');
+  });
+
+  it('still drops the same hand-typed number sent twice, so a double tap is one row', () => {
+    // The guard on the clause above. Rule 1 sees the identical value from the
+    // identical source first, so pressing Save twice is one reading and not two.
+    const outcome = decideDedup(
+      {
+        metric: 'waist',
+        source: 'manual',
+        rawValue: '99.0',
+        measuredAt: new Date('2026-08-21T16:40:00Z'),
+        timeZone: PARIS,
+      },
+      [stored({ id: 'first-reading', rawValue: '99.0' })],
+    );
+    expect(outcome.decision).toBe('dropped_as_duplicate');
+    expect(outcome.store).toBe(false);
+  });
+
   it('does not store a hand-typed reading over a device one for the same day', () => {
     const outcome = decideDedup(
       {

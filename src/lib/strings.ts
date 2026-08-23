@@ -1072,6 +1072,14 @@ export const strings = {
       otherWins: (params: { source: string; value: string }) =>
         `${params.source} ${params.value} is the better reading for that day, so this one was not stored.`,
       firstOfDay: () => 'The first reading of this metric on this day.',
+      /**
+       * The owner writing over his own hand on the same day. It names what it
+       * replaced rather than saying a row was kept, because the reading it
+       * replaced is still on file and still readable, and the sentence is
+       * frozen on the row at write time.
+       */
+      measuredAgain: (params: { value: string }) =>
+        `You measured this again on this day. The earlier reading of ${params.value} is still on file.`,
       importedFirst: (params: { source: string; key: string }) =>
         `The first time ${params.source} sent measure ${params.key}.`,
       importRevised: (params: { source: string; from: string; to: string }) =>
