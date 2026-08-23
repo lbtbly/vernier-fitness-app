@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from 'node:crypto';
-import { and, asc, desc, eq, gte, isNotNull, lte, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, inArray, isNotNull, lte, sql } from 'drizzle-orm';
 import { getDb } from './client';
 import {
   calendarBusy,
@@ -434,6 +434,27 @@ export async function readOpenPlan(): Promise<StoredPlan | null> {
     .select()
     .from(calendarPlan)
     .where(eq(calendarPlan.state, 'open'))
+    .orderBy(desc(calendarPlan.builtAt))
+    .limit(1);
+  if (!plan) return null;
+  return readPlan(plan.id);
+}
+
+/**
+ * The plan the screen shows: the one that is open, or the last one applied.
+ *
+ * F108 asks that after the write the SAME LIST carries outcomes and undo, and a
+ * list that disappeared when the page was reloaded would not be that list. A
+ * superseded plan is deliberately not here: it is the record of a screen the
+ * owner read and did not apply, and showing it again would offer changes that
+ * were worked out against a calendar that has since moved.
+ */
+export async function readLatestPlan(): Promise<StoredPlan | null> {
+  const db = getDb();
+  const [plan] = await db
+    .select()
+    .from(calendarPlan)
+    .where(inArray(calendarPlan.state, ['open', 'applied']))
     .orderBy(desc(calendarPlan.builtAt))
     .limit(1);
   if (!plan) return null;

@@ -11,6 +11,7 @@ import {
   disconnect,
   offerCalendars,
   openRun,
+  planById,
   planView,
   undoWrite,
   writeLogView,
@@ -184,8 +185,10 @@ async function handle(request: Request) {
       });
     }
 
-    const applied = await currentPlan();
-    const stored = applied ?? null;
+    // The plan BY NAME rather than whatever is open, because applying it closed
+    // it: the screen has to come back holding the same list with its outcomes on
+    // it, which is the half of F108 that happens before any undo.
+    const stored = await planById(planId);
     return ok({
       applied: {
         written: result.written,

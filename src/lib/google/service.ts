@@ -17,7 +17,7 @@ import {
   markPlanRow,
   readAvailability,
   readConnection,
-  readOpenPlan,
+  readLatestPlan,
   readPlan,
   readPlannedSessions,
   readTokens,
@@ -888,8 +888,14 @@ export async function describeConnection(): Promise<GoogleView> {
   return describeGoogle(settings.mode, settings.clientId !== '' && settings.clientSecret !== '');
 }
 
+/** The plan the screen shows: the open one, or the last one applied. */
 export async function currentPlan(): Promise<StoredPlan | null> {
-  return readOpenPlan();
+  return readLatestPlan();
+}
+
+/** One plan by name, for the answer to an apply, which has just closed it. */
+export async function planById(id: string): Promise<StoredPlan | null> {
+  return readPlan(id);
 }
 
 export async function writeLog(limit = 100): Promise<WriteLogEntry[]> {
