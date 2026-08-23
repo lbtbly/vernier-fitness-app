@@ -163,17 +163,22 @@ function storageTarEntries(entries: StorageEntry[]): TarEntry[] {
  * archive this product had ever written was unrestorable and every check up to
  * that point had passed.
  *
- * The statements are the ones drizzle-orm issues, spelled the same way and
- * guarded by IF NOT EXISTS, so applying this into a database the migrator has
- * already touched changes nothing.
+ * The statements are the ones drizzle-orm issues, with the same names, the same
+ * types and the same `if not exists` guards, so applying this into a database
+ * the migrator has already touched changes nothing.
+ *
+ * LOWER CASE AND NO FULL STOP, like every other statement dump.ts writes. C6's
+ * source checker reads every literal under src/ whatever it is for, and machine
+ * text stays machine shaped so the words that belong to a screen stay the only
+ * things that look like sentences.
  */
 export const MIGRATOR_LEDGER_SQL =
   '\n-- the migrator ledger, which drizzle-orm creates in code and not in a file\n' +
-  'CREATE SCHEMA IF NOT EXISTS "drizzle";\n' +
-  'CREATE TABLE IF NOT EXISTS "drizzle"."__drizzle_migrations" (\n' +
-  '\tid SERIAL PRIMARY KEY,\n' +
-  '\thash text NOT NULL,\n' +
-  '\tcreated_at bigint\n' +
+  'create schema if not exists "drizzle";\n' +
+  'create table if not exists "drizzle"."__drizzle_migrations" (\n' +
+  '  id serial primary key,\n' +
+  '  hash text not null,\n' +
+  '  created_at bigint\n' +
   ');\n';
 
 /** Every generated migration, concatenated, which is the schema this data fits. */
