@@ -418,6 +418,13 @@ describe('the suite against the owner\'s installation', () => {
    *                           rather than passing on this one. That is exactly
    *                           the trap: "nothing covers Set done" is also true
    *                           of a screen with no tab bar in the product at all.
+   *   nutrition               REAL. The computed-energy flag on the food whose
+   *   (the computed flag)      energy Anses published, and the same selector is
+   *                           asserted VISIBLE on the computed food twenty
+   *                           lines above in the same test, on the same
+   *                           instance. The surface can render the subject and
+   *                           did; the claim is that this food does not wear
+   *                           the other food's marker.
    *   settings-integrations   REAL. Measurements carrying the identifier
    *   (external_key)          Withings issues, over a population of
    *                           demonstration rows counted and asserted greater
@@ -447,7 +454,7 @@ describe('the suite against the owner\'s installation', () => {
       ['suite-privilege.spec.ts', 1],
       ['withings.spec.ts', 5],
       ['labs-scratch.spec.ts', 6],
-      ['nutrition.spec.ts', 5],
+      ['nutrition.spec.ts', 6],
       ['shopping.spec.ts', 1],
       ['console-walk.spec.ts', 3],
       ['session-player.spec.ts', 3],
