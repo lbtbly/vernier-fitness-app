@@ -511,3 +511,23 @@ export function BellIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+/**
+ * The download arrow from `12-settings-integrations.html` frame 3, which draws
+ * it on each of the three export rows. Copied path for path from the sheet's
+ * own `#down` symbol rather than redrawn.
+ */
+export function DownloadIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} aria-hidden="true" focusable="false">
+      <path
+        d="M10 3.4v10M6 9.6 10 13.6l4-4M4 16.6h12"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}

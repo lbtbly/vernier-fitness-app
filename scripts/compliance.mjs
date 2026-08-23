@@ -77,6 +77,9 @@ const {
   scanForBannedPhrases,
   templateKeys,
 } = await import(join(projectRoot, 'src', 'lib', 'compliance.ts'));
+const { DATA_CATEGORIES, retentionToken } = await import(
+  join(projectRoot, 'src', 'lib', 'backup', 'categories.ts')
+);
 
 const VERBOSE = process.argv.includes('--verbose');
 
@@ -289,7 +292,76 @@ if (product !== '') {
 }
 
 // --------------------------------------------------------------------------
-// 4. What it would take for this to go red, run every time.
+// 4. R4 and F131: the retention table in docs/privacy.md against the code.
+//
+// F131's second clause is that the period stated per data category MATCHES THE
+// VALUE THE CODE ENFORCES. A document and a constant agree on the day they are
+// written and drift a slice later, and nobody notices, because nothing reads
+// both. This reads both.
+//
+// The table's third column is a TOKEN, on purpose: the document has to be
+// readable by a person and comparable by a script, and a sentence is only ever
+// one of those. `until-deleted`, `8-hours`, `30-archives`.
+
+const privacyDoc = join(projectRoot, 'docs', 'privacy.md');
+let privacy = '';
+try {
+  privacy = await readFile(privacyDoc, 'utf8');
+} catch {
+  failures.push({ where: 'docs/privacy.md', what: 'R4 asks for a privacy notice and there is none' });
+}
+
+/** Every `| Name | id | token |` row of the retention table, as a map. */
+function retentionRows(document) {
+  const rows = new Map();
+  for (const line of document.split('\n')) {
+    const match = /^\|\s*[^|]+\|\s*`([a-z_]+)`\s*\|\s*`([a-z0-9-]+)`\s*\|/.exec(line.trim());
+    if (match) rows.set(match[1], match[2]);
+  }
+  return rows;
+}
+
+const stated = retentionRows(privacy);
+const enforced = new Map(DATA_CATEGORIES.map((category) => [category.id, retentionToken(category.retention)]));
+
+if (privacy !== '') {
+  for (const [id, token] of enforced) {
+    if (!stated.has(id)) {
+      failures.push({
+        where: `docs/privacy.md ${id}`,
+        what: `the code holds this category and the document does not state a retention for it`,
+      });
+      continue;
+    }
+    if (stated.get(id) !== token) {
+      failures.push({
+        where: `docs/privacy.md ${id}`,
+        what: `the document says ${stated.get(id)} and the code enforces ${token}`,
+      });
+    }
+  }
+  for (const id of stated.keys()) {
+    if (!enforced.has(id)) {
+      failures.push({
+        where: `docs/privacy.md ${id}`,
+        what: 'the document states a retention for a category the code does not have',
+      });
+    }
+  }
+  for (const claim of [
+    'household exemption',
+    'Delete permanently',
+    'Export everything',
+    'append-only',
+  ]) {
+    if (!privacy.includes(claim)) {
+      failures.push({ where: 'docs/privacy.md', what: `does not state: ${claim}` });
+    }
+  }
+}
+
+// --------------------------------------------------------------------------
+// 5. What it would take for this to go red, run every time.
 
 const MUST_BE_CAUGHT = [
   'Your LDL cholesterol is high for a man of your age.',
@@ -303,6 +375,31 @@ for (const sentence of MUST_BE_CAUGHT) {
     failures.push({
       where: 'the check itself',
       what: `this sentence passed and must not: ${JSON.stringify(sentence)}`,
+    });
+  }
+}
+
+/*
+ * And the same self-test for the retention comparison, because a parser that
+ * silently matched nothing would report every category as agreeing with a
+ * document it never read. A table row that disagrees MUST be caught, and a
+ * table with no rows at all must be caught too.
+ */
+{
+  const wrong = retentionRows('| Sign-in sessions | `sign_in_session` | `99-hours` | x | y |');
+  if (wrong.get('sign_in_session') !== '99-hours') {
+    failures.push({
+      where: 'the check itself',
+      what: 'the retention table parser does not read a row it is handed',
+    });
+  }
+  if (retentionRows('nothing here at all').size !== 0) {
+    failures.push({ where: 'the check itself', what: 'the retention parser invents rows' });
+  }
+  if (stated.size === 0 && privacy !== '') {
+    failures.push({
+      where: 'docs/privacy.md',
+      what: 'the retention table was read as empty, so nothing was compared',
     });
   }
 }
@@ -353,6 +450,13 @@ for (const line of wrap(keys)) process.stdout.write(`    ${line}\n`);
 process.stdout.write(
   `  refusal self-test: ${MUST_BE_CAUGHT.length} sentences that must be caught, all caught.\n`,
 );
+process.stdout.write(
+  `  retention: ${stated.size} categories stated in docs/privacy.md against ${enforced.size} in ` +
+    `src/lib/backup/categories.ts:\n`,
+);
+for (const line of wrap([...enforced].map(([id, token]) => `${id}=${token}`))) {
+  process.stdout.write(`    ${line}\n`);
+}
 if (VERBOSE) {
   for (const line of walked) process.stdout.write(`  ${line.key}\t${line.rendered}\n`);
 }
@@ -385,8 +489,9 @@ if (keys.length < TEMPLATE_FLOOR) {
 if (failures.length === 0) {
   process.stdout.write(
     'compliance: no template assesses a condition or recommends a clinical action, ' +
-      'every explanation cites a public source and invites a professional, and the intended-purpose ' +
-      'statement makes all five required claims.\n',
+      'every explanation cites a public source and invites a professional, the intended-purpose ' +
+      'statement makes all five required claims, and every retention period in docs/privacy.md is ' +
+      'the one the code enforces.\n',
   );
   process.exit(0);
 }

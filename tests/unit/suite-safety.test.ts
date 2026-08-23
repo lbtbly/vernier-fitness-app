@@ -526,6 +526,40 @@ describe('the suite against the owner\'s installation', () => {
    *                           renders. That screen carries eleven diagnostic
    *                           rows, four category switches and two time fields,
    *                           and the same expression logs the count it walked.
+   *   Slice 13 added one file with eleven members, and every one was read
+   *   against the same question before it was written down here. Seven of them
+   *   are a different shape from the rest of this inventory and are worth
+   *   naming: an EXIT CODE is not a count over a population, it is a verdict a
+   *   process reached, and each one has that process's whole output printed
+   *   beside it and asserted to contain a specific sentence.
+   *
+   *   backup:105,156,191      REAL. `verify` and `restore` exiting 0, each with
+   *   backup:289,294,575      its stdout printed and asserted to contain the
+   *                           sentence the command prints when it has actually
+   *                           done the work: "every chunk authenticated and
+   *                           every member matched its digest", "every table
+   *                           came back with the count the archive recorded",
+   *                           "every table holds exactly what the file carried".
+   *                           A command that did nothing exits 2 with a usage
+   *                           message and fails the sentence.
+   *   backup:161              REAL. `corrupt` exiting 0, and the file it wrote
+   *                           is verified on the next line, where it must FAIL.
+   *   backup:165              INVERTED, and it is F125 itself: `not.toBe(0)` on
+   *                           the exit code of a verification that has to
+   *                           refuse. The pattern above matches the `.toBe(0)`
+   *                           inside it; the assertion is the opposite one.
+   *   backup:130              REAL, and it is F124's trace. No encryption or
+   *                           dump binary in the image, over a PATH whose
+   *                           executable count is printed on the same line and
+   *                           asserted above fifty. A zero over an empty PATH
+   *                           fails on the count.
+   *   backup:355,356          REAL, and they are the point of F131. Both tables
+   *                           of the deleted category, counted after the
+   *                           deletion, with the SAME COUNTS TAKEN AND PRINTED
+   *                           BEFORE IT and asserted greater than zero. The
+   *                           deletion row is then read back and asserted to
+   *                           carry the before count, so the zero is bracketed
+   *                           by the population on both sides.
    */
   it('lets no assertion claim a zero over a population the surface cannot render', () => {
     // The one that was hollow. It is gone from /health and present on Today.
@@ -558,6 +592,7 @@ describe('the suite against the owner\'s installation', () => {
       ['calendar.spec.ts', 3],
       ['review.spec.ts', 2],
       ['push.spec.ts', 3],
+      ['backup.spec.ts', 11],
     ]);
     // `toHaveCount(0, { timeout: 3_000 })` was invisible to this pattern until
     // slice 5 wrote one: the closing paren was required right after the zero, so

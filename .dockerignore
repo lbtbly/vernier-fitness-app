@@ -21,6 +21,13 @@ out
 *.p[e]m
 *.k[e]y
 
+# Runtime data. Neither belongs in a build context: storage holds one person's
+# photographs and laboratory documents, and backups holds the encrypted archives
+# of both. A file copied in would be shadowed by the volume at run time and
+# would still be sitting in a layer.
+storage
+backups
+
 # Host-only tooling and working files.
 docs
 SETUP.html

@@ -17,6 +17,13 @@
 #   scripts/test-stack.sh down          stop and remove it
 #   scripts/test-stack.sh url           print its origin
 #
+# SCRATCH_BACKUP_DIR mounts a host directory at /app/backups and tells the app a
+# destination is configured, which is how the archive's CONFIGURED destination is
+# proven on an instance whose rows nobody would miss. Left unset there is no
+# mount and no configured directory, so the same instance proves the FALLBACK and
+# the alert that names it. F127 needs both, and neither may be produced by taking
+# the owner's own iCloud folder away.
+#
 # It runs the same image as the live app, on the same Docker network, against a
 # separate database inside the same Postgres. The owner's database, the owner's
 # container and the published port on 3000 are never touched.
@@ -55,6 +62,11 @@ scratch_url() {
 ensure_database() {
   docker compose exec -T db sh -c \
     "psql -U \"\$POSTGRES_USER\" -d \"\$POSTGRES_DB\" -tAc \"select 1 from pg_database where datname = '${SCRATCH_DB}'\" | grep -q 1 || psql -U \"\$POSTGRES_USER\" -d \"\$POSTGRES_DB\" -c \"create database ${SCRATCH_DB}\"" >/dev/null
+}
+
+drop_named_database() {
+  docker compose exec -T db sh -c \
+    "psql -U \"\$POSTGRES_USER\" -d \"\$POSTGRES_DB\" -c \"drop database if exists $1 with (force)\"" >/dev/null
 }
 
 drop_database() {
@@ -105,6 +117,9 @@ start() {
     -e GOOGLE_DEMO_FAULT="${GOOGLE_DEMO_FAULT:-none}" \
     -e DATABASE_URL="$(scratch_url)" \
     -e MASTER_KEY="$key" \
+    -e BACKUP_DIR="${SCRATCH_BACKUP_DIR:+/app/backups}" \
+    -e BACKUP_RETENTION_DAYS="${SCRATCH_BACKUP_RETENTION:-30}" \
+    ${SCRATCH_BACKUP_DIR:+-v "${SCRATCH_BACKUP_DIR}:/app/backups"} \
     -p "127.0.0.1:${PORT}:3000" \
     "$IMAGE" >/dev/null
 }
@@ -173,6 +188,25 @@ case "${1:-up}" in
     remove_container
     drop_database
     echo "test-stack: stopped, scratch database dropped"
+    ;;
+  drop-named)
+    # One database this suite created, by name, dropped. The connection to the
+    # owner's database is a superuser one because CREATE and DROP DATABASE need
+    # one, and it lives HERE rather than in tests/e2e/host.ts: that file may
+    # only ever reach the owner's install as vernier_suite, and
+    # tests/unit/suite-safety.test.ts fails it by shape if it does otherwise.
+    #
+    # The name is bounded to this suite's own prefix, so nothing anyone passes
+    # can name the owner's database.
+    need_stack
+    case "${2:-}" in
+      vernier_*) drop_named_database "$2" ;;
+      *)
+        echo "test-stack: drop-named takes a vernier_ database, never ${2:-nothing}" >&2
+        exit 1
+        ;;
+    esac
+    echo "test-stack: dropped ${2}"
     ;;
   url)
     echo "$ORIGIN"

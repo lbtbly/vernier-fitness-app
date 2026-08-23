@@ -1,11 +1,14 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { GooglePanel } from '@/components/GooglePanel';
+import { OperatorAlerts } from '@/components/OperatorAlerts';
 import { IngestPanel } from '@/components/IngestPanel';
 import { OperatorPanel } from '@/components/OperatorPanel';
 import { ScreenTitle } from '@/components/ScreenTitle';
 import { BellIcon } from '@/components/icons';
 import { WithingsPanel } from '@/components/WithingsPanel';
+import { readOpenAlerts } from '@/db/alerts';
+import { readLastGoodBackupRun } from '@/db/backup';
 import { listCredentials } from '@/db/auth';
 import { readLastAcceptedBatch, readLiveCredential } from '@/db/ingest';
 import { describeIntegrations } from '@/db/integrations';
@@ -13,7 +16,7 @@ import { readOpenQuestions } from '@/db/measurements';
 import { readSubscriptions } from '@/db/push';
 import { getConfig } from '@/lib/config';
 import { readCsrfToken } from '@/lib/csrf';
-import { deviceTypeLabel } from '@/lib/display';
+import { deviceTypeLabel, fileSize } from '@/lib/display';
 import { hoursBetween, longDate, shortDateTime, time24 } from '@/lib/format';
 import { readSession } from '@/lib/session';
 import { strings } from '@/lib/strings';
@@ -39,6 +42,8 @@ export default async function SettingsPage() {
     ingestCredential,
     lastBatch,
     devices,
+    lastArchive,
+    alerts,
   ] = await Promise.all([
     describeIntegrations(),
     listCredentials(session.ownerId),
@@ -49,6 +54,8 @@ export default async function SettingsPage() {
     readLiveCredential(),
     readLastAcceptedBatch(),
     readSubscriptions(),
+    readLastGoodBackupRun(),
+    readOpenAlerts(),
   ]);
   const subscribedDevices = devices.length;
 
@@ -71,6 +78,13 @@ export default async function SettingsPage() {
   return (
     <>
       <ScreenTitle title={strings.settings.title} sub={strings.settings.sub} />
+
+      {/*
+        * The one persistent banner F133 asks for, on the screen the owner opens
+        * when something is wrong. It carries the surface, the cause and one
+        * action per open alert, and it clears itself when the cause goes.
+        */}
+      <OperatorAlerts alerts={alerts} timeZone={config.timeZone} />
 
       {/*
         * The AI consent, which is an integration like any other and belongs on
@@ -211,6 +225,44 @@ export default async function SettingsPage() {
         <div className="actions">
           <Link prefetch={false} className="btn block" href="/settings/notifications">
             {strings.push.title}
+          </Link>
+        </div>
+      </section>
+
+      {/*
+        * Data and backups, which C16 names on this screen and which is its own
+        * surface behind this card: the archive, the export, the permanent
+        * delete and the machine state would each be a card here and would push
+        * the integrations off the screen they belong to.
+        */}
+      <section className="card" data-card="data-and-backups">
+        <div className="between">
+          <span className="lbl">{strings.data.title}</span>
+          {lastArchive ? (
+            <span className="chip g" data-settings-archive="verified">
+              {strings.data.archiveVerified}
+            </span>
+          ) : (
+            <span className="chip w" data-settings-archive="never">
+              {strings.data.archiveNever}
+            </span>
+          )}
+        </div>
+        <p className="sub" style={{ marginTop: 'var(--s2)' }}>
+          {strings.data.settingsCardBody}
+        </p>
+        {lastArchive ? (
+          <div className="row" style={{ marginTop: 'var(--s2)' }}>
+            <span className="grow sub mut">{strings.data.archiveTitle}</span>
+            <span className="num" data-settings-archive-at="true">
+              {when(new Date(lastArchive.finishedAt ?? lastArchive.startedAt))} ·{' '}
+              {strings.data.archiveEncrypted(fileSize(lastArchive.bytes))}
+            </span>
+          </div>
+        ) : null}
+        <div className="actions">
+          <Link prefetch={false} className="btn block" href="/settings/data">
+            {strings.data.open}
           </Link>
         </div>
       </section>

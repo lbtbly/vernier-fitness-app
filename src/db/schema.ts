@@ -2505,3 +2505,174 @@ export const reviewDecision = pgTable(
   },
   (table) => [unique('review_decision_block').on(table.weekStart, table.block)],
 );
+
+/**
+ * ---------------------------------------------------------------------------
+ * Slice 13. The archive, the restore check, the alert and the deletion.
+ * ---------------------------------------------------------------------------
+ */
+
+/**
+ * One archive run, whatever became of it.
+ *
+ * A ROW IS WRITTEN BEFORE THE WORK STARTS AND UPDATED WHEN IT ENDS, so a run
+ * that died halfway through leaves `running` on the record rather than leaving
+ * nothing at all. The failure this whole slice exists to prevent is a backup
+ * that stopped working in March and was noticed in November, and the shape of
+ * that failure is an absence: nothing on the screen, nothing in a log, nothing
+ * to see. An absence cannot raise an alert. A row can.
+ *
+ * `cause` is a TOKEN and never a sentence, the same way `job_run.detail` is.
+ * The screen looks the words up in the catalogue; a sentence stored here would
+ * be a database value speaking to a person with no key behind it.
+ */
+export const backupRun = pgTable(
+  'backup_run',
+  {
+    id: text('id').primaryKey(),
+    /** 'scheduled' when the daily tick claimed it, 'manual' when he pressed the button. */
+    kind: text('kind').notNull().default('scheduled'),
+    /** The `job_run` period this belongs to, on a scheduled run. Null on a manual one. */
+    periodStart: text('period_start'),
+    startedAt: timestamp('started_at', { withTimezone: true }).notNull().defaultNow(),
+    finishedAt: timestamp('finished_at', { withTimezone: true }),
+    /** 'running' | 'ok' | 'failed' */
+    outcome: text('outcome').notNull().default('running'),
+    /**
+     * 'configured' when it landed in the cloud-synced destination, 'fallback'
+     * when that path was not usable and it landed on the local volume instead.
+     * F127 turns on this column and on the two beside it.
+     */
+    destination: text('destination').notNull().default('configured'),
+    /** The directory as the OWNER knows it: the host path, not the mount point. */
+    directory: text('directory').notNull().default(''),
+    /** The mount point inside the container, which is what actually took the write. */
+    writtenTo: text('written_to').notNull().default(''),
+    fileName: text('file_name').notNull().default(''),
+    bytes: bigint('bytes', { mode: 'number' }).notNull().default(0),
+    chunks: integer('chunks').notNull().default(0),
+    /** 'unchecked' | 'verified' | 'failed'. Every run verifies what it just wrote. */
+    integrity: text('integrity').notNull().default('unchecked'),
+    /** Why it fell back, or why it failed. A token from src/lib/backup/causes.ts. */
+    cause: text('cause').notNull().default(''),
+    /** The errno or the numbers behind the cause, so a screen can name the path. */
+    detail: jsonb('detail').notNull().default(sql`'{}'::jsonb`),
+    tableCount: integer('table_count').notNull().default(0),
+    rowCount: bigint('row_count', { mode: 'number' }).notNull().default(0),
+    manifestDigest: text('manifest_digest').notNull().default(''),
+    /** Free space at the destination when the run finished, for the headroom row. */
+    freeBytes: bigint('free_bytes', { mode: 'number' }),
+    /** What retention left behind, and what it removed, counted rather than assumed. */
+    kept: integer('kept').notNull().default(0),
+    removed: integer('removed').notNull().default(0),
+  },
+  (table) => [
+    index('backup_run_started').on(table.startedAt),
+    index('backup_run_outcome').on(table.outcome, table.startedAt),
+  ],
+);
+
+/**
+ * One proof that an archive restores, which is a different claim from one
+ * proving it verifies.
+ *
+ * Verification says the bytes are the bytes that were written. A restore check
+ * says a database was rebuilt from them and came out with the same rows in it.
+ * The operator console shows the date of the last one because an archive nobody
+ * has ever restored is a hypothesis.
+ */
+export const restoreCheck = pgTable(
+  'restore_check',
+  {
+    id: text('id').primaryKey(),
+    checkedAt: timestamp('checked_at', { withTimezone: true }).notNull().defaultNow(),
+    archiveName: text('archive_name').notNull(),
+    /** The database it was rebuilt into. Never the live one without the typed phrase. */
+    targetDatabase: text('target_database').notNull(),
+    /** 'matched' | 'mismatched' | 'failed' */
+    outcome: text('outcome').notNull(),
+    tablesCompared: integer('tables_compared').notNull().default(0),
+    sourceRows: bigint('source_rows', { mode: 'number' }).notNull().default(0),
+    restoredRows: bigint('restored_rows', { mode: 'number' }).notNull().default(0),
+    /** Per-table differences, empty on a match. Numbers, never prose. */
+    differences: jsonb('differences').notNull().default(sql`'[]'::jsonb`),
+    cause: text('cause').notNull().default(''),
+  },
+  (table) => [index('restore_check_checked').on(table.checkedAt)],
+);
+
+/**
+ * Something broke, and the owner is told rather than left to notice.
+ *
+ * THE PANEL'S FIRST FINDING WAS THAT SILENCE IS THE FAILURE MODE. A green
+ * healthcheck on a broken sync is the canonical version of it, and this table
+ * is the answer: a failed scheduled job, a failed archive run and an
+ * integration that stopped working all raise a row here, one push goes out per
+ * row, and the banner stays up until the cause is gone.
+ *
+ * `key` is what makes it ONE notification rather than one per sweep. The
+ * partial unique index in drizzle/pending/13-backup.sql allows one OPEN row per
+ * key, so a failure that persists for six days is one alert with one push, and
+ * the same failure recurring after a repair is a new row with a new push.
+ */
+export const operatorAlert = pgTable(
+  'operator_alert',
+  {
+    id: text('id').primaryKey(),
+    /** Stable per failing thing: `backup`, `job:weekly_review`, `integration:withings`. */
+    key: text('key').notNull(),
+    /** Which surface is broken, as a token the catalogue turns into a name. */
+    surface: text('surface').notNull(),
+    /** Why, as a token. The catalogue holds the sentence. */
+    cause: text('cause').notNull(),
+    /** The numbers and the names the sentence needs: a path, an hour count, a code. */
+    detail: jsonb('detail').notNull().default(sql`'{}'::jsonb`),
+    /** Where the one action goes. A route in this app, always. */
+    route: text('route').notNull(),
+    /** 'alert' when an operation failed, 'warn' when something is out of date. */
+    severity: text('severity').notNull().default('alert'),
+    raisedAt: timestamp('raised_at', { withTimezone: true }).notNull().defaultNow(),
+    /** When the one push went out. Null while it is still owed. */
+    notifiedAt: timestamp('notified_at', { withTimezone: true }),
+    /** Why the push has not gone out yet, when it has not. A token. */
+    notifyDetail: text('notify_detail').notNull().default(''),
+    /** When the cause stopped being true. The banner goes with it. */
+    clearedAt: timestamp('cleared_at', { withTimezone: true }),
+  },
+  (table) => [
+    index('operator_alert_open').on(table.clearedAt, table.raisedAt),
+    index('operator_alert_key').on(table.key),
+  ],
+);
+
+/**
+ * One permanent deletion, recorded permanently.
+ *
+ * The row survives what it describes, which is the whole point: the rows are
+ * gone, and what is left is the record that the owner asked for them to be gone
+ * on a date, with the counts. R4 asks for a captured deletion completed in a
+ * real session, and this is the part of that capture the database keeps.
+ *
+ * IT NEVER HOLDS THE PHRASE HE TYPED. It holds that a phrase matched.
+ */
+export const deletionRun = pgTable(
+  'deletion_run',
+  {
+    id: text('id').primaryKey(),
+    /** A category id from src/lib/backup/categories.ts, or `everything`. */
+    category: text('category').notNull(),
+    requestedAt: timestamp('requested_at', { withTimezone: true }).notNull().defaultNow(),
+    completedAt: timestamp('completed_at', { withTimezone: true }),
+    /** 'done' | 'refused' */
+    outcome: text('outcome').notNull().default('refused'),
+    /** What was there before, per table. The population the zero afterwards covers. */
+    before: jsonb('before').notNull().default(sql`'{}'::jsonb`),
+    /** What went, per table. */
+    removed: jsonb('removed').notNull().default(sql`'{}'::jsonb`),
+    /** Files taken off the storage volume, counted. */
+    filesRemoved: integer('files_removed').notNull().default(0),
+    /** Why it was refused, as a token. Empty on a completed deletion. */
+    cause: text('cause').notNull().default(''),
+  },
+  (table) => [index('deletion_run_requested').on(table.requestedAt)],
+);

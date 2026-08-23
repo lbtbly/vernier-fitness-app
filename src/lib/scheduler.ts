@@ -1,3 +1,4 @@
+import { sweepAlerts } from '@/db/alerts';
 import { failStaleRuns, postgresLedger } from '@/db/jobs';
 import { sendNotification } from '@/db/push';
 import { runReminderSweep } from '@/db/reminders';
@@ -7,9 +8,14 @@ import { dayLabel } from '@/lib/format';
 import { type RunOutcome, runPeriod } from '@/lib/job-runner';
 import { buildMessage, mailSettings, sendMail } from '@/lib/mail';
 import { renderReviewEmail, renderReviewText, reviewSubject } from '@/lib/review-email';
+import { runArchive } from '@/lib/backup/run';
 import {
+  DAILY_ARCHIVE_JOB,
+  DAILY_ARCHIVE_SCHEDULE,
   SWEEP_MINUTES,
   WEEKLY_REVIEW_SCHEDULE,
+  dailyPeriodKey,
+  missedDailyPeriods,
   missedPeriods,
   reviewedWeekStart,
   weeklyPeriodKey,
@@ -130,6 +136,26 @@ export async function runWeeklyReviewPeriod(now: Date): Promise<RunOutcome> {
 }
 
 /**
+ * One claim of one archive period.
+ *
+ * `runArchive` never throws: it writes a `failed` row with a cause token,
+ * because a rejected promise inside a cron callback is a container log nobody
+ * reads. So the failure is re-raised HERE, where the ledger can see it, and the
+ * message is the cause token rather than a sentence, exactly as
+ * `src/db/jobs.ts` requires of `detail`. A failed period can be re-claimed
+ * three times, which in practice means the next boot tries again.
+ */
+export async function runArchivePeriod(now: Date): Promise<RunOutcome> {
+  const { timeZone } = getConfig();
+  const periodStart = dailyPeriodKey(now, DAILY_ARCHIVE_SCHEDULE, timeZone);
+  return runPeriod(postgresLedger(), DAILY_ARCHIVE_JOB, periodStart, async () => {
+    const run = await runArchive({ kind: 'scheduled', periodStart, now });
+    if (run.outcome !== 'ok') throw new Error(run.cause || 'archive_failed');
+    return `${run.fileName} ${run.bytes} bytes ${run.destination}`;
+  });
+}
+
+/**
  * What a boot owes.
  *
  * At most one period, deliberately. A machine off for a month has four missed
@@ -149,6 +175,30 @@ export async function catchUpOnBoot(now: Date): Promise<RunOutcome[]> {
       await runPeriod(postgresLedger(), WEEKLY_REVIEW_JOB, periodStart, () =>
         runWeeklyReview(periodStart),
       ),
+    );
+  }
+
+  /*
+   * AND THE ARCHIVE, WHICH IS THE SAME RULE WITH A HIGHER STAKE. A container
+   * that was off at 03:00 has no copy of that day, and the claim is what makes
+   * the catch-up write one rather than two. One period, deliberately: a machine
+   * off for a week owes seven archives of a database that has one current
+   * state, and six of them would be tonight's data under yesterday's names.
+   */
+  const archiveSince = new Date(now.getTime() - CATCH_UP_WINDOW_DAYS * 86_400_000);
+  for (const periodStart of missedDailyPeriods(
+    archiveSince,
+    now,
+    DAILY_ARCHIVE_SCHEDULE,
+    timeZone,
+    CATCH_UP_PERIODS,
+  )) {
+    outcomes.push(
+      await runPeriod(postgresLedger(), DAILY_ARCHIVE_JOB, periodStart, async () => {
+        const run = await runArchive({ kind: 'scheduled', periodStart, now });
+        if (run.outcome !== 'ok') throw new Error(run.cause || 'archive_failed');
+        return `${run.fileName} ${run.bytes} bytes ${run.destination}`;
+      }),
     );
   }
   return outcomes;
@@ -194,6 +244,31 @@ export async function startScheduler(): Promise<{ stale: number; schedules: numb
       void runReminderSweep(new Date()).catch((error: unknown) => {
         console.error(`[vernier] reminder sweep: ${(error as Error).message}`);
       });
+      /*
+       * THE ALERT SWEEP RIDES THE SAME TICK AND CATCHES ITS OWN FAILURES. It
+       * reads state rather than events, so five minutes is the longest the
+       * owner can be uninformed about something that broke, and a throw in the
+       * reminder sweep above must not take it down with it: the two are
+       * deliberately separate promises. F133.
+       */
+      void sweepAlerts(new Date()).catch((error: unknown) => {
+        console.error(`[vernier] alert sweep: ${(error as Error).message}`);
+      });
+    },
+    { timezone: timeZone },
+  );
+
+  /*
+   * The nightly archive at 03:00 Paris. node-cron is the tick and the ledger is
+   * the correctness, exactly as it is for the Sunday run above: a container
+   * that was off at 03:00 reaches the same claim on the way back up.
+   */
+  const archive = cron.schedule(
+    `${DAILY_ARCHIVE_SCHEDULE.minute} ${DAILY_ARCHIVE_SCHEDULE.hour} * * *`,
+    () => {
+      void runArchivePeriod(new Date()).catch((error: unknown) => {
+        console.error(`[vernier] archive tick: ${(error as Error).message}`);
+      });
     },
     { timezone: timeZone },
   );
@@ -224,12 +299,31 @@ export async function startScheduler(): Promise<{ stale: number; schedules: numb
       console.error(`[vernier] scheduler catch-up did not run: ${(error as Error).message}`);
     });
 
+  /*
+   * ONE SWEEP AT BOOT, BEHIND THE SCHEDULES. A container that has just come back
+   * up is exactly the one whose owner wants to know what is broken, and waiting
+   * five minutes to tell him is five minutes of the silence this whole
+   * mechanism exists to end. Not awaited, for the same reason the catch-up is
+   * not: `register()` runs before the first request is served.
+   */
+  void sweepAlerts(now)
+    .then((report) => {
+      console.log(
+        `[vernier] alert sweep: ${report.raised.length} raised, ${report.cleared} cleared, ` +
+          `${report.standing} standing, ${report.notified} notified, ${report.held} held`,
+      );
+    })
+    .catch((error: unknown) => {
+      console.error(`[vernier] alert sweep did not run: ${(error as Error).message}`);
+    });
+
   return {
     stale: stale.length,
-    schedules: 2,
+    schedules: 3,
     stop: () => {
       void weekly.stop();
       void sweep.stop();
+      void archive.stop();
     },
   };
 }
