@@ -120,8 +120,51 @@ export function itemsFromWords(words: RecognisedWord[], height: number, scale: n
  * digits start dropping below 200. It is the smallest scale that read the
  * fixture cleanly and it costs about a second a page on this machine.
  */
+export const OCR_SCALE = 2;
+
+/**
+ * The pages, rasterised, WITH A FRESH COPY OF THE DOCUMENT FOR EACH ONE.
+ *
+ * pdf.js transfers the buffer it is handed. Measured on this Mac against the
+ * three-page fixture: the source `Uint8Array` goes from 4599 bytes to 0 during
+ * the first `renderPageAsImage`, and the second call throws "Cannot transfer
+ * object of unsupported type". The research note recorded the same gotcha on
+ * 2026-08-21 and the loop this replaces handed the same array in three times,
+ * so a two-page scan could never have produced a second page.
+ *
+ * It is its own exported function so the unit suite can drive it with no
+ * tesseract, no language data and no container: the copy rule is the whole of
+ * the defect and it is provable with a renderer and a three-page PDF.
+ */
+export async function renderPages(
+  bytes: Uint8Array,
+  pages: number[],
+  canvasImport: () => Promise<unknown>,
+  scale: number = OCR_SCALE,
+): Promise<Array<{ page: number; image: Uint8Array; size: { width: number; height: number } | null }>> {
+  const { renderPageAsImage } = await import('unpdf');
+  const rendered = [];
+  for (const page of pages) {
+    // The copy is per call and not per run. One copy reused would be detached
+    // by the first page exactly as the original is.
+    const own = new Uint8Array(bytes);
+    const image = new Uint8Array(await renderPageAsImage(own, page, { canvasImport: canvasImport as never, scale }));
+    rendered.push({ page, image, size: pngSize(image) });
+  }
+  return rendered;
+}
+
 export async function recognisePages(bytes: Uint8Array, pages: number[]): Promise<OcrOutcome> {
   if (pages.length === 0) return { available: true, pages: [] };
+
+  // A document that has already been through `extractTextItems` is a document
+  // whose buffer pdf.js has transferred away, and rasterising nothing produces
+  // no rows and a green screen, which is the shape of every check that passes
+  // by not checking. The upload route keeps an untouched copy for this reason;
+  // if that copy is ever lost, this says so by name instead of failing quietly.
+  if (bytes.byteLength === 0) {
+    return { available: false, reason: 'recognition_failed', detail: 'detached-buffer' };
+  }
 
   // The specifiers are built at runtime so the bundler does not try to resolve
   // a package the branch exists to make optional.
@@ -147,8 +190,7 @@ export async function recognisePages(bytes: Uint8Array, pages: number[]): Promis
     return { available: false, reason: 'language_data_absent', detail: languageFile };
   }
 
-  const { renderPageAsImage } = await import('unpdf');
-  const scale = 2;
+  const scale = OCR_SCALE;
   let worker: Worker;
   try {
     worker = await createWorker(OCR_LANGUAGE, undefined, {
@@ -162,13 +204,7 @@ export async function recognisePages(bytes: Uint8Array, pages: number[]): Promis
 
   try {
     const recognised: PageItems[] = [];
-    for (const page of pages) {
-      const rendered = await renderPageAsImage(bytes, page, {
-        canvasImport: canvasImport as never,
-        scale,
-      });
-      const image = new Uint8Array(rendered);
-      const size = pngSize(image);
+    for (const { page, image, size } of await renderPages(bytes, pages, canvasImport, scale)) {
       if (!size) {
         return { available: false, reason: 'recognition_failed', detail: String(page) };
       }
