@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { isImmersiveRoute } from '@/lib/routes';
 import { strings } from '@/lib/strings';
 import { CalendarIcon, DumbbellIcon, ForkIcon, GearIcon, WaveIcon } from './icons';
 
@@ -15,6 +16,18 @@ const TABS = [
 
 export function TabBar() {
   const pathname = usePathname();
+
+  /*
+   * THE PLAYER GETS NO TAB BAR, AND IT IS GONE RATHER THAN HIDDEN.
+   *
+   * `display:none` would take it out of hit testing and leave five links in the
+   * markup of a screen screen 07 draws none on. Returning null removes the
+   * nodes, so nothing can be tapped, focused, read by a screen reader or found
+   * by a walk of the document. `.app-scroll:has(.player)` in globals.css drops
+   * the bottom padding this bar reserves, which is what pulls Set done back
+   * inside the viewport instead of leaving it under a bar that is not there.
+   */
+  if (isImmersiveRoute(pathname)) return null;
 
   return (
     <nav className="tabbar" aria-label={strings.common.sections}>

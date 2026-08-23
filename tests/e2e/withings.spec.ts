@@ -324,12 +324,44 @@ test('F42. the four states the status screen has to show, each captured', async 
   ];
 
   for (const [name, patch, word] of states) {
-    scratchQuery(`update withings_connection set mode = 'live', ${patch}`);
+    // The sync instant is set on every state so the two places the screen
+    // prints it can be compared. It is the same column the importer writes.
+    scratchQuery(
+      `update withings_connection set mode = 'live', last_successful_sync_at = timestamptz '2026-08-23 14:01:30+02', ${patch}`,
+    );
     await openSettings(page);
     await expect(card(page)).toHaveAttribute('data-withings', name);
     await expect(page.locator('[data-withings-state]')).toHaveText(new RegExp(word, 'i'));
     await expect(page.getByText(/last successful sync/i)).toBeVisible();
     console.log(`state ${name} rendered as ${await page.locator('[data-withings-state]').innerText()}`);
+
+    /*
+     * A TEST BUTTON, IN EVERY STATE. F42 names one as part of what the status
+     * screen shows, and `revoked` rendered Reconnect alone: zero of them, on
+     * the one card where "token or network" is the whole question.
+     *
+     * It counts rather than asserting visibility, because the defect was a
+     * count of zero against a screen where three other states had one.
+     */
+    const tests = await page.locator('[data-withings] button', { hasText: /^Test$/ }).count();
+    console.log(`state ${name} renders ${tests} test button(s)`);
+    expect(tests).toBe(1);
+
+    /*
+     * ONE FACT, ONE ANSWER. The card and the integrations list are on the same
+     * screen and used to read different columns, so this installation showed
+     * "23 Aug, 14:01" on one and "No successful sync yet" on the other. Both
+     * strings are read and compared here rather than each being checked for
+     * plausibility on its own.
+     */
+    const onCard = (await page.locator('[data-withings-last-sync]').innerText()).trim();
+    const inList = (
+      await page.locator('[data-integration="withings"] [data-integration-last-sync]').innerText()
+    ).trim();
+    console.log(`state ${name}: card says "${onCard}", list says "${inList}"`);
+    expect(onCard).not.toMatch(/no successful sync/i);
+    expect(inList).toContain(onCard);
+
     await page.screenshot({ path: `${CAPTURES}/f42-${name}.png`, fullPage: true });
   }
 

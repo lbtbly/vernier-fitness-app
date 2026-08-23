@@ -148,6 +148,7 @@ export default async function SettingsPage() {
         method={session.method}
         expiresAt={when(session.expiresAt)}
         csrfToken={csrfToken}
+        timeZone={config.timeZone}
       />
     </>
   );

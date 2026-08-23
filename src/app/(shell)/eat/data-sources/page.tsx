@@ -124,6 +124,23 @@ export default async function DataSourcesPage() {
           ) : (
             <span className="note">{strings.nutrition.foodExampleNone}</span>
           )}
+          {/*
+            * Both sides of F79's comparison, reachable from the screen that
+            * counts them. The marker is only a marker if the screen next door
+            * wears a different one, and the only way to see that is to open
+            * both along the route the product offers.
+            */}
+          {facts.publishedExample ? (
+            <Link
+              className="btn"
+              href={`/eat/food/${encodeURIComponent(facts.publishedExample)}`}
+              data-example="published-energy"
+            >
+              {strings.nutrition.foodPublishedExample}
+            </Link>
+          ) : (
+            <span className="note">{strings.nutrition.foodExampleNone}</span>
+          )}
         </div>
       </section>
 

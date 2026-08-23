@@ -562,12 +562,54 @@ test.describe('F78 and F79: the food table, its publisher, and the two markers',
 
     const flag = page.locator('[data-flag="computed_atwater"]');
     await expect(flag).toBeVisible();
+    const computedChip = (await flag.innerText()).trim();
     // One tap: the summary opens the panel on the same screen as the number.
     await flag.click();
     const explanation = await page.locator('[data-card="per-100g"]').innerText();
     console.log(`computed-energy panel:\n${explanation}`);
     expect(explanation).toContain('1169/2011');
     await page.screenshot({ path: `${CAPTURES}/food-computed-energy.png`, fullPage: true });
+
+    /*
+     * AND THE OTHER SIDE OF THE COMPARISON, which is the whole of F79.
+     *
+     * The chip rendered unconditionally, so a food whose energy Anses published
+     * wore the same words, the same colour and the same background as one this
+     * app computed: the marker marked every food and therefore marked nothing.
+     * Both foods are opened here, by the links the data-sources screen offers,
+     * and the two chips are read and compared with each other.
+     */
+    const publishedRows = Number(
+      scratchQuery("select count(*) from food where energy_source = 'published'"),
+    );
+    console.log(`food table: ${publishedRows} rows carry an energy Anses published`);
+    expect(publishedRows).toBeGreaterThan(0);
+
+    await page.goto('/eat/data-sources');
+    await page.waitForLoadState('networkidle');
+    await page.locator('[data-example="published-energy"]').click();
+    await page.waitForLoadState('networkidle');
+
+    const publishedFlag = page.locator('[data-flag="published"]');
+    await expect(publishedFlag).toBeVisible();
+    await expect(page.locator('[data-flag="computed_atwater"]')).toHaveCount(0);
+    const publishedChip = (await publishedFlag.innerText()).trim();
+    const border = await publishedFlag.evaluate((node) => getComputedStyle(node).borderStyle);
+    const computedBorder = 'dashed';
+    console.log(
+      `computed chip "${computedChip}" against published chip "${publishedChip}", ` +
+        `published border ${border}`,
+    );
+    expect(publishedChip).not.toBe(computedChip);
+    expect(border).not.toBe(computedBorder);
+
+    await publishedFlag.click();
+    const publishedPanel = await page.locator('[data-card="per-100g"]').innerText();
+    console.log(`published-energy panel:\n${publishedPanel}`);
+    expect(publishedPanel).not.toContain('1169/2011');
+    // The recipe sentence used to ship here, on a screen with no ingredients.
+    expect(publishedPanel).not.toContain('ingredient');
+    await page.screenshot({ path: `${CAPTURES}/food-published-energy.png`, fullPage: true });
   });
 });
 

@@ -420,6 +420,31 @@ describe('the suite against the owner\'s installation', () => {
    *                           on a four-session week, so a zero here is the
    *                           claim that none of them escaped its card and not
    *                           the claim that the screen was empty.
+   *   The craft-defect pass added one member and one file, and both were read
+   *   against the same question before they were written down.
+   *
+   *   session-player           REAL. Tab bar elements on the session player,
+   *   (the tab bar count)      which screen 07 draws none of. The same test
+   *                           counts the bar's five links on /train first and
+   *                           asserts that count, so a build where the bar
+   *                           never renders anywhere fails on the line above
+   *                           rather than passing on this one. That is exactly
+   *                           the trap: "nothing covers Set done" is also true
+   *                           of a screen with no tab bar in the product at all.
+   *   nutrition               REAL. The computed-energy flag on the food whose
+   *   (the computed flag)      energy Anses published, and the same selector is
+   *                           asserted VISIBLE on the computed food twenty
+   *                           lines above in the same test, on the same
+   *                           instance. The surface can render the subject and
+   *                           did; the claim is that this food does not wear
+   *                           the other food's marker.
+   *   settings-integrations   REAL. Measurements carrying the identifier
+   *   (external_key)          Withings issues, over a population of
+   *                           demonstration rows counted and asserted greater
+   *                           than zero two lines above, with the connection
+   *                           row printed beside it. The zero IS the claim: the
+   *                           card counted the seed's ninety rows as readings
+   *                           the scale delivered.
    */
   it('lets no assertion claim a zero over a population the surface cannot render', () => {
     // The one that was hollow. It is gone from /health and present on Today.
@@ -442,11 +467,12 @@ describe('the suite against the owner\'s installation', () => {
       ['suite-privilege.spec.ts', 1],
       ['withings.spec.ts', 5],
       ['labs-scratch.spec.ts', 6],
-      ['nutrition.spec.ts', 5],
+      ['nutrition.spec.ts', 6],
       ['shopping.spec.ts', 1],
       ['console-walk.spec.ts', 3],
-      ['session-player.spec.ts', 2],
+      ['session-player.spec.ts', 3],
       ['train-week.spec.ts', 4],
+      ['settings-integrations.spec.ts', 1],
     ]);
     // `toHaveCount(0, { timeout: 3_000 })` was invisible to this pattern until
     // slice 5 wrote one: the closing paren was required right after the zero, so

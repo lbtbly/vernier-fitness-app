@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { CloseIcon, MinusIcon, MuteIcon, PlusIcon, SoundIcon, SwapIcon } from '@/components/icons';
+import { CloseIcon, InfoIcon, MinusIcon, MuteIcon, PlusIcon, SoundIcon, SwapIcon } from '@/components/icons';
 import { alternativesFor, mediaFor, movementOf } from '@/lib/catalogue';
 import { movementCue, movementName, targetLabel } from '@/lib/display';
 import { shortDate } from '@/lib/format';
@@ -73,7 +73,16 @@ export type PlayerSession = {
   kind: string;
   plannedFor: string;
   movements: PlayerMovement[];
-  band: { label: string; low: number; high: number } | null;
+  /**
+   * The pre-session target range, and every session carries one.
+   *
+   * It was nullable, and null on anything that was not cardio, intervals or a
+   * walk, so the Target range card was missing from the strength sessions that
+   * are most of the week. `07-session-player.html` draws that card on a Home
+   * strength session. The type is what stops it going missing again: there is
+   * no value of this field that renders no card.
+   */
+  band: { label: string; low: number; high: number };
 };
 
 type Phase = 'ready' | 'work' | 'rest' | 'done';
@@ -430,6 +439,22 @@ export function SessionPlayer({
   if (phase === 'ready') {
     return (
       <div className="player" data-phase="ready">
+        {/*
+          * The way out, drawn rather than borrowed.
+          *
+          * The tab bar does not render on this route any more, because screen
+          * 07 draws none and the one it drew covered Set done. The work and
+          * rest phases have carried this control all along; this screen was
+          * leaning on the bar, so it gets the same button in the same place
+          * with the same label.
+          */}
+        <div className="hdr">
+          <Link className="btn icon" href="/train" aria-label={strings.player.leave}>
+            <CloseIcon />
+          </Link>
+          <span className="grow strong">{strings.player.title}</span>
+        </div>
+
         <div className="card">
           <span className="lbl">{strings.trainWeek.kinds[session.kind as 'strength']}</span>
           <div className="head">{strings.player.title}</div>
@@ -903,21 +928,20 @@ export function SessionPlayer({
             * than a selector. The band beside it is a pre-session target: this
             * app does not read heart rate, live or otherwise, and says so.
             */}
-          {session.band ? (
-            <div className="card tight" data-card="intensity">
-              <div className="between">
-                <div className="stack grow">
-                  <span className="lbl">{strings.intensity.label}</span>
-                  <span className="num strong">
-                    {strings.intensity.range(session.band.label, session.band.low, session.band.high)}
-                  </span>
-                </div>
+          <div className="card tight" data-card="intensity">
+            <div className="between">
+              <div className="stack grow">
+                <span className="lbl">{strings.intensity.label}</span>
+                <span className="num strong">
+                  {strings.intensity.range(session.band.label, session.band.low, session.band.high)}
+                </span>
               </div>
-              <p className="note" style={{ marginTop: '6px' }}>
-                {strings.intensity.talkTest} {strings.intensity.noTracking}
-              </p>
+              <InfoIcon className="ch" />
             </div>
-          ) : null}
+            <p className="note" style={{ marginTop: '6px' }}>
+              {strings.intensity.talkTest} {strings.intensity.noTracking}
+            </p>
+          </div>
 
           <div className="spacer" />
         </div>

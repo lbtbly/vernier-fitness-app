@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { and, eq, inArray, sql } from 'drizzle-orm';
+import { and, eq, inArray, isNotNull, sql } from 'drizzle-orm';
 import { getDb } from './client';
 import { importQuestion, integrationCredential, measurement, sourceRecord, withingsConnection } from './schema';
 import { renderDedupReason } from './measurements';
@@ -538,13 +538,36 @@ export async function standingOnDays(
   return found;
 }
 
-/** How many rows this source has ever landed. The status card prints it. */
-export async function countStoredRows(source: Source): Promise<number> {
+/**
+ * How many readings THIS CONNECTION'S IMPORTER has stored. Not how many rows
+ * carry its source.
+ *
+ * F42's card printed "Readings stored 90" on an installation whose connection
+ * row read mode demo, state disconnected, cursor null, rows_stored 0, with no
+ * credential row and no import ever run. It counted every measurement whose
+ * source was `demo`, which in demonstration mode is the demonstration seed's
+ * ninety Withings-shaped rows: readings the seed planted, presented as readings
+ * the owner's scale delivered.
+ *
+ * WHAT THE NUMBER SHOULD COUNT is readings that arrived through the import
+ * path, and `external_key` is exactly that fact and nothing else. Withings
+ * writes `grpid:type` on every measure it delivers and a revision carries its
+ * own key qualified by the modification instant; the seed writes none, because
+ * nothing outside ever issued it an identifier. So the key is present on
+ * precisely the rows an import wrote, in both modes: in demonstration mode the
+ * scale is the demonstration account and its rows really did come down the
+ * import path, which is the number that card is about.
+ *
+ * It is counted off the table rather than read from the connection row's own
+ * tally, for the same reason the food screen counts its rows: a counter can
+ * drift from what is there and a query cannot.
+ */
+export async function countImportedRows(source: Source): Promise<number> {
   const db = getDb();
   const [row] = await db
     .select({ n: sql<number>`count(*)::int` })
     .from(measurement)
-    .where(eq(measurement.source, source));
+    .where(and(eq(measurement.source, source), isNotNull(measurement.externalKey)));
   return row?.n ?? 0;
 }
 
@@ -724,7 +747,15 @@ export type WithingsView = {
   rowsSeen: number;
   groupsDropped: number;
   questionsRaised: number;
-  storedRows: number;
+  /**
+   * Readings this connection's importer has stored, counted off the measurement
+   * table by the identifier Withings issued.
+   *
+   * It is a different fact from `rowsStored` above, which is the connection
+   * row's own running tally, and the two names being one word apart is how the
+   * card ended up printing the wrong one for six weeks. This one is the query.
+   */
+  importedRows: number;
   lastBatchId: string | null;
   cause: WithingsCause | null;
 };
@@ -763,7 +794,7 @@ export async function describeWithings(
 ): Promise<WithingsView> {
   const row = await readConnection();
   const source: Source = mode === 'demo' ? 'demo' : 'withings';
-  const storedRows = await countStoredRows(source);
+  const importedRows = await countImportedRows(source);
   const refreshExpiresAt = refreshExpiryOf(row);
   return {
     mode,
@@ -779,7 +810,7 @@ export async function describeWithings(
     rowsSeen: row?.rowsSeen ?? 0,
     groupsDropped: row?.groupsDropped ?? 0,
     questionsRaised: row?.questionsRaised ?? 0,
-    storedRows,
+    importedRows,
     lastBatchId: row?.lastBatchId ?? null,
     cause: (row?.lastFailureKind as WithingsCause | null) ?? null,
   };

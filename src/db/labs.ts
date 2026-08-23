@@ -117,6 +117,8 @@ export type CreateDocumentInput = {
   storedPath: string | null;
   checksum: string | null;
   refusals: number;
+  /** Which pages those refusals came from, ascending and deduplicated. */
+  refusalPages: number[];
   census: PageCensus[];
   rows: ReviewRow[];
 };
@@ -138,6 +140,7 @@ export async function createDocument(input: CreateDocumentInput): Promise<Docume
       checksum: input.checksum,
       fileRemoved: false,
       refusals: input.refusals,
+      refusalPages: input.refusalPages,
       census: input.census,
       extraction: input.rows,
     })
@@ -160,6 +163,7 @@ export function toReviewDocument(row: DocumentRow): ReviewDocument {
     fileRemoved: row.fileRemoved,
     hasFile: row.storedPath !== null && !row.fileRemoved,
     refusals: row.refusals,
+    refusalPages: row.refusalPages ?? [],
     census: row.census as PageCensus[],
     rows: row.extraction as ReviewRow[],
   };

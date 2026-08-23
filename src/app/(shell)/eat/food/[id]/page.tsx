@@ -3,6 +3,7 @@ import { MacroLine } from '@/components/Macros';
 import { ScreenTitle } from '@/components/ScreenTitle';
 import { InfoIcon } from '@/components/icons';
 import { readFood } from '@/db/foods';
+import { energyProvenance } from '@/lib/display';
 import { allAliases, aliasFoodId, aliasName } from '@/lib/food-aliases';
 import { energyText } from '@/lib/macros';
 import { strings } from '@/lib/strings';
@@ -45,6 +46,7 @@ export default async function FoodPage({ params }: { params: Promise<{ id: strin
   }
 
   const alias = allAliases().find((entry) => aliasFoodId(entry) === row.id) ?? null;
+  const energy = energyProvenance(row.energySource);
 
   return (
     <>
@@ -82,19 +84,27 @@ export default async function FoodPage({ params }: { params: Promise<{ id: strin
           />
         </div>
 
+        {/*
+          * The marker, one tap from the number, and it names which of the three
+          * this food is. It used to read "Computed energy" whatever the column
+          * said: a published 274 kcal and a computed one wore the same chip,
+          * the same colour and the same background, and only the paragraph
+          * inside the panel differed. The words, the border and the data flag
+          * all come off `energy_source` now, in one place, so the chip cannot
+          * drift from the sentence under it.
+          */}
         <details className="card flat" style={{ marginTop: 'var(--s3)', padding: 0 }}>
           <summary
-            className="src"
+            className={energy.className}
             style={{ cursor: 'pointer', minHeight: 'var(--touch)' }}
-            data-flag={row.energySource ?? 'none'}
+            data-flag={energy.flag}
+            data-energy-source={row.energySource ?? 'none'}
           >
             <InfoIcon />
-            {strings.nutrition.computedEnergyChip}
+            {energy.chip}
           </summary>
           <p className="sub" style={{ paddingTop: 'var(--s2)' }}>
-            {row.energySource === 'computed_atwater'
-              ? strings.nutrition.computedEnergyBody
-              : strings.nutrition.publishedEnergyBody}
+            {energy.body}
           </p>
         </details>
 

@@ -48,7 +48,7 @@ export default defineConfig({
   projects: [
     {
       name: 'webkit-iphone',
-      testIgnore: /focus\.spec\.ts|service-worker\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|launch-report\.spec\.ts|notices\.spec\.ts|withings\.spec\.ts|ingest\.spec\.ts|labs-scratch\.spec\.ts|nutrition\.spec\.ts|shopping\.spec\.ts|catalogue-offline\.spec\.ts|train-week\.spec\.ts|session-player\.spec\.ts|console-walk\.spec\.ts/,
+      testIgnore: /focus\.spec\.ts|service-worker\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|launch-report\.spec\.ts|notices\.spec\.ts|withings\.spec\.ts|ingest\.spec\.ts|labs-scratch\.spec\.ts|nutrition\.spec\.ts|shopping\.spec\.ts|catalogue-offline\.spec\.ts|train-week\.spec\.ts|session-player\.spec\.ts|console-walk\.spec\.ts|settings-integrations\.spec\.ts/,
       use: { ...devices['Desktop Safari'], viewport: { width: 393, height: 852 }, deviceScaleFactor: 3 },
     },
     {
@@ -168,7 +168,7 @@ export default defineConfig({
       // attribute relaxed, so WebKit will carry it over loopback too, and it
       // grades its fold in both engines against one database.
       name: 'chrome-scratch',
-      testMatch: /launch-report\.spec\.ts|notices\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|withings\.spec\.ts|ingest\.spec\.ts|labs-scratch\.spec\.ts|nutrition\.spec\.ts|shopping\.spec\.ts|train-week\.spec\.ts|session-player\.spec\.ts|console-walk\.spec\.ts/,
+      testMatch: /launch-report\.spec\.ts|notices\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|withings\.spec\.ts|ingest\.spec\.ts|labs-scratch\.spec\.ts|nutrition\.spec\.ts|shopping\.spec\.ts|train-week\.spec\.ts|session-player\.spec\.ts|console-walk\.spec\.ts|settings-integrations\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         channel: 'chrome',

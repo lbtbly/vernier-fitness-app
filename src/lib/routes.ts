@@ -152,3 +152,33 @@ export function shouldIssueCsrfCookie(pathname: string): boolean {
   if (NO_COOKIE_PATHS.includes(pathname)) return false;
   return !NO_COOKIE_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 }
+
+/**
+ * The screens that own the whole viewport, with no tab bar over them.
+ *
+ * ONE ROUTE IS ON THIS LIST AND IT IS THE SESSION PLAYER. Screen 07 draws no
+ * tab bar on any of its four frames and calls Set done "the only accent and the
+ * largest object on the screen", and the shipped build drew the bar straight
+ * over it: the control's box measured y771 to y859 in an 852 px viewport, the
+ * bar sat at y795 to y852, `elementFromPoint` at the button's centre returned
+ * the bar's own glyph, and a real tap there navigated to /train and ended the
+ * session. The one control the owner needs mid-set, in a basement gym, quietly
+ * ended his session.
+ *
+ * The predicate lives here rather than inside the component because this file
+ * is where a route's class is decided, and because a regular expression written
+ * inline in a client component is a regular expression nothing tests.
+ * `/train/session/<id>` is immersive; `/train/session/<id>/edit` is not, because
+ * editing a session is an ordinary screen with an ordinary way out.
+ */
+export function isImmersiveRoute(pathname: string): boolean {
+  const path = pathname.length > 1 && pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
+  const segments = path.split('/');
+  return (
+    segments.length === 4 &&
+    segments[0] === '' &&
+    segments[1] === 'train' &&
+    segments[2] === 'session' &&
+    segments[3] !== ''
+  );
+}

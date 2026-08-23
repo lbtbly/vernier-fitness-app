@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { classifyRoute, isApiRoute, isOpenRoute, shouldIssueCsrfCookie } from '@/lib/routes';
+import {
+  classifyRoute,
+  isApiRoute,
+  isImmersiveRoute,
+  isOpenRoute,
+  shouldIssueCsrfCookie,
+} from '@/lib/routes';
 
 /**
  * The route table the middleware enforces and scripts/route-table.mjs grades.
@@ -128,5 +134,33 @@ describe('the route table', () => {
     }
     expect(shouldIssueCsrfCookie('/sign-in')).toBe(true);
     expect(shouldIssueCsrfCookie('/settings')).toBe(true);
+  });
+
+  /**
+   * The session player owns the whole viewport, and the tab bar reads this to
+   * know it must not draw over it. The bar sat across the Set done control at
+   * 393x852 and a tap at that control's centre ended the session.
+   *
+   * WHAT WOULD MAKE THIS GO RED: widening the match to the whole /train/session
+   * subtree, which would take the tab bar off the session editor as well, or
+   * narrowing it to a literal path, which would put the bar back on every
+   * session the owner actually opens.
+   */
+  it('calls the session player immersive and nothing else', () => {
+    expect(isImmersiveRoute('/train/session/sess_2026-08-24_a')).toBe(true);
+    expect(isImmersiveRoute('/train/session/sess_2026-08-24_a/')).toBe(true);
+
+    for (const path of [
+      '/train',
+      '/train/session',
+      '/train/session/',
+      '/train/session/sess_1/edit',
+      '/train/catalogue',
+      '/',
+      '/settings',
+      '/health/labs/lab_1',
+    ]) {
+      expect(isImmersiveRoute(path), `${path} is not the player`).toBe(false);
+    }
   });
 });

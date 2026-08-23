@@ -203,3 +203,63 @@ export function targetLabel(unit: string, target: number): string {
   if (unit === 'minute') return strings.player.minutes(target);
   return strings.player.reps(target);
 }
+
+/**
+ * The refusal banner's sentence, over the pages the parser actually refused on.
+ *
+ * C10. The screen built this list out of the page census, which is every page
+ * in the document, and announced "Page 1, 2, 3 holds a blood-pressure reading"
+ * on a three-page panel whose blood-pressure line was on page 2 alone. The
+ * pages are stored now; this turns them into English, with the verb agreeing
+ * with the list and a sentence for the document that recorded no page.
+ */
+export function refusalSentence(pages: number[]): string {
+  if (pages.length === 0) return strings.labs.refusedNoPage;
+  if (pages.length === 1) return strings.labs.refusedOnePage(pages[0]);
+  const last = pages[pages.length - 1];
+  return strings.labs.refusedManyPages(
+    strings.labs.refusedPageJoin(pages.slice(0, -1).join(', '), String(last)),
+  );
+}
+
+/**
+ * Where an energy value came from, as a chip and as the sentence behind it.
+ *
+ * F79 IS THIS FUNCTION. The food screen rendered the "Computed energy" chip
+ * unconditionally, so `ciqual:1000`, whose 274 kcal Anses published, wore the
+ * identical chip, colour and background as `ciqual:1010`, whose energy this app
+ * worked out from its macronutrients. A marker that marks everything marks
+ * nothing.
+ *
+ * Three values, three answers, chosen here rather than in a component, for the
+ * same reason `sourceLabel` and `withingsStateLabel` are here: a column value
+ * must never reach a screen as a column value, and a branch written inline in a
+ * page is a branch nothing can test. `est` is the dashed edge, which is
+ * DESIGN.md's mark for a number this product produced rather than received.
+ */
+export type EnergyProvenance = { chip: string; body: string; className: string; flag: string };
+
+export function energyProvenance(energySource: string | null): EnergyProvenance {
+  if (energySource === 'computed_atwater') {
+    return {
+      chip: strings.nutrition.computedEnergyChip,
+      body: strings.nutrition.computedEnergyBody,
+      className: 'src est',
+      flag: 'computed_atwater',
+    };
+  }
+  if (energySource === 'published') {
+    return {
+      chip: strings.nutrition.publishedEnergyChip,
+      body: strings.nutrition.publishedEnergyFoodBody,
+      className: 'src',
+      flag: 'published',
+    };
+  }
+  return {
+    chip: strings.nutrition.noEnergyChip,
+    body: strings.nutrition.noEnergyFoodBody,
+    className: 'src',
+    flag: 'none',
+  };
+}

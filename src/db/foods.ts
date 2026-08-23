@@ -161,6 +161,12 @@ export type FoodTableFacts = {
   nullFibreExample: string | null;
   /** A live row whose energy Vernier computed, so F79's marker has a screen. */
   computedExample: string | null;
+  /**
+   * A live row whose energy Anses published, so the marker has something to be
+   * distinguishable FROM. F79 is a comparison and a screen that can only reach
+   * one side of it cannot show one.
+   */
+  publishedExample: string | null;
 };
 
 /**
@@ -205,6 +211,13 @@ export async function readFoodTableFacts(): Promise<FoodTableFacts> {
     .orderBy(asc(food.id))
     .limit(1);
 
+  const [publishedRow] = await db
+    .select({ id: food.id })
+    .from(food)
+    .where(eq(food.energySource, 'published'))
+    .orderBy(asc(food.id))
+    .limit(1);
+
   return {
     total: Number(totals?.total ?? 0),
     allFive: Number(totals?.allFive ?? 0),
@@ -215,5 +228,6 @@ export async function readFoodTableFacts(): Promise<FoodTableFacts> {
     tableVersion: version?.tableVersion ?? null,
     nullFibreExample: noFibre?.id ?? null,
     computedExample: computedRow?.id ?? null,
+    publishedExample: publishedRow?.id ?? null,
   };
 }

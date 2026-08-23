@@ -68,7 +68,7 @@ export function WithingsPanel(props: Props) {
   const when = (iso: string | null) => (iso ? shortDateTime(new Date(iso), props.timeZone) : null);
   const cause = withingsCauseLine(view.cause);
   const connected = view.state === 'connected' || view.state === 'demo' || view.state === 'expiring';
-  const neverImported = view.storedRows === 0;
+  const neverImported = view.importedRows === 0;
 
   async function run(action: Action) {
     setBusy(action);
@@ -145,7 +145,7 @@ export function WithingsPanel(props: Props) {
         <dl>
           <div className="field">
             <dt>{strings.withings.lastSync}</dt>
-            <dd className="num">
+            <dd className="num" data-withings-last-sync="true">
               {busy ? (
                 <span className="skel" style={{ width: '112px' }} />
               ) : (
@@ -155,8 +155,8 @@ export function WithingsPanel(props: Props) {
           </div>
           <div className="field">
             <dt>{strings.withings.readingsStored}</dt>
-            <dd className="num">
-              {busy ? <span className="skel" style={{ width: '48px' }} /> : view.storedRows}
+            <dd className="num" data-withings-imported="true">
+              {busy ? <span className="skel" style={{ width: '48px' }} /> : view.importedRows}
             </dd>
           </div>
           <div className="field">
@@ -219,21 +219,50 @@ export function WithingsPanel(props: Props) {
             </button>
           </>
         ) : (
-          <button
-            type="button"
-            className="btn primary block"
-            onClick={() => void run('connect')}
-            disabled={busy !== null}
-          >
-            <ScaleIcon />
-            {busy === 'connect'
-              ? strings.withings.working
-              : view.state === 'revoked' || view.state === 'expiring'
-                ? strings.withings.reconnect
-                : view.mode === 'demo'
-                  ? strings.withings.connectDemo
-                  : strings.withings.connect}
-          </button>
+          <>
+            <button
+              type="button"
+              className="btn primary grow"
+              onClick={() => void run('connect')}
+              disabled={busy !== null}
+            >
+              <ScaleIcon />
+              {busy === 'connect'
+                ? strings.withings.working
+                : view.state === 'revoked' || view.state === 'expiring'
+                  ? strings.withings.reconnect
+                  : view.mode === 'demo'
+                    ? strings.withings.connectDemo
+                    : strings.withings.connect}
+            </button>
+            {/*
+              * THE TEST BUTTON IS ON EVERY STATE, AND THE REVOKED ONE NEEDS IT
+              * MOST.
+              *
+              * `data-withings=revoked` rendered Reconnect alone: zero test
+              * buttons, where demonstration, connected and expiring each render
+              * one, and F42 names a test button as part of what the status
+              * screen shows. `12-settings-integrations.html` draws Reconnect and
+              * Test side by side on exactly that unhappy card, which is the
+              * state where asking "is it the token or is it the network" is the
+              * whole question.
+              *
+              * It is safe here because it asks and never writes: one measure
+              * call from the current cursor, the envelope read, nothing
+              * committed and no cursor moved. A connection that was never made
+              * answers `never_connected` and says so, which is an honest result
+              * rather than an error.
+              */}
+            <button
+              type="button"
+              className="btn grow"
+              onClick={() => void run('test')}
+              disabled={busy !== null}
+            >
+              <SyncIcon />
+              {busy === 'test' ? strings.withings.working : strings.withings.test}
+            </button>
+          </>
         )}
       </div>
 

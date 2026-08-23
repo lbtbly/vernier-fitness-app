@@ -158,10 +158,22 @@ export default async function RecipePage({
           the explanation, so the marker is reachable without leaving the screen
           the number is on.
         */}
+        {/*
+          * The chip says which of the two this recipe is, the way the food
+          * screen does. It read "Computed energy" over a recipe whose own panel
+          * then said "0 of 4 ingredients carry a computed energy", which is the
+          * marker marking a thing it did not apply to.
+          */}
         <details className="card flat" style={{ marginTop: 'var(--s2)', padding: 0 }}>
-          <summary className="src" style={{ cursor: 'pointer', minHeight: 'var(--touch)' }} data-flag="computed-energy">
+          <summary
+            className={(active?.computedEnergyCount ?? 0) > 0 ? 'src est' : 'src'}
+            style={{ cursor: 'pointer', minHeight: 'var(--touch)' }}
+            data-flag={(active?.computedEnergyCount ?? 0) > 0 ? 'computed_atwater' : 'published'}
+          >
             <InfoIcon />
-            {strings.nutrition.computedEnergyChip}
+            {(active?.computedEnergyCount ?? 0) > 0
+              ? strings.nutrition.computedEnergyChip
+              : strings.nutrition.publishedEnergyChip}
           </summary>
           <div style={{ paddingTop: 'var(--s2)' }}>
             <p className="sub">

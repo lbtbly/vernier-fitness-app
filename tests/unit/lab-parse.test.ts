@@ -11,7 +11,9 @@ import {
   linesOf,
   nonWhitespaceCount,
   parseReference,
+  refusedPages,
 } from '@/lib/lab-parse';
+import { refusalSentence } from '@/lib/display';
 import { BUILT_IN_ANALYTES } from '@/lib/labs';
 import { PANEL_PAGE_TWO, panelPages, pageOf, scannedPage } from './lab-fixture';
 
@@ -130,6 +132,57 @@ describe('blood pressure, refused at extraction', () => {
     expect(serialised).not.toContain('128');
     expect(serialised).not.toContain('mmHg');
     expect(serialised.toLowerCase()).not.toContain('tension');
+  });
+
+  /**
+   * C10. The banner named every page in the document because the screen built
+   * its list out of the census, and the parser's own page number was thrown
+   * away at write time. These three assertions are what would go red if that
+   * came back: the pages the refusals were on are a strict subset of the pages
+   * the document has, the sentence names the one page, and it names no other.
+   *
+   * The population is printed rather than implied. A run where the fixture had
+   * no blood-pressure line at all would satisfy "the banner names no wrong
+   * page" trivially, and that is the shape of pass this project keeps finding.
+   */
+  it('names the page the refusal was on and no other page in the document', () => {
+    const read = panel();
+    const pages = refusedPages(read.refusals);
+    console.log(
+      `document pages: ${read.census.map((page) => page.page).join(', ')}; ` +
+        `refusals: ${read.refusals.length}; refused pages: ${pages.join(', ')}`,
+    );
+    expect(read.census).toHaveLength(2);
+    expect(read.refusals).toHaveLength(1);
+    expect(pages).toEqual([2]);
+
+    const sentence = refusalSentence(pages);
+    expect(sentence).toContain('Page 2 holds');
+    expect(sentence).not.toContain('Page 1');
+    expect(sentence).not.toContain('Page 3');
+    // Singular subject, singular verb. The shipped line read "Page 1, 2, 3
+    // holds", which is both the wrong pages and the wrong verb.
+    expect(sentence).not.toContain('Pages');
+  });
+
+  it('lists several refused pages once each, in order, with a plural verb', () => {
+    const many = refusedPages(
+      [
+        { page: 4, reason: 'blood_pressure' },
+        { page: 2, reason: 'blood_pressure' },
+      ],
+      [{ page: 2, reason: 'blood_pressure' }],
+    );
+    expect(many).toEqual([2, 4]);
+    expect(refusalSentence(many)).toContain('Pages 2 and 4 each hold');
+    expect(refusalSentence([2, 4, 7])).toContain('Pages 2, 4 and 7 each hold');
+  });
+
+  it('names no page at all when none was recorded', () => {
+    const sentence = refusalSentence([]);
+    console.log(`no-page sentence: ${sentence}`);
+    expect(sentence).not.toContain('Page');
+    expect(sentence).toContain('not recorded');
   });
 
   it('keeps a refused line out of the excerpt built around its neighbours', () => {

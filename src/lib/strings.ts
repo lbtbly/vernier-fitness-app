@@ -2011,8 +2011,32 @@ export const strings = {
 
     refusedTitle: (count: number) =>
       count === 1 ? 'One row was refused.' : `${count} rows were refused.`,
-    refusedBody: (pages: string) =>
-      `Page ${pages} holds a blood-pressure reading. It was not extracted, it is not displayed here and it is not stored. This app has no field for it and never will.`,
+    /**
+     * THE PAGES THE REFUSALS WERE ACTUALLY ON, AND THE VERB AGREES WITH THE
+     * LIST.
+     *
+     * One sentence took a string of every page in the document and read "Page
+     * 1, 2, 3 holds a blood-pressure reading" on a three-page panel whose
+     * blood-pressure line was on page 2. Two things wrong at once: the wrong
+     * pages, and a singular verb over a list.
+     *
+     * THREE KEYS RATHER THAN ONE FUNCTION WITH THREE BRANCHES, and the reason
+     * is the rendered check. scripts/rendered-strings.mjs probes a key that
+     * takes data by calling it with a sentinel, 0, 1, 2, 5 and a proxy, and
+     * none of those is an array of two, so two of the three branches would
+     * never be rendered into an anchor and the plural sentence would read as
+     * uncatalogued copy the first time a panel refused two pages. Each branch
+     * takes a scalar here and `refusalSentence` in src/lib/display.ts picks
+     * between them, which is where this product chooses words anyway.
+     */
+    refusedNoPage:
+      'The page it was printed on was not recorded for this import. It was not extracted, it is not displayed here and it is not stored. This app has no field for it and never will.',
+    refusedOnePage: (page: number) =>
+      `Page ${page} holds a blood-pressure reading. It was not extracted, it is not displayed here and it is not stored. This app has no field for it and never will.`,
+    refusedManyPages: (pages: string) =>
+      `Pages ${pages} each hold a blood-pressure reading. They were not extracted, they are not displayed here and they are not stored. This app has no field for one and never will.`,
+    /** "2, 4 and 7". The conjunction is a word a person reads, so it has a key. */
+    refusedPageJoin: (pages: string, last: string) => `${pages} and ${last}`,
 
     needsEyes: (count: number) => `Needs your eyes, ${count}`,
     readCleanly: (count: number) => `Read cleanly, ${count}`,
@@ -2426,7 +2450,21 @@ export const strings = {
       `${pct}% of this recipe's mass resolved to a food row, which is under ${threshold}%. The energy is shown as a range because the rest could be anything.`,
     fibreShortfall: (pct: string) =>
       `Fibre resolved on ${pct}% of the mass, so the fibre figure is thinner than the others. It carries its own number for exactly that reason.`,
+    /**
+     * THREE CHIPS, BECAUSE THERE ARE THREE ANSWERS AND F79 IS ABOUT TELLING
+     * THEM APART.
+     *
+     * The screen printed the computed chip on every food, so a published 274
+     * kcal wore the same words, the same colour and the same border as a
+     * computed one and the marker marked nothing. `energy_source` holds
+     * `published`, `computed_atwater` or null, and each one gets its own line
+     * here. The dashed edge on the computed chip is DESIGN.md's mark for a
+     * number this app produced rather than received; origin never spends a
+     * semantic colour.
+     */
     computedEnergyChip: 'Computed energy',
+    publishedEnergyChip: 'Published energy',
+    noEnergyChip: 'No energy value',
     computedEnergyTitle: 'This energy was computed, not published',
     /**
      * F79's marker, in words, one tap from the number. Anses publishes an
@@ -2440,6 +2478,15 @@ export const strings = {
     computedEnergyCount: (computed: number, total: number) =>
       `${computed} of ${total} ingredients carry a computed energy.`,
     publishedEnergyBody: 'Every ingredient here carries an energy value Anses published.',
+    /**
+     * The same fact about ONE food rather than about a recipe's ingredients.
+     * The recipe sentence above shipped on the food screen, where it told the
+     * owner about ingredients on a page that has none.
+     */
+    publishedEnergyFoodBody:
+      'Anses publishes this energy value in the Ciqual table. Vernier stores it as printed and computes nothing from the nutrients below.',
+    noEnergyFoodBody:
+      'Anses publishes no energy value for this food, and its protein, carbohydrate or fat is missing too, so there was nothing to compute one from. The energy reads unknown here and never 0.',
     openProvenance: 'Where this number came from',
 
     snapshotLabel: 'Snapshot',
@@ -2774,6 +2821,12 @@ export const strings = {
     foodNotFoundBody: 'That food is not in this database. Nothing was deleted; the id does not exist.',
     foodNoFibreExample: 'A food with no fibre value',
     foodComputedExample: 'A food whose energy Vernier computed',
+    /**
+     * The other half of the pair. F79 is a comparison, so both sides of it are
+     * one tap from the screen that states the counts: a published energy and a
+     * computed one, side by side, each carrying its own chip.
+     */
+    foodPublishedExample: 'A food whose energy Anses published',
     foodExampleNone: 'Every food in the table carries this value, so there is no example to show.',
     dataSourcesEmptyTitle: 'The food table is empty',
     dataSourcesEmptyBody:

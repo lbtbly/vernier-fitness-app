@@ -4,7 +4,7 @@ import { getConfig } from '@/lib/config';
 import { csrfFailure } from '@/lib/csrf';
 import { ok, refuse, sessionOrRefusal } from '@/lib/gate';
 import { knownUnits } from '@/lib/lab-display';
-import { type PageItems, census, extractPanel } from '@/lib/lab-parse';
+import { type PageItems, census, extractPanel, refusedPages } from '@/lib/lab-parse';
 import { recognisePages } from '@/lib/lab-ocr';
 import { type ReviewRow, previewConversion } from '@/lib/lab-review';
 import { newDocumentId, removeDocument, writeDocument } from '@/lib/lab-storage';
@@ -195,6 +195,9 @@ async function handle(request: Request) {
     storedPath: `labs/${id}.pdf`,
     checksum,
     refusals: fromText.refusals.length + fromOptical.refusals.length,
+    // The pages, kept rather than counted. Both passes over the file can refuse
+    // a line, and a page one of them saw is a page: `refusedPages` unions them.
+    refusalPages: refusedPages(fromText.refusals, fromOptical.refusals),
     census: pageCensus,
     rows,
   });

@@ -931,11 +931,19 @@ export const labAnalyte = pgTable(
  * carry both answers. F63 reads the directory before and after, and this row is
  * what the screen reads.
  *
- * NO BLOOD PRESSURE REACHES THIS TABLE. `refusals` is a count and a page number
- * and nothing else: the parser drops a blood-pressure line before any row is
- * built, so there is no field here for the value and no field for the label
- * either. F60 asks for a query across every table and this is the table it would
- * have been in.
+ * NO BLOOD PRESSURE REACHES THIS TABLE. `refusals` is a count and `refusal_pages`
+ * is the list of pages those refusals came from, and that is all: the parser
+ * drops a blood-pressure line before any row is built, so there is no field here
+ * for the value and no field for the label either. F60 asks for a query across
+ * every table and this is the table it would have been in.
+ *
+ * THE PAGE NUMBERS ARE STORED BECAUSE THE SCREEN HAS TO NAME THEM AND WAS
+ * GUESSING. Only the count was kept, so LabReview built its list out of the
+ * census, which is every page in the document: a three-page panel whose
+ * blood-pressure line is on page 2 alone drew "Page 1, 2, 3 holds a
+ * blood-pressure reading". In a product that refuses to print the value it
+ * refused, naming the wrong pages is the same category of wrong. The parser
+ * always knew which page; the write threw it away.
  */
 export const labDocument = pgTable(
   'lab_document',
@@ -961,6 +969,12 @@ export const labDocument = pgTable(
     retentionAt: timestamp('retention_at', { withTimezone: true }),
     /** How many lines were refused at extraction. A count, never a value. */
     refusals: integer('refusals').notNull().default(0),
+    /**
+     * Which pages those refusals were on, ascending, each page once. A page
+     * number, never a line number, never an offset and never a value: the page
+     * is what the owner can check against his own paper.
+     */
+    refusalPages: integer('refusal_pages').array().notNull().default([]),
     /** Non-whitespace characters per page, and whether each page was image only. */
     census: jsonb('census').notNull(),
     /** The candidate rows and their decisions. A holding, never a store. */

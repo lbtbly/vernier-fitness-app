@@ -1,0 +1,24 @@
+-- Slice fix-craft. Pending DDL, applied on merge, in order, by the lead.
+--
+-- One column, and it exists because a screen was naming the wrong pages.
+--
+-- C10. `lab_document.refusals` stored how many lines the parser refused and
+-- nothing about where they were, so `LabReview.tsx` built its list out of the
+-- page census, which is every page in the document. A three-page panel whose
+-- blood-pressure line is on page 2 alone rendered "Page 1, 2, 3 holds a
+-- blood-pressure reading". The parser has known the page since slice 7:
+-- `Refusal` in src/lib/lab-parse.ts is `{ page, reason }` and the write dropped
+-- the page on the floor.
+--
+-- What this column holds is page numbers, ascending, each page once. It holds
+-- no value, no label, no line and no offset, which is the same rule the count
+-- beside it has followed since it was written. F60 asks for a query across
+-- every table for a blood-pressure reading, and after this column exists the
+-- answer is still nothing.
+--
+-- Idempotent: IF NOT EXISTS, and the default backfills every row already there
+-- with the empty list. An existing document keeps its count and gains an empty
+-- page list, which the banner renders as the sentence that names no page rather
+-- than as a sentence naming the wrong one.
+alter table lab_document
+  add column if not exists refusal_pages integer[] not null default '{}'::integer[];
