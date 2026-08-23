@@ -413,11 +413,24 @@ function Row({
   const blocked = waiting && isBlocked(row.flags);
   const savable = canSave(row) && !offline;
   const state = row.decision === 'saved' ? 'done' : row.decision === 'rejected' ? 'rej' : blocked ? 'attn' : '';
-  const reference = referenceLine(
-    row.reference?.low ?? null,
-    row.reference?.high ?? null,
-    row.printedUnit || 'mmol/L',
-  );
+  /*
+   * The interval, as the sheet printed it wherever the sheet printed one.
+   *
+   * "< 5" and "0 to 5" are not the same claim, and a row whose unit column the
+   * sheet left empty has no unit to take a decimal precision from either: the
+   * first draft fell back to mmol/L and drew the GGT row's "12 - 64" as
+   * "ref 12.00 to 64.00", which is this app inventing two decimal places the
+   * laboratory did not print. The parsed bounds are still stored and still
+   * editable; what is DRAWN is the sheet's own text.
+   */
+  const reference =
+    row.reference?.text && row.reference.text.trim() !== ''
+      ? row.reference.text.trim()
+      : referenceLine(
+          row.reference?.low ?? null,
+          row.reference?.high ?? null,
+          row.converted?.unit ?? row.printedUnit,
+        );
 
   return (
     <div

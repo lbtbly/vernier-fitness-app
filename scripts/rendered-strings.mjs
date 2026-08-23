@@ -348,6 +348,31 @@ const DATA_QUERIES = [
    */
   ['lab_document.file_name', "select distinct file_name from lab_document where file_name <> ''"],
   ['lab_document.laboratory', "select distinct laboratory from lab_document where laboratory <> ''"],
+  /*
+   * Every readable fragment the review holding carries: the label the sheet
+   * printed, the value it printed, the unit it printed and the excerpt quoted
+   * back under "As printed". All four are words off the owner's own document,
+   * and all four are drawn on the review screen.
+   *
+   * The review is in `unreachableBranches` below, because this walk will not
+   * upload a laboratory document onto the owner's storage volume to grade copy,
+   * so nothing here is reachable today. It is written now anyway: the day a
+   * slice makes that screen walkable, the vocabulary is already right, and the
+   * alternative is a blanket exemption for the surface, which is the shape of
+   * every hole this check exists to close.
+   */
+  [
+    'lab_document.extraction',
+    `select distinct value from lab_document,
+       jsonb_array_elements(extraction) as row_json,
+       lateral (
+         select row_json->>'printedLabel' as value
+         union all select row_json->>'printedValue'
+         union all select row_json->>'printedUnit'
+         union all select jsonb_array_elements_text(coalesce(row_json->'excerpt', '[]'::jsonb))
+       ) as fragment
+     where value is not null and value <> ''`,
+  ],
 ];
 
 let dataValues = 0;
