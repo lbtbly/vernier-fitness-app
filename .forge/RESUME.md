@@ -1,56 +1,58 @@
 # Resume
 
-## HANDOFF, 2026-08-23. Read this block, then PROCESS.md, then carry on.
+## HANDOFF, 2026-08-23, end of session. Read this, then PROCESS.md, then carry on.
 
-**Phase:** 8 BUILD and 9 VERIFY, iterating. The run is armed; `.forge/ARMED` exists. The greenlight is closed and is never re-opened.
+**Phase:** the run is **STOPPED at the owner's instruction.** `.forge/ARMED` is removed and the Stop gate is off. Nothing is in flight. The greenlight is closed and is never re-opened; re-arming means creating `.forge/ARMED` again, not re-running the gate.
 
-**Checked: 41 of 166.** Slices 1, 2 and 3 closed. Slice 4 closed but for the defects below.
+**Checked: 41 of 166.** Slices 1, 2 and 3 closed. Slice 4 closed but for F23, C5 and C9.
 
-**Next action:** finish the stabilisation dispatch in flight, then run slices 5 onward in parallel worktrees per PROCESS.md.
+**Current slice:** 4, finishing. **Next action:** verify the F23 and C5 fixes that landed at `f5bff8a` and `cb8887e` and were never ruled, then start slice 5 (Withings) under the parallel-worktree rule in PROCESS.md.
 
-### In flight when this was written
+**Nothing is in flight.** The stabilisation dispatch completed and its work is committed at `64822a5` and `676b673`.
 
-One builder, stabilising before slice 5. Four items: add the missing `lint` script and make the gate fail loudly when a step it names is absent; diagnose the passkey regression and say whether it is test or product; fix F31's unclickable chart point; restore the owner's goal date through the shipped form. It must show **three consecutive clean full runs** before slice 5 starts. If its tree is dirty on resume, let it land or reset to `8af1417` and re-dispatch.
+### Health of the build, verified this session
 
-### Open defects, by line
+The app is live and healthy at `https://lamberts-mac-mini.tailda76d6.ts.net`, HTTP 200, publicly trusted certificate, both containers healthy, listener on `127.0.0.1` only. Suites: **140 unit, 72 end-to-end passed with 1 skipped and 0 failed, three consecutive runs.** The gate runs five named steps and now **returns 2 when it names a step `package.json` does not define**, so it can no longer report a check it did not run.
 
-| Line | Severity | What |
+### Open lines, by id
+
+| Line | State | What |
 |---|---|---|
-| **R7** | high, now the largest risk to finishing | `passkey.spec.ts:130` failed five consecutive times at the second authentication, three isolated, with no request reaching the origin, so the ceremony dies in the page before it posts. Was a flake, now reproducible. **F9 is ticked; if the product regressed, F9 is wrong and gets un-ticked, not quietly repaired.** The suite also degraded 72, 71, 70, 66 across four runs on one tree. |
-| **F31** | medium | The average series' dot covers the newest weight dot on Health, so the two-tap provenance walk cannot start. Ticked line, defect arriving. |
-| **F29** | medium, plus a data change | The seeded goal reads 76.0 kg on 2027-06-30 where the seed writes 2027-03-30. A test died before its restore. Two taps on the Health goal form, not SQL. |
-| **F23** | open | First-ever waist could not be typed; fix landed at `f5bff8a`/`cb8887e`, not yet verified. |
-| **C5** | open | The typing race and the 40 px target; same fix, not yet verified. |
-| **F24** | low, latent | When the origin answers a queued write with one of `PARK_ON`'s six statuses the offline line vanishes and the chip claims Stored on a row that does not exist. No shipped request produces those statuses today. |
-| **C2** | high, owner action | See below. |
-| **F27** | note, not a failure | The maxima sum leaves 24 px of slack. Anything wanting its own element above the trend has 24 px. |
-| **F34** | low | The sweep's regex does not reach `expect(query(...)).toBe('0')`; 16 such assertions exist and all 16 are real today. |
+| **F23** | fix landed, never verified | The waist field could not be typed into; `99.0` yielded `9.1`. Fixed at `f5bff8a`/`cb8887e`, tests now type character by character in both engines. **Needs a verifier dispatch.** |
+| **C5** | fix landed, never verified | The typing race (a value typed while the sheet's read was in flight was silently replaced) and the 40 px target against section 2b's 44 px floor. Same commits. **Needs a verifier dispatch.** |
 | **C9** | not slice 4's | Moved to slice 8 by the architect; it names the session player. |
+| **F4, R1, C2** | evidence now exists, unruled | The owner completed both device steps on 2026-08-23. See below. |
+| **F24** | low, latent | When the origin answers a queued write with one of `PARK_ON`'s six statuses the offline line vanishes and the chip claims Stored on a row that does not exist. No shipped request produces those statuses today. |
+| **F27** | note, not a failure | The maxima sum to 679 and leave 24 px of slack. Anything wanting its own element above the trend has 24 px. |
+| **F34** | low | The suite-safety sweep's regex does not reach `expect(query(...)).toBe('0')`; 16 such assertions exist and all 16 are real today. |
+| **C4** | ticked, with a recorded product characteristic | A painted, enabled, dead control exists during hydration: a click before React attaches is delivered and does nothing. Recorded for the final pass rather than fixed, because disabling it changes the gate C4 is ticked against. |
 
-### Owner actions, with their ordering
+### The three lines the owner unblocked, ready to rule
 
-1. **Clear the two `device_observation` rows BEFORE launching Vernier from the Home Screen.** They read true from a headless test browser and **cannot be corrected by any shipped path**: the upsert ORs `true` in and coalesces the first timestamp, so a fabricated true is permanent and, once he launches on top of it, indistinguishable from the real signal. C2 can never be honestly ruled otherwise. Command already given to him. The lead attempted it and the permission classifier refused, correctly.
-2. **Decide about the fabricated waist row `f636c7bf-aee7-4127-b3b1-26b178ab378e`**, 99.0 cm, manual, not seed, before slice 5 imports real Withings history. It is the only non-seed row on the install and becomes indistinguishable from real waist history the moment that runs. Removal needs a truncate and re-seed at a psql prompt, which is the capability slice 3 deliberately removed from the suite.
-3. Optional, low: two published `SharedShortcut` records named "Test" under his Apple ID, from a research probe. Remove via Stop Sharing in the Shortcuts app.
+On 2026-08-23 the owner cleared the two false `device_observation` rows, launched Vernier from the iPhone Home Screen at 08:54:07 reporting from `100.121.138.9`, and registered a passkey at 08:56:13 with no suite marker. The endpoint now reads `standaloneSeen`, `wakeLockAvailable` and `passkeyRegistered` all true, and `request_origin` holds a second address for the first time in the run.
 
-### Two guards that would not have caught a real loss, and the one that did not
+**F4, R1 and C2 are now provable and are not ruled.** A verifier dispatch closes them. `pushSubscription` stays false, correctly: push arrives in slice 12.
 
-The stabilisation agent reported the 2026-08-23 five-table clear as an unattributed data loss. **It was the owner, on the lead's written instruction**, removing the fabricated waist row before slice 5 put real history beside it. Attributed and closed in DEFECTS.md.
+### Owner actions outstanding
 
-Its two structural findings survive the attribution and are the useful part:
+**None blocking.** Both ordering-critical actions are done, in the right order: the false rows were cleared before the launch, so `first_observed_at` records the owner's own device rather than a headless browser; and the fabricated waist row went before slice 5 could put real history beside it.
 
-1. **`measurement_append_only` is a row-level trigger, and TRUNCATE fires no row-level trigger.** The append-only guarantee this run built holds against UPDATE, DELETE and upsert, and does not hold against TRUNCATE. That is by design and it is the owner's deliberate escape hatch, but it means the strongest guarantee in the schema has one documented way past it.
-2. **The census compares totals, so it cannot see a replacement.** All three stability runs printed "nothing of the owner's was taken" while the five tables had in fact been emptied, because the seed refilled 90 rows a second later and the owner logged a waist at 08:54:34. True of the count, false of the data. A census that counts rows cannot detect a clear followed by a refill; it needs identities or a high-water mark.
+One optional, low: two published `SharedShortcut` records named "Test" under his Apple ID, left by a research probe. Remove via Stop Sharing in the Shortcuts app.
 
-**And there is no backup in the tree.** Slice 13 ships backup and restore. Until it does, the only copy of anything real is the running database.
+### Two guards that would not catch a real loss
+
+1. **`measurement_append_only` is a row-level trigger, and TRUNCATE fires no row-level trigger.** The append-only guarantee holds against UPDATE, DELETE and upsert, and has one documented way past it, which is the owner's deliberate escape hatch.
+2. **The census compares totals, so it cannot see a clear followed by a refill.** Three stability runs printed that nothing of the owner's was taken while five tables had in fact been emptied, because the seed refilled and the owner logged a waist seconds later. True of the count, false of the data.
+
+**There is no backup in the tree.** Slice 13 ships backup and restore. Until then the only copy of anything real is the running database.
 
 ### The defect class to carry into every remaining slice
 
-**Five instances of a check that passes by not checking**, four found by a verifier attacking the check rather than the code, none by the suite: an offline test with service workers blocked; a string checker never wired into the gate; an assertion over an empty population; `fill()` instead of typing, which hid an unusable field for four rounds; and a `lint` step that does not exist. When a check is green, ask what it would take for it to be red.
+**Five instances of a check that passes by not checking**, four found by a verifier attacking the check rather than the code, none by the suite: an offline test with service workers blocked; a string checker never wired into the gate; an assertion over an empty population; `fill()` instead of typing, which hid an unusable field for four rounds; and a `lint` step that did not exist and stood down silently on every run this project ever had. When a check is green, ask what it would take for it to be red.
 
 ### State files, all current
 
-`PROCESS.md` (the process change), `GOAL.md`, `BRIEF.md`, `DESIGN.md`, `PLAN.md`, `DOD.md` (166 lines, 41 checked), `PREFLIGHT.md`, `EVIDENCE.md`, `DEFECTS.md`, `AMENDMENTS.md` (A1 to A6; A4 and A5 edited DOD.md and both came out tighter), `RULING-SLICE-3.md`, `RULING-SLICE-4.md`, `GREENLIGHT.md`.
+`PROCESS.md` (the 2026-08-23 process change), `GOAL.md`, `BRIEF.md`, `DESIGN.md`, `PLAN.md`, `DOD.md` (166 lines, 41 checked), `PREFLIGHT.md`, `EVIDENCE.md`, `DEFECTS.md`, `AMENDMENTS.md` (A1 to A6; A4 and A5 edited DOD.md and both came out tighter), `RULING-SLICE-3.md`, `RULING-SLICE-4.md`, `GREENLIGHT.md`.
 
 ---
 
