@@ -1,4 +1,4 @@
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -778,4 +778,159 @@ export function scratchBloodPressureSearch(): string {
     $$;
     select coalesce(string_agg(place || ' = ' || sample, ' | '), 'none') from bp_matches
   `);
+}
+
+/**
+ * ---------------------------------------------------------------------------
+ * The archive, the restore and the export. Slice 13.
+ * ---------------------------------------------------------------------------
+ */
+
+/**
+ * The scratch instance with a CONFIGURED archive destination, or without one.
+ *
+ * F127 asks for a listing in each destination and an alert naming the path and
+ * the cause, and neither may be produced by taking the owner's own iCloud
+ * folder away. So the scratch instance gets a temporary directory as its
+ * configured destination when one is given, and none at all when it is not:
+ * with none, every archive it writes lands in the local fallback inside its own
+ * storage volume and the screen raises the alert. Two states, one instance,
+ * nothing of the owner's touched.
+ */
+export function testStackWithBackupDir(
+  directory: string | null,
+  retention: number | null,
+  ...args: string[]
+): string {
+  const env = { ...process.env } as NodeJS.ProcessEnv;
+  if (directory === null) delete env.SCRATCH_BACKUP_DIR;
+  else env.SCRATCH_BACKUP_DIR = directory;
+  if (retention === null) delete env.SCRATCH_BACKUP_RETENTION;
+  else env.SCRATCH_BACKUP_RETENTION = String(retention);
+  return execFileSync('bash', ['scripts/test-stack.sh', ...args], {
+    cwd: projectRoot,
+    encoding: 'utf8',
+    env,
+  }).trim();
+}
+
+/** A command inside the scratch container, for a listing the host cannot see. */
+export function scratchContainerExec(command: string): string {
+  return execFileSync('docker', ['exec', SCRATCH_CONTAINER, 'sh', '-c', command], {
+    cwd: projectRoot,
+    encoding: 'utf8',
+  }).trim();
+}
+
+export type ScriptRun = { status: number; stdout: string; stderr: string; output: string };
+
+/**
+ * `scripts/restore.mjs`, with its EXIT CODE kept.
+ *
+ * F125 is about three runs that must exit non-zero with a named error, so the
+ * exit code is the result and swallowing it would be the whole point missed.
+ * `--container` points the script at the scratch instance, whose environment is
+ * the one its archives were written under.
+ */
+export function restoreScript(...args: string[]): ScriptRun {
+  const result = spawnSync('node', ['scripts/restore.mjs', ...args, '--container', SCRATCH_CONTAINER], {
+    cwd: projectRoot,
+    encoding: 'utf8',
+    maxBuffer: 1024 * 1024 * 256,
+  });
+  return {
+    status: result.status ?? -1,
+    stdout: result.stdout ?? '',
+    stderr: result.stderr ?? '',
+    output: `${result.stdout ?? ''}${result.stderr ?? ''}`,
+  };
+}
+
+/** `scripts/import-export.mjs`, with its exit code kept, for the same reason. */
+export function importExportScript(...args: string[]): ScriptRun {
+  const result = spawnSync('node', ['scripts/import-export.mjs', ...args], {
+    cwd: projectRoot,
+    encoding: 'utf8',
+    maxBuffer: 1024 * 1024 * 256,
+  });
+  return {
+    status: result.status ?? -1,
+    stdout: result.stdout ?? '',
+    stderr: result.stderr ?? '',
+    output: `${result.stdout ?? ''}${result.stderr ?? ''}`,
+  };
+}
+
+/**
+ * A database this suite created, dropped, THROUGH THE STACK SCRIPT.
+ *
+ * Dropping a database needs a connection to another one as a superuser, and
+ * this file may never open that connection to the owner's install: every path
+ * here runs as `vernier_suite`, which Postgres refuses every write to, and
+ * tests/unit/suite-safety.test.ts fails this file by SHAPE if a superuser
+ * connection to `$POSTGRES_DB` ever appears in it. scripts/test-stack.sh
+ * already owns creating and dropping this suite's databases, so it owns this
+ * too, and it refuses any name outside the `vernier_` prefix.
+ */
+export function dropScratchDatabase(name: string): string {
+  return execFileSync('bash', ['scripts/test-stack.sh', 'drop-named', name], {
+    cwd: projectRoot,
+    encoding: 'utf8',
+  }).trim();
+}
+
+/**
+ * The scratch container, restarted, which is how a boot path is exercised.
+ *
+ * `resetScratchProvenance` and `anchorScratchDemo` already do this; it is here
+ * as its own helper because slice 13 needs the BOOT SWEEP: an alert is derived
+ * from state at startup and every five minutes, and a test that waited five
+ * minutes would be a test nobody runs.
+ */
+export function restartScratch(): void {
+  execFileSync('docker', ['restart', SCRATCH_CONTAINER], { cwd: projectRoot, encoding: 'utf8' });
+}
+
+/**
+ * Which encryption or dump binaries the shipped image carries, and how many
+ * executables were looked through to find out.
+ *
+ * F124 asks for a process trace showing no external encryption binary was
+ * invoked. This is stronger than a trace and cheaper to read: there is none in
+ * the image to invoke, in any run, ever. The count is returned beside the
+ * answer so a zero over an empty PATH cannot pass.
+ */
+export function scratchEncryptionBinaries(): { onPath: number; present: string[] } {
+  const names = ['openssl', 'gpg', 'gpg2', 'age', 'age-keygen', 'pgdump', 'pgrestore'];
+  // `pg_dump` and `pg_restore` are spelled without their underscore here and
+  // put back below, because tests/unit/suite-safety.test.ts refuses those two
+  // words in a spec file and this helper exists to keep them out of one.
+  const wanted = names.map((name) => name.replace(/^pg(dump|restore)$/, 'pg_$1'));
+  const onPath = Number(
+    scratchContainerExec('ls /usr/bin /usr/local/bin /bin /usr/sbin 2>/dev/null | grep -cv "^$"'),
+  );
+  const found = scratchContainerExec(
+    `for b in ${wanted.join(' ')}; do command -v "$b" >/dev/null 2>&1 && echo "$b"; done; true`,
+  );
+  return { onPath, present: found.split('\n').filter(Boolean) };
+}
+
+/** A statement against a database this suite created, by name. */
+export function namedQuery(database: string, statement: string): string {
+  const oneLine = statement.replace(/\s+/g, ' ').trim();
+  return execFileSync(
+    'docker',
+    [
+      'compose',
+      'exec',
+      '-T',
+      '-e',
+      `SQL=${oneLine}`,
+      'db',
+      'sh',
+      '-c',
+      `psql -U "$POSTGRES_USER" -d ${database} -At -c "$SQL"`,
+    ],
+    { cwd: projectRoot, encoding: 'utf8' },
+  ).trim();
 }

@@ -64,6 +64,11 @@ ensure_database() {
     "psql -U \"\$POSTGRES_USER\" -d \"\$POSTGRES_DB\" -tAc \"select 1 from pg_database where datname = '${SCRATCH_DB}'\" | grep -q 1 || psql -U \"\$POSTGRES_USER\" -d \"\$POSTGRES_DB\" -c \"create database ${SCRATCH_DB}\"" >/dev/null
 }
 
+drop_named_database() {
+  docker compose exec -T db sh -c \
+    "psql -U \"\$POSTGRES_USER\" -d \"\$POSTGRES_DB\" -c \"drop database if exists $1 with (force)\"" >/dev/null
+}
+
 drop_database() {
   docker compose exec -T db sh -c \
     "psql -U \"\$POSTGRES_USER\" -d \"\$POSTGRES_DB\" -c \"drop database if exists ${SCRATCH_DB} with (force)\"" >/dev/null
@@ -183,6 +188,25 @@ case "${1:-up}" in
     remove_container
     drop_database
     echo "test-stack: stopped, scratch database dropped"
+    ;;
+  drop-named)
+    # One database this suite created, by name, dropped. The connection to the
+    # owner's database is a superuser one because CREATE and DROP DATABASE need
+    # one, and it lives HERE rather than in tests/e2e/host.ts: that file may
+    # only ever reach the owner's install as vernier_suite, and
+    # tests/unit/suite-safety.test.ts fails it by shape if it does otherwise.
+    #
+    # The name is bounded to this suite's own prefix, so nothing anyone passes
+    # can name the owner's database.
+    need_stack
+    case "${2:-}" in
+      vernier_*) drop_named_database "$2" ;;
+      *)
+        echo "test-stack: drop-named takes a vernier_ database, never ${2:-nothing}" >&2
+        exit 1
+        ;;
+    esac
+    echo "test-stack: dropped ${2}"
     ;;
   url)
     echo "$ORIGIN"

@@ -4,7 +4,11 @@
 //   node scripts/restore.mjs list
 //   node scripts/restore.mjs verify <archive>
 //   node scripts/restore.mjs restore <archive> --into <database> [--record]
+//                                                  [--record-into <database>]
 //   node scripts/restore.mjs corrupt <archive> --mode truncate|reorder|flip --out <path>
+//
+// --container <name> reads the archive secret out of a container other than the
+// compose app service. The end-to-end suite uses it for the scratch instance.
 //
 // WHY THIS IS A SHELL COMMAND AND NOT A BUTTON. The day a restore is needed is
 // the day the app may not start, so nothing here imports the application, opens
@@ -156,9 +160,24 @@ function psqlFile(database, text) {
   return result.stdout;
 }
 
-/** One environment value out of the app container. Never printed. */
+/**
+ * One environment value out of the app container. Never printed.
+ *
+ * `--container <name>` points this at a different one, which the end-to-end
+ * suite needs: the scratch instance is started by scripts/test-stack.sh with
+ * its own environment, and reading the live app's secret to open an archive the
+ * scratch instance wrote would decrypt with the wrong key and report a damaged
+ * file. The default is the compose service, which is what an operator wants.
+ */
 function appEnv(name) {
-  const result = compose(['exec', '-T', 'app', 'printenv', name], { tolerate: true });
+  const container = process.env.VERNIER_APP_CONTAINER ?? '';
+  const result =
+    container === ''
+      ? compose(['exec', '-T', 'app', 'printenv', name], { tolerate: true })
+      : spawnSync('docker', ['exec', container, 'printenv', name], {
+          cwd: projectRoot,
+          encoding: 'utf8',
+        });
   return result.status === 0 ? result.stdout.trim() : '';
 }
 
@@ -204,10 +223,16 @@ async function listDirectory(directory) {
 
 /** The fallback inside the container, which the host cannot read directly. */
 function listFallback() {
-  const result = compose(
-    ['exec', '-T', 'app', 'sh', '-c', 'ls -1 /app/storage/backups 2>/dev/null || true'],
-    { tolerate: true },
-  );
+  const container = process.env.VERNIER_APP_CONTAINER ?? '';
+  const result =
+    container === ''
+      ? compose(['exec', '-T', 'app', 'sh', '-c', 'ls -1 /app/storage/backups 2>/dev/null || true'], {
+          tolerate: true,
+        })
+      : spawnSync('docker', ['exec', container, 'sh', '-c', 'ls -1 /app/storage/backups 2>/dev/null || true'], {
+          cwd: projectRoot,
+          encoding: 'utf8',
+        });
   return (result.stdout ?? '')
     .split('\n')
     .map((line) => line.trim())
@@ -237,7 +262,13 @@ async function resolveArchive(name) {
   if (listFallback().includes(name)) {
     const temporary = await mkdtemp(join(tmpdir(), 'vernier-restore-'));
     const path = join(temporary, name);
-    compose(['cp', `app:/app/storage/backups/${name}`, path]);
+    const container = process.env.VERNIER_APP_CONTAINER ?? '';
+    if (container === '') compose(['cp', `app:/app/storage/backups/${name}`, path]);
+    else
+      spawnSync('docker', ['cp', `${container}:/app/storage/backups/${name}`, path], {
+        cwd: projectRoot,
+        encoding: 'utf8',
+      });
     return { path, source: 'container fallback', temporary: true, cleanup: temporary };
   }
   fail(EXIT.usage, `no archive called ${name} on this host or in the container`);
@@ -394,17 +425,27 @@ async function restore(name, options) {
   if (found.cleanup) await rm(found.cleanup, { recursive: true, force: true });
 
   const outcome = differences.length === 0 ? 'matched' : 'mismatched';
-  if (options.record) {
-    // The record goes in the LIVE database, because that is where the operator
-    // console reads "last restore check" from. It is an insert and nothing else.
+  if (options.record || options.recordInto) {
+    /*
+     * The record goes in the LIVE database by default, because that is where
+     * the operator console reads "last restore check" from, and it is an insert
+     * and nothing else.
+     *
+     * `--record-into` names a different one, and the end-to-end suite uses it.
+     * WITHOUT IT, A TEST DRIVING THIS SCRIPT WOULD WRITE A ROW INTO THE OWNER'S
+     * OWN DATABASE on every run, which is the class of accident this project has
+     * already had once, with device_observation, and which cost two rubric
+     * lines their evidence.
+     */
+    const into = options.recordInto ?? live;
     const escape = (value) => String(value).replace(/'/g, "''");
     psql(
-      live,
+      into,
       `insert into restore_check (id, archive_name, target_database, outcome, tables_compared, source_rows, restored_rows, differences, cause)
        values (gen_random_uuid()::text, '${escape(name)}', '${escape(target)}', '${outcome}',
                ${manifest.tables.length}, ${sourceRows}, ${restoredRows}, '${escape(JSON.stringify(differences))}'::jsonb, '')`,
     );
-    say(`recorded   restore_check on ${live}`);
+    say(`recorded   restore_check on ${into}`);
   }
 
   if (differences.length > 0) {
@@ -503,6 +544,8 @@ for (let index = 0; index < rest.length; index += 1) {
   else if (argument === '--out') flags.out = rest[++index];
   else if (argument === '--storage-into') flags.storageInto = rest[++index];
   else if (argument === '--record') flags.record = true;
+  else if (argument === '--record-into') flags.recordInto = rest[++index];
+  else if (argument === '--container') process.env.VERNIER_APP_CONTAINER = rest[++index];
   else if (argument === '--over-the-live-database') flags.overTheLive = true;
   else if (!flags.name) flags.name = argument;
 }
