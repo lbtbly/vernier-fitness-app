@@ -1650,3 +1650,264 @@ export const readinessCheck = pgTable(
   },
   (table) => [index('readiness_check_answered').on(table.answeredAt)],
 );
+
+/**
+ * ---------------------------------------------------------------------------
+ * Push, the weekly review and the Sunday run. Slice 12.
+ *
+ * Three things live down here and they are related by one fact: the owner is
+ * not looking at the screen when any of them happens. A push arrives on a
+ * locked phone, a review is prepared at 20:00 whether or not anybody is home,
+ * and a container that was off across Sunday has to work out what it owes on
+ * the way back up. Everything that decides is therefore written down rather
+ * than held in a process, because a process that restarts remembers nothing.
+ * ---------------------------------------------------------------------------
+ */
+
+/**
+ * One device that has agreed to be told things.
+ *
+ * KEYED BY ENDPOINT AND NEVER BY DEVICE, because a device has no identity here.
+ * iOS has supported multiple installs of the same web app since the beginning
+ * and each install gets its own subscription; deleting the Home Screen icon
+ * destroys the storage partition and the subscription with it, and re-adding
+ * makes a brand new one with a new endpoint. So the table holds a set of live
+ * endpoints, a replacement is an insert, and a subscription that has gone is a
+ * row that is deleted rather than a row that is marked.
+ *
+ * `applicationServerKey` is stored because a rotated VAPID pair breaks delivery
+ * with no error anywhere the owner can see: the phone still holds a
+ * subscription, this table still holds a row, and every send is refused 403 by
+ * a push service neither of them talks to. One column turns that into a row on
+ * the diagnostics screen.
+ *
+ * `lastStatus` and its two companions are denormalised from `push_delivery`
+ * below on purpose. The diagnostics screen asks "what happened to the last send
+ * to THIS endpoint" on every render, and the answer being one row read by
+ * primary key rather than a sort over a growing log is what keeps that screen
+ * honest about being cheap.
+ */
+export const pushSubscription = pgTable(
+  'push_subscription',
+  {
+    id: text('id').primaryKey(),
+    endpoint: text('endpoint').notNull(),
+    p256dh: text('p256dh').notNull(),
+    auth: text('auth').notNull(),
+    applicationServerKey: text('application_server_key').notNull(),
+    /** What the device said it was when it subscribed. Evidence, never a decision. */
+    userAgent: text('user_agent').notNull().default(''),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    /** Moved on every launch that re-posts this same endpoint. */
+    lastSeenAt: timestamp('last_seen_at', { withTimezone: true }).notNull().defaultNow(),
+    lastStatus: integer('last_status'),
+    lastStatusAt: timestamp('last_status_at', { withTimezone: true }),
+    lastApnsId: text('last_apns_id'),
+  },
+  (table) => [uniqueIndex('push_subscription_endpoint').on(table.endpoint)],
+);
+
+/**
+ * Every send this machine has made, and what the push service answered.
+ *
+ * THERE IS NO FOREIGN KEY TO `push_subscription` AND THAT IS THE POINT. A 410
+ * deletes the subscription, and the whole value of this table is that the
+ * reason it went is still readable afterwards. A cascade would erase the
+ * evidence at the exact moment it became interesting, and a restrict would stop
+ * the delete F116 requires.
+ *
+ * `endpointTail` is the last twelve characters and never the endpoint itself.
+ * Enough to tell two devices apart on a screen, and not enough to be a
+ * capability. `removed` records the consequence rather than leaving it to be
+ * inferred from a missing row.
+ */
+export const pushDelivery = pgTable(
+  'push_delivery',
+  {
+    id: text('id').primaryKey(),
+    subscriptionId: text('subscription_id').notNull(),
+    endpointTail: text('endpoint_tail').notNull(),
+    /** What the send was for: 'reminder', 'review', 'test', 'operator'. */
+    kind: text('kind').notNull(),
+    /** The push service's status code, or 0 when the request never got one. */
+    status: integer('status').notNull(),
+    apnsId: text('apns_id'),
+    detail: text('detail').notNull().default(''),
+    removed: boolean('removed').notNull().default(false),
+    at: timestamp('at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('push_delivery_subscription').on(table.subscriptionId, table.at),
+    index('push_delivery_at').on(table.at),
+  ],
+);
+
+/**
+ * One row per reminder category, holding whether it speaks and how early.
+ *
+ * The four rows are seeded by drizzle/pending/12-push.sql from the same list
+ * `src/lib/reminders.ts` exports, so the settings screen has four rows to draw
+ * on a fresh install rather than an empty state that reads as broken.
+ */
+export const reminderSetting = pgTable('reminder_setting', {
+  category: text('category').primaryKey(),
+  enabled: boolean('enabled').notNull().default(true),
+  leadMinutes: integer('lead_minutes').notNull().default(0),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+/**
+ * Quiet hours. One row, forever, the same way the owner is one row.
+ *
+ * Stored as two wall-clock strings rather than as instants, because 22:00 means
+ * 22:00 on both sides of a clock change and an offset stored beside it would be
+ * a second thing to keep true.
+ */
+export const reminderPreference = pgTable(
+  'reminder_preference',
+  {
+    id: text('id').primaryKey(),
+    singleton: boolean('singleton').notNull().default(true),
+    quietFrom: text('quiet_from').notNull().default('22:00'),
+    quietTo: text('quiet_to').notNull().default('07:00'),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [uniqueIndex('reminder_preference_singleton').on(table.singleton)],
+);
+
+/**
+ * One thing the owner is being reminded about, and its whole life.
+ *
+ * `unique(category, subjectId)` is the entire idempotency of the sweep: the
+ * five-minute tick re-reads the same accepted session, the same unconfirmed
+ * menu and the same stale source every time it runs, and raising them is an
+ * insert that conflicts and does nothing. Without it a session two days out
+ * would collect five hundred and seventy-six reminder rows before it happened.
+ *
+ * `state` carries what became of it, including the two outcomes that are not
+ * a send: `suppressed`, which is quiet hours, and `expired`, which is the thing
+ * itself having passed. Both are visible on the screen, because a reminder that
+ * silently did not arrive is indistinguishable from one that was never raised.
+ */
+export const reminderItem = pgTable(
+  'reminder_item',
+  {
+    id: text('id').primaryKey(),
+    category: text('category').notNull(),
+    /** The row this reminder is about: a session id, a plan id, a source name. */
+    subjectId: text('subject_id').notNull(),
+    dueAt: timestamp('due_at', { withTimezone: true }).notNull(),
+    line: text('line').notNull(),
+    detail: text('detail').notNull(),
+    route: text('route').notNull(),
+    /** 'pending' | 'sent' | 'done' | 'suppressed' | 'expired' */
+    state: text('state').notNull().default('pending'),
+    /** The sweep window this item was sent in, which is what grouped it. */
+    windowKey: text('window_key'),
+    sentAt: timestamp('sent_at', { withTimezone: true }),
+    suppressedAt: timestamp('suppressed_at', { withTimezone: true }),
+    doneAt: timestamp('done_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    unique('reminder_item_subject').on(table.category, table.subjectId),
+    index('reminder_item_state').on(table.state, table.dueAt),
+    index('reminder_item_window').on(table.windowKey),
+  ],
+);
+
+/**
+ * The run ledger, and the claim that stops a job happening twice.
+ *
+ * `(job_name, period_start)` is unique, `period_start` is a PARIS LOCAL key
+ * such as `2026-10-25T20:00`, and the row is written BEFORE any work is done.
+ * That ordering is the whole mechanism, exactly as it is in
+ * `src/db/idempotency.ts`: five cron ticks inside one period all try the same
+ * insert, one of them wins, and the four that lose do nothing at all rather
+ * than doing the work and discovering afterwards that somebody else did too.
+ *
+ * The key is local because the last Sunday in October is twenty-five hours
+ * long. A weekly bucket computed by arithmetic on an instant moves its boundary
+ * by an hour that night and can hand two keys to one Sunday evening, which is
+ * two rows, two claims and two plans. See src/lib/schedule.ts.
+ *
+ * `state` is 'running', 'done' or 'failed'. A row still 'running' past its
+ * timeout is marked 'failed' at startup rather than being left to hold its
+ * period forever, because a container killed mid-run would otherwise wedge that
+ * slot for good and nothing would ever say so.
+ */
+export const jobRun = pgTable(
+  'job_run',
+  {
+    id: text('id').primaryKey(),
+    jobName: text('job_name').notNull(),
+    periodStart: text('period_start').notNull(),
+    state: text('state').notNull().default('running'),
+    attempt: integer('attempt').notNull().default(1),
+    claimedAt: timestamp('claimed_at', { withTimezone: true }).notNull().defaultNow(),
+    finishedAt: timestamp('finished_at', { withTimezone: true }),
+    /** What happened, in words, so a failed run is readable a week later. */
+    detail: text('detail').notNull().default(''),
+  },
+  (table) => [
+    uniqueIndex('job_run_period').on(table.jobName, table.periodStart),
+    index('job_run_state').on(table.state, table.claimedAt),
+  ],
+);
+
+/**
+ * One weekly review, which is a LEDGER ROW AND NOT A SUMMARY.
+ *
+ * Nothing about the week is stored here. The review is computed on every read
+ * from `measurement`, `health_sample`, `planned_session`, `session_run`,
+ * `set_log`, `meal_plan` and `nutrition_target`, which are the tables that hold
+ * the facts, and a second copy of those facts in this row would be a number
+ * that could disagree with the one on Health. What this row carries is that the
+ * period produced a review, which week it was for, and what became of the
+ * email.
+ *
+ * `weekStart` is unique, so the "one plan per period" half of F119 is enforced
+ * by Postgres rather than by a handler: five ticks that all somehow got past
+ * the ledger would still produce one review.
+ */
+export const weeklyReview = pgTable(
+  'weekly_review',
+  {
+    id: text('id').primaryKey(),
+    /** The Monday of the week being reviewed, as a day key. */
+    weekStart: text('week_start').notNull(),
+    /** The job period that produced it, so a review can be traced to its run. */
+    periodStart: text('period_start').notNull(),
+    generatedAt: timestamp('generated_at', { withTimezone: true }).notNull().defaultNow(),
+    /** 'preview' when no mail transport is configured, then 'sent' or 'failed'. */
+    emailState: text('email_state').notNull().default('preview'),
+    emailAt: timestamp('email_at', { withTimezone: true }),
+    emailDetail: text('email_detail').notNull().default(''),
+  },
+  (table) => [
+    uniqueIndex('weekly_review_week').on(table.weekStart),
+    index('weekly_review_generated').on(table.generatedAt),
+  ],
+);
+
+/**
+ * What the owner said about each block of next week's proposal.
+ *
+ * Three blocks, three rows, three decisions, and no control anywhere that
+ * decides more than one of them. DESIGN.md section 5's first decision and F121:
+ * declining the menu says nothing about the sessions, and neither of them
+ * writes to a calendar.
+ */
+export const reviewDecision = pgTable(
+  'review_decision',
+  {
+    id: text('id').primaryKey(),
+    weekStart: text('week_start').notNull(),
+    /** 'training' | 'nutrition' | 'shopping' */
+    block: text('block').notNull(),
+    /** 'proposed' | 'accepted' | 'rejected' */
+    state: text('state').notNull().default('proposed'),
+    decidedAt: timestamp('decided_at', { withTimezone: true }),
+  },
+  (table) => [unique('review_decision_block').on(table.weekStart, table.block)],
+);

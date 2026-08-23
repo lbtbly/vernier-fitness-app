@@ -50,6 +50,15 @@ export type PushTransport = (input: {
   payload: string;
 }) => Promise<TransportAnswer>;
 
+/**
+ * Why a send did not happen, and every one of these is a sentence the owner
+ * reads rather than a code a log swallows. `no-keys` and `no-devices` are here
+ * beside the three payload refusals because all five end the same way, with
+ * nothing sent, and a caller that had to tell them apart by shape would end up
+ * telling one of them wrong.
+ */
+export type SendRefusal = 'no-title' | 'no-body' | 'too-large' | 'no-keys' | 'no-devices';
+
 export type SendResult =
   | {
       ok: true;
@@ -59,7 +68,7 @@ export type SendResult =
       removed: number;
       answers: Array<{ endpointTail: string; status: number; outcome: DeliveryOutcome }>;
     }
-  | { ok: false; reason: 'no-title' | 'no-body' | 'too-large'; error: string; detail: string };
+  | { ok: false; reason: SendRefusal; error: string; detail: string };
 
 /** The last twelve characters of an endpoint. Enough to tell two apart, and no more. */
 export function endpointTail(endpoint: string): string {
