@@ -41,6 +41,7 @@
 // between its interpolations. Anything else fails, one word or twenty, and
 // adding a word to MACHINE is a deliberate edit to this file rather than
 // something a sentence can drift into.
+import { createHash } from 'node:crypto';
 import { readFile, writeFile } from 'node:fs/promises';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -49,8 +50,10 @@ const here = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(here, '..');
 const worker = join(projectRoot, 'public', 'sw.js');
 const catalogue = join(projectRoot, 'src', 'lib', 'strings.ts');
+const mediaManifest = join(projectRoot, 'src', 'data', 'movement-media.json');
 
 const { strings } = await import(catalogue);
+const media = JSON.parse(await readFile(mediaManifest, 'utf8'));
 
 const OPEN = '// --- generated from src/lib/strings.ts by scripts/build-sw.mjs. Do not edit by hand.';
 const CLOSE = '// --- end generated ---';
@@ -62,6 +65,47 @@ const KEYS = [
   ['causePrefix', strings.offline.causePrefix],
   ['causeSuffix', strings.offline.causeSuffix],
 ];
+
+/**
+ * Every bundled demonstration, in the worker, because F66 is a basement gym.
+ *
+ * The worker used to precache six shell assets and nothing else, and the cards
+ * carry `loading=lazy`, so the only demonstrations that survived the network
+ * going away were the ones the owner had already scrolled past WHILE ONLINE.
+ * Measured on the shipped build: 38 of 44 did not render offline. F66 asks for
+ * a catalogue that is usable with no signal, and a still that appears only
+ * after you have already seen it is not that.
+ *
+ * The whole layer is 3.54 MB across 44 files on this Mac mini, served over the
+ * tailnet, so it is precached at install rather than fetched on demand. It is
+ * generated from `src/data/movement-media.json`, which is the same manifest the
+ * cards render from, so a movement added without running `npm run sw` is a red
+ * `sw:check` rather than a card that is blank in a basement.
+ */
+const MEDIA_PATHS = media
+  .filter((record) => record.embeddingMode === 'bundled')
+  .map((record) => record.path)
+  .sort();
+
+/**
+ * A version for the media cache, derived from the manifest itself.
+ *
+ * The shell cache is versioned by hand because its contents change when the
+ * worker's logic changes. The media cache must not be: bumping the shell would
+ * throw away 3.5 MB and re-fetch it over a link that might be a phone. So this
+ * changes when, and only when, the demonstrations change, and `activate` keeps
+ * whichever media cache the current manifest names.
+ */
+const MEDIA_VERSION = createHash('sha256')
+  .update(
+    media
+      .filter((record) => record.embeddingMode === 'bundled')
+      .map((record) => `${record.path}:${record.bytes}:${record.sha256}`)
+      .sort()
+      .join('\n'),
+  )
+  .digest('hex')
+  .slice(0, 12);
 
 /**
  * A JavaScript string literal in this repository's own quoting: single, unless
@@ -76,10 +120,14 @@ function block() {
   const lines = KEYS.map(([name, value]) => `  ${name}: ${literal(value)},`);
   return [
     OPEN,
-    '// Run `npm run sw` after changing strings.offline in the catalogue.',
+    '// Run `npm run sw` after changing strings.offline or src/data/movement-media.json.',
     'const COPY = {',
     ...lines,
     '};',
+    `const MEDIA_VERSION = ${literal(MEDIA_VERSION)};`,
+    'const MEDIA = [',
+    ...MEDIA_PATHS.map((path) => `  ${literal(path)},`),
+    '];',
     CLOSE,
   ].join('\n');
 }
@@ -99,8 +147,9 @@ function block() {
  */
 const MACHINE = new Set([
   // Cache and version.
-  'v4',
+  'v5',
   'vernier-shell-',
+  'vernier-media-',
   // Paths this worker precaches, serves or refuses to touch.
   '/offline',
   '/manifest.webmanifest',
@@ -117,10 +166,17 @@ const MACHINE = new Set([
   'fetch',
   'push',
   'SKIP_WAITING',
+  // The second message the app sends: fill the media cache with whatever is
+  // missing. Asked from the shell layout, which renders only for a live
+  // session, because /movements is behind the session gate.
+  'PRECACHE_MEDIA',
   // Request and response shapes.
   'GET',
   'navigate',
   'basic',
+  // The cache mode a precache fetch asks for: go to the network, never the
+  // browser's own HTTP cache.
+  'reload',
   'Content-Type',
   'text/html; charset=utf-8',
   // The outbox: database, stores, keys and the headers a queued write carries.

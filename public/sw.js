@@ -1,17 +1,64 @@
 // Vernier's service worker. Hand written, no next-pwa, which last shipped in
 // 2022. Serve it with Cache-Control: no-cache; next.config.ts does that.
-const VERSION = 'v4';
+const VERSION = 'v5';
 const SHELL = `vernier-shell-${VERSION}`;
 const OFFLINE = '/offline';
 
 // --- generated from src/lib/strings.ts by scripts/build-sw.mjs. Do not edit by hand.
-// Run `npm run sw` after changing strings.offline in the catalogue.
+// Run `npm run sw` after changing strings.offline or src/data/movement-media.json.
 const COPY = {
   title: 'Offline',
   cardTitle: 'This phone cannot reach the Mac mini',
   causePrefix: 'The app shell is stored on this device, so it opened. Everything else waits for',
   causeSuffix: 'Either this device has left the tailnet, or the Mac mini is asleep or stopped.',
 };
+const MEDIA_VERSION = 'fdc372eb4816';
+const MEDIA = [
+  '/movements/abdominal-brace.svg',
+  '/movements/abdominal-curl.gif',
+  '/movements/ankle-circle.svg',
+  '/movements/back-stretch.gif',
+  '/movements/bench-dip.svg',
+  '/movements/bicycle-crunch.svg',
+  '/movements/bird-dog.svg',
+  '/movements/bodyweight-squat.gif',
+  '/movements/burpee.gif',
+  '/movements/calf-raise.gif',
+  '/movements/chest-dip.svg',
+  '/movements/chest-stretch.gif',
+  '/movements/close-grip-push-up.svg',
+  '/movements/crunch.svg',
+  '/movements/dead-bug.svg',
+  '/movements/donkey-calf-raise.svg',
+  '/movements/floor-back-extension.gif',
+  '/movements/front-plank.svg',
+  '/movements/glute-bridge.svg',
+  '/movements/hamstring-curl.gif',
+  '/movements/hamstring-stretch.gif',
+  '/movements/high-knees.gif',
+  '/movements/hip-abduction.gif',
+  '/movements/hip-lift.svg',
+  '/movements/jumping-jack.gif',
+  '/movements/knee-extension.gif',
+  '/movements/lunge.gif',
+  '/movements/lying-leg-raise.svg',
+  '/movements/mountain-climber.svg',
+  '/movements/pelvic-tilt.gif',
+  '/movements/push-up.svg',
+  '/movements/quad-stretch.gif',
+  '/movements/recovery-walk.gif',
+  '/movements/reverse-crunch.svg',
+  '/movements/side-plank.svg',
+  '/movements/stationary-bike.gif',
+  '/movements/step-up.gif',
+  '/movements/superman.svg',
+  '/movements/toe-touch.gif',
+  '/movements/treadmill-intervals.gif',
+  '/movements/treadmill-walk.gif',
+  '/movements/triceps-dip.svg',
+  '/movements/wall-push-up.gif',
+  '/movements/wall-sit.svg',
+];
 // --- end generated ---
 
 /**
@@ -71,22 +118,89 @@ const SHELL_ASSETS = [
   '/favicon.ico',
 ];
 
+// The demonstrations, and F66's basement gym.
+//
+// MEDIA and MEDIA_VERSION are written into the generated block above from
+// src/data/movement-media.json, which is the same manifest the cards render
+// from. The shell used to be the whole precache and the cards carry
+// loading=lazy, so the only demonstration that survived the network going away
+// was one the owner had already scrolled past while online: 38 of 44 rendered
+// as nothing. 3.54 MB across 44 files, off a Mac mini on the tailnet, is worth
+// paying once at install to make the catalogue usable with no signal.
+//
+// ITS OWN CACHE, VERSIONED BY THE MANIFEST. A shell version bump changes the
+// worker's logic and must not throw 3.5 MB away over a phone link, so the media
+// cache changes name when the demonstrations change and at no other time.
+const MEDIA_CACHE = `vernier-media-${MEDIA_VERSION}`;
+const MEDIA_PATHS = new Set(MEDIA);
+
+/**
+ * Fill the media cache with whatever is missing from it.
+ *
+ * IT NEVER FAILS THE INSTALL. A worker that refuses to install because one GIF
+ * was slow leaves the phone with no offline shell at all, which is a worse
+ * product than a catalogue with one card missing. What proves the fill really
+ * happened is tests/e2e/catalogue-offline.spec.ts, which takes the network away
+ * and renders a movement it never scrolled to.
+ *
+ * A REDIRECT IS NOT A DEMONSTRATION. /movements is behind the session gate, so
+ * an install that runs before the owner has signed in gets the sign-in document
+ * with a 200 on it. Caching that would poison the entry until the manifest
+ * changes, and offline the card would draw nothing at all with the cache
+ * reporting a hit. `response.redirected` is how the platform says so.
+ */
+async function precacheMedia() {
+  const cache = await caches.open(MEDIA_CACHE);
+  const held = new Set((await cache.keys()).map((request) => new URL(request.url).pathname));
+  const wanted = MEDIA.filter((path) => !held.has(path));
+  let stored = 0;
+  const fill = async () => {
+    for (;;) {
+      const path = wanted.pop();
+      if (path === undefined) return;
+      try {
+        const response = await fetch(path, { cache: 'reload' });
+        if (!response.ok || response.redirected || response.type !== 'basic') continue;
+        await cache.put(path, response);
+        stored += 1;
+      } catch {
+        // Unreachable. The next install or the next message picks it up, and
+        // what is already cached stays exactly where it is.
+      }
+    }
+  };
+  await Promise.all([fill(), fill(), fill(), fill(), fill(), fill()]);
+  return stored;
+}
+
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(SHELL).then((cache) => cache.addAll(SHELL_ASSETS)));
+  event.waitUntil((async () => {
+    const cache = await caches.open(SHELL);
+    await cache.addAll(SHELL_ASSETS);
+    await precacheMedia();
+  })());
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
-    await Promise.all(keys.filter((key) => key !== SHELL).map((key) => caches.delete(key)));
+    const keep = new Set([SHELL, MEDIA_CACHE]);
+    await Promise.all(keys.filter((key) => !keep.has(key)).map((key) => caches.delete(key)));
     await self.clients.claim();
   })());
 });
 
 // Swapping the bundle out from under a running session is never the worker's
 // call. The app asks when it is safe.
+//
+// And the second message is the repair. An install that ran on the sign-in
+// screen could cache no demonstration, because they are behind the session
+// gate, and a worker does not install again until its script changes. The shell
+// layout renders only for a live session, so it asks from there, on every load,
+// and a fill with nothing missing costs one Cache Storage read.
 self.addEventListener('message', (event) => {
   if (event.data === 'SKIP_WAITING') self.skipWaiting();
+  if (event.data === 'PRECACHE_MEDIA') event.waitUntil(precacheMedia());
 });
 
 self.addEventListener('fetch', (event) => {
@@ -120,10 +234,25 @@ self.addEventListener('fetch', (event) => {
   }
 
   event.respondWith((async () => {
+    // A demonstration is looked up by path, in its own cache, ignoring Vary.
+    // The precache asked for it with fetch(), which sends Accept: */*, and the
+    // card asks for it with an img element, which sends an image Accept list. A
+    // Vary on the response would make those two different keys and turn a
+    // precached demonstration into a miss at the exact moment the network is
+    // gone, which is the whole thing F66 is about.
+    const drawn = MEDIA_PATHS.has(url.pathname)
+      ? await caches.match(url.pathname, { cacheName: MEDIA_CACHE, ignoreVary: true })
+      : null;
+    if (drawn) return drawn;
     const hit = await caches.match(request);
     if (hit) return hit;
     const fresh = await fetch(request);
-    if (fresh.ok && fresh.type === 'basic') (await caches.open(SHELL)).put(request, fresh.clone());
+    // A demonstration goes in the media cache and everything else in the shell,
+    // so a shell version bump never throws the 3.5 MB away.
+    if (fresh.ok && fresh.type === 'basic') {
+      const name = MEDIA_PATHS.has(url.pathname) ? MEDIA_CACHE : SHELL;
+      (await caches.open(name)).put(request, fresh.clone());
+    }
     return fresh;
   })());
 });

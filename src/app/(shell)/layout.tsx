@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { DeviceReport } from '@/components/DeviceReport';
+import { PrecacheDemonstrations } from '@/components/PrecacheDemonstrations';
 import { TabBar } from '@/components/TabBar';
 import { readCsrfToken } from '@/lib/csrf';
 import { mintLaunchTicket } from '@/lib/launch-ticket';
@@ -37,6 +38,13 @@ export default async function ShellLayout({ children }: { children: React.ReactN
       <main className="app-scroll">{children}</main>
       <TabBar />
       <DeviceReport csrfToken={csrfToken} launchTicket={mintLaunchTicket(session.id)} />
+      {/*
+        F66. The demonstrations are precached at install, and an install that
+        ran on the sign-in screen could cache none of them, because /movements
+        is behind this very gate. Asked from here, where the session is already
+        proven live, for the same reason the launch report is.
+      */}
+      <PrecacheDemonstrations />
     </div>
   );
 }
