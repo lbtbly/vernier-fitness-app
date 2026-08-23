@@ -408,6 +408,13 @@ const DATA_QUERIES = [
    * which is the only place it can be run rather than guessed at.
    */
   ['food.name_fr', 'select distinct name_fr from food'],
+  /*
+   * Anses's own tag for the edition it published, drawn beside the food rows as
+   * the provenance of every number on the screen. It is their version string,
+   * not a sentence this product wrote, and it is established by provenance the
+   * way every other exemption here is: it comes out of the column.
+   */
+  ['food.table_version', 'select distinct table_version from food'],
 ];
 
 let dataValues = 0;

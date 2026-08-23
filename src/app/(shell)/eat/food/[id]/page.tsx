@@ -100,7 +100,9 @@ export default async function FoodPage({ params }: { params: Promise<{ id: strin
 
         {row.censoredFields.length > 0 ? (
           <p className="note warn" style={{ marginTop: 'var(--s3)' }} data-censored="true">
-            {strings.nutrition.foodCensoredBody(row.censoredFields.join(', '))}
+            {strings.nutrition.foodCensoredBody(
+              row.censoredFields.map((column) => strings.nutrition.censoredField(column)).join(', '),
+            )}
           </p>
         ) : null}
       </section>

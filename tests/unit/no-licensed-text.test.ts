@@ -283,7 +283,22 @@ describe('F71: the schema stores no ratio, score or risk number', () => {
   test('the schema is read, and it is the whole of it', () => {
     expect(SCHEMA.length).toBeGreaterThan(5);
     expect(SCHEMA.some((file) => file.path === 'src/db/schema.ts')).toBe(true);
-    expect(SCHEMA.some((file) => file.path === 'drizzle/pending/08-train.sql')).toBe(true);
+    // The NUMBERED migration, not the pending staging file. This slice was
+    // built in a worktree and wrote its raw DDL to drizzle/pending/08-train.sql,
+    // because nine parallel slices cannot each claim 0007 and drizzle's
+    // snapshots are a chain. On merge that file is appended to the numbered
+    // migration and deleted, which is the contract in drizzle/pending/README.md.
+    // Asserting on the staging path made this test pass only inside the
+    // worktree and fail the moment the DDL reached the place it actually lives.
+    //
+    // GOES RED IF: the training DDL stops being covered by the walk, which is
+    // the thing F71 turns on. It cannot go green on an empty set: SCHEMA is
+    // asserted above to hold more than five files including schema.ts.
+    const migrations = SCHEMA.filter(
+      (file) => /^drizzle\/\d{4}_.*\.sql$/.test(file.path) || file.path.startsWith('drizzle/pending/'),
+    );
+    expect(migrations.length).toBeGreaterThan(0);
+    expect(migrations.some((file) => /movement|session_run|set_log/.test(file.text))).toBe(true);
   });
 
   test('no column or table name in it names a ratio, a score or a risk', () => {

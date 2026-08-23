@@ -2501,6 +2501,24 @@ export const strings = {
     foodGroupLabel: 'Anses group',
     foodPer100g: 'Per 100 g',
     foodCensored: 'Read as a ceiling, not a measurement',
+    /**
+     * The censored columns, named the way a person names them.
+     *
+     * `food.censored_fields` holds the seed's own column names, and joining
+     * them straight into the sentence below put `fibre_g` on the screen. C6
+     * caught it the first time the nutrition surfaces were walked, which was
+     * the merge, because slice 9's five screens were outside the walk until
+     * then. A column name is not copy this product may render; it is the shape
+     * of the store leaking through the words.
+     */
+    censoredFieldLabels: {
+      kcal_100g: 'energy',
+      protein_g: 'protein',
+      carb_g: 'carbohydrate',
+      fat_g: 'fat',
+      fibre_g: 'fibre',
+    } as Record<string, string>,
+    censoredField: (column: string) => strings.nutrition.censoredFieldLabels[column] ?? column,
     foodCensoredBody: (fields: string) =>
       `Anses printed "traces" or a "less than" value for ${fields}, so Vernier stored 0 and marked it. A censored zero is a limit somebody measured against, not a measurement of nothing.`,
     foodNotFound: 'No such food',
