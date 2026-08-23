@@ -1,3 +1,40 @@
-parked 2026-08-23T19:57:37Z
-84 of 166 rubric line(s) checked, 82 unchecked
-A park is not a PASS. The gate stays armed.
+parked 2026-08-23, session three. 84 of 166 checked, 82 unchecked.
+A park is not a PASS. The gate stays armed and no line has been softened.
+
+## The app is UP. The earlier park said otherwise and that is now stale.
+
+The owner ran `scripts/up.sh --build` and it came up clean: app and db both
+healthy, 127.0.0.1:3000 and the tailnet answering, **12 migrations applied**
+including 0011, the scheduler carrying 3 schedules, and the alert sweep running.
+391 measurement rows, 6 of them not seeded.
+
+**Why the boot stalled the first time, and it is a preflight item nobody had
+written down.** Slice 13 writes its nightly archive to the configured iCloud
+Drive path, so on first boot Docker Desktop raised a macOS permission request
+for iCloud Drive access and waited. Headless, that reads as a hang. The owner
+granted it. **A fresh Mac will hit the same prompt and stall the same way**, so
+it belongs in `.forge/PREFLIGHT.md` with its cause. F129 depends on it.
+
+## What the next session does, in order
+
+1. **Re-measure.** The last suite read 135 passed, 18 failed, 1 skipped, 54 did
+   not run, taken BEFORE the stylesheet repair reached the image. Those numbers
+   are stale in the product's favour. Run the gate and the suite on main and
+   work from real ones.
+2. **One fix wave** in parallel worktrees: F42, F55, F62, F65, F66, F72, F77,
+   F79, F87, F88, F89, C9, C10, C11, C12, R2, plus whatever the re-measure adds.
+3. **Verify slices 10, 11, 12 and 13.** None has ever been verified.
+4. **Slice 14**, the final full-scope pass over all 166 on the finished product.
+
+Before the next parallel merge, **add a CSS structural check to the gate.** A
+union splice tore `.seg button{` in half and about 70 rules shipped nested and
+dead. None of the six gate steps can see that, and a brace count cannot either,
+because comments and content strings carry braces.
+
+## Waiting on the owner, in this order
+
+1. The iPhone Settings screenshot. Closes F4, R1 and C2 together.
+2. Withings credentials, for F44, after slice 5 passes.
+3. Building the Shortcut on the iPhone, for F56.
+
+`.forge/RESUME.md` carries the full handoff.
