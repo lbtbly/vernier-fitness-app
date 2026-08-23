@@ -437,7 +437,7 @@ advance, so the budget does not have to be re-argued once per slice.
   item-level link is constructed, no menu item or price is stored, and any
   nutrition figure is badged as an estimate or rendered "unknown". Evidence: the
   capture, the generated URL, and a query showing zero stored menu rows.
-- [ ] **F93.** A meal photo is reduced to about 1092 pixels on its long edge and
+- [x] **F93.** A meal photo is reduced to about 1092 pixels on its long edge and
   re-encoded on the device before upload, and the stored file carries no camera
   metadata and no location. Evidence: the uploaded dimensions and a metadata dump
   of the stored file showing zero tags.
