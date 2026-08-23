@@ -374,7 +374,19 @@ test.describe('F86 and C12: the week generates, and each meal is decided on its 
        */
       const drawn = await page.locator('[data-meal]').first().evaluate((node) => {
         const title = node.querySelector('.head') as HTMLElement;
-        const accept = node.querySelector('[data-decision=accept]') as HTMLElement;
+        /*
+         * `data-control`, which is what screen 08 draws.
+         *
+         * This read `[data-decision=accept]` and there is no such node inside a
+         * meal row: MealWeek.tsx marks its three buttons `data-control`, and
+         * every other query in this file already says so. `querySelector`
+         * returned null, `getComputedStyle(null)` raised inside the page, and
+         * the whole measurement failed before it graded anything. The
+         * `data-decision` spelling belongs to ConfirmDiff, which screens 06 and
+         * the calendar write share and this screen does not.
+         */
+        const accept = node.querySelector('[data-control=accept]') as HTMLElement;
+        const box = accept.getBoundingClientRect();
         return {
           title: {
             colour: getComputedStyle(title).color,
@@ -383,8 +395,16 @@ test.describe('F86 and C12: the week generates, and each meal is decided on its 
           },
           accept: {
             radius: getComputedStyle(accept).borderRadius,
-            width: getComputedStyle(accept).width,
-            height: getComputedStyle(accept).height,
+            /*
+             * THE BORDER BOX, which is the thing a thumb lands on.
+             * `getComputedStyle().width` resolves to the CONTENT box, and
+             * globals.css sets `*{box-sizing:border-box}` with a 1 px border on
+             * `.seg button`, so a control that is exactly 44 px square reports
+             * 42. tests/e2e/button-geometry.spec.ts measures the same floor off
+             * `getBoundingClientRect()` and that is the precedent followed here.
+             */
+            width: `${Math.round(box.width)}px`,
+            height: `${Math.round(box.height)}px`,
             pressed: accept.getAttribute('aria-pressed'),
             background: getComputedStyle(accept).backgroundColor,
           },
@@ -406,6 +426,33 @@ test.describe('F86 and C12: the week generates, and each meal is decided on its 
         fullPage: true,
       });
     }
+
+    /*
+     * THE ACCEPTED TICK, which screen 08 draws green and rounded and which the
+     * torn stylesheet drew as a square grey box for a whole slice.
+     *
+     * A resting control and an accepted one are read off the same node, so this
+     * cannot pass by measuring a colour that was already there. The comparison
+     * is against the resting background rather than against a literal, because
+     * the token is the stylesheet's to name and the claim is that the two
+     * states are drawn differently at all.
+     */
+    await page.setViewportSize({ width: 393, height: 852 });
+    await page.goto('/eat');
+    await page.waitForLoadState('networkidle');
+    const accept = page.locator('[data-meal]').first().locator('[data-control=accept]');
+    const resting = await accept.evaluate((node) => getComputedStyle(node).backgroundColor);
+    await accept.click();
+    await expect(accept).toHaveAttribute('aria-pressed', 'true');
+    const pressed = await accept.evaluate((node) => ({
+      background: getComputedStyle(node).backgroundColor,
+      border: getComputedStyle(node).borderColor,
+      colour: getComputedStyle(node).color,
+    }));
+    console.log(`C12  accept resting ${resting}, accepted ${JSON.stringify(pressed)}`);
+    expect(pressed.background, 'an accepted meal is drawn exactly like a proposed one').not.toBe(
+      resting,
+    );
   });
 });
 
