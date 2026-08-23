@@ -46,13 +46,22 @@ export function Progression({
   timeZone,
   rows,
   blockedSite,
+  blockedReason,
   accented,
 }: {
   csrfToken: string;
   timeZone: string;
   rows: ProgressionRow[];
-  /** The site reported twice running, which blocks every advancement. */
+  /** The site the pain rule is blocking on, already a label. */
   blockedSite: string | null;
+  /**
+   * Which limb of the pain rule is blocking, so the card says why.
+   *
+   * It only ever said "reported in two sessions running", which was the only
+   * limb anything enforced. Three more are enforced now and each one is a
+   * different fact about the owner's week.
+   */
+  blockedReason: 'repeatedSite' | 'aboveCeiling' | 'notSubsided' | 'roseFromLastWeek' | null;
   /** Whether the screen's one accented action belongs to the first card here. */
   accented: boolean;
 }) {
@@ -88,11 +97,19 @@ export function Progression({
   }
 
   if (blockedSite) {
+    const say =
+      blockedReason === 'aboveCeiling'
+        ? strings.progression.blockedCeiling
+        : blockedReason === 'notSubsided'
+          ? strings.progression.blockedMorning
+          : blockedReason === 'roseFromLastWeek'
+            ? strings.progression.blockedRose
+            : strings.progression.blocked;
     return (
-      <section className="card" data-progression="blocked">
+      <section className="card" data-progression="blocked" data-blocked-by={blockedReason}>
         <span className="lbl">{strings.progression.label}</span>
         <p className="sub" style={{ marginTop: 'var(--s2)' }}>
-          {strings.progression.blocked(blockedSite)}
+          {say(blockedSite)}
         </p>
       </section>
     );

@@ -3712,6 +3712,12 @@ export const strings = {
         `One cardio session, because the weekly target is ${minutes} minutes of moderate work.`,
       painDeload: (site: string) =>
         `Volume is cut this week: you reported ${site} in two sessions running.`,
+      painCeiling: (site: string) =>
+        `Volume is cut this week: ${site} went past the 5 out of 10 ceiling last session.`,
+      painMorning: (site: string) =>
+        `Volume is cut this week: ${site} was still there the next morning.`,
+      painRose: (site: string) =>
+        `Volume is cut this week: ${site} was worse than it had been the week before.`,
       ownEdit: (when: string) => `You moved this to ${when}.`,
     },
     longerFact: (percent: number, longest: number) =>
@@ -3781,6 +3787,17 @@ export const strings = {
       'A movement advances when you go 2 or more reps past the target on the last set, in two sessions running. Progression is not required to get results, so a week with none of this in it is a normal week.',
     blocked: (site: string) =>
       `Nothing advances while ${site} has been reported in two sessions running. That movement cuts volume instead.`,
+    /*
+     * One sentence per limb of the pain rule, because the owner is owed the
+     * reason and not just the refusal. The player states all four of these to
+     * him as he logs the session; this is where the app says it meant them.
+     */
+    blockedCeiling: (site: string) =>
+      `Nothing advances while ${site} is past the 5 out of 10 ceiling. That movement cuts volume instead.`,
+    blockedMorning: (site: string) =>
+      `Nothing advances while ${site} is still there the next morning. That movement cuts volume instead.`,
+    blockedRose: (site: string) =>
+      `Nothing advances while ${site} is worse than it was last week. That movement cuts volume instead.`,
   },
 
   /** The session player, screen 07. */

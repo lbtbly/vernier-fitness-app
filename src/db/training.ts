@@ -22,8 +22,8 @@ import {
   type PainReport,
   type SetResult,
   deloadSets,
+  painVerdict,
   proposeAdvancement,
-  repeatedSite,
 } from '@/lib/training-rules';
 import { type Cause, type ProposedSession, proposeWeek } from '@/lib/week-proposal';
 
@@ -196,10 +196,30 @@ export function renderCause(cause: Cause, timeZone: string): string {
       return line.weeklyCardio(Number(cause.params.minutes));
     case 'painDeload':
       return line.painDeload(painSiteLabel(String(cause.params.site)));
+    case 'painCeiling':
+      return line.painCeiling(painSiteLabel(String(cause.params.site)));
+    case 'painMorning':
+      return line.painMorning(painSiteLabel(String(cause.params.site)));
+    case 'painRose':
+      return line.painRose(painSiteLabel(String(cause.params.site)));
     default:
       return line.noHistoryYet(3);
   }
 }
+
+/**
+ * How many session reports the pain rule reads back.
+ *
+ * It was 4, which is about one week at three to five sessions, and that was
+ * enough while the only limb enforced was "the same site twice running", which
+ * looks at the last two. The week-to-week limb compares against a report seven
+ * to fourteen days old, and four reports do not reach that far: with five
+ * sessions a week they cover Wednesday to Sunday, so the comparison would have
+ * found nothing to compare against and the limb would have been wired in and
+ * still silent. Sixteen covers three weeks at the top of the range with room
+ * over, and the window in `lastWeekAtSameSite` is what bounds it in time.
+ */
+export const PAIN_HISTORY_REPORTS = 16;
 
 const PAIN_SITES = strings.player.painSites as Record<string, string>;
 
@@ -226,7 +246,7 @@ async function proposalInput(now: Date, timeZone: string) {
       .select()
       .from(sessionReport)
       .orderBy(desc(sessionReport.recordedAt))
-      .limit(4),
+      .limit(PAIN_HISTORY_REPORTS),
   ]);
 
   // What each finished run actually loaded, so the 48-hour rule is computed
@@ -273,7 +293,7 @@ async function proposalInput(now: Date, timeZone: string) {
     subsidedByMorning: report.painSubsidedByMorning,
   }));
 
-  return { history, repeatedPainSite: repeatedSite(painReports), timeZone };
+  return { history, painBlock: painVerdict(painReports), timeZone };
 }
 
 /**
@@ -333,7 +353,7 @@ export async function proposeNextWeek(now: Date, timeZone: string): Promise<Prop
     timeZone,
     history: input.history,
     steps,
-    repeatedPainSite: input.repeatedPainSite,
+    painBlock: input.painBlock,
     now,
   });
 
@@ -360,7 +380,7 @@ export async function proposeNextWeek(now: Date, timeZone: string): Promise<Prop
       })
       .onConflictDoNothing({ target: sessionProposal.id });
 
-    const deload = input.repeatedPainSite !== null;
+    const deload = input.painBlock !== null;
     for (const [position, movementId] of proposal.movementIds.entries()) {
       const item = movementOf(movementId);
       if (!item) continue;
@@ -671,17 +691,19 @@ export async function finishRun(write: ReportWrite): Promise<{ advancements: Adv
 export async function writeAdvancements(runId: string): Promise<Advancement[]> {
   const db = getDb();
   const history = await readSetHistory(180);
-  const reports = await readPainReports(4);
-  const blockedSite = repeatedSite(reports);
+  const reports = await readPainReports(PAIN_HISTORY_REPORTS);
+  const block = painVerdict(reports);
   const movementIds = [...new Set(history.map((set) => set.movementId))];
   const advancements: Advancement[] = [];
 
   for (const movementId of movementIds) {
     const item = movementOf(movementId);
     if (!item) continue;
-    // Nothing advances on a movement that loads the site reported twice
-    // running. It deloads instead, which the next proposal reads.
-    if (blockedSite && blockedSite !== 'none') continue;
+    // Nothing advances while the pain rule is saying anything at all: past the
+    // ceiling, still there in the morning, worse than last week, or the same
+    // site twice running. It deloads instead, which the next proposal reads.
+    // This read `repeatedSite` alone, which is one limb of four.
+    if (block && block.site !== 'none') continue;
     const advancement = proposeAdvancement(history, movementId);
     if (!advancement) continue;
     advancements.push(advancement);

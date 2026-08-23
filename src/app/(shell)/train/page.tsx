@@ -5,6 +5,7 @@ import { ScreenTitle } from '@/components/ScreenTitle';
 import { TrainWeek, type PlanRow } from '@/components/TrainWeek';
 import { ChevronIcon, InfoIcon } from '@/components/icons';
 import {
+  PAIN_HISTORY_REPORTS,
   painSiteLabel,
   readLatestReadiness,
   readPainReports,
@@ -20,7 +21,7 @@ import { DRIFT_AFTER_MINUTES, ESTIMATE_ERROR, OWNER_AGE, guidanceFor } from '@/l
 import { dayAfter } from '@/lib/local-time';
 import { screeningIsCurrent } from '@/lib/readiness';
 import { strings } from '@/lib/strings';
-import { repeatedSite } from '@/lib/training-rules';
+import { painVerdict } from '@/lib/training-rules';
 
 export const metadata = { title: strings.train.title };
 export const dynamic = 'force-dynamic';
@@ -68,7 +69,9 @@ export default async function TrainPage() {
       readProgressions('proposed'),
       readLatestReadiness(),
       readRestingHeartRate(),
-      readPainReports(4),
+      // Far enough back for the week-to-week limb to have a week to compare
+      // against. Four reports reach Wednesday at five sessions a week.
+      readPainReports(PAIN_HISTORY_REPORTS),
     ]);
   } catch (error) {
     // Screen 00's error state, on this screen, rather than the shell's own
@@ -112,7 +115,11 @@ export default async function TrainPage() {
   }));
 
   const screeningDue = !screeningIsCurrent(readiness?.answeredAt ?? null, now);
-  const blocked = repeatedSite(painReports);
+  // The whole pain rule, not one limb of it. This read `repeatedSite`, so a
+  // knee that went past the ceiling, or was still there in the morning, or was
+  // worse than last week, showed the owner a progression card offering to
+  // advance the movement that caused it.
+  const blocked = painVerdict(painReports);
   const guidance = guidanceFor(resting);
 
   // One accented action, on the thing due now. The page decides which surface
@@ -231,7 +238,8 @@ export default async function TrainPage() {
         csrfToken={csrfToken}
         timeZone={timeZone}
         rows={progressionRows}
-        blockedSite={blocked ? painSiteLabel(blocked) : null}
+        blockedSite={blocked ? painSiteLabel(blocked.site) : null}
+        blockedReason={blocked ? blocked.reason : null}
         accented={accent === 'progression'}
       />
 
