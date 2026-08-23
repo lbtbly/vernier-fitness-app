@@ -48,7 +48,7 @@ export default defineConfig({
   projects: [
     {
       name: 'webkit-iphone',
-      testIgnore: /focus\.spec\.ts|service-worker\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|launch-report\.spec\.ts|notices\.spec\.ts|withings\.spec\.ts|ingest\.spec\.ts|labs-scratch\.spec\.ts|nutrition\.spec\.ts|shopping\.spec\.ts|catalogue-offline\.spec\.ts|train-week\.spec\.ts|session-player\.spec\.ts|console-walk\.spec\.ts/,
+      testIgnore: /focus\.spec\.ts|service-worker\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|launch-report\.spec\.ts|notices\.spec\.ts|withings\.spec\.ts|ingest\.spec\.ts|labs-scratch\.spec\.ts|nutrition\.spec\.ts|shopping\.spec\.ts|catalogue-offline\.spec\.ts|train-week\.spec\.ts|session-player\.spec\.ts|console-walk\.spec\.ts|review\.spec\.ts|push\.spec\.ts/,
       use: { ...devices['Desktop Safari'], viewport: { width: 393, height: 852 }, deviceScaleFactor: 3 },
     },
     {
@@ -163,12 +163,23 @@ export default defineConfig({
       // is written down: the wall-clock arithmetic under it is proven
       // engine-free in tests/unit/session-clock.test.ts.
       //
+      // review.spec.ts and push.spec.ts joined it in slice 12, for the same
+      // reason as everything above them: both WRITE. The review spec decides a
+      // proposal block, and on the owner's install that would leave next week
+      // accepted or declined by a headless browser he never asked. The push
+      // spec toggles a reminder category, moves the quiet window and closes a
+      // reminder item, which are settings he chose and a notification he would
+      // then never get. Both also need a database with a week in it, which is
+      // what the demonstration seed on this instance gives them: an assertion
+      // over an empty week reads identically to one over a clean week, and that
+      // is the whole of A4's first rule.
+      //
       // notices.spec.ts is the one exception and says so in its own header: it
       // injects the session the shipped recovery route minted with the Secure
       // attribute relaxed, so WebKit will carry it over loopback too, and it
       // grades its fold in both engines against one database.
       name: 'chrome-scratch',
-      testMatch: /launch-report\.spec\.ts|notices\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|withings\.spec\.ts|ingest\.spec\.ts|labs-scratch\.spec\.ts|nutrition\.spec\.ts|shopping\.spec\.ts|train-week\.spec\.ts|session-player\.spec\.ts|console-walk\.spec\.ts/,
+      testMatch: /launch-report\.spec\.ts|notices\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|withings\.spec\.ts|ingest\.spec\.ts|labs-scratch\.spec\.ts|nutrition\.spec\.ts|shopping\.spec\.ts|train-week\.spec\.ts|session-player\.spec\.ts|console-walk\.spec\.ts|review\.spec\.ts|push\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         channel: 'chrome',

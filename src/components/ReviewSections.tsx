@@ -37,34 +37,40 @@ function Figure({ row }: { row: ReviewRow }) {
 export function ReviewSections({ review }: { review: WeeklyReviewView }) {
   return (
     <>
-      {review.sections
-        .filter((section) => section.id !== 'proposal')
-        .map((section) => (
-          <section className="card" key={section.id} data-section={section.id}>
-            <span className="lbl">{section.title}</span>
-            {section.rows.map((row) => (
-              <div className="row" key={row.id} data-row={row.id} data-tone={row.tone}>
-                <div className="stack grow">
-                  <span>{row.label}</span>
-                  {row.note ? (
-                    <span
-                      className={row.noteTone === 'warn' ? 'note warn' : 'note'}
-                      data-note-tone={row.noteTone}
-                    >
-                      {row.note}
-                    </span>
-                  ) : null}
-                </div>
-                <Figure row={row} />
+      {/*
+        * ALL NINE, INCLUDING THE PROPOSAL. The proposal's rows live on the next
+        * screen, where each block is decided on its own, but its section is on
+        * this one so the screen and the email carry the same nine and a reader
+        * counting them gets the same answer from either. A section that
+        * appeared in the email and not on the screen would be two documents
+        * claiming to be one summary.
+        */}
+      {review.sections.map((section) => (
+        <section className="card" key={section.id} data-section={section.id}>
+          <span className="lbl">{section.title}</span>
+          {section.rows.map((row) => (
+            <div className="row" key={row.id} data-row={row.id} data-tone={row.tone}>
+              <div className="stack grow">
+                <span>{row.label}</span>
+                {row.note ? (
+                  <span
+                    className={row.noteTone === 'warn' ? 'note warn' : 'note'}
+                    data-note-tone={row.noteTone}
+                  >
+                    {row.note}
+                  </span>
+                ) : null}
               </div>
-            ))}
-            {section.paragraphs.map((paragraph) => (
-              <p className="sub" key={paragraph} style={{ marginTop: 'var(--s2)' }}>
-                {paragraph}
-              </p>
-            ))}
-          </section>
-        ))}
+              <Figure row={row} />
+            </div>
+          ))}
+          {section.paragraphs.map((paragraph) => (
+            <p className="sub" key={paragraph} style={{ marginTop: 'var(--s2)' }}>
+              {paragraph}
+            </p>
+          ))}
+        </section>
+      ))}
     </>
   );
 }
