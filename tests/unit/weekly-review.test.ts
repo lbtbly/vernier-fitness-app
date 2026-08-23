@@ -189,6 +189,41 @@ describe('the email is the same review', () => {
     expect(html).toContain(strings.review.nextTitle);
   });
 
+  /*
+   * NINE SECTIONS, EACH ONCE, IN THE ORDER THE REVIEW ASSEMBLES THEM.
+   *
+   * The title check above passes on a document that carries a title twice, and
+   * that is what shipped: the proposal is the ninth section AND the block that
+   * holds its rows, so mapping all nine and then printing the block rendered
+   * "Next week" twice, the first time as a card holding nothing but the note
+   * the second one repeats. Ten cards, one of them empty, against a line that
+   * counts nine.
+   *
+   * WHAT WOULD MAKE THIS GO RED: take the proposal filter out of
+   * renderReviewEmail and `found` is ten long with 'proposal' in it twice.
+   */
+  test('marks nine sections, each exactly once, and never renders one twice', () => {
+    const review = assembleReview(twoMissedSessions());
+    const html = renderReviewEmail(review, ORIGIN);
+    const found = [...html.matchAll(/data-section="([^"]+)"/g)].map((match) => match[1]);
+    console.log(`sections marked in the email: ${found.join(', ')}`);
+    expect(found).toEqual([...REVIEW_SECTION_IDS]);
+    expect(found).toHaveLength(REVIEW_SECTION_COUNT);
+
+    // And the ninth title appears once as a heading rather than twice, which is
+    // what the count above cannot see on its own.
+    const headings = html.split(strings.review.nextTitle).length - 1;
+    console.log(`"${strings.review.nextTitle}" appears ${headings} time(s) in the document`);
+    expect(headings).toBe(1);
+
+    // The plain-text part is the same review and had the same duplication.
+    const text = renderReviewText(review, ORIGIN);
+    const shouted = text.split(strings.review.nextTitle.toUpperCase()).length - 1;
+    console.log(`the text part shouts the ninth title ${shouted} time(s)`);
+    expect(shouted).toBe(1);
+    expect(text).toContain(strings.review.proposalNote);
+  });
+
   test('fetches nothing: no script, no stylesheet link, no image', () => {
     const html = renderReviewEmail(assembleReview(twoMissedSessions()), ORIGIN);
     expect(html).not.toContain('<script');

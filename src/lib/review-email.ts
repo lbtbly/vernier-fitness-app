@@ -80,7 +80,24 @@ export function renderReviewEmail(review: WeeklyReviewView, appUrl: string): str
   const from = dayLabel(review.weekStart);
   const to = dayLabel(review.weekEnd);
 
+  /*
+   * EIGHT CARDS HERE, AND THE NINTH IS THE BLOCK BELOW.
+   *
+   * `assembleReview` returns nine sections and the ninth is the proposal, whose
+   * rows live somewhere else: on screen they are on the next screen, and an
+   * email has no next screen, so they are printed here under the same title.
+   * Mapping all nine AND printing that block put "Next week" in this document
+   * twice, the first time as a card holding nothing but the note the second one
+   * repeats. F118 counts nine sections and this preview carried ten, one of
+   * them empty.
+   *
+   * `data-section` carries the same nine ids the screen uses, so the sections
+   * can be counted off the markup rather than off a screenshot and the two
+   * renderings of one review cannot drift without a test seeing it. An email
+   * client ignores an attribute it does not know.
+   */
   const sections = review.sections
+    .filter((section) => section.id !== 'proposal')
     .map((section) => {
       const rows =
         section.rows.length === 0
@@ -92,7 +109,7 @@ export function renderReviewEmail(review: WeeklyReviewView, appUrl: string): str
             `<p style="margin:8px 0 0;font-size:15px;line-height:21px;color:${INK_2}">${escapeHtml(text)}</p>`,
         )
         .join('');
-      return `<div style="background:${SURFACE};border:1px solid ${LINE};border-radius:16px;padding:16px;margin-bottom:12px">
+      return `<div data-section="${escapeHtml(section.id)}" style="background:${SURFACE};border:1px solid ${LINE};border-radius:16px;padding:16px;margin-bottom:12px">
 <div style="font-size:11px;line-height:14px;letter-spacing:.06em;text-transform:uppercase;color:${INK_3};font-weight:600">${escapeHtml(section.title)}</div>
 ${rows}${paragraphs}
 </div>`;
@@ -132,7 +149,7 @@ ${block.cause ? `<div style="font-size:12px;line-height:18px;color:${INK_3};marg
 <p style="margin:0 0 16px;font-size:15px;line-height:21px;color:${INK_2}">${escapeHtml(strings.review.emailIntro(from, to))}</p>
 ${fix}
 ${sections}
-<div style="background:${SURFACE};border:1px solid ${LINE};border-radius:16px;padding:16px;margin-bottom:12px">
+<div data-section="proposal" style="background:${SURFACE};border:1px solid ${LINE};border-radius:16px;padding:16px;margin-bottom:12px">
 <div style="font-size:11px;line-height:14px;letter-spacing:.06em;text-transform:uppercase;color:${INK_3};font-weight:600">${escapeHtml(strings.review.nextTitle)}</div>
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin-top:6px">${proposal}</table>
 <p style="margin:12px 0 0;font-size:13px;line-height:19px;color:${INK_2}">${escapeHtml(strings.review.proposalNote)}</p>
@@ -163,7 +180,10 @@ export function renderReviewText(review: WeeklyReviewView, appUrl: string): stri
 
   if (review.fix) lines.push(`${review.fix.title} ${review.fix.body}`, '');
 
-  for (const section of review.sections) {
+  // The proposal is held back here for the same reason it is in the HTML: it is
+  // the ninth section and the block below is what carries its rows, so printing
+  // both put the heading and the note in this part twice.
+  for (const section of review.sections.filter((candidate) => candidate.id !== 'proposal')) {
     lines.push(section.title.toUpperCase());
     for (const row of section.rows) {
       lines.push(`  ${row.label}: ${row.value ?? row.absence ?? ''}`);
@@ -178,6 +198,7 @@ export function renderReviewText(review: WeeklyReviewView, appUrl: string): stri
     lines.push(`  ${block.label}: ${block.headline} (${strings.review.proposalStates[block.state]})`);
     if (block.cause) lines.push(`    ${block.cause}`);
   }
+  lines.push(`  ${strings.review.proposalNote}`);
   lines.push('', `${strings.review.open}: ${appUrl}/review`, '', strings.review.emailFooter);
 
   return lines.join('\n');

@@ -108,14 +108,31 @@ test.describe('the week, read back', () => {
 
     await page.goto('/review/email');
     await page.waitForLoadState('networkidle');
-    const titles = await page.evaluate(() =>
-      [...document.querySelectorAll('div')]
-        .map((node) => node.textContent?.trim() ?? '')
-        .filter((text) => text.length > 0 && text.length < 40),
-    );
-    console.log(`email preview headings: ${titles.slice(0, 20).join(' | ')}`);
 
-    const body = await page.locator('body').innerText();
+    /*
+     * THE NINE, BY IDENTITY, THE SAME WAY THE SCREEN TEST ABOVE COUNTS THEM.
+     * A substring walk over a whole document is not a count: "Sessions" is a
+     * row label as well as a section title, so several of the nine passed on
+     * text that was nothing to do with a section, and the tenth card this
+     * preview shipped with, an empty duplicate of the ninth, was invisible to
+     * it. The email carries the same `data-section` ids the screen does.
+     */
+    const found = await page
+      .locator('[data-section]')
+      .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-section')));
+    console.log(`sections in the email preview: ${found.join(', ')}`);
+    expect(found).toEqual(SECTIONS);
+
+    /*
+     * And each one says its own title, read off textContent as well as off the
+     * rendered text. The headings are uppercased by CSS, so innerText returns
+     * what the screen paints, "WEIGHT AND WAIST", where the document says
+     * "Weight and waist": that is what this assertion failed on while every
+     * section was present. The document is what a mail client with the styles
+     * stripped renders, so the document is asserted too.
+     */
+    const source = await page.locator('body').evaluate((node) => node.textContent ?? '');
+    const painted = await page.locator('body').innerText();
     for (const title of [
       'Weight and waist',
       'Sessions',
@@ -127,8 +144,12 @@ test.describe('the week, read back', () => {
       'What was hard',
       'Next week',
     ]) {
-      expect(body).toContain(title);
+      expect(source, `the document says ${title}`).toContain(title);
+      expect(painted, `the preview paints ${title}`).toContain(title.toUpperCase());
     }
+    // NINE SECTIONS, NOT NINE TITLES. The ninth used to be shouted twice, the
+    // first time over a card holding nothing but the note the second repeats.
+    expect(painted.split('NEXT WEEK').length - 1, 'how often "Next week" is shouted').toBe(1);
 
     // Nothing is fetched. An email client requests none of it, so a preview
     // that needed a stylesheet would be a preview of a different document.
@@ -136,9 +157,21 @@ test.describe('the week, read back', () => {
     page.on('request', (request) => requests.push(request.url()));
     await page.reload();
     await page.waitForLoadState('networkidle');
-    const external = requests.filter((url) => !url.endsWith('/review/email'));
+    console.log(`requests the reload made: ${requests.join(', ')}`);
+    // The document itself, and the favicon the browser asks for on its own
+    // account. Neither is a reference this document carries, and the claim is
+    // about what the document asks for, so it is also asserted against the
+    // markup: no script, no link, no img, no url() anywhere in it.
+    const external = requests.filter(
+      (url) => !url.endsWith('/review/email') && new URL(url).pathname !== '/favicon.ico',
+    );
     console.log(`requests the email preview made: ${external.length}`);
     expect(external).toEqual([]);
+
+    const markup = await page.content();
+    for (const reference of ['<script', '<link', '<img', 'url(']) {
+      expect(markup, `the document carries no ${reference}`).not.toContain(reference);
+    }
 
     await page.screenshot({ path: `${CAPTURES}/f118-email-preview.png`, fullPage: true });
   });
