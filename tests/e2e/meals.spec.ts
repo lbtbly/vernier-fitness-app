@@ -5,6 +5,7 @@ import {
   projectRoot,
   scratchQuery,
   scratchSignInLink,
+  testStack,
   testStackWithAiCap,
   waitForScratch,
 } from './host';
@@ -63,6 +64,12 @@ test.beforeAll(async () => {
   console.log(testStackWithAiCap(HEADROOM_USD, 'reset'));
   await waitForScratch();
   await ensureScratchOwner();
+});
+
+// Put the instance back the way the rest of the suite expects it, because F98
+// leaves it running under a ceiling nothing can be sent through.
+test.afterAll(() => {
+  testStack('reset');
 });
 
 async function signIn(page: Page) {
@@ -351,6 +358,29 @@ test('F95 F96 the estimate is a range, and abandoning one leaves the tables wher
   }
   const totals = (await page.locator('[data-total="range"]').textContent()) ?? '';
   expect(totals).toMatch(/\d+ to \d+/);
+
+  /*
+   * AND THE FOUR MACRONUTRIENTS, which are the half F96 was passing over.
+   *
+   * The energy line was a range and the totals card drew protein, carbs, fat
+   * and fibre as bare points off `totals.mid`, which says a photograph produced
+   * a weight to the gram. 09-meal-estimate.html line 197 draws all four as
+   * ranges, beside the energy line that already was one.
+   *
+   * GOES RED IF: the totals card goes back to passing `mid` alone. Nothing has
+   * been weighed at this point in the walk, so every bound is still spread and
+   * a collapsed one here would be a number the estimate invented.
+   */
+  const macros = await page
+    .locator('[data-card="totals"] [data-macro]')
+    .evaluateAll((nodes) =>
+      nodes.map((node) => `${node.getAttribute('data-macro')}: ${(node.textContent ?? '').trim()}`),
+    );
+  console.log(`F96: the totals card reads ${macros.join(' | ')}`);
+  expect(macros).toHaveLength(4);
+  for (const macro of macros) {
+    expect(macro, 'a macronutrient on the totals card is a bare point').toMatch(/\d+ to \d+ g/);
+  }
 
   for (const viewport of VIEWPORTS) {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
