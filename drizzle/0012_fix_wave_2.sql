@@ -1,3 +1,8 @@
+ALTER TABLE "recipe_ingredient" ALTER COLUMN "alias_id" DROP NOT NULL;
+--> statement-breakpoint
+-- ---------------------------------------------------------------------------
+-- fix-open, appended on merge. Written in its own worktree, numbered here.
+-- ---------------------------------------------------------------------------
 -- fix-open. Raw DDL drizzle cannot express, numbered on merge.
 --
 -- One statement, and it exists because F87 asks a question about mass.
