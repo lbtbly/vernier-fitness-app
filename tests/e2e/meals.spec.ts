@@ -1,5 +1,5 @@
 import { mkdirSync } from 'node:fs';
-import { expect, test, type Page } from './fixtures';
+import { expect, retypeInto, test, type Page } from './fixtures';
 import {
   ensureScratchOwner,
   projectRoot,
@@ -83,15 +83,19 @@ async function signIn(page: Page) {
  *
  * NEVER `fill()`. A fill sets the whole value in one input event and passed for
  * four rounds of this project over a field that could not be typed into at all.
+ *
+ * THE SELECT-ALL IS `retypeInto`'S NOW AND NOT THIS FILE'S. This pressed Meta+A
+ * and then Control+A, and on macOS Chrome the second is "move to the beginning
+ * of the line": it collapsed the selection the first one had made, Backspace
+ * at caret 0 deleted nothing, and the typed value landed in front of the old
+ * one. `#entry-kcal` held "750", was typed "800" and read back "800750", so F97
+ * failed on its first edit every run and took F90, F91, F92, F98 and F99 with
+ * it. tests/e2e/fixtures.ts already exports `retypeInto` with `ControlOrMeta+a`
+ * after the same defect broke nutrition.spec.ts and console-walk.spec.ts; two
+ * copies of one keystroke disagreed and this file kept the broken one.
  */
 async function typeInto(page: Page, selector: string, value: string) {
-  const field = page.locator(selector);
-  await field.click();
-  await field.press('Meta+A').catch(() => undefined);
-  await field.press('Control+A').catch(() => undefined);
-  await field.press('Backspace');
-  await field.pressSequentially(value, { delay: 15 });
-  await expect(field).toHaveValue(value);
+  await retypeInto(page.locator(selector), value);
 }
 
 async function turnOnPhotoAnalysis(page: Page) {
