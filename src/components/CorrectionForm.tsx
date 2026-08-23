@@ -96,11 +96,23 @@ export function CorrectionForm({
     }
   }
 
+  /*
+   * The unit as prose names it, or nothing at all. A rating is asked for in
+   * points and a note in no unit, so the label has two forms and each is its
+   * own catalogue key: a conditional inside one key renders a string no key
+   * equals, which is what C6's rendered check caught on this very span.
+   */
+  const spokenUnit = unitName(unit);
+
   return (
     <div className="card tight">
       <span className="lbl">{strings.provenance.correctThisValue}</span>
       <label className="formfield" htmlFor="correction-value" style={{ marginTop: 'var(--s2)' }}>
-        <span className="lbl">{strings.provenance.correctionValueLabel(unitName(unit))}</span>
+        <span className="lbl">
+          {spokenUnit === ''
+            ? strings.provenance.correctionValueLabel
+            : strings.provenance.correctionValueLabelInUnit(spokenUnit)}
+        </span>
         <input
           id="correction-value"
           className="input num"

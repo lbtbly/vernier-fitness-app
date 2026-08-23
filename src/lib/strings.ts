@@ -1104,8 +1104,19 @@ export const strings = {
       `${printed}  x ${factor}  ${stored}`,
     correctionHistory: 'Correction history',
     correctThisValue: 'Correct this value',
-    correctionValueLabel: (unit: string) =>
-      unit === '' ? 'The number it should be' : `The number it should be, in ${unit}`,
+    /*
+     * Two keys, because the label has two forms and a form is not a branch.
+     *
+     * This was one key holding `unit === '' ? A : B`, and no catalogue key ever
+     * equalled the string it rendered on a metric with no unit: a rating out of
+     * five is asked for in points, a free note in nothing at all, and on those
+     * the label read "The number it should be" with no key behind it. C6's
+     * rendered-output check reads the screen rather than the source and it
+     * failed the fragment, correctly. A conditional inside a key hides one of
+     * its own outcomes from the catalogue, so both outcomes are keys.
+     */
+    correctionValueLabel: 'The number it should be',
+    correctionValueLabelInUnit: (unit: string) => `The number it should be, in ${unit}`,
     correctionReasonLabel: 'Why, in your own words',
     saveCorrection: 'Save the correction',
     noCorrection: 'No correction on this value.',
