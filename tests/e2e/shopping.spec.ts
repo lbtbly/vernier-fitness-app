@@ -3,6 +3,7 @@ import { countWhenDrawn, expect, retypeInto, test, type Page } from './fixtures'
 import {
   ensureScratchOwner,
   projectRoot,
+  scratchAttempt,
   scratchQuery,
   scratchSignInLink,
   testStack,
@@ -270,7 +271,12 @@ test.describe('F89: a deducted line is struck through, not removed', () => {
     await page.waitForLoadState('networkidle');
     // The database refuses it as well as the route, so no future handler can
     // tick a line the box already brought.
-    const refusal = scratchQuery(
+    // `scratchAttempt` rather than `scratchQuery`, for the same reason
+    // withings.spec.ts and demo-seed.spec.ts already reach for it: a `raise
+    // notice` goes to stderr, and `scratchQuery` returns stdout, which for a
+    // DO block is the word "DO" and nothing else. The refusal being read back
+    // here would never have been in the string.
+    const refusal = scratchAttempt(
       `do $$ begin
          begin
            update shopping_item set checked = true where deduction <> 'none';
