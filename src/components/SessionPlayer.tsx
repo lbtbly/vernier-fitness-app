@@ -447,9 +447,16 @@ export function SessionPlayer({
           * rest phases have carried this control all along; this screen was
           * leaning on the bar, so it gets the same button in the same place
           * with the same label.
+          *
+          * AND WITH THE SAME `prefetch={false}` THE OTHER TWO CARRY. This one
+          * shipped without it and it was the last failed request left on the C9
+          * walk: the ready screen prefetches /train, the owner taps Start, this
+          * whole branch unmounts, and the browser cancels the segment fetches
+          * still in the air. Two net::ERR_ABORTED per walk, from the one
+          * control on this screen nobody had asked to stay quiet.
           */}
         <div className="hdr">
-          <Link className="btn icon" href="/train" aria-label={strings.player.leave}>
+          <Link prefetch={false} className="btn icon" href="/train" aria-label={strings.player.leave}>
             <CloseIcon />
           </Link>
           <span className="grow strong">{strings.player.title}</span>
