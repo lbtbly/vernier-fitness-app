@@ -1148,6 +1148,16 @@ a.noticeline{min-height:var(--touch)}
 .seg{display:flex;gap:6px;flex:none}
 .seg button{
   width:var(--touch);height:var(--touch);
+  border-radius:10px;
+  border:1px solid var(--line-2);
+  background:var(--surface-2);
+  color:var(--text-2);
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+.seg button svg{width:20px;height:20px}
+.seg button:disabled{opacity:.5;cursor:default}
+
 /* ---------- training, screens 06 and 07 ---------- */
 
 /*
@@ -1404,11 +1414,7 @@ html[data-theme=light]{--media-plate:#FFFFFF}
 .mealrow .grow{min-width:0}
 .mealrow .head{font-size:var(--t-body);line-height:var(--t-body-lh);font-weight:600;margin:0}
 .daytotal{border-top:1px solid var(--line);margin-top:6px;padding-top:var(--s3)}
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-.seg button svg{width:20px;height:20px}
+
 .seg button[aria-pressed=true][data-decision=accept]{background:var(--good-soft);border-color:var(--good);color:var(--good)}
 .seg button[aria-pressed=true][data-decision=edit]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
 .seg button[aria-pressed=true][data-decision=reject]{background:var(--alert-soft);border-color:var(--alert);color:var(--alert)}

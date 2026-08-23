@@ -448,7 +448,27 @@ export async function ensureScratchOwner(): Promise<void> {
  * counted as the run's own and was taken. The owner watched one die.
  */
 export function resetScratchProvenance(): void {
-  scratchQuery('truncate measurement, source_record, import_question, idempotency_key, write_request');
+  // CASCADE, and the list is derived rather than written out.
+  //
+  // This named five tables. Slice 10 then added meal_entry.source_record and
+  // recipe_box_item.source_record, so Postgres began refusing the whole
+  // statement with 'cannot truncate a table referenced in a foreign key
+  // constraint'. labs-scratch.spec.ts died in beforeAll, taking F58 to F63's
+  // only end-to-end walk with it, and quick-log.spec.ts calls this at the top
+  // of every test including F23's own tap-count evidence. The suite went from
+  // 143 passed to 127 and nothing in it said why.
+  //
+  // A hand-maintained list of tables is a list that goes stale on the next
+  // slice. CASCADE follows the graph the database already knows, and the
+  // statement below names the roots and lets Postgres find the rest.
+  //
+  // GOES RED IF: a later slice adds a table referencing these and this stops
+  // clearing it. The count printed by every caller's own census is what shows
+  // that, which is why each spec prints its population rather than trusting
+  // this to have worked.
+  scratchQuery(
+    'truncate measurement, source_record, import_question, idempotency_key, write_request cascade',
+  );
   execFileSync('docker', ['restart', SCRATCH_CONTAINER], { cwd: projectRoot, encoding: 'utf8' });
   execFileSync(
     'bash',
