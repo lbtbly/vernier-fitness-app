@@ -332,6 +332,23 @@ const DATA_QUERIES = [
   ],
   ['integration_credential.scope', 'select distinct scope from integration_credential'],
   ['webauthn_credential.label', 'select distinct label from webauthn_credential'],
+  /*
+   * The two fields the iPhone shortcut authors, and they are here for the same
+   * reason a typed note is: the owner wrote them, into a Text action on his own
+   * phone, and this app has no say in either.
+   *
+   * `device` is what he calls the phone. `metric` is the slug he chose from the
+   * guide's list, and the diagnostics screen prints it per metric so a slug
+   * spelled differently from the guide shows as rows with no reading rather
+   * than as silence.
+   *
+   * `ingest_batch.outcome` is deliberately NOT here. It is a token from a fixed
+   * set, the screen renders it through the catalogue's own lookup, and a raw
+   * token reaching a chip is exactly the defect this check exists to catch.
+   * That is the same line `integration_credential.state` sits on.
+   */
+  ['ingest_batch.device', "select distinct device from ingest_batch where device <> ''"],
+  ['health_sample.metric', 'select distinct metric from health_sample'],
 ];
 
 let dataValues = 0;
