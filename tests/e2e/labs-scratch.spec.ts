@@ -13,6 +13,7 @@ import {
   waitForScratch,
 } from './host';
 import { garbledPanelPdf, imageOnlyPdf, panelPdf } from '../unit/lab-pdf';
+import { strings } from '@/lib/strings';
 
 /**
  * Slice 7 end to end, on the scratch instance.
@@ -197,6 +198,27 @@ test('F60. blood pressure is refused by name, without its value, anywhere', asyn
   // And carrying no value.
   expect(words).not.toContain('128');
   expect(words).not.toContain('82');
+
+  /*
+   * THE PAGE IT WAS ACTUALLY ON, AND ONLY THAT PAGE.
+   *
+   * This sentence read "Page 1, 2, 3 holds a blood-pressure reading" on a
+   * three-page panel whose blood-pressure line was on page 2: the component
+   * built the list from the per-page census, which is every page in the file,
+   * and the write layer stored refusals as a count so the page was gone by the
+   * time the screen asked. 05-labs-review.html:119 draws "Page 2 holds a
+   * blood-pressure reading". PANEL_PAGE_TWO in tests/unit/lab-fixture.ts is
+   * where 'Tension arterielle' sits, so 2 is the answer and 1 is not.
+   *
+   * GOES RED IF: the column goes back to a count, or the component goes back to
+   * the census. Both produce a list of every page, which is what is refused
+   * below rather than a shape.
+   */
+  const stored = scratchQuery('select refusal_pages::text from lab_document');
+  console.log(`F60  the document stores refusal pages ${stored}`);
+  expect(stored, 'the page a refusal came from is not stored').toBe('{2}');
+  expect(words, 'the refusal names a page it was not on').toContain(strings.labs.refusedOnePage(2));
+  expect(words, 'the refusal names every page in the document').not.toContain('1, 2');
 
   // The whole rendered document, not only the banner.
   const markup = await page.content();
@@ -674,6 +696,32 @@ test('C10. the review matches screen 05 at three viewports, in all five states',
     );
     console.log(`C10  ${viewport.name}: controls under 44 px: ${JSON.stringify(small)}`);
     expect(small).toEqual([]);
+
+    /*
+     * THE HEADING, MEASURED, BECAUSE THIS SCREEN'S RULES SHIPPED DEAD FOR A DAY.
+     *
+     * A merge splice tore `.seg button{` in half on 2026-08-22 and every rule
+     * after it, `.lab-head` and `.lab-head .title-line` among them, shipped as
+     * `.seg button <selector>` and matched nothing. The 44 px sweep above did
+     * not see it: `.seg button`'s own declarations survived the tear, so the row
+     * controls kept their size while the heading above them lost its layout and
+     * its type. These three captures were taken through all of it.
+     *
+     * GOES RED IF: the stylesheet is torn again anywhere above these rules.
+     */
+    const heading = await page.locator('.lab-head').first().evaluate((node) => {
+      const line = node.querySelector('.title-line') as HTMLElement;
+      return {
+        display: getComputedStyle(node).display,
+        align: getComputedStyle(node).alignItems,
+        weight: getComputedStyle(line).fontWeight,
+        size: getComputedStyle(line).fontSize,
+      };
+    });
+    console.log(`C10  ${viewport.name}: the heading computes ${JSON.stringify(heading)}`);
+    expect(heading.display, 'the review heading is not a row').toBe('flex');
+    expect(heading.align, 'the review heading does not centre what it holds').toBe('center');
+    expect(heading.weight, 'screen 05 draws the panel title at weight 700').toBe('700');
 
     await page.screenshot({ path: `${CAPTURES}/c10-review-${viewport.name}.png`, fullPage: true });
   }
