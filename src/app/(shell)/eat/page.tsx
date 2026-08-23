@@ -379,9 +379,17 @@ export default async function EatPage() {
       ) : null}
       <div className="banner" data-card="rules">
         <InfoIcon />
-        <p className="grow">
-          {sentences.length > 0 ? strings.nutrition.rulesBanner(sentences) : strings.nutrition.ruleNone}
-        </p>
+        <div className="stack grow">
+          {sentences.length > 0 ? (
+            sentences.map((sentence) => (
+              <p key={sentence} className="rule-line">
+                {sentence}
+              </p>
+            ))
+          ) : (
+            <p>{strings.nutrition.ruleNone}</p>
+          )}
+        </div>
       </div>
       <MealWeek
         days={days}

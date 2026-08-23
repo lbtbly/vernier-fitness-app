@@ -2852,8 +2852,16 @@ export const strings = {
     weekClosing:
       'Calories and macros are estimates from a food table, not a laboratory. They are good enough to steer a trend and no more.',
 
-    /** The four rules, summarised over the generated week. */
-    rulesBanner: (parts: string[]) => parts.join(' '),
+    /*
+     * The four rules, summarised over the generated week, ONE SENTENCE PER
+     * ELEMENT.
+     *
+     * This used to be `parts.join(' ')`, which put three catalogued sentences
+     * into one text node. C6 allows two catalogued strings to sit ADJACENT and
+     * be read together; it does not allow three of them fused into a single
+     * string no key can equal, and the rendered check caught exactly that. The
+     * join is gone and the screen renders each sentence in its own element.
+     */
     ruleExcluded: (subject: string) => `No ${subject} in any meal this week, by exclusion.`,
     ruleAllergy: (subject: string) =>
       `No ${subject} in any meal this week, and none in the shopping list, by allergy.`,
@@ -2861,10 +2869,20 @@ export const strings = {
       days === 1
         ? `A ${subject}-free alternative on 1 day, by intolerance.`
         : `A ${subject}-free alternative on ${days} days, by intolerance.`,
+    /*
+     * "Allowed and used" leads, and the subject follows it.
+     *
+     * The subjects are stored lowercase because they are nouns in the middle of
+     * every other sentence here, so opening a sentence with one rendered
+     * "nuts allowed and used on 7 days." A sentence that begins on a lowercase
+     * interpolated noun is wrong in a way no checker measures, and it is the
+     * same shape as the food screen rendering a database column name: the store
+     * showing through the words.
+     */
     rulePreference: (subject: string, days: number) =>
       days === 1
-        ? `${subject} allowed and used on 1 day.`
-        : `${subject} allowed and used on ${days} days.`,
+        ? `Allowed and used on 1 day: ${subject}.`
+        : `Allowed and used on ${days} days: ${subject}.`,
     ruleNone: 'No allergy, intolerance, exclusion or preference is stored yet.',
     /** The four kinds, as the profile screen names them. Four rules, four words. */
     ruleKinds: {

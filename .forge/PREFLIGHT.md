@@ -71,6 +71,7 @@ be writable before that run, not after it, or the first archive is lost and the
 loss is silent.
 
 - [ ] env:BACKUP_DIR | Backup dir set on this Mac | pick a folder inside iCloud Drive and set BACKUP_DIR
+- [ ] manual | **Docker Desktop granted macOS permission to reach iCloud Drive** | see "The grant that stalls a first boot" below
 - [ ] run:sh -c 'set -a; . ./.env 2>/dev/null; set +a; test -d "$BACKUP_DIR" -a -w "$BACKUP_DIR"' | Backup dir exists writable | mkdir -p "$HOME/Library/Mobile Documents/com~apple~CloudDocs/lbtbly-backups"
 
 ## Third-party accounts, before their slices
@@ -155,3 +156,22 @@ the same operation as Copy iCloud Link, so it published two public shortcut
 records named "Test" under `lambert.bouley@gmail.com`. They hold no personal data.
 Remove them in the Shortcuts app with Stop Sharing. Recorded here so it is not
 lost; it gates nothing.
+
+## The grant that stalls a first boot, and it looks like a hang
+
+Slice 13 writes its nightly archive to `BACKUP_DIR`, which the plan puts inside
+iCloud Drive. iCloud Drive is one of the folders macOS puts behind TCC, so the
+first time the container's bind mount reaches it, **Docker Desktop raises a
+macOS permission request and waits.**
+
+Nobody is watching a boot. Headless, that reads as a hang: the app container
+sits in `Created`, nothing answers on 127.0.0.1:3000, and no log line says why,
+because the process asking is Docker Desktop and not Vernier. It cost this run
+one stalled rebuild on 2026-08-23 and was diagnosed only because the owner sat
+down at the Mac and saw the dialog waiting.
+
+**Grant it before the first boot on any machine**, in Docker Desktop's own
+prompt or under System Settings > Privacy & Security > Files and Folders.
+F129 depends on it: without the grant the archive lands in the local fallback
+and the machine status screen raises its alert, which is correct behaviour and
+is not the same as the backup working.

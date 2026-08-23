@@ -154,6 +154,19 @@ run sw:check || exit 2
 # line whose check runs once a day is a regulatory line nobody is holding.
 run compliance || exit 2
 
+# The stylesheet's structure, which no other step in this gate can see.
+#
+# A merge splice tore a rule in half and about seventy rules shipped nested
+# under a selector that never matched. typecheck and lint do not read CSS, the
+# two string checks read words rather than shape, and the build compiled it
+# happily because nesting is valid and a dead rule is not an error. A brace
+# count would have missed it too: comments and content strings carry braces, so
+# the torn file counted balanced.
+#
+# It reads one file with no stack and no browser, so it belongs in the per-edit
+# run beside strings and sw:check.
+run css:check || exit 2
+
 if [ "${FORGE_CHECKS_FULL:-0}" = "1" ]; then
   # strings:rendered launches a browser at the LIVE ORIGIN, and the live origin
   # serves the primary tree. Run from a worktree it would grade main's shipped
