@@ -371,11 +371,22 @@ test('F42. the four states the status screen has to show, each captured', async 
   await waitForScratch();
   await signIn(page);
 
+  /*
+   * Each state is the WHOLE row, not a patch on whatever the test before it
+   * left. F43 runs immediately above this one and sets last_failure_kind to
+   * 'unreachable' on purpose, so a patch that only names the state drew a
+   * working "Connected" card with a red failure sentence under it, and the
+   * capture for the healthy state was a photograph of an unhealthy one.
+   */
   const states: Array<[string, string, string]> = [
-    ['connected', "state = 'connected', refresh_rotated_at = now()", 'Connected'],
+    [
+      'connected',
+      "state = 'connected', refresh_rotated_at = now(), last_failure_kind = null, last_failure_status = null",
+      'Connected',
+    ],
     [
       'expiring',
-      "state = 'connected', refresh_rotated_at = now() - interval '350 days'",
+      "state = 'connected', refresh_rotated_at = now() - interval '350 days', last_failure_kind = null, last_failure_status = null",
       'Expiring',
     ],
     ['revoked', "state = 'revoked', last_failure_kind = 'reconnect'", 'Revoked'],
@@ -426,12 +437,36 @@ test('F42. the four states the status screen has to show, each captured', async 
   // The revoked card names the cause and not a status code.
   await expect(page.locator('[data-withings-cause="reconnect"]')).toContainText(/refused the stored token/i);
 
-  // And back to demonstration, which is the fourth.
+  /*
+   * And back to demonstration, which is the fourth.
+   *
+   * THE ROW GOES BACK TOO, AND IT HAS TO. `stateOf` answers `revoked` before it
+   * ever looks at the mode, deliberately: a grant the provider tore up is torn
+   * up whatever else is true, and calling that card "Demonstration" would be
+   * the screen forgetting a fact. So restarting in demonstration mode over the
+   * revoked row this loop just wrote leaves the card revoked, and the fourth
+   * state was never photographed.
+   *
+   * That is not a state the product can reach on its own. `revoked` is written
+   * by a live import the provider refused, and there is no live import in
+   * demonstration mode; the loop above put it there by writing the row. So the
+   * row is put back into the shape a demonstration connection actually has,
+   * with the same one statement the other three states are drawn from, and the
+   * cause with it.
+   */
   console.log(testStackWithWithingsMode('demo', 'up'));
   await waitForScratch();
+  scratchQuery(
+    `update withings_connection set mode = 'demo', state = 'connected', last_failure_kind = null,
+       last_failure_status = null, refresh_rotated_at = now()`,
+  );
   await signIn(page);
   await openSettings(page);
   await expect(card(page)).toHaveAttribute('data-withings', 'demo');
+  await expect(page.locator('[data-withings-state]')).toHaveText(/demonstration/i);
+  const demoTests = await page.locator('[data-withings] button', { hasText: /^Test$/ }).count();
+  console.log(`state demo renders ${demoTests} test button(s)`);
+  expect(demoTests).toBe(1);
   await page.screenshot({ path: `${CAPTURES}/f42-demonstration.png`, fullPage: true });
 });
 
