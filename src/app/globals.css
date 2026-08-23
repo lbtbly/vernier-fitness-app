@@ -339,7 +339,16 @@ body{
   *{transition-duration:1ms !important}
 }
 
-a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible,[tabindex]:focus-visible{
+/*
+ * Focus, on everything, which DESIGN.md means literally.
+ *
+ * `select` and `textarea` were not on this list and both are now: the training
+ * media screen picks a movement with a select and the session player takes a
+ * note in a textarea, and a control the keyboard can reach with no ring on it
+ * is a control a keyboard user loses. The quick log's note field was already in
+ * that position and is covered by the same line.
+ */
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible,[tabindex]:focus-visible{
   outline:2px solid var(--focus);
   outline-offset:2px;
 }

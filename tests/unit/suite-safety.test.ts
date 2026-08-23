@@ -295,6 +295,35 @@ describe('the suite against the owner\'s installation', () => {
    *   suite-privilege:67      REAL. Every refused statement is printed with the
    *                           answer Postgres gave it.
    *   this file               REAL. Both offender lists print what they walked.
+   *
+   *   Slice 8 added three files and every member of the class in them was read
+   *   against the same question before it was written down here.
+   *
+   *   console-walk:154        REAL. The outbox depth out of IndexedDB, after a
+   *                           quick-log write and two logged sets the same test
+   *                           watched land. The queue was demonstrably not
+   *                           empty a moment earlier.
+   *   console-walk:172,173    REAL. C9's two zeros, and the run prints the
+   *                           surfaces it walked, the requests it saw and the
+   *                           responses it counted beside them, with a floor
+   *                           asserted on each so an empty walk fails.
+   *   session-player:199      REAL. Every dialog raised during a driven full
+   *                           session is recorded by a `page.on('dialog')`
+   *                           listener attached before the first tap, and the
+   *                           session is asserted to have reached its done
+   *                           phase, so the recording covers a session that
+   *                           really ran.
+   *   session-player:203      REAL. `dialog[open]` and `[role=alertdialog]` on
+   *                           the player, which draws a `role=dialog` sheet of
+   *                           its own two tests earlier: the surface can render
+   *                           the subject and does.
+   *   train-week:284          REAL. The squat's absence from the progression
+   *                           cards, on a screen that renders the push-up's
+   *                           card in the assertion two lines above it. The
+   *                           seeded histories are printed first.
+   *   train-week:409,432      REAL. Rows the two refusal probes left behind,
+   *                           counted after Postgres printed its refusal, on a
+   *                           table the same file lists thirty rows of.
    */
   it('lets no assertion claim a zero over a population the surface cannot render', () => {
     // The one that was hollow. It is gone from /health and present on Today.
@@ -314,6 +343,9 @@ describe('the suite against the owner\'s installation', () => {
       ['today.spec.ts', 6],
       ['notices.spec.ts', 3],
       ['suite-privilege.spec.ts', 1],
+      ['console-walk.spec.ts', 3],
+      ['session-player.spec.ts', 2],
+      ['train-week.spec.ts', 3],
     ]);
     const zeroish = /toHaveCount\(0\)|\.toBe\(0\)|toEqual\(\[\]\)|toHaveLength\(0\)|not\.toBeVisible\(|toBeHidden\(/;
     const counted: string[] = [];

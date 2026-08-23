@@ -48,7 +48,7 @@ export default defineConfig({
   projects: [
     {
       name: 'webkit-iphone',
-      testIgnore: /focus\.spec\.ts|service-worker\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|launch-report\.spec\.ts|notices\.spec\.ts/,
+      testIgnore: /focus\.spec\.ts|service-worker\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|launch-report\.spec\.ts|notices\.spec\.ts|catalogue-offline\.spec\.ts|train-week\.spec\.ts|session-player\.spec\.ts|console-walk\.spec\.ts/,
       use: { ...devices['Desktop Safari'], viewport: { width: 393, height: 852 }, deviceScaleFactor: 3 },
     },
     {
@@ -57,7 +57,13 @@ export default defineConfig({
       // read back, and because what is being graded here is the worker's code
       // rather than an engine's rendering.
       name: 'chrome-worker',
-      testMatch: /service-worker\.spec\.ts/,
+      // catalogue-offline.spec.ts joined it in slice 8. F66 asks for a capture
+      // of five movement cards with the network disabled, and an offline test
+      // run with service workers blocked is a test with no worker to be
+      // offline: that is failure number one on this run's list and it is not
+      // being repeated. The file only READS, so it is safe at the live origin,
+      // which is where the worker really lives.
+      testMatch: /service-worker\.spec\.ts|catalogue-offline\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         channel: 'chrome',
@@ -113,12 +119,24 @@ export default defineConfig({
       // tailnet behind a second HTTPS proxy, and it is written down rather than
       // discovered: what these files prove, they prove in Chrome.
       //
+      // train-week.spec.ts, session-player.spec.ts and console-walk.spec.ts
+      // joined it in slice 8, all three for the same reason: they WRITE. They
+      // propose weeks, accept and reject sessions, run whole sessions, log
+      // sets, store a media record and save a waist measurement through the
+      // quick log. On the owner's install a rejected session would move his
+      // adherence denominator overnight for no reason he could find, and
+      // `measurement` refuses DELETE, so a walked write there is permanent.
+      // session-player.spec.ts also freezes the page lifecycle to prove the
+      // clock, which is a Chromium protocol, so the engine is the price and it
+      // is written down: the wall-clock arithmetic under it is proven
+      // engine-free in tests/unit/session-clock.test.ts.
+      //
       // notices.spec.ts is the one exception and says so in its own header: it
       // injects the session the shipped recovery route minted with the Secure
       // attribute relaxed, so WebKit will carry it over loopback too, and it
       // grades its fold in both engines against one database.
       name: 'chrome-scratch',
-      testMatch: /launch-report\.spec\.ts|notices\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts/,
+      testMatch: /launch-report\.spec\.ts|notices\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|train-week\.spec\.ts|session-player\.spec\.ts|console-walk\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         channel: 'chrome',
