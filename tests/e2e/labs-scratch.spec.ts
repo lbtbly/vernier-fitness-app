@@ -236,8 +236,22 @@ test('F60. blood pressure is refused by name, without its value, anywhere', asyn
    * the census. Both produce a list of every page, which is what is refused
    * below rather than a shape.
    */
-  const stored = scratchQuery('select refusal_pages::text from lab_document');
-  console.log(`F60  the document stores refusal pages ${stored}`);
+  /*
+   * THE DOCUMENT THIS SCREEN IS SHOWING, by the identifier in the address bar.
+   *
+   * This asked `lab_document` for every row it held and compared the answer to
+   * one array. F59 above leaves its panel in review rather than abandoning it,
+   * so by the time this runs there are two documents and psql returns two
+   * lines: `{2}` newline `{2}`, which is not `{2}`. The claim was never about
+   * how many documents exist. It is about the one that was just uploaded.
+   */
+  const documentId = new URL(page.url()).pathname.split('/').filter(Boolean).at(-1)!;
+  const held = Number(scratchQuery('select count(*) from lab_document'));
+  const stored = scratchQuery(
+    `select refusal_pages::text from lab_document where id = '${documentId}'`,
+  );
+  console.log(`F60  ${documentId}, one of ${held} document(s) held, stores refusal pages ${stored}`);
+  expect(documentId).toMatch(/^lab_/);
   expect(stored, 'the page a refusal came from is not stored').toBe('{2}');
   expect(words, 'the refusal names a page it was not on').toContain(strings.labs.refusedOnePage(2));
   expect(words, 'the refusal names every page in the document').not.toContain('1, 2');
