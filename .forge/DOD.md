@@ -135,7 +135,7 @@ advance, so the budget does not have to be re-argued once per slice.
   highlighted, the photo and the model reply, the derivation, and the demonstration
   record. Evidence: six captures, one per source, all landing on the same screen
   shape.
-- [ ] **F23.** Waist, energy, fatigue, hunger, satiety and a free note each commit
+- [x] **F23.** Waist, energy, fatigue, hunger, satiety and a free note each commit
   from Today in six taps or fewer. Evidence: a scripted interaction printing the
   tap count for each of the six.
 - [x] **F24.** With the origin unreachable, a quick-log write commits locally,

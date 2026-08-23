@@ -1,0 +1,47 @@
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+F23  chrome  energy: 3 taps from Today, stored 1 row(s)
+F23  chrome  fatigue: 3 taps from Today, stored 1 row(s)
+F23  chrome  hunger: 3 taps from Today, stored 1 row(s)
+F23  chrome  satiety: 3 taps from Today, stored 1 row(s)
+F23  chrome  the note field holds "Slept badly. Left knee fine." after typing it one key at a time
+F23  chrome  note: 3 taps from Today, stored 1 row(s)
+F23  chrome  first-ever waist: field holds "", placeholder "--", up disabled true, down disabled true
+F23  chrome  key "9" -> "9" caret 1
+F23  chrome  key "9" -> "99" caret 2
+F23  chrome  key "." -> "99." caret 3
+F23  chrome  key "0" -> "99.0" caret 4
+F23  chrome  waist: 3 taps from Today, stored 1 row(s)
+F23  chrome  TAP COUNTS  energy=3  fatigue=3  hunger=3  satiety=3  note=3  waist=3
+F23  chrome  worst of the six: 3 taps against a line that says six
+F23  chrome  stored manual rows:
+energy 4 point manual reported
+fatigue 2 point manual reported
+hunger 3 point manual reported
+note Slept badly. Left knee fine. text manual reported
+satiety 4 point manual reported
+waist 99.0 cm manual measured_manual
+F23  chrome  console errors on the walk: 0
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+F23  webkit  energy: 3 taps from Today, stored 1 row(s)
+F23  webkit  fatigue: 3 taps from Today, stored 1 row(s)
+F23  webkit  hunger: 3 taps from Today, stored 1 row(s)
+F23  webkit  satiety: 3 taps from Today, stored 1 row(s)
+F23  webkit  the note field holds "Slept badly. Left knee fine." after typing it one key at a time
+F23  webkit  note: 3 taps from Today, stored 1 row(s)
+F23  webkit  first-ever waist: field holds "", placeholder "--", up disabled true, down disabled true
+F23  webkit  key "9" -> "9" caret 1
+F23  webkit  key "9" -> "99" caret 2
+F23  webkit  key "." -> "99." caret 3
+F23  webkit  key "0" -> "99.0" caret 4
+F23  webkit  waist: 3 taps from Today, stored 1 row(s)
+F23  webkit  TAP COUNTS  energy=3  fatigue=3  hunger=3  satiety=3  note=3  waist=3
+F23  webkit  worst of the six: 3 taps against a line that says six
+F23  webkit  stored manual rows:
+energy 4 point manual reported
+fatigue 2 point manual reported
+hunger 3 point manual reported
+note Slept badly. Left knee fine. text manual reported
+satiety 4 point manual reported
+waist 99.0 cm manual measured_manual
+F23  webkit  console errors on the walk: 0
+F23 done

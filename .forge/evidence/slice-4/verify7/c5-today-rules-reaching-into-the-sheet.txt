@@ -1,0 +1,20 @@
+BLEED chrome  the sheet sits inside .card.day: true
+BLEED chrome  ancestry: div.sheet < section.card.day < div.today < main.app-scroll < div.app
+BLEED chrome  the error card's .actions margin-top 8px  (screen 00 draws that row at 12px, .card .sub + .actions is var(--s3)=12px, .card.day .actions is var(--s2)=8px)
+BLEED chrome  the retry button min-height 44px, measured 44px  (.sheet .btn is 52px, .card.day .actions .btn is var(--touch)=44px)
+BLEED chrome  Save margin-top 14px min-height 52px  (.card.day .btn.primary adds margin-top:14px)
+BLEED webkit  the sheet sits inside .card.day: true
+BLEED webkit  ancestry: div.sheet < section.card.day < div.today < main.app-scroll < div.app
+BLEED webkit  the error card's .actions margin-top 8px  (screen 00 draws that row at 12px, .card .sub + .actions is var(--s3)=12px, .card.day .actions is var(--s2)=8px)
+BLEED webkit  the retry button min-height 44px, measured 44px  (.sheet .btn is 52px, .card.day .actions .btn is var(--touch)=44px)
+BLEED webkit  Save margin-top 14px min-height 52px  (.card.day .btn.primary adds margin-top:14px)
+C5   chrome 393  the sheet foot puts Save 27 px below its divider: padding-top 12px plus a margin-top of 14px the sheet never wrote. 03-quick-log.html line 64 draws padding:12px 0 28px and no margin on the button.
+C5   chrome 768  the sheet foot puts Save 27 px below its divider: padding-top 12px plus a margin-top of 14px the sheet never wrote. 03-quick-log.html line 64 draws padding:12px 0 28px and no margin on the button.
+C5   chrome 1280 the sheet foot puts Save 27 px below its divider: padding-top 12px plus a margin-top of 14px the sheet never wrote. 03-quick-log.html line 64 draws padding:12px 0 28px and no margin on the button.
+C5   webkit 393  the sheet foot puts Save 27 px below its divider: padding-top 12px plus a margin-top of 14px the sheet never wrote. 03-quick-log.html line 64 draws padding:12px 0 28px and no margin on the button.
+C5   webkit 768  the sheet foot puts Save 27 px below its divider: padding-top 12px plus a margin-top of 14px the sheet never wrote. 03-quick-log.html line 64 draws padding:12px 0 28px and no margin on the button.
+C5   webkit 1280 the sheet foot puts Save 27 px below its divider: padding-top 12px plus a margin-top of 14px the sheet never wrote. 03-quick-log.html line 64 draws padding:12px 0 28px and no margin on the button.
+SWEEP  Today-scoped and gate-scoped rules that reach inside the quick-log sheet: 3
+SWEEP    .card.day .actions  ->  div.actions   { margin-top: var(--s2); }
+SWEEP    .card.day .actions .btn  ->  button.btn.grow   { min-height: var(--touch); }
+SWEEP    .card.day .btn.primary  ->  button.btn.primary.block   { margin-top: 14px; }
