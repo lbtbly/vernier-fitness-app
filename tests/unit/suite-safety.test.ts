@@ -412,7 +412,7 @@ describe('the suite against the owner\'s installation', () => {
    *   member above were re-read off the files in the same pass, because a
    *   pointer into the wrong line is worse than no pointer at all.
    *
-   *   train-week:220          REAL. Decision controls that sit outside any
+   *   train-week:223          REAL. Decision controls that sit outside any
    *                           proposal row, on a screen whose rows and controls
    *                           are both counted and printed on the two lines
    *                           above it and asserted to be three per row. The

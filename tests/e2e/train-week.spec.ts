@@ -208,9 +208,12 @@ test.describe('F72, the proposed week', () => {
     // controls is three times the count of rows, exactly, on any week.
     const proposals = await page.locator('[data-proposal]').count();
     const decisions = await page.locator('[data-proposal] [data-decision]').count();
+    // Walked in the page rather than written as a `:not()` with a complex
+    // selector inside it, which is a Selectors Level 4 feature and not
+    // something to bet a rubric line on across two engines.
     const outside = await page
-      .locator('[data-decision]:not([data-proposal] [data-decision])')
-      .count();
+      .locator('[data-decision]')
+      .evaluateAll((nodes) => nodes.filter((node) => node.closest('[data-proposal]') === null).length);
     console.log(
       `${proposals} row(s) carrying ${decisions} decision control(s), ` +
         `and ${outside} decision control(s) outside any row`,
