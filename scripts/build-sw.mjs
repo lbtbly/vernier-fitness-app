@@ -58,12 +58,27 @@ const media = JSON.parse(await readFile(mediaManifest, 'utf8'));
 const OPEN = '// --- generated from src/lib/strings.ts by scripts/build-sw.mjs. Do not edit by hand.';
 const CLOSE = '// --- end generated ---';
 
-/** Every string the worker itself puts on a screen, by its key. */
+/**
+ * Every string the worker itself puts on a screen: the name it takes inside the
+ * worker, its value, and the catalogue key it came from.
+ *
+ * The third column exists because this block no longer draws from one section.
+ * The log line used to print `offline.` in front of every name, which was true
+ * when all four keys were offline copy and became a lie the moment the push
+ * fallback joined them. A report that names the wrong source is worse than one
+ * that names none.
+ */
 const KEYS = [
-  ['title', strings.offline.title],
-  ['cardTitle', strings.offline.cardTitle],
-  ['causePrefix', strings.offline.causePrefix],
-  ['causeSuffix', strings.offline.causeSuffix],
+  ['title', strings.offline.title, 'offline.title'],
+  ['cardTitle', strings.offline.cardTitle, 'offline.cardTitle'],
+  ['causePrefix', strings.offline.causePrefix, 'offline.causePrefix'],
+  ['causeSuffix', strings.offline.causeSuffix, 'offline.causeSuffix'],
+  // What the worker shows when a push arrives carrying nothing it can read.
+  // Safari revokes the subscription of a worker that shows nothing, so these
+  // two are not decoration: they are the last thing standing between a failed
+  // decode and a phone that stops being told anything.
+  ['notificationTitle', strings.notification.fallbackTitle, 'notification.fallbackTitle'],
+  ['notificationBody', strings.notification.fallbackBody, 'notification.fallbackBody'],
 ];
 
 /**
@@ -165,13 +180,21 @@ const MACHINE = new Set([
   'message',
   'fetch',
   'push',
+  'notificationclick',
   'SKIP_WAITING',
   // The second message the app sends: fill the media cache with whatever is
   // missing. Asked from the shell layout, which renders only for a live
   // session, because /movements is behind the session gate.
   'PRECACHE_MEDIA',
+  // The notification action id the payload carries and the click handler reads.
+  // A machine token: the WORDS on that button come from the catalogue and are
+  // sent in the payload, because a worker cannot import this file.
+  'done',
+  // The client type matchAll asks for.
+  'window',
   // Request and response shapes.
   'GET',
+  'POST',
   'navigate',
   'basic',
   // The cache mode a precache fetch asks for: go to the network, never the
@@ -179,6 +202,9 @@ const MACHINE = new Set([
   'reload',
   'Content-Type',
   'text/html; charset=utf-8',
+  'application/json',
+  // The endpoint the notification's Done action posts to.
+  '/api/push/done',
   // The outbox: database, stores, keys and the headers a queued write carries.
   'vernier',
   'outbox',
@@ -189,6 +215,9 @@ const MACHINE = new Set([
   'readwrite',
   'Idempotency-Key',
   'x-vernier-csrf',
+  // The type name `typeof` answers with, which the push handler asks for before
+  // it trusts a field out of a payload.
+  'string',
   // The five characters the offline document escapes.
   '&amp;',
   '&lt;',
@@ -380,5 +409,5 @@ if (process.argv.includes('--check')) {
 
 await writeFile(worker, source.slice(0, opensAt) + wanted + source.slice(closesAt + CLOSE.length), 'utf8');
 process.stdout.write(
-  `build-sw: wrote ${KEYS.length} catalogue key(s) into public/sw.js: ${KEYS.map(([name]) => `offline.${name}`).join(', ')}.\n`,
+  `build-sw: wrote ${KEYS.length} catalogue key(s) into public/sw.js: ${KEYS.map(([, , key]) => key).join(', ')}.\n`,
 );

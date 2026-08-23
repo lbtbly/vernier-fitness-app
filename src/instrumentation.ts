@@ -153,6 +153,31 @@ export async function register(): Promise<void> {
     console.error(`[vernier] demo seed did not run: ${(error as Error).message}`);
   }
 
+  // The two schedules, and the two things a boot owes before either can tick.
+  //
+  // ORDER MATTERS AND IT IS INSIDE startScheduler. A run still marked running
+  // from a process that no longer exists is cleared first and awaited, because
+  // it would otherwise hold its period against every tick that followed it,
+  // silently, forever. The catch-up runs behind the schedules rather than in
+  // front of them: it reads six tables and may hand a message to a mail relay,
+  // and this function runs before the first request is served. It logs its own
+  // outcome where it finishes, so the line below states what it waited for and
+  // nothing more.
+  //
+  // The claim is what makes this safe to call from every process that boots.
+  // Nothing here asks whether it is the only one; it takes the period or it
+  // does not, and Postgres arbitrates.
+  try {
+    const { startScheduler } = await import('./lib/scheduler');
+    const started = await startScheduler();
+    console.log(
+      `[vernier] scheduler: ${started.schedules} schedule(s), ` +
+        `${started.stale} stale run(s) cleared, catch-up running`,
+    );
+  } catch (error) {
+    console.error(`[vernier] scheduler did not start: ${(error as Error).message}`);
+  }
+
   // The training half of the demonstration, which needs the catalogue above it
   // and the measurement series beside it: it proposes a week through the
   // shipped proposer, so every cause on screen 06 names an input that is really

@@ -502,6 +502,30 @@ describe('the suite against the owner\'s installation', () => {
    *                           provider earlier in the same run, asserted at
    *                           f101 step one, and the test prints the connection
    *                           row beside the count.
+   *   Slice 12 added two files and every member of the class in them was read
+   *   against the same question before it was written down here.
+   *
+   *   review:141              REAL. Requests the email preview made, recorded by
+   *                           a `page.on('request')` listener attached before the
+   *                           reload, and the document itself is in the list the
+   *                           filter removes, so an empty page would fail the
+   *                           filter rather than pass it. The point of the line
+   *                           is that an email client fetches nothing.
+   *   review:181              REAL. Denylist matches over the rendered screen,
+   *                           and the same line asserts the copy is over three
+   *                           hundred characters first, so a screen that failed
+   *                           to render cannot answer this zero.
+   *   push:261,267            REAL. The reminder row that was just closed, on a
+   *                           list the same test counted above zero and took the
+   *                           first item from. The `count === 0` branch above
+   *                           returns before either line is reached and asserts
+   *                           the styled empty state instead, so neither zero is
+   *                           ever answered by an empty list.
+   *   push:287                REAL. Controls under 44 px, filtered out of every
+   *                           button, link and input the notifications screen
+   *                           renders. That screen carries eleven diagnostic
+   *                           rows, four category switches and two time fields,
+   *                           and the same expression logs the count it walked.
    */
   it('lets no assertion claim a zero over a population the surface cannot render', () => {
     // The one that was hollow. It is gone from /health and present on Today.
@@ -532,6 +556,8 @@ describe('the suite against the owner\'s installation', () => {
       ['settings-integrations.spec.ts', 1],
       ['meals.spec.ts', 4],
       ['calendar.spec.ts', 3],
+      ['review.spec.ts', 2],
+      ['push.spec.ts', 3],
     ]);
     // `toHaveCount(0, { timeout: 3_000 })` was invisible to this pattern until
     // slice 5 wrote one: the closing paren was required right after the zero, so

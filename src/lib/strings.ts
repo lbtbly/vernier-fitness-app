@@ -908,6 +908,49 @@ export const strings = {
       deductedNotTickableDetail:
         'It is already covered by your recipe box or your cupboard, and it stays on the list so you can see that. Nothing was written.',
     },
+
+    /** Everything the push routes refuse, and what they say when they do. */
+    push: {
+      bodyDetail: 'Open Notifications and try again. Nothing was stored.',
+      notASubscription: 'That is not a push subscription.',
+      notASubscriptionDetail:
+        'A subscription carries an endpoint and both of its keys. Nothing was stored, and this device is still whatever it was before.',
+      unknownEndpoint: 'The Mac mini does not hold that subscription.',
+      unknownEndpointDetail:
+        'It was never stored, or it was removed after the push service reported it gone. Turn notifications on again from this device.',
+      refusedSilent: 'That send would have shown no notification, so it was refused here.',
+      refusedSilentDetail:
+        'Safari revokes push permission for an app that receives a push and shows nothing, so a payload with no title never leaves this machine.',
+      refusedTooLarge: 'That notification is too large to send.',
+      refusedTooLargeDetail:
+        'A push payload has to fit in four kilobytes. Nothing was sent, and no subscription was changed.',
+      noSubscriptions: 'No device is subscribed to notifications.',
+      noSubscriptionsDetail:
+        'Open Vernier from its Home Screen icon and turn notifications on, then send the test again.',
+      sendFailed: 'The push service refused the send.',
+      noItem: 'There is no such reminder.',
+      noItemDetail: 'It was closed already, or it belongs to a week that has passed.',
+      badCategory: 'That is not a reminder category.',
+      badCategoryDetail:
+        'The four are the training session, weight and waist, the menu confirmation and missing data. Nothing was stored.',
+      badQuietHours: 'Those quiet hours were not stored.',
+      badQuietHoursDetail: 'Both are a 24-hour time such as 22:00. Nothing was stored.',
+      badLead: 'That reminder lead time was not stored.',
+      badLeadDetail: 'It is a whole number of minutes from 0 to 240. Nothing was stored.',
+    },
+
+    /** The weekly review and the Sunday run. */
+    review: {
+      failed: 'The weekly review did not build.',
+      failedDetail:
+        'Nothing was written and nothing about your week changed. The boot log on the Mac mini names the read that stopped.',
+      noReview: 'There is no review for that week.',
+      noReviewDetail: 'It has not been prepared yet. The Sunday run prepares it at 20:00.',
+      bodyDetail: 'Open the review again and repeat the action. Nothing was written.',
+      badBlock: 'That is not a block of the proposal.',
+      badBlockDetail:
+        'The three are training, nutrition and shopping, and each is decided on its own. Nothing was written.',
+    },
   },
 
   /** The manifest and the document head, which is copy a share sheet reads out. */
@@ -4288,5 +4331,381 @@ export const strings = {
         `This is ${slot}, eaten at home on a weekday. What is on the plate and roughly how much?`,
       questionSummary: 'identify foods and portions',
     },
+  },
+
+  /**
+   * What the service worker shows when a push arrives carrying nothing it can
+   * read.
+   *
+   * IT IS NOT DECORATION AND IT IS NOT A PLACEHOLDER. Safari revokes the push
+   * subscription of a worker that receives a push and shows no notification, so
+   * a payload that failed to decode, or arrived empty, or lost its title still
+   * has to put something on the screen. These two lines are what it puts there,
+   * and they say the true thing: something arrived and the app could not read
+   * it. They reach the worker through the generated block in public/sw.js,
+   * because a worker cannot import this file.
+   */
+  notification: {
+    fallbackTitle: 'Vernier has something for you',
+    fallbackBody:
+      'A notification arrived that this phone could not read. Open the app to see what is waiting.',
+    doneAction: 'Done',
+  },
+
+  /** Web Push: turning it on, diagnosing it, and every reason it refuses. */
+  push: {
+    title: 'Notifications',
+    sub: 'What Vernier sends this phone, and what to do when nothing arrives',
+
+    enableTitle: 'Turn on notifications for this device',
+    enableBody:
+      'Reminders arrive on the device you turn them on from, and each device asks separately. iOS asks exactly once: refuse it, and the app can never ask again, and the switch moves to Settings, Notifications, Vernier.',
+    enable: 'Enable notifications',
+    enabling: 'Asking iOS for permission',
+    enabled: 'Notifications are on for this device.',
+    enabledBody: 'The Mac mini now holds this device and will send reminders to it.',
+    disable: 'Stop notifications on this device',
+    disabled: 'Notifications are off for this device.',
+    sendTest: 'Send a test notification',
+    testSent: 'The test was accepted by the push service.',
+    testTitle: 'Vernier is reaching this phone',
+    testBody: 'This is the test notification you asked for. Nothing was changed.',
+
+    unsupportedTitle: 'This browser cannot receive notifications',
+    unsupportedBody:
+      'Web Push needs a service worker and the Notification interface. Open Vernier from its Home Screen icon on an iPhone running iOS 16.4 or newer, or from Safari 16 or newer on a Mac.',
+    deniedTitle: 'iOS is refusing notifications for Vernier',
+    deniedBody:
+      'Permission was refused once, and iOS never asks a second time from inside an app. Open Settings, then Notifications, then Vernier, then Allow Notifications.',
+    dismissedTitle: 'The permission prompt closed without an answer',
+    dismissedBody: 'Nothing was stored. Tap Enable notifications again when you are ready.',
+    subscribeFailedTitle: 'This device did not subscribe',
+    subscribeFailedBody:
+      'Permission was granted and the subscription still did not complete. The rows below say which step stopped, and nothing was stored on the Mac mini.',
+
+    noKeys: 'This installation has no push key pair, so nothing can be sent.',
+    noKeysDetail:
+      'Run node scripts/gen-vapid.mjs on the Mac mini and restart the containers. It writes both halves into the environment file and prints neither.',
+    keysPresent: 'The push key pair is present on the Mac mini.',
+    keysAbsent: 'The push key pair is absent on the Mac mini.',
+
+    diagnosticsTitle: 'Why notifications are not arriving',
+    diagnosticsBody:
+      'Eleven checks, in the order they have to pass. Everything below the first failure is left unchecked, because its answer would be meaningless until the failure above it is fixed.',
+    diagnosticsAllPass: 'All eleven checks pass on this device.',
+    diagnosticsStopped: (label: string) => `Stopped at ${label}.`,
+    rowPassed: 'Passed',
+    rowFailed: 'Failed',
+    rowNotChecked: 'Not checked',
+    remedyLabel: 'What to do',
+    checks: {
+      secure: {
+        label: 'Secure context',
+        remedy:
+          'Vernier has to be reached over HTTPS. Open it at its Tailscale address rather than at an IP address and a port.',
+      },
+      installed: {
+        label: 'Opened from the Home Screen',
+        remedy:
+          'iOS gives notifications to installed web apps and to nothing else. In Safari, tap Share, then Add to Home Screen, then open Vernier from the new icon.',
+      },
+      notifications: {
+        label: 'Notification interface',
+        remedy:
+          'iOS hides the Notification interface from a Safari tab. It appears once the app is opened from its Home Screen icon on iOS 16.4 or newer.',
+      },
+      platform: {
+        label: 'Platform version',
+        remedy:
+          'Web Push needs iOS 16.4 or newer. Keeping the screen awake during a session needs 18.4.',
+      },
+      permission: {
+        label: 'Permission',
+        remedy:
+          'Tap Enable notifications. If iOS has already been told no, open Settings, then Notifications, then Vernier, then Allow Notifications.',
+      },
+      worker: {
+        label: 'Service worker',
+        remedy:
+          'The worker did not reach active. Close every Vernier window, open it again from the Home Screen icon, and give it a moment on a connection that reaches the Mac mini.',
+      },
+      subscription: {
+        label: 'Subscription on this device',
+        remedy: 'This device holds no subscription. Tap Enable notifications.',
+      },
+      keyMatch: {
+        label: 'Key match',
+        remedy:
+          'This device subscribed with a different key from the one the Mac mini sends with. Stop notifications on this device and turn them on again.',
+      },
+      serverKnown: {
+        label: 'Known to the Mac mini',
+        remedy:
+          'The Mac mini does not hold this subscription, so it has nowhere to send. Stop notifications on this device and turn them on again.',
+      },
+      delivery: {
+        label: 'Last delivery',
+        remedy:
+          'The push service refused the last send. 403 is the key pair, 404 and 410 mean the subscription is gone and a new one is needed, 413 means the payload was too big, 429 means too many sends to this device.',
+      },
+      badge: {
+        label: 'Badge on the icon',
+        remedy:
+          'Badging arrives with notification permission. Open Settings, then Notifications, then Vernier, then Badges.',
+      },
+    },
+    detail: {
+      standalone: 'Home Screen',
+      browserTab: 'Browser tab',
+      present: 'Present',
+      absent: 'Absent',
+      platformUnknown: 'Not an iPhone or iPad',
+      platformVersion: (version: string) => `iOS ${version}`,
+      workerNone: 'None registered',
+      endpointTail: (tail: string) => `Ends ${tail}`,
+      none: 'None',
+      matches: 'Matches the key this machine sends with',
+      differs: 'Differs from the key this machine sends with',
+      known: (tail: string) => `Held, ends ${tail}`,
+      unknown: 'Not held',
+      unreachable: 'The Mac mini did not answer',
+      lastSend: (status: number, when: string) => `HTTP ${status} at ${when}`,
+      neverSent: 'Nothing has been sent to this device yet',
+      badgeWorks: 'Set and cleared',
+      badgeRefused: 'Refused by this browser',
+    },
+    workerStates: {
+      active: 'Active',
+      installing: 'Installing',
+      waiting: 'Waiting',
+    },
+    permissions: {
+      granted: 'Granted',
+      denied: 'Refused',
+      default: 'Not asked yet',
+      unavailable: 'Unavailable in this browser',
+    },
+    focusTitle: 'One thing this screen cannot check',
+    focusBody:
+      'A Focus mode silences notifications and tells the web nothing at all. If all eleven checks pass and nothing arrives, open Settings, then Focus, and see whether Vernier is allowed through the one that is on.',
+    reSubscribedTitle: 'This device has a new subscription',
+    reSubscribedBody:
+      'iOS never announces a rotated subscription, so Vernier re-reads it on every launch. The endpoint changed and the new one has been sent to the Mac mini.',
+  },
+
+  /** Reminders: the four categories, their settings, and the copy they carry. */
+  reminders: {
+    title: 'Reminders',
+    sub: 'What is worth a notification, when, and when never',
+    settingsTitle: 'What gets a reminder',
+    settingsBody:
+      'Each category is on or off on its own, and everything due in the same five minutes arrives as one notification rather than four.',
+    leadLabel: 'How long before',
+    leadMinutes: (minutes: number) => `${minutes} minutes before`,
+    leadAtTime: 'At the time',
+    quietTitle: 'Quiet hours',
+    quietBody:
+      'Nothing is sent between these two times. A reminder that falls inside them is dropped rather than saved up, so the morning does not open with a stack of last night.',
+    quietFrom: 'From',
+    quietTo: 'Until',
+    quietWindow: (from: string, to: string) => `silent from ${from} until ${to}`,
+    saved: 'Saved.',
+    saveQuiet: 'Save the quiet window',
+    saveFailed: 'That change was not stored.',
+    on: 'On',
+    off: 'Off',
+    categories: {
+      session: {
+        label: 'Training session',
+        purpose: 'Before a session you accepted for this week.',
+      },
+      measurements: {
+        label: 'Weight and waist',
+        purpose: 'When a measurement is due and the day has not had one.',
+      },
+      menu: {
+        label: 'Menu confirmation',
+        purpose: 'When a generated week is still waiting to be confirmed.',
+      },
+      missing_data: {
+        label: 'Missing data',
+        purpose: 'When a source has sent nothing for long enough to bend a trend.',
+      },
+    },
+    lines: {
+      session: (title: string, at: string) => `${title} at ${at}`,
+      measurements: 'Weight and waist are due',
+      menu: (weekOf: string) => `The menu for the week of ${weekOf} is waiting`,
+      missingData: (source: string, since: string) => `${source} has sent nothing since ${since}`,
+    },
+    /** The sentence under the line, which is a notification's body when it is alone. */
+    details: {
+      session: (place: string) => `At ${place}. Tap Done once it is finished.`,
+      sessionNoPlace: 'Tap Done once it is finished.',
+      measurements: 'One weigh-in and one tape measure. Both take under a minute.',
+      menu: 'Confirm it and the shopping list is built from what you accepted.',
+      missingData: (source: string) =>
+        `Run one sync and ${source} fills the gap in the trend rather than leaving a hole in it.`,
+    },
+    manyTitle: (count: number) => `${count} things to do`,
+    manyBody: (lines: string[]) => `${lines.join('. ')}.`,
+    doneTitle: 'Marked done',
+    doneBody: 'It is closed and will not be raised again.',
+    pendingTitle: 'Waiting for you',
+    pendingEmptyTitle: 'Nothing is waiting',
+    pendingEmptyBody:
+      'Reminders appear here as they are raised, and each one carries the button that closes it. There is nothing due right now.',
+    markDone: 'Mark it done',
+    suppressedChip: 'Held by quiet hours',
+    suppressedAt: (at: string) => `Due at ${at}, inside quiet hours, so nothing was sent.`,
+    sentAt: (at: string) => `Sent at ${at}`,
+    groupedInto: (count: number) => `Sent as one notification carrying ${count} items`,
+    errorTitle: 'The reminder settings did not load',
+    errorBody:
+      'Reminders already scheduled are unaffected. This screen is the one that did not load.',
+    loadingLabel: 'Loading the reminder settings',
+    offlineNote: 'These are the settings stored on this phone. Changing one needs the Mac mini.',
+  },
+
+  /** The weekly review: the screen, the proposal and the email. */
+  review: {
+    title: 'Your week',
+    nextTitle: 'Next week',
+    weekOf: (from: string, to: string) => `${from} to ${to}`,
+    generatedAt: (at: string) => `Prepared ${at}`,
+    seeNext: "See next week's plan",
+    nothingChanged: 'Nothing has changed yet. Reading the week changes nothing.',
+    back: 'Back to the week',
+    open: 'Open the weekly review',
+
+    emptyTitle: 'There is no week to read back yet',
+    emptyBody:
+      'The review is prepared every Sunday at 20:00 from what is in this database. Log a weight, accept a session or confirm a menu, and the first one has something to say.',
+    errorTitle: 'The review did not load',
+    errorBody:
+      'Everything it reads is still stored. This page is the one that did not load, and nothing about your week changed.',
+    loadingLabel: 'Preparing the week',
+    staleTitle: (days: number) => `Prepared ${days} days ago`,
+    staleBody:
+      'This is the review from the last Sunday run, read back exactly as it was prepared. The numbers are the ones that were true then.',
+    offlineNote: 'This is the copy stored on this phone. It refreshes when the Mac mini answers.',
+
+    sections: {
+      body: 'Weight and waist',
+      adherence: 'Sessions',
+      activity: 'Activity',
+      sleep: 'Sleep',
+      training: 'Training',
+      nutrition: 'Nutrition',
+      wentWell: 'What went well',
+      wasHard: 'What was hard',
+      proposal: 'Next week',
+    },
+
+    weightAverage: 'Weight, 7-day average',
+    weightChange: (value: string) => `${value} kg this week`,
+    waist: 'Waist',
+    waistMeasured: (when: string) => `Measured ${when}`,
+    noReading: 'No reading this week',
+    shortWindow: (have: number, of: number) => `Read from ${have} days of ${of}.`,
+    sessionsCount: (done: number, planned: number) => `${done} of ${planned}`,
+    sessionsNone: 'No sessions were planned',
+    sessionNotDone: (day: string) => `${day} did not happen.`,
+    sessionNotDoneBecause: (day: string, cause: string) => `${day} did not happen. ${cause}`,
+    steps: 'Steps',
+    stepsDaily: (value: string) => `${value} a day`,
+    sleepNightly: 'Sleep a night',
+    mealsDecided: 'Meals decided',
+    mealsDecidedCount: (decided: number, of: number) => `${decided} of ${of}`,
+    dailyTarget: 'Daily calorie target',
+    dailyTargetValue: (kcal: string) => `${kcal} kcal`,
+    noTarget: 'No target is set yet',
+    noPlan: 'No menu was generated for this week',
+    setsLogged: (sets: number, movements: number) => `${sets} sets across ${movements} movements`,
+    noSets: 'No sets were logged',
+    nothingRecorded: 'Nothing was recorded',
+
+    /** The two paragraphs, each line derived from a fact and never from a mood. */
+    wentWellNone:
+      'This is the first week with anything in it, so there is nothing to compare against yet. Next Sunday there will be.',
+    wentWellSessions: (done: number) =>
+      done === 1 ? 'One session happened this week.' : `${done} sessions happened this week.`,
+    wentWellWeightToward: (size: string, target: string) =>
+      `The 7-day average moved ${size} kg towards ${target} kg.`,
+    wentWellWaist: (when: string) =>
+      `Waist was measured on ${when}, so the second line on the chart has a point this week.`,
+    wentWellSets: (sets: number) =>
+      `${sets} sets were logged, so next week's loads come from what you actually did.`,
+    wasHardNone: 'Nothing in this week asks for a change.',
+    wasHardSession: (day: string, cause: string) => `${day} did not happen. ${cause}`,
+    wasHardSessionNoCause: (day: string) =>
+      `${day} did not happen, and nothing was recorded about why.`,
+    wasHardStale: (source: string, since: string) =>
+      `${source} has sent nothing since ${since}, so the numbers here are read from fewer days than a week.`,
+    wasHardShortWindow: (label: string, have: number, of: number) =>
+      `${label} is read from ${have} days of ${of}. Read it loosely.`,
+    wasHardNoMenu: 'No menu was generated for this week, so there is nothing to read back about food.',
+
+    /** The one banner. Out of date is what --warn is for, and it is the only thing here that gets it. */
+    fixTitle: 'One thing to fix before next week.',
+    fixStale: (source: string, since: string) =>
+      `${source} has sent nothing since ${since}. One sync brings the numbers back.`,
+
+    proposalNote: 'Each block is decided on its own. Accepting one says nothing about the others.',
+    proposalAccept: 'Accept',
+    proposalReject: 'Decline',
+    proposalStates: {
+      proposed: 'Not decided',
+      accepted: 'Accepted',
+      rejected: 'Declined',
+    },
+    proposalDecided: (accepted: number, declined: number) =>
+      `${accepted} accepted, ${declined} declined`,
+    proposalOpenWeek: 'Open the week and edit a session',
+    proposalOpenMenu: 'Open the menu',
+    proposalOpenList: 'Open the shopping list',
+    blocks: {
+      training: 'Training',
+      nutrition: 'Nutrition',
+      shopping: 'Shopping',
+    },
+    proposalTraining: (sessions: number, minutes: number) => `${sessions} sessions, ${minutes} minutes`,
+    proposalTrainingNone: 'No sessions are proposed for next week yet',
+    proposalNutrition: (kcal: string) => `${kcal} kcal a day`,
+    proposalNutritionNone: 'No menu is generated for next week yet',
+    proposalShopping: (items: number, deducted: number) =>
+      `${items} items, ${deducted} already in the cupboard`,
+    proposalShoppingNone: 'No shopping list is built for next week yet',
+    notProposedLabel: 'Not proposed',
+    notProposedBody:
+      'A tighter calorie target. Nothing in this week asks for one, and Vernier does not move a target to look busy.',
+
+    calendarLabel: 'Calendar',
+    calendarConnected: 'Google Calendar is connected',
+    calendarConnectedBody:
+      'A session you accept here reaches the dedicated calendar once you have confirmed the change, line by line, on the calendar screen. Nothing on this screen writes to it.',
+    calendarNotConnected: 'Google Calendar is not connected',
+    calendarNotConnectedBody:
+      'Once it is, the sessions you accept here are shown as a diff of exactly what would be created, moved and removed, and nothing is written until you confirm each line.',
+    calendarConnect: 'Connect it in Settings',
+
+    emailLabel: 'Email version',
+    emailChip: 'Preview',
+    emailPreviewBody:
+      'The same summary is prepared as an email every Sunday at 20:00. No mail host is configured on this machine, so it stays in the local preview until one is.',
+    emailConfigured: 'The mail relay is connected, so this summary is sent as well as shown here.',
+    emailOpen: 'Open the email preview',
+    emailSubject: (from: string, to: string) => `Vernier, your week: ${from} to ${to}`,
+    emailIntro: (from: string, to: string) =>
+      `Here is the week of ${from} to ${to}, read back from what is stored on your Mac mini.`,
+    emailFooter:
+      'Prepared on your own machine from your own data. Nothing in this message left the tailnet to be written.',
+    emailNoTransport: 'No mail host is configured, so this was not sent anywhere.',
+    emailNotSent: 'Not sent',
+    emailSent: (at: string) => `Sent ${at}`,
+
+    remindersLabel: 'Reminders that follow',
+    remindersBody: (quiet: string) =>
+      `A notification before each session you accepted, everything due in the same five minutes grouped into one, and ${quiet}. One button in it marks the item done.`,
   },
 } as const;

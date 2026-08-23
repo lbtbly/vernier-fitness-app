@@ -11,6 +11,8 @@ const COPY = {
   cardTitle: 'This phone cannot reach the Mac mini',
   causePrefix: 'The app shell is stored on this device, so it opened. Everything else waits for',
   causeSuffix: 'Either this device has left the tailnet, or the Mac mini is asleep or stopped.',
+  notificationTitle: 'Vernier has something for you',
+  notificationBody: 'A notification arrived that this phone could not read. Open the app to see what is waiting.',
 };
 const MEDIA_VERSION = 'fdc372eb4816';
 const MEDIA = [
@@ -333,6 +335,53 @@ async function drainOutbox() {
   return sent;
 }
 
+/**
+ * Marks reminder items done from the notification's own action.
+ *
+ * The anti-forgery token comes out of the same IndexedDB store the outbox
+ * keeps it in, because a worker has no page to read a header off. The session
+ * cookie rides along on its own: a fetch inside a service worker defaults to
+ * same-origin credentials, and this origin is the only one it ever talks to.
+ *
+ * A failure here is swallowed on purpose. The notification has already been
+ * shown, which is the promise that matters, and the item is still on the
+ * reminders screen with its own button.
+ */
+async function closeItems(ids) {
+  let csrf = '';
+  let db;
+  try {
+    db = await openOutbox();
+    csrf = (await outboxRequest(db, 'readonly', (store) => store.get('csrf'), OUTBOX_META)) || '';
+  } catch {
+    // No database, no token. The request below will be refused and the item
+    // stays where it is, which is the honest outcome.
+  } finally {
+    if (db) db.close();
+  }
+  await fetch('/api/push/done', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-vernier-csrf': csrf },
+    body: JSON.stringify({ ids }),
+  }).catch(() => {});
+}
+
+// ---------------------------------------------------------------------------
+// A NOTIFICATION ON EVERY PUSH. THERE IS NO BRANCH THROUGH THIS HANDLER THAT
+// SHOWS NOTHING.
+//
+// Apple: "Safari doesn't support invisible push notifications. Present push
+// notifications to the user immediately after your service worker receives
+// them. If you don't, Safari revokes the push notification permission for your
+// site." WebKit is blunter: violations of the userVisibleOnly promise result in
+// the subscription being revoked. An exception inside this handler counts as a
+// violation, which is why the show is wrapped and has a fallback show inside
+// the catch, and why the outbox drain happens AFTER the notification rather
+// than before it. Draining is opportunistic. Showing is the promise.
+//
+// A payload that failed to decode, arrived empty, or lost its title still puts
+// COPY.notificationTitle on the screen. That is not a placeholder: it says the
+// true thing, that something arrived and this phone could not read it.
 self.addEventListener('push', (event) => {
   const payload = (() => {
     try {
@@ -342,14 +391,58 @@ self.addEventListener('push', (event) => {
     }
   })();
 
+  const readable = (value) => (typeof value === 'string' && value.trim() !== '' ? value : null);
+  const title = readable(payload.title) || COPY.notificationTitle;
+  const body = readable(payload.body) || COPY.notificationBody;
+  const url = readable(payload.url) || '/';
+
   event.waitUntil((async () => {
-    await drainOutbox();
-    if (payload.title) {
-      await self.registration.showNotification(payload.title, {
-        body: payload.body,
-        tag: payload.tag,
-        data: payload.data,
+    try {
+      await self.registration.showNotification(title, {
+        body,
+        tag: readable(payload.tag) || 'vernier',
+        data: { url, itemIds: Array.isArray(payload.itemIds) ? payload.itemIds : [] },
+        // Ignored on iOS, where Notification.actions is unsupported, and drawn
+        // on the Mac. The tap on the body reaches the same screen either way.
+        actions: Array.isArray(payload.actions) ? payload.actions : [],
+        // iOS defaults to sound on and macOS to sound off. Be explicit.
+        silent: false,
+      });
+    } catch {
+      // Even a refused showNotification must not leave the promise unkept.
+      await self.registration.showNotification(COPY.notificationTitle, {
+        body: COPY.notificationBody,
       });
     }
+
+    const badge = payload.notification && payload.notification.app_badge;
+    if (badge !== undefined && self.navigator && self.navigator.setAppBadge) {
+      const count = Number(badge);
+      if (Number.isFinite(count)) await self.navigator.setAppBadge(count).catch(() => {});
+    }
+
+    // Trigger 6 of the outbox's six: the push woke this worker, and that is the
+    // only background execution iOS offers.
+    await drainOutbox().catch(() => {});
+  })());
+});
+
+// The tap. `event.action` is 'done' when the notification's own button was
+// used, which happens on a Mac; on iOS there is no button and the body's tap
+// opens the reminders screen, where the same endpoint sits behind a 48 px
+// control. One endpoint, two routes to it.
+self.addEventListener('notificationclick', (event) => {
+  const data = event.notification.data || {};
+  const url = typeof data.url === 'string' ? data.url : '/';
+  const itemIds = Array.isArray(data.itemIds) ? data.itemIds : [];
+  const closing = event.action === 'done' && itemIds.length > 0;
+  event.notification.close();
+
+  event.waitUntil((async () => {
+    if (closing) await closeItems(itemIds);
+    const open = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    const already = open.find((client) => client.url.includes(url));
+    if (already) return already.focus();
+    return self.clients.openWindow(url);
   })());
 });

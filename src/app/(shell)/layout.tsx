@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { DeviceReport } from '@/components/DeviceReport';
 import { PrecacheDemonstrations } from '@/components/PrecacheDemonstrations';
+import { PushLaunchCheck } from '@/components/PushLaunchCheck';
 import { TabBar } from '@/components/TabBar';
 import { readCsrfToken } from '@/lib/csrf';
 import { mintLaunchTicket } from '@/lib/launch-ticket';
@@ -45,6 +46,15 @@ export default async function ShellLayout({ children }: { children: React.ReactN
         proven live, for the same reason the launch report is.
       */}
       <PrecacheDemonstrations />
+
+      {/*
+        * The re-read that stands in for `pushsubscriptionchange`, which iOS
+        * never fires. It hangs here beside the launch report for the same
+        * reason: a Home Screen launch opens the start URL, which is a screen
+        * under this layout, so every launch raises it. See
+        * src/components/PushLaunchCheck.tsx.
+        */}
+      <PushLaunchCheck csrfToken={csrfToken} />
     </div>
   );
 }
