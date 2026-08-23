@@ -4,10 +4,13 @@ import { describe, expect, it } from 'vitest';
 import {
   BANNED_PHRASES,
   BANNED_STEMS,
+  argumentTuples,
   explanationFaults,
   missingStatements,
   normaliseForScan,
+  renderTemplates,
   scanForBannedPhrases,
+  templateKeys,
 } from '@/lib/compliance';
 import { formatNumber } from '@/lib/format';
 import { BUILT_IN_ANALYTES, renderExplanation } from '@/lib/labs';
@@ -168,5 +171,99 @@ describe('the intended-purpose statement', () => {
       'not-a-medical-device',
     );
     expect(missingStatements('')).toHaveLength(5);
+  });
+});
+
+/**
+ * The walk itself, and the hole a verifier found in it on 23 August 2026.
+ *
+ * `npm run compliance` rendered the five parts `renderExplanation` returns, for
+ * the thirteen catalogued analytes. All thirteen publish both bounds, so
+ * `explanation.between` rendered thirteen times and `below`, `above` and
+ * `unstated` rendered never. `heading` is not one of the returned parts, so it
+ * rendered never either. A banned sentence planted in `unstated` left the check
+ * at exit 0, which is the twelfth instance of this run's one failure class and
+ * the first one inside a checker. These tests grade the WALK rather than the
+ * copy, because the copy was never the thing that failed.
+ */
+describe('the template walk R2 rests on', () => {
+  it('covers every leaf of the labs catalogue, and prints what it covered', () => {
+    // WHAT WOULD MAKE THIS RED: a walk that skips template functions, or one
+    // subtree, or an object nested inside another. Any of those leaves a
+    // template in the catalogue and outside the population, which is how
+    // `explanation.unstated` sat unread while the check reported zero.
+    const population = templateKeys(strings.labs, 'labs');
+    const { walked, unrenderable } = renderTemplates(strings.labs, 'labs');
+    const covered = new Set(walked.map((line) => line.key));
+    const missing = population.filter((name) => !covered.has(name));
+    console.log(
+      `compliance: ${population.length} labs templates, ${walked.length} renderings, ` +
+        `${missing.length} uncovered, ${unrenderable.length} unrenderable`,
+    );
+    expect(population.length).toBeGreaterThanOrEqual(130);
+    expect(missing).toEqual([]);
+    expect(unrenderable).toEqual([]);
+  });
+
+  it('renders both sides of a template that branches on its argument', () => {
+    // WHAT WOULD MAKE THIS RED: calling each template once. `panelStored(1)`
+    // says "1 value stored" and `panelStored(2)` says "2 values stored", and a
+    // walk that only ever passed one number reads one of those two and reports
+    // a clean run over the other.
+    const singular = strings.labs.panelStored(1);
+    const plural = strings.labs.panelStored(2);
+    expect(singular).not.toBe(plural);
+    const { walked } = renderTemplates({ panelStored: strings.labs.panelStored });
+    const rendered = walked.map((line) => line.rendered);
+    expect(rendered).toContain(singular);
+    expect(rendered).toContain(plural);
+    expect(argumentTuples(2)).toHaveLength(25);
+    expect(argumentTuples(0)).toEqual([[]]);
+  });
+
+  it('finds a banned sentence planted in the template a verifier planted in', () => {
+    // WHAT WOULD MAKE THIS RED: the walk going back to rendering only the
+    // branches today's catalogue happens to reach. The sentence below is the
+    // one the verifier used, character for character.
+    const planted = 'Your result is abnormal and you should see a doctor.';
+    for (const name of ['unstated', 'heading', 'below', 'above', 'between']) {
+      const subtree = { ...strings.labs.explanation, [name]: () => planted };
+      const { walked } = renderTemplates(subtree, 'labs.explanation');
+      const caught = walked
+        .filter((line) => scanForBannedPhrases(line.rendered).length > 0)
+        .map((line) => line.key);
+      expect(caught, `planted in labs.explanation.${name}`).toContain(`labs.explanation.${name}`);
+    }
+    // And the unplanted catalogue is clean, so the loop above is not passing on
+    // a walk that flags everything it reads.
+    const { walked } = renderTemplates(strings.labs.explanation, 'labs.explanation');
+    expect(walked.filter((line) => scanForBannedPhrases(line.rendered).length > 0)).toEqual([]);
+    expect(templateKeys(strings.labs.explanation)).toHaveLength(9);
+  });
+
+  it('takes all four context branches of the shipped renderer', () => {
+    // WHAT WOULD MAKE THIS RED: an analyte with no published range rendering
+    // anything other than `unstated`. /api/labs/row writes exactly that analyte
+    // every time the owner adds a fourteenth one, so the branch is on the
+    // shipped path and not a hypothetical.
+    const analyte = BUILT_IN_ANALYTES.find((entry) => entry.key === 'ferritin')!;
+    const label = (strings.metrics as Record<string, string>)[analyte.key];
+    const copy = strings.labs.explanation;
+    const low = formatNumber(analyte.referenceLow!, analyte.unit);
+    const high = formatNumber(analyte.referenceHigh!, analyte.unit);
+    const shapes = [
+      [{ ...analyte }, copy.between(label, low, high, analyte.unit)],
+      [{ ...analyte, referenceLow: null }, copy.below(label, high, analyte.unit)],
+      [{ ...analyte, referenceHigh: null }, copy.above(label, low, analyte.unit)],
+      [{ ...analyte, referenceLow: null, referenceHigh: null }, copy.unstated(label)],
+    ] as const;
+    const taken: string[] = [];
+    for (const [variant, expected] of shapes) {
+      const explanation = renderExplanation(variant, label, formatNumber, copy);
+      expect(explanation.context).toBe(expected);
+      taken.push(explanation.context);
+    }
+    console.log(`compliance: four reference shapes rendered for ferritin: ${taken.join(' | ')}`);
+    expect(new Set(taken).size).toBe(4);
   });
 });
