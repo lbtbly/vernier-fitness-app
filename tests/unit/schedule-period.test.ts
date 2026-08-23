@@ -130,6 +130,55 @@ describe('the Sunday period, in Paris local time', () => {
   });
 });
 
+describe('the week the screen reads back', () => {
+  test('is the same one the job claimed, from Sunday evening to Sunday evening', async () => {
+    // The screen and the job compute this from one function. `mondayOf(today)`
+    // is right at 20:45 on a Sunday and wrong every other hour of the week: on
+    // the Monday after, it names the week that has just started and has nothing
+    // in it, and the proposal block then looks at the week after next and finds
+    // no sessions, because slice 8 proposes for the Monday that is coming.
+    const { reviewedWeekOf } = await import('@/db/weekly-review');
+    const walked: string[] = [];
+    for (const at of [
+      '2026-08-23T20:45:00+02:00',
+      '2026-08-23T23:59:00+02:00',
+      '2026-08-24T09:00:00+02:00',
+      '2026-08-26T13:00:00+02:00',
+      '2026-08-29T18:00:00+02:00',
+      '2026-08-30T19:59:00+02:00',
+    ]) {
+      const week = reviewedWeekOf(new Date(at), ZONE);
+      walked.push(`${at} -> ${week}`);
+      expect(week).toBe('2026-08-17');
+    }
+    console.log(walked.join('\n'));
+    expect(walked).toHaveLength(6);
+
+    // And the moment the next Sunday's 20:00 arrives, it moves on by exactly
+    // one week and not by one day.
+    expect(reviewedWeekOf(new Date('2026-08-30T20:00:00+02:00'), ZONE)).toBe('2026-08-24');
+  });
+
+  test('the next week it proposes for is the one slice 8 proposes for', async () => {
+    const { reviewedWeekOf } = await import('@/db/weekly-review');
+    const { upcomingWeekStart } = await import('@/db/training');
+    // At the moment the review is generated, which is the moment that matters:
+    // the block on screen names the week the training proposer just filled.
+    for (const at of ['2026-08-23T20:45:00+02:00', '2026-10-25T20:45:00+01:00']) {
+      const reviewed = reviewedWeekOf(new Date(at), ZONE);
+      const proposesFor = dayAfterKey(reviewed, 7);
+      const theirs = upcomingWeekStart(new Date(at), ZONE);
+      console.log(`${at}: review proposes for ${proposesFor}, training proposes for ${theirs}`);
+      expect(proposesFor).toBe(theirs);
+    }
+  });
+});
+
+/** Whole days on a label, the same arithmetic `dayAfter` does. */
+function dayAfterKey(from: string, ahead: number): string {
+  return new Date(Date.parse(`${from}T00:00:00Z`) + ahead * 86_400_000).toISOString().slice(0, 10);
+}
+
 describe('what a boot owes', () => {
   test('a container down across Sunday owes exactly one period', () => {
     // Booting on the Tuesday after a Sunday it missed.

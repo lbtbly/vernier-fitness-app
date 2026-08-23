@@ -9,7 +9,8 @@ import { readListForPlan } from './shopping';
 import { readProposals } from './training';
 import { readFreshness, readTrends } from './trends';
 import { getConfig } from '@/lib/config';
-import { dayAfter, instantOnDay, localDayKey, mondayOf } from '@/lib/local-time';
+import { dayAfter, instantOnDay } from '@/lib/local-time';
+import { WEEKLY_REVIEW_SCHEDULE, reviewedWeekStart, weeklyPeriodKey } from '@/lib/schedule';
 import { dailySeries } from '@/lib/trend';
 import {
   type ProposalBlockId,
@@ -37,9 +38,24 @@ export const WEEKLY_REVIEW_JOB = 'weekly_review';
 
 export type WeeklyReviewRow = typeof weeklyReview.$inferSelect;
 
-/** The Monday of the week a Sunday-evening review looks back at. */
+/**
+ * The Monday of the week the review reads back, and it is READ OFF THE SAME
+ * PERIOD KEY THE JOB CLAIMS rather than off today's calendar.
+ *
+ * `mondayOf(today)` is right at 20:45 on a Sunday and wrong every other hour of
+ * the week. On the Monday morning after, it names the week that has just
+ * started and has nothing in it yet, so the screen would read back an empty
+ * week while the ledger row for the week just lived sat beside it. Worse, the
+ * proposal block would look at the week after next and find no sessions,
+ * because slice 8 proposes for the Monday that is coming.
+ *
+ * Reading it off `weeklyPeriodKey` gives the week the last Sunday 20:00 covered
+ * and gives the same answer from Sunday evening until the next Sunday evening,
+ * which is what a summary of a week is. The screen and the job cannot disagree,
+ * because they compute it the same way from the same function.
+ */
 export function reviewedWeekOf(now: Date, timeZone: string): string {
-  return mondayOf(localDayKey(now, timeZone), timeZone);
+  return reviewedWeekStart(weeklyPeriodKey(now, WEEKLY_REVIEW_SCHEDULE, timeZone), timeZone);
 }
 
 /** Seven day keys, Monday first. */
