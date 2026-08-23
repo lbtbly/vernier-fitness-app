@@ -327,6 +327,26 @@ export const measurement = pgTable(
     sourceRecordId: text('source_record_id')
       .notNull()
       .references(() => sourceRecord.id),
+    /**
+     * The identifier the origin gave this measure, when it gave one. Null on
+     * everything the owner typed, because a tape measure has no identifier.
+     *
+     * Withings writes `grpid:type` here, and the unique index below is what
+     * makes the same measure arriving a second time an insert that does
+     * nothing rather than a second row. It CANNOT be an upsert: the trigger
+     * above refuses UPDATE, and `INSERT ... ON CONFLICT DO UPDATE` fires the
+     * same trigger. `.forge/AMENDMENTS.md` A1 records the ruling. A re-import
+     * that disagrees appends a correction or raises a question, and both carry
+     * their own key qualified by the modification instant that produced them,
+     * so running the same import twice is a no-op at both levels.
+     */
+    externalKey: text('external_key'),
+    /**
+     * The `modified` this row was written from, in unix seconds. It is what
+     * "arriving with a newer modification time" is read against, and a column
+     * beats parsing it back out of a key.
+     */
+    externalModified: bigint('external_modified', { mode: 'number' }),
     rootId: text('root_id').notNull(),
     correctsId: text('corrects_id'),
     correctionIndex: integer('correction_index').notNull().default(0),
