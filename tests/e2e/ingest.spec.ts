@@ -148,7 +148,21 @@ test('F52. the credential is shown once, stored as a hash, and never rendered ag
   expect(hash).not.toContain(token);
   expect(stored).not.toContain(token);
   expect(stored).not.toContain(secret);
-  expect(live).toBe('t');
+  /*
+   * 'true', not 't'.
+   *
+   * `psql -At` prints a bare boolean column as `t`, and that is what this line
+   * asserted. The statement above does not select a bare boolean: it
+   * concatenates `live` into text, and Postgres's boolean output function
+   * writes 'true'. So this compared 't' against 'true' and had never once been
+   * satisfiable. It is the FIRST test in a serial file, so the thirteen behind
+   * it were skipped, and the whole slice-6 end-to-end suite had never executed.
+   *
+   * It goes red if the credential is stored dead. `live` is the column the
+   * revocation test below flips, and F52 rests on a credential that is live
+   * when it is minted and refused after it is revoked.
+   */
+  expect(live).toBe('true');
 
   // And nowhere in the reloaded screen, which is the claim "shown once" makes.
   await page.reload();
@@ -642,7 +656,14 @@ test('F52. a revoked credential is refused on the very next request', async ({ p
     "select key_id || ' revoked_at=' || coalesce(revoked_at::text, 'never') || ' live=' || live from ingest_credential",
   );
   console.log(`F52  the row after revocation: ${revoked}`);
-  expect(revoked).toContain('live=f');
+  /*
+   * The whole word. `live=f` is a prefix of `live=false` and would have been
+   * satisfied by either spelling, which is the same confusion between psql's
+   * display of a bare boolean and Postgres's own text cast that made the
+   * minting test above unsatisfiable. Naming the value in full means this can
+   * only be read one way.
+   */
+  expect(revoked).toContain('live=false');
   expect(revoked).not.toContain('revoked_at=never');
 
   const after = postScratchIngest({ token, secret, nonce: 'f52-after-revoke' });

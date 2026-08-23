@@ -634,7 +634,7 @@ export function QuickLog({
 
           {justLogged.state === 'applied' || justLogged.state === 'tooLate' ? (
             <div className="actions">
-              <Link className="btn grow" href={`/value/${justLogged.values[0].id}`}>
+              <Link prefetch={false} className="btn grow" href={`/value/${justLogged.values[0].id}`}>
                 {strings.todayLog.correct}
                 <ChevronIcon className="ch" />
               </Link>

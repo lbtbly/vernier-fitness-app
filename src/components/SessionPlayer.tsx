@@ -655,7 +655,7 @@ export function SessionPlayer({
           <div className="card" data-state="saved" style={{ marginTop: 'var(--s3)' }}>
             <p className="sub">{strings.player.savedNote}</p>
             <div className="actions">
-              <Link className="btn block" href="/train">
+              <Link prefetch={false} className="btn block" href="/train">
                 {strings.trainWeek.back}
               </Link>
             </div>
@@ -691,7 +691,7 @@ export function SessionPlayer({
   return (
     <div className="player" data-phase={phase}>
       <div className="hdr">
-        <Link className="btn icon" href="/train" aria-label={strings.player.leave}>
+        <Link prefetch={false} className="btn icon" href="/train" aria-label={strings.player.leave}>
           <CloseIcon />
         </Link>
         <div className="grow stack">

@@ -136,9 +136,39 @@ test('F59. accepting one row stores one row, and no control commits a panel', as
   console.log(`F59  ${labels.length} controls on the screen`);
   expect(labels.filter((label) => /save \d+ rows|accept all|save all/i.test(label))).toEqual([]);
 
-  // Row 3 of the panel, saved on its own control.
-  const third = page.locator('[data-row]').nth(2);
+  /*
+   * ROW 3 OF THE PANEL, BY ITS ORDINAL AND NOT BY ITS PLACE ON THE SCREEN.
+   *
+   * F59 names row 3 of a twenty-two row panel. This read `.nth(2)`, the third
+   * `[data-row]` in document order, and the screen is not in panel order: it
+   * groups the rows into what needs the owner's eyes, what read cleanly and
+   * what he has already decided, blocked first. `.nth(2)` landed on Ferritine,
+   * ordinal 11, inside the blocked group, whose accept control is DISABLED
+   * until the owner answers what is wrong with it. That is the product doing
+   * exactly what F62 asks; the test then waited sixty seconds for a button that
+   * is meant not to be pressable and took the whole serial file down with it.
+   *
+   * Row 3 is the LDL line, which reads cleanly and is savable, and
+   * tests/unit/lab-review.test.ts asserts that independently of this walk.
+   *
+   * The census below is what stops this becoming a guess again: it prints which
+   * ordinals are blocked and asserts row 3 is not one of them, so a change that
+   * blocks it fails here with a sentence instead of timing out on a click.
+   */
+  const blockedOrdinals = await page
+    .locator('[data-row][data-blocked="true"]')
+    .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-row') ?? ''));
+  const onScreen = await page
+    .locator('[data-row]')
+    .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-row') ?? ''));
+  console.log(`F59  ordinals on screen in document order: ${onScreen.join(', ')}`);
+  console.log(`F59  ordinals the product blocks until the owner answers: ${blockedOrdinals.join(', ')}`);
+  expect(onScreen).toContain('3');
+  expect(blockedOrdinals).not.toContain('3');
+
+  const third = page.locator('[data-row="3"]');
   const ordinal = await third.getAttribute('data-row');
+  await expect(third.locator('button.ok')).toBeEnabled();
   await clickWhenLive(third.locator('button.ok'));
   await expect(third).toHaveAttribute('data-decision', 'saved', { timeout: 30_000 });
 

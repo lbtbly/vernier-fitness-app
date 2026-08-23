@@ -21,6 +21,19 @@ test.describe('the route table', () => {
     expect(table).toMatch(/GET {2}\/settings\s+protected\s+307\s+refused/);
     expect(table).toMatch(/GET {2}\/healthz\s+public\s+200\s+open/);
     expect(table).toMatch(/POST \/api\/auth\/password\s+gate\s+403\s+refused/);
+
+    // The bytes under public/, graded by the same classifier as the routes.
+    //
+    // The shell answers: the worker is what an offline phone asks for before it
+    // has a session to present. The movement demonstrations do not: they are
+    // product content, `src/lib/routes.ts` leaves them protected, and F14 says
+    // everything but the sign-in page, liveness and the shell needs a session.
+    // Pinned here so a later slice that widens PUBLIC_PREFIXES to '/movements/'
+    // turns this red instead of quietly opening forty-four files to anyone who
+    // can reach the tailnet.
+    expect(table).toMatch(/GET {2}\/sw\.js\s+public\s+200\s+open/);
+    expect(table).toMatch(/GET {2}\/icons\/[^\s]+\s+public\s+200\s+open/);
+    expect(table).toMatch(/GET {2}\/movements\/push-up\.svg\s+protected\s+307\s+refused/);
   });
 
   test('a document redirects and an API path answers 401', async ({ page }) => {

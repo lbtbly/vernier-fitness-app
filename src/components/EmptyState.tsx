@@ -24,7 +24,7 @@ export function EmptyState({
       <div className="head">{title}</div>
       <p className="sub">{body}</p>
       <div className="actions">
-        <Link className="btn primary block" href={actionHref}>
+        <Link prefetch={false} className="btn primary block" href={actionHref}>
           {actionLabel}
         </Link>
       </div>

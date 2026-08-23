@@ -167,14 +167,60 @@ test.describe('F72, the proposed week', () => {
   test('no control on this screen commits the whole week', async ({ page }) => {
     await openTrain(page);
     await ensureWeek(page);
+    /*
+     * EVERY CONTROL, READ BY ITS NAME AND NOT BY ITS TEXT.
+     *
+     * This walked `textContent` and dropped everything that came back empty,
+     * and screen 06's decision controls are icon buttons: Accept, Edit and
+     * Reject carry an svg and an `aria-label` and no text node at all. So the
+     * population it counted was three, against a floor of four, and it failed
+     * on a screen carrying thirteen controls. Worse than the count: a control
+     * labelled only `aria-label="Accept all"` was invisible to the loop below,
+     * which is the one thing this test exists to catch. A check that cannot see
+     * the defect it is aimed at is not a check.
+     *
+     * The name is what a person and a screen reader both get, so the name is
+     * what is read: the text if there is any, and the spoken label if there is
+     * not.
+     */
     const labels = await page
-      .locator('button, a[role=button], input[type=submit]')
-      .evaluateAll((nodes) => nodes.map((node) => (node.textContent ?? '').trim()).filter(Boolean));
-    console.log(`controls on screen 06: ${labels.join(' | ')}`);
+      .locator('button, a, input[type=submit]')
+      .evaluateAll((nodes) =>
+        nodes
+          .map(
+            (node) =>
+              (node.textContent ?? '').trim() ||
+              (node.getAttribute('aria-label') ?? '').trim() ||
+              (node.getAttribute('title') ?? '').trim() ||
+              (node.getAttribute('value') ?? '').trim(),
+          )
+          .filter(Boolean),
+      );
+    console.log(`controls on screen 06: ${labels.length}, named: ${labels.join(' | ')}`);
     expect(labels.length).toBeGreaterThan(4);
     for (const label of labels) {
       expect(label).not.toMatch(/accept all|approve the week|confirm all|apply all|accept week/i);
     }
+
+    // And the decisions are per row, which is the other half of the clause.
+    // Every row carries its own accept, edit and reject, and nothing carries a
+    // fourth that would speak for the rest of them: the count of decision
+    // controls is three times the count of rows, exactly, on any week.
+    const proposals = await page.locator('[data-proposal]').count();
+    const decisions = await page.locator('[data-proposal] [data-decision]').count();
+    // Walked in the page rather than written as a `:not()` with a complex
+    // selector inside it, which is a Selectors Level 4 feature and not
+    // something to bet a rubric line on across two engines.
+    const outside = await page
+      .locator('[data-decision]')
+      .evaluateAll((nodes) => nodes.filter((node) => node.closest('[data-proposal]') === null).length);
+    console.log(
+      `${proposals} row(s) carrying ${decisions} decision control(s), ` +
+        `and ${outside} decision control(s) outside any row`,
+    );
+    expect(proposals).toBeGreaterThan(0);
+    expect(decisions).toBe(proposals * 3);
+    expect(outside).toBe(0);
   });
 });
 

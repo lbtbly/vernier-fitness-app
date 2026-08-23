@@ -299,41 +299,41 @@ describe('the suite against the owner\'s installation', () => {
    *                           lines above, and it closing is what puts Undo and
    *                           Edit back in the accessibility tree.
    *   notices.spec.ts:705     REAL. The scroll offset again, and F27 turns on it.
-   *   ingest.spec.ts:178      REAL. `duplicates` is a field of the route's own
+   *   ingest.spec.ts:192      REAL. `duplicates` is a field of the route's own
    *                           answer, on the first arrival of a batch into an
    *                           emptied table, and the `accepted` count beside it
    *                           is asserted equal to the fixture's own row count.
    *                           A zero here is the claim that nothing was already
    *                           stored, over a population the same line prints.
-   *   ingest.spec.ts:205      REAL. `accepted` on the second, third and fourth
+   *   ingest.spec.ts:219      REAL. `accepted` on the second, third and fourth
    *                           run of an overlapping window. `duplicates` is
    *                           asserted greater than zero on the same response,
    *                           and the row counts before and after all four runs
    *                           are printed and compared. A run that had reached
    *                           nothing at all would fail on the duplicates.
    *   notices.spec.ts:583     REAL. The scroll offset again, and F27 turns on it.
-   *   nutrition:148, 179      REAL. `[data-card="preview"]` is drawn by the very
+   *   nutrition:150, 181      REAL. `[data-card="preview"]` is drawn by the very
    *                           same component whenever the verdict is `allowed`,
    *                           and the same locator is asserted VISIBLE two tests
    *                           earlier and again three lines later, after the
    *                           compliant rate is accepted. Its absence is the
    *                           whole of the refusal.
-   *   nutrition:152           REAL. `[data-control="confirm-below-floor"]` is a
+   *   nutrition:154           REAL. `[data-control="confirm-below-floor"]` is a
    *                           control this component really renders, on the
    *                           blocked card, and the test below asserts it
    *                           VISIBLE there. Asserting it absent on the
    *                           rate-refusal card is the line: a refused rate has
    *                           no confirmation that unlocks it and a blocked
    *                           floor does.
-   *   nutrition:183           REAL. A count of target rows, taken after a walk
+   *   nutrition:185           REAL. A count of target rows, taken after a walk
    *                           that typed a whole body into the form and got a
    *                           block, and the test above it stores a row through
    *                           the same screen and asserts the count is 1.
-   *   nutrition:396           REAL. F84's zero, and the same console line prints
+   *   nutrition:398           REAL. F84's zero, and the same console line prints
    *                           the ingredient lines walked and the shellfish
    *                           recipes the catalogue holds, both asserted above
    *                           zero on every generation.
-   *   shopping:206            REAL. `.boxtap` is the tick control every bought
+   *   shopping:208            REAL. `.boxtap` is the tick control every bought
    *                           line on that screen renders, and the same test
    *                           asserts the deducted row itself visible with its
    *                           quantity struck through. A deducted line has
@@ -341,21 +341,21 @@ describe('the suite against the owner\'s installation', () => {
    *                           and the row is not.
    *   suite-privilege:67      REAL. Every refused statement is printed with the
    *                           answer Postgres gave it.
-   *   withings.spec.ts:108    REAL. Rows whose source is not `demo`, counted
+   *   withings.spec.ts:109    REAL. Rows whose source is not `demo`, counted
    *                           over a table the same three lines print the whole
    *                           source census of. A hundreds-strong population is
    *                           asserted immediately above it.
-   *   withings.spec.ts:188    REAL. The blood pressure probe row, counted after
+   *   withings.spec.ts:229    REAL. The blood pressure probe row, counted after
    *                           an INSERT the same test printed the refusal of.
    *                           The zero is the constraint holding, and the
    *                           constraint's own message is asserted beside it.
-   *   withings.spec.ts:250    REAL. `.skel` is drawn by the Withings card and
+   *   withings.spec.ts:294    REAL. `.skel` is drawn by the Withings card and
    *                           by the shell's loading state, on the screens being
    *                           walked, and the render time is printed beside it.
-   *   withings.spec.ts:324    REAL. Open questions, counted after the same test
+   *   withings.spec.ts:410    REAL. Open questions, counted after the same test
    *                           asserted exactly one open and then answered it
    *                           through the shipped control.
-   *   withings.spec.ts:336    REAL. The notice region on Today draws this line,
+   *   withings.spec.ts:422    REAL. The notice region on Today draws this line,
    *                           and the same test watched it appear on the settings
    *                           card before the answer closed it.
    *   labs-scratch:109        REAL. The review holding is counted non-zero
@@ -368,11 +368,11 @@ describe('the suite against the owner\'s installation', () => {
    *                           fails before either filter is reached. What is
    *                           being defended is that NO control on a screen full
    *                           of controls writes more than one row.
-   *   labs-scratch:339,340    REAL. The refusal branch of F65, and both zeros
+   *   labs-scratch:369,370    REAL. The refusal branch of F65, and both zeros
    *                           sit under an `expect(refused).toBeVisible()` that
    *                           proves the surface rendered the refusal. The
    *                           population is the upload that was just made.
-   *   labs-scratch:511        REAL. It filters a list of every visible control
+   *   labs-scratch:541        REAL. It filters a list of every visible control
    *                           on the screen, and the rows and control groups are
    *                           counted and printed at each of three viewports on
    *                           the lines above.
@@ -381,11 +381,11 @@ describe('the suite against the owner\'s installation', () => {
    *   Slice 8 added three files and every member of the class in them was read
    *   against the same question before it was written down here.
    *
-   *   console-walk:154        REAL. The outbox depth out of IndexedDB, after a
+   *   console-walk:168        REAL. The outbox depth out of IndexedDB, after a
    *                           quick-log write and two logged sets the same test
    *                           watched land. The queue was demonstrably not
    *                           empty a moment earlier.
-   *   console-walk:172,173    REAL. C9's two zeros, and the run prints the
+   *   console-walk:186,187    REAL. C9's two zeros, and the run prints the
    *                           surfaces it walked, the requests it saw and the
    *                           responses it counted beside them, with a floor
    *                           asserted on each so an empty walk fails.
@@ -399,13 +399,27 @@ describe('the suite against the owner\'s installation', () => {
    *                           the player, which draws a `role=dialog` sheet of
    *                           its own two tests earlier: the surface can render
    *                           the subject and does.
-   *   train-week:284          REAL. The squat's absence from the progression
+   *   train-week:330          REAL. The squat's absence from the progression
    *                           cards, on a screen that renders the push-up's
    *                           card in the assertion two lines above it. The
    *                           seeded histories are printed first.
-   *   train-week:409,432      REAL. Rows the two refusal probes left behind,
+   *   train-week:455,478      REAL. Rows the two refusal probes left behind,
    *                           counted after Postgres printed its refusal, on a
    *                           table the same file lists thirty rows of.
+   *
+   *   The suite-stabilising dispatch added one, and it was read against the
+   *   same question before it was written down here. The line numbers of every
+   *   member above were re-read off the files in the same pass, because a
+   *   pointer into the wrong line is worse than no pointer at all.
+   *
+   *   train-week:223          REAL. Decision controls that sit outside any
+   *                           proposal row, on a screen whose rows and controls
+   *                           are both counted and printed on the two lines
+   *                           above it and asserted to be three per row. The
+   *                           surface renders `[data-decision]` thirteen times
+   *                           on a four-session week, so a zero here is the
+   *                           claim that none of them escaped its card and not
+   *                           the claim that the screen was empty.
    */
   it('lets no assertion claim a zero over a population the surface cannot render', () => {
     // The one that was hollow. It is gone from /health and present on Today.
@@ -432,7 +446,7 @@ describe('the suite against the owner\'s installation', () => {
       ['shopping.spec.ts', 1],
       ['console-walk.spec.ts', 3],
       ['session-player.spec.ts', 2],
-      ['train-week.spec.ts', 3],
+      ['train-week.spec.ts', 4],
     ]);
     // `toHaveCount(0, { timeout: 3_000 })` was invisible to this pattern until
     // slice 5 wrote one: the closing paren was required right after the zero, so

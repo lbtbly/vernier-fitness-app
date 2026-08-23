@@ -51,7 +51,7 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
           <div className="head">{strings.player.errorTitle}</div>
           <p className="sub">{strings.player.errorBody}</p>
           <div className="actions">
-            <Link className="btn block" href="/train">
+            <Link prefetch={false} className="btn block" href="/train">
               {strings.trainWeek.back}
             </Link>
           </div>
@@ -69,7 +69,7 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
           <div className="head">{strings.player.notFoundTitle}</div>
           <p className="sub">{strings.player.notFoundBody}</p>
           <div className="actions">
-            <Link className="btn primary block" href="/train">
+            <Link prefetch={false} className="btn primary block" href="/train">
               {strings.trainWeek.back}
             </Link>
           </div>
@@ -87,7 +87,7 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
           <div className="head">{strings.player.emptyTitle}</div>
           <p className="sub">{strings.player.emptyBody}</p>
           <div className="actions">
-            <Link className="btn primary block" href="/train">
+            <Link prefetch={false} className="btn primary block" href="/train">
               {strings.trainWeek.back}
             </Link>
           </div>

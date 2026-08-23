@@ -79,7 +79,7 @@ export function NoticeRegion({ notices }: { notices: Notice[] }) {
       <div className="noticelines">
         {notices.map((notice) =>
           notice.href ? (
-            <Link className="noticeline" key={notice.id} data-notice={notice.id} href={notice.href}>
+            <Link prefetch={false} className="noticeline" key={notice.id} data-notice={notice.id} href={notice.href}>
               <span className="grow">{notice.lines.join(' ')}</span>
               <ChevronIcon className="ch" />
             </Link>

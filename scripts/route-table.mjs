@@ -120,8 +120,23 @@ for (const route of routes) {
   }
 }
 
-// The static shell: bytes served straight out of public/, named here so the
-// table covers everything the app answers and not only what src/app declares.
+// The bytes served straight out of public/, named here so the table covers
+// everything the app answers and not only what src/app declares.
+//
+// THEY ARE GRADED BY THE SAME CLASSIFIER AS EVERYTHING ELSE. This loop used to
+// assert 200 on every file under public/, on the reading that public/ IS the
+// static shell. That was true when public/ held a worker, a manifest, a favicon
+// and five icons. Slice 8 put forty-four movement demonstrations there, which
+// are product content and not shell, and `src/lib/routes.ts` classifies them
+// protected: the app redirected all forty-four to sign-in, correctly, and this
+// walk called every one of them a failure and exited 1.
+//
+// F14 names "the static shell" and routes.ts is where this repository says what
+// that is: PUBLIC_PATHS and PUBLIC_PREFIXES, reviewed one by one. So a file in
+// public/ is asked the same question as a route, and the answer is graded by
+// the same `verdictFor`. That is stricter than what it replaces rather than
+// looser: a movement gif answering 200 to a caller with no session is now a
+// FAIL, where before it was the only thing this loop would accept.
 async function enumerateStatic(dir = join(projectRoot, 'public'), prefix = '') {
   const found = [];
   for (const entry of await readdir(dir, { withFileTypes: true })) {
@@ -136,12 +151,18 @@ async function enumerateStatic(dir = join(projectRoot, 'public'), prefix = '') {
 
 console.log('');
 for (const path of (await enumerateStatic()).sort()) {
+  const routeClass = classifyRoute(path);
   const response = await fetch(`${baseUrl}${path}`, { redirect: 'manual' });
-  const open = response.status === 200;
-  if (!open) failures += 1;
+  const [verdict, why] = verdictFor(
+    routeClass,
+    response.status,
+    response.headers.get('location') || '',
+    response.headers.get('set-cookie') || '',
+  );
+  if (verdict === 'FAIL') failures += 1;
   checked += 1;
   console.log(
-    `GET  ${path.padEnd(44)} ${'shell'.padEnd(9)} ${String(response.status).padEnd(4)} ${(open ? 'open' : 'FAIL').padEnd(8)} static shell`,
+    `GET  ${path.padEnd(44)} ${routeClass.padEnd(9)} ${String(response.status).padEnd(4)} ${verdict.padEnd(8)} ${why}`,
   );
 }
 

@@ -76,6 +76,11 @@ export type DedupReason = {
     | 'otherWins'
     | 'firstOfDay'
     /**
+     * The owner writing by hand over something he wrote by hand earlier the
+     * same day. Not a duplicate and not a question: a second act.
+     */
+    | 'measuredAgain'
+    /**
      * The two an importer decides, which the quick log never can. A measure
      * that arrives with an identifier of its own is deduplicated on that
      * identifier rather than on the day it was taken, so its reason names the
@@ -467,6 +472,48 @@ export function decideDedup(incoming: IncomingValue, stored: StoredCandidate[]):
           incoming: incoming.rawValue,
           corrected: correction.rawValue,
         },
+      },
+    };
+  }
+
+  /*
+   * THE OWNER'S OWN HAND, TWICE ON ONE DAY, IS TWO ACTS AND NOT ONE DELIVERY.
+   *
+   * The clause below is right for every source that DELIVERS. An importer
+   * running twice over one window is the same fact arriving again, and slice 5
+   * found exactly that pair in demonstration mode, which is why it stopped
+   * asking whether the incoming source differed from the standing one.
+   *
+   * It is wrong for the one source that ACTS. A person who measured his waist
+   * at 99.0, read the tape again and typed 91.4 into the same sheet has not
+   * re-delivered anything; he has said something new, through the only screen
+   * that says it. Dropped, his correction disappears while the sheet reports a
+   * save, and the stepper the quick log draws beside that field can never
+   * commit anything at all: every value it produces is a second manual reading
+   * on a day that already holds one. That is what the change above cost, and it
+   * is a regression against F23, which was ticked before it landed.
+   *
+   * THE SAME NUMBER TWICE NEVER REACHES HERE. Rule 1 drops the identical value
+   * from the same source on the same day, so a double tap on Save is still one
+   * row. Only a DIFFERENT number, typed by hand, over a hand-typed one, stores.
+   * The table appends, so both readings stay readable, and `compareStanding`
+   * gives the day to the later of them.
+   *
+   * It is deliberately narrow: both sides have to be `manual`. A hand-typed
+   * weight still loses to the scale's reading of the same morning, which is
+   * what PRECEDENCE says and what F36 rests on.
+   */
+  const standingByHand = whatStands(
+    [...heads.values()].filter((row) => row.source === 'manual'),
+    incoming.timeZone,
+  );
+  if (incoming.source === 'manual' && standingByHand) {
+    return {
+      decision: 'kept_over_duplicate',
+      store: true,
+      reason: {
+        key: 'measuredAgain',
+        params: { value: standingByHand.rawValue },
       },
     };
   }
