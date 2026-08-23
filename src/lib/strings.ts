@@ -461,6 +461,9 @@ export const strings = {
         'The identifier of the calendar this app created is missing, and there is no way to look it up again. Nothing was written and no second calendar was made. Disconnect and connect again to create one.',
       noRows: 'Nothing was selected.',
       noRowsDetail: 'Tick at least one change, or leave the screen. Nothing was written.',
+      calendarNotEmpty: 'That calendar still holds events this app wrote.',
+      calendarNotEmptyDetail:
+        'Undo those first, one at a time, and then this. Nothing was changed, and no event was deleted along the way.',
       unknownWrite: 'That write is not in the log.',
       unknownWriteDetail: 'Nothing was undone.',
       alreadyUndone: 'That write has been undone already.',
@@ -2038,6 +2041,8 @@ export const strings = {
       state_mismatch:
         'The value that came back from Google is not the one this app sent. The round trip was refused and nothing was stored.',
       no_code: 'Google came back with no authorisation code, so there was nothing to exchange.',
+      exchange_failed:
+        'The authorisation code did not exchange for a token. It is short lived, so the usual cause is a consent page that sat open for a while. Start again and nothing is lost.',
       missing_calendar:
         'The identifier of the calendar this app created is missing. There is no way to look it up again, and a second calendar is never made in its place. Disconnect and connect again.',
     },
@@ -2146,6 +2151,17 @@ export const strings = {
       sessionGone: (day: string, time: string) =>
         `Removed because the session on ${day} at ${time} is no longer in your training week.`,
     },
+
+    /**
+     * The first row of the first plan: the calendar itself.
+     *
+     * Creating it is an outbound write like any other, so it is confirmed like
+     * any other rather than happening quietly during connect. That is what makes
+     * "every outbound write is reachable only from a confirmation" true with no
+     * exception beside it.
+     */
+    createCalendarCause:
+      'This app has no calendar of its own yet. It creates one, and every event it ever writes goes there and nowhere else.',
 
     /* ---------------- what the diff surfaces rather than hides ---------------- */
     failureTitle: 'One calendar could not be read',

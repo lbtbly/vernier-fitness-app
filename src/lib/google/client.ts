@@ -24,11 +24,12 @@ import { type FreeBusyReading, readFreeBusy } from '@/lib/google/availability';
  * Withings.
  *
  * THE WRITE GUARD IS IN `callGoogle` AND NOWHERE ELSE. A request declares itself
- * a read or a write. A write carries a confirmation, and a confirmation can only
- * be minted by `confirmSelected` from a stored plan the owner ticked and
- * applied. `callGoogle` refuses a write without one BEFORE it touches the
+ * a read or a write. A write carries a confirmation, and a confirmation is
+ * minted in exactly two places: `confirmSelected`, from a stored plan the owner
+ * ticked and applied, and `confirmUndo`, from a stored write log row he pressed
+ * Undo on. `callGoogle` refuses a write without one BEFORE it touches the
  * transport, so "nothing writes before the diff is confirmed" is the shape of
- * the function rather than a rule four call sites remember to follow. Drive any
+ * the function rather than a rule five call sites remember to follow. Drive any
  * write site with the confirmation skipped and the transport is never called at
  * all, which is what `tests/unit/google-write-sites.test.ts` asserts, one site
  * at a time, printing the enumeration it walked.
@@ -135,6 +136,33 @@ export function confirmSelected(
       confirmedAt: now,
       proof: proofFor(plan.id, rowId),
     }));
+}
+
+/**
+ * The second and last way a confirmation is minted: an undo.
+ *
+ * An undo is a confirmation of its own. The owner is looking at a stored write
+ * log row, which is a record of something that really happened, and he presses
+ * Undo on that line. So the proof is taken over the stored write rather than
+ * over a plan row, and the two mints are the whole set: `confirmSelected` and
+ * this. Nothing else in this repository can produce the value `callGoogle`
+ * demands, which is what makes F110 a property of the code.
+ *
+ * It refuses a write that failed, because there is nothing to reverse, and a
+ * write that has already been undone, because reversing it twice would be a
+ * write the owner confirmed once.
+ */
+export type UndoableWrite = {
+  id: string;
+  outcome: string;
+  undoneByWriteId: string | null;
+};
+
+export function confirmUndo(write: UndoableWrite, now: Date): Confirmation | null {
+  if (write.outcome !== 'written') return null;
+  if (write.undoneByWriteId !== null) return null;
+  const planId = `undo:${write.id}`;
+  return { planId, rowId: write.id, confirmedAt: now, proof: proofFor(planId, write.id) };
 }
 
 export function isConfirmed(confirmation: Confirmation | null | undefined): boolean {

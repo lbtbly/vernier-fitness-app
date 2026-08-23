@@ -270,6 +270,18 @@ export function calendarsInsertUrl(): string {
   return `${CALENDAR_BASE}/calendars`;
 }
 
+/**
+ * DELETE the calendar this app created, by the stored identifier.
+ *
+ * It exists so that the creation of the calendar has an undo like every other
+ * write in the log. It cannot name any calendar but the stored one, and the
+ * service refuses it while events this app wrote are still in there.
+ */
+export function calendarUrl(calendarId: string): string {
+  const id = requireStoredCalendarId(calendarId);
+  return `${CALENDAR_BASE}/calendars/${encodeURIComponent(id)}`;
+}
+
 /** POST an event into the stored app calendar. */
 export function eventsInsertUrl(calendarId: string): string {
   const id = requireStoredCalendarId(calendarId);

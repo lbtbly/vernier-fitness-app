@@ -5,6 +5,7 @@ import {
   callGoogle,
 } from '@/lib/google/client';
 import {
+  calendarUrl,
   calendarsInsertUrl,
   eventUrl,
   eventsInsertUrl,
@@ -14,7 +15,7 @@ import {
  * EVERY OUTBOUND WRITE THIS PRODUCT CAN MAKE, IN ONE FILE, ENUMERATED.
  *
  * F110 and C14 are one risk stated twice: an event appearing in the owner's
- * calendar that he never approved. The control is that there are exactly four
+ * calendar that he never approved. The control is that there are exactly five
  * places a request with a side effect leaves this machine, they are all here,
  * every one of them goes through `callGoogle` with `kind: 'write'`, and
  * `callGoogle` refuses a write with no confirmation before it touches the
@@ -28,14 +29,15 @@ import {
  * write request, which is what makes the list complete rather than merely
  * accurate.
  *
- * ADDING A FIFTH WRITE MEANS ADDING IT HERE. There is nowhere else it can go:
- * the three URL builders it would need are exported from `protocol.ts` and used
- * nowhere but this file, and the confirmation type it would need is minted by
- * one function in `client.ts`.
+ * ADDING A SIXTH WRITE MEANS ADDING IT HERE. There is nowhere else it can go:
+ * the four URL builders it would need are exported from `protocol.ts` and used
+ * nowhere but this file, and the confirmation it would need is minted by two
+ * named functions in `client.ts` and by nothing else.
  */
 
 export type WriteSiteId =
   | 'calendars.insert'
+  | 'calendars.delete'
   | 'events.insert'
   | 'events.update'
   | 'events.delete';
@@ -123,6 +125,28 @@ export async function createAppCalendar(
   });
 }
 
+/**
+ * Remove the calendar this app created.
+ *
+ * The undo of `calendars.insert`, and it is here so that F108's claim holds
+ * without an exception: every past write in the log has an undo beside it. The
+ * service refuses this one while any event write in that calendar is still
+ * standing, because an undo that silently takes four other events with it is
+ * not an undo.
+ */
+export async function deleteAppCalendar(
+  ports: ClientPorts,
+  confirmation: Confirmation | null,
+  input: WriteInput,
+): Promise<GoogleAnswer> {
+  return callGoogle(ports, {
+    kind: 'write',
+    method: 'DELETE',
+    url: calendarUrl(input.calendarId),
+    confirmation,
+  });
+}
+
 export async function insertEvent(
   ports: ClientPorts,
   confirmation: Confirmation | null,
@@ -175,10 +199,17 @@ export async function deleteEvent(
 
 export const WRITE_SITES: readonly WriteSite[] = Object.freeze([
   { id: 'calendars.insert', method: 'POST', run: createAppCalendar },
+  { id: 'calendars.delete', method: 'DELETE', run: deleteAppCalendar },
   { id: 'events.insert', method: 'POST', run: insertEvent },
   { id: 'events.update', method: 'PUT', run: updateEvent },
   { id: 'events.delete', method: 'DELETE', run: deleteEvent },
 ]);
 
 /** The count this file declares it has, asserted by the test against the walk. */
-export const WRITE_SITE_COUNT = 4;
+export const WRITE_SITE_COUNT = 5;
+
+export function writeSite(id: WriteSiteId): WriteSite {
+  const site = WRITE_SITES.find((entry) => entry.id === id);
+  if (!site) throw new Error(`google_calendar: no write site named ${id}`);
+  return site;
+}

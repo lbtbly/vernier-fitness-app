@@ -12,6 +12,19 @@ export function longDate(date: Date, timeZone: string): string {
   }).format(date);
 }
 
+/**
+ * The weekday alone, "Thursday", in the app's zone.
+ *
+ * The calendar diff needs it because the cause the design sheet fixes reads
+ * "moved from Thursday because your calendar shows you busy 18:00 to 23:00",
+ * and a sentence naming the whole date there is longer to read than the row it
+ * explains. It is the same `en-GB` formatter every other shape in this file
+ * uses, so a pseudo-locale run and a timezone-shifted run both behave.
+ */
+export function weekdayName(date: Date, timeZone: string): string {
+  return new Intl.DateTimeFormat('en-GB', { weekday: 'long', timeZone }).format(date);
+}
+
 export function shortDate(date: Date, timeZone: string): string {
   return new Intl.DateTimeFormat('en-GB', {
     day: 'numeric',
