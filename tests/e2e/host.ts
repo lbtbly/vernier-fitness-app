@@ -72,16 +72,37 @@ export function query(statement: string): string {
   // One line, always. A statement written across several lines in a test would
   // reach psql with the newlines escaped, and psql would refuse it.
   const oneLine = statement.replace(/\s+/g, ' ').trim();
+  /*
+   * AND THE STATEMENT TRAVELS AS AN ENVIRONMENT VARIABLE, NOT AS SHELL TEXT.
+   *
+   * All five helpers in this file used to interpolate the SQL into the string
+   * `sh -c` runs, which means the shell read it before psql did. `$POSTGRES_USER`
+   * expanding is the point; every other dollar expanding is a silent rewrite of
+   * the query. F60 asks the whole database whether anything anywhere reads as a
+   * blood pressure, that walk needs a `do $$ ... $$` block, and what arrived at
+   * psql was `do 23542 declare ...`: the shell's own process id, twice, and a
+   * syntax error instead of an answer. The check had never once run.
+   *
+   * `-e SQL=...` hands docker the text as an argument, and `"$SQL"` inside the
+   * command expands it once. A parameter expansion is not re-scanned, so a
+   * dollar, a backtick or a semicolon inside a statement reaches Postgres as
+   * itself. scripts/recovery.sh already carries values into a container this
+   * way. The `psql -U` line stays word for word what it was, because
+   * tests/unit/suite-safety.test.ts reads these five lines to prove which role
+   * opens which database.
+   */
   return execFileSync(
     'docker',
     [
       'compose',
       'exec',
       '-T',
+      '-e',
+      `SQL=${oneLine}`,
       'db',
       'sh',
       '-c',
-      `PGOPTIONS='-c default_transaction_read_only=on' psql -U ${SUITE_ROLE} -d "$POSTGRES_DB" -At -c ${JSON.stringify(oneLine)}`,
+      `PGOPTIONS='-c default_transaction_read_only=on' psql -U ${SUITE_ROLE} -d "$POSTGRES_DB" -At -c "$SQL"`,
     ],
     { cwd: projectRoot, encoding: 'utf8' },
   ).trim();
@@ -140,12 +161,12 @@ export function forgetSuitePasskey(credentialId: string): string {
       'compose',
       'exec',
       '-T',
+      '-e',
+      `SQL=select suite_forget_passkey('${credentialId.replace(/'/g, "''")}')`,
       'db',
       'sh',
       '-c',
-      `psql -U ${SUITE_ROLE} -d "$POSTGRES_DB" -At -c ${JSON.stringify(
-        `select suite_forget_passkey('${credentialId.replace(/'/g, "''")}')`,
-      )} 2>&1`,
+      `psql -U ${SUITE_ROLE} -d "$POSTGRES_DB" -At -c "$SQL" 2>&1`,
     ],
     { cwd: projectRoot, encoding: 'utf8' },
   ).trim();
@@ -166,10 +187,12 @@ export function suiteAttempt(statement: string): string {
       'compose',
       'exec',
       '-T',
+      '-e',
+      `SQL=${oneLine}`,
       'db',
       'sh',
       '-c',
-      `psql -U ${SUITE_ROLE} -d "$POSTGRES_DB" -At -c ${JSON.stringify(oneLine)} 2>&1 || true`,
+      `psql -U ${SUITE_ROLE} -d "$POSTGRES_DB" -At -c "$SQL" 2>&1 || true`,
     ],
     { cwd: projectRoot, encoding: 'utf8' },
   ).trim();
@@ -258,10 +281,12 @@ export function scratchQuery(statement: string): string {
       'compose',
       'exec',
       '-T',
+      '-e',
+      `SQL=${oneLine}`,
       'db',
       'sh',
       '-c',
-      `psql -U "$POSTGRES_USER" -d vernier_scratch -At -c ${JSON.stringify(oneLine)}`,
+      `psql -U "$POSTGRES_USER" -d vernier_scratch -At -c "$SQL"`,
     ],
     { cwd: projectRoot, encoding: 'utf8' },
   ).trim();
@@ -296,10 +321,12 @@ export function scratchAttempt(statement: string): string {
       'compose',
       'exec',
       '-T',
+      '-e',
+      `SQL=${oneLine}`,
       'db',
       'sh',
       '-c',
-      `psql -U "$POSTGRES_USER" -d vernier_scratch -At -c ${JSON.stringify(oneLine)} 2>&1 || true`,
+      `psql -U "$POSTGRES_USER" -d vernier_scratch -At -c "$SQL" 2>&1 || true`,
     ],
     { cwd: projectRoot, encoding: 'utf8' },
   ).trim();
