@@ -273,6 +273,34 @@ export function testStackWithDemoMode(demoMode: '0' | '1', ...args: string[]): s
 }
 
 /**
+ * The scratch instance with the monthly language-model ceiling set on purpose.
+ *
+ * WHY THE DEFAULT COULD NOT STAY. scripts/test-stack.sh caps the scratch
+ * instance at 0.03 USD, chosen so the refusal arrives on the third call rather
+ * than after two thousand. tests/e2e/meals.spec.ts needs about a dozen calls
+ * before it ever reaches the test about the ceiling: an estimate for F93, two
+ * for F95 and F96, one for F97, four for the two recipes and two more for the
+ * takeaway slots. The fourth one was refused, F95 waited sixty seconds for an
+ * estimate the ceiling had stopped, and the five serial tests behind it never
+ * ran. Every one of them passed alone, which is how it stayed hidden.
+ *
+ * So the file raises the ceiling for itself and then lowers it, deliberately,
+ * under the test that grades the refusal. Lowering it is also STRONGER than the
+ * walk it replaces: instead of sending calls until one is refused and hoping
+ * eight is enough, the ceiling is put UNDER what the ledger has already spent
+ * and the very next call has nowhere to go.
+ *
+ * `up` rather than `reset`, so the ledger those calls wrote is still there.
+ */
+export function testStackWithAiCap(capUsd: string, ...args: string[]): string {
+  return execFileSync('bash', ['scripts/test-stack.sh', ...args], {
+    cwd: projectRoot,
+    encoding: 'utf8',
+    env: { ...process.env, ANTHROPIC_MONTHLY_CAP_USD: capUsd, DEMO_MODE: process.env.DEMO_MODE ?? '0' },
+  }).trim();
+}
+
+/**
  * The scratch instance started in a chosen Withings mode.
  *
  * F42 names four states the status screen has to show, and two of them,

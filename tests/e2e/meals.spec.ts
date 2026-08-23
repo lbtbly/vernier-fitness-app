@@ -5,7 +5,7 @@ import {
   projectRoot,
   scratchQuery,
   scratchSignInLink,
-  testStack,
+  testStackWithAiCap,
   waitForScratch,
 } from './host';
 import { scanJpeg } from '../../src/lib/jpeg';
@@ -24,8 +24,16 @@ import { strings } from '../../src/lib/strings';
  * THE SCRATCH INSTANCE RUNS ANTHROPIC IN DEMONSTRATION MODE WITH A RATE TABLE.
  * No key, so nothing leaves this machine. Rates, so a demonstration call is
  * priced and the ledger accumulates, which is the only way the monthly ceiling
- * can be shown refusing a call on an installation that has no key at all. The
- * cap is 0.03 USD, which the third call crosses.
+ * can be shown refusing a call on an installation that has no key at all.
+ *
+ * THE CEILING IS THIS FILE'S TO SET AND IT SETS IT TWICE. The stack script caps
+ * the scratch instance at 0.03 USD, which the third call crosses, and this file
+ * makes about a dozen before it reaches the test about the ceiling. The fourth
+ * was refused, F95 waited a minute for an estimate that had been stopped, and
+ * the five serial tests behind it never ran; every one of them passed alone.
+ * So beforeAll starts the instance with a ceiling no test here can reach, and
+ * F98 restarts it with one the ledger has ALREADY crossed, which is a stronger
+ * proof than sending calls until one bounces.
  *
  * WHAT WOULD MAKE THESE GO RED. The photograph test reads the STORED BYTES back
  * through the app's own route and scans them here, in the test process, rather
@@ -45,9 +53,14 @@ const VIEWPORTS = [
 
 test.describe.configure({ mode: 'serial' });
 
+/** Higher than every call this file makes, so nothing here is refused by cost. */
+const HEADROOM_USD = '5.00';
+/** Under what the file has spent by the time F98 runs, so the next call has nowhere to go. */
+const LOW_CEILING_USD = '0.0001';
+
 test.beforeAll(async () => {
   mkdirSync(CAPTURES, { recursive: true });
-  console.log(testStack('reset'));
+  console.log(testStackWithAiCap(HEADROOM_USD, 'reset'));
   await waitForScratch();
   await ensureScratchOwner();
 });
@@ -664,30 +677,43 @@ test('F98 the monthly ceiling refuses the call, and the ledger says so', async (
   await turnOnPhotoAnalysis(page);
 
   /*
-   * The scratch instance is capped at 0.03 USD with the demonstration priced at
-   * the rates in scripts/test-stack.sh. Earlier tests in this file have already
-   * spent some of it, so this walks until the refusal arrives rather than
-   * assuming which call it lands on, and prints every attempt.
+   * THE CEILING IS PUT UNDER WHAT HAS ALREADY BEEN SPENT.
+   *
+   * This used to send photographs until one bounced, up to eight of them, on an
+   * instance capped at 0.03 USD. That cap starved the five tests above this one
+   * instead, so the file now runs with headroom and the refusal is produced
+   * here, on purpose, by restarting the same instance with a ceiling the ledger
+   * has already crossed. `up` keeps the database, so the spend those tests
+   * wrote is the population this refusal is read against.
+   *
+   * It is the stronger walk. One call, one refusal, and the number that refused
+   * it is printed beside the number that was already spent.
    */
-  let refused = false;
-  for (let attempt = 1; attempt <= 8 && !refused; attempt += 1) {
-    await page.goto('/eat/estimate');
-    await page.waitForLoadState('networkidle');
-    await choosePhoto(page);
-    await page.locator('[data-action="send"]').click();
+  const spentBefore = scratchQuery(
+    "select round(sum(cost_usd)::numeric, 4) from usage_ledger where outcome = 'charged'",
+  );
+  console.log(`F98: ${spentBefore} USD charged this month before the ceiling is lowered`);
+  expect(Number(spentBefore)).toBeGreaterThan(0);
+  console.log(testStackWithAiCap(LOW_CEILING_USD, 'up'));
+  await waitForScratch();
+  await signIn(page);
+  await turnOnPhotoAnalysis(page);
 
-    const error = page.locator('.card.error[data-state="error"]');
-    const estimate = page.locator('[data-meal-estimate="estimate"]');
-    await Promise.race([
-      error.waitFor({ timeout: 30_000 }).catch(() => undefined),
-      estimate.waitFor({ timeout: 30_000 }).catch(() => undefined),
-    ]);
-    refused = await error.isVisible();
-    const spent = scratchQuery(
-      "select round(sum(cost_usd)::numeric, 4) from usage_ledger where outcome = 'charged'",
-    );
-    console.log(`F98: attempt ${attempt}, refused ${refused}, spent so far ${spent} USD`);
-  }
+  await page.goto('/eat/estimate');
+  await page.waitForLoadState('networkidle');
+  await choosePhoto(page);
+  await page.locator('[data-action="send"]').click();
+
+  const error = page.locator('.card.error[data-state="error"]');
+  const estimate = page.locator('[data-meal-estimate="estimate"]');
+  await Promise.race([
+    error.waitFor({ timeout: 30_000 }).catch(() => undefined),
+    estimate.waitFor({ timeout: 30_000 }).catch(() => undefined),
+  ]);
+  const refused = await error.isVisible();
+  console.log(
+    `F98: with the ceiling at ${LOW_CEILING_USD} USD and ${spentBefore} USD spent, refused ${refused}`,
+  );
 
   expect(refused).toBe(true);
   await expect(page.getByText(strings.meals.ceilingReachedTitle)).toBeVisible();

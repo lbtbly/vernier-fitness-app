@@ -8,7 +8,7 @@ import { CameraIcon, CloseIcon, EditIcon, PlusIcon, ShieldIcon, SparkIcon, WarnI
 import { CSRF_HEADER } from '@/lib/cookie-names';
 import { LONG_EDGE_PX, downscaleToJpeg } from '@/lib/downscale';
 import { allAliases, aliasNameById } from '@/lib/food-aliases';
-import type { MacroSet } from '@/lib/macros';
+import { EMPTY_MACROS, type MacroSet } from '@/lib/macros';
 import { carryTheCaughtObject, messageOf } from '@/lib/platform-cause';
 import { strings } from '@/lib/strings';
 
@@ -610,7 +610,15 @@ export function MealEstimate({
                 strings.units.kcal,
               )}
             </div>
-            <MacroLine macros={totals?.mid ?? { kcal: null, proteinG: null, carbG: null, fatG: null, fibreG: null }} />
+            {/*
+              * All four macronutrients as ranges, which is what screen 09 draws
+              * beside an energy line that was already one. Passing `mid` alone
+              * printed four bare points off a photograph.
+              */}
+            <MacroLine
+              macros={totals?.mid ?? EMPTY_MACROS}
+              band={totals ? { low: totals.low, high: totals.high } : null}
+            />
             <p className="note" style={{ marginTop: 'var(--s2)' }}>
               {strings.meals.saveNote(String(totals?.mid.kcal ?? 0))}
             </p>
