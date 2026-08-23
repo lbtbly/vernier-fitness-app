@@ -500,3 +500,169 @@ export const writeRequest = pgTable(
   },
   (table) => [index('write_request_key').on(table.key)],
 );
+
+/**
+ * ---------------------------------------------------------------------------
+ * Apple Health ingest. Slice 6.
+ *
+ * The iPhone pushes and this machine never pulls, so everything below describes
+ * one direction: a batch arrives, it is authenticated, its rows are made unique
+ * by a key the server synthesises, and what a whole day of them adds up to
+ * becomes a measurement through the same door every other value goes through.
+ * ---------------------------------------------------------------------------
+ */
+
+/**
+ * The credential the iPhone shortcut presents, and it is deliberately two
+ * halves stored two different ways.
+ *
+ * `tokenHash` is the SHA-256 of the bearer token and there is no other copy of
+ * it anywhere. The token is shown once, at creation, and the database cannot
+ * give it back: a stolen backup is not a working ingest credential.
+ *
+ * The other half is the signing secret, and it is NOT here. It is sealed with
+ * the master key in `integration_credential` under the provider `apple_health`,
+ * beside every other third-party secret, because the server has to recompute
+ * the two-pass digest from it on every request and F54 has to print the digest
+ * it computes for a fixed canonical string. A value the server must reproduce
+ * cannot be stored as a hash. Splitting them is what keeps that true without
+ * weakening the token: the recoverable half opens nothing on its own, since
+ * every request needs the bearer token as well.
+ *
+ * `keyId` is the `k1` the canonical string names, so a rotation can mint `k2`
+ * and keep the shape.
+ *
+ * Revocation sets `revokedAt` rather than deleting the row. The row is the
+ * record that this key existed and when it stopped; a partial unique index in
+ * drizzle/pending/06-apple-health.sql keeps exactly one un-revoked row.
+ */
+export const ingestCredential = pgTable('ingest_credential', {
+  keyId: text('key_id').primaryKey(),
+  tokenHash: text('token_hash').notNull(),
+  label: text('label').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  revokedAt: timestamp('revoked_at', { withTimezone: true }),
+  lastUsedAt: timestamp('last_used_at', { withTimezone: true }),
+  /**
+   * Whether this key is still live, computed by the database from the column
+   * beside it so no writer gets a say, exactly as `measurement.seed` is. The
+   * partial unique index in drizzle/pending/06-apple-health.sql sits on this
+   * column and is what makes "one live credential" a constraint rather than a
+   * rule somebody remembers.
+   */
+  live: boolean('live')
+    .notNull()
+    .generatedAlwaysAs(sql`"revoked_at" is null`),
+});
+
+/**
+ * A nonce this endpoint has already seen, kept for 24 hours.
+ *
+ * The nonce is not a secret and does not need to be unpredictable. Shortcuts
+ * has no UUID action and `Random Number` is not documented as a CSPRNG, so the
+ * nonce is a timestamp and two random runs, and its only job is uniqueness.
+ * Uniqueness is enforced here, by an index, and never by entropy: an attacker
+ * who guesses the next nonce gains nothing, because he still needs the token
+ * and a matching digest, and a nonce already in this table is refused.
+ *
+ * The unique index is named and separate from the primary key so a verifier can
+ * read it back out of `pg_indexes` as a unique index rather than infer one.
+ */
+export const ingestNonce = pgTable(
+  'ingest_nonce',
+  {
+    id: text('id').primaryKey(),
+    nonce: text('nonce').notNull(),
+    seenAt: timestamp('seen_at', { withTimezone: true }).notNull().defaultNow(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  },
+  (table) => [
+    uniqueIndex('ingest_nonce_value').on(table.nonce),
+    index('ingest_nonce_expires_at').on(table.expiresAt),
+  ],
+);
+
+/**
+ * One arrival of a batch, whatever became of it.
+ *
+ * Every outcome appends a row, refusals included, so the diagnostics screen can
+ * show that the phone is reaching this machine and being turned away rather
+ * than not reaching it at all. Those are different failures with different
+ * fixes, and from the phone they look identical: silence.
+ *
+ * `outcome` is a token and never a sentence: `accepted`, `bad_digest`,
+ * `forbidden_type` and the rest. The words for it live in the catalogue.
+ *
+ * There is no sync cursor on this table and there is not going to be one. A
+ * failed run on a locked phone that advanced a checkpoint is a documented way
+ * to lose a day permanently; every run re-reads a fixed 48-hour window and the
+ * dedup key makes the overlap free.
+ */
+export const ingestBatch = pgTable(
+  'ingest_batch',
+  {
+    id: text('id').primaryKey(),
+    keyId: text('key_id').notNull(),
+    device: text('device').notNull(),
+    nonce: text('nonce').notNull(),
+    windowStart: timestamp('window_start', { withTimezone: true }),
+    windowEnd: timestamp('window_end', { withTimezone: true }),
+    generatedAt: timestamp('generated_at', { withTimezone: true }),
+    receivedAt: timestamp('received_at', { withTimezone: true }).notNull().defaultNow(),
+    outcome: text('outcome').notNull(),
+    seriesCount: integer('series_count').notNull().default(0),
+    rowsReceived: integer('rows_received').notNull().default(0),
+    rowsAccepted: integer('rows_accepted').notNull().default(0),
+    rowsDuplicate: integer('rows_duplicate').notNull().default(0),
+    readingsStored: integer('readings_stored').notNull().default(0),
+  },
+  (table) => [index('ingest_batch_received_at').on(table.receivedAt)],
+);
+
+/**
+ * One health sample, exactly as the phone reported it.
+ *
+ * Append only, and the trigger in drizzle/pending/06-apple-health.sql is what
+ * makes that true rather than a convention: this is raw evidence, and a
+ * rewritten sample is a lie about what a device said.
+ *
+ * `dedupKey` is the sample identifier Shortcuts does not expose, synthesised
+ * from the seven fields it does. The unique index on it is the whole of the
+ * idempotency at row level: an overlapping 48-hour window costs nothing and a
+ * nervous owner can run the shortcut ten times.
+ *
+ * `value` is null for a category sample such as a sleep stage, whose value is a
+ * word. `valueRaw` always holds what arrived, and `unit` holds the unit the
+ * phone displayed it in, because `Value` comes back in the action's displayed
+ * Health unit and never in the HealthKit SDK unit.
+ */
+export const healthSample = pgTable(
+  'health_sample',
+  {
+    id: text('id').primaryKey(),
+    batchId: text('batch_id')
+      .notNull()
+      .references(() => ingestBatch.id),
+    origin: text('origin').notNull(),
+    metric: text('metric').notNull(),
+    grouping: text('grouping').notNull(),
+    /** The Find Health Samples picker label as it arrived, for provenance. */
+    type: text('type').notNull(),
+    valueRaw: text('value_raw').notNull(),
+    value: doublePrecision('value'),
+    unit: text('unit').notNull(),
+    startAt: timestamp('start_at', { withTimezone: true }).notNull(),
+    endAt: timestamp('end_at', { withTimezone: true }).notNull(),
+    /** Minutes east of UTC the sample declared. Paris in August is 120. */
+    offsetMinutes: integer('offset_minutes').notNull(),
+    /** What HealthKit named as the sample's source: iPhone, Apple Watch, or nothing. */
+    sampleSource: text('sample_source').notNull(),
+    dedupKey: text('dedup_key').notNull(),
+    ingestedAt: timestamp('ingested_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('health_sample_dedup_key').on(table.dedupKey),
+    index('health_sample_metric_start_at').on(table.metric, table.startAt),
+    index('health_sample_batch').on(table.batchId),
+  ],
+);

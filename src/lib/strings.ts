@@ -151,7 +151,16 @@ export const strings = {
       },
       apple_health: {
         name: 'Apple Health',
-        purpose: 'Steps, workouts, sleep and resting heart rate from the iPhone shortcut.',
+        /**
+         * It said "steps, workouts, sleep and resting heart rate" until slice 6
+         * read the platform note. `Find Health Samples` asks HealthKit for
+         * quantity and category types and a workout session is neither, so no
+         * shortcut can read one and no version of this app will show one. The
+         * research is explicit that this belongs in the product copy, so the
+         * owner is not left waiting for something that cannot arrive.
+         */
+        purpose:
+          'Steps, sleep, heart rate and VO2 max from the iPhone shortcut. Workouts never arrive: Apple does not let a shortcut read one.',
       },
       google_calendar: {
         name: 'Google Calendar',
@@ -162,6 +171,41 @@ export const strings = {
         purpose: 'The Sunday review, sent from this machine.',
       },
     },
+
+    /**
+     * The Apple Health card on Settings, which is where the ingest credential
+     * is created and revoked and where the two screens it owns are reached.
+     *
+     * The credential is shown once and this copy says so before the button is
+     * pressed rather than after, because "cannot be shown again" read after the
+     * fact is a trap and read before it is a warning.
+     */
+    ingestTitle: 'Apple Health shortcut',
+    ingestNone: 'No ingest token yet',
+    ingestNoneBody:
+      'The iPhone shortcut needs a token and a signing secret before it can send anything. Both are shown once, here, and neither can be read back afterwards.',
+    ingestLive: (keyId: string) => `Ingest token ${keyId} is live`,
+    ingestCreatedOn: (when: string) => `Created ${when}`,
+    ingestLastUsed: (when: string) => `Last used ${when}`,
+    ingestNeverUsed: 'Never used yet',
+    ingestRevokedOn: (when: string) => `Revoked ${when}`,
+    ingestCreate: 'Create the ingest token',
+    ingestRotate: 'Replace the ingest token',
+    ingestRevoke: 'Revoke it',
+    ingestRevoked: 'Revoked. The next request from the shortcut will be refused.',
+    ingestCreateWarning:
+      'Creating a token revokes the one before it. The shortcut on the iPhone stops working until you paste the new pair into it.',
+    ingestShownOnce: 'Copy both of these now',
+    ingestShownOnceBody:
+      'This is the only time either value is shown. They are not stored in a form this screen can read back, and closing this card loses them for good.',
+    ingestTokenLabel: 'Ingest token, for the Authorization header',
+    ingestSecretLabel: 'Signing secret, for the two Text actions',
+    ingestKeyIdLabel: 'Key identifier',
+    ingestDone: 'I have copied both',
+    ingestOpenGuide: 'Open the shortcut guide',
+    ingestOpenDiagnostics: 'Open ingest diagnostics',
+    ingestScopeNote:
+      'This token opens the ingest endpoint and nothing else. It cannot sign you in, it cannot read a measurement, and your sign-in cannot post a batch.',
   },
 
   signIn: {
@@ -410,6 +454,75 @@ export const strings = {
       emptyCredential: 'That credential is empty.',
       emptyCredentialDetail: 'Paste the token or key the integration issued.',
       willNotOpen: 'The stored credential will not open.',
+    },
+
+    /**
+     * The ingest endpoint's own words, and they carry more weight than any
+     * other copy in this app.
+     *
+     * `Get Contents of URL` has no status output. The Shortcut cannot tell 200
+     * from 401: all it can do is read one field out of the body and show it. So
+     * every answer this endpoint gives, success and failure alike, carries a
+     * `message` written for a person standing in a kitchen holding a phone, and
+     * that message names the cause and the next action. A response with no
+     * message is a run the owner cannot tell apart from silence.
+     */
+    ingest: {
+      samplesStored: (accepted: number) =>
+        accepted === 1 ? '1 new sample stored.' : `${accepted} new samples stored.`,
+      alreadyHere: (duplicates: number) =>
+        duplicates === 1 ? '1 was already here.' : `${duplicates} were already here.`,
+      readingsStored: (readings: number) =>
+        readings === 1
+          ? 'One complete day became a reading.'
+          : `${readings} complete days became readings.`,
+      nothingNew: 'Nothing new arrived. Everything in that window was already stored.',
+      noSamples:
+        'That batch reached the Mac mini and carried no samples at all. Check the filters in the shortcut, and that Health is allowed to read each type.',
+      /** A day the roll-up refused, named per metric so the owner can see which. */
+      readingRefused: (metric: string, detail: string) => `${metric}: ${detail}`,
+
+      badSchema: (field: string) =>
+        `That batch is not in the form this app accepts. The field ${field} is missing, is not a string, or is not part of this contract. Nothing was stored.`,
+      badVersion: (found: string) =>
+        `This app accepts health.ingest.v1 batches, and that one said ${found}. Nothing was stored.`,
+      badToken:
+        'That request carried no ingest token this app knows. Open Settings on the Mac mini, create a new ingest token, and paste it into the shortcut.',
+      badTokenRevoked:
+        'That ingest token has been revoked. Create a new one in Settings on the Mac mini and paste it into the shortcut.',
+      noCredential:
+        'No ingest token exists on this machine yet. Open Settings on the Mac mini and create one, then paste it into the shortcut.',
+      badDigest: (keyId: string) =>
+        `The digest did not match the one this app computed for key ${keyId}. Either the secret in the shortcut is not the secret this app holds, or the canonical text has a line out of place. Open the ingest diagnostics screen and compare the two.`,
+      staleTimestamp: (minutes: number) =>
+        `That request was ${minutes} minutes old, and this app accepts five. Check that the iPhone clock is set automatically, then run the shortcut again.`,
+      staleTimestampFuture: (minutes: number) =>
+        `That request was timed ${minutes} minutes in the future, and this app accepts five. Check that the iPhone clock is set automatically, then run the shortcut again.`,
+      replayedNonce:
+        'That request repeated a nonce this app has already seen, so it was refused rather than stored a second time. Check that the shortcut builds a fresh nonce on every run.',
+      forbiddenType: (series: string) =>
+        `Blood pressure is never accepted by this app. Remove the ${series} block from the shortcut. Nothing in that batch was stored.`,
+      lengthMismatch: (series: string, column: string, expected: string, found: string) =>
+        `The ${series} block sent ${expected} readings but ${found} values for ${column}. Its six lists have to be the same length. Nothing was stored.`,
+      tooLarge: (found: string, limit: string) =>
+        `That batch carried ${found} where this app accepts ${limit}. Shorten the window in the shortcut, or group the busy metrics by hour, and run it again.`,
+      badTimestampFormat: (series: string, field: string, found: string) =>
+        `The ${series} block sent ${found} as its ${field} time. Every time has to carry a numeric offset, which is what the date format in the guide produces. Nothing was stored.`,
+      failed:
+        'The Mac mini could not finish storing that batch. Nothing was half stored. Run the shortcut again, and if it keeps failing the Mac mini is the place to look.',
+      /** What a batch's outcome is called where the diagnostics screen lists it. */
+      outcomes: {
+        accepted: 'Stored',
+        bad_schema: 'Wrong shape',
+        bad_token: 'Token refused',
+        bad_digest: 'Digest did not match',
+        stale_timestamp: 'Clock too far out',
+        replayed_nonce: 'Nonce already used',
+        forbidden_type: 'Blood pressure refused',
+        length_mismatch: 'Lists of different lengths',
+        too_large: 'Too big',
+        bad_timestamp_format: 'Time with no offset',
+      },
     },
 
     launch: {
@@ -1111,6 +1224,30 @@ export const strings = {
      * the iPhone and the app can only say where it is set up.
      */
     runShortcut: 'Run the shortcut on the iPhone',
+    /**
+     * F55's line on Today: when the last batch actually landed, in words,
+     * whether or not anything is wrong.
+     *
+     * It is shown when the shortcut is healthy as well as when it is not, and
+     * that is the point. The panel's first finding is that silence is the
+     * failure mode and that the owner should not have to notice an absence; a
+     * timestamp he can read every morning is what turns "I think it is working"
+     * into a fact. Past 36 hours it takes the warn treatment and says how long
+     * it has been, which is the app noticing for him.
+     */
+    lastIngestLabel: 'Last batch from the iPhone',
+    lastIngestNever: 'None yet',
+    /**
+     * Two keys rather than one with a branch on 48, and that is a checker fact
+     * rather than a taste. The closed-world check renders every key with a
+     * probe and tiles the screen out of what comes back; a branch it cannot
+     * reach contributes no anchor, and the sentence behind it reads as copy
+     * with no key. Both branches of each of these is reachable with a numeral.
+     */
+    lastIngestAgeHours: (hours: number) => (hours === 1 ? '1 hour ago' : `${hours} hours ago`),
+    lastIngestAgeDays: (days: number) => (days === 1 ? '1 day ago' : `${days} days ago`),
+    lastIngestNeverBody:
+      'No batch has arrived from the iPhone yet. Build the shortcut from the guide in Settings and run it once by hand.',
     vo2Note:
       'VO2 max arrives from the watch every few weeks. Between two readings the app shows the last one with its date, never a fresh-looking number.',
     sleepNote:
