@@ -19,7 +19,34 @@
 # warning: skip when the last full pass went green under DEBOUNCE seconds ago.
 # Per dispatch it is absolute: runlog.sh runs this unthrottled on SubagentStop,
 # before commit.sh, so a slice can never end dirty and no red tree is committed.
-cd "${CLAUDE_PROJECT_DIR:-.}" 2>/dev/null || exit 0
+HERE=$(cd "$(dirname "$0")" 2>/dev/null && pwd)
+# shellcheck source=lib/trees.sh
+. "$HERE/lib/trees.sh" 2>/dev/null || true
+
+# WHICH TREE. Slices 5 to 13 build in parallel git worktrees, and this hook used
+# to cd to CLAUDE_PROJECT_DIR unconditionally: a builder editing a worktree got
+# MAIN graded, green, on a tree it had not touched. That is the same defect as
+# the lint step that was named and never defined. So the tree is read off the
+# edit itself.
+#
+# FORGE_TREE wins, for a direct invocation that knows where it is. Otherwise the
+# payload's file_path names the tree, because that is the file that just
+# changed. Only when neither says anything does it fall back to the project
+# directory.
+TREE=""
+if [ -n "${FORGE_TREE:-}" ]; then
+  TREE=$FORGE_TREE
+else
+  INPUT=""
+  [ -t 0 ] || IFS= read -r -d '' -t 2 INPUT 2>/dev/null || true
+  if [ -n "$INPUT" ] && command -v python3 >/dev/null 2>&1; then
+    FP=$(printf '%s' "$INPUT" | python3 -c \
+      'import json,sys;d=json.load(sys.stdin).get("tool_input",{});print(d.get("file_path") or d.get("notebook_path") or "")' 2>/dev/null)
+    [ -n "$FP" ] && TREE=$(forge_tree_of "$FP" 2>/dev/null || true)
+  fi
+fi
+[ -n "$TREE" ] || TREE=${CLAUDE_PROJECT_DIR:-.}
+cd "$TREE" 2>/dev/null || exit 0
 [ -f package.json ] || exit 0
 PM=npm; [ -f pnpm-lock.yaml ] && PM=pnpm
 has() { python3 -c "import json;print('$1' in json.load(open('package.json')).get('scripts',{}))" 2>/dev/null | grep -q True; }
@@ -106,6 +133,27 @@ run strings || exit 2
 run sw:check || exit 2
 
 if [ "${FORGE_CHECKS_FULL:-0}" = "1" ]; then
+  # strings:rendered launches a browser at the LIVE ORIGIN, and the live origin
+  # serves the primary tree. Run from a worktree it would grade main's shipped
+  # copy and report the answer as this tree's, which is the exact shape of every
+  # check-that-passes-by-not-checking this run has hit. It does not run here.
+  #
+  # It is DEFERRED, not waived, and the deferral is written down where the merge
+  # has to walk over it: scripts/worktree.sh refuses to close a slice whose
+  # marker is still present, and clears it only after the check has run on main
+  # with that slice merged in. A line is ticked by a verifier on main, after
+  # that, and never from inside a worktree.
+  if ! forge_is_primary "$TREE" 2>/dev/null; then
+    mkdir -p .forge 2>/dev/null
+    printf '%s | strings:rendered deferred to merge, tree %s\n' \
+      "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$TREE" >> .forge/.rendered-deferred 2>/dev/null
+    echo "checks: strings:rendered DEFERRED. This is a worktree and the live origin" >&2
+    echo "        serves main, so running it here would grade the wrong tree." >&2
+    echo "        Four checks ran, not five. Recorded in .forge/.rendered-deferred;" >&2
+    echo "        the merge runs it on main before this slice can be verified." >&2
+    [ -d .forge ] && date +%s > "$STAMP" 2>/dev/null
+    exit 0
+  fi
   # A missing stack FAILS here, and does not stand down.
   #
   # The rule above, that a check which could not run says so and steps aside, is

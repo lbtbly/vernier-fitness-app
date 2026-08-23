@@ -8,7 +8,13 @@
 # Run one committed nothing for seven and a half hours of BUILD and then landed
 # 314 paths in one lump. The lead's slice commits are the real history; this is
 # the net underneath them, so a crash costs minutes rather than a day.
-cd "${CLAUDE_PROJECT_DIR:-.}" 2>/dev/null || exit 0
+# --tree <path> commits THAT worktree. Without it the primary tree, as before.
+# A worktree builder's work was never checkpointed at all until this existed:
+# this script cd'd to the project directory, found main clean, and exited
+# reporting success, which is rule 5 failing silently.
+TREE=""
+if [ "$1" = "--tree" ]; then TREE=$2; shift 2; fi
+cd "${TREE:-${CLAUDE_PROJECT_DIR:-.}}" 2>/dev/null || exit 0
 git rev-parse --git-dir >/dev/null 2>&1 || exit 0
 
 NOW=0

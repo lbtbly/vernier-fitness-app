@@ -28,9 +28,29 @@ printf '%s | %s | stopped | %ss\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "${AGENT:-ag
 # committed does not exist, and a builder whose typecheck is red mid-slice is
 # exactly the one who must not lose an hour to a crash. So the commit happens
 # and carries the word, and the log carries it too.
+#
+# EVERY TREE, not just this one. Slices 5 to 13 build in parallel worktrees and
+# a SubagentStop payload does not say which tree the subagent was in. Rather
+# than guess, gate and checkpoint all of them: a stop is the natural boundary
+# for whichever builder just finished, and the trees that did not change cost a
+# clean `git status` each. Gating only main was reporting green for work it had
+# never read.
+# shellcheck source=lib/trees.sh
+. "$HERE/lib/trees.sh" 2>/dev/null || true
+PRIMARY=$(forge_primary_tree 2>/dev/null || echo "${CLAUDE_PROJECT_DIR:-.}")
+TREES=$(forge_trees 2>/dev/null)
+[ -n "$TREES" ] || TREES=$PRIMARY
+
 CHECKS=ok
-FORGE_CHECKS_FULL=1 "$HERE/checks.sh" >/dev/null 2>&1 || CHECKS=red
-[ "$CHECKS" = red ] && printf '%s | checks | red\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> .forge/RUNLOG.md
+for T in $TREES; do
+  [ -d "$T" ] || continue
+  TC=ok
+  FORGE_TREE="$T" FORGE_CHECKS_FULL=1 "$HERE/checks.sh" </dev/null >/dev/null 2>&1 || TC=red
+  if [ "$TC" = red ]; then
+    CHECKS=red
+    printf '%s | checks | red | %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$T" >> "$PRIMARY/.forge/RUNLOG.md"
+  fi
+done
 
 command -v node >/dev/null 2>&1 && node "$HERE/progress.mjs" >/dev/null 2>&1
 # Throttled safety commit. A subagent finishing is the most frequent natural
@@ -45,5 +65,15 @@ else
   MSG="forge: checkpoint"
 fi
 [ "$CHECKS" = red ] && MSG="$MSG, checks red"
-"$HERE/commit.sh" "$MSG" >/dev/null 2>&1
+for T in $TREES; do
+  [ -d "$T" ] || continue
+  if [ "$T" = "$PRIMARY" ]; then
+    "$HERE/commit.sh" --tree "$T" "$MSG" >/dev/null 2>&1
+  else
+    # A worktree's message names its branch, so the history says which slice a
+    # checkpoint belongs to without anyone reading the diff.
+    BR=$(git -C "$T" rev-parse --abbrev-ref HEAD 2>/dev/null || echo detached)
+    "$HERE/commit.sh" --tree "$T" "forge: checkpoint on $BR" >/dev/null 2>&1
+  fi
+done
 exit 0
