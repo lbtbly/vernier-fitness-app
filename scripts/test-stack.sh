@@ -92,6 +92,40 @@ ANTHROPIC_DEMO_INPUT_RATE=${ANTHROPIC_INPUT_USD_PER_MTOK:-3}
 ANTHROPIC_DEMO_OUTPUT_RATE=${ANTHROPIC_OUTPUT_USD_PER_MTOK:-15}
 ANTHROPIC_DEMO_CAP=${ANTHROPIC_MONTHLY_CAP_USD:-0.03}
 
+#
+# THE LANGUAGE MODEL, READ ONLY, AND NOTHING ELSE OFF THE OWNER'S VOLUME.
+#
+# F65 asks for a page with no text layer to be routed to optical recognition and
+# for every recognised row to arrive flagged. The scratch instance ran with no
+# storage volume at all, so `/app/storage/tessdata/fra.traineddata` was never
+# there, the route refused every scanned page by name, and the end-to-end test
+# took its honest branch: detection proven, routing proven, the flags on
+# recognised rows not proven and F65 not closed. Six verifications could have
+# read that and none of them would have seen recognition run.
+#
+# The host directory `scripts/fetch-tessdata.sh` fills is mounted at that path,
+# read only. NOT the owner's `vernier_storage` volume: that holds his own
+# laboratory documents, and `scratchLabFiles()` lists `/app/storage/labs` to
+# prove an abandoned upload took its bytes with it. A scratch instance writing
+# into the owner's volume would put a test's PDFs beside his and make that count
+# a count of both.
+#
+# `/app/storage/labs` therefore stays in the container's own writable layer and
+# goes when the container goes, which is what every other test here assumes.
+#
+# Absent model, absent mount, and the suite says so in its own words rather than
+# starting a container that half works.
+# Set to the host directory when the model is really there, empty when it is
+# not, and used with the same `${VAR:+...}` idiom SCRATCH_BACKUP_DIR uses two
+# lines below it, so an absent model is an absent flag rather than an empty
+# argument docker has to parse.
+TESSDATA_DIR="$PWD/var/tessdata"
+if [ -f "${TESSDATA_DIR}/fra.traineddata" ]; then
+  SCRATCH_TESSDATA="$TESSDATA_DIR"
+else
+  SCRATCH_TESSDATA=""
+fi
+
 start() {
   local key=$1
   remove_container
@@ -120,14 +154,24 @@ start() {
     -e BACKUP_DIR="${SCRATCH_BACKUP_DIR:+/app/backups}" \
     -e BACKUP_RETENTION_DAYS="${SCRATCH_BACKUP_RETENTION:-30}" \
     ${SCRATCH_BACKUP_DIR:+-v "${SCRATCH_BACKUP_DIR}:/app/backups"} \
+    ${SCRATCH_TESSDATA:+-v "${SCRATCH_TESSDATA}:/app/storage/tessdata:ro"} \
     -p "127.0.0.1:${PORT}:3000" \
     "$IMAGE" >/dev/null
+}
+
+say_tessdata() {
+  if [ -n "$SCRATCH_TESSDATA" ]; then
+    echo "test-stack: fra.traineddata mounted read only from ${SCRATCH_TESSDATA}"
+  else
+    echo "test-stack: no fra.traineddata at ${TESSDATA_DIR}. The scratch instance will refuse every scanned page by name, and F65's recognition half cannot run. Fetch it with scripts/fetch-tessdata.sh --download" >&2
+  fi
 }
 
 wait_for_ready() {
   for _ in $(seq 1 60); do
     if curl -fsS "${ORIGIN}/healthz" >/dev/null 2>&1; then
       echo "test-stack: ready at ${ORIGIN}"
+      say_tessdata
       return 0
     fi
     sleep 1

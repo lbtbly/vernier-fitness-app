@@ -102,6 +102,36 @@ describe('rasterising the pages that carry no text', () => {
     const model = `${root}var/tessdata/${OCR_LANGUAGE}.traineddata`;
     const installed = existsSync(model);
     console.log(`lab-ocr: ${OCR_LANGUAGE} model ${installed ? 'present at' : 'absent from'} ${model}`);
+
+    /*
+     * AND WHERE THERE IS A VOLUME, THE MODEL HAS TO BE IN IT.
+     *
+     * The branch below asserted the refusal when the model was absent, printed
+     * "RECOGNITION DID NOT RUN", and went green. That is honest as far as it
+     * goes and it is still a run that cannot be told from a run that recognised
+     * a page, by exit code or by anything a gate reads. Six verifications in a
+     * row could have passed with the recognition half never once executing.
+     *
+     * `var/` is the product's own storage root. An installation that has one
+     * and has no language model in it refuses every scanned document by name,
+     * which is a defect the operator should hear from the suite rather than
+     * from a screen at the moment he uploads a photocopy. A tree with no volume
+     * at all, which is every fresh worktree, is asked for nothing.
+     *
+     * Measured here with the model installed: 24 words off an image-only page,
+     * four rows, every one carrying optical_recognition and low_confidence.
+     *
+     * GOES RED IF: the model is taken out of a volume that exists, which is
+     * exactly the state F65 was verified against and nothing could see.
+     */
+    const hasVolume = existsSync(`${root}var`);
+    console.log(`lab-ocr: storage volume ${hasVolume ? 'exists' : 'does not exist'} at ${root}var`);
+    if (hasVolume) {
+      expect(
+        installed,
+        `this machine has a storage volume at ${root}var and no ${OCR_LANGUAGE} model in it, so every scanned document is refused. Install it with scripts/fetch-tessdata.sh`,
+      ).toBe(true);
+    }
     try {
       const bytes = await imageOnlyPdf();
       const forOcr = new Uint8Array(bytes);
