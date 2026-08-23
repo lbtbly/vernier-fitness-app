@@ -154,6 +154,31 @@ describe('absence, drawn', () => {
   });
 });
 
+describe('the week key the menu is stored under', () => {
+  test('is slice 9\'s midday-UTC Monday, and the two halves are inverses', async () => {
+    // `meal_plan.week_start` is unique on a column slice 9 fills with a Monday
+    // at midday UTC. A lookup built from midnight in the app's zone misses
+    // every row by two hours and reports a week with a menu in it as a week
+    // with none. This is the assertion that turns a change on their side into a
+    // red test here rather than an empty section on a Sunday evening.
+    const { planInstantOf, weekStartKey } = await import('@/db/weekly-review');
+    const { nextWeekStart } = await import('@/db/nutrition');
+    for (const key of ['2026-08-24', '2026-10-26', '2026-03-30', '2027-01-04']) {
+      const instant = planInstantOf(key);
+      console.log(`${key} -> ${instant.toISOString()} -> ${weekStartKey(instant)}`);
+      expect(instant.toISOString()).toBe(`${key}T12:00:00.000Z`);
+      expect(weekStartKey(instant)).toBe(key);
+    }
+    // And the shape slice 9 itself produces, across a clock change, matches.
+    for (const now of ['2026-08-23T20:45:00+02:00', '2026-10-25T20:45:00+01:00']) {
+      const theirs = nextWeekStart(new Date(now), 'Europe/Paris');
+      const mine = planInstantOf(weekStartKey(theirs));
+      console.log(`slice 9 at ${now}: ${theirs.toISOString()}, read back as ${mine.toISOString()}`);
+      expect(mine.getTime()).toBe(theirs.getTime());
+    }
+  });
+});
+
 describe('the email is the same review', () => {
   test('carries all nine section titles and the proposal', () => {
     const review = assembleReview(twoMissedSessions());

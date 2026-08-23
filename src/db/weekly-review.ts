@@ -2,7 +2,7 @@ import { and, asc, desc, eq, gte, lte } from 'drizzle-orm';
 import { getDb } from './client';
 import { ensureDemoIsToday } from './demo';
 import { readGoal } from './goal';
-import { readPlan, readPlanMeals, readTarget, tallyMeals } from './nutrition';
+import { readPlan, readPlanMeals, readTarget, tallyMeals, weekStartKey } from './nutrition';
 import { reviewDecision, sessionRun, setLog, weeklyReview } from './schema';
 import { readSessionsBetween } from './sessions';
 import { readListForPlan } from './shopping';
@@ -48,6 +48,26 @@ function weekKeys(weekStart: string): string[] {
 }
 
 /**
+ * The instant `meal_plan.week_start` is keyed by, and it is SLICE 9'S
+ * CONVENTION rather than this file's.
+ *
+ * `nextWeekStart` in src/db/nutrition.ts builds a Monday as midday UTC, and
+ * `meal_plan_week` is unique on that column, so a lookup built from midnight in
+ * the app's zone misses every row by two hours and reports a week with a menu
+ * in it as a week with none. Midday is deliberate over there: it is a label
+ * with no zone left to shift it. This follows it rather than reinventing it,
+ * and `tests/unit/weekly-review.test.ts` asserts the two are inverses so a
+ * change on their side is a red test on this one rather than an empty section.
+ */
+export function planInstantOf(weekStart: string): Date {
+  return new Date(`${weekStart}T12:00:00Z`);
+}
+
+/** The inverse, which is slice 9's own function. Re-exported so the round trip
+ * is asserted against the two halves a reader would use rather than a copy. */
+export { weekStartKey };
+
+/**
  * The facts the assembler works from, read in one pass.
  *
  * The window is fourteen days rather than seven because the week's own change
@@ -86,11 +106,11 @@ export async function readReviewFacts(weekStart: string): Promise<ReviewFacts> {
     .where(and(gte(setLog.completedAt, weekStartInstant), lte(setLog.completedAt, weekEndInstant)))
     .orderBy(asc(setLog.completedAt));
 
-  const plan = await readPlan(weekStartInstant);
+  const plan = await readPlan(planInstantOf(weekStart));
   const planMeals = plan ? await readPlanMeals(plan.id) : [];
   const tally = tallyMeals(planMeals);
 
-  const nextPlan = await readPlan(instantOnDay(nextWeekStart, 0, 0, timeZone));
+  const nextPlan = await readPlan(planInstantOf(nextWeekStart));
   const nextProposals = await readProposals(nextWeekStart);
   const nextList = nextPlan ? await readListForPlan(nextPlan.id) : null;
   const decisions = await readDecisions(nextWeekStart);
