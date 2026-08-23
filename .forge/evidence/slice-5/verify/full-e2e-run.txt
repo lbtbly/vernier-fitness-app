@@ -1,0 +1,202 @@
+        at /Users/lambertbouley/Claude/lbtbly-fitness-app/tests/e2e/console-walk.spec.ts:183:27
+
+    Error Context: test-results/console-walk-C9-four-surfa-073e6-was-a-walk-and-not-a-render-chrome-scratch/error-context.md
+
+  8) [chrome-scratch] › tests/e2e/ingest.spec.ts:119:1 › F52. the credential is shown once, stored as a hash, and never rendered again 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "t"
+    Received: "true"
+
+      149 |   expect(stored).not.toContain(token);
+      150 |   expect(stored).not.toContain(secret);
+    > 151 |   expect(live).toBe('t');
+          |                ^
+      152 |
+      153 |   // And nowhere in the reloaded screen, which is the claim "shown once" makes.
+      154 |   await page.reload();
+        at /Users/lambertbouley/Claude/lbtbly-fitness-app/tests/e2e/ingest.spec.ts:151:16
+
+    Error Context: test-results/ingest-F52-the-credential--fa323-sh-and-never-rendered-again-chrome-scratch/error-context.md
+
+    Error Context: test-results/ingest-F52-the-credential--fa323-sh-and-never-rendered-again-chrome-scratch/error-context.md
+
+  9) [chrome-scratch] › tests/e2e/labs-scratch.spec.ts:115:1 › F59. accepting one row stores one row, and no control commits a panel 
+
+    Test timeout of 60000ms exceeded.
+
+    Error: locator.click: Test timeout of 60000ms exceeded.
+    Call log:
+      - waiting for locator('[data-row]').nth(2).locator('button.ok')
+        - locator resolved to <button disabled class="ok" type="button" data-writes="11" aria-busy="false" aria-label="Save Ferritin to your panel">…</button>
+      - attempting click action
+        2 × waiting for element to be visible, enabled and stable
+          - element is not enabled
+        - retrying click action
+        - waiting 20ms
+        2 × waiting for element to be visible, enabled and stable
+          - element is not enabled
+        - retrying click action
+          - waiting 100ms
+        110 × waiting for element to be visible, enabled and stable
+            - element is not enabled
+          - retrying click action
+            - waiting 500ms
+
+
+       at fixtures.ts:169
+
+      167 |
+      168 | export async function clickWhenLive(control: Locator, timeout = 15_000): Promise<void> {
+    > 169 |   await (await waitUntilLive(control, timeout)).click();
+          |                                                 ^
+      170 | }
+      171 |
+      172 | /**
+        at clickWhenLive (/Users/lambertbouley/Claude/lbtbly-fitness-app/tests/e2e/fixtures.ts:169:49)
+        at /Users/lambertbouley/Claude/lbtbly-fitness-app/tests/e2e/labs-scratch.spec.ts:142:3
+
+    Error Context: test-results/labs-scratch-F59-accepting-8788c--no-control-commits-a-panel-chrome-scratch/error-context.md
+
+    Error Context: test-results/labs-scratch-F59-accepting-8788c--no-control-commits-a-panel-chrome-scratch/error-context.md
+
+  10) [chrome-scratch] › tests/e2e/notices.spec.ts:954:1 › F23 and C5. a first-ever waist commits in six taps or fewer, from a blank field and not from zero 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "91.4"
+    Received: "99.0"
+
+    Call Log:
+    - Timeout 20000ms exceeded while waiting on the predicate
+
+      1101 |             { timeout: 20_000 },
+      1102 |           )
+    > 1103 |           .toBe('91.4');
+           |            ^
+      1104 |         console.log(
+      1105 |           `F23  ${engine.padEnd(6)} the corrected reading stored as ` +
+      1106 |             `${scratchQuery("select raw_value || ' ' || unit || ' ' || source from measurement where metric = 'waist' order by measured_at desc limit 1")}, ` +
+        at /Users/lambertbouley/Claude/lbtbly-fitness-app/tests/e2e/notices.spec.ts:1103:12
+        at inEngine (/Users/lambertbouley/Claude/lbtbly-fitness-app/tests/e2e/fixtures.ts:263:5)
+        at /Users/lambertbouley/Claude/lbtbly-fitness-app/tests/e2e/notices.spec.ts:967:5
+
+    Error Context: test-results/notices-F23-and-C5-a-first-120af-ank-field-and-not-from-zero-chrome-scratch/error-context.md
+
+  11) [chrome-scratch] › tests/e2e/nutrition.spec.ts:102:3 › F80: the daily target computes from Mifflin-St Jeor and a published band › 38 years, male, 183 cm, 89.0 kg gives 1849 resting and 2866 at level 1.55 
+
+    Error: expect(locator).toHaveValue(expected) failed
+
+    Locator:  locator('#target-rate')
+    Expected: "0.33"
+    Received: "0.330.33"
+    Timeout:  10000ms
+
+    Call log:
+      - Expect "toHaveValue" with timeout 10000ms
+      - waiting for locator('#target-rate')
+        24 × locator resolved to <input id="target-rate" value="0.330.33" class="input num" inputmode="decimal"/>
+           - unexpected value "0.330.33"
+
+
+      72 |   await field.press('Backspace');
+      73 |   await field.pressSequentially(value, { delay: 15 });
+    > 74 |   await expect(field).toHaveValue(value);
+         |                       ^
+      75 | }
+      76 |
+      77 | async function setBody(
+        at typeInto (/Users/lambertbouley/Claude/lbtbly-fitness-app/tests/e2e/nutrition.spec.ts:74:23)
+        at setBody (/Users/lambertbouley/Claude/lbtbly-fitness-app/tests/e2e/nutrition.spec.ts:88:3)
+        at /Users/lambertbouley/Claude/lbtbly-fitness-app/tests/e2e/nutrition.spec.ts:104:5
+
+    Error Context: test-results/nutrition-F80-the-daily-ta-d4c6a-ting-and-2866-at-level-1-55-chrome-scratch/error-context.md
+
+  12) [chrome-scratch] › tests/e2e/shopping.spec.ts:106:3 › F88: one list, grouped by aisle, whose ticks survive a reload › the list builds from the confirmed week and is grouped the way a shop is walked 
+
+    Error: expect(locator).toHaveValue(expected) failed
+
+    Locator:  locator('#target-rate')
+    Expected: "0.33"
+    Received: "0.330.33"
+    Timeout:  10000ms
+
+    Call log:
+      - Expect "toHaveValue" with timeout 10000ms
+      - waiting for locator('#target-rate')
+        24 × locator resolved to <input id="target-rate" value="0.330.33" class="input num" inputmode="decimal"/>
+           - unexpected value "0.330.33"
+
+
+      61 |   await field.press('Backspace');
+      62 |   await field.pressSequentially(value, { delay: 15 });
+    > 63 |   await expect(field).toHaveValue(value);
+         |                       ^
+      64 | }
+      65 |
+      66 | /**
+        at typeInto (/Users/lambertbouley/Claude/lbtbly-fitness-app/tests/e2e/shopping.spec.ts:63:23)
+        at buildAWeek (/Users/lambertbouley/Claude/lbtbly-fitness-app/tests/e2e/shopping.spec.ts:80:3)
+        at /Users/lambertbouley/Claude/lbtbly-fitness-app/tests/e2e/shopping.spec.ts:110:5
+
+    Error Context: test-results/shopping-F88-one-list-grou-8c921-ed-the-way-a-shop-is-walked-chrome-scratch/error-context.md
+
+  13) [chrome-scratch] › tests/e2e/train-week.spec.ts:167:3 › F72, the proposed week › no control on this screen commits the whole week 
+
+    Error: expect(received).toBeGreaterThan(expected)
+
+    Expected: > 4
+    Received:   3
+
+      172 |       .evaluateAll((nodes) => nodes.map((node) => (node.textContent ?? '').trim()).filter(Boolean));
+      173 |     console.log(`controls on screen 06: ${labels.join(' | ')}`);
+    > 174 |     expect(labels.length).toBeGreaterThan(4);
+          |                           ^
+      175 |     for (const label of labels) {
+      176 |       expect(label).not.toMatch(/accept all|approve the week|confirm all|apply all|accept week/i);
+      177 |     }
+        at /Users/lambertbouley/Claude/lbtbly-fitness-app/tests/e2e/train-week.spec.ts:174:27
+
+    Error Context: test-results/train-week-F72-the-propose-50d62-reen-commits-the-whole-week-chrome-scratch/error-context.md
+
+  14) [chrome-scratch] › tests/e2e/withings.spec.ts:68:1 › F36. connect, import, sync and status all complete with no client id and no network 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 328
+    Received: 333
+
+      117 |   await page.getByRole('button', { name: /import the history/i }).click();
+      118 |   await expect(page.getByText(/readings stored out of/i)).toBeVisible({ timeout: 60_000 });
+    > 119 |   expect(Number(scratchQuery('select count(*) from measurement'))).toBe(stored);
+          |                                                                    ^
+      120 |
+      121 |   // ---- incremental sync
+      122 |   await page.getByRole('button', { name: /^sync now$/i }).click();
+        at /Users/lambertbouley/Claude/lbtbly-fitness-app/tests/e2e/withings.spec.ts:119:68
+
+    Error Context: test-results/withings-F36-connect-impor-38b43-no-client-id-and-no-network-chrome-scratch/error-context.md
+
+    Error Context: test-results/withings-F36-connect-impor-38b43-no-client-id-and-no-network-chrome-scratch/error-context.md
+
+  14 failed
+    [webkit-iphone] › tests/e2e/boundary.spec.ts:14:3 › the route table › every route answers what it should to a caller with no session 
+    [webkit-iphone] › tests/e2e/button-geometry.spec.ts:44:1 › every shell button sits on the 48 px, 16 px base 
+    [webkit-iphone] › tests/e2e/health.spec.ts:160:3 › screen 04, Health › C8. every chart carries a hidden table, a title and a description 
+    [chrome-scratch] › tests/e2e/console-walk.spec.ts:77:5 › C9, four surfaces at three viewports › no console error and no failed request at 393x852 
+    [chrome-scratch] › tests/e2e/console-walk.spec.ts:77:5 › C9, four surfaces at three viewports › no console error and no failed request at 768x1024 
+    [chrome-scratch] › tests/e2e/console-walk.spec.ts:77:5 › C9, four surfaces at three viewports › no console error and no failed request at 1280x800 
+    [chrome-scratch] › tests/e2e/console-walk.spec.ts:177:3 › C9, four surfaces at three viewports › the writes really landed, so the walk was a walk and not a render 
+    [chrome-scratch] › tests/e2e/ingest.spec.ts:119:1 › F52. the credential is shown once, stored as a hash, and never rendered again 
+    [chrome-scratch] › tests/e2e/labs-scratch.spec.ts:115:1 › F59. accepting one row stores one row, and no control commits a panel 
+    [chrome-scratch] › tests/e2e/notices.spec.ts:954:1 › F23 and C5. a first-ever waist commits in six taps or fewer, from a blank field and not from zero 
+    [chrome-scratch] › tests/e2e/nutrition.spec.ts:102:3 › F80: the daily target computes from Mifflin-St Jeor and a published band › 38 years, male, 183 cm, 89.0 kg gives 1849 resting and 2866 at level 1.55 
+    [chrome-scratch] › tests/e2e/shopping.spec.ts:106:3 › F88: one list, grouped by aisle, whose ticks survive a reload › the list builds from the confirmed week and is grouped the way a shop is walked 
+    [chrome-scratch] › tests/e2e/train-week.spec.ts:167:3 › F72, the proposed week › no control on this screen commits the whole week 
+    [chrome-scratch] › tests/e2e/withings.spec.ts:68:1 › F36. connect, import, sync and status all complete with no client id and no network 
+  1 skipped
+  56 did not run
+  95 passed (11.0m)
+
+[exited with code 0]

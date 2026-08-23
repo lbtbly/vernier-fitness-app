@@ -1,0 +1,7 @@
+checks: typecheck ran and passed
+checks: lint ran and passed
+checks: strings ran and passed
+checks: sw:check ran and passed
+checks: compliance ran and passed
+checks: strings:rendered ran and passed
+exit=0

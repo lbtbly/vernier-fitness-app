@@ -195,31 +195,31 @@ advance, so the budget does not have to be re-argued once per slice.
 - [x] **F35.** No daily body-composition reading is the headline number on any
   screen, and one sentence on Health states that hydration moves scale estimates.
   Evidence: the capture and the sentence.
-- [ ] **F36.** In demonstration mode the whole Withings pipeline runs with no
+- [x] **F36.** In demonstration mode the whole Withings pipeline runs with no
   client identifier and no network: connect, historical import, incremental sync
   and status all complete and every imported row carries source `demo`. Evidence:
   the four steps captured with the network disabled, and the row source counts.
-- [ ] **F37.** The authorization request carries response type, client
+- [x] **F37.** The authorization request carries response type, client
   identifier, state, scope `user.metrics` and redirect URI and carries no code
   challenge; a callback whose state does not match is refused; the token exchange
   and refresh post the request-token action form-encoded, and the rotated refresh
   token replaces the stored one inside the same transaction. Evidence: contract
   tests against recorded responses, one per clause.
-- [ ] **F38.** The measure request sends the eight-code type allowlist and
+- [x] **F38.** The measure request sends the eight-code type allowlist and
   category 1 explicitly, loops on the continuation flag and offset to exhaustion
   under a bounded page cap, decodes each value as value times ten to the unit, and
   advances the cursor to the maximum modification time only after the write
   commits. Evidence: the recorded requests across a three-page fixture and the
   cursor value after a deliberate crash between fetch and commit.
-- [ ] **F39.** A measure group containing a blood-pressure type is dropped whole,
+- [x] **F39.** A measure group containing a blood-pressure type is dropped whole,
   so its heart-rate measure is not harvested, and the storage layer rejects any
   insert whose type is outside the allowlist even when the fetch layer is bypassed.
   Evidence: two tests, one per layer, over a fixture group.
-- [ ] **F40.** Running the same import twice produces the same row count, and a
+- [x] **F40.** Running the same import twice produces the same row count, and a
   corrected group arriving with a newer modification time updates in place and
   appends a provenance entry rather than inserting a second row. Evidence: row
   counts across three runs and the provenance history for the corrected group.
-- [ ] **F41.** The response envelope is read before the HTTP status on every call.
+- [x] **F41.** The response envelope is read before the HTTP status on every call.
   Statuses 401, 100, 101, 102, 200, 342 and 343 trigger exactly one refresh and one
   retry then surface a reconnect prompt; 601 backs off with jitter; 522 retries;
   status 100 with a present but empty measure list is treated as no data rather
@@ -228,7 +228,7 @@ advance, so the budget does not have to be re-argued once per slice.
   demonstration, the last successful sync time and a test button, and shows no
   token, no client secret and no account identifier. Evidence: the capture and a
   search of the rendered markup for the seeded credential values.
-- [ ] **F43.** With the Withings adapter unreachable, Today and Health still
+- [x] **F43.** With the Withings adapter unreachable, Today and Health still
   render every other source, name the stale Withings data by cause, and show no
   loading state for longer than 3 seconds. Evidence: a capture with the adapter
   blocked and a timing trace.
