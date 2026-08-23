@@ -84,7 +84,6 @@ describe('the JSON document', () => {
   it('holds nothing at all when there is nothing at all, and still parses', async () => {
     const text = await collect(
       jsonDocument(META, {
-        // eslint-disable-next-line require-yield
         async *[Symbol.asyncIterator]() {
           return;
         },
