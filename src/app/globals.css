@@ -498,6 +498,23 @@ a.value-link:active{opacity:.7}
 
 /* ---------- the sheet, screen 03 ---------- */
 
+/*
+ * NOTHING SCOPED TO A SCREEN REACHES IN HERE, AND THAT IS ENFORCED IN THE DOM.
+ *
+ * `QuickLog` is mounted inside `section.card.day`, because the day card's rows
+ * are its children. The sheet itself is portalled to `document.body`, so its
+ * ancestry is `div.sheet < body` and not `div.sheet < section.card.day <
+ * div.today`. It used to be the second, and three Today rules crossed into
+ * screen 03 through it: the error card's action row lost 4 px of margin, Try
+ * again lost the 52 px escalation below, and Save sat 27 px under the foot
+ * divider where the sheet draws 12. That was defect 52's mechanism at three new
+ * properties, and scoping those three rules would have left the next Today rule
+ * free to do it again.
+ *
+ * So a rule that is meant to reach the sheet names the sheet. There is no other
+ * way in, and tests/e2e/layout.spec.ts fails if the portal is ever removed.
+ */
+
 .scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:30;border:0;width:100%;padding:0}
 
 .sheet{

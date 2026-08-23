@@ -256,13 +256,13 @@ describe('the suite against the owner\'s installation', () => {
    *   quick-log:597, 632      REAL. Undo is drawn by the just-logged row while
    *                           the entry is queued, and the same locator is
    *                           asserted visible earlier in the same test.
-   *   quick-log:614, 1091     REAL. The outbox depth, read out of IndexedDB
+   *   quick-log:614, 1373     REAL. The outbox depth, read out of IndexedDB
    *                           after a replay the same test proved happened.
-   *   quick-log:869           REAL. `[data-state="stale"]` is drawn by the sheet
+   *   quick-log:1072          REAL. `[data-state="stale"]` is drawn by the sheet
    *                           and was asserted visible fifteen lines above.
-   *   quick-log:898           REAL. The loading card is drawn by the sheet and
+   *   quick-log:1101          REAL. The loading card is drawn by the sheet and
    *                           the same test held it open to see it.
-   *   quick-log:1092          REAL. `[data-just-logged]` is drawn by the day
+   *   quick-log:1374          REAL. `[data-just-logged]` is drawn by the day
    *                           card and the same test watched it appear.
    *   passkey.spec.ts:77      REAL. "No passkey is registered yet." is drawn by
    *                           `/settings`, and the branch that asserts its
@@ -286,12 +286,19 @@ describe('the suite against the owner\'s installation', () => {
    *   today.spec.ts:225,281   REAL. Both filter a list the same run printed.
    *   today.spec.ts:374-375   REAL. Console errors and failed requests, over a
    *                           walk whose surfaces are counted and printed.
-   *   notices.spec.ts:198     REAL. The route's own answer, whose `questions`
+   *   notices.spec.ts:246     REAL. The route's own answer, whose `questions`
    *                           array is asserted non-empty one line away.
-   *   notices.spec.ts:443     REAL. The sheet is drawn by the very click three
+   *   notices.spec.ts:496     REAL. The loading card is drawn by the sheet, and
+   *                           this is the wait that makes the waist typing below
+   *                           mean anything: the snapshot read fills that field,
+   *                           so a value typed while the card is still up is
+   *                           typed into something about to be re-rendered. The
+   *                           same card is held open and asserted visible in
+   *                           quick-log.spec.ts, on the same component.
+   *   notices.spec.ts:564     REAL. The sheet is drawn by the very click three
    *                           lines above, and it closing is what puts Undo and
    *                           Edit back in the accessibility tree.
-   *   notices.spec.ts:583     REAL. The scroll offset again, and F27 turns on it.
+   *   notices.spec.ts:705     REAL. The scroll offset again, and F27 turns on it.
    *   suite-privilege:67      REAL. Every refused statement is printed with the
    *                           answer Postgres gave it.
    *   this file               REAL. Both offender lists print what they walked.
@@ -312,7 +319,7 @@ describe('the suite against the owner\'s installation', () => {
       ['passkey.spec.ts', 1],
       ['trend-scratch.spec.ts', 5],
       ['today.spec.ts', 6],
-      ['notices.spec.ts', 3],
+      ['notices.spec.ts', 4],
       ['suite-privilege.spec.ts', 1],
     ]);
     const zeroish = /toHaveCount\(0\)|\.toBe\(0\)|toEqual\(\[\]\)|toHaveLength\(0\)|not\.toBeVisible\(|toBeHidden\(/;
