@@ -8,7 +8,7 @@ import { aliasById, aliasFoodId } from '@/lib/food-aliases';
 import { instantOnDay, localDayKey, dayAfter } from '@/lib/local-time';
 import type { MacroSet } from '@/lib/macros';
 import type { ParsedLine, ArtifactKind, SecondPortionAnswer } from '@/lib/recipe-box';
-import { secondPortionOffsetDays } from '@/lib/recipe-box';
+import { secondPortionOffsetDays, storableLines } from '@/lib/recipe-box';
 import type { Proposal } from '@/lib/takeaway';
 
 /**
@@ -63,7 +63,33 @@ export type ImportResult = {
 export async function importBoxRecipe(input: ImportInput): Promise<ImportResult> {
   const db = getDb();
   const recipeId = `recipe_box_${crypto.randomUUID()}`;
-  const matchedLines = input.lines.filter((line) => line.aliasId !== null && line.grams !== null);
+  /*
+   * EVERY LINE THAT CARRIES A WEIGHT, MATCHED OR NOT.
+   *
+   * This filtered on `aliasId !== null && grams !== null`, so a line the parser
+   * could weigh but not name never became a row. F87 measures coverage as
+   * resolved mass over total mass, and total mass is summed over the rows: a
+   * card reading "200 g samphire, 300 g potatoes" stored one row, summed 300 g
+   * of total mass, resolved 300 g of it, and reported 100 percent coverage over
+   * three fifths of the food. The below-85-percent branch could not fire on any
+   * input, which makes "renders as a range and states the shortfall" a sentence
+   * about a state the product could not reach.
+   *
+   * A line with no weight is still not stored, and that is not the same
+   * omission: mass coverage is a share of a total, and a line with no grams
+   * contributes nothing to either side of it. `ImportResult.unmatched` counts
+   * both kinds, so the screen can still say how many lines it could not read.
+   */
+  const storedLines = storableLines(input.lines);
+
+  /*
+   * The lines that named something the alias layer knows, which is a different
+   * question from the one above and is used for two different things: the plate
+   * items on the meal entry, which need an alias to point at a food row, and
+   * the matched and unmatched counts the import screen reports. A line with a
+   * weight and no name is a recipe ingredient and is not a plate item.
+   */
+  const matchedLines = storedLines.filter((line) => line.aliasId !== null);
 
   await db.transaction(async (tx) => {
     await upsertSourceRecord(input.sourceRecord, tx);
@@ -83,12 +109,12 @@ export async function importBoxRecipe(input: ImportInput): Promise<ImportResult>
     });
 
     let position = 0;
-    for (const line of matchedLines) {
-      const alias = aliasById(line.aliasId as string);
+    for (const line of storedLines) {
+      const alias = line.aliasId === null ? null : aliasById(line.aliasId);
       await tx.insert(recipeIngredient).values({
         id: `recipe_ing_${crypto.randomUUID()}`,
         recipeId,
-        aliasId: line.aliasId as string,
+        aliasId: line.aliasId,
         foodId: alias ? aliasFoodId(alias) : null,
         grams: line.grams as number,
         position,

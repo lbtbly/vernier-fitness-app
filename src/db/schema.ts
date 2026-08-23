@@ -1031,7 +1031,24 @@ export const recipeIngredient = pgTable(
     recipeId: text('recipe_id')
       .notNull()
       .references(() => recipe.id),
-    aliasId: text('alias_id').notNull(),
+    /**
+     * The alias this line resolved to, or NULL when nothing in the alias layer
+     * matched the words on the card.
+     *
+     * IT IS NULLABLE BECAUSE F87 IS ABOUT MASS AND NOT ABOUT ROWS. A recipe box
+     * import used to drop every line it could not match before any of them
+     * became a row here, so a card reading "200 g samphire, 300 g potatoes"
+     * stored one line, measured coverage over that one line, and reported 100
+     * percent over three fifths of the food. The below-85-percent branch that
+     * F87 asks for was unreachable by construction: nothing that failed to
+     * resolve was ever in the denominator.
+     *
+     * So an unresolved line with a weight on it is kept, with null here and
+     * null in `food_id`, and it counts against coverage exactly as it should.
+     * A line with no weight is still not stored: it carries no mass, so there
+     * is nothing for it to be a share of.
+     */
+    aliasId: text('alias_id'),
     foodId: text('food_id').references(() => food.id),
     grams: doublePrecision('grams').notNull(),
     position: integer('position').notNull(),

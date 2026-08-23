@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest';
+import { NUTRITION } from '@/lib/nutrition';
 import {
   ARTIFACT_KINDS,
   gramsOf,
@@ -8,6 +9,7 @@ import {
   nameFromLink,
   parseIngredientLines,
   secondPortionOffsetDays,
+  storableLines,
 } from '@/lib/recipe-box';
 
 /**
@@ -111,5 +113,64 @@ describe('the four artifacts and the three answers are closed sets', () => {
       (['next_day', 'moved', 'frozen'] as const).map((answer) => String(secondPortionOffsetDays(answer))),
     );
     expect(placements.size).toBe(3);
+  });
+});
+
+/**
+ * F87's DENOMINATOR, AND THE BRANCH IT MAKES REACHABLE.
+ *
+ * The import kept only lines carrying BOTH a weight and an alias, so an
+ * ingredient it could weigh and not name never became a row. Coverage is
+ * resolved mass over total mass and total mass was summed over the stored rows,
+ * so it could not fall below the 85 percent threshold on any input at all:
+ * "below 85 percent coverage the number renders as a range and states the
+ * shortfall" described a state the product could not reach.
+ *
+ * These two tests are the two halves of that. The first grades the selection,
+ * the second walks a real card through the parser and the same function and
+ * shows the coverage the sum will produce from it.
+ *
+ * GOES RED IF: the alias test comes back into the filter, which is exactly the
+ * shape the defect had.
+ */
+describe('a line with a weight is stored whether or not it has a name', () => {
+  test('the weighed unnamed line survives, and only the weightless one does not', () => {
+    const lines = parseIngredientLines(
+      '200 g samphire\n300 g potatoes\n1 sachet of the spice mix',
+    );
+    console.log(
+      `parsed: ${lines.map((line) => `${line.grams ?? 'no grams'}/${line.aliasId ?? 'no name'}`).join(' | ')}`,
+    );
+    expect(lines).toHaveLength(3);
+
+    const stored = storableLines(lines);
+    console.log(
+      `stored: ${stored.map((line) => `${line.grams}/${line.aliasId ?? 'no name'}`).join(' | ')}`,
+    );
+    // Two of the three carry a weight, and one of those two has no name.
+    expect(stored).toHaveLength(2);
+    expect(stored.filter((line) => line.aliasId === null)).toHaveLength(1);
+    // The weightless line is out, and it is out for a different reason: it has
+    // no mass, so it belongs to neither side of a share of mass.
+    expect(stored.every((line) => line.grams !== null)).toBe(true);
+  });
+
+  test('the mass that survives is what makes coverage able to fall', () => {
+    const stored = storableLines(parseIngredientLines('200 g samphire\n300 g potatoes'));
+    const total = stored.reduce((sum, line) => sum + (line.grams ?? 0), 0);
+    const named = stored
+      .filter((line) => line.aliasId !== null)
+      .reduce((sum, line) => sum + (line.grams ?? 0), 0);
+    const coverage = (named / total) * 100;
+    console.log(`${named} g named of ${total} g stored, coverage ${coverage.toFixed(1)}%`);
+    expect(total).toBe(500);
+    expect(named).toBe(300);
+    expect(coverage).toBeLessThan(NUTRITION.coverageRangeThresholdPct);
+    // The old filter is written out here rather than described, so the number
+    // it produced is on the record beside the number the fix produces.
+    const oldWay = stored.filter((line) => line.aliasId !== null);
+    const oldTotal = oldWay.reduce((sum, line) => sum + (line.grams ?? 0), 0);
+    console.log(`the filter this replaces stored ${oldTotal} g and reported ${(100).toFixed(1)}%`);
+    expect(oldTotal).toBe(named);
   });
 });

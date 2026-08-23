@@ -2994,6 +2994,18 @@ export const strings = {
     ingredients: 'Ingredients',
     ingredientLine: (grams: string, name: string) => `${grams} g ${name}`,
     ingredientUnresolved: 'Not counted. No food table row matches this ingredient.',
+    /**
+     * A line the parser weighed and could not name.
+     *
+     * The screen printed `line.aliasId` here, which was a machine token
+     * rendered to a person, and it printed nothing at all once an unnamed line
+     * could exist. The weight is real and it is what the coverage shortfall is
+     * made of, so it is stated: the mass is on the screen and the fact that
+     * nothing is known about it is beside it.
+     */
+    ingredientUnnamed: (grams: string) => `${grams} g, not recognised`,
+    ingredientUnnamedNote:
+      'The card listed this and Vernier could not tell what it was. Its weight still counts against the mass covered below, which is why that figure is not 100%.',
     /** Where a recipe's numbers came from, one word per provenance value. */
     provenance: {
       computed_ciqual: 'Computed from Anses Ciqual rows',

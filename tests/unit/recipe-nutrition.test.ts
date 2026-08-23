@@ -109,6 +109,53 @@ describe('coverage below 85 percent widens the range and says so', () => {
     expect(computed.wideRange).toBe(true);
   });
 
+  /*
+   * AND THE LINE WITH NO NAME AT ALL, WHICH IS THE ONE THE PRODUCT ACTUALLY
+   * PRODUCES.
+   *
+   * Every case in this block passed while the branch was unreachable in the
+   * shipped product, which is worth writing down. They all use `aliasId: 'b'`
+   * with `food: null`: an ingredient the alias layer names and the food table
+   * does not carry. Nothing in the shipped catalogue is in that state, and the
+   * one importer that could produce an unresolved line, the recipe box, dropped
+   * every one of them before they became rows. So the arithmetic below was
+   * correct and no input the product could build ever reached it.
+   *
+   * A weighed line with no alias is what a recipe card really hands this app,
+   * and it is now stored. This is the same sum over that shape.
+   *
+   * GOES RED IF: a line with no alias stops counting towards total mass, which
+   * would put the shortfall back where it was.
+   */
+  test('a weighed line with no name at all is mass the coverage has to answer for', () => {
+    const fromACard: IngredientLine[] = [
+      { aliasId: 'potatoes', grams: 300, food: food() },
+      { aliasId: null, grams: 200, food: null },
+    ];
+    const computed = computeRecipeNutrition(fromACard, 1);
+    console.log(
+      `500 g on the card, 300 g named: coverage ${computed.coveragePct.toFixed(1)}%, ` +
+        `wideRange ${computed.wideRange}, provenance ${computed.provenance}`,
+    );
+    expect(computed.coveragePct).toBeCloseTo(60, 5);
+    expect(computed.unresolvedCount).toBe(1);
+    expect(computed.ingredientCount).toBe(2);
+    expect(computed.provenance).toBe('computed_partial');
+    expect(computed.wideRange).toBe(true);
+    // And the number it computed is the named third's, not a figure for 500 g.
+    expect(computed.perServing.kcal).toBeCloseTo(3 * (food().kcal100g ?? 0), 5);
+  });
+
+  test('a line with no name still moves the source hash, so it cannot be invisible', () => {
+    const withIt = sourceHash([
+      { aliasId: 'potatoes', grams: 300, food: food() },
+      { aliasId: null, grams: 200, food: null },
+    ]);
+    const withoutIt = sourceHash([{ aliasId: 'potatoes', grams: 300, food: food() }]);
+    console.log(`with the unnamed line ${withIt}, without it ${withoutIt}`);
+    expect(withIt).not.toBe(withoutIt);
+  });
+
   test('the threshold is the published 85 percent and nothing else', () => {
     expect(NUTRITION.coverageRangeThresholdPct).toBe(85);
     const justUnder: IngredientLine[] = [

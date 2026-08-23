@@ -44,20 +44,27 @@ export function recipeName(row: { nameKey: string | null; name: string | null })
 }
 
 /** The ingredient list for a variant, with the free-from swaps already applied. */
-export function variantIngredients(
-  ingredients: { aliasId: string; grams: number; boxSupplied: boolean }[],
+export function variantIngredients<T extends { aliasId: string | null }>(
+  ingredients: T[],
   variant: Variant,
-): { aliasId: string; grams: number; boxSupplied: boolean }[] {
+): T[] {
   if (variant === 'base') return ingredients;
   return ingredients.map((line) => {
-    const alias = aliasById(line.aliasId);
+    const alias = line.aliasId === null ? null : aliasById(line.aliasId);
     return alias?.lactoseFree ? { ...line, aliasId: alias.lactoseFree } : line;
   });
 }
 
-/** True when this recipe has a dairy item with an alternative stored. */
-export function hasLactoseFreeVariant(ingredients: { aliasId: string }[]): boolean {
-  return ingredients.some((line) => aliasById(line.aliasId)?.lactoseFree !== undefined);
+/**
+ * True when this recipe has a dairy item with an alternative stored.
+ *
+ * A line with no alias answers no, which is the honest answer: nothing is known
+ * about it, so nothing can be swapped for it.
+ */
+export function hasLactoseFreeVariant(ingredients: { aliasId: string | null }[]): boolean {
+  return ingredients.some(
+    (line) => line.aliasId !== null && aliasById(line.aliasId)?.lactoseFree !== undefined,
+  );
 }
 
 export async function seedRecipeCatalogue(): Promise<{ recipes: number; written: number }> {
@@ -108,7 +115,18 @@ export type RecipeView = {
   servings: number;
   cookMinutes: number;
   origin: string;
-  ingredients: { id: string; aliasId: string; foodId: string | null; grams: number; boxSupplied: boolean }[];
+  /**
+   * `aliasId` is null on a line the parser weighed and could not name. It stays
+   * in the list because F87's coverage is a share of mass, and mass with
+   * nothing behind it is exactly what the shortfall is made of.
+   */
+  ingredients: {
+    id: string;
+    aliasId: string | null;
+    foodId: string | null;
+    grams: number;
+    boxSupplied: boolean;
+  }[];
 };
 
 export async function readRecipes(): Promise<RecipeView[]> {
@@ -153,16 +171,16 @@ export async function readRecipe(id: string): Promise<RecipeView | null> {
  * 82 and not a number it has not earned.
  */
 export async function resolveIngredients(
-  ingredients: { aliasId: string; grams: number }[],
+  ingredients: { aliasId: string | null; grams: number }[],
 ): Promise<IngredientLine[]> {
   const ids: string[] = [];
   for (const line of ingredients) {
-    const alias = aliasById(line.aliasId);
+    const alias = line.aliasId === null ? null : aliasById(line.aliasId);
     if (alias) ids.push(aliasFoodId(alias));
   }
   const foods = await readFoods(ids);
   return ingredients.map((line) => {
-    const alias = aliasById(line.aliasId);
+    const alias = line.aliasId === null ? null : aliasById(line.aliasId);
     const row = alias ? foods.get(aliasFoodId(alias)) : undefined;
     return {
       aliasId: line.aliasId,
