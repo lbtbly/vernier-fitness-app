@@ -1938,3 +1938,310 @@ export const takeawayProposal = pgTable(
   },
   (table) => [unique('takeaway_proposal_slot').on(table.weekStart, table.position)],
 );
+
+/**
+ * ---------------------------------------------------------------------------
+ * Google Calendar. Slice 11.
+ *
+ * Six tables, and the rules that matter are between them rather than inside any
+ * one of them:
+ *
+ * 1. NOTHING IS WRITTEN OUTSIDE A CONFIRMED PLAN. A plan is a row with rows of
+ *    its own and a state. Every outbound write names the plan row it came from,
+ *    and a plan row that was not ticked is stored `skipped` and never carries a
+ *    write identifier.
+ * 2. THE WRITE LOG IS PERMANENT AND APPEND ONLY. `calendar_write` refuses UPDATE
+ *    and DELETE by trigger, exactly as `measurement` does, so undo is available
+ *    on every past write for as long as the database exists. An undo is a new
+ *    row naming the one it reverses, never an edit of the row it reverses.
+ * 3. AVAILABILITY IS A CACHE AND SAYS SO. `calendar_busy` and
+ *    `calendar_read_failure` hold the last successful free-busy read with the
+ *    instant it happened, so a week can still be proposed with Google
+ *    unreachable and the screen can name the age of what it used.
+ * ---------------------------------------------------------------------------
+ */
+
+/**
+ * One row, forever, holding everything about the Google connection that is not a
+ * credential.
+ *
+ * THE CREDENTIAL IS NOT HERE. The token bundle lives sealed in
+ * `integration_credential` under the provider `google_calendar`, encrypted with
+ * the master key, the same split slice 5 made for Withings.
+ *
+ * `appCalendarId` is the ONLY handle to the calendar this app created. There is
+ * no lookup path back to it under `calendar.app.created` alone, because
+ * `calendarList.list` needs a calendarlist scope and the app-created scope does
+ * not carry one. Losing it is unrecoverable, and creating a second calendar in
+ * its place would orphan the first with the owner's history in it, so a missing
+ * identifier beside a live grant is an ERROR STATE and never a signal to
+ * recreate.
+ *
+ * `lastErrorRaw` is Google's answer, whole. F109 asks for the raw error body,
+ * and `invalid_grant` plus "Token has been expired or revoked." are two
+ * different facts: the first says what class of failure it is and the second
+ * tells the owner what happened to him.
+ */
+export const googleConnection = pgTable('google_connection', {
+  /** Always 'google_calendar'. One row, the way the owner is one row. */
+  id: text('id').primaryKey(),
+  /** 'demo' or 'live'. Read off the environment on every connect, stored so a screen can say it. */
+  mode: text('mode').notNull(),
+  /** 'disconnected', 'connecting', 'connected', 'revoked' or 'demo'. */
+  state: text('state').notNull(),
+  /** The calendar this app made. Unrecoverable if lost, never recreated. */
+  appCalendarId: text('app_calendar_id'),
+  appCalendarSummary: text('app_calendar_summary'),
+  /**
+   * When it was created, kept SEPARATELY from the identifier on purpose.
+   *
+   * The pair is what tells "this connection has never made a calendar" from
+   * "this connection made one and the identifier is gone". The first offers to
+   * create one. The second is F105's error state, and it must never become a
+   * second calendar.
+   */
+  appCalendarCreatedAt: timestamp('app_calendar_created_at', { withTimezone: true }),
+  /** The calendars the owner ticked in the picker, read for availability only. */
+  watchedCalendarIds: jsonb('watched_calendar_ids').notNull().default([]),
+  connectedAt: timestamp('connected_at', { withTimezone: true }),
+  /** When Google refused the grant, with the raw body beside it. */
+  disconnectedAt: timestamp('disconnected_at', { withTimezone: true }),
+  lastErrorKind: text('last_error_kind'),
+  lastErrorRaw: text('last_error_raw'),
+  lastErrorAt: timestamp('last_error_at', { withTimezone: true }),
+  /** When availability was last read successfully. The age the stale line prints. */
+  lastAvailabilityAt: timestamp('last_availability_at', { withTimezone: true }),
+  lastSuccessfulWriteAt: timestamp('last_successful_write_at', { withTimezone: true }),
+  /**
+   * True the moment a permanent refusal lands, and it stops every scheduled
+   * read. F109 asks for background synchronisation to stop rather than to keep
+   * failing quietly against a grant that is dead.
+   */
+  backgroundSyncStopped: boolean('background_sync_stopped').notNull().default(false),
+  /**
+   * The SHA-256 of the `state` this app put on the authorize URL, never the
+   * value, so a backup of this table carries nothing replayable.
+   */
+  authStateHash: text('auth_state_hash'),
+  authStateIssuedAt: timestamp('auth_state_issued_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+/**
+ * The last availability that was actually read, one row per busy interval.
+ *
+ * It is a cache and it is dated, which is the whole point: F111 asks that with
+ * the provider unreachable the training week still proposes from the last stored
+ * availability AND names the stale calendar by cause. A snapshot with no
+ * timestamp could do the first half and not the second.
+ */
+export const calendarBusy = pgTable(
+  'calendar_busy',
+  {
+    id: text('id').primaryKey(),
+    /** Which of the owner's calendars this interval came from. */
+    calendarId: text('calendar_id').notNull(),
+    startAt: timestamp('start_at', { withTimezone: true }).notNull(),
+    endAt: timestamp('end_at', { withTimezone: true }).notNull(),
+    readAt: timestamp('read_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index('calendar_busy_window').on(table.startAt, table.endAt)],
+);
+
+/**
+ * A calendar the free-busy query could not answer for.
+ *
+ * THIS TABLE IS THE DEFECT CLASS, WRITTEN DOWN. A calendar the owner has been
+ * unshared from comes back with an `errors` entry and an EMPTY busy list, which
+ * is indistinguishable from a free day. Storing the failure is what lets the
+ * diff say "this time is not confirmed clear" instead of scheduling a session
+ * over a real meeting and reporting the calendar as clear while it does it.
+ */
+export const calendarReadFailure = pgTable(
+  'calendar_read_failure',
+  {
+    id: text('id').primaryKey(),
+    calendarId: text('calendar_id').notNull(),
+    /** Google's own reason token, stored as a token. The words are in the catalogue. */
+    reason: text('reason').notNull(),
+    detail: text('detail').notNull().default(''),
+    readAt: timestamp('read_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index('calendar_read_failure_read').on(table.readAt)],
+);
+
+/**
+ * One set of changes, worked out and rendered, with nothing written yet.
+ *
+ * The plan exists as a row BEFORE the confirm screen draws it, so what the owner
+ * confirms is a stored set rather than whatever the server recomputes when the
+ * button arrives. A recomputed plan is a different plan, and applying it would
+ * be writing something he never read.
+ */
+export const calendarPlan = pgTable(
+  'calendar_plan',
+  {
+    id: text('id').primaryKey(),
+    builtAt: timestamp('built_at', { withTimezone: true }).notNull().defaultNow(),
+    windowFrom: timestamp('window_from', { withTimezone: true }).notNull(),
+    windowTo: timestamp('window_to', { withTimezone: true }).notNull(),
+    mode: text('mode').notNull(),
+    /** The app calendar this plan targets, frozen at build time. */
+    calendarId: text('calendar_id').notNull(),
+    /** 'open', 'applied' or 'superseded'. Only an open plan can be confirmed. */
+    state: text('state').notNull().default('open'),
+    availabilityAt: timestamp('availability_at', { withTimezone: true }),
+    /** True when the plan was built on stored availability rather than a fresh read. */
+    availabilityStale: boolean('availability_stale').notNull().default(false),
+    failures: integer('failures').notNull().default(0),
+    /**
+     * The app calendar's events at the moment the plan was built, which is the
+     * "before" column the owner actually read.
+     *
+     * Stored rather than recomputed at render time, because a column recomputed
+     * later is a different column: it would show what the calendar holds now
+     * rather than what it held when the change was worked out, and the two
+     * differ exactly when something went wrong.
+     */
+    beforeEvents: jsonb('before_events').notNull().default([]),
+    /**
+     * Sessions with nowhere free inside the search window.
+     *
+     * They are not changes, so they are not rows, and they are stored anyway
+     * because the alternative is a session quietly missing from the diff. A
+     * plan that drops something without saying so is the failure class this
+     * whole slice is built against.
+     */
+    unplaceable: jsonb('unplaceable').notNull().default([]),
+    totalChanges: integer('total_changes').notNull().default(0),
+    heldBack: integer('held_back').notNull().default(0),
+    appliedAt: timestamp('applied_at', { withTimezone: true }),
+  },
+  (table) => [index('calendar_plan_built').on(table.builtAt)],
+);
+
+/**
+ * One row of the diff: a verb, a before, an after and the cause in words.
+ *
+ * `cause` is the RENDERED sentence, frozen at build time the way `dedup_reason`
+ * and the training week's cause are, and `causeKey` is the key it came from so a
+ * later reading knows which rule placed it.
+ *
+ * `defaultSelected` is stored rather than derived, because F107 is a claim about
+ * what the screen offered: additions and moves selected, removals unselected. A
+ * value in the row can be read back months later; a rule in a component cannot.
+ */
+export const calendarPlanRow = pgTable(
+  'calendar_plan_row',
+  {
+    id: text('id').primaryKey(),
+    planId: text('plan_id')
+      .notNull()
+      .references(() => calendarPlan.id),
+    position: integer('position').notNull(),
+    /** 'added', 'moved' or 'removed'. What the row does, for the grouping. */
+    verb: text('verb').notNull(),
+    /**
+     * WHICH ENUMERATED WRITE SITE THIS ROW WILL USE, as data rather than as
+     * something the apply handler infers from the shape of the row. F110 asks
+     * that every outbound write be one of an enumerated set, and a row that
+     * names its site can be read back and checked against the log months later.
+     */
+    site: text('site').notNull(),
+    sessionId: text('session_id'),
+    /** The deterministic event identifier this row writes to. */
+    eventId: text('event_id').notNull(),
+    title: text('title').notNull(),
+    beforeStart: timestamp('before_start', { withTimezone: true }),
+    beforeEnd: timestamp('before_end', { withTimezone: true }),
+    afterStart: timestamp('after_start', { withTimezone: true }),
+    afterEnd: timestamp('after_end', { withTimezone: true }),
+    cause: text('cause').notNull(),
+    causeKey: text('cause_key').notNull(),
+    defaultSelected: boolean('default_selected').notNull(),
+    /** 'pending', 'applied', 'skipped' or 'failed'. */
+    state: text('state').notNull().default('pending'),
+    outcomeDetail: text('outcome_detail'),
+    /** The write this row produced, when it produced one. */
+    writeId: text('write_id'),
+    decidedAt: timestamp('decided_at', { withTimezone: true }),
+  },
+  (table) => [
+    index('calendar_plan_row_plan').on(table.planId, table.position),
+    unique('calendar_plan_row_slot').on(table.planId, table.position),
+  ],
+);
+
+/**
+ * THE PERMANENT WRITE LOG. One appended row per outbound write, whatever the
+ * outcome, and the row is never edited and never deleted.
+ *
+ * F108 asks that undo stay available for EVERY past write, including one made
+ * two sessions earlier. That is only true if the log keeps enough to reverse the
+ * write without asking Google anything: the event identifier, the verb, and both
+ * sides of the change. All four are here.
+ *
+ * An undo is a new row with `undoesWriteId` set. Whether a write can still be
+ * undone is therefore a question about the presence of another row rather than
+ * about a flag somebody remembered to set, and a trigger in
+ * `drizzle/pending/11-calendar.sql` refuses UPDATE and DELETE so it stays that
+ * way.
+ */
+export const calendarWrite = pgTable(
+  'calendar_write',
+  {
+    id: text('id').primaryKey(),
+    at: timestamp('at', { withTimezone: true }).notNull().defaultNow(),
+    planId: text('plan_id'),
+    planRowId: text('plan_row_id'),
+    /** The enumerated call site: 'calendars.insert', 'events.insert', and so on. */
+    site: text('site').notNull(),
+    /** 'added', 'moved', 'removed' or 'undo'. */
+    verb: text('verb').notNull(),
+    eventId: text('event_id').notNull(),
+    sessionId: text('session_id'),
+    title: text('title').notNull(),
+    beforeStart: timestamp('before_start', { withTimezone: true }),
+    beforeEnd: timestamp('before_end', { withTimezone: true }),
+    afterStart: timestamp('after_start', { withTimezone: true }),
+    afterEnd: timestamp('after_end', { withTimezone: true }),
+    /** 'written' or 'failed'. A failure is logged as loudly as a success. */
+    outcome: text('outcome').notNull(),
+    httpStatus: integer('http_status'),
+    detail: text('detail'),
+    mode: text('mode').notNull(),
+    /** The write this one reverses, when it is an undo. */
+    undoesWriteId: text('undoes_write_id'),
+  },
+  (table) => [
+    index('calendar_write_at').on(table.at),
+    index('calendar_write_undoes').on(table.undoesWriteId),
+  ],
+);
+
+/**
+ * The demonstration account's own calendar, stored on this machine.
+ *
+ * It exists so the demonstration is a calendar rather than a canned answer: an
+ * event written here is read back by the next plan, counted before and after a
+ * second apply, and taken out again by undo. None of that is provable against a
+ * fixture that forgets.
+ *
+ * Every row carries `demonstration` in `mode`, so what is a demonstration event
+ * is readable off the database rather than off a badge.
+ */
+export const googleDemoEvent = pgTable(
+  'google_demo_event',
+  {
+    id: text('id').primaryKey(),
+    sessionId: text('session_id'),
+    summary: text('summary').notNull(),
+    description: text('description').notNull().default(''),
+    startAt: timestamp('start_at', { withTimezone: true }).notNull(),
+    endAt: timestamp('end_at', { withTimezone: true }).notNull(),
+    mode: text('mode').notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index('google_demo_event_start').on(table.startAt)],
+);

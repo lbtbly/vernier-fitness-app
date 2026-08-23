@@ -424,6 +424,55 @@ export const strings = {
         'Nothing was written and the cursor did not move, so the next sync asks the same question. Every reading already stored is unchanged.',
     },
 
+    /**
+     * Everything the calendar route refuses, and what it says when it does.
+     *
+     * Every one of these sentences is written from the same position: what did
+     * not happen. A calendar refusal that leaves the owner unsure whether an
+     * event landed is worse than the failure itself, because the only way to
+     * find out is to open Google and look.
+     */
+    calendar: {
+      bodyDetail: 'Open the calendar screen again and repeat the action. Nothing was written.',
+      unknownAction: 'That is not something the calendar connection does.',
+      unknownActionDetail:
+        'Connect, choose calendars, check what will change, apply, undo and disconnect are the six. Nothing was written.',
+      notConfigured: 'This machine has no Google credentials.',
+      notConfiguredDetail:
+        'Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in the environment file and restart, or run the demonstration account, which needs neither.',
+      notConnected: 'Google Calendar is not connected.',
+      notConnectedDetail: 'Connect it first. Nothing was read and nothing was written.',
+      noCode: 'Google came back with no authorisation code.',
+      noCodeDetail: 'Start the connection again from Settings. Nothing was stored.',
+      stateMismatch: 'That callback was refused.',
+      stateMismatchDetail:
+        'The value returned does not match the one this app sent, so the round trip was not this app asking. Nothing was stored and no code was exchanged.',
+      exchangeFailed: 'The authorisation code did not exchange for a token.',
+      exchangeFailedDetail:
+        'Start the connection again from Settings and accept the consent page without waiting. Nothing was stored.',
+      noRefreshToken: 'Google returned no refresh token.',
+      noRefreshTokenDetail:
+        'Without one this connection would stop working within the hour and could never renew itself. Nothing was stored. Remove Vernier from your Google account permissions and connect again.',
+      noPlan: 'That set of changes is no longer open.',
+      noPlanDetail:
+        'It was applied already, or a newer one replaced it. Check what will change again. Nothing was written.',
+      noCalendar: 'This connection has no calendar of its own.',
+      noCalendarDetail:
+        'The identifier of the calendar this app created is missing, and there is no way to look it up again. Nothing was written and no second calendar was made. Disconnect and connect again to create one.',
+      noRows: 'Nothing was selected.',
+      noRowsDetail: 'Tick at least one change, or leave the screen. Nothing was written.',
+      calendarNotEmpty: 'That calendar still holds events this app wrote.',
+      calendarNotEmptyDetail:
+        'Undo those first, one at a time, and then this. Nothing was changed, and no event was deleted along the way.',
+      unknownWrite: 'That write is not in the log.',
+      unknownWriteDetail: 'Nothing was undone.',
+      alreadyUndone: 'That write has been undone already.',
+      alreadyUndoneDetail: 'The calendar is as it was before it. Nothing was changed.',
+      failed: 'That calendar run did not finish.',
+      failedDetail:
+        'What is in your calendar is exactly what the write log says is in it. Nothing else was written, and every other part of this app is unaffected.',
+    },
+
     bootstrap: {
       bodyDetail: 'Type the password twice and try again.',
       /** The owner's name when he gives none. It reaches the screen, so it has a key. */
@@ -2052,6 +2101,292 @@ export const strings = {
     neverShown:
       'No token, no client secret and no account identifier appears on this screen, in any state.',
     scopeNote: 'One scope is requested and it is the one body composition rides on.',
+  },
+
+  /**
+   * THE CONFIRM DIFF, and it is its own block because the component is shared.
+   *
+   * `src/components/ConfirmDiff.tsx` is rendered by the training week and by the
+   * calendar write, which is C14, so its words cannot live under either surface's
+   * key: copy filed under `calendar` and drawn on screen 06 is a catalogue that
+   * has stopped describing where its strings appear. What is here is what the
+   * component itself draws. What each surface says around it stays with the
+   * surface.
+   */
+  confirm: {
+    summaryLabel: 'Summary',
+    added: 'added',
+    moved: 'moved',
+    removed: 'removed',
+    groupAdded: 'Added',
+    groupMoved: 'Moved',
+    groupRemoved: 'Removed',
+    selectedChip: (chosen: number, total: number) => `${chosen} of ${total} selected`,
+    /** C15 asks the list to state its own length as a number before it is scrolled. */
+    rowCount: (rows: number) =>
+      rows === 1 ? '1 change is listed below' : `${rows} changes are listed below`,
+    beforeLabel: 'Calendar now',
+    afterLabel: 'Calendar after',
+    columnEmpty: 'Nothing in this window',
+    acceptLabel: 'Apply this change',
+    rejectLabel: 'Hold this one back',
+    acceptRemovalLabel: 'Delete it from the calendar',
+    keepLabel: 'Keep it in the calendar',
+    removalNote: 'Removals start unselected. You opt in to a delete, never out of it.',
+  },
+
+  /**
+   * Google Calendar, and the confirm diff that stands in front of every write.
+   *
+   * THE COPY IS THE CONTROL HERE, not decoration on top of one. The panel's
+   * finding was that an event appearing in a calendar nobody approved is the
+   * failure this product cannot come back from, and a summary sentence fails the
+   * test the diff exists to pass. So every row names what, when and why, in the
+   * owner's own words, and every sentence on this screen is written from the
+   * position of what has and has not happened yet.
+   *
+   * The causes are rendered from these templates and FROZEN on the plan row,
+   * exactly the way `dedup_reason` and the training week's cause are. A later
+   * rule change never rewrites what the owner was told at the time.
+   */
+  calendar: {
+    title: 'Google Calendar',
+    sub: 'Your training week, written into a calendar this app made',
+    purpose:
+      'Reads when you are busy, writes your sessions into a calendar it created itself, and never touches any other calendar you own.',
+
+    /** The state chip. The column holds a token; these are the words for it. */
+    states: {
+      disconnected: 'Not connected',
+      connecting: 'Waiting for consent',
+      connected: 'Connected',
+      revoked: 'Disconnected by Google',
+      demo: 'Demonstration',
+    },
+
+    /**
+     * Why it is not working, chosen from a token stored on the connection row.
+     * A cause names what stopped and what to do about it, never a status code on
+     * its own.
+     */
+    causes: {
+      never_connected:
+        'Google Calendar has never been connected here, so nothing has been read and nothing has been written.',
+      awaiting_consent:
+        'The consent page was opened and has not come back yet. Finish it in the tab that opened, or start again from here.',
+      unreachable:
+        'This Mac could not reach Google. Nothing was written, and your calendar is exactly as the write log below says it is.',
+      timeout:
+        'Google took longer than 10 seconds to answer. Nothing was written. A timeout is reported rather than looped on.',
+      not_json: 'Something answered that was not the Google Calendar API. Nothing was written.',
+      invalid_grant:
+        'Google refused the stored token permanently. That happens when access is revoked, when six months pass with no use, or when a time-limited grant ends. Reconnecting is the only fix, and nothing is retried in the meantime.',
+      deleted_client:
+        'The Google client this app uses has been deleted. Reconnecting cannot fix that: restore the client in the Google Cloud console first, on the Deleted credentials page.',
+      invalid_client:
+        'Google refused the client id or the secret on this machine. Check both in the environment file. Reconnecting will not help until they are right.',
+      rate_limited:
+        'Google asked for a pause. Nothing was written, and the changes you confirmed are still waiting.',
+      api_error: 'Google answered with an error it does not explain. Nothing was written.',
+      not_configured:
+        'No client id and no secret are set on this machine, so a live connection cannot be attempted. The demonstration account needs neither.',
+      state_mismatch:
+        'The value that came back from Google is not the one this app sent. The round trip was refused and nothing was stored.',
+      no_code: 'Google came back with no authorisation code, so there was nothing to exchange.',
+      exchange_failed:
+        'The authorisation code did not exchange for a token. It is short lived, so the usual cause is a consent page that sat open for a while. Start again and nothing is lost.',
+      missing_calendar:
+        'The identifier of the calendar this app created is missing. There is no way to look it up again, and a second calendar is never made in its place. Disconnect and connect again.',
+    },
+
+    /** What this installation is talking to, printed beside the state. */
+    modeDemo: 'the demonstration account, no client id and no network',
+    modeLive: 'your Google account',
+
+    /* ---------------- the settings card ---------------- */
+    connect: 'Connect Google Calendar',
+    connectDemo: 'Connect the demonstration account',
+    reconnect: 'Reconnect',
+    disconnect: 'Disconnect',
+    working: 'Working',
+    connectOpen: 'Opening the Google consent page. Accept it there and this screen picks it up.',
+    connected: 'Connected. Choose which calendars to read next.',
+    disconnectedNote:
+      'Disconnected. The stored token was deleted from this machine. The calendar this app created and every event in it are untouched.',
+    emptyTitle: 'Google Calendar is not connected',
+    emptyBody:
+      'Connect it once and your training week can be written into a calendar of its own, placed around what your other calendars already hold. Nothing is written without your confirmation, ever.',
+    errorTitle: 'The last calendar run did not finish',
+    errorStillWorks:
+      'Everything else on this machine is unaffected. Your training week, Today and every stored reading are exactly where they were.',
+    errorRetry: 'Try it again',
+    offline: 'This browser is offline, so the button could not reach the Mac mini. Nothing was sent.',
+    loadingLabel: 'Reading the calendar connection',
+    neverShown: 'No token and no client secret appears on this screen, in any state.',
+    reconnectTitle: 'Google needs your consent again',
+    reconnectBody:
+      'The stored token was deleted the moment Google refused it, background reads are stopped, and nothing is being retried. One reconnect puts it back.',
+    disconnectedAt: (when: string) => `Disconnected ${when}`,
+    rawErrorLabel: 'What Google answered',
+    scopesLabel: 'Access asked for',
+    scopesNote:
+      'Three and no more: the list of your calendars, when you are busy, and full access to calendars this app creates. It cannot read the title of a single event in any calendar you already own.',
+    lastAvailability: 'Availability last read',
+    neverRead: 'Availability has never been read',
+    appCalendarLabel: 'Calendar written to',
+    appCalendarNone: 'Not created yet',
+    watchedLabel: 'Calendars read for availability',
+    watchedNone: 'None chosen yet',
+    openDiff: 'Check what will change',
+
+    /* ---------------- the picker ---------------- */
+    pickTitle: 'Which calendars should be read',
+    pickBody:
+      'Busy and free times are read from the ones you tick. No title, no guest and no location ever leaves them: the only question this app asks Google is when you are not free.',
+    pickSave: 'Save the choice',
+    pickSaved: 'Saved. Availability will be read from these.',
+    pickEmptyTitle: 'No calendars came back',
+    pickEmptyBody:
+      'Google returned an empty list. That usually means the account has no calendars yet. Nothing was stored.',
+    pickPrimaryNote: 'Your own calendar. Read for availability only, never written to.',
+    pickCount: (chosen: number, total: number) => `${chosen} of ${total} chosen`,
+
+    /* ---------------- the confirm diff ---------------- */
+    diffTitle: 'Confirm the changes',
+    diffSub: 'Nothing is written yet.',
+    writtenWhereLabel: 'Written where',
+    writtenWhere: (name: string) =>
+      `Calendar ${name} only. Nothing is written to your own calendar, ever.`,
+    /** The sticky footer's own line, as `00-patterns.html` frame 4 writes it. */
+    footerSelected: (chosen: number, held: number) => {
+      const selected = chosen === 1 ? '1 change selected' : `${chosen} changes selected`;
+      if (held === 0) return `${selected}, nothing held back`;
+      return `${selected}, ${held} held back`;
+    },
+    selectAll: 'Select all',
+    clearAll: 'Clear all',
+    apply: (count: number) => (count === 1 ? 'Apply 1 change' : `Apply ${count} changes`),
+    applyNone: 'Nothing selected yet',
+    applying: 'Writing',
+    undoStays: 'Undo stays on this screen after the write, and in the log below for ever.',
+    when: (day: string, from: string, to: string) => `${day}, ${from} to ${to}`,
+    whenShort: (day: string, time: string) => `${day}, ${time}`,
+
+    /** The cause on every row, in plain words, naming the input it acted on. */
+    rowCauses: {
+      clear: (day: string, time: string) =>
+        `Placed at ${time} on ${day} because your calendars show nothing else then.`,
+      clearUnverified: (day: string, time: string, calendars: number) =>
+        calendars === 1
+          ? `Placed at ${time} on ${day}. One calendar could not be read, so this time is not confirmed clear.`
+          : `Placed at ${time} on ${day}. ${calendars} calendars could not be read, so this time is not confirmed clear.`,
+      movedBusy: (day: string, from: string, to: string) =>
+        `Moved from ${day} because your calendar shows you busy ${from} to ${to}.`,
+      movedInPlan: (day: string, time: string) =>
+        `Moved to ${day} at ${time} because you changed this session in your training week.`,
+      sessionGone: (day: string, time: string) =>
+        `Removed because the session on ${day} at ${time} is no longer in your training week.`,
+    },
+
+    /**
+     * The first row of the first plan: the calendar itself.
+     *
+     * Creating it is an outbound write like any other, so it is confirmed like
+     * any other rather than happening quietly during connect. That is what makes
+     * "every outbound write is reachable only from a confirmation" true with no
+     * exception beside it.
+     */
+    createCalendarCause:
+      'This app has no calendar of its own yet. It creates one, and every event it ever writes goes there and nowhere else.',
+
+    /* ---------------- what the diff surfaces rather than hides ---------------- */
+    failureTitle: 'One calendar could not be read',
+    failureTitleMany: (count: number) => `${count} calendars could not be read`,
+    failureRow: (name: string, reason: string) => `${name}: Google answered ${reason}`,
+    failureBody:
+      'A calendar that answers with an error returns an empty busy list, which reads exactly like a free day. It is not treated as free here: the times below are placed on what could be read, and they are not confirmed clear.',
+    unplaceableTitle: 'Nowhere free for this session',
+    unplaceableRow: (title: string, day: string, from: string, to: string) =>
+      `${title} on ${day} has nothing free in the next week: you are busy ${from} to ${to} at every time it fits.`,
+    heldBackNote: (count: number) =>
+      count === 1
+        ? '1 more change is waiting and will be offered after these are applied.'
+        : `${count} more changes are waiting and will be offered after these are applied.`,
+
+    /* ---------------- the five states on this surface ---------------- */
+    planEmptyTitle: 'Your calendar already matches your plan',
+    planEmptyBody:
+      'Every session in the next fortnight is in the calendar at the time your training week says, and there is nothing in the calendar that is not in your plan. There is nothing to write.',
+    notConnectedTitle: 'Google Calendar is not connected',
+    notConnectedBody:
+      'Connect it from Settings and your training week can be written into a calendar of its own. Your plan works exactly as it does now in the meantime.',
+    openSettings: 'Open Settings',
+    buildPlan: 'Check what will change',
+    rebuild: 'Check again',
+    checking: 'Reading your calendars',
+    builtAt: (when: string) => `Worked out ${when}`,
+    staleTitle: (when: string) => `Availability last read ${when}`,
+    staleBody:
+      'Google could not be reached, so this uses the last availability stored on this machine. Times below are placed on what was true then, and the calendar has not been touched.',
+    staleChip: 'Last stored availability',
+    errorTitleDiff: 'The changes could not be worked out',
+    errorBodyDiff:
+      'Nothing was written. Your training week and your calendar are both exactly as they were.',
+
+    /* ---------------- after the write ---------------- */
+    outcomeTitle: 'What was written',
+    outcomes: {
+      written: 'Written',
+      failed: 'Not written',
+      skipped: 'Held back',
+      undone: 'Undone',
+    },
+    appliedNote: (written: number, held: number) =>
+      held === 0
+        ? `${written} written. Nothing was held back.`
+        : `${written} written, ${held} held back and not touched.`,
+    undo: 'Undo',
+    undoing: 'Undoing',
+    undone: 'Undone',
+    undoneNote: 'Undone. The calendar is back to what the Before column showed.',
+    writeLogTitle: 'Every write this app has made',
+    writeLogNote:
+      'The log is permanent and undo stays available on every line of it, whether it was written this evening or two months ago.',
+    writeLogEmptyTitle: 'Nothing has been written yet',
+    writeLogEmptyBody:
+      'Every event this app ever writes lands here with the time it happened and an undo beside it. Nothing is written until you confirm a set of changes.',
+    writeLogRow: (verb: string, title: string) => `${verb}: ${title}`,
+    demoChip: 'Demonstration',
+    demoNote:
+      'This is the demonstration account. It runs the whole flow, picker to write to undo, against a recorded Google with no client id and no network, and every event it writes is marked as a demonstration.',
+
+    /* ---------------- what lands in the calendar ---------------- */
+    calendarName: 'Vernier training',
+    calendarDescription:
+      'Training sessions written by Vernier on this Mac. Every event here was confirmed one at a time. Nothing outside this calendar is ever changed.',
+    eventSummary: (title: string) => `Training: ${title}`,
+    eventDescription: (cause: string) =>
+      `Written by Vernier from your training week. ${cause} Undo it in the app under Train, Calendar.`,
+
+    /* ---------------- the demonstration account's own calendars ---------------- */
+    demo: {
+      primary: 'Lambert, personal',
+      family: 'Family',
+      unshared: 'Team, shared once',
+      /**
+       * What the recorded Google answers when the demonstration walks the
+       * revoked path. It is Google's own wording, kept because F109 stores the
+       * raw error body and shows it, and a demonstration that showed invented
+       * wording would teach the owner to expect something Google never says.
+       */
+      revokedDescription: 'Token has been expired or revoked.',
+      /**
+       * And what it answers a call made with a dead access token. Google's own
+       * wording again, for the same reason: a demonstration that invented the
+       * words would teach the owner to expect something Google never says.
+       */
+      invalidCredentials: 'Invalid Credentials',
+    },
   },
 
   /**

@@ -81,6 +81,29 @@ describe('the route table', () => {
     }
   });
 
+  it('calls the Google callback a gate route, and the calendar API a protected one', () => {
+    // Same reason as the Withings callback above, same class, same refusal. A
+    // top-level navigation from accounts.google.com carries no SameSite=Strict
+    // cookie, so the route cannot require a session; it validates the `state`
+    // this app minted instead and refuses everything else.
+    expect(classifyRoute('/api/integrations/google/callback')).toBe('gate');
+    expect(isOpenRoute('/api/integrations/google/callback')).toBe(true);
+
+    // AND IT IS ONE PATH, NOT A NAMESPACE. /api/calendar is where every write to
+    // Google is confirmed and applied, and it is behind the session like every
+    // other write in this app. A prefix here would have opened it.
+    for (const path of [
+      '/api/calendar',
+      '/api/integrations',
+      '/api/integrations/google',
+      '/api/integrations/google/callback/extra',
+      '/api/integrations/anything-else',
+    ]) {
+      expect(classifyRoute(path)).toBe('protected');
+      expect(isOpenRoute(path)).toBe(false);
+    }
+  });
+
   it('calls the health ingest endpoint the gate, and nothing beside it', () => {
     // It carries its own credential. A shortcut posting from Get Contents of
     // URL has no cookie jar and cannot sign in, so it presents a bearer token

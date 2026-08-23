@@ -1691,3 +1691,30 @@ html[data-theme=light]{--media-plate:#FFFFFF}
 @media (prefers-reduced-motion: reduce){
   .switch,.switch .knob{transition:none}
 }
+/* ---------- the confirm diff, screen 00 frame 4 ---------- */
+
+/*
+ * The before and after columns.
+ *
+ * Two columns at every width, including 393, because the whole claim of this
+ * block is that the owner reads what the calendar holds beside what it would
+ * hold. Stacked, they are two lists and the comparison is gone, so they stay
+ * side by side and the type steps down instead.
+ */
+.diffcols{display:flex;gap:var(--s3);align-items:flex-start}
+.diffcol{flex:1 1 0;min-width:0}
+.diffcol .lbl{margin-bottom:6px;display:block}
+.difflist{list-style:none;margin:0;padding:0}
+.difflist li{
+  padding:6px 0;
+  border-bottom:1px solid var(--line);
+  display:flex;flex-direction:column;gap:1px;
+}
+.difflist li:last-child{border-bottom:0}
+.difflist li[data-column-change=removed] .sub{text-decoration:line-through;color:var(--text-3)}
+.difflist li[data-column-change=movedTo] .note{color:var(--text-2)}
+
+/* The counts, at metric size, in the order added, moved, removed. */
+[data-confirm-counts]{margin:10px 0 0}
+[data-confirm-counts] .metric{line-height:var(--t-metric-lh)}
+[data-confirm-rowcount]{margin-top:10px}

@@ -284,6 +284,13 @@ export default async function TrainPage() {
           </div>
           <ChevronIcon className="ch" />
         </Link>
+        <Link prefetch={false} className="row value-link" href="/train/calendar">
+          <div className="stack grow">
+            <span className="head">{strings.calendar.diffTitle}</span>
+            <span className="note">{strings.calendar.sub}</span>
+          </div>
+          <ChevronIcon className="ch" />
+        </Link>
         <Link prefetch={false} className="row value-link" href="/train/media">
           <div className="stack grow">
             <span className="head">{strings.media.title}</span>

@@ -4,10 +4,13 @@
 #
 #   scripts/test-stack.sh up            start it on 127.0.0.1:3101, empty database
 #
-# It always runs Withings in demonstration mode with an empty client pair, so a
-# spec that drives connect, import and sync writes to this database and opens no
-# socket. WITHINGS_MODE can be set to live for a spec that needs the other
-# branch, and there is no id or secret here for it to use.
+# It always runs Withings and Google Calendar in demonstration mode with an
+# empty client pair, so a spec that drives connect, import, sync, a confirmed
+# diff and an undo writes to this database and opens no socket. WITHINGS_MODE
+# can be set to live for a spec that needs the other branch, and there is no id
+# or secret here for it to use. GOOGLE_DEMO_FAULT=outage restarts it with the
+# recorded Google unreachable and GOOGLE_DEMO_FAULT=revoked with the grant
+# refused, which is how those two paths are proven without a real account.
 #   scripts/test-stack.sh reset         drop and recreate the scratch database
 #   scripts/test-stack.sh rekey         restart it under a different master key
 #   scripts/test-stack.sh no-key        try to boot it with no master key, print the log
@@ -95,6 +98,11 @@ start() {
     -e WITHINGS_MODE="${WITHINGS_MODE:-demo}" \
     -e WITHINGS_CLIENT_ID="" \
     -e WITHINGS_CLIENT_SECRET="" \
+    -e GOOGLE_MODE="${GOOGLE_MODE:-demo}" \
+    -e GOOGLE_CLIENT_ID="${GOOGLE_CLIENT_ID:-}" \
+    -e GOOGLE_CLIENT_SECRET="${GOOGLE_CLIENT_SECRET:-}" \
+    -e GOOGLE_REDIRECT_URI="${GOOGLE_REDIRECT_URI:-}" \
+    -e GOOGLE_DEMO_FAULT="${GOOGLE_DEMO_FAULT:-none}" \
     -e DATABASE_URL="$(scratch_url)" \
     -e MASTER_KEY="$key" \
     -p "127.0.0.1:${PORT}:3000" \

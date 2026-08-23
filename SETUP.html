@@ -231,8 +231,14 @@ footer{color:var(--text-3);font-size:12.5px;padding:26px 0 0;border-top:1px soli
     <div class="copyline"><code id="gcb">http://localhost:3000/api/integrations/google/callback</code><button class="mini" data-copy="gcb">Copy</button></div>
     <div class="note">Localhost, not the <code>ts.net</code> name, and that is deliberate. Google exempts localhost from its HTTPS rule, while a <code>ts.net</code> redirect collides with the Authorized domains requirement in a way Google does not document for unverified apps. You will connect Google once, from a browser on this Mac. Everything after that works from the phone.</div>
     <ol class="steps" start="6" style="counter-reset:s 5">
+      <li>Open <b>Data access</b>, click <b>Add or remove scopes</b>, and add these three, exactly these three:</li>
+    </ol>
+    <div class="copyline"><code id="gscopes">https://www.googleapis.com/auth/calendar.calendarlist.readonly https://www.googleapis.com/auth/calendar.freebusy https://www.googleapis.com/auth/calendar.app.created</code><button class="mini" data-copy="gscopes">Copy</button></div>
+    <div class="note">Paste all three into the manual box, one per line or space separated. Do not add <code>.../auth/calendar</code> or <code>.../auth/calendar.events</code>: both grant write access to every calendar you own, Vernier asks for neither, and a scope declared here that the app never sends is an open permission on your account for no reason. The list in the console and the list in the code have to match exactly, and <code>docs/google-calendar.md</code> holds the same three.</div>
+    <ol class="steps" start="7" style="counter-reset:s 6">
       <li>Back under <b>Audience</b>, click <b>Publish app</b> so the status reads <b>In production</b>. <em>Leave it in Testing and Google expires your refresh token seven days after you connect</em>, and the calendar silently stops working. Unverified in production is fine for one user: you will see a warning screen once and click through it.</li>
       <li>Copy the client ID and client secret below. The secret is shown once; if lost, use <b>Add Secret</b> on the client page.</li>
+      <li>Leave <code>GOOGLE_MODE</code> at <code>demo</code> until both values are in place. In demonstration mode the whole flow runs against a recorded Google with no client id at all, so you can see the confirm screen before you connect anything real.</li>
     </ol>
     <div class="field">
       <label for="gid">Google client ID</label>

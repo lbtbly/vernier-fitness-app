@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm';
 import { getDb } from './client';
 import { integrationCredential } from './schema';
 import { WITHINGS_PROVIDER, readConnection } from './withings';
+import { SCOPE_PARAM } from '@/lib/google/scopes';
 import { openSecret, sealSecret } from '@/lib/master-key';
 import { strings } from '@/lib/strings';
 
@@ -29,10 +30,22 @@ export const INTEGRATIONS = [
     scope: 'ingest.write',
   },
   {
+    /*
+     * THE SCOPE LIST HERE IS THE ONE THE REQUEST CARRIES, imported rather than
+     * typed again.
+     *
+     * It read `calendar.events.owned calendar.freebusy calendar.calendars.own`
+     * until slice 11, which was a guess made before the research note was
+     * written and which the settings screen printed as fact. Two of those three
+     * are not scopes this app ever asks for, and one of them, `events.owned`,
+     * would authorize writing to calendars this app did not create. A second
+     * list of scopes in a repository is the drift this project has already paid
+     * for twice, so there is one list and everything reads it.
+     */
     provider: 'google_calendar',
     name: strings.settings.providers.google_calendar.name,
     purpose: strings.settings.providers.google_calendar.purpose,
-    scope: 'calendar.events.owned calendar.freebusy calendar.calendars.own',
+    scope: SCOPE_PARAM,
   },
   {
     provider: 'mail_relay',

@@ -78,6 +78,22 @@ services:
       ANTHROPIC_INPUT_USD_PER_MTOK: ${ANTHROPIC_INPUT_USD_PER_MTOK:-}
       ANTHROPIC_OUTPUT_USD_PER_MTOK: ${ANTHROPIC_OUTPUT_USD_PER_MTOK:-}
       ANTHROPIC_MAX_OUTPUT_TOKENS: ${ANTHROPIC_MAX_OUTPUT_TOKENS:-1024}
+      # Google Calendar, the same shape and for the same reason: demo answers
+      # the picker, the busy periods, the calendar and every write from a
+      # recorded Google with no socket at all, live opens one. Nothing here
+      # reached the container before slice 11, so the preflight line that reads
+      # GOOGLE_CLIENT_SECRET inside it could not have passed.
+      GOOGLE_MODE: ${GOOGLE_MODE:-demo}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-}
+      # A demonstration control and nothing else: none, outage or revoked. The
+      # second makes the recorded Google unreachable, so the screen falls back to
+      # stored availability and names the cause. The third makes it refuse the
+      # grant, so the permanent-refusal path runs. Both prove a real code path
+      # without a real Google account and without taking this machine's network
+      # away.
+      GOOGLE_DEMO_FAULT: ${GOOGLE_DEMO_FAULT:-none}
       # The connection string is assembled here so the app never needs to know
       # how the parts are stored.
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}

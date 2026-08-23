@@ -263,3 +263,50 @@ export function energyProvenance(energySource: string | null): EnergyProvenance 
     flag: 'none',
   };
 }
+
+const CALENDAR_STATE_LABELS = strings.calendar.states as Record<string, string>;
+
+/**
+ * The Google Calendar state, in words. Same door as `withingsStateLabel` above
+ * and for the same reason: five settings on a column, one place they become
+ * English, and no chip anywhere printing the token the database stores.
+ */
+export function calendarStateLabel(state: string): string {
+  return CALENDAR_STATE_LABELS[state] ?? state;
+}
+
+const CALENDAR_CAUSES = strings.calendar.causes as Record<string, string>;
+
+/**
+ * Why the calendar connection is not working, chosen from the token on the
+ * connection row.
+ *
+ * `invalid_grant`, `deleted_client` and `invalid_client` are three different
+ * sentences here rather than one, because the owner acts differently on each:
+ * the first is a reconnect, the second needs the Cloud console, and the third
+ * needs the environment file. A single "authentication failed" would send him to
+ * the wrong one two times in three.
+ */
+export function calendarCauseLine(cause: string | null): string | null {
+  if (!cause) return null;
+  return CALENDAR_CAUSES[cause] ?? null;
+}
+
+const CALENDAR_OUTCOMES = strings.calendar.outcomes as Record<string, string>;
+
+/** What one confirmed row ended as: written, not written, held back or undone. */
+export function calendarOutcomeLabel(outcome: string): string {
+  return CALENDAR_OUTCOMES[outcome] ?? outcome;
+}
+
+const CALENDAR_VERBS: Record<string, string> = {
+  added: strings.confirm.groupAdded,
+  moved: strings.confirm.groupMoved,
+  removed: strings.confirm.groupRemoved,
+  undo: strings.calendar.undone,
+};
+
+/** The verb of a diff row or a log line, in words rather than as the stored token. */
+export function calendarVerbLabel(verb: string): string {
+  return CALENDAR_VERBS[verb] ?? verb;
+}

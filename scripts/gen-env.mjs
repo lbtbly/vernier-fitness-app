@@ -45,6 +45,11 @@ const SETTINGS = [
     value: 'demo',
     note: 'Withings transport. demo runs the whole pipeline with no client id and no network, live opens a socket. See .env.example.',
   },
+  {
+    key: 'GOOGLE_MODE',
+    value: 'demo',
+    note: 'Google Calendar transport. demo runs picker, availability, calendar, diff, write and undo with no client id and no network, live opens a socket. See .env.example.',
+  },
 ];
 
 function generate(key) {

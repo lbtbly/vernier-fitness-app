@@ -273,6 +273,49 @@ export function testStackWithWithingsMode(mode: 'demo' | 'live', ...args: string
   }).trim();
 }
 
+/**
+ * The scratch instance with the recorded Google refusing to answer.
+ *
+ * F111 asks what the screen does with the calendar provider unreachable, and the
+ * answer has to be produced by an unreachable provider rather than by a mocked
+ * response: with this on, every calendar API call comes back the way a socket
+ * that never opened comes back, so the fallback to stored availability is the
+ * real one.
+ */
+export function testStackWithCalendarFault(
+  fault: 'none' | 'outage' | 'revoked',
+  ...args: string[]
+): string {
+  return execFileSync('bash', ['scripts/test-stack.sh', ...args], {
+    cwd: projectRoot,
+    encoding: 'utf8',
+    env: { ...process.env, GOOGLE_DEMO_FAULT: fault, DEMO_MODE: '1' },
+  }).trim();
+}
+
+/**
+ * The scratch instance in LIVE Google mode with a client id that is not real.
+ *
+ * The only thing it is used for is capturing the authorization URL the shipped
+ * Connect button navigates to, with the navigation blocked, so F102 and F103 are
+ * read off the request this app really builds rather than off a unit test's idea
+ * of it. No socket is opened: the browser is stopped at the redirect.
+ */
+export function testStackWithGoogleLive(clientId: string, ...args: string[]): string {
+  return execFileSync('bash', ['scripts/test-stack.sh', ...args], {
+    cwd: projectRoot,
+    encoding: 'utf8',
+    env: {
+      ...process.env,
+      DEMO_MODE: '1',
+      GOOGLE_MODE: 'live',
+      GOOGLE_CLIENT_ID: clientId,
+      GOOGLE_CLIENT_SECRET: 'not-a-real-value',
+      GOOGLE_REDIRECT_URI: 'http://127.0.0.1:3101/api/integrations/google/callback',
+    },
+  }).trim();
+}
+
 export function scratchQuery(statement: string): string {
   const oneLine = statement.replace(/\s+/g, ' ').trim();
   return execFileSync(
