@@ -462,13 +462,13 @@ describe('the suite against the owner\'s installation', () => {
    *   Slice 10 added one file and every member of the class in it was read
    *   against the same question before it was written down here.
    *
-   *   meals:209               REAL. `ai_call` at zero, on an instance where the
+   *   meals:233               REAL. `ai_call` at zero, on an instance where the
    *                           same test has just posted a real photograph at the
    *                           real endpoint and read back a 403. The table is
    *                           written by every call that succeeds, and the next
    *                           test in the file proves it non-zero, so an empty
    *                           table here is a refusal and not an absent feature.
-   *   meals:274,275           REAL, and they are the point of F93. The subject
+   *   meals:298,299           REAL, and they are the point of F93. The subject
    *                           is a file the same run put GPS into: the bytes
    *                           going in are scanned first and asserted to CARRY
    *                           a location, printed with their marker list, and
@@ -481,7 +481,7 @@ describe('the suite against the owner\'s installation', () => {
    *                           which is asserted GREATER than zero on the same
    *                           line. The screen that would have written those
    *                           rows was rendered and walked.
-   *   meals:576               REAL. Refused ledger rows that carry a cost or an
+   *   meals:708               REAL. Refused ledger rows that carry a cost or an
    *                           output token, on a table the same test prints in
    *                           full and asserts contains a refusal. The subject
    *                           is a filter over a population that is proven
@@ -489,7 +489,7 @@ describe('the suite against the owner\'s installation', () => {
    *   Slice 11 added one file and all three members of the class in it were read
    *   against the same question before they were written down here.
    *
-   *   calendar:187,188        REAL, and they are the point of the slice. The
+   *   calendar:204,205        REAL, and they are the point of the slice. The
    *                           events in the demonstration calendar and the rows
    *                           in the write log, counted WHILE THE CONFIRM DIFF
    *                           IS OPEN. Both tables can hold rows and do a few
@@ -497,7 +497,7 @@ describe('the suite against the owner\'s installation', () => {
    *                           run prints the diff's own row count first and then
    *                           the event listing afterwards, so the zero is
    *                           bracketed by a population on each side.
-   *   calendar:440            REAL. Stored Google credentials after an invalid
+   *   calendar:462            REAL. Stored Google credentials after an invalid
    *                           grant. The same table held exactly one for that
    *                           provider earlier in the same run, asserted at
    *                           f101 step one, and the test prints the connection
@@ -505,36 +505,36 @@ describe('the suite against the owner\'s installation', () => {
    *   Slice 12 added two files and every member of the class in them was read
    *   against the same question before it was written down here.
    *
-   *   review:141              REAL. Requests the email preview made, recorded by
+   *   review:169              REAL. Requests the email preview made, recorded by
    *                           a `page.on('request')` listener attached before the
    *                           reload, and the document itself is in the list the
    *                           filter removes, so an empty page would fail the
    *                           filter rather than pass it. The point of the line
    *                           is that an email client fetches nothing.
-   *   review:181              REAL. Denylist matches over the rendered screen,
+   *   review:214              REAL. Denylist matches over the rendered screen,
    *                           and the same line asserts the copy is over three
    *                           hundred characters first, so a screen that failed
    *                           to render cannot answer this zero.
-   *   push:261,267            REAL. The reminder row that was just closed, on a
+   *   push:291,297            REAL. The reminder row that was just closed, on a
    *                           list the same test counted above zero and took the
    *                           first item from. The `count === 0` branch above
    *                           returns before either line is reached and asserts
    *                           the styled empty state instead, so neither zero is
    *                           ever answered by an empty list.
-   *   push:287                REAL. Controls under 44 px, filtered out of every
+   *   push:317                REAL. Controls under 44 px, filtered out of every
    *                           button, link and input the notifications screen
    *                           renders. That screen carries eleven diagnostic
    *                           rows, four category switches and two time fields,
    *                           and the same expression logs the count it walked.
-   *   Slice 13 added one file with eleven members, and every one was read
-   *   against the same question before it was written down here. Seven of them
+   *   Slice 13 added one file with twelve members, and every one was read
+   *   against the same question before it was written down here. Eight of them
    *   are a different shape from the rest of this inventory and are worth
    *   naming: an EXIT CODE is not a count over a population, it is a verdict a
    *   process reached, and each one has that process's whole output printed
    *   beside it and asserted to contain a specific sentence.
    *
-   *   backup:105,156,191      REAL. `verify` and `restore` exiting 0, each with
-   *   backup:289,294,575      its stdout printed and asserted to contain the
+   *   backup:105,156,212      REAL. `verify` and `restore` exiting 0, each with
+   *   backup:310,315,597      its stdout printed and asserted to contain the
    *                           sentence the command prints when it has actually
    *                           done the work: "every chunk authenticated and
    *                           every member matched its digest", "every table
@@ -542,9 +542,22 @@ describe('the suite against the owner\'s installation', () => {
    *                           "every table holds exactly what the file carried".
    *                           A command that did nothing exits 2 with a usage
    *                           message and fails the sentence.
-   *   backup:161              REAL. `corrupt` exiting 0, and the file it wrote
-   *                           is verified on the next line, where it must FAIL.
-   *   backup:165              INVERTED, and it is F125 itself: `not.toBe(0)` on
+   *   backup:164              REAL, and it arrived with F125's fix. `frames`
+   *                           exiting 0, printing the chunk layout of the very
+   *                           archive the three corruptions are then made from,
+   *                           and the same block asserts the count it parsed is
+   *                           at least two. It IS the population beside those
+   *                           three failures: the swap was refused on any
+   *                           archive holding fewer than four chunks, every
+   *                           archive this instance writes holds two or three,
+   *                           and nothing in the run printed how many there
+   *                           were, so the refusal read as a test failure for a
+   *                           day.
+   *   backup:172              REAL. `corrupt` exiting 0, and the file it wrote
+   *                           is verified below, where it must FAIL with the
+   *                           code the corrupt command printed as the one it
+   *                           expects.
+   *   backup:185              INVERTED, and it is F125 itself: `not.toBe(0)` on
    *                           the exit code of a verification that has to
    *                           refuse. The pattern above matches the `.toBe(0)`
    *                           inside it; the assertion is the opposite one.
@@ -553,13 +566,18 @@ describe('the suite against the owner\'s installation', () => {
    *                           executable count is printed on the same line and
    *                           asserted above fifty. A zero over an empty PATH
    *                           fails on the count.
-   *   backup:355,356          REAL, and they are the point of F131. Both tables
+   *   backup:376,377          REAL, and they are the point of F131. Both tables
    *                           of the deleted category, counted after the
    *                           deletion, with the SAME COUNTS TAKEN AND PRINTED
    *                           BEFORE IT and asserted greater than zero. The
    *                           deletion row is then read back and asserted to
    *                           carry the before count, so the zero is bracketed
    *                           by the population on both sides.
+   *
+   *   The line numbers above are where each member sat when it was last read.
+   *   They drift whenever a spec is edited and the sweep below counts members
+   *   rather than reading them, which is why the count is the thing that fails:
+   *   a member nobody has written down here stops the suite until somebody has.
    */
   it('lets no assertion claim a zero over a population the surface cannot render', () => {
     // The one that was hollow. It is gone from /health and present on Today.
@@ -592,7 +610,7 @@ describe('the suite against the owner\'s installation', () => {
       ['calendar.spec.ts', 3],
       ['review.spec.ts', 2],
       ['push.spec.ts', 3],
-      ['backup.spec.ts', 11],
+      ['backup.spec.ts', 12],
     ]);
     // `toHaveCount(0, { timeout: 3_000 })` was invisible to this pattern until
     // slice 5 wrote one: the closing paren was required right after the zero, so
