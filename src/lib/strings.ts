@@ -2137,10 +2137,12 @@ export const strings = {
     writtenWhereLabel: 'Written where',
     writtenWhere: (name: string) =>
       `Calendar ${name} only. Nothing is written to your own calendar, ever.`,
-    footerSelected: (chosen: number, held: number) =>
-      held === 0
-        ? `${chosen} selected, nothing held back`
-        : `${chosen} selected, ${held} held back`,
+    /** The sticky footer's own line, as `00-patterns.html` frame 4 writes it. */
+    footerSelected: (chosen: number, held: number) => {
+      const selected = chosen === 1 ? '1 change selected' : `${chosen} changes selected`;
+      if (held === 0) return `${selected}, nothing held back`;
+      return `${selected}, ${held} held back`;
+    },
     selectAll: 'Select all',
     clearAll: 'Clear all',
     apply: (count: number) => (count === 1 ? 'Apply 1 change' : `Apply ${count} changes`),
