@@ -1,12 +1,15 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { IngestPanel } from '@/components/IngestPanel';
 import { OperatorPanel } from '@/components/OperatorPanel';
 import { ScreenTitle } from '@/components/ScreenTitle';
+import { BellIcon } from '@/components/icons';
 import { WithingsPanel } from '@/components/WithingsPanel';
 import { listCredentials } from '@/db/auth';
 import { readLastAcceptedBatch, readLiveCredential } from '@/db/ingest';
 import { describeIntegrations } from '@/db/integrations';
 import { readOpenQuestions } from '@/db/measurements';
+import { readSubscriptions } from '@/db/push';
 import { getConfig } from '@/lib/config';
 import { readCsrfToken } from '@/lib/csrf';
 import { deviceTypeLabel } from '@/lib/display';
@@ -24,16 +27,26 @@ export default async function SettingsPage() {
   const session = await readSession();
   if (!session) redirect('/sign-in');
 
-  const [integrations, passkeys, csrfToken, withings, questions, ingestCredential, lastBatch] =
-    await Promise.all([
-      describeIntegrations(),
-      listCredentials(session.ownerId),
-      readCsrfToken(),
-      describeConnection(),
-      readOpenQuestions(),
-      readLiveCredential(),
-      readLastAcceptedBatch(),
-    ]);
+  const [
+    integrations,
+    passkeys,
+    csrfToken,
+    withings,
+    questions,
+    ingestCredential,
+    lastBatch,
+    devices,
+  ] = await Promise.all([
+    describeIntegrations(),
+    listCredentials(session.ownerId),
+    readCsrfToken(),
+    describeConnection(),
+    readOpenQuestions(),
+    readLiveCredential(),
+    readLastAcceptedBatch(),
+    readSubscriptions(),
+  ]);
+  const subscribedDevices = devices.length;
 
   // The age of the last accepted batch, in hours, against the one threshold
   // this app has for a source going quiet. 36 falls inside a day boundary, so
@@ -142,6 +155,30 @@ export default async function SettingsPage() {
         stale={lastBatchAgeHours === null || lastBatchAgeHours >= STALE_HOURS}
         csrfToken={csrfToken}
       />
+
+      {/*
+        * Notifications, which is its own screen because it holds eleven
+        * diagnostic rows and four category switches and would swamp this one.
+        * The card states what it owns so the owner can tell from here whether
+        * it is worth opening.
+        */}
+      <section className="card" data-panel="notifications">
+        <div className="between">
+          <span className="lbl">{strings.push.title}</span>
+          <span className="src">
+            <BellIcon />
+            {subscribedDevices > 0 ? strings.push.enabled : strings.push.disabled}
+          </span>
+        </div>
+        <p className="sub" style={{ marginTop: 'var(--s2)' }}>
+          {strings.push.sub}
+        </p>
+        <div className="actions">
+          <Link className="btn block" href="/settings/notifications">
+            {strings.push.title}
+          </Link>
+        </div>
+      </section>
 
       <OperatorPanel
         integrations={integrations}

@@ -460,3 +460,33 @@ export function PlayIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+/**
+ * The envelope on the weekly review's email card, lifted from the `#mail`
+ * symbol in .forge/wireframes/11-weekly-review.html so the shipped screen and
+ * the approved wireframe draw the same shape.
+ */
+export function MailIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} aria-hidden="true" focusable="false">
+      <rect x="2.4" y="4.6" width="15.2" height="10.8" rx="2.4" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <path d="m3.4 6.4 6.6 4.6 6.6-4.6" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+/** The reminders glyph, drawn in the same two weights as the rest of the set. */
+export function BellIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} aria-hidden="true" focusable="false">
+      <path
+        d="M5.2 8.4a4.8 4.8 0 0 1 9.6 0v3.2l1.3 2.2H3.9l1.3-2.2z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      <path d="M8.2 16a1.9 1.9 0 0 0 3.6 0" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}

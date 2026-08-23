@@ -3844,6 +3844,9 @@ export const strings = {
       'A tighter calorie target. Nothing in this week asks for one, and Vernier does not move a target to look busy.',
 
     calendarLabel: 'Calendar',
+    calendarConnected: 'Google Calendar is connected',
+    calendarConnectedBody:
+      'A session you accept here is written to the dedicated calendar only after you confirm the change, line by line, on the calendar screen. Nothing on this screen writes to it.',
     calendarNotConnected: 'Google Calendar is not connected',
     calendarNotConnectedBody:
       'Once it is, the sessions you accept here are shown as a diff of exactly what would be created, moved and removed, and nothing is written until you confirm each line.',

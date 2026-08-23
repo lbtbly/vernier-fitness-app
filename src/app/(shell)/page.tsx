@@ -726,6 +726,29 @@ export default async function TodayPage() {
         </section>
       ) : null}
 
+      {/*
+        * The Sunday review, which DESIGN.md's information architecture puts on
+        * Today: "Today owns the day and the week... and the Sunday review".
+        *
+        * IT IS THE LAST CARD ON THE SCREEN AND THAT IS DELIBERATE. F27's budget
+        * is 715 pixels and it is spent by the four elements this file names at
+        * the top. This card sits below every one of them, below the trend,
+        * below adherence and below the values on file, so it spends none of it.
+        * Its own height is fixed by construction: one label, one line of copy
+        * and one 48 px control, whatever the week holds.
+        */}
+      <section className="card" data-panel="review">
+        <span className="lbl">{strings.review.title}</span>
+        <p className="sub" style={{ marginTop: 'var(--s2)' }}>
+          {strings.review.emailPreviewBody}
+        </p>
+        <div className="actions">
+          <Link className="btn block" href="/review">
+            {strings.review.open}
+          </Link>
+        </div>
+      </section>
+
       <p className="note centre" style={{ padding: '4px 20px 0' }}>
         {strings.today.closing}
       </p>
