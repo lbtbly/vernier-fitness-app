@@ -1,4 +1,3 @@
-import { strings } from '@/lib/strings';
 import type { ReviewRow, WeeklyReviewView } from '@/lib/weekly-review';
 
 /**
@@ -73,12 +72,4 @@ export function ReviewSections({ review }: { review: WeeklyReviewView }) {
       ))}
     </>
   );
-}
-
-/**
- * The nine section titles as a list, so a screen that needs to state its own
- * length can. Used by the email and by the review's own heading count.
- */
-export function sectionTitles(): string[] {
-  return Object.values(strings.review.sections);
 }

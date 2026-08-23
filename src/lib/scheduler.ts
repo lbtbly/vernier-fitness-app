@@ -35,8 +35,16 @@ import { assembleReview } from '@/lib/weekly-review';
  * tick arrived at, so a tick at the wrong hour claims the right period or none.
  */
 
-/** The five-minute sweep's name in the ledger, for the operator console. */
-export const REMINDER_SWEEP_JOB = 'reminder_sweep';
+/*
+ * THE FIVE-MINUTE SWEEP DOES NOT CLAIM A PERIOD, AND THAT IS DELIBERATE.
+ *
+ * The ledger exists so a job that must happen once per period happens once per
+ * period, and the Sunday run is that job. The sweep is different: its whole
+ * idempotency is the item state, because an item already marked `sent` is not
+ * sent again by any tick, however many of them run. Giving it a ledger row
+ * would be 288 rows a day for a mechanism it does not need, and a table that
+ * grows for no reason is a table somebody prunes badly later.
+ */
 
 /** How far back a boot will look for a period it owes. One, and F120 says why. */
 const CATCH_UP_PERIODS = 1;

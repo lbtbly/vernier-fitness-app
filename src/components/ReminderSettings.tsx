@@ -37,7 +37,7 @@ export function ReminderSettings({
   quiet: QuietHours;
 }) {
   const [rows, setRows] = useState(settings);
-  const [window, setWindow] = useState(quiet);
+  const [quietWindow, setQuietWindow] = useState(quiet);
   const [busy, setBusy] = useState<string | null>(null);
   const [saved, setSaved] = useState<string | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
@@ -62,7 +62,7 @@ export function ReminderSettings({
         return;
       }
       setRows(answer.settings);
-      if (answer.quiet) setWindow(answer.quiet);
+      if (answer.quiet) setQuietWindow(answer.quiet);
       setSaved(key);
     } catch {
       setFailure(strings.reminders.saveFailed);
@@ -94,7 +94,7 @@ export function ReminderSettings({
                   </span>
                 ) : null}
                 {enabled && category === 'session' ? (
-                  <span className="pick" style={{ marginTop: 'var(--s2)' }}>
+                  <span className="leadpick">
                     {LEADS.map((minutes) => (
                       <button
                         type="button"
@@ -127,7 +127,7 @@ export function ReminderSettings({
         })}
       </section>
 
-      <section className="card" data-quiet-hours={`${window.from}-${window.to}`}>
+      <section className="card" data-quiet-hours={`${quietWindow.from}-${quietWindow.to}`}>
         <span className="lbl">{strings.reminders.quietTitle}</span>
         <p className="sub" style={{ marginTop: 'var(--s2)' }}>
           {strings.reminders.quietBody}
@@ -139,9 +139,9 @@ export function ReminderSettings({
               className="input"
               id="quiet-from"
               type="time"
-              value={window.from}
+              value={quietWindow.from}
               disabled={busy !== null}
-              onChange={(event) => setWindow({ ...window, from: event.target.value })}
+              onChange={(event) => setQuietWindow({ ...quietWindow, from: event.target.value })}
             />
           </label>
           <label className="stack grow" htmlFor="quiet-to">
@@ -150,14 +150,14 @@ export function ReminderSettings({
               className="input"
               id="quiet-to"
               type="time"
-              value={window.to}
+              value={quietWindow.to}
               disabled={busy !== null}
-              onChange={(event) => setWindow({ ...window, to: event.target.value })}
+              onChange={(event) => setQuietWindow({ ...quietWindow, to: event.target.value })}
             />
           </label>
         </div>
         <p className="note" data-quiet-window>
-          {strings.reminders.quietWindow(window.from, window.to)}
+          {strings.reminders.quietWindow(quietWindow.from, quietWindow.to)}
         </p>
         <div className="actions">
           <button
@@ -165,9 +165,9 @@ export function ReminderSettings({
             className="btn block"
             data-setting-action="quiet"
             disabled={busy !== null}
-            onClick={() => void post({ quiet: window }, 'quiet')}
+            onClick={() => void post({ quiet: quietWindow }, 'quiet')}
           >
-            {strings.reminders.quietTitle}
+            {strings.reminders.saveQuiet}
           </button>
         </div>
       </section>

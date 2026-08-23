@@ -126,8 +126,8 @@ async function gather(csrfToken: string): Promise<PushFacts> {
 
 function Row({ row, answered }: { row: PushCheckRow; answered: boolean }) {
   return (
-    <div className="row" data-check={row.id} data-check-state={row.state}>
-      <span className="tap" aria-hidden="true">
+    <div className="row checkrow" data-check={row.id} data-check-state={row.state}>
+      <span className="mark-slot" aria-hidden="true">
         {row.state === 'passed' ? <OkIcon /> : row.state === 'failed' ? <CloseIcon /> : null}
       </span>
       <div className="stack grow">

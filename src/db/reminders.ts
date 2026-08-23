@@ -18,7 +18,6 @@ import {
   REMINDER_CATEGORIES,
   type ReminderCategory,
   type ReminderSetting,
-  isReminderCategory,
   planSweep,
 } from '@/lib/reminders';
 import { strings } from '@/lib/strings';
@@ -436,6 +435,3 @@ export async function runReminderSweep(
     delivery: { ok: true, sentTo: result.sent, removed: result.removed },
   };
 }
-
-/** Whether a string names one of the four. The routes ask before they write. */
-export { isReminderCategory };

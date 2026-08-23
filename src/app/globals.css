@@ -1526,3 +1526,40 @@ html[data-theme=light]{--media-plate:#FFFFFF}
 .mediarow{display:flex;flex-direction:column;gap:2px;padding:10px 0;border-bottom:1px solid var(--line)}
 .mediarow:last-child{border-bottom:0}
 .mediarow .head{font-size:var(--t-body);line-height:var(--t-body-lh)}
+
+/* ---------------------------------------------------------------------------
+ * Slice 12. The reminder lead picker and the diagnostic rows.
+ *
+ * `.pick` is defined twice in this stylesheet, once horizontal and once
+ * vertical, and the second wins. Neither shape is right for five short lead
+ * times, so this is its own class rather than a third redefinition of a name
+ * two screens already rely on.
+ * ------------------------------------------------------------------------ */
+.leadpick{display:flex;gap:6px;flex-wrap:wrap;margin-top:var(--s2)}
+.leadpick button{
+  flex:0 1 auto;min-height:var(--touch);padding:0 12px;
+  border-radius:10px;
+  border:1px solid var(--line-2);
+  background:var(--surface-2);
+  color:var(--text-2);
+  font:inherit;font-size:var(--t-sub);
+  cursor:pointer;
+}
+.leadpick button[aria-pressed=true]{
+  background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600;
+}
+.leadpick button:disabled{opacity:.5;cursor:default}
+
+/*
+ * One diagnostic row. The icon slot is fixed so eleven rows line up whatever
+ * their state, and the row keeps the 44 px floor even when its glyph is absent,
+ * which is what a not-checked row draws.
+ */
+.checkrow{align-items:flex-start}
+.checkrow .mark-slot{
+  width:20px;height:20px;flex:none;margin-top:2px;display:flex;align-items:center;justify-content:center;
+}
+.checkrow .mark-slot svg{width:18px;height:18px}
+.checkrow[data-check-state=passed] .mark-slot{color:var(--good)}
+.checkrow[data-check-state=failed] .mark-slot{color:var(--alert)}
+.checkrow[data-check-state=not-checked] .mark-slot{color:var(--text-3)}

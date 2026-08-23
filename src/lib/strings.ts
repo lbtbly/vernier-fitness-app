@@ -3675,6 +3675,7 @@ export const strings = {
     quietTo: 'Until',
     quietWindow: (from: string, to: string) => `silent from ${from} until ${to}`,
     saved: 'Saved.',
+    saveQuiet: 'Save the quiet window',
     saveFailed: 'That change was not stored.',
     on: 'On',
     off: 'Off',
