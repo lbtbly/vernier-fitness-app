@@ -97,3 +97,4 @@ Triaged by /doc-health. Checked = handled.
 - [ ] 2026-08-22 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `src/components/Queue.tsx`
 - [ ] 2026-08-22 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `src/app/(shell)/page.tsx`
 - [ ] 2026-08-23 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `scripts/checks.sh`
+- [ ] 2026-08-23 ⚠️ Potential personal data → check GDPR compliance (minimization, retention, consent) — `.forge/PROCESS.md`
