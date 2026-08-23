@@ -1,5 +1,48 @@
 # Resume
 
+## HANDOFF, 2026-08-23. Read this block, then PROCESS.md, then carry on.
+
+**Phase:** 8 BUILD and 9 VERIFY, iterating. The run is armed; `.forge/ARMED` exists. The greenlight is closed and is never re-opened.
+
+**Checked: 41 of 166.** Slices 1, 2 and 3 closed. Slice 4 closed but for the defects below.
+
+**Next action:** finish the stabilisation dispatch in flight, then run slices 5 onward in parallel worktrees per PROCESS.md.
+
+### In flight when this was written
+
+One builder, stabilising before slice 5. Four items: add the missing `lint` script and make the gate fail loudly when a step it names is absent; diagnose the passkey regression and say whether it is test or product; fix F31's unclickable chart point; restore the owner's goal date through the shipped form. It must show **three consecutive clean full runs** before slice 5 starts. If its tree is dirty on resume, let it land or reset to `8af1417` and re-dispatch.
+
+### Open defects, by line
+
+| Line | Severity | What |
+|---|---|---|
+| **R7** | high, now the largest risk to finishing | `passkey.spec.ts:130` failed five consecutive times at the second authentication, three isolated, with no request reaching the origin, so the ceremony dies in the page before it posts. Was a flake, now reproducible. **F9 is ticked; if the product regressed, F9 is wrong and gets un-ticked, not quietly repaired.** The suite also degraded 72, 71, 70, 66 across four runs on one tree. |
+| **F31** | medium | The average series' dot covers the newest weight dot on Health, so the two-tap provenance walk cannot start. Ticked line, defect arriving. |
+| **F29** | medium, plus a data change | The seeded goal reads 76.0 kg on 2027-06-30 where the seed writes 2027-03-30. A test died before its restore. Two taps on the Health goal form, not SQL. |
+| **F23** | open | First-ever waist could not be typed; fix landed at `f5bff8a`/`cb8887e`, not yet verified. |
+| **C5** | open | The typing race and the 40 px target; same fix, not yet verified. |
+| **F24** | low, latent | When the origin answers a queued write with one of `PARK_ON`'s six statuses the offline line vanishes and the chip claims Stored on a row that does not exist. No shipped request produces those statuses today. |
+| **C2** | high, owner action | See below. |
+| **F27** | note, not a failure | The maxima sum leaves 24 px of slack. Anything wanting its own element above the trend has 24 px. |
+| **F34** | low | The sweep's regex does not reach `expect(query(...)).toBe('0')`; 16 such assertions exist and all 16 are real today. |
+| **C9** | not slice 4's | Moved to slice 8 by the architect; it names the session player. |
+
+### Owner actions, with their ordering
+
+1. **Clear the two `device_observation` rows BEFORE launching Vernier from the Home Screen.** They read true from a headless test browser and **cannot be corrected by any shipped path**: the upsert ORs `true` in and coalesces the first timestamp, so a fabricated true is permanent and, once he launches on top of it, indistinguishable from the real signal. C2 can never be honestly ruled otherwise. Command already given to him. The lead attempted it and the permission classifier refused, correctly.
+2. **Decide about the fabricated waist row `f636c7bf-aee7-4127-b3b1-26b178ab378e`**, 99.0 cm, manual, not seed, before slice 5 imports real Withings history. It is the only non-seed row on the install and becomes indistinguishable from real waist history the moment that runs. Removal needs a truncate and re-seed at a psql prompt, which is the capability slice 3 deliberately removed from the suite.
+3. Optional, low: two published `SharedShortcut` records named "Test" under his Apple ID, from a research probe. Remove via Stop Sharing in the Shortcuts app.
+
+### The defect class to carry into every remaining slice
+
+**Five instances of a check that passes by not checking**, four found by a verifier attacking the check rather than the code, none by the suite: an offline test with service workers blocked; a string checker never wired into the gate; an assertion over an empty population; `fill()` instead of typing, which hid an unusable field for four rounds; and a `lint` step that does not exist. When a check is green, ask what it would take for it to be red.
+
+### State files, all current
+
+`PROCESS.md` (the process change), `GOAL.md`, `BRIEF.md`, `DESIGN.md`, `PLAN.md`, `DOD.md` (166 lines, 41 checked), `PREFLIGHT.md`, `EVIDENCE.md`, `DEFECTS.md`, `AMENDMENTS.md` (A1 to A6; A4 and A5 edited DOD.md and both came out tighter), `RULING-SLICE-3.md`, `RULING-SLICE-4.md`, `GREENLIGHT.md`.
+
+---
+
 ## Read `.forge/PROCESS.md` first. The process changed on 2026-08-23.
 
 Set by the owner after slice 4. The bar is unchanged: 166 lines, PASS at one hundred percent, no line softened. Three things change.
