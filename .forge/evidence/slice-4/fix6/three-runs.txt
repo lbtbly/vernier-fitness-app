@@ -1,0 +1,18 @@
+Three consecutive full end-to-end runs, all projects, on one tree.
+
+run 1    72 passed (5.3m),   1 skipped, 0 failed, 0 did not run
+run 2    72 passed (5.0m),   1 skipped, 0 failed, 0 did not run
+run 3    72 passed (5.2m),   1 skipped, 0 failed, 0 did not run
+
+The one skip is the same one in all three and is the documented engine
+split: layout.spec.ts's accessibility-tree half needs the DevTools
+protocol, so it stands down in WebKit and chrome-layout runs it, green, as
+test 72 of every run. No serial sibling was left unrun in any of them.
+
+The three lines this dispatch was sent at, read out of all three runs:
+  F27    sum   679 px  against a fold of 715 px      (unmoved by the .row fix)
+  F31    a weight dot reached /value/demo_weight_on_2026-08-23
+  F29    restored to 76|2027-03-30
+
+Unit: 15 files, 140 tests, all passed.
+Gate: five steps, each one named by the gate that ran it, exit 0.
