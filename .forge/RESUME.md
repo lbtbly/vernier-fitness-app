@@ -1,5 +1,14 @@
 # Resume
 
+## Read `.forge/PROCESS.md` first. The process changed on 2026-08-23.
+
+Set by the owner after slice 4. The bar is unchanged: 166 lines, PASS at one hundred percent, no line softened. Three things change.
+
+1. **Scoped re-verify. Never re-rule a ticked line.** A re-verify rules the defect list, the slice's own `Closes:` ids, and any line still unchecked. Nothing else. The final full-scope pass proves all 166 on the finished product. The lead drifted from this by adding "re-confirm the ticked lines underneath" to dispatch after dispatch, and that drift is most of this run's wall-clock.
+2. **Parallelize independent slices** in git worktrees, one builder per tree, migrations numbered on merge.
+3. **One verdict line per slice** to the owner. Full reporting only for his data, his actions, rubric amendments, and a defect class worth carrying.
+
+
 Name: Vernier. Chosen 2026-08-21 by the naming workflow, recorded in BRIEF.md with its reasoning and in DESIGN.md with its mark. Every later phase uses it: manifest, Home Screen label, push titles, the Sunday email, the docs, and WEBAUTHN_RP_NAME.
 
 Owner decisions, taken 2026-08-21, binding:
