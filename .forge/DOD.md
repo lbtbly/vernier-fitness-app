@@ -317,28 +317,28 @@ advance, so the budget does not have to be re-argued once per slice.
 - [ ] **F66.** The movement catalogue holds at least 30 movements, each with cue
   text and a bundled still or animation that renders with the network disabled.
   Evidence: the count, and a capture of five movement cards offline.
-- [ ] **F67.** Every media record carries source URL, author or source name,
+- [x] **F67.** Every media record carries source URL, author or source name,
   verification date, licence or embedding mode, and its movement; a record with a
   null author is rejected at write. Evidence: the table definition, the full
   record listing, and the rejected insert.
-- [ ] **F68.** Embedding is restricted to an allowlist held as data, not code: a
+- [x] **F68.** Embedding is restricted to an allowlist held as data, not code: a
   URL outside it is refused in the editorial screen with a named reason, the
   embedded player is a privacy-enhanced iframe fetched by the browser, no element
   is drawn over it, and no downloaded video file exists in the repository.
   Evidence: the refusal capture, the player markup, and a repository scan for
   media file extensions.
-- [ ] **F69.** The readiness gate asks the three screening inputs and the
+- [x] **F69.** The readiness gate asks the three screening inputs and the
   published symptom list, and neither PAR-Q+ text nor a derivative of it appears
   anywhere in the repository. Evidence: the gate capture and a repository search
   for the PAR-Q+ question strings.
-- [ ] **F70.** Heart-rate guidance renders as ranges, never point targets, derived
+- [x] **F70.** Heart-rate guidance renders as ranges, never point targets, derived
   from Tanaka with a maximum of 181 at age 38, using percent heart-rate reserve
   when a resting heart rate is stored and percent maximum when it is not, and never
   both on one screen. The only in-session intensity control is the talk-test
   ceiling. No live heart-rate tracking, no five-zone dial, no readiness score and
   no injury-risk number exists anywhere in the app. Evidence: two captures, one per
   anchoring method, plus a repository search for the excluded terms.
-- [ ] **F71.** A proposed session longer than 110 percent of the longest session in
+- [x] **F71.** A proposed session longer than 110 percent of the longest session in
   the past 30 days is flagged as a plain fact naming the percentage, with no risk
   number attached, and no acute-chronic workload ratio is computed or stored.
   Evidence: the flag capture and a repository search plus a schema search for the
@@ -350,22 +350,22 @@ advance, so the budget does not have to be re-argued once per slice.
   the whole week: rejecting one leaves the others untouched. Evidence: the capture,
   the spacing check over the generated week, and the row states after one
   rejection.
-- [ ] **F73.** Progression advances a movement only when the owner exceeded the
+- [x] **F73.** Progression advances a movement only when the owner exceeded the
   rep target by 2 or more on the last set in two consecutive sessions, is proposed
   and confirmed rather than applied, and the interface states that the size of the
   increment is convention rather than measured. Evidence: two proposals over seeded
   histories that do and do not meet the trigger, plus the stated sentence.
-- [ ] **F74.** The session player runs with the network disabled, derives elapsed
+- [x] **F74.** The session player runs with the network disabled, derives elapsed
   and remaining time from wall-clock timestamps, and after 60 seconds backgrounded
   shows the correct remaining time. Nothing interrupts an open session: no rating
   prompt, no permission prompt, no upsell, no in-app banner. Evidence: the offline
   run, the backgrounding capture, and a driven full session recording every dialog
   raised.
-- [ ] **F75.** Last week's working load or duration for the open movement renders
+- [x] **F75.** Last week's working load or duration for the open movement renders
   inside the set without navigation, and an easier variant, a harder variant and a
   movement substitution are each one tap away without ending the session.
   Evidence: four captures.
-- [ ] **F76.** Voice cues are primed inside the session-start tap, every spoken
+- [x] **F76.** Voice cues are primed inside the session-start tap, every spoken
   cue has a visible equivalent on screen, and the mute control silences speech
   while leaving the visual cue. Evidence: the primed utterance in the tap handler,
   and captures with sound on and muted.
@@ -376,7 +376,7 @@ advance, so the budget does not have to be re-argued once per slice.
   sessions reduces volume and never advances the movement. No licensed effort-scale
   anchor wording appears in the repository. Evidence: the capture, the two seeded
   histories with and without repeated pain, and the repository search.
-- [ ] **F78.** The food table holds at least 2,298 rows carrying energy, protein,
+- [x] **F78.** The food table holds at least 2,298 rows carrying energy, protein,
   carbohydrate, fat and fibre, names its publisher and its table version on the
   data-sources screen, and stores a missing nutrient as null which renders as
   "unknown" and never as 0. Evidence: the row count, the screen, and a capture of a
@@ -384,11 +384,11 @@ advance, so the budget does not have to be re-argued once per slice.
 - [ ] **F79.** Energy computed from macronutrients where the published value is
   absent is stored with a computed marker, and the marker is visible one tap from
   the number. Evidence: the row and the capture.
-- [ ] **F80.** Daily targets compute from the Mifflin-St Jeor equation with an
+- [x] **F80.** Daily targets compute from the Mifflin-St Jeor equation with an
   activity level from the published 1.40 to 1.90 bands: for 38 years, male, 183 cm,
   89.0 kg the resting figure is 1849 kcal and the total at level 1.55 is 2866 kcal,
   both within 1 kcal. Evidence: the computed values and the capture.
-- [ ] **F81.** A target below the estimated resting figure raises a caution
+- [x] **F81.** A target below the estimated resting figure raises a caution
   naming it; a target below 1500 kcal is blocked until explicitly confirmed on a
   screen that recommends a professional; a planned loss above 0.89 kg per week is
   refused and the nearest compliant rate is offered. Evidence: three captures.
@@ -396,17 +396,17 @@ advance, so the budget does not have to be re-argued once per slice.
   fibre with no decimal place on any macronutrient, energy rounded to the nearest
   10 when computed from ingredients and to the nearest 25 when estimated. Evidence:
   captures of one computed and one estimated meal.
-- [ ] **F83.** Allergy, intolerance, exclusion and preference are four distinct
+- [x] **F83.** Allergy, intolerance, exclusion and preference are four distinct
   stored rules: adding nuts as a preference and shellfish as an exclusion produces
   two different behaviours, and no query path resolves one as the other. Evidence:
   the schema, and a test asserting the two rules never share a code path.
-- [ ] **F84.** No generated menu contains molluscs, crustaceans or other
+- [x] **F84.** No generated menu contains molluscs, crustaceans or other
   shellfish. Evidence: a generated four-week menu checked against the ingredient
   denylist, with the check output and zero matches.
-- [ ] **F85.** Every dairy item in a generated menu offers a lactose-free
+- [x] **F85.** Every dairy item in a generated menu offers a lactose-free
   alternative, and choosing it recomputes the meal's macronutrients. Evidence: the
   capture before and after a swap with both macro sets.
-- [ ] **F86.** A week of breakfasts, weekday lunches and at-home dinners
+- [x] **F86.** A week of breakfasts, weekday lunches and at-home dinners
   generates, each meal is accepted, edited or rejected one at a time, and the
   generator honours the configured maximum cooking time: two generations at 20 and
   60 minutes produce different menus and neither exceeds its limit. Evidence: both
