@@ -64,6 +64,23 @@ export const GATE_PATHS: string[] = [
   '/api/auth/passkey/authentication/options',
   '/api/auth/passkey/authentication/verify',
   '/sign-in/recover',
+  /**
+   * The Withings consent page coming back, and it is on this list rather than
+   * the public one because it refuses rather than answers.
+   *
+   * The session cookie is `SameSite=Strict`, which is right and stays. A
+   * top-level navigation from `account.withings.com` is cross-site, so the
+   * browser sends no cookie with it, and a protected route would answer the
+   * owner's own consent with a 401 while the authorization code expires 30
+   * seconds later. What stands in for the session is the `state` this app
+   * minted: its SHA-256 sits on the connection row, the comparison is constant
+   * time, and the pair is spent whatever the outcome. No state, no write, 403.
+   *
+   * It issues no session and it never will, which is the one thing
+   * scripts/route-table.mjs grades a gate route on, and with no parameters at
+   * all it answers 400.
+   */
+  '/api/withings/callback',
   /*
    * The Apple Health ingest endpoint, and it is in this class for the mirror of
    * the reason the four above are.

@@ -40,6 +40,11 @@ const SETTINGS = [
     value: '1',
     note: 'Demonstration seed. 1 writes six marked rows on boot, 0 writes nothing. See .env.example.',
   },
+  {
+    key: 'WITHINGS_MODE',
+    value: 'demo',
+    note: 'Withings transport. demo runs the whole pipeline with no client id and no network, live opens a socket. See .env.example.',
+  },
 ];
 
 function generate(key) {

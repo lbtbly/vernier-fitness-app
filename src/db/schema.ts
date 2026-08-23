@@ -327,6 +327,26 @@ export const measurement = pgTable(
     sourceRecordId: text('source_record_id')
       .notNull()
       .references(() => sourceRecord.id),
+    /**
+     * The identifier the origin gave this measure, when it gave one. Null on
+     * everything the owner typed, because a tape measure has no identifier.
+     *
+     * Withings writes `grpid:type` here, and the unique index below is what
+     * makes the same measure arriving a second time an insert that does
+     * nothing rather than a second row. It CANNOT be an upsert: the trigger
+     * above refuses UPDATE, and `INSERT ... ON CONFLICT DO UPDATE` fires the
+     * same trigger. `.forge/AMENDMENTS.md` A1 records the ruling. A re-import
+     * that disagrees appends a correction or raises a question, and both carry
+     * their own key qualified by the modification instant that produced them,
+     * so running the same import twice is a no-op at both levels.
+     */
+    externalKey: text('external_key'),
+    /**
+     * The `modified` this row was written from, in unix seconds. It is what
+     * "arriving with a newer modification time" is read against, and a column
+     * beats parsing it back out of a key.
+     */
+    externalModified: bigint('external_modified', { mode: 'number' }),
     rootId: text('root_id').notNull(),
     correctsId: text('corrects_id'),
     correctionIndex: integer('correction_index').notNull().default(0),
@@ -362,6 +382,23 @@ export const measurement = pgTable(
     index('measurement_metric_measured_at').on(table.metric, table.measuredAt),
     index('measurement_root').on(table.rootId, table.correctionIndex),
     index('measurement_source').on(table.source),
+    /*
+     * The importer's whole idempotency, in one index.
+     *
+     * `(source, external_key)`, exactly as A1 names it. Postgres treats NULLs
+     * as distinct in a unique index, so every hand-typed row keeps a null key
+     * and none of them collides with any other; a Withings row carries
+     * `grpid:type` and the second arrival of that measure is an INSERT that
+     * conflicts and does nothing. It cannot be an upsert, because the
+     * append-only trigger fires on `ON CONFLICT DO UPDATE` exactly as it fires
+     * on a bare UPDATE.
+     *
+     * The source is in the key on purpose. A demonstration import writes
+     * `source = 'demo'` and a real one writes `source = 'withings'`, so
+     * connecting the real scale later cannot collide with the demonstration
+     * history: they are different facts and they are allowed to coexist.
+     */
+    uniqueIndex('measurement_source_external_key').on(table.source, table.externalKey),
     /*
      * The linkage, enforced by Postgres rather than by a handler. A seeded
      * measurement can only point at a seeded source record and a real one can
@@ -519,6 +556,7 @@ export const writeRequest = pgTable(
 
 /**
  * ---------------------------------------------------------------------------
+ * Withings. Slice 5.
  * Apple Health ingest. Slice 6.
  *
  * The iPhone pushes and this machine never pulls, so everything below describes
@@ -548,6 +586,76 @@ export const writeRequest = pgTable(
  * score or a number about injury risk.
  * ---------------------------------------------------------------------------
  */
+
+/**
+ * One row, forever, holding everything about the Withings connection that is
+ * not a credential.
+ *
+ * THE CREDENTIAL IS NOT HERE. The token bundle lives sealed in
+ * `integration_credential`, encrypted with the master key, and the two rows are
+ * written inside one transaction so a rotated refresh token can never be
+ * stranded from the access token it arrived with. That split is what makes the
+ * transaction real: a single-row write is atomic whether or not anybody meant
+ * it to be, and F37 asks for a guarantee rather than an accident.
+ *
+ * Everything on this row is safe on a screen: no token, no client secret, no
+ * account identifier. The Withings user id stays inside the sealed bundle,
+ * because F42 forbids it on the status screen and the surest way to keep it off
+ * a screen is to keep it out of every column a screen can read.
+ *
+ * `cursor` is max(modified) over what has been COMMITTED, in unix seconds, and
+ * it is the last thing an import writes. The whole reason it is a stored fact
+ * rather than the `updatetime` a response reported is that a crash between
+ * fetch and commit must not be able to skip a row: a cursor derived from data
+ * already in this database cannot name a measure this database does not hold.
+ */
+export const withingsConnection = pgTable('withings_connection', {
+  /** Always 'withings'. One row, the same way the owner is one row. */
+  id: text('id').primaryKey(),
+  /** 'demo' or 'live'. Read off the environment on every connect, stored so a screen can say it. */
+  mode: text('mode').notNull(),
+  /** 'disconnected', 'connecting', 'connected', 'expiring', 'revoked' or 'demo'. */
+  state: text('state').notNull(),
+  cursor: bigint('cursor', { mode: 'number' }),
+  accessExpiresAt: timestamp('access_expires_at', { withTimezone: true }),
+  refreshRotatedAt: timestamp('refresh_rotated_at', { withTimezone: true }),
+  connectedAt: timestamp('connected_at', { withTimezone: true }),
+  lastSyncStartedAt: timestamp('last_sync_started_at', { withTimezone: true }),
+  lastSuccessfulSyncAt: timestamp('last_successful_sync_at', { withTimezone: true }),
+  /** The source record the last batch wrote, so the status card can link to it. */
+  lastBatchId: text('last_batch_id'),
+  /** Counters the status screen prints. Cumulative, never reset by a failure. */
+  rowsStored: integer('rows_stored').notNull().default(0),
+  rowsSeen: integer('rows_seen').notNull().default(0),
+  groupsDropped: integer('groups_dropped').notNull().default(0),
+  questionsRaised: integer('questions_raised').notNull().default(0),
+  /**
+   * Why the last attempt did not work, as a TOKEN and never as a sentence. A
+   * cause the owner reads is chosen in `src/lib/display.ts` from the string
+   * catalogue, because a database value painted onto a chip is the defect C6
+   * was rewritten over.
+   */
+  lastFailureKind: text('last_failure_kind'),
+  /** The envelope status that came with it, for the operator and never for a screen. */
+  lastFailureStatus: integer('last_failure_status'),
+  /**
+   * The SHA-256 of the `state` this app put on the authorize URL, never the
+   * value. A callback whose state does not hash to this is refused, and a
+   * backup of this table therefore carries nothing replayable.
+   */
+  authStateHash: text('auth_state_hash'),
+  authStateIssuedAt: timestamp('auth_state_issued_at', { withTimezone: true }),
+  /**
+   * The day the demonstration account's history is generated back from, and the
+   * stage it is in. Both are stored so the dataset is a pure function of this
+   * row: the same anchor gives the same dates on the next boot and on the boot
+   * after a fortnight away, exactly as the demonstration seed does.
+   */
+  demoAnchorDay: text('demo_anchor_day'),
+  demoStage: text('demo_stage'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
 
 /**
  * ---------------------------------------------------------------------------

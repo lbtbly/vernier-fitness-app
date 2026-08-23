@@ -3,6 +3,11 @@
 # installation: first run, a wrong master key, a missing one.
 #
 #   scripts/test-stack.sh up            start it on 127.0.0.1:3101, empty database
+#
+# It always runs Withings in demonstration mode with an empty client pair, so a
+# spec that drives connect, import and sync writes to this database and opens no
+# socket. WITHINGS_MODE can be set to live for a spec that needs the other
+# branch, and there is no id or secret here for it to use.
 #   scripts/test-stack.sh reset         drop and recreate the scratch database
 #   scripts/test-stack.sh rekey         restart it under a different master key
 #   scripts/test-stack.sh no-key        try to boot it with no master key, print the log
@@ -68,6 +73,9 @@ start() {
     -e WEBAUTHN_RP_NAME=Vernier \
     -e TZ="$(app_env TZ)" \
     -e DEMO_MODE="${DEMO_MODE:-0}" \
+    -e WITHINGS_MODE="${WITHINGS_MODE:-demo}" \
+    -e WITHINGS_CLIENT_ID="" \
+    -e WITHINGS_CLIENT_SECRET="" \
     -e DATABASE_URL="$(scratch_url)" \
     -e MASTER_KEY="$key" \
     -p "127.0.0.1:${PORT}:3000" \

@@ -1,7 +1,7 @@
 import type { Notice } from '@/components/Notices';
 import { ScaleIcon, WarnIcon, WaveIcon } from '@/components/icons';
 import type { SourceFreshness } from '@/db/trends';
-import { sourceLabel } from '@/lib/display';
+import { sourceLabel, withingsCauseLine } from '@/lib/display';
 import { shortDateTime } from '@/lib/format';
 import { strings } from '@/lib/strings';
 
@@ -32,13 +32,26 @@ export function staleAge(freshness: SourceFreshness): string {
   return strings.provenance.staleLabel(label, Math.floor(hours / 24));
 }
 
-/** What stopped, in words, and never a status code on its own. */
+/**
+ * What stopped, in words, and never a status code on its own.
+ *
+ * F43 asks that a Withings adapter nobody can reach be named BY CAUSE, and "the
+ * scale last synced on Friday" is an age wearing a cause's clothes: it says
+ * when the silence started and nothing about why. The connection records the
+ * reason as a token, `src/lib/display.ts` finds the sentence for it, and the
+ * age still follows on the same line. With no recorded cause the age is all
+ * there is to say, and saying only that is honest.
+ */
 export function staleCause(freshness: SourceFreshness, timeZone: string): string {
-  if (!freshness.lastAt) return strings.stale.notConnected(sourceLabel(freshness.source));
+  const cause = freshness.source === 'withings' ? withingsCauseLine(freshness.lastError) : null;
+  if (!freshness.lastAt) {
+    return cause ?? strings.stale.notConnected(sourceLabel(freshness.source));
+  }
   const when = shortDateTime(freshness.lastAt, timeZone);
-  return freshness.source === 'withings'
-    ? strings.stale.scaleCause(when)
-    : strings.stale.shortcutCause(when);
+  if (freshness.source === 'withings') {
+    return cause ? strings.stale.scaleCauseWith(cause, when) : strings.stale.scaleCause(when);
+  }
+  return strings.stale.shortcutCause(when);
 }
 
 /** The chip: the age, in the warn treatment, beside the card it belongs to. */

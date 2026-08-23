@@ -1,9 +1,11 @@
 import { once } from '@/db/idempotency';
 import {
+  answerImportQuestion,
   appendCorrection,
   readChain,
   readLogSnapshot,
   readMeasurement,
+  readQuestion,
   storeMeasurement,
   toView,
 } from '@/db/measurements';
@@ -108,6 +110,7 @@ async function handle(request: Request) {
     timeZone?: unknown;
     values?: unknown;
     correctsId?: unknown;
+    questionId?: unknown;
     rawValue?: unknown;
     reason?: unknown;
   };
@@ -119,6 +122,101 @@ async function handle(request: Request) {
 
   const config = getConfig();
   const timeZone = usableTimeZone(body.timeZone, config.timeZone);
+
+  // An answer to an import question, which is a correction that names the
+  // question it settles. A2 in .forge/AMENDMENTS.md: F26 raised questions that
+  // no code path could ever close, so a disagreeing re-import left a permanent
+  // warning on Today. Same route, same key, same anti-forgery check, because an
+  // answer is a write like any other and a second endpoint is a second thing to
+  // protect.
+  if (body.action === 'answer') {
+    const questionId = typeof body.questionId === 'string' ? body.questionId.trim() : '';
+    const rawValue = typeof body.rawValue === 'string' ? body.rawValue.trim() : '';
+    const typed = typeof body.reason === 'string' ? body.reason.trim() : '';
+    if (questionId === '' || rawValue === '') {
+      return refuse(
+        422,
+        strings.api.log.answerNeedsQuestion,
+        strings.api.log.answerNeedsQuestionDetail,
+      );
+    }
+
+    const { handled: settled } = await once(key, '/api/log#answer', async () => {
+      const question = await readQuestion(questionId);
+      if (!question) {
+        return {
+          outcome: 'refused' as const,
+          handled: {
+            status: 404,
+            body: {
+              error: strings.api.log.answerQuestionGone(questionId),
+              detail: strings.api.log.answerQuestionGoneDetail,
+            } as Record<string, unknown>,
+          },
+        };
+      }
+
+      // The same gate the quick log's own values pass. An answer is a permanent
+      // row in a table that refuses DELETE, so it is checked like one.
+      const checked = validate({ metric: question.metric, rawValue });
+      if (!checked.ok) {
+        return {
+          outcome: 'refused' as const,
+          handled: {
+            status: 422,
+            body: {
+              error: strings.api.log.answerRefused,
+              detail: checked.detail,
+            } as Record<string, unknown>,
+          },
+        };
+      }
+
+      const result = await answerImportQuestion({
+        id: crypto.randomUUID(),
+        questionId,
+        rawValue,
+        value: checked.value,
+        // The reason is frozen on the row at write time, so it names the
+        // question whatever else the owner wrote. His own words come first.
+        reason: typed === ''
+          ? strings.api.log.answerReason(questionId)
+          : `${typed} ${strings.api.log.answerReason(questionId)}`,
+        timeZone,
+      });
+
+      if (!result.answered) {
+        return {
+          outcome: 'refused' as const,
+          handled: {
+            status: 409,
+            body: {
+              error: strings.api.log.answerQuestionGone(questionId),
+              detail: strings.api.log.answerQuestionGoneDetail,
+            } as Record<string, unknown>,
+          },
+        };
+      }
+
+      const chain = await readChain(result.row.rootId);
+      return {
+        outcome: 'applied' as const,
+        handled: {
+          status: 201,
+          body: {
+            answered: {
+              questionId: result.question.id,
+              answer: result.question.answer,
+              answeredAt: result.question.answeredAt?.toISOString() ?? null,
+            },
+            corrected: toView(result.row),
+            chain: chain.map((entry) => toView(entry)),
+          } as Record<string, unknown>,
+        },
+      };
+    });
+    return ok(settled.body, settled.status);
+  }
 
   // An edit. It appends and it never overwrites, so the original and every
   // correction before this one stay exactly where they are and stay readable.

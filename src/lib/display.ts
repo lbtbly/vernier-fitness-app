@@ -135,6 +135,34 @@ export function sleepLabel(minutes: number): string {
   return strings.signals.sleepDuration(Math.floor(whole / 60), String(whole % 60).padStart(2, '0'));
 }
 
+const WITHINGS_STATE_LABELS = strings.withings.states as Record<string, string>;
+
+/**
+ * The Withings state, in words. Five settings on a column and one place they
+ * become English, exactly as a source, a confidence and an integration state
+ * do above. A chip printing the column value is the defect C6 was rewritten
+ * over, and this is the door that keeps it shut.
+ */
+export function withingsStateLabel(state: string): string {
+  return WITHINGS_STATE_LABELS[state] ?? state;
+}
+
+const WITHINGS_CAUSES = strings.withings.causes as Record<string, string>;
+
+/**
+ * Why the connection is not working, in the owner's language, chosen from the
+ * token the connection row stores.
+ *
+ * A cause names what stopped and what to do about it. A status code alone names
+ * neither, and the panel's first finding was that silence is the failure mode:
+ * the operator found a dead token by noticing a flat gap four days later, which
+ * is the worst possible signal because he was not looking for it.
+ */
+export function withingsCauseLine(cause: string | null): string | null {
+  if (!cause) return null;
+  return WITHINGS_CAUSES[cause] ?? null;
+}
+
 const MOVEMENT_COPY = strings.movement as Record<string, { name: string; cue: string }>;
 
 /**

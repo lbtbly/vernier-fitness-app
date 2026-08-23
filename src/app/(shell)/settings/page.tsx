@@ -2,15 +2,18 @@ import { redirect } from 'next/navigation';
 import { IngestPanel } from '@/components/IngestPanel';
 import { OperatorPanel } from '@/components/OperatorPanel';
 import { ScreenTitle } from '@/components/ScreenTitle';
+import { WithingsPanel } from '@/components/WithingsPanel';
 import { listCredentials } from '@/db/auth';
 import { readLastAcceptedBatch, readLiveCredential } from '@/db/ingest';
 import { describeIntegrations } from '@/db/integrations';
+import { readOpenQuestions } from '@/db/measurements';
 import { getConfig } from '@/lib/config';
 import { readCsrfToken } from '@/lib/csrf';
 import { deviceTypeLabel } from '@/lib/display';
 import { hoursBetween, longDate, shortDateTime, time24 } from '@/lib/format';
 import { readSession } from '@/lib/session';
 import { strings } from '@/lib/strings';
+import { describeConnection } from '@/lib/withings/service';
 import { STALE_HOURS } from '@/lib/trend';
 
 export const metadata = { title: strings.settings.title };
@@ -21,13 +24,16 @@ export default async function SettingsPage() {
   const session = await readSession();
   if (!session) redirect('/sign-in');
 
-  const [integrations, passkeys, csrfToken, ingestCredential, lastBatch] = await Promise.all([
-    describeIntegrations(),
-    listCredentials(session.ownerId),
-    readCsrfToken(),
-    readLiveCredential(),
-    readLastAcceptedBatch(),
-  ]);
+  const [integrations, passkeys, csrfToken, withings, questions, ingestCredential, lastBatch] =
+    await Promise.all([
+      describeIntegrations(),
+      listCredentials(session.ownerId),
+      readCsrfToken(),
+      describeConnection(),
+      readOpenQuestions(),
+      readLiveCredential(),
+      readLastAcceptedBatch(),
+    ]);
 
   // The age of the last accepted batch, in hours, against the one threshold
   // this app has for a source going quiet. 36 falls inside a day boundary, so
@@ -97,6 +103,22 @@ export default async function SettingsPage() {
           {strings.settings.passkeysNote}
         </p>
       </section>
+
+      {/*
+        * The scale, before the credential list.
+        *
+        * `12-settings-integrations.html` frame 1 puts Withings first among the
+        * integrations and gives it a status line, a cause and two actions of
+        * its own, and this is the card that draws them. The generic list below
+        * still carries all four providers, because that is where a credential
+        * is entered and the other three have nothing else yet.
+        */}
+      <WithingsPanel
+        view={withings}
+        timeZone={config.timeZone}
+        csrfToken={csrfToken}
+        openQuestions={questions.length}
+      />
 
       {/*
         * The Apple Health card, above the generic integration list because it

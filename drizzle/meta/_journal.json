@@ -57,6 +57,13 @@
       "when": 1787481838220,
       "tag": "0007_wave_a",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1787482970591,
+      "tag": "0008_withings",
+      "breakpoints": true
     }
   ]
 }

@@ -256,6 +256,13 @@ body{
 .chip.g{color:var(--good);border-color:var(--good);background:var(--good-soft)}
 .chip.w{color:var(--warn);border-color:var(--warn);background:var(--warn-soft)}
 .chip.a{color:var(--alert);border-color:var(--alert);background:var(--alert-soft)}
+/*
+ * The dotted chip, from 12-settings-integrations.html, which draws the
+ * demonstration state that way. Neutral chrome and never a colour: a
+ * demonstration connection has not failed at anything, and --warn and --alert
+ * are reserved for something that needs attention and something that broke.
+ */
+.chip.d{border-style:dotted}
 
 .banner{
   display:flex;

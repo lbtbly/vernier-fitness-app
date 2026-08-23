@@ -48,7 +48,7 @@ export default defineConfig({
   projects: [
     {
       name: 'webkit-iphone',
-      testIgnore: /focus\.spec\.ts|service-worker\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|launch-report\.spec\.ts|notices\.spec\.ts|ingest\.spec\.ts|labs-scratch\.spec\.ts|nutrition\.spec\.ts|shopping\.spec\.ts|catalogue-offline\.spec\.ts|train-week\.spec\.ts|session-player\.spec\.ts|console-walk\.spec\.ts/,
+      testIgnore: /focus\.spec\.ts|service-worker\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|launch-report\.spec\.ts|notices\.spec\.ts|withings\.spec\.ts|ingest\.spec\.ts|labs-scratch\.spec\.ts|nutrition\.spec\.ts|shopping\.spec\.ts|catalogue-offline\.spec\.ts|train-week\.spec\.ts|session-player\.spec\.ts|console-walk\.spec\.ts/,
       use: { ...devices['Desktop Safari'], viewport: { width: 393, height: 852 }, deviceScaleFactor: 3 },
     },
     {
@@ -125,6 +125,15 @@ export default defineConfig({
       // evidence of a device, so the suite writes it here, where nobody will
       // ever read it as evidence of anything.
       //
+      // withings.spec.ts joined it in slice 5, and it is the clearest case yet.
+      // Every test in it WRITES: connect stores a token, the historical import
+      // lands three hundred rows, and the answer path appends a correction.
+      // `measurement` refuses DELETE, so none of that can be taken back out,
+      // and the owner's install holds the only copy of anything real in this
+      // product. scripts/test-stack.sh starts this instance with
+      // WITHINGS_MODE=demo and an empty client pair, so the spec opens no
+      // socket either: what it drives is the demonstration dataset, which is
+      // the whole of what F36 asks to be proven.
       // nutrition.spec.ts and shopping.spec.ts joined it in slice 9, and they
       // are the largest arrivals so far. Everything those two grade is a write:
       // a target row, a generated week, twenty-six meal decisions, a confirmed
@@ -159,7 +168,7 @@ export default defineConfig({
       // attribute relaxed, so WebKit will carry it over loopback too, and it
       // grades its fold in both engines against one database.
       name: 'chrome-scratch',
-      testMatch: /launch-report\.spec\.ts|notices\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|ingest\.spec\.ts|labs-scratch\.spec\.ts|nutrition\.spec\.ts|shopping\.spec\.ts|train-week\.spec\.ts|session-player\.spec\.ts|console-walk\.spec\.ts/,
+      testMatch: /launch-report\.spec\.ts|notices\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|withings\.spec\.ts|ingest\.spec\.ts|labs-scratch\.spec\.ts|nutrition\.spec\.ts|shopping\.spec\.ts|train-week\.spec\.ts|session-player\.spec\.ts|console-walk\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         channel: 'chrome',

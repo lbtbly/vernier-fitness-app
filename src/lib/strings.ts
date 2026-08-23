@@ -381,6 +381,16 @@ export const strings = {
       failedDetail:
         'Nothing was stored and nothing was changed. Try again; if it keeps failing, the Mac mini is the place to look.',
       alreadyApplying: 'This write is already being applied under the same idempotency key.',
+      /** A2's answer path, which is a correction with a question named on it. */
+      answerNeedsQuestion: 'That answer names no question.',
+      answerNeedsQuestionDetail:
+        'Open the value from Today and answer it there. Nothing was written.',
+      answerQuestionGone: (id: string) => `There is no open question ${id} to answer.`,
+      answerQuestionGoneDetail:
+        'It was answered already, or this screen is older than the database. Open Today again.',
+      answerRefused: 'That answer was not stored.',
+      /** Frozen on the correction row at write time, the way every dedup reason is. */
+      answerReason: (id: string) => `Answers import question ${id}.`,
     },
 
     correction: {
@@ -389,6 +399,29 @@ export const strings = {
       lead: 'The value on file has not moved and nothing was written.',
       chip: 'Failed',
       retry: 'Try again',
+    },
+
+    withings: {
+      bodyDetail: 'Open Settings and press the button again. Nothing was written.',
+      unknownAction: 'That is not something the Withings connection does.',
+      unknownActionDetail:
+        'Connect, import, sync, test and disconnect are the five. Nothing was written.',
+      notConfigured: 'This machine has no Withings credentials.',
+      notConfiguredDetail:
+        'Set WITHINGS_CLIENT_ID and WITHINGS_CLIENT_SECRET in the environment file and restart, or run the demonstration account, which needs neither.',
+      notConnected: 'The scale is not connected.',
+      notConnectedDetail: 'Connect it first. Nothing was read and nothing was written.',
+      noCode: 'Withings came back with no authorisation code.',
+      noCodeDetail: 'Start the connection again from Settings. Nothing was stored.',
+      stateMismatch: 'That callback was refused.',
+      stateMismatchDetail:
+        'The value returned does not match the one this app sent, so the round trip was not this app asking. Nothing was stored.',
+      exchangeFailed: 'The authorisation code did not exchange for a token.',
+      exchangeFailedDetail:
+        'The code lives 30 seconds. Start the connection again and accept the consent page without waiting.',
+      failed: 'That Withings run did not finish.',
+      failedDetail:
+        'Nothing was written and the cursor did not move, so the next sync asks the same question. Every reading already stored is unchanged.',
     },
 
     bootstrap: {
@@ -1039,6 +1072,10 @@ export const strings = {
       otherWins: (params: { source: string; value: string }) =>
         `${params.source} ${params.value} is the better reading for that day, so this one was not stored.`,
       firstOfDay: () => 'The first reading of this metric on this day.',
+      importedFirst: (params: { source: string; key: string }) =>
+        `The first time ${params.source} sent measure ${params.key}.`,
+      importRevised: (params: { source: string; from: string; to: string }) =>
+        `${params.source} revised this measure from ${params.from} to ${params.to}. The value before it is still readable.`,
     },
     /**
      * The whole id, never a slice of one. Eight characters of a UUID reads as
@@ -1047,6 +1084,13 @@ export const strings = {
      * original months later, so it names something they can search for.
      */
     correctionOf: (id: string) => `Corrects the reading ${id}, which stays readable.`,
+    /**
+     * A correction the owner did not type. It is frozen on the row at write
+     * time exactly as a hand-written reason is, and it names who revised it,
+     * because "corrected by you" on a row nobody touched is the app lying about
+     * its own history.
+     */
+    revisedByImport: (source: string) => `${source} sent a revised value for this measure.`,
     seeded: 'Seeded. Nothing else described this metric on this day.',
 
     valueSheetTitle: 'Value',
@@ -1114,6 +1158,26 @@ export const strings = {
       'source.field.correctedTo': 'Corrected to',
       'source.field.correctionOf': 'Correction of',
       'source.field.reason': 'Reason',
+      /**
+       * What one Withings batch carried, on the source screen. Every one of
+       * these is a line the owner can read after the fact to answer "did that
+       * import drop something", which is the question a source screen exists
+       * for and the question no per-integration screen ever gets asked twice.
+       */
+      'source.field.mode': 'Ran against',
+      'source.field.typeFilter': 'Types requested',
+      'source.field.category': 'Category',
+      'source.field.pages': 'Pages fetched',
+      'source.field.groupsReceived': 'Measure groups',
+      'source.field.groupsDropped': 'Groups dropped whole',
+      'source.field.bloodPressureDropped': 'Dropped as blood pressure',
+      'source.field.cursorFrom': 'Read from',
+      'source.field.cursorTo': 'Cursor now',
+      'source.field.duplicates': 'Already stored',
+      'source.field.revised': 'Revised in place',
+      'source.field.questions': 'Questions raised',
+      'source.field.refusedByStorage': 'Refused by the store',
+      'source.field.envelopeStatus': 'Envelope status',
     },
     allSourcesLabel: 'Sources, one chip each',
     allSourcesNote:
@@ -1297,6 +1361,16 @@ export const strings = {
       hours === 1 ? `${source}, 1 hour old` : `${source}, ${hours} hours old`,
     shortcutCause: (when: string) => `The iPhone shortcut last sent a batch on ${when}.`,
     scaleCause: (when: string) => `The scale last synced on ${when}.`,
+    /**
+     * The scale's silence, named by what caused it rather than by its age.
+     *
+     * F43 asks that a Withings adapter nobody can reach be named BY CAUSE on
+     * Today and on Health, and "the scale last synced on Friday" is an age
+     * wearing a cause's clothes. The connection records why the last attempt
+     * failed as a token, and this turns that token into the sentence, with the
+     * age still beside it in the chip.
+     */
+    scaleCauseWith: (cause: string, when: string) => `${cause} The last reading arrived on ${when}.`,
     notConnected: (source: string) =>
       `${source} is not connected, so nothing has arrived and nothing is being estimated in its place.`,
     fresh: (source: string, when: string) => `${source} last sent a reading on ${when}.`,
@@ -1710,6 +1784,154 @@ export const strings = {
     raisedAt: 'Raised',
     openCount: (count: number) =>
       count === 1 ? '1 import is waiting on you' : `${count} imports are waiting on you`,
+
+    /**
+     * The answer, which had nowhere to be written until now.
+     *
+     * `.forge/AMENDMENTS.md` A2: a question could be raised and never closed,
+     * so a disagreeing re-import left a warning on Today that the owner could
+     * do nothing about. That is the same failure the panel named from the other
+     * side, the app telling him something is wrong and giving him no move.
+     * Picking or typing here writes a correction that names the question, and
+     * the question closes with what he chose recorded on it.
+     */
+    answerTitle: 'Answer it',
+    answerBody:
+      'Pick the number that is right, or type a different one. What you choose is written as a correction naming this question, and every value before it stays readable.',
+    choiceLabel: 'Which number stands',
+    keepStored: 'Keep your correction',
+    takeIncoming: 'Take the import',
+    typeAnother: 'Type a different number',
+    provenanceLine: (source: string, when: string) => `${source}, ${when}`,
+    answerValueLabel: (unit: string) =>
+      unit === '' ? 'The number that stands' : `The number that stands, in ${unit}`,
+    answerReasonLabel: 'Why, in your own words',
+    answerReasonDefault: 'Answered an import question.',
+    save: 'Answer and close this question',
+    saving: 'Answering',
+    answered: (value: string) => `Answered. ${value} stands and this question is closed.`,
+    answerFailedTitle: 'That answer was not written',
+    answerFailedLead: 'Nothing changed. Try again, or open the value and correct it directly.',
+    answerRetry: 'Try again',
+    closedTitle: 'This question is closed',
+    closedBody: (value: string, when: string) =>
+      `You answered on ${when} and ${value} stands. The correction it wrote is in the history below.`,
+  },
+
+  /**
+   * Withings, on the status screen and in the words a failed sync gets.
+   *
+   * Everything here is a state or a cause. No token, no secret and no account
+   * identifier has a key in this section, because nothing on that screen may
+   * render one and the surest way to keep a value off a screen is to give it no
+   * way to become a sentence.
+   */
+  withings: {
+    title: 'Withings Body Smart',
+    purpose:
+      'Weight, fat ratio, fat mass, fat-free mass, muscle, bone, body water and standing heart rate, from the scale.',
+    /** The state chip. The column holds a token; these are the words for it. */
+    states: {
+      disconnected: 'Not connected',
+      connecting: 'Waiting for consent',
+      connected: 'Connected',
+      expiring: 'Expiring',
+      revoked: 'Revoked',
+      demo: 'Demonstration',
+    },
+    /**
+     * Why it is not working, chosen from a token stored on the connection row.
+     * A cause names what stopped and what to do about it, never a status code
+     * on its own.
+     */
+    causes: {
+      never_connected:
+        'The scale has never been connected here, so nothing has arrived and nothing is being estimated in its place.',
+      awaiting_consent:
+        'The consent page was opened and has not come back yet. The authorisation code Withings issues lives 30 seconds, so if this has been sitting a while, start again.',
+      unreachable:
+        'This Mac could not reach Withings. Nothing was written, and every reading already stored is exactly where it was.',
+      timeout:
+        'Withings took longer than 10 seconds to answer. Nothing was written. A timeout is retried once and then reported rather than looped on.',
+      not_json: 'Something answered that was not the Withings API. Nothing was written.',
+      reconnect:
+        'Withings refused the stored token, and refused it again after one refresh. Reconnecting is the only fix: the public API has no way to revive a dead refresh token.',
+      rate_limited:
+        'Withings asked for a pause. The next attempt waits and tries again, and nothing was lost.',
+      api_error: 'Withings answered with an error it does not explain. Nothing was written.',
+      not_configured:
+        'No client id and no secret are set on this machine, so a live connection cannot be attempted. The demonstration account needs neither.',
+      state_mismatch:
+        'The value that came back from Withings is not the one this app sent. The round trip was refused and nothing was stored.',
+      no_code: 'Withings came back with no authorisation code, so there was nothing to exchange.',
+      exchange_failed:
+        'The authorisation code did not exchange for a token. It lives 30 seconds, so the usual cause is a slow consent page.',
+      page_cap:
+        'The history is longer than one run walks. The rest arrives on the next sync, from the cursor this one left.',
+    },
+    /** What this installation is talking to, printed on the batch record. */
+    modeDemo: 'the demonstration account, no network',
+    modeLive: 'your Withings account',
+
+    lastSync: 'Last successful sync',
+    neverSynced: 'No successful sync yet',
+    readingsStored: 'Readings stored',
+    readingsSeen: 'Measures received',
+    groupsDropped: 'Groups dropped whole',
+    cursorLabel: 'Read up to',
+    cursorNever: 'Nothing read yet',
+    sinceLabel: (count: number) => (count === 1 ? '1 reading stored' : `${count} readings stored`),
+    lastSyncLine: (when: string, count: number) =>
+      count === 1 ? `Last sync ${when}, 1 reading stored` : `Last sync ${when}, ${count} readings stored`,
+
+    connect: 'Connect the scale',
+    connectDemo: 'Connect the demonstration account',
+    reconnect: 'Reconnect',
+    importHistory: 'Import the history',
+    syncNow: 'Sync now',
+    test: 'Test',
+    disconnect: 'Disconnect',
+    working: 'Working',
+
+    connected: 'Connected. Import the history next.',
+    connectOpen: 'Opening the Withings consent page. Accept it there and this screen picks it up.',
+    imported: (stored: number, seen: number) =>
+      `Imported. ${stored} readings stored out of ${seen} measures received.`,
+    synced: (stored: number) =>
+      stored === 1 ? 'Synced. 1 new reading stored.' : `Synced. ${stored} new readings stored.`,
+    nothingNew: 'Synced. Withings has nothing new since the last read.',
+    revisedNote: (count: number) =>
+      count === 1
+        ? '1 reading was revised, and the value before it is still readable.'
+        : `${count} readings were revised, and the values before them are still readable.`,
+    questionsNote: (count: number) =>
+      count === 1
+        ? '1 import disagrees with a correction you made. It is waiting on Today.'
+        : `${count} imports disagree with corrections you made. They are waiting on Today.`,
+    droppedNote: (count: number) =>
+      count === 1
+        ? '1 measure group was dropped whole because it carried blood pressure.'
+        : `${count} measure groups were dropped whole because they carried blood pressure.`,
+    testPassed: 'The connection answered and the token opened. Nothing was written.',
+    testWrote: 'The connection answered. Nothing was written; this only asks.',
+    disconnectedNote:
+      'Disconnected. The stored token was deleted. Every reading it ever imported stays exactly where it is.',
+
+    openBatch: 'Open the last sync',
+    emptyTitle: 'The scale is not connected',
+    emptyBody:
+      'Connect it once and every weigh-in after that arrives on its own. Nothing is estimated in the meantime and no number is invented to fill the gap.',
+    errorTitle: 'The last Withings run did not finish',
+    errorStillWorks:
+      'Everything else on this machine is unaffected. Today and Health still render every other source, and the readings already stored are unchanged.',
+    errorRetry: 'Try it again',
+    loading: 'Reading the connection',
+    offline: 'This browser is offline, so the button could not reach the Mac mini. Nothing was sent.',
+    bloodPressureNote:
+      'Blood pressure is refused twice on the way in. A measure group carrying it is dropped whole, so the heart rate beside it is never harvested, and the store refuses any type outside the eight this app asks for even when the fetch is bypassed.',
+    neverShown:
+      'No token, no client secret and no account identifier appears on this screen, in any state.',
+    scopeNote: 'One scope is requested and it is the one body composition rides on.',
   },
 
   /**
@@ -1961,6 +2183,13 @@ export const strings = {
   unitNames: {
     kg: 'kg',
     cm: 'cm',
+    /**
+     * DESIGN.md fixes kg, cm, km, kcal and g and then adds "the printed
+     * laboratory unit", and slice 4 already extended the same rule to the units
+     * a watch reports: bpm, ms, mL/kg/min. A fat ratio is a percentage and this
+     * follows that precedent rather than inventing a kilogram for it.
+     */
+    '%': 'per cent',
     km: 'km',
     kcal: 'kcal',
     g: 'g',
@@ -1975,8 +2204,9 @@ export const strings = {
     'µg/L': 'µg/L',
     /* The laboratory units, kept as the sheet prints them. C6 allows the
        printed laboratory unit and nothing else, so each symbol has a key here
-       rather than being concatenated onto a number in a component. */
-    '%': '%',
+       rather than being concatenated onto a number in a component.
+       Per cent is not repeated here: this map is the SPOKEN form and it
+       already keys '%' as "per cent" above. */
     'U/L': 'U/L',
     'IU/L': 'IU/L',
     'UI/L': 'UI/L',
@@ -1993,6 +2223,7 @@ export const strings = {
   units: {
     kg: 'kg',
     cm: 'cm',
+    '%': '%',
     km: 'km',
     kcal: 'kcal',
     g: 'g',
@@ -2005,7 +2236,6 @@ export const strings = {
     'mmol/L': 'mmol/L',
     'g/L': 'g/L',
     'µg/L': 'µg/L',
-    '%': '%',
     'U/L': 'U/L',
     'IU/L': 'IU/L',
     'UI/L': 'UI/L',
@@ -2545,6 +2775,14 @@ export const strings = {
     hrv: 'Heart rate variability',
     vo2_max: 'VO2 max',
     weight_average_7d: 'Weight, 7-day average',
+    /** The seven the scale sends beside the weight. */
+    fat_mass: 'Fat mass',
+    fat_free_mass: 'Fat-free mass',
+    fat_ratio: 'Fat ratio',
+    muscle_mass: 'Muscle mass',
+    bone_mass: 'Bone mass',
+    body_water: 'Body water',
+    standing_heart_rate: 'Standing heart rate',
     /* The thirteen analytes slice 7 seeds into `lab_analyte`. Their labels are
        words a person reads, so they are keys here; a fourteenth analyte the
        owner adds carries the name HE typed and comes out of the database, which

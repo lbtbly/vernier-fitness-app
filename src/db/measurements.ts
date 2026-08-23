@@ -11,7 +11,9 @@ import {
   decideDedup,
   orderChain,
   sameDay,
+  whatStands,
 } from '@/lib/provenance';
+import { getConfig } from '@/lib/config';
 import type { LogSnapshot, MeasurementView } from '@/lib/measurement-view';
 import { strings } from '@/lib/strings';
 
@@ -119,8 +121,11 @@ async function candidatesFor(metric: string, measuredAt: Date): Promise<StoredCa
   }));
 }
 
-export async function upsertSourceRecord(input: SourceRecordInput): Promise<void> {
-  const db = getDb();
+export async function upsertSourceRecord(
+  input: SourceRecordInput,
+  executor?: Executor,
+): Promise<void> {
+  const db = executor ?? getDb();
   await db
     .insert(sourceRecord)
     .values({
@@ -229,6 +234,20 @@ export type CorrectionInput = {
 };
 
 /**
+ * Anything that can run a query: the pool, or one transaction on it.
+ *
+ * It exists so answering an import question can close the question and append
+ * the correction it wrote inside one transaction, without a second copy of the
+ * only door into `measurement`. A crash between those two writes would leave a
+ * question the owner already answered still sitting on Today, or a closed
+ * question with no correction behind it, and both are the app disagreeing with
+ * itself about what he did.
+ */
+type Database = ReturnType<typeof getDb>;
+type Transaction = Parameters<Parameters<Database['transaction']>[0]>[0];
+export type Executor = Database | Transaction;
+
+/**
  * An edit, which is an insert. The original keeps its row, its number and its
  * source forever, and after three edits the chain holds four rows.
  *
@@ -236,16 +255,20 @@ export type CorrectionInput = {
  * happened to be looking at, so two edits raised from two stale screens still
  * produce a chain and never a fork.
  */
-export async function appendCorrection(input: CorrectionInput): Promise<MeasurementRow> {
-  const db = getDb();
-  const anchor = await readMeasurement(input.correctsId);
+export async function appendCorrection(
+  input: CorrectionInput,
+  executor?: Executor,
+): Promise<MeasurementRow> {
+  const db = executor ?? getDb();
+  const anchor = await readMeasurement(input.correctsId, db);
   if (!anchor) throw new Error(strings.api.log.correctionTargetGone(input.correctsId));
 
-  const chain = await readChain(anchor.rootId);
+  const chain = await readChain(anchor.rootId, db);
   const current = orderChain(chain).at(-1)!;
 
   const sourceRecordId = `src_${input.id}`;
-  await upsertSourceRecord({
+  await upsertSourceRecord(
+    {
     id: sourceRecordId,
     source: 'manual',
     kind: 'manual_entry',
@@ -255,9 +278,11 @@ export async function appendCorrection(input: CorrectionInput): Promise<Measurem
       { key: 'source.field.correctedFrom', value: current.rawValue },
       { key: 'source.field.correctedTo', value: input.rawValue },
       { key: 'source.field.correctionOf', value: current.id },
-      { key: 'source.field.reason', value: input.reason },
-    ],
-  });
+        { key: 'source.field.reason', value: input.reason },
+      ],
+    },
+    db,
+  );
 
   const [row] = await db
     .insert(measurement)
@@ -293,15 +318,18 @@ export async function appendCorrection(input: CorrectionInput): Promise<Measurem
   return row;
 }
 
-export async function readMeasurement(id: string): Promise<MeasurementRow | undefined> {
-  const db = getDb();
+export async function readMeasurement(
+  id: string,
+  executor?: Executor,
+): Promise<MeasurementRow | undefined> {
+  const db = executor ?? getDb();
   const [row] = await db.select().from(measurement).where(eq(measurement.id, id));
   return row;
 }
 
 /** Every row of one value's history, oldest first. The original is always index 0. */
-export async function readChain(rootId: string): Promise<MeasurementRow[]> {
-  const db = getDb();
+export async function readChain(rootId: string, executor?: Executor): Promise<MeasurementRow[]> {
+  const db = executor ?? getDb();
   const rows = await db
     .select()
     .from(measurement)
@@ -356,32 +384,134 @@ export async function readCurrentValues(limit = 40): Promise<MeasurementRow[]> {
  * same thing while six rows existed and stopped being it the moment a six-week
  * series landed: twelve rows of weight, one per morning, under a label saying
  * "on file". One row per metric is what that label always meant.
+ *
+ * Which one per metric is `compareStanding`, not the clock. On a day holding
+ * both a seeded reading and a measured one this card used to print the
+ * fabricated weight with a Demonstration chip while the measured weight sat in
+ * the table unshown, which is the archive answering the wrong question.
+ * `.forge/AMENDMENTS.md` A7.
  */
-export async function readLatestPerMetric(): Promise<MeasurementRow[]> {
+export async function readLatestPerMetric(
+  timeZone: string = getConfig().timeZone,
+): Promise<MeasurementRow[]> {
   const rows = await readCurrentValues(400);
-  const byMetric = new Map<string, MeasurementRow>();
+  const byMetric = new Map<string, MeasurementRow[]>();
   for (const row of rows) {
-    const held = byMetric.get(row.metric);
-    if (!held || row.measuredAt.getTime() > held.measuredAt.getTime()) byMetric.set(row.metric, row);
+    const held = byMetric.get(row.metric) ?? [];
+    held.push(row);
+    byMetric.set(row.metric, held);
   }
-  return [...byMetric.values()].sort(
-    (left, right) => right.measuredAt.getTime() - left.measuredAt.getTime(),
-  );
+  return [...byMetric.values()]
+    .map((held) => whatStands(held, timeZone)!)
+    .sort((left, right) => right.measuredAt.getTime() - left.measuredAt.getTime());
 }
 
-/** The last value of one metric, corrections applied. Null when there has never been one. */
-export async function readLatestOfMetric(metric: string): Promise<MeasurementRow | null> {
+/**
+ * The last value of one metric, corrections applied. Null when there has never
+ * been one.
+ *
+ * This is what the quick-log sheet opens its waist control from, so a seeded
+ * reading winning the day here is the number the owner steps up and down from.
+ * The comparator decides, then the chain resolves.
+ */
+export async function readLatestOfMetric(
+  metric: string,
+  timeZone: string = getConfig().timeZone,
+): Promise<MeasurementRow | null> {
   const db = getDb();
   const rows = await db
     .select()
     .from(measurement)
     .where(eq(measurement.metric, metric))
     .orderBy(desc(measurement.measuredAt))
-    .limit(12);
-  if (rows.length === 0) return null;
-  const newest = rows[0];
+    .limit(24);
+  const newest = whatStands(rows, timeZone);
+  if (!newest) return null;
   const chain = await readChain(newest.rootId);
   return orderChain(chain).at(-1) ?? newest;
+}
+
+export type ImportQuestionRow = typeof importQuestion.$inferSelect;
+
+export type AnswerInput = {
+  /** The id of the correction this answer writes. Also the write's idempotency key. */
+  id: string;
+  questionId: string;
+  rawValue: string;
+  value: number | null;
+  /** The owner's own words, or the catalogue line when he wrote none. */
+  reason: string;
+  timeZone: string;
+};
+
+export type AnswerResult =
+  | { answered: true; question: ImportQuestionRow; row: MeasurementRow }
+  | { answered: false; reason: 'gone' | 'closed'; question: ImportQuestionRow | null };
+
+/**
+ * Answering an import question, which is the half `.forge/AMENDMENTS.md` A2
+ * found missing.
+ *
+ * F26 was met and proven: a re-import that disagrees with a correction raises a
+ * question holding both values and writes nothing. What had no code path at all
+ * was the answer. `state` permitted 'answered', nothing ever set it, and a
+ * warning the owner could not clear is its own version of the failure the panel
+ * named, the app telling him something is wrong and giving him no move.
+ *
+ * ONE TRANSACTION, TWO WRITES, AND THE ORDER MATTERS. The question is claimed
+ * first, with `state = 'open'` in the WHERE clause, so two taps on a slow
+ * connection cannot both write a correction: the second claims nothing and says
+ * the question is already closed. Then the correction appends through the same
+ * door every other correction in this product goes through, inside the same
+ * transaction, so there is no window in which one exists without the other.
+ */
+export async function answerImportQuestion(input: AnswerInput): Promise<AnswerResult> {
+  const db = getDb();
+  return db.transaction(async (tx) => {
+    const [existing] = await tx
+      .select()
+      .from(importQuestion)
+      .where(eq(importQuestion.id, input.questionId));
+    if (!existing) return { answered: false, reason: 'gone', question: null };
+
+    const [claimed] = await tx
+      .update(importQuestion)
+      .set({ state: 'answered', answeredAt: new Date(), answer: input.rawValue })
+      .where(and(eq(importQuestion.id, input.questionId), eq(importQuestion.state, 'open')))
+      .returning();
+    if (!claimed) return { answered: false, reason: 'closed', question: existing };
+
+    const row = await appendCorrection(
+      {
+        id: input.id,
+        correctsId: existing.measurementId,
+        rawValue: input.rawValue,
+        value: input.value,
+        reason: input.reason,
+        timeZone: input.timeZone,
+      },
+      tx,
+    );
+    return { answered: true, question: claimed, row };
+  });
+}
+
+export async function readQuestion(id: string): Promise<ImportQuestionRow | undefined> {
+  const db = getDb();
+  const [row] = await db.select().from(importQuestion).where(eq(importQuestion.id, id));
+  return row;
+}
+
+/** Every question raised against one chain, open or answered, newest first. */
+export async function readQuestionsForChain(rootId: string): Promise<ImportQuestionRow[]> {
+  const db = getDb();
+  const chain = await readChain(rootId);
+  if (chain.length === 0) return [];
+  return db
+    .select()
+    .from(importQuestion)
+    .where(inArray(importQuestion.measurementId, chain.map((row) => row.id)))
+    .orderBy(desc(importQuestion.raisedAt));
 }
 
 export async function readOpenQuestions() {
@@ -450,7 +580,9 @@ export async function readLogSnapshot(timeZone: string): Promise<LogSnapshot> {
   const now = new Date();
   const [today, lastWaist, questions] = await Promise.all([
     readDay(now, timeZone),
-    readLatestOfMetric('waist'),
+    // The snapshot's own zone, so the day the sheet draws and the day the
+    // comparator resolves are one day and not two.
+    readLatestOfMetric('waist', timeZone),
     readOpenQuestions(),
   ]);
   const records = await readSourceRecordsFor(lastWaist ? [...today, lastWaist] : today);
