@@ -112,8 +112,18 @@ function runsOfAbsence(days: TableDay[], minimum = GAP_DAYS) {
   return runs;
 }
 
-/** How many of the seven days ending at `index` carried a reading. */
-function windowCount(days: TableDay[], index: number): number {
+/**
+ * How many of the seven days ending at `index` carried a reading, or -1 for the
+ * first six columns.
+ *
+ * Those six are excluded on purpose and it is the difference between measuring
+ * absence and measuring the edge of the table. Their windows are short because
+ * the series starts there, not because anything is missing, and counting them
+ * would let "a window under five days exists" be satisfied on an install with no
+ * hole in it at all, which is exactly the shape this file was written to stop
+ * standing in for a seeded gap.
+ */
+function settledWindowCount(days: TableDay[], index: number): number {
   let held = 0;
   for (let step = 0; step < WINDOW; step += 1) {
     const at = index - step;
@@ -226,7 +236,7 @@ test('F30. the average is dashed at 5 or 6 of 7, undrawn below 5, and states its
   const short: string[] = [];
   const tooShort: string[] = [];
   days.forEach((day, index) => {
-    const held = windowCount(days, index);
+    const held = settledWindowCount(days, index);
     if (held < 0) return;
     if (held === WINDOW) whole.push(day.when);
     else if (held >= DRAWN_AT) short.push(day.when);
@@ -272,7 +282,7 @@ test('F30. the average is dashed at 5 or 6 of 7, undrawn below 5, and states its
   // Last week's average is the point one window back, which is the day at
   // index length - 1 - 7 in the table. The screen has to state that day's own
   // count and not a rounder number.
-  const lastWeek = windowCount(days, days.length - 1 - WINDOW);
+  const lastWeek = settledWindowCount(days, days.length - 1 - WINDOW);
   console.log(`F30  the table says that day's window held ${lastWeek} of ${WINDOW}`);
   expect(stated, 'the stated count is not the count the table holds').toBe(lastWeek);
 

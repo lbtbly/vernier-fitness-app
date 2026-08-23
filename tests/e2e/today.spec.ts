@@ -50,15 +50,19 @@ function runsOfAbsence(hasReading: boolean[], minimum = GAP_DAYS) {
 }
 
 /**
- * How many of the seven days ending at `index` carried a reading, or -1 where
- * the window runs off the front of the table and the chart has no window to
- * draw on at all.
+ * How many of the seven days ending at `index` carried a reading.
+ *
+ * The same arithmetic `rollingAverage` in src/lib/trend.ts does, including at
+ * the front of the window: a day off the start of the table is not counted and
+ * does not end the count, so column 4 sits on five readings and is drawable
+ * while column 3 sits on four and is not. Getting that wrong in the other
+ * direction is how a prediction of the rendered line quietly stops predicting.
  */
 function windowCount(days: Array<{ value: string }>, index: number, absent: string): number {
   let held = 0;
   for (let step = 0; step < AVERAGE_WINDOW; step += 1) {
     const at = index - step;
-    if (at < 0) return -1;
+    if (at < 0) continue;
     if (days[at].value !== absent) held += 1;
   }
   return held;
@@ -327,11 +331,18 @@ test.describe('screen 02, Today', () => {
     // the database does not: so the days holding a stored weight are counted in
     // Postgres, over the same thirty-day window `windowDays` builds, and the
     // screen has to hold exactly that many.
+    // Chain heads only, which is the rule `heads()` in src/db/trends.ts applies
+    // before anything is drawn: a corrected reading is one reading and the value
+    // that stands is the last correction of it.
     const storedDays = Number(
       query(`select count(distinct (measured_at at time zone 'Europe/Paris')::date)
-             from measurement
-             where metric = 'weight'
-               and (measured_at at time zone 'Europe/Paris')::date
+             from (
+               select distinct on (root_id) root_id, measured_at
+               from measurement
+               where metric = 'weight'
+               order by root_id, correction_index desc
+             ) heads
+             where (measured_at at time zone 'Europe/Paris')::date
                    > (now() at time zone 'Europe/Paris')::date - 30`).trim(),
     );
     const dots = await chart.locator('g[data-dots] a').evaluateAll((nodes) =>
@@ -390,15 +401,22 @@ test.describe('screen 02, Today', () => {
       for (const x of xs) vertices.add(x);
     }
     const counts = days.map((_, index) => windowCount(days, index, NO_READING));
-    const drawable = counts.map((count) => count >= AVERAGE_MINIMUM);
+    // A day inside a run of absence is undrawn whatever its window held, which
+    // is what makes the break across a hole a break rather than a lighter line.
+    const inAGap = new Set<number>();
+    for (const run of runs) for (let at = run.from; at <= run.to; at += 1) inAGap.add(at);
+    const drawable = counts.map(
+      (count, index) => count >= AVERAGE_MINIMUM && !inAGap.has(index),
+    );
     const alone = drawable.filter(
       (yes, index) => yes && !drawable[index - 1] && !drawable[index + 1],
     ).length;
     const expected = drawable.filter(Boolean).length - alone;
     console.log(
-      `F30  windows under five days: ${counts.filter((count) => count >= 0 && count < AVERAGE_MINIMUM).length}, ` +
+      `F30  windows under five days: ${counts.filter((count) => count < AVERAGE_MINIMUM).length}, ` +
         `at five or six: ${counts.filter((count) => count === 5 || count === 6).length}, ` +
-        `whole: ${counts.filter((count) => count === AVERAGE_WINDOW).length}`,
+        `whole: ${counts.filter((count) => count === AVERAGE_WINDOW).length}, ` +
+        `${inAGap.size} column(s) inside a hole and undrawn whatever their window held`,
     );
     console.log(`F30  the average draws ${vertices.size} vertices where the table predicts ${expected}`);
     expect(
