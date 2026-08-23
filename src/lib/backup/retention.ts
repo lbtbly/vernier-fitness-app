@@ -10,8 +10,8 @@ import { DEFAULT_ARCHIVE_RETENTION } from './categories';
  * where other things live. A retention pass that removed "the oldest files in
  * the directory" would one day remove something that was never ours. Nothing is
  * considered for removal unless its name matches `ARCHIVE_NAME` exactly, and
- * `tests/unit/backup-retention.test.ts` puts a photograph and a document in the
- * directory and proves both survive four runs.
+ * `tests/unit/backup-run.test.ts` puts a photograph, a note and a file with our
+ * own name on it in the directory and proves all three survive four runs.
  *
  * THE TIMESTAMP IS UTC AND THAT IS DELIBERATE. Every date this product shows a
  * person is Europe/Paris, as DESIGN.md requires, and the screen renders these
@@ -75,7 +75,7 @@ export function selectForRemoval(names: string[], keep: number): RetentionPlan {
  * it is already in the owner's file. What it counts is archives, and the
  * comment beside it says so.
  */
-export function retentionSetting(env: NodeJS.ProcessEnv = process.env): number {
+export function retentionSetting(env: Record<string, string | undefined> = process.env): number {
   const raw = (env.BACKUP_RETENTION_DAYS ?? '').trim();
   const value = Number.parseInt(raw, 10);
   if (!Number.isFinite(value) || value < 1) return DEFAULT_ARCHIVE_RETENTION;

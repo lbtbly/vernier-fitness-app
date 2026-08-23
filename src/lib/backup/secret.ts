@@ -21,6 +21,9 @@
  * the same way or an archive is written with one secret and opened with another.
  */
 
+/** Just enough of an environment to read two names out of. */
+export type Env = Record<string, string | undefined>;
+
 export type SecretChoice = {
   secret: string;
   /** Which environment variable it came from, for the header and for a message. */
@@ -36,7 +39,7 @@ export class SecretMissingError extends Error {
   }
 }
 
-export function archiveSecret(env: NodeJS.ProcessEnv = process.env): SecretChoice {
+export function archiveSecret(env: Env = process.env): SecretChoice {
   const passphrase = (env.BACKUP_PASSPHRASE ?? '').trim();
   if (passphrase !== '') return { secret: passphrase, source: 'passphrase' };
   const masterKey = (env.MASTER_KEY ?? '').trim();
