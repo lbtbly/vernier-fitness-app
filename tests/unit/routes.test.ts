@@ -57,6 +57,24 @@ describe('the route table', () => {
     }
   });
 
+  it('calls the Withings callback a gate route, because a strict cookie cannot reach it', () => {
+    // The session cookie is SameSite=Strict, which is right and stays. A
+    // top-level navigation from account.withings.com is cross-site, so the
+    // browser sends no cookie with it and a protected route would answer the
+    // owner's own consent with a 401 while the 30-second authorization code
+    // expired. What stands in for the session is the `state` this app minted,
+    // compared in constant time against the SHA-256 on the connection row.
+    expect(classifyRoute('/api/withings/callback')).toBe('gate');
+    expect(isOpenRoute('/api/withings/callback')).toBe(true);
+
+    // And it is one path, not a namespace. Everything else Withings is behind
+    // the session like every other write in this app.
+    for (const path of ['/api/withings', '/api/withings/sync', '/api/withings/callback/extra']) {
+      expect(classifyRoute(path)).toBe('protected');
+      expect(isOpenRoute(path)).toBe(false);
+    }
+  });
+
   it('protects everything else, including a route nobody has written yet', () => {
     for (const path of [
       '/',

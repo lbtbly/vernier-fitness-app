@@ -294,6 +294,23 @@ describe('the suite against the owner\'s installation', () => {
    *   notices.spec.ts:583     REAL. The scroll offset again, and F27 turns on it.
    *   suite-privilege:67      REAL. Every refused statement is printed with the
    *                           answer Postgres gave it.
+   *   withings.spec.ts:108    REAL. Rows whose source is not `demo`, counted
+   *                           over a table the same three lines print the whole
+   *                           source census of. A hundreds-strong population is
+   *                           asserted immediately above it.
+   *   withings.spec.ts:188    REAL. The blood pressure probe row, counted after
+   *                           an INSERT the same test printed the refusal of.
+   *                           The zero is the constraint holding, and the
+   *                           constraint's own message is asserted beside it.
+   *   withings.spec.ts:250    REAL. `.skel` is drawn by the Withings card and
+   *                           by the shell's loading state, on the screens being
+   *                           walked, and the render time is printed beside it.
+   *   withings.spec.ts:324    REAL. Open questions, counted after the same test
+   *                           asserted exactly one open and then answered it
+   *                           through the shipped control.
+   *   withings.spec.ts:336    REAL. The notice region on Today draws this line,
+   *                           and the same test watched it appear on the settings
+   *                           card before the answer closed it.
    *   this file               REAL. Both offender lists print what they walked.
    */
   it('lets no assertion claim a zero over a population the surface cannot render', () => {
@@ -314,8 +331,14 @@ describe('the suite against the owner\'s installation', () => {
       ['today.spec.ts', 6],
       ['notices.spec.ts', 3],
       ['suite-privilege.spec.ts', 1],
+      ['withings.spec.ts', 5],
     ]);
-    const zeroish = /toHaveCount\(0\)|\.toBe\(0\)|toEqual\(\[\]\)|toHaveLength\(0\)|not\.toBeVisible\(|toBeHidden\(/;
+    // `toHaveCount(0, { timeout: 3_000 })` was invisible to this pattern until
+    // slice 5 wrote one: the closing paren was required right after the zero, so
+    // BOUNDING an assertion took it straight out of the sweep. A checker with a
+    // shape it cannot see is the same defect the sweep exists to catch, so a
+    // comma after the zero counts now.
+    const zeroish = /toHaveCount\(0\s*[,)]|\.toBe\(0\)|toEqual\(\[\]\)|toHaveLength\(0\)|not\.toBeVisible\(|toBeHidden\(/;
     const counted: string[] = [];
     for (const [name, source] of specs()) {
       if (!name.endsWith('.spec.ts')) continue;

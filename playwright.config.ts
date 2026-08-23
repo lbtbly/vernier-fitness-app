@@ -48,7 +48,7 @@ export default defineConfig({
   projects: [
     {
       name: 'webkit-iphone',
-      testIgnore: /focus\.spec\.ts|service-worker\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|launch-report\.spec\.ts|notices\.spec\.ts/,
+      testIgnore: /focus\.spec\.ts|service-worker\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|launch-report\.spec\.ts|notices\.spec\.ts|withings\.spec\.ts/,
       use: { ...devices['Desktop Safari'], viewport: { width: 393, height: 852 }, deviceScaleFactor: 3 },
     },
     {
@@ -105,6 +105,16 @@ export default defineConfig({
       // evidence of a device, so the suite writes it here, where nobody will
       // ever read it as evidence of anything.
       //
+      // withings.spec.ts joined it in slice 5, and it is the clearest case yet.
+      // Every test in it WRITES: connect stores a token, the historical import
+      // lands three hundred rows, and the answer path appends a correction.
+      // `measurement` refuses DELETE, so none of that can be taken back out,
+      // and the owner's install holds the only copy of anything real in this
+      // product. scripts/test-stack.sh starts this instance with
+      // WITHINGS_MODE=demo and an empty client pair, so the spec opens no
+      // socket either: what it drives is the demonstration dataset, which is
+      // the whole of what F36 asks to be proven.
+      //
       // Chrome, because that instance answers on plain loopback HTTP and the
       // session cookie is Secure. WebKit refuses a Secure cookie from an http
       // origin, 127.0.0.1 and localhost alike, so a WebKit run of this file
@@ -118,7 +128,7 @@ export default defineConfig({
       // attribute relaxed, so WebKit will carry it over loopback too, and it
       // grades its fold in both engines against one database.
       name: 'chrome-scratch',
-      testMatch: /launch-report\.spec\.ts|notices\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts/,
+      testMatch: /launch-report\.spec\.ts|notices\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|withings\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         channel: 'chrome',

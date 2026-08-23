@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import { CorrectionForm } from '@/components/CorrectionForm';
+import { QuestionAnswer } from '@/components/QuestionAnswer';
 import { SourceChip } from '@/components/SourceChip';
 import { CloseIcon, DocIcon } from '@/components/icons';
-import { readChain, readMeasurement, readOpenQuestions, readSourceRecord, toView } from '@/db/measurements';
+import { readChain, readMeasurement, readQuestionsForChain, readSourceRecord, toView } from '@/db/measurements';
 import { getConfig } from '@/lib/config';
 import { readCsrfToken } from '@/lib/csrf';
 import { conversionLine, confidenceLabel, dedupLabel, metricLabel, sourceLabel, valueLabel } from '@/lib/display';
@@ -49,7 +50,12 @@ export default async function ValueSheetPage({ params }: { params: Promise<{ id:
   const [chain, record, questions, csrfToken] = await Promise.all([
     readChain(row.rootId),
     readSourceRecord(row.sourceRecordId),
-    readOpenQuestions(),
+    // Every question ever raised against THIS chain, open or answered, rather
+    // than every open question in the database. The old read took the whole
+    // open list and matched it against the chain, which was right while one
+    // question existed and stopped being right the moment an answered one had
+    // to be shown as answered.
+    readQuestionsForChain(row.rootId),
     readCsrfToken(),
   ]);
 
@@ -59,7 +65,8 @@ export default async function ValueSheetPage({ params }: { params: Promise<{ id:
   const original = views[0];
   const label = valueLabel(current);
   const conversion = conversionLine(current);
-  const question = questions.find((entry) => chain.some((link) => link.id === entry.measurementId));
+  const question = questions.find((entry) => entry.state === 'open');
+  const answered = questions.find((entry) => entry.state === 'answered');
 
   return (
     <>
@@ -150,6 +157,41 @@ export default async function ValueSheetPage({ params }: { params: Promise<{ id:
             <span className="grow sub mut">{strings.question.raisedAt}</span>
             <span className="num">{shortDateTime(question.raisedAt, timeZone)}</span>
           </div>
+
+          {/*
+            * A2. The question now has an answer path, on the screen that shows
+            * it, with both values and both provenances in front of the choice.
+            */}
+          <QuestionAnswer
+            question={{
+              id: question.id,
+              metric: question.metric,
+              storedRawValue: question.storedRawValue,
+              storedUnit: question.storedUnit,
+              storedSource: question.storedSource,
+              storedMeasuredAt: question.storedMeasuredAt.toISOString(),
+              incomingRawValue: question.incomingRawValue,
+              incomingUnit: question.incomingUnit,
+              incomingSource: question.incomingSource,
+              incomingMeasuredAt: question.incomingMeasuredAt.toISOString(),
+            }}
+            unit={current.unit}
+            storedWhen={shortDateTime(question.storedMeasuredAt, timeZone)}
+            incomingWhen={shortDateTime(question.incomingMeasuredAt, timeZone)}
+            csrfToken={csrfToken}
+          />
+        </section>
+      ) : answered ? (
+        <section className="card">
+          <span className="lbl">{strings.question.closedTitle}</span>
+          <p className="sub" style={{ margin: 'var(--s2) 0 0' }}>
+            {strings.question.closedBody(
+              `${answered.answer ?? ''} ${answered.storedUnit}`,
+              answered.answeredAt
+                ? shortDateTime(answered.answeredAt, timeZone)
+                : shortDateTime(answered.raisedAt, timeZone),
+            )}
+          </p>
         </section>
       ) : null}
 

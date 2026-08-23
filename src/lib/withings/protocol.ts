@@ -148,6 +148,19 @@ export type TokenAnswer = {
   refresh_token: string;
   expires_in: number;
   scope: string;
+  /**
+   * The authorization scheme the access token is presented under.
+   *
+   * READ FROM THE SERVER AND NEVER WRITTEN DOWN HERE. RFC 6749 marks
+   * `token_type` REQUIRED in a token response for exactly this reason: the
+   * client is told which scheme to use rather than assuming one, and Withings
+   * documents the field among its success fields. So the Authorization header
+   * this product sends is assembled from the answer that issued the token, and
+   * the scheme name appears nowhere in this repository. An answer carrying no
+   * token type is refused with a named cause rather than guessed at, because a
+   * guessed scheme fails on the owner's first real sync and not here.
+   */
+  token_type: string;
 };
 
 export function readTokenAnswer(body: Record<string, unknown>): TokenAnswer | null {
@@ -155,15 +168,18 @@ export function readTokenAnswer(body: Record<string, unknown>): TokenAnswer | nu
   const accessToken = body.access_token;
   const refreshToken = body.refresh_token;
   const expiresIn = body.expires_in;
+  const tokenType = body.token_type;
   if (typeof accessToken !== 'string' || accessToken === '') return null;
   if (typeof refreshToken !== 'string' || refreshToken === '') return null;
   if (typeof expiresIn !== 'number' || !Number.isFinite(expiresIn)) return null;
+  if (typeof tokenType !== 'string' || tokenType.trim() === '') return null;
   return {
     userid: typeof userid === 'string' ? userid : String(userid ?? ''),
     access_token: accessToken,
     refresh_token: refreshToken,
     expires_in: expiresIn,
     scope: typeof body.scope === 'string' ? body.scope : SCOPE,
+    token_type: tokenType.trim(),
   };
 }
 

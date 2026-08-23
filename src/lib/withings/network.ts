@@ -23,7 +23,9 @@ export function networkTransport(onFailure?: (failure: NetworkFailure) => void):
     const headers: Record<string, string> = {
       'Content-Type': 'application/x-www-form-urlencoded',
     };
-    if (request.bearer) headers.Authorization = `Bearer ${request.bearer}`;
+    // Already assembled by the client from the scheme the token answer named.
+    // Nothing here decides what an access token is presented as.
+    if (request.authorization) headers.Authorization = request.authorization;
 
     let response: Response;
     try {

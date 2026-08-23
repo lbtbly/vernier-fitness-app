@@ -1,3 +1,4 @@
+import { type Source, PRECEDENCE } from '@/lib/provenance';
 import type { CallCounters, MeasureResult, RequestLine } from '@/lib/withings/client';
 import type { HarvestedGroup, HarvestedRow } from '@/lib/withings/codes';
 
@@ -27,9 +28,21 @@ export type StoredForKey = {
 
 export type RowDecision =
   | { kind: 'insert' }
-  | { kind: 'duplicate'; keptId: string; because: 'identical' | 'not_newer' }
+  | { kind: 'duplicate'; keptId: string; because: 'identical' | 'not_newer' | 'day_taken' }
   | { kind: 'revise'; correctsId: string; rootId: string; from: string; index: number }
   | { kind: 'question'; measurementId: string; storedRawValue: string; storedSource: string };
+
+/**
+ * A reading of the same metric that already stands for the same day, from some
+ * chain this import has never written.
+ *
+ * The demonstration seed writes a Withings-shaped weight every morning, and so
+ * does the demonstration account this slice connects. Without this the two
+ * would both be points on the chart, twice a day, for six weeks: one reading
+ * per metric per day is the rule this product has had since slice 3 and an
+ * importer does not get an exemption from it.
+ */
+export type StandingOnDay = { id: string; source: string; rawValue: string };
 
 /**
  * What to do with one measure that arrived.
@@ -52,10 +65,24 @@ export type RowDecision =
  *    modification cannot revise anything; it is the same fact told again.
  */
 export function decideRow(
-  incoming: { rawText: string; modified: number },
+  incoming: { rawText: string; modified: number; source: Source },
   stored: StoredForKey | null,
+  standing: StandingOnDay | null = null,
 ): RowDecision {
-  if (!stored) return { kind: 'insert' };
+  if (!stored) {
+    // 0. Nothing has this key, but something already describes this metric on
+    //    this day. Precedence decides, and an equal rank means the row that is
+    //    already here stays: an append-only store cannot take the loser back
+    //    out, so the tie has to be broken in favour of what is committed.
+    if (standing) {
+      const mine = PRECEDENCE[incoming.source] ?? 0;
+      const theirs = PRECEDENCE[standing.source as Source] ?? 0;
+      if (mine <= theirs) {
+        return { kind: 'duplicate', keptId: standing.id, because: 'day_taken' };
+      }
+    }
+    return { kind: 'insert' };
+  }
 
   if (stored.headRawValue === incoming.rawText) {
     return { kind: 'duplicate', keptId: stored.headId, because: 'identical' };
@@ -116,6 +143,11 @@ export type ImportPorts = {
   readCursor: () => Promise<number | null>;
   fetch: (lastUpdate: number | null) => Promise<MeasureResult>;
   lookup: (externalKeys: string[]) => Promise<Map<string, StoredForKey>>;
+  /**
+   * What already stands for each metric on each day this answer touches, keyed
+   * `metric|YYYY-MM-DD` in the app's zone. Chain heads only.
+   */
+  standing: (rows: HarvestedRow[]) => Promise<Map<string, StandingOnDay>>;
   /** One transaction. Everything in the batch lands, or none of it does. */
   commit: (batch: PreparedBatch) => Promise<CommitReport>;
   advanceCursor: (to: number) => Promise<void>;
@@ -148,6 +180,17 @@ export function batchIdFor(from: number | null, to: number | null): string {
   return `withings_batch_${from ?? 0}_${to ?? 0}`;
 }
 
+/** The key `standing` is read by: one metric, one calendar day, in the app's zone. */
+export function dayKeyFor(metric: string, at: Date, timeZone: string): string {
+  const day = new Intl.DateTimeFormat('en-CA', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone,
+  }).format(at);
+  return `${metric}|${day}`;
+}
+
 /**
  * One import run.
  *
@@ -158,7 +201,7 @@ export function batchIdFor(from: number | null, to: number | null): string {
  */
 export async function runImport(
   ports: ImportPorts,
-  options: { historical: boolean },
+  options: { historical: boolean; source: Source; timeZone: string },
 ): Promise<ImportReport> {
   const from = options.historical ? null : await ports.readCursor();
   const result = await ports.fetch(from);
@@ -193,11 +236,26 @@ export async function runImport(
 
   const keys = [...new Set(result.harvest.rows.map((row) => row.externalKey))];
   const stored = keys.length > 0 ? await ports.lookup(keys) : new Map<string, StoredForKey>();
+  const standing =
+    result.harvest.rows.length > 0
+      ? await ports.standing(result.harvest.rows)
+      : new Map<string, StandingOnDay>();
 
-  const rows: PreparedRow[] = result.harvest.rows.map((row) => ({
-    row,
-    decision: decideRow(row, stored.get(row.externalKey) ?? null),
-  }));
+  // A day this run has already claimed counts as taken for the rest of the run,
+  // so two weigh-ins in one morning land as one reading and the second names
+  // the first. Without it the day rule would only hold against rows that were
+  // already committed when the fetch started.
+  const claimed = new Map<string, StandingOnDay>();
+  const rows: PreparedRow[] = result.harvest.rows.map((row) => {
+    const held = stored.get(row.externalKey) ?? null;
+    const dayKey = dayKeyFor(row.metric, row.measuredAt, options.timeZone);
+    const already = standing.get(dayKey) ?? claimed.get(dayKey) ?? null;
+    const decision = decideRow({ ...row, source: options.source }, held, already);
+    if (!held && decision.kind === 'insert') {
+      claimed.set(dayKey, { id: row.externalKey, source: options.source, rawValue: row.rawText });
+    }
+    return { row, decision };
+  });
 
   const batch: PreparedBatch = {
     batchId: batchIdFor(from, result.maxModified),

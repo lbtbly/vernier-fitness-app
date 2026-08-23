@@ -201,8 +201,18 @@ export function OperatorPanel(props: Props) {
           {strings.settings.credentialHelp}
         </p>
 
+        {/*
+          * NOT PRIMARY ANY MORE, AND THAT IS DESIGN.md SECTION 5's THIRD RULE.
+          * One accented action per screen, on the thing due now. Slice 5 puts a
+          * Withings card above this one whose action is genuinely due: connect
+          * a scale that is not connected, or reconnect one whose token died.
+          * Saving a credential is due only while the owner is typing one, and
+          * `12-settings-integrations.html` frame 1 agrees: its accent sits on
+          * the integration that needs him, and nothing on that sheet is a
+          * primary save button.
+          */}
         <div className="actions">
-          <button type="button" className="btn primary block" onClick={onSave} disabled={busy || secret === ''}>
+          <button type="button" className="btn block" onClick={onSave} disabled={busy || secret === ''}>
             {strings.settings.saveCredential}
           </button>
         </div>

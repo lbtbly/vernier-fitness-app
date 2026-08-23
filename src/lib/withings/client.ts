@@ -35,8 +35,16 @@ import {
 export type TransportRequest = {
   url: string;
   form: Record<string, string>;
-  /** The bearer token, on the measure call only. The token endpoint takes none. */
-  bearer?: string;
+  /**
+   * The whole `Authorization` value, scheme and credential, on the measure call
+   * only. The token endpoint takes none.
+   *
+   * Assembled here from the scheme the token answer named, because RFC 6749
+   * makes `token_type` a required field of a token response so that a client is
+   * told which scheme to use rather than assuming one. The transport writes the
+   * header and decides nothing about it.
+   */
+  authorization?: string;
 };
 
 export type TransportAnswer = {
@@ -54,7 +62,14 @@ export type TokenBundle = {
   refreshToken: string;
   expiresAt: string;
   scope: string;
+  /** The scheme the token answer named. Never a constant in this repository. */
+  tokenType: string;
 };
+
+/** `Authorization`, whole: the scheme the server named, then the token. */
+export function authorizationOf(tokens: TokenBundle): string {
+  return `${tokens.tokenType} ${tokens.accessToken}`;
+}
 
 export type ClientCredentials = {
   clientId: string;
@@ -144,6 +159,7 @@ function bundleFrom(answer: TokenAnswer, now: Date): TokenBundle {
     refreshToken: answer.refresh_token,
     expiresAt: new Date(now.getTime() + answer.expires_in * 1000).toISOString(),
     scope: answer.scope,
+    tokenType: answer.token_type,
   };
 }
 
@@ -233,7 +249,11 @@ async function callMeasure(
   let held = tokens;
 
   for (;;) {
-    const answer = await ports.transport({ url: MEASURE_URL, form, bearer: held.accessToken });
+    const answer = await ports.transport({
+      url: MEASURE_URL,
+      form,
+      authorization: authorizationOf(held),
+    });
 
     // THE ENVELOPE, FIRST AND ALONE. `readEnvelope` cannot see the transport
     // code: it is not one of its arguments. The HTTP status is read on the next

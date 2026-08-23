@@ -213,12 +213,18 @@ export function demoTransport(read: () => DemoServerState, advance: () => void):
         refresh_token: `demo-refresh-${generation}`,
         expires_in: 10_800,
         scope: 'user.metrics',
+        // The demonstration account's own scheme, and deliberately not the
+        // real one. Nothing in demonstration mode ever opens a socket, so no
+        // Authorization header built from this reaches anybody, and writing the
+        // live scheme into a fixture would put a wire constant in the tree that
+        // the network path is careful never to hard code.
+        token_type: 'demo-bearer',
         csrf_token: `demo-csrf-${generation}`,
       });
     }
 
     if (request.url !== MEASURE_URL) return envelope(2554, {});
-    if (!request.bearer) return envelope(401, {});
+    if (!request.authorization) return envelope(401, {});
     if (request.form.action !== 'getmeas') return envelope(503, {});
     if (!request.form.meastypes || request.form.category !== '1') return envelope(503, {});
 

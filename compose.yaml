@@ -55,6 +55,14 @@ services:
       # source 'demo', so a demonstration reading is tellable from a real one by
       # reading the table.
       DEMO_MODE: ${DEMO_MODE:-0}
+      # Withings. The mode decides which transport the adapter is built with:
+      # demo answers from a generated dataset with no socket at all, live opens
+      # one. Nothing here reached the container before slice 5, so the preflight
+      # line that reads WITHINGS_CLIENT_SECRET inside it could not have passed.
+      WITHINGS_MODE: ${WITHINGS_MODE:-demo}
+      WITHINGS_CLIENT_ID: ${WITHINGS_CLIENT_ID:-}
+      WITHINGS_CLIENT_SECRET: ${WITHINGS_CLIENT_SECRET:-}
+      WITHINGS_REDIRECT_URI: ${WITHINGS_REDIRECT_URI:-}
       # The connection string is assembled here so the app never needs to know
       # how the parts are stored.
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}

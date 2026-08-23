@@ -231,6 +231,24 @@ export function testStackWithDemoMode(demoMode: '0' | '1', ...args: string[]): s
   }).trim();
 }
 
+/**
+ * The scratch instance started in a chosen Withings mode.
+ *
+ * F42 names four states the status screen has to show, and two of them,
+ * connected and expiring, are unreachable while the mode is demonstration:
+ * `stateOf` calls a demonstration connection a demonstration one whatever the
+ * token underneath is doing. The live branch needs no credential to be
+ * rendered, only a connection row, so the spec restarts this instance in live
+ * mode with an empty client pair and writes the row it wants to photograph.
+ */
+export function testStackWithWithingsMode(mode: 'demo' | 'live', ...args: string[]): string {
+  return execFileSync('bash', ['scripts/test-stack.sh', ...args], {
+    cwd: projectRoot,
+    encoding: 'utf8',
+    env: { ...process.env, WITHINGS_MODE: mode },
+  }).trim();
+}
+
 export function scratchQuery(statement: string): string {
   const oneLine = statement.replace(/\s+/g, ' ').trim();
   return execFileSync(
@@ -284,6 +302,21 @@ export function scratchAttempt(statement: string): string {
     ],
     { cwd: projectRoot, encoding: 'utf8' },
   ).trim();
+}
+
+/**
+ * One environment variable, read out of the scratch container.
+ *
+ * F36 turns on there being NO CLIENT ID AND NO SECRET, and a harness asserting
+ * that about itself proves nothing. This asks the running container, which is
+ * the thing the claim is about. It prints the length and never the value, so a
+ * variable that does hold something cannot reach a log.
+ */
+export function scratchEnv(name: string): string {
+  return execFileSync('docker', ['exec', SCRATCH_CONTAINER, 'printenv', name], {
+    cwd: projectRoot,
+    encoding: 'utf8',
+  }).trim();
 }
 
 export function ownerExists(): boolean {

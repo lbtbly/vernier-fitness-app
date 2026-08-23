@@ -111,8 +111,11 @@ async function candidatesFor(metric: string, measuredAt: Date): Promise<StoredCa
   }));
 }
 
-export async function upsertSourceRecord(input: SourceRecordInput): Promise<void> {
-  const db = getDb();
+export async function upsertSourceRecord(
+  input: SourceRecordInput,
+  executor?: Executor,
+): Promise<void> {
+  const db = executor ?? getDb();
   await db
     .insert(sourceRecord)
     .values({
@@ -218,6 +221,20 @@ export type CorrectionInput = {
 };
 
 /**
+ * Anything that can run a query: the pool, or one transaction on it.
+ *
+ * It exists so answering an import question can close the question and append
+ * the correction it wrote inside one transaction, without a second copy of the
+ * only door into `measurement`. A crash between those two writes would leave a
+ * question the owner already answered still sitting on Today, or a closed
+ * question with no correction behind it, and both are the app disagreeing with
+ * itself about what he did.
+ */
+type Database = ReturnType<typeof getDb>;
+type Transaction = Parameters<Parameters<Database['transaction']>[0]>[0];
+export type Executor = Database | Transaction;
+
+/**
  * An edit, which is an insert. The original keeps its row, its number and its
  * source forever, and after three edits the chain holds four rows.
  *
@@ -225,16 +242,20 @@ export type CorrectionInput = {
  * happened to be looking at, so two edits raised from two stale screens still
  * produce a chain and never a fork.
  */
-export async function appendCorrection(input: CorrectionInput): Promise<MeasurementRow> {
-  const db = getDb();
-  const anchor = await readMeasurement(input.correctsId);
+export async function appendCorrection(
+  input: CorrectionInput,
+  executor?: Executor,
+): Promise<MeasurementRow> {
+  const db = executor ?? getDb();
+  const anchor = await readMeasurement(input.correctsId, db);
   if (!anchor) throw new Error(strings.api.log.correctionTargetGone(input.correctsId));
 
-  const chain = await readChain(anchor.rootId);
+  const chain = await readChain(anchor.rootId, db);
   const current = orderChain(chain).at(-1)!;
 
   const sourceRecordId = `src_${input.id}`;
-  await upsertSourceRecord({
+  await upsertSourceRecord(
+    {
     id: sourceRecordId,
     source: 'manual',
     kind: 'manual_entry',
@@ -244,9 +265,11 @@ export async function appendCorrection(input: CorrectionInput): Promise<Measurem
       { key: 'source.field.correctedFrom', value: current.rawValue },
       { key: 'source.field.correctedTo', value: input.rawValue },
       { key: 'source.field.correctionOf', value: current.id },
-      { key: 'source.field.reason', value: input.reason },
-    ],
-  });
+        { key: 'source.field.reason', value: input.reason },
+      ],
+    },
+    db,
+  );
 
   const [row] = await db
     .insert(measurement)
@@ -276,15 +299,18 @@ export async function appendCorrection(input: CorrectionInput): Promise<Measurem
   return row;
 }
 
-export async function readMeasurement(id: string): Promise<MeasurementRow | undefined> {
-  const db = getDb();
+export async function readMeasurement(
+  id: string,
+  executor?: Executor,
+): Promise<MeasurementRow | undefined> {
+  const db = executor ?? getDb();
   const [row] = await db.select().from(measurement).where(eq(measurement.id, id));
   return row;
 }
 
 /** Every row of one value's history, oldest first. The original is always index 0. */
-export async function readChain(rootId: string): Promise<MeasurementRow[]> {
-  const db = getDb();
+export async function readChain(rootId: string, executor?: Executor): Promise<MeasurementRow[]> {
+  const db = executor ?? getDb();
   const rows = await db
     .select()
     .from(measurement)
@@ -365,6 +391,89 @@ export async function readLatestOfMetric(metric: string): Promise<MeasurementRow
   const newest = rows[0];
   const chain = await readChain(newest.rootId);
   return orderChain(chain).at(-1) ?? newest;
+}
+
+export type ImportQuestionRow = typeof importQuestion.$inferSelect;
+
+export type AnswerInput = {
+  /** The id of the correction this answer writes. Also the write's idempotency key. */
+  id: string;
+  questionId: string;
+  rawValue: string;
+  value: number | null;
+  /** The owner's own words, or the catalogue line when he wrote none. */
+  reason: string;
+  timeZone: string;
+};
+
+export type AnswerResult =
+  | { answered: true; question: ImportQuestionRow; row: MeasurementRow }
+  | { answered: false; reason: 'gone' | 'closed'; question: ImportQuestionRow | null };
+
+/**
+ * Answering an import question, which is the half `.forge/AMENDMENTS.md` A2
+ * found missing.
+ *
+ * F26 was met and proven: a re-import that disagrees with a correction raises a
+ * question holding both values and writes nothing. What had no code path at all
+ * was the answer. `state` permitted 'answered', nothing ever set it, and a
+ * warning the owner could not clear is its own version of the failure the panel
+ * named, the app telling him something is wrong and giving him no move.
+ *
+ * ONE TRANSACTION, TWO WRITES, AND THE ORDER MATTERS. The question is claimed
+ * first, with `state = 'open'` in the WHERE clause, so two taps on a slow
+ * connection cannot both write a correction: the second claims nothing and says
+ * the question is already closed. Then the correction appends through the same
+ * door every other correction in this product goes through, inside the same
+ * transaction, so there is no window in which one exists without the other.
+ */
+export async function answerImportQuestion(input: AnswerInput): Promise<AnswerResult> {
+  const db = getDb();
+  return db.transaction(async (tx) => {
+    const [existing] = await tx
+      .select()
+      .from(importQuestion)
+      .where(eq(importQuestion.id, input.questionId));
+    if (!existing) return { answered: false, reason: 'gone', question: null };
+
+    const [claimed] = await tx
+      .update(importQuestion)
+      .set({ state: 'answered', answeredAt: new Date(), answer: input.rawValue })
+      .where(and(eq(importQuestion.id, input.questionId), eq(importQuestion.state, 'open')))
+      .returning();
+    if (!claimed) return { answered: false, reason: 'closed', question: existing };
+
+    const row = await appendCorrection(
+      {
+        id: input.id,
+        correctsId: existing.measurementId,
+        rawValue: input.rawValue,
+        value: input.value,
+        reason: input.reason,
+        timeZone: input.timeZone,
+      },
+      tx,
+    );
+    return { answered: true, question: claimed, row };
+  });
+}
+
+export async function readQuestion(id: string): Promise<ImportQuestionRow | undefined> {
+  const db = getDb();
+  const [row] = await db.select().from(importQuestion).where(eq(importQuestion.id, id));
+  return row;
+}
+
+/** Every question raised against one chain, open or answered, newest first. */
+export async function readQuestionsForChain(rootId: string): Promise<ImportQuestionRow[]> {
+  const db = getDb();
+  const chain = await readChain(rootId);
+  if (chain.length === 0) return [];
+  return db
+    .select()
+    .from(importQuestion)
+    .where(inArray(importQuestion.measurementId, chain.map((row) => row.id)))
+    .orderBy(desc(importQuestion.raisedAt));
 }
 
 export async function readOpenQuestions() {

@@ -69,7 +69,20 @@ export type StoredDedupDecision = (typeof STORED_DEDUP_DECISIONS)[number];
  * the row, frozen at write time, the way an audit reason is.
  */
 export type DedupReason = {
-  key: 'identical' | 'conflictsWithCorrection' | 'keptOverOther' | 'otherWins' | 'firstOfDay';
+  key:
+    | 'identical'
+    | 'conflictsWithCorrection'
+    | 'keptOverOther'
+    | 'otherWins'
+    | 'firstOfDay'
+    /**
+     * The two an importer decides, which the quick log never can. A measure
+     * that arrives with an identifier of its own is deduplicated on that
+     * identifier rather than on the day it was taken, so its reason names the
+     * identifier and not the day.
+     */
+    | 'importedFirst'
+    | 'importRevised';
   params: Record<string, string>;
 };
 
@@ -118,9 +131,46 @@ export const METRICS = {
   resting_heart_rate: { unit: 'bpm', kind: 'number', low: 25, high: 220 },
   hrv: { unit: 'ms', kind: 'number', low: 1, high: 400 },
   vo2_max: { unit: 'mL/kg/min', kind: 'number', low: 5, high: 90 },
+  /**
+   * The seven body-composition readings a Body Smart publishes through the
+   * Withings API, and nothing beyond them.
+   *
+   * Visceral fat and basal metabolic rate are absent on purpose: Withings' own
+   * device matrix has both unchecked for this model and puts them on the Body
+   * Comp, the Body Pro 2 and the Body Scan. The Withings app computing a number
+   * is not the API returning one. If either ever appears in a real response it
+   * gets a metric then, on evidence.
+   *
+   * `standing_heart_rate` is deliberately not `resting_heart_rate`. The scale
+   * reads a pulse while the owner stands on it after waking; the watch reports
+   * a resting rate over a night. Two populations in one series would describe
+   * neither.
+   */
+  fat_mass: { unit: 'kg', kind: 'number', low: 1, high: 200 },
+  fat_free_mass: { unit: 'kg', kind: 'number', low: 10, high: 300 },
+  fat_ratio: { unit: '%', kind: 'number', low: 1, high: 70 },
+  muscle_mass: { unit: 'kg', kind: 'number', low: 5, high: 200 },
+  bone_mass: { unit: 'kg', kind: 'number', low: 0.5, high: 10 },
+  body_water: { unit: 'kg', kind: 'number', low: 5, high: 150 },
+  standing_heart_rate: { unit: 'bpm', kind: 'number', low: 25, high: 220 },
   /** The laboratory's own unit, kept as printed. A converted value never appears alone. */
   ldl_cholesterol: { unit: 'mmol/L', kind: 'number', low: 0, high: 30 },
 } as const;
+
+/**
+ * What the scale sends beside the weight, in the order the status card lists
+ * them. Weight is not on this list: it has its own chart, its own headline
+ * rules and its own goal, and it is not one of a set of seven.
+ */
+export const BODY_COMPOSITION_METRICS = [
+  'fat_ratio',
+  'fat_mass',
+  'fat_free_mass',
+  'muscle_mass',
+  'bone_mass',
+  'body_water',
+  'standing_heart_rate',
+] as const;
 
 export type Metric = keyof typeof METRICS;
 
@@ -234,7 +284,7 @@ export function sameDay(left: Date, right: Date, timeZone: string): boolean {
  * disagreement: precedence only decides which of two rows describing the same
  * event is the one the charts read, and the loser is named in the reason.
  */
-const PRECEDENCE: Record<Source, number> = {
+export const PRECEDENCE: Record<Source, number> = {
   withings: 4,
   apple_health_shortcut: 3,
   lab_pdf: 4,
