@@ -152,6 +152,31 @@ describe('a row that cannot be saved as it stands', () => {
     expect(savable).toContain('Apolipoproteine B');
   });
 
+  it('blocks a row whose value could not be read, and has nothing to convert', () => {
+    // F62. The row exists, it is waiting, its unit is printed on the sheet, and
+    // it is still not savable, because the characters beside the unit are not a
+    // number. It would go red if `value_ambiguous` fell off the blocking list:
+    // a flag nobody acts on and a flag nobody sets look the same on the screen.
+    const review = reviewOf();
+    const template = review.rows.find((entry) => canSave(entry))!;
+    const garbled: ReviewRow = {
+      ...template,
+      printedValue: '5,4Q',
+      printedUnit: '%',
+      flags: ['value_ambiguous', 'low_confidence'],
+      confidence: 0.5,
+      converted: previewConversion(
+        BUILT_IN_ANALYTES.find((entry) => entry.key === 'hba1c') ?? null,
+        '5,4Q',
+        '%',
+      ),
+    };
+    expect(canSave(garbled)).toBe(false);
+    // Nothing to convert either, which is why the review draws the unreadable
+    // line instead of "stored as printed" over a row that cannot be stored.
+    expect(garbled.converted).toBeNull();
+  });
+
   it('refuses to save a row that has already been decided', () => {
     const review = reviewOf();
     const row = review.rows.find((entry) => canSave(entry))!;

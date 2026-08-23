@@ -85,6 +85,18 @@ function ConversionNote({ row }: { row: ReviewRow }) {
   const printed = `${row.printedValue}${
     row.printedUnit === '' ? '' : ` ${unitSymbol(row.printedUnit)}`
   }`;
+  // F62. A garbled value has nothing to convert and nothing to store, so this
+  // line says that instead of "stored as printed", which would be a sentence
+  // about a row that is blocked from being stored at all. The flag is the
+  // parser's own verdict and `converted` is null until an edit is saved, so a
+  // row the owner has corrected goes back to the ordinary line below.
+  if (row.converted === null && row.flags.includes('value_ambiguous')) {
+    return (
+      <div className="conv" data-conversion={row.ordinal}>
+        {strings.labs.valueUnreadable(printed)}
+      </div>
+    );
+  }
   if (!row.converted || row.converted.factor === null) {
     return (
       <div className="conv" data-conversion={row.ordinal}>

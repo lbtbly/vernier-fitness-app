@@ -321,6 +321,60 @@ export function findDate(text: string): string | null {
 }
 
 /**
+ * How long a printed value can be before it is something other than a value.
+ *
+ * A laboratory prints "1,44" or "128" or "0,975". Twelve characters is room for
+ * a number with a thousands space and two garbled characters, and it is short
+ * enough to exclude a sentence, a method name and a footer.
+ */
+const GARBLED_MAX_LENGTH = 12;
+
+/**
+ * Two letters, because optical recognition mistakes ONE character at a time.
+ *
+ * "5.4Q" for "5.40" carries one letter, "1O,2" carries one. A cell with three
+ * or more letters in it is a word with a number in it, which is a heading, a
+ * method or a footer, and reading one as a result is how a review fills with
+ * rows nobody printed.
+ */
+const GARBLED_MAX_LETTERS = 2;
+
+/**
+ * A cell that was MEANT to be a number and came out as something else. F62.
+ *
+ * THIS IS THE ROW THAT USED TO VANISH. The value scan looked for a cell that
+ * parsed as a number or read as a censored limit, and a line with neither was
+ * skipped whole: a sheet printing HbA1c as "5,4Q" produced no row at all, so
+ * there was no flag, no blocked save and nothing on the screen. A row that
+ * vanishes is worse than a row that is wrong, because the owner cannot correct
+ * what he cannot see, and F62 says a value that is ambiguous is FLAGGED and
+ * BLOCKED rather than dropped.
+ *
+ * So the shape is named rather than guessed at. It carries a digit, it is short,
+ * it holds at most two letters, and it is none of the four things that are not
+ * results: a clean number, a censored limit, a date, or a reference interval.
+ * The slash is excluded outright because every cell that carries one is a date,
+ * a page marker or a ratio.
+ *
+ * WHAT THIS DOES NOT DO. It never overrides a clean number on the same line:
+ * `extractPanel` looks for one of those first and only falls back to this when
+ * the line has none. A row that reads cleanly today reads exactly the same way
+ * afterwards.
+ */
+export function looksLikeGarbledValue(text: string): boolean {
+  const trimmed = text.trim();
+  if (trimmed === '' || trimmed.length > GARBLED_MAX_LENGTH) return false;
+  if (!/\d/.test(trimmed)) return false;
+  if (/[/:]/.test(trimmed)) return false;
+  if (parseFrenchNumber(trimmed) !== null) return false;
+  if (isCensored(trimmed)) return false;
+  if (findDate(trimmed) !== null) return false;
+  if (parseReference(trimmed) !== null) return false;
+  const letters = trimmed.replace(/[^A-Za-zµμ]/g, '');
+  return letters.length <= GARBLED_MAX_LETTERS;
+}
+
+/**
  * The excerpt frame 2 draws under "As printed", and the one place a refused
  * line could have leaked.
  *
@@ -462,9 +516,15 @@ export function extractPanel(input: ExtractInput): Panel {
       if (label === '' || parseFrenchNumber(label) !== null) continue;
 
       const rest = line.cells.slice(1);
-      const valueAt = rest.findIndex(
+      let valueAt = rest.findIndex(
         (cell) => parseFrenchNumber(cell.text) !== null || isCensored(cell.text),
       );
+      // F62, and the row that used to disappear. A line whose value cell holds
+      // "5,4Q" has no number and no limit on it, and it was skipped whole: no
+      // row, no flag, no blocked save, and nothing on the screen for the owner
+      // to correct. The fallback runs ONLY when the line has no clean number
+      // anywhere, so a row that reads cleanly today is untouched.
+      if (valueAt === -1) valueAt = rest.findIndex((cell) => looksLikeGarbledValue(cell.text));
       if (valueAt === -1) continue;
 
       const valueCell = rest[valueAt];

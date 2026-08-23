@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { extractTextItems } from 'unpdf';
 import { IMAGE_ONLY_THRESHOLD, census, extractPanel, type PageItems } from '@/lib/lab-parse';
 import { BUILT_IN_ANALYTES } from '@/lib/labs';
-import { panelPdf, scannedPanelPdf } from './lab-pdf';
+import { garbledPanelPdf, panelPdf, scannedPanelPdf } from './lab-pdf';
 
 /**
  * The parser against `unpdf` itself, on a real PDF, with no browser, no
@@ -91,6 +91,29 @@ describe('a real PDF, read by the shipped library', () => {
     const serialised = JSON.stringify(panel);
     expect(serialised).not.toContain('128');
     expect(serialised.toLowerCase()).not.toContain('mmhg');
+  });
+
+  it('returns the garbled row from a real file instead of skipping the line', async () => {
+    // F62 through the shipped library. The hand-built fixture grades the rules;
+    // this grades the rules against items `unpdf` really produced, which is the
+    // path the upload route takes. It would go red if the value scan went back
+    // to wanting a cell that parses as a number: the sheet has three results and
+    // the review holding would hold two, with HbA1c nowhere on the screen.
+    const panel = extractPanel({
+      pages: await pagesOf(garbledPanelPdf()),
+      catalogue: BUILT_IN_ANALYTES,
+      knownUnits: UNITS,
+    });
+    console.log(
+      `lab-pdf: garbled sheet gave ${panel.rows.length} rows: ` +
+        panel.rows.map((row) => `${row.printedLabel}=${row.printedValue}`).join(', '),
+    );
+    expect(panel.rows).toHaveLength(3);
+    const hba1c = panel.rows.find((row) => row.analyte === 'hba1c')!;
+    expect(hba1c.printedValue).toBe('5,4Q');
+    expect(hba1c.flags).toContain('value_ambiguous');
+    expect(hba1c.flags).toContain('low_confidence');
+    expect(hba1c.confidence).toBeLessThan(0.9);
   });
 
   it('detects a page with no text layer as image only, from a real file', async () => {

@@ -12,7 +12,7 @@ import {
   testStack,
   waitForScratch,
 } from './host';
-import { panelPdf, scannedPanelPdf } from '../unit/lab-pdf';
+import { garbledPanelPdf, panelPdf, scannedPanelPdf } from '../unit/lab-pdf';
 
 /**
  * Slice 7 end to end, on the scratch instance.
@@ -276,6 +276,96 @@ test('F62. a flagged row is blocked, and stays blocked against a direct request'
   expect(corrected).toContain('U/L');
 });
 
+test('F62. a garbled digit produces a flagged, blocked row that names what was printed', async ({
+  page,
+}) => {
+  await signIn(page);
+  const before = measurementCount();
+  await uploadPanel(page, garbledPanelPdf(), 'analyses-garbled-12-08-2026.pdf');
+
+  // WHAT WOULD MAKE THIS RED: the value scan going back to wanting a cell that
+  // parses as a number. The sheet prints three results and the two garbled ones
+  // were skipped whole, so the review held one row, the banner said so, and
+  // HbA1c appeared nowhere on the screen. A row that vanishes is worse than a
+  // row that is wrong: the owner cannot correct what he cannot see.
+  const printed = await page
+    .locator('[data-row]')
+    .evaluateAll((nodes) => nodes.map((node) => (node.textContent ?? '').replace(/\s+/g, ' ').trim()));
+  console.log(`F62  ${printed.length} rows on the review off a three-result sheet`);
+  for (const [index, row] of printed.entries()) console.log(`F62    row ${index + 1}: ${row}`);
+  expect(printed).toHaveLength(3);
+
+  const banner = (await page.locator('[data-banner="nothing-stored"]').textContent())!
+    .replace(/\s+/g, ' ')
+    .trim();
+  console.log(`F62  the banner reads: ${banner}`);
+  expect(banner).toContain('3 rows read');
+
+  // The row itself: named, blocked, and quoting the characters the sheet set.
+  const row = page.locator('[data-row]').filter({ hasText: 'HbA1c' }).first();
+  await expect(row).toBeVisible();
+  await expect(row).toHaveAttribute('data-blocked', 'true');
+  const words = (await row.textContent())!.replace(/\s+/g, ' ').trim();
+  console.log(`F62  the garbled row reads: ${words}`);
+  expect(words).toContain('5,4Q');
+  expect(words.toLowerCase()).toContain('low confidence');
+  expect(words.toLowerCase()).toContain('not a number');
+  await expect(row.locator('button.ok')).toBeDisabled();
+  await page.screenshot({ path: `${CAPTURES}/f62-garbled-flagged-and-blocked.png`, fullPage: true });
+
+  // And the block is not a property of the markup: the same save, sent as a
+  // request with no edit on it, is refused by the route.
+  const ordinal = Number(await row.getAttribute('data-row'));
+  const documentId = page.url().split('/health/labs/')[1].split('/')[0];
+  const refusal = await page.evaluate(
+    async ([id, at]) => {
+      const token = document.cookie
+        .split('; ')
+        .find((pair) => pair.startsWith('vernier_csrf='))!
+        .slice('vernier_csrf='.length);
+      const response = await fetch('/api/labs/row', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-vernier-csrf': token,
+          'Idempotency-Key': crypto.randomUUID(),
+        },
+        body: JSON.stringify({ documentId: id, ordinal: at, action: 'save' }),
+      });
+      return { status: response.status, body: await response.text() };
+    },
+    [documentId, ordinal] as [string, number],
+  );
+  console.log(`F62  the direct save of the garbled row was answered ${refusal.status}: ${refusal.body}`);
+  expect(refusal.status).toBe(422);
+  expect(measurementCount()).toBe(before);
+
+  // The owner corrects it by typing what the sheet really shows, and that edit
+  // is the explicit decision F62 asks for. Typed character by character: `fill`
+  // sets a whole value in one input event and has passed for four rounds over a
+  // field that could not be typed into at all.
+  await page.goto(`/health/labs/${documentId}/row/${ordinal}`);
+  await page.waitForLoadState('networkidle');
+  const field = page.locator('#lab-value');
+  await expect(field).toHaveValue('5,4Q');
+  await field.selectText();
+  await field.pressSequentially('5,4', { delay: 15 });
+  await expect(field).toHaveValue('5,4');
+  await clickWhenLive(page.getByRole('button', { name: /save this row/i }));
+  await page.waitForURL(/\/health\/labs\/lab_[^/]+$/, { timeout: 30_000 });
+
+  const after = measurementCount();
+  console.log(`F62  after typing the correction: ${before} rows before, ${after} after`);
+  expect(after).toBe(before + 1);
+  const stored = scratchQuery(
+    "select raw_value || ' ' || raw_unit || ' at confidence ' || confidence from measurement where metric = 'hba1c' order by created_at desc limit 1",
+  );
+  console.log(`F62  the corrected HbA1c row stores: ${stored}`);
+  expect(stored).toContain('5,4');
+  expect(stored).not.toContain('5,4Q');
+  await page.screenshot({ path: `${CAPTURES}/f62-garbled-corrected.png`, fullPage: true });
+});
+
 test('F63. the file is kept or deleted at validation, and delete removes it from the volume', async ({
   page,
 }) => {
@@ -316,6 +406,8 @@ test('F63. the file is kept or deleted at validation, and delete removes it from
 
 test('F65. a page with no text layer is detected, counted and routed', async ({ page }) => {
   await signIn(page);
+  const before = measurementCount();
+  const filesBefore = scratchLabFiles();
   await page.goto('/health/labs');
   await page.waitForLoadState('networkidle');
   await page
@@ -329,16 +421,35 @@ test('F65. a page with no text layer is detected, counted and routed', async ({ 
   // installed, the upload is REFUSED by name with nothing stored, and the screen
   // says so. What must never happen is the third: a scanned page read as if it
   // were text, producing no rows and a green screen.
+  //
+  // BOTH HALVES COUNT FROM WHERE THIS TEST STARTED. They used to read `0` and
+  // `[]`, and this file is serial: F59, F61 and both F62 tests store rows and
+  // leave documents on the volume before this one runs, so the refusal branch
+  // could only ever have been read in isolation. A test whose assertion is only
+  // true when the tests before it did nothing is the same class of defect as a
+  // test asserting a zero over an empty database.
   const refused = page.locator('[data-state="error"]');
   const onReview = /\/health\/labs\/lab_/.test(page.url());
   if (!onReview) {
     await expect(refused).toBeVisible();
     const words = (await refused.textContent())!.replace(/\s+/g, ' ').trim();
-    console.log(`F65  the recogniser is not installed and the upload was refused: ${words}`);
+    console.log(`F65  the scanned page was refused by name: ${words}`);
+    console.log(
+      `F65  measurement rows ${before} before and ${measurementCount()} after, ` +
+        `${filesBefore.length} file(s) before and ${scratchLabFiles().length} after`,
+    );
     expect(words.toLowerCase()).toContain('optical recognition');
-    expect(measurementCount()).toBe(0);
-    expect(scratchLabFiles()).toEqual([]);
+    // Nothing new stored, and the refused upload took its own bytes with it.
+    expect(measurementCount()).toBe(before);
+    expect(scratchLabFiles().sort()).toEqual([...filesBefore].sort());
     await page.screenshot({ path: `${CAPTURES}/f65-recogniser-absent.png`, fullPage: true });
+    // A refusal is honest and it is NOT the line. F65 asks for recognised rows
+    // arriving flagged, and a refusal has none, so the test says so out loud
+    // rather than passing quietly on the branch that proves less.
+    console.log(
+      'F65  RECOGNITION DID NOT RUN. The detection and the routing are proven above; ' +
+        'the flags on recognised rows are not, and F65 is not closed by this branch.',
+    );
     return;
   }
 

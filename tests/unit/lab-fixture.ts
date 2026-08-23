@@ -113,6 +113,28 @@ export const PANEL_PAGE_TWO: FixtureLine[] = [
   { label: 'Creatinine', value: '9,2', unit: 'mg/L', reference: '7,0 - 12,0' },
 ];
 
+/**
+ * F62's sheet: three results, and the middle one printed with a garbled digit.
+ *
+ * "5,4Q" is what a laboratory prints when the toner is low and what optical
+ * recognition returns for "5,40" often enough that the flag copy names it, and
+ * "l86" is a lower-case L where the sheet printed a one. Neither parses as a
+ * number and neither is a censored limit, so under the old scan the whole LINE
+ * was skipped: HbA1c appeared nowhere on the review, there was no flag and
+ * nothing to block. A row that vanishes is worse than a row that is wrong.
+ *
+ * The clean row is first on purpose. It proves the fallback did not steal a
+ * value from a line that reads cleanly, which is the one way this fix could
+ * have made the parser worse.
+ */
+export const GARBLED_PAGE: FixtureLine[] = [
+  { plain: 'Laboratoire Cerballiance Paris 11' },
+  { plain: 'Prelevement du 12/08/2026 a 08:15' },
+  { label: 'Glycemie a jeun', value: '0,97', unit: 'g/L', reference: '0,70 - 1,10' },
+  { label: 'Hemoglobine glyquee HbA1c', value: '5,4Q', unit: '%', reference: '4,0 - 5,6' },
+  { label: 'Ferritine', value: 'l86', unit: 'µg/L', reference: '30 - 400' },
+];
+
 export function panelPages(): PageItems[] {
   return [pageOf(1, PANEL_PAGE_ONE), pageOf(2, PANEL_PAGE_TWO)];
 }

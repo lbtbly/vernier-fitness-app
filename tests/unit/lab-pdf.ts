@@ -1,4 +1,10 @@
-import { COLUMNS, type FixtureLine, PANEL_PAGE_ONE, PANEL_PAGE_TWO } from './lab-fixture';
+import {
+  COLUMNS,
+  type FixtureLine,
+  GARBLED_PAGE,
+  PANEL_PAGE_ONE,
+  PANEL_PAGE_TWO,
+} from './lab-fixture';
 
 /**
  * A real PDF, built here, with a real text layer laid out in columns.
@@ -136,4 +142,12 @@ export function panelPdf(): Uint8Array {
 /** The same panel with a third page that carries no text layer at all. */
 export function scannedPanelPdf(): Uint8Array {
   return buildLabPdf([PANEL_PAGE_ONE, PANEL_PAGE_TWO], 1);
+}
+
+/**
+ * F62's sheet, as a real PDF: three results with a garbled digit on one of
+ * them, uploaded through the shipped file field by the end-to-end spec.
+ */
+export function garbledPanelPdf(): Uint8Array {
+  return buildLabPdf([GARBLED_PAGE]);
 }
