@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { and, asc, count, eq, isNull, sql } from 'drizzle-orm';
+import { and, asc, count, eq, inArray, isNull, sql } from 'drizzle-orm';
 import { getDb } from './client';
 import { food } from './schema';
 
@@ -135,10 +135,16 @@ export async function readFood(id: string): Promise<FoodRow | null> {
 export async function readFoods(ids: string[]): Promise<Map<string, FoodRow>> {
   if (ids.length === 0) return new Map();
   const db = getDb();
-  const rows = await db
-    .select()
-    .from(food)
-    .where(sql`${food.id} = any(${ids})`);
+  // inArray, not a hand-written any(). Drizzle interpolates a JS array into a
+  // sql`` template as a TUPLE of parameters, so `any(${ids})` reached Postgres
+  // as `any(($1, $2))`, which is not valid syntax, and every call to this
+  // function threw. It is the only read of the food table the recipe snapshot
+  // has, so no recipe nutrition computed at all and the boot log said
+  // "nutrition seed did not run" once and moved on.
+  //
+  // Five other files in src/db reach for inArray for exactly this. Matching the
+  // nearest precedent would have avoided it.
+  const rows = await db.select().from(food).where(inArray(food.id, ids));
   return new Map(rows.map((row) => [row.id, row]));
 }
 

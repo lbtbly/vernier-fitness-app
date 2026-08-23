@@ -380,16 +380,34 @@ const DATA_QUERIES = [
    */
   [
     'lab_document.extraction',
-    `select distinct value from lab_document,
+    // `fragment.text`, qualified. `value` was ambiguous: jsonb_array_elements
+    // names its own output column `value` too, so Postgres refused the query
+    // outright and strings:rendered exited non-zero the first time it ran on a
+    // tree where lab_document existed. It could not have run in slice 7's
+    // worktree, because the table is created by the migration that main numbers
+    // on merge. Same cost as the trigger bug in 0007, and found the same way.
+    `select distinct fragment.text from lab_document,
        jsonb_array_elements(extraction) as row_json,
        lateral (
-         select row_json->>'printedLabel' as value
+         select row_json->>'printedLabel' as text
          union all select row_json->>'printedValue'
          union all select row_json->>'printedUnit'
          union all select jsonb_array_elements_text(coalesce(row_json->'excerpt', '[]'::jsonb))
        ) as fragment
-     where value is not null and value <> ''`,
+     where fragment.text is not null and fragment.text <> ''`,
   ],
+  /*
+   * The name of a food, as Anses published it in Table Ciqual 2025. Two shipped
+   * screens draw it out of the column: the food detail and the ingredient rows
+   * on a recipe. It is French, it is not this repository's words, and it is
+   * outside C6 for exactly the reason the excerpt on a laboratory row is.
+   *
+   * Added on merge rather than in slice 9's worktree, because a query against a
+   * table that did not exist yet on main would have turned the gate red for the
+   * four builders merging ahead of it. The slice named it and main runs it,
+   * which is the only place it can be run rather than guessed at.
+   */
+  ['food.name_fr', 'select distinct name_fr from food'],
 ];
 
 let dataValues = 0;
@@ -1000,6 +1018,10 @@ const PERMITTED_SOURCES = [
 const rowIds = db('select id from measurement order by measured_at desc');
 const ratingIds = db("select id from measurement where unit = 'point'");
 const sourceIds = db('select id from source_record order by recorded_at desc');
+// One food, for the detail screen. It renders name_fr straight out of the
+// column above, so the screen and the exemption have to be walked together or
+// neither proves anything.
+const foodIds = db('select id from food order by name_fr limit 1');
 const sourcesBehindAValue = db(
   `select distinct record.source from measurement value
    join source_record record on record.id = value.source_record_id`,
@@ -1080,6 +1102,7 @@ const floor = [
   ['source records walked', sourceIds.length, 1],
   ['ratings on the one to five scale', ratingIds.length, 1],
   ['sources with a stored value behind them', sourcesBehindAValue.length, PERMITTED_SOURCES.length],
+  ['foods walked on their own screen', foodIds.length, 1],
 ];
 
 process.stdout.write('rendered strings: the population this walk covers\n');
@@ -1169,6 +1192,19 @@ async function walk() {
   for (const path of ['/health/labs', '/health/labs/new']) {
     await page.goto(path);
     await readSurface(page, path, 'no panel stored');
+  }
+
+  // The nutrition surfaces, slice 9. Five screens the closed-world check had
+  // never seen, two of which render food.name_fr out of the column exempted
+  // above. A surface not walked is a surface not checked, and this was the
+  // gap slice 9's builder named rather than left for the final pass to find.
+  for (const path of ['/eat/data-sources', '/eat/targets', '/eat/shopping']) {
+    await page.goto(path);
+    await readSurface(page, path, 'nutrition, whatever this installation holds');
+  }
+  for (const id of foodIds) {
+    await page.goto(`/eat/food/${id}`);
+    await readSurface(page, '/eat/food/[id]', `one food, ${id}`);
   }
 
   await page.goto('/settings');
