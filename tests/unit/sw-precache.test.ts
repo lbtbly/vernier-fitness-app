@@ -88,7 +88,7 @@ describe('every bundled demonstration is on the phone before it is needed', () =
     // on the response makes those two different cache keys and the precached
     // bytes are a miss at the moment the network is gone.
     expect(worker).toContain(
-      "await caches.match(url.pathname, { cacheName: MEDIA_CACHE, ignoreVary: true })",
+      'await caches.match(url.pathname, { cacheName: MEDIA_CACHE, ignoreVary: true })',
     );
   });
 
