@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useJustLogged } from '@/components/Queue';
 import { SourceChip } from '@/components/SourceChip';
@@ -659,267 +660,304 @@ export function QuickLog({
         {strings.quickLog.open}
       </button>
 
-      {open ? (
-        <>
-          <button
-            type="button"
-            className="scrim"
-            aria-label={strings.quickLog.close}
-            onClick={() => setOpen(false)}
-          />
-          <div className="sheet" role="dialog" aria-modal="true" aria-label={strings.quickLog.title}>
-            <div className="grabber" />
-            <div className="between sheet-head">
-              <div className="stack">
-                <span className="title-line">{strings.quickLog.title}</span>
-                <span className="note num">
-                  {load.state === 'ready' && load.snapshot.lastWaist === null
-                    ? strings.quickLog.firstTime
-                    : `${longDate(now, timeZone)}, ${time24(now, timeZone)}`}
-                </span>
-              </div>
+      {/*
+        * THE SHEET IS RAISED FROM TODAY AND IT DOES NOT LIVE THERE.
+        *
+        * This component is mounted inside `section.card.day`, because the day
+        * card's own rows are its children and a write replaces them. The sheet
+        * used to be rendered in place, so its ancestry read
+        * `div.sheet < section.card.day < div.today`, and every Today-scoped rule
+        * in globals.css reached inside screen 03. Three of them did, measured
+        * identically in Chrome and WebKit at 393, 768 and 1280:
+        *
+        *   .card.day .actions      put the error card's action row 8 px under
+        *                           its sub, where 00-patterns.html draws 12
+        *   .card.day .actions .btn took Try again back down to 44 px, losing the
+        *                           52 px escalation `.sheet .btn` gives it
+        *   .card.day .btn.primary  put Save 27 px below the foot divider, where
+        *                           03-quick-log.html draws 12 and no margin
+        *
+        * That is defect 52's mechanism, un-fixed, resurfacing at three new
+        * properties. Scoping those three rules would have closed those three
+        * properties and left the door open: slices 5 to 9 are adding to Today
+        * right now, and every rule they add to `.card.day` would reach in here
+        * the same way. So the door is closed instead of the three holes.
+        *
+        * A portal and not a hoist, because the day card's rows have to stay
+        * inside the card that draws them and this component owns both. The sheet
+        * is `position:fixed` over the viewport in both places, so nothing about
+        * its own geometry moves; what moves is what can reach it, which is now
+        * only the rules that name it. C4 is ticked against the day card, and the
+        * day card renders exactly what it rendered before.
+        *
+        * React keeps the tree, so state, context, events and focus all behave as
+        * they did. `document` is only touched inside this branch, which needs a
+        * click to open and therefore never runs on the server.
+        */}
+      {open
+        ? createPortal(
+            <>
               <button
-                ref={closeRef}
                 type="button"
-                className="btn icon"
+                className="scrim"
                 aria-label={strings.quickLog.close}
                 onClick={() => setOpen(false)}
-              >
-                <CloseIcon />
-              </button>
-            </div>
-
-            <div className="sheetbody">
-              {/*
-                * Offline is not a mode here, it is a count. The banner reports
-                * what is still in the queue and nothing about it changes what
-                * Save does.
-                */}
-              {queued > 0 ? (
-                <div className="banner" data-state="offline">
-                  <WarnIcon />
-                  <div className="grow">
-                    <b>{strings.quickLog.offlineTitle}</b> {strings.quickLog.offlineBody(queued)}
-                  </div>
-                </div>
-              ) : null}
-
-              {/*
-                * A write the queue would not take, and the reason the server
-                * would have given. Nothing was put on this phone and nothing
-                * was sent, which is what the card says: the alternative was
-                * telling the owner an entry was safe when the flush was
-                * certain to refuse it.
-                */}
-              {refused ? (
-                <div className="card error" data-state="refused">
-                  <div className="head" style={{ marginTop: 0 }}>
-                    {strings.quickLog.refusedTitle}
-                  </div>
-                  {refused.map((reason) => (
-                    <p className="sub" key={reason}>
-                      {reason}
-                    </p>
-                  ))}
-                  <p className="sub">{strings.quickLog.refusedBody}</p>
-                </div>
-              ) : null}
-
-              {load.state === 'loading' ? (
-                <div className="card" data-state="loading" aria-busy="true" aria-label={strings.quickLog.loadingLabel}>
-                  <div className="between">
-                    <span className="lbl">{strings.quickLog.waist}</span>
-                    <span className="skel" style={{ width: '74px', height: '22px', borderRadius: '6px' }} />
-                  </div>
-                  <span className="skel" style={{ width: '186px', height: '34px', margin: '8px 0' }} />
-                  <span className="skel" style={{ width: '250px', height: '13px' }} />
-                </div>
-              ) : null}
-
-              {load.state === 'error' ? (
-                <div className="card error" data-state="error">
-                  <div className="between">
-                    <span className="lbl">{strings.quickLog.waist}</span>
-                    <span className="chip a">{strings.error.title}</span>
-                  </div>
-                  <div className="head">{strings.quickLog.errorTitle}</div>
-                  <p className="sub">
-                    {load.authored === 'platform' ? (
-                      <span data-authored="platform" ref={carryTheCaughtObject(load.caught)}>
-                        {messageOf(load.caught)}
-                      </span>
-                    ) : (
-                      <span data-authored="vernier">{load.detail}</span>
-                    )}{' '}
-                    {strings.quickLog.errorBody}
-                  </p>
-                  <div className="actions">
-                    <button type="button" className="btn grow" onClick={() => void read()}>
-                      {strings.common.retry}
-                    </button>
-                  </div>
-                </div>
-              ) : null}
-
-              {load.state === 'ready' && load.snapshot.lastWaist === null ? (
-                <div className="card empty" data-state="empty">
-                  <div className="head" style={{ marginTop: 0 }}>
-                    {strings.quickLog.waistEmptyTitle}
-                  </div>
-                  <p className="sub">{strings.quickLog.waistEmptyBody}</p>
-                </div>
-              ) : null}
-
-              {load.state === 'ready' && lastWaist && staleDays !== null && staleDays >= WAIST_STALE_DAYS ? (
-                <div className="card" data-state="stale">
-                  <div className="between">
-                    <span className="lbl">{strings.quickLog.waist}</span>
-                    <SourceChip source={lastWaist.source} confidence={lastWaist.confidence} staleDays={staleDays} />
-                  </div>
-                  <div className="head">{strings.quickLog.staleTitle(staleDays)}</div>
-                  <p className="sub">{strings.quickLog.staleBody}</p>
-                </div>
-              ) : null}
-
-              <div className="field-block">
-                <div className="between" style={{ marginBottom: 'var(--s2)' }}>
-                  <span className="lbl">{strings.quickLog.waist}</span>
-                  {lastWaist ? (
+              />
+              <div className="sheet" role="dialog" aria-modal="true" aria-label={strings.quickLog.title}>
+                <div className="grabber" />
+                <div className="between sheet-head">
+                  <div className="stack">
+                    <span className="title-line">{strings.quickLog.title}</span>
                     <span className="note num">
-                      {strings.quickLog.waistLastPrefix} {valueLabel(lastWaist).number}{' '}
-                      {valueLabel(lastWaist).unit}, {shortDate(new Date(lastWaist.measuredAt), timeZone)}
+                      {load.state === 'ready' && load.snapshot.lastWaist === null
+                        ? strings.quickLog.firstTime
+                        : `${longDate(now, timeZone)}, ${time24(now, timeZone)}`}
                     </span>
-                  ) : null}
-                </div>
-                <div className="stepper">
+                  </div>
                   <button
+                    ref={closeRef}
                     type="button"
-                    aria-label={strings.quickLog.waistDown}
-                    onClick={() => stepWaist(-WAIST_STEP)}
-                    disabled={nothingToStepFrom}
+                    className="btn icon"
+                    aria-label={strings.quickLog.close}
+                    onClick={() => setOpen(false)}
                   >
-                    <MinusIcon />
+                    <CloseIcon />
                   </button>
+                </div>
+
+                <div className="sheetbody">
                   {/*
-                    * The value, and it is a field. Screen 03 frame 3 draws it as
-                    * the muted `--` on a first-ever waist, which is the state
-                    * the stepper alone cannot answer: it is relative, and there
-                    * is nothing to be relative to. So the first number is typed
-                    * and every one after it is stepped, which is F23's six taps
-                    * on both paths. The field carries no value attribute when it
-                    * is empty, so `--` is a placeholder and not a number.
+                    * Offline is not a mode here, it is a count. The banner reports
+                    * what is still in the queue and nothing about it changes what
+                    * Save does.
                     */}
-                  <div className="grow centre">
-                    <label className="visually-hidden" htmlFor="quick-log-waist">
-                      {strings.quickLog.waistFieldLabel}
-                    </label>
-                    <input
-                      id="quick-log-waist"
-                      className={nothingToStepFrom ? 'metric mut waistfield' : 'metric waistfield'}
-                      type="text"
-                      inputMode="decimal"
-                      autoComplete="off"
-                      placeholder={strings.quickLog.waistBlank}
-                      /*
-                       * The text, straight back out, and nothing in between.
-                       * Every version of this that reformatted the value on the
-                       * way through moved the caret with it, and a field that
-                       * moves the caret cannot be typed into: `99.0` arrived as
-                       * `9.1`. Tidying and parsing happen at Save, where the
-                       * owner has stopped typing.
-                       */
-                      value={waist}
-                      onChange={(event) => takeWaist(event.target.value)}
-                    />{' '}
-                    <span className="sub">{strings.units.cm}</span>
+                  {queued > 0 ? (
+                    <div className="banner" data-state="offline">
+                      <WarnIcon />
+                      <div className="grow">
+                        <b>{strings.quickLog.offlineTitle}</b> {strings.quickLog.offlineBody(queued)}
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {/*
+                    * A write the queue would not take, and the reason the server
+                    * would have given. Nothing was put on this phone and nothing
+                    * was sent, which is what the card says: the alternative was
+                    * telling the owner an entry was safe when the flush was
+                    * certain to refuse it.
+                    */}
+                  {refused ? (
+                    <div className="card error" data-state="refused">
+                      <div className="head" style={{ marginTop: 0 }}>
+                        {strings.quickLog.refusedTitle}
+                      </div>
+                      {refused.map((reason) => (
+                        <p className="sub" key={reason}>
+                          {reason}
+                        </p>
+                      ))}
+                      <p className="sub">{strings.quickLog.refusedBody}</p>
+                    </div>
+                  ) : null}
+
+                  {load.state === 'loading' ? (
+                    <div className="card" data-state="loading" aria-busy="true" aria-label={strings.quickLog.loadingLabel}>
+                      <div className="between">
+                        <span className="lbl">{strings.quickLog.waist}</span>
+                        <span className="skel" style={{ width: '74px', height: '22px', borderRadius: '6px' }} />
+                      </div>
+                      <span className="skel" style={{ width: '186px', height: '34px', margin: '8px 0' }} />
+                      <span className="skel" style={{ width: '250px', height: '13px' }} />
+                    </div>
+                  ) : null}
+
+                  {load.state === 'error' ? (
+                    <div className="card error" data-state="error">
+                      <div className="between">
+                        <span className="lbl">{strings.quickLog.waist}</span>
+                        <span className="chip a">{strings.error.title}</span>
+                      </div>
+                      <div className="head">{strings.quickLog.errorTitle}</div>
+                      <p className="sub">
+                        {load.authored === 'platform' ? (
+                          <span data-authored="platform" ref={carryTheCaughtObject(load.caught)}>
+                            {messageOf(load.caught)}
+                          </span>
+                        ) : (
+                          <span data-authored="vernier">{load.detail}</span>
+                        )}{' '}
+                        {strings.quickLog.errorBody}
+                      </p>
+                      <div className="actions">
+                        <button type="button" className="btn grow" onClick={() => void read()}>
+                          {strings.common.retry}
+                        </button>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {load.state === 'ready' && load.snapshot.lastWaist === null ? (
+                    <div className="card empty" data-state="empty">
+                      <div className="head" style={{ marginTop: 0 }}>
+                        {strings.quickLog.waistEmptyTitle}
+                      </div>
+                      <p className="sub">{strings.quickLog.waistEmptyBody}</p>
+                    </div>
+                  ) : null}
+
+                  {load.state === 'ready' && lastWaist && staleDays !== null && staleDays >= WAIST_STALE_DAYS ? (
+                    <div className="card" data-state="stale">
+                      <div className="between">
+                        <span className="lbl">{strings.quickLog.waist}</span>
+                        <SourceChip source={lastWaist.source} confidence={lastWaist.confidence} staleDays={staleDays} />
+                      </div>
+                      <div className="head">{strings.quickLog.staleTitle(staleDays)}</div>
+                      <p className="sub">{strings.quickLog.staleBody}</p>
+                    </div>
+                  ) : null}
+
+                  <div className="field-block">
+                    <div className="between" style={{ marginBottom: 'var(--s2)' }}>
+                      <span className="lbl">{strings.quickLog.waist}</span>
+                      {lastWaist ? (
+                        <span className="note num">
+                          {strings.quickLog.waistLastPrefix} {valueLabel(lastWaist).number}{' '}
+                          {valueLabel(lastWaist).unit}, {shortDate(new Date(lastWaist.measuredAt), timeZone)}
+                        </span>
+                      ) : null}
+                    </div>
+                    <div className="stepper">
+                      <button
+                        type="button"
+                        aria-label={strings.quickLog.waistDown}
+                        onClick={() => stepWaist(-WAIST_STEP)}
+                        disabled={nothingToStepFrom}
+                      >
+                        <MinusIcon />
+                      </button>
+                      {/*
+                        * The value, and it is a field. Screen 03 frame 3 draws it as
+                        * the muted `--` on a first-ever waist, which is the state
+                        * the stepper alone cannot answer: it is relative, and there
+                        * is nothing to be relative to. So the first number is typed
+                        * and every one after it is stepped, which is F23's six taps
+                        * on both paths. The field carries no value attribute when it
+                        * is empty, so `--` is a placeholder and not a number.
+                        */}
+                      <div className="grow centre">
+                        <label className="visually-hidden" htmlFor="quick-log-waist">
+                          {strings.quickLog.waistFieldLabel}
+                        </label>
+                        <input
+                          id="quick-log-waist"
+                          className={nothingToStepFrom ? 'metric mut waistfield' : 'metric waistfield'}
+                          type="text"
+                          inputMode="decimal"
+                          autoComplete="off"
+                          placeholder={strings.quickLog.waistBlank}
+                          /*
+                           * The text, straight back out, and nothing in between.
+                           * Every version of this that reformatted the value on the
+                           * way through moved the caret with it, and a field that
+                           * moves the caret cannot be typed into: `99.0` arrived as
+                           * `9.1`. Tidying and parsing happen at Save, where the
+                           * owner has stopped typing.
+                           */
+                          value={waist}
+                          onChange={(event) => takeWaist(event.target.value)}
+                        />{' '}
+                        <span className="sub">{strings.units.cm}</span>
+                      </div>
+                      <button
+                        type="button"
+                        aria-label={strings.quickLog.waistUp}
+                        disabled={nothingToStepFrom}
+                        onClick={() => stepWaist(WAIST_STEP)}
+                      >
+                        <PlusIcon />
+                      </button>
+                    </div>
+                    {/*
+                      * Two different sentences for two different absences, and the
+                      * difference is whether the app knows. Frame 3's first-ever
+                      * waist is a fact: there has never been one, so type it. A read
+                      * that failed is an unknown: the last one may exist and this
+                      * phone cannot see it, and that is worth saying out loud.
+                      */}
+                    {noBaseToStepFrom ? (
+                      <p className="note warn" data-waist="no-base">
+                        {strings.quickLog.waistNoBase}
+                      </p>
+                    ) : nothingToStepFrom ? (
+                      <p className="note" data-waist="type-it">
+                        {strings.quickLog.waistTypeIt}
+                      </p>
+                    ) : null}
                   </div>
+
+                  {RATING_FIELDS.map((field) => (
+                    <div className="field-block" key={field.metric}>
+                      <span className="lbl">{field.label}</span>
+                      <div className="scale5" role="group" aria-label={field.label}>
+                        {SCALE.map((point) => (
+                          <button
+                            key={point}
+                            type="button"
+                            aria-pressed={ratings[field.metric] === point}
+                            aria-label={strings.quickLog.ratingLabel(field.label, point, RATING_MAX)}
+                            onClick={() =>
+                              setRatings((current) => ({
+                                ...current,
+                                [field.metric]: current[field.metric] === point ? null : point,
+                              }))
+                            }
+                          >
+                            {point}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="anchors">
+                        <span>{field.low}</span>
+                        <span>{field.high}</span>
+                      </div>
+                    </div>
+                  ))}
+
+                  <div className="field-block">
+                    <label className="lbl" htmlFor="quick-log-note">
+                      {strings.quickLog.note}
+                    </label>
+                    <textarea
+                      id="quick-log-note"
+                      className="ta"
+                      placeholder={strings.quickLog.notePlaceholder}
+                      value={note}
+                      onChange={(event) => setNote(event.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="sheetfoot">
                   <button
                     type="button"
-                    aria-label={strings.quickLog.waistUp}
-                    disabled={nothingToStepFrom}
-                    onClick={() => stepWaist(WAIST_STEP)}
+                    className="btn primary block"
+                    onClick={() => void save()}
+                    disabled={saving}
                   >
-                    <PlusIcon />
+                    {saving ? strings.quickLog.saving : strings.quickLog.save}
                   </button>
-                </div>
-                {/*
-                  * Two different sentences for two different absences, and the
-                  * difference is whether the app knows. Frame 3's first-ever
-                  * waist is a fact: there has never been one, so type it. A read
-                  * that failed is an unknown: the last one may exist and this
-                  * phone cannot see it, and that is worth saying out loud.
-                  */}
-                {noBaseToStepFrom ? (
-                  <p className="note warn" data-waist="no-base">
-                    {strings.quickLog.waistNoBase}
+                  <p className="note centre" style={{ marginTop: 'var(--s2)' }}>
+                    {load.state === 'ready' && load.snapshot.lastWaist === null
+                      ? strings.quickLog.blankNote
+                      : strings.quickLog.savedNote}
                   </p>
-                ) : nothingToStepFrom ? (
-                  <p className="note" data-waist="type-it">
-                    {strings.quickLog.waistTypeIt}
-                  </p>
-                ) : null}
-              </div>
-
-              {RATING_FIELDS.map((field) => (
-                <div className="field-block" key={field.metric}>
-                  <span className="lbl">{field.label}</span>
-                  <div className="scale5" role="group" aria-label={field.label}>
-                    {SCALE.map((point) => (
-                      <button
-                        key={point}
-                        type="button"
-                        aria-pressed={ratings[field.metric] === point}
-                        aria-label={strings.quickLog.ratingLabel(field.label, point, RATING_MAX)}
-                        onClick={() =>
-                          setRatings((current) => ({
-                            ...current,
-                            [field.metric]: current[field.metric] === point ? null : point,
-                          }))
-                        }
-                      >
-                        {point}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="anchors">
-                    <span>{field.low}</span>
-                    <span>{field.high}</span>
-                  </div>
                 </div>
-              ))}
-
-              <div className="field-block">
-                <label className="lbl" htmlFor="quick-log-note">
-                  {strings.quickLog.note}
-                </label>
-                <textarea
-                  id="quick-log-note"
-                  className="ta"
-                  placeholder={strings.quickLog.notePlaceholder}
-                  value={note}
-                  onChange={(event) => setNote(event.target.value)}
-                />
               </div>
-            </div>
-
-            <div className="sheetfoot">
-              <button
-                type="button"
-                className="btn primary block"
-                onClick={() => void save()}
-                disabled={saving}
-              >
-                {saving ? strings.quickLog.saving : strings.quickLog.save}
-              </button>
-              <p className="note centre" style={{ marginTop: 'var(--s2)' }}>
-                {load.state === 'ready' && load.snapshot.lastWaist === null
-                  ? strings.quickLog.blankNote
-                  : strings.quickLog.savedNote}
-              </p>
-            </div>
-          </div>
-        </>
-      ) : null}
+            </>,
+            document.body,
+          )
+        : null}
     </>
   );
 }

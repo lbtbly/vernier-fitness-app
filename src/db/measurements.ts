@@ -74,6 +74,14 @@ export type WriteInput = {
   value: number | null;
   unit: string;
   conversionFactor?: number | null;
+  /**
+   * The reference interval the laboratory printed. Slice 7 fills these; every
+   * other writer leaves them absent, because a waist measurement has no
+   * reference interval and a zero would be a claim rather than a blank.
+   */
+  referenceLow?: number | null;
+  referenceHigh?: number | null;
+  referenceText?: string | null;
   timeZone: string;
   source: Source;
   measuredAt: Date;
@@ -194,6 +202,9 @@ export async function storeMeasurement(input: WriteInput): Promise<WriteResult> 
       value: input.value,
       unit: input.unit,
       conversionFactor: input.conversionFactor ?? null,
+      referenceLow: input.referenceLow ?? null,
+      referenceHigh: input.referenceHigh ?? null,
+      referenceText: input.referenceText ?? null,
       timeZone: input.timeZone,
       source: input.source,
       measuredAt: input.measuredAt,
@@ -283,6 +294,12 @@ export async function appendCorrection(
       value: input.value,
       unit: current.unit,
       conversionFactor: current.conversionFactor,
+      // A correction inherits the interval of the row it corrects. The sheet
+      // printed one interval for that sample, and editing the number does not
+      // change what the sheet said.
+      referenceLow: current.referenceLow,
+      referenceHigh: current.referenceHigh,
+      referenceText: current.referenceText,
       timeZone: input.timeZone,
       source: 'manual',
       measuredAt: current.measuredAt,
@@ -534,6 +551,9 @@ export function toView(
     value: row.value,
     unit: row.unit,
     conversionFactor: row.conversionFactor,
+    referenceLow: row.referenceLow,
+    referenceHigh: row.referenceHigh,
+    referenceText: row.referenceText,
     timeZone: row.timeZone,
     source: row.source,
     measuredAt: row.measuredAt.toISOString(),

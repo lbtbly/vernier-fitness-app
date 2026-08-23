@@ -1,0 +1,54 @@
+C5   chrome stale    card padding 16px 16px 16px 16px (screen 00: 16px 16px 16px 16px) margin-bottom 12px (12px) radius 16px (16px) border 1px solid rgb(42, 42, 46) box 361x109 at x=16 :: ON SCREEN-00 GEOMETRY
+C5   chrome stale    reads: WaistDemo, 3 days oldWaist last measured 3 days agoMeasure again at the navel, standing, breathing out.
+C5   chrome stale    sheet opacity at capture 1
+C5   chrome stale    console errors 0
+C5   chrome loading  card padding 16px 16px 16px 16px (screen 00: 16px 16px 16px 16px) margin-bottom 12px (12px) radius 16px (16px) border 1px solid rgb(42, 42, 46) box 361x119 at x=16 :: ON SCREEN-00 GEOMETRY
+C5   chrome loading  skeletons 74x22, 186x34, 250x13 (screen 00: 74x22, 186x34, 250x13) :: MATCH
+C5   chrome loading  reads: Waist
+C5   chrome loading  sheet opacity at capture 1
+C5   chrome loading  console errors 0
+C5   chrome error    card padding 16px 16px 16px 16px (screen 00: 16px 16px 16px 16px) margin-bottom 12px (12px) radius 16px (16px) border 1px solid rgb(240, 122, 106) box 361x201 at x=16 :: ON SCREEN-00 GEOMETRY
+C5   chrome error    reads: WaistThis screen failed to loadYour last measurements did not loadThe Mac mini answered 503 at 11:03 and gave no reason. The sheet still saves: a write goes to this phone first and uploads when the Mac mini answers.Try again
+C5   chrome error    sheet opacity at capture 1
+C5   chrome error    console errors 1
+C5   chrome offline  the origin is reachable: false
+C5   chrome offline  banner padding 11px 12px 11px 12px (screen 00: 11px 12px 11px 12px) margin-bottom 12px (12px) radius 12px (12px) border 1px solid rgb(42, 42, 46) box 361x81 at x=16 :: ON SCREEN-00 GEOMETRY
+C5   chrome offline  reads: Saved on this phone 1 entry is waiting to upload. It keeps the time you typed it, not the time it arrives.
+C5   chrome offline  sheet opacity at capture 1
+C5   chrome offline  console errors 3 (the origin was taken away, so a failed fetch is the state)
+states chrome done
+C5   webkit stale    card padding 16px 16px 16px 16px (screen 00: 16px 16px 16px 16px) margin-bottom 12px (12px) radius 16px (16px) border 1px solid rgb(42, 42, 46) box 361x109 at x=16 :: ON SCREEN-00 GEOMETRY
+C5   webkit stale    reads: WaistDemo, 3 days oldWaist last measured 3 days agoMeasure again at the navel, standing, breathing out.
+C5   webkit stale    sheet opacity at capture 1
+C5   webkit stale    console errors 0
+C5   webkit loading  card padding 16px 16px 16px 16px (screen 00: 16px 16px 16px 16px) margin-bottom 12px (12px) radius 16px (16px) border 1px solid rgb(42, 42, 46) box 361x119 at x=16 :: ON SCREEN-00 GEOMETRY
+C5   webkit loading  skeletons 74x22, 186x34, 250x13 (screen 00: 74x22, 186x34, 250x13) :: MATCH
+C5   webkit loading  reads: Waist
+C5   webkit loading  sheet opacity at capture 1
+C5   webkit loading  console errors 0
+C5   webkit error    card padding 16px 16px 16px 16px (screen 00: 16px 16px 16px 16px) margin-bottom 12px (12px) radius 16px (16px) border 1px solid rgb(240, 122, 106) box 361x201 at x=16 :: ON SCREEN-00 GEOMETRY
+C5   webkit error    reads: WaistThis screen failed to loadYour last measurements did not loadThe Mac mini answered 503 at 11:03 and gave no reason. The sheet still saves: a write goes to this phone first and uploads when the Mac mini answers.Try again
+C5   webkit error    sheet opacity at capture 1
+C5   webkit error    console errors 1
+C5   webkit offline  the origin is reachable: false
+C5   webkit offline  banner padding 11px 12px 11px 12px (screen 00: 11px 12px 11px 12px) margin-bottom 12px (12px) radius 12px (12px) border 1px solid rgb(42, 42, 46) box 361x81 at x=16 :: ON SCREEN-00 GEOMETRY
+C5   webkit offline  reads: Saved on this phone 1 entry is waiting to upload. It keeps the time you typed it, not the time it arrives.
+C5   webkit offline  sheet opacity at capture 1
+C5   webkit offline  console errors 3 (the origin was taken away, so a failed fetch is the state)
+states webkit done
+C5   chrome empty   the database holds 0 measurement row(s) and 0 waist row(s)
+C5   chrome empty   the card reads: No waist measurement yetTape at the navel, standing, breathing out. Same spot each time matters more than the exact number.
+C5   chrome empty   card padding 16px 16px 16px 16px  margin-bottom 12px  radius 16px  border 1px dashed  361x98 at x=16
+C5   chrome empty   sheet 393 at x=0 radius 22px; the waist field is 130.4x52 holding "" behind the placeholder "--"
+C5   chrome empty   head "Quick logFirst time"  foot "SaveFill what you have. Blank fields stay blank, they are not stored as zero."
+C5   chrome empty   stepper refused while the field is blank: up true, down true
+C5   chrome empty   sheet opacity at capture 1
+C5   chrome empty   console errors 0
+C5   webkit empty   the database holds 0 measurement row(s) and 0 waist row(s)
+C5   webkit empty   the card reads: No waist measurement yetTape at the navel, standing, breathing out. Same spot each time matters more than the exact number.
+C5   webkit empty   card padding 16px 16px 16px 16px  margin-bottom 12px  radius 16px  border 1px dashed  361x98 at x=16
+C5   webkit empty   sheet 393 at x=0 radius 22px; the waist field is 132.7x52 holding "" behind the placeholder "--"
+C5   webkit empty   head "Quick logFirst time"  foot "SaveFill what you have. Blank fields stay blank, they are not stored as zero."
+C5   webkit empty   stepper refused while the field is blank: up true, down true
+C5   webkit empty   sheet opacity at capture 1
+C5   webkit empty   console errors 0

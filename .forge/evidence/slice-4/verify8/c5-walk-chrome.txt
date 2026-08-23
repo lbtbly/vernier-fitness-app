@@ -1,0 +1,701 @@
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+
+=== chrome 393x852 stale ===
+  opacity at capture 1  transform none  animations []
+  ancestry: body < html   insideACard=false   scrim: body < html
+  sheet 393/0  max-width 720px  padding 8px 16px 0px
+  state cards present: [stale]  card padding: stale=16px
+  foot padding-top 12px border 1px; Save margin-top 0px, 12 px below the divider, 52 px min 52px font 16px
+  actions: none
+  scale5: 20 buttons 52px/css 52px/min auto
+  stepper: 2 buttons 60x60
+  --- targets walked: 26 ---
+        44 x     44  min 44px    button   Close the quick log
+        60 x     60  min auto    button   Down half a centimetre
+        52 x  130.4  min 52px    input    Waist in centimetres
+        60 x     60  min auto    button   Up half a centimetre
+        52 x   65.8  min auto    button   Energy, 1 of 5
+        52 x   65.8  min auto    button   Energy, 2 of 5
+        52 x   65.8  min auto    button   Energy, 3 of 5
+        52 x   65.8  min auto    button   Energy, 4 of 5
+        52 x   65.8  min auto    button   Energy, 5 of 5
+        52 x   65.8  min auto    button   Fatigue, 1 of 5
+        52 x   65.8  min auto    button   Fatigue, 2 of 5
+        52 x   65.8  min auto    button   Fatigue, 3 of 5
+        52 x   65.8  min auto    button   Fatigue, 4 of 5
+        52 x   65.8  min auto    button   Fatigue, 5 of 5
+        52 x   65.8  min auto    button   Hunger, 1 of 5
+        52 x   65.8  min auto    button   Hunger, 2 of 5
+        52 x   65.8  min auto    button   Hunger, 3 of 5
+        52 x   65.8  min auto    button   Hunger, 4 of 5
+        52 x   65.8  min auto    button   Hunger, 5 of 5
+        52 x   65.8  min auto    button   Satiety after eating, 1 of 5
+        52 x   65.8  min auto    button   Satiety after eating, 2 of 5
+        52 x   65.8  min auto    button   Satiety after eating, 3 of 5
+        52 x   65.8  min auto    button   Satiety after eating, 4 of 5
+        52 x   65.8  min auto    button   Satiety after eating, 5 of 5
+        80 x    361  min 80px    textarea Note
+        52 x    361  min 52px    button   Save
+  targets under 44 px: 0 of 26 walked
+
+=== chrome 393x852 loaded ===
+  opacity at capture 1  transform none  animations []
+  ancestry: body < html   insideACard=false   scrim: body < html
+  sheet 393/0  max-width 720px  padding 8px 16px 0px
+  state cards present: []  card padding: none
+  foot padding-top 12px border 1px; Save margin-top 0px, 12 px below the divider, 52 px min 52px font 16px
+  actions: none
+  scale5: 20 buttons 52px/css 52px/min auto
+  stepper: 2 buttons 60x60
+  --- targets walked: 26 ---
+        44 x     44  min 44px    button   Close the quick log
+        60 x     60  min auto    button   Down half a centimetre
+        52 x  130.4  min 52px    input    Waist in centimetres
+        60 x     60  min auto    button   Up half a centimetre
+        52 x   65.8  min auto    button   Energy, 1 of 5
+        52 x   65.8  min auto    button   Energy, 2 of 5
+        52 x   65.8  min auto    button   Energy, 3 of 5
+        52 x   65.8  min auto    button   Energy, 4 of 5
+        52 x   65.8  min auto    button   Energy, 5 of 5
+        52 x   65.8  min auto    button   Fatigue, 1 of 5
+        52 x   65.8  min auto    button   Fatigue, 2 of 5
+        52 x   65.8  min auto    button   Fatigue, 3 of 5
+        52 x   65.8  min auto    button   Fatigue, 4 of 5
+        52 x   65.8  min auto    button   Fatigue, 5 of 5
+        52 x   65.8  min auto    button   Hunger, 1 of 5
+        52 x   65.8  min auto    button   Hunger, 2 of 5
+        52 x   65.8  min auto    button   Hunger, 3 of 5
+        52 x   65.8  min auto    button   Hunger, 4 of 5
+        52 x   65.8  min auto    button   Hunger, 5 of 5
+        52 x   65.8  min auto    button   Satiety after eating, 1 of 5
+        52 x   65.8  min auto    button   Satiety after eating, 2 of 5
+        52 x   65.8  min auto    button   Satiety after eating, 3 of 5
+        52 x   65.8  min auto    button   Satiety after eating, 4 of 5
+        52 x   65.8  min auto    button   Satiety after eating, 5 of 5
+        80 x    361  min 80px    textarea Note
+        52 x    361  min 52px    button   Save
+  targets under 44 px: 0 of 26 walked
+
+=== chrome 393x852 loading ===
+  opacity at capture 1  transform none  animations []
+  ancestry: body < html   insideACard=false   scrim: body < html
+  sheet 393/0  max-width 720px  padding 8px 16px 0px
+  state cards present: [loading]  card padding: loading=16px
+  foot padding-top 12px border 1px; Save margin-top 0px, 12 px below the divider, 52 px min 52px font 16px
+  actions: none
+  scale5: 20 buttons 52px/css 52px/min auto
+  stepper: 2 buttons 60x60
+  --- targets walked: 26 ---
+        44 x     44  min 44px    button   Close the quick log
+        60 x     60  min auto    button   Down half a centimetre
+        52 x  130.4  min 52px    input    Waist in centimetres
+        60 x     60  min auto    button   Up half a centimetre
+        52 x   65.8  min auto    button   Energy, 1 of 5
+        52 x   65.8  min auto    button   Energy, 2 of 5
+        52 x   65.8  min auto    button   Energy, 3 of 5
+        52 x   65.8  min auto    button   Energy, 4 of 5
+        52 x   65.8  min auto    button   Energy, 5 of 5
+        52 x   65.8  min auto    button   Fatigue, 1 of 5
+        52 x   65.8  min auto    button   Fatigue, 2 of 5
+        52 x   65.8  min auto    button   Fatigue, 3 of 5
+        52 x   65.8  min auto    button   Fatigue, 4 of 5
+        52 x   65.8  min auto    button   Fatigue, 5 of 5
+        52 x   65.8  min auto    button   Hunger, 1 of 5
+        52 x   65.8  min auto    button   Hunger, 2 of 5
+        52 x   65.8  min auto    button   Hunger, 3 of 5
+        52 x   65.8  min auto    button   Hunger, 4 of 5
+        52 x   65.8  min auto    button   Hunger, 5 of 5
+        52 x   65.8  min auto    button   Satiety after eating, 1 of 5
+        52 x   65.8  min auto    button   Satiety after eating, 2 of 5
+        52 x   65.8  min auto    button   Satiety after eating, 3 of 5
+        52 x   65.8  min auto    button   Satiety after eating, 4 of 5
+        52 x   65.8  min auto    button   Satiety after eating, 5 of 5
+        80 x    361  min 80px    textarea Note
+        52 x    361  min 52px    button   Save
+  targets under 44 px: 0 of 26 walked
+
+=== chrome 393x852 error ===
+  opacity at capture 1  transform none  animations []
+  ancestry: body < html   insideACard=false   scrim: body < html
+  sheet 393/0  max-width 720px  padding 8px 16px 0px
+  state cards present: [error]  card padding: error=16px
+  foot padding-top 12px border 1px; Save margin-top 0px, 12 px below the divider, 52 px min 52px font 16px
+  actions: error margin-top 12px drawn 12 px [Try again 52px min 52px]
+  scale5: 20 buttons 52px/css 52px/min auto
+  stepper: 2 buttons 60x60
+  --- targets walked: 27 ---
+        44 x     44  min 44px    button   Close the quick log
+        52 x    327  min 52px    button   Try again
+        60 x     60  min auto    button   Down half a centimetre
+        52 x  130.4  min 52px    input    Waist in centimetres
+        60 x     60  min auto    button   Up half a centimetre
+        52 x   65.8  min auto    button   Energy, 1 of 5
+        52 x   65.8  min auto    button   Energy, 2 of 5
+        52 x   65.8  min auto    button   Energy, 3 of 5
+        52 x   65.8  min auto    button   Energy, 4 of 5
+        52 x   65.8  min auto    button   Energy, 5 of 5
+        52 x   65.8  min auto    button   Fatigue, 1 of 5
+        52 x   65.8  min auto    button   Fatigue, 2 of 5
+        52 x   65.8  min auto    button   Fatigue, 3 of 5
+        52 x   65.8  min auto    button   Fatigue, 4 of 5
+        52 x   65.8  min auto    button   Fatigue, 5 of 5
+        52 x   65.8  min auto    button   Hunger, 1 of 5
+        52 x   65.8  min auto    button   Hunger, 2 of 5
+        52 x   65.8  min auto    button   Hunger, 3 of 5
+        52 x   65.8  min auto    button   Hunger, 4 of 5
+        52 x   65.8  min auto    button   Hunger, 5 of 5
+        52 x   65.8  min auto    button   Satiety after eating, 1 of 5
+        52 x   65.8  min auto    button   Satiety after eating, 2 of 5
+        52 x   65.8  min auto    button   Satiety after eating, 3 of 5
+        52 x   65.8  min auto    button   Satiety after eating, 4 of 5
+        52 x   65.8  min auto    button   Satiety after eating, 5 of 5
+        80 x    361  min 80px    textarea Note
+        52 x    361  min 52px    button   Save
+  targets under 44 px: 0 of 27 walked
+
+=== chrome 393x852 offline ===
+  opacity at capture 1  transform none  animations []
+  ancestry: body < html   insideACard=false   scrim: body < html
+  sheet 393/0  max-width 720px  padding 8px 16px 0px
+  state cards present: [offline, error]  card padding: error=16px
+  foot padding-top 12px border 1px; Save margin-top 0px, 12 px below the divider, 52 px min 52px font 16px
+  actions: error margin-top 12px drawn 12 px [Try again 52px min 52px]
+  scale5: 20 buttons 52px/css 52px/min auto
+  stepper: 2 buttons 60x60
+  --- targets walked: 27 ---
+        44 x     44  min 44px    button   Close the quick log
+        52 x    327  min 52px    button   Try again
+        60 x     60  min auto    button   Down half a centimetre
+        52 x  130.4  min 52px    input    Waist in centimetres
+        60 x     60  min auto    button   Up half a centimetre
+        52 x   65.8  min auto    button   Energy, 1 of 5
+        52 x   65.8  min auto    button   Energy, 2 of 5
+        52 x   65.8  min auto    button   Energy, 3 of 5
+        52 x   65.8  min auto    button   Energy, 4 of 5
+        52 x   65.8  min auto    button   Energy, 5 of 5
+        52 x   65.8  min auto    button   Fatigue, 1 of 5
+        52 x   65.8  min auto    button   Fatigue, 2 of 5
+        52 x   65.8  min auto    button   Fatigue, 3 of 5
+        52 x   65.8  min auto    button   Fatigue, 4 of 5
+        52 x   65.8  min auto    button   Fatigue, 5 of 5
+        52 x   65.8  min auto    button   Hunger, 1 of 5
+        52 x   65.8  min auto    button   Hunger, 2 of 5
+        52 x   65.8  min auto    button   Hunger, 3 of 5
+        52 x   65.8  min auto    button   Hunger, 4 of 5
+        52 x   65.8  min auto    button   Hunger, 5 of 5
+        52 x   65.8  min auto    button   Satiety after eating, 1 of 5
+        52 x   65.8  min auto    button   Satiety after eating, 2 of 5
+        52 x   65.8  min auto    button   Satiety after eating, 3 of 5
+        52 x   65.8  min auto    button   Satiety after eating, 4 of 5
+        52 x   65.8  min auto    button   Satiety after eating, 5 of 5
+        80 x    361  min 80px    textarea Note
+        52 x    361  min 52px    button   Save
+  targets under 44 px: 0 of 27 walked
+  console errors in chrome 393x852: 3 Failed to load resource: net::ERR_CONNECTION_FAILED | Failed to load resource: net::ERR_CONNECTION_FAILED | Failed to load resource: net::ERR_CONNECTION_FAILED
+  waist field value in empty: "" placeholder "--"
+
+=== chrome 393x852 empty ===
+  opacity at capture 1  transform none  animations []
+  ancestry: body < html   insideACard=false   scrim: body < html
+  sheet 393/0  max-width 720px  padding 8px 16px 0px
+  state cards present: [empty]  card padding: empty=16px
+  foot padding-top 12px border 1px; Save margin-top 0px, 12 px below the divider, 52 px min 52px font 16px
+  actions: none
+  scale5: 20 buttons 52px/css 52px/min auto
+  stepper: 2 buttons 60x60
+  --- targets walked: 26 ---
+        44 x     44  min 44px    button   Close the quick log
+        60 x     60  min auto    button   Down half a centimetre
+        52 x  130.4  min 52px    input    Waist in centimetres
+        60 x     60  min auto    button   Up half a centimetre
+        52 x   65.8  min auto    button   Energy, 1 of 5
+        52 x   65.8  min auto    button   Energy, 2 of 5
+        52 x   65.8  min auto    button   Energy, 3 of 5
+        52 x   65.8  min auto    button   Energy, 4 of 5
+        52 x   65.8  min auto    button   Energy, 5 of 5
+        52 x   65.8  min auto    button   Fatigue, 1 of 5
+        52 x   65.8  min auto    button   Fatigue, 2 of 5
+        52 x   65.8  min auto    button   Fatigue, 3 of 5
+        52 x   65.8  min auto    button   Fatigue, 4 of 5
+        52 x   65.8  min auto    button   Fatigue, 5 of 5
+        52 x   65.8  min auto    button   Hunger, 1 of 5
+        52 x   65.8  min auto    button   Hunger, 2 of 5
+        52 x   65.8  min auto    button   Hunger, 3 of 5
+        52 x   65.8  min auto    button   Hunger, 4 of 5
+        52 x   65.8  min auto    button   Hunger, 5 of 5
+        52 x   65.8  min auto    button   Satiety after eating, 1 of 5
+        52 x   65.8  min auto    button   Satiety after eating, 2 of 5
+        52 x   65.8  min auto    button   Satiety after eating, 3 of 5
+        52 x   65.8  min auto    button   Satiety after eating, 4 of 5
+        52 x   65.8  min auto    button   Satiety after eating, 5 of 5
+        80 x    361  min 80px    textarea Note
+        52 x    361  min 52px    button   Save
+  targets under 44 px: 0 of 26 walked
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+
+=== chrome 768x1024 stale ===
+  opacity at capture 1  transform none  animations []
+  ancestry: body < html   insideACard=false   scrim: body < html
+  sheet 720/24  max-width 720px  padding 8px 16px 0px
+  state cards present: [stale]  card padding: stale=16px
+  foot padding-top 12px border 1px; Save margin-top 0px, 12 px below the divider, 52 px min 52px font 16px
+  actions: none
+  scale5: 20 buttons 52px/css 52px/min auto
+  stepper: 2 buttons 60x60
+  --- targets walked: 26 ---
+        44 x     44  min 44px    button   Close the quick log
+        60 x     60  min auto    button   Down half a centimetre
+        52 x  130.4  min 52px    input    Waist in centimetres
+        60 x     60  min auto    button   Up half a centimetre
+        52 x  131.2  min auto    button   Energy, 1 of 5
+        52 x  131.2  min auto    button   Energy, 2 of 5
+        52 x  131.2  min auto    button   Energy, 3 of 5
+        52 x  131.2  min auto    button   Energy, 4 of 5
+        52 x  131.2  min auto    button   Energy, 5 of 5
+        52 x  131.2  min auto    button   Fatigue, 1 of 5
+        52 x  131.2  min auto    button   Fatigue, 2 of 5
+        52 x  131.2  min auto    button   Fatigue, 3 of 5
+        52 x  131.2  min auto    button   Fatigue, 4 of 5
+        52 x  131.2  min auto    button   Fatigue, 5 of 5
+        52 x  131.2  min auto    button   Hunger, 1 of 5
+        52 x  131.2  min auto    button   Hunger, 2 of 5
+        52 x  131.2  min auto    button   Hunger, 3 of 5
+        52 x  131.2  min auto    button   Hunger, 4 of 5
+        52 x  131.2  min auto    button   Hunger, 5 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 1 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 2 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 3 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 4 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 5 of 5
+        80 x    688  min 80px    textarea Note
+        52 x    688  min 52px    button   Save
+  targets under 44 px: 0 of 26 walked
+
+=== chrome 768x1024 loaded ===
+  opacity at capture 1  transform none  animations []
+  ancestry: body < html   insideACard=false   scrim: body < html
+  sheet 720/24  max-width 720px  padding 8px 16px 0px
+  state cards present: []  card padding: none
+  foot padding-top 12px border 1px; Save margin-top 0px, 12 px below the divider, 52 px min 52px font 16px
+  actions: none
+  scale5: 20 buttons 52px/css 52px/min auto
+  stepper: 2 buttons 60x60
+  --- targets walked: 26 ---
+        44 x     44  min 44px    button   Close the quick log
+        60 x     60  min auto    button   Down half a centimetre
+        52 x  130.4  min 52px    input    Waist in centimetres
+        60 x     60  min auto    button   Up half a centimetre
+        52 x  131.2  min auto    button   Energy, 1 of 5
+        52 x  131.2  min auto    button   Energy, 2 of 5
+        52 x  131.2  min auto    button   Energy, 3 of 5
+        52 x  131.2  min auto    button   Energy, 4 of 5
+        52 x  131.2  min auto    button   Energy, 5 of 5
+        52 x  131.2  min auto    button   Fatigue, 1 of 5
+        52 x  131.2  min auto    button   Fatigue, 2 of 5
+        52 x  131.2  min auto    button   Fatigue, 3 of 5
+        52 x  131.2  min auto    button   Fatigue, 4 of 5
+        52 x  131.2  min auto    button   Fatigue, 5 of 5
+        52 x  131.2  min auto    button   Hunger, 1 of 5
+        52 x  131.2  min auto    button   Hunger, 2 of 5
+        52 x  131.2  min auto    button   Hunger, 3 of 5
+        52 x  131.2  min auto    button   Hunger, 4 of 5
+        52 x  131.2  min auto    button   Hunger, 5 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 1 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 2 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 3 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 4 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 5 of 5
+        80 x    688  min 80px    textarea Note
+        52 x    688  min 52px    button   Save
+  targets under 44 px: 0 of 26 walked
+
+=== chrome 768x1024 loading ===
+  opacity at capture 1  transform none  animations []
+  ancestry: body < html   insideACard=false   scrim: body < html
+  sheet 720/24  max-width 720px  padding 8px 16px 0px
+  state cards present: [loading]  card padding: loading=16px
+  foot padding-top 12px border 1px; Save margin-top 0px, 12 px below the divider, 52 px min 52px font 16px
+  actions: none
+  scale5: 20 buttons 52px/css 52px/min auto
+  stepper: 2 buttons 60x60
+  --- targets walked: 26 ---
+        44 x     44  min 44px    button   Close the quick log
+        60 x     60  min auto    button   Down half a centimetre
+        52 x  130.4  min 52px    input    Waist in centimetres
+        60 x     60  min auto    button   Up half a centimetre
+        52 x  131.2  min auto    button   Energy, 1 of 5
+        52 x  131.2  min auto    button   Energy, 2 of 5
+        52 x  131.2  min auto    button   Energy, 3 of 5
+        52 x  131.2  min auto    button   Energy, 4 of 5
+        52 x  131.2  min auto    button   Energy, 5 of 5
+        52 x  131.2  min auto    button   Fatigue, 1 of 5
+        52 x  131.2  min auto    button   Fatigue, 2 of 5
+        52 x  131.2  min auto    button   Fatigue, 3 of 5
+        52 x  131.2  min auto    button   Fatigue, 4 of 5
+        52 x  131.2  min auto    button   Fatigue, 5 of 5
+        52 x  131.2  min auto    button   Hunger, 1 of 5
+        52 x  131.2  min auto    button   Hunger, 2 of 5
+        52 x  131.2  min auto    button   Hunger, 3 of 5
+        52 x  131.2  min auto    button   Hunger, 4 of 5
+        52 x  131.2  min auto    button   Hunger, 5 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 1 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 2 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 3 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 4 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 5 of 5
+        80 x    688  min 80px    textarea Note
+        52 x    688  min 52px    button   Save
+  targets under 44 px: 0 of 26 walked
+
+=== chrome 768x1024 error ===
+  opacity at capture 1  transform none  animations []
+  ancestry: body < html   insideACard=false   scrim: body < html
+  sheet 720/24  max-width 720px  padding 8px 16px 0px
+  state cards present: [error]  card padding: error=16px
+  foot padding-top 12px border 1px; Save margin-top 0px, 12 px below the divider, 52 px min 52px font 16px
+  actions: error margin-top 12px drawn 12 px [Try again 52px min 52px]
+  scale5: 20 buttons 52px/css 52px/min auto
+  stepper: 2 buttons 60x60
+  --- targets walked: 27 ---
+        44 x     44  min 44px    button   Close the quick log
+        52 x    654  min 52px    button   Try again
+        60 x     60  min auto    button   Down half a centimetre
+        52 x  130.4  min 52px    input    Waist in centimetres
+        60 x     60  min auto    button   Up half a centimetre
+        52 x  131.2  min auto    button   Energy, 1 of 5
+        52 x  131.2  min auto    button   Energy, 2 of 5
+        52 x  131.2  min auto    button   Energy, 3 of 5
+        52 x  131.2  min auto    button   Energy, 4 of 5
+        52 x  131.2  min auto    button   Energy, 5 of 5
+        52 x  131.2  min auto    button   Fatigue, 1 of 5
+        52 x  131.2  min auto    button   Fatigue, 2 of 5
+        52 x  131.2  min auto    button   Fatigue, 3 of 5
+        52 x  131.2  min auto    button   Fatigue, 4 of 5
+        52 x  131.2  min auto    button   Fatigue, 5 of 5
+        52 x  131.2  min auto    button   Hunger, 1 of 5
+        52 x  131.2  min auto    button   Hunger, 2 of 5
+        52 x  131.2  min auto    button   Hunger, 3 of 5
+        52 x  131.2  min auto    button   Hunger, 4 of 5
+        52 x  131.2  min auto    button   Hunger, 5 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 1 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 2 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 3 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 4 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 5 of 5
+        80 x    688  min 80px    textarea Note
+        52 x    688  min 52px    button   Save
+  targets under 44 px: 0 of 27 walked
+
+=== chrome 768x1024 offline ===
+  opacity at capture 1  transform none  animations []
+  ancestry: body < html   insideACard=false   scrim: body < html
+  sheet 720/24  max-width 720px  padding 8px 16px 0px
+  state cards present: [offline, error]  card padding: error=16px
+  foot padding-top 12px border 1px; Save margin-top 0px, 12 px below the divider, 52 px min 52px font 16px
+  actions: error margin-top 12px drawn 12 px [Try again 52px min 52px]
+  scale5: 20 buttons 52px/css 52px/min auto
+  stepper: 2 buttons 60x60
+  --- targets walked: 27 ---
+        44 x     44  min 44px    button   Close the quick log
+        52 x    654  min 52px    button   Try again
+        60 x     60  min auto    button   Down half a centimetre
+        52 x  130.4  min 52px    input    Waist in centimetres
+        60 x     60  min auto    button   Up half a centimetre
+        52 x  131.2  min auto    button   Energy, 1 of 5
+        52 x  131.2  min auto    button   Energy, 2 of 5
+        52 x  131.2  min auto    button   Energy, 3 of 5
+        52 x  131.2  min auto    button   Energy, 4 of 5
+        52 x  131.2  min auto    button   Energy, 5 of 5
+        52 x  131.2  min auto    button   Fatigue, 1 of 5
+        52 x  131.2  min auto    button   Fatigue, 2 of 5
+        52 x  131.2  min auto    button   Fatigue, 3 of 5
+        52 x  131.2  min auto    button   Fatigue, 4 of 5
+        52 x  131.2  min auto    button   Fatigue, 5 of 5
+        52 x  131.2  min auto    button   Hunger, 1 of 5
+        52 x  131.2  min auto    button   Hunger, 2 of 5
+        52 x  131.2  min auto    button   Hunger, 3 of 5
+        52 x  131.2  min auto    button   Hunger, 4 of 5
+        52 x  131.2  min auto    button   Hunger, 5 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 1 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 2 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 3 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 4 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 5 of 5
+        80 x    688  min 80px    textarea Note
+        52 x    688  min 52px    button   Save
+  targets under 44 px: 0 of 27 walked
+  console errors in chrome 768x1024: 3 Failed to load resource: net::ERR_CONNECTION_FAILED | Failed to load resource: net::ERR_CONNECTION_FAILED | Failed to load resource: net::ERR_CONNECTION_FAILED
+  waist field value in empty: "" placeholder "--"
+
+=== chrome 768x1024 empty ===
+  opacity at capture 1  transform none  animations []
+  ancestry: body < html   insideACard=false   scrim: body < html
+  sheet 720/24  max-width 720px  padding 8px 16px 0px
+  state cards present: [empty]  card padding: empty=16px
+  foot padding-top 12px border 1px; Save margin-top 0px, 12 px below the divider, 52 px min 52px font 16px
+  actions: none
+  scale5: 20 buttons 52px/css 52px/min auto
+  stepper: 2 buttons 60x60
+  --- targets walked: 26 ---
+        44 x     44  min 44px    button   Close the quick log
+        60 x     60  min auto    button   Down half a centimetre
+        52 x  130.4  min 52px    input    Waist in centimetres
+        60 x     60  min auto    button   Up half a centimetre
+        52 x  131.2  min auto    button   Energy, 1 of 5
+        52 x  131.2  min auto    button   Energy, 2 of 5
+        52 x  131.2  min auto    button   Energy, 3 of 5
+        52 x  131.2  min auto    button   Energy, 4 of 5
+        52 x  131.2  min auto    button   Energy, 5 of 5
+        52 x  131.2  min auto    button   Fatigue, 1 of 5
+        52 x  131.2  min auto    button   Fatigue, 2 of 5
+        52 x  131.2  min auto    button   Fatigue, 3 of 5
+        52 x  131.2  min auto    button   Fatigue, 4 of 5
+        52 x  131.2  min auto    button   Fatigue, 5 of 5
+        52 x  131.2  min auto    button   Hunger, 1 of 5
+        52 x  131.2  min auto    button   Hunger, 2 of 5
+        52 x  131.2  min auto    button   Hunger, 3 of 5
+        52 x  131.2  min auto    button   Hunger, 4 of 5
+        52 x  131.2  min auto    button   Hunger, 5 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 1 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 2 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 3 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 4 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 5 of 5
+        80 x    688  min 80px    textarea Note
+        52 x    688  min 52px    button   Save
+  targets under 44 px: 0 of 26 walked
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+
+=== chrome 1280x900 stale ===
+  opacity at capture 1  transform none  animations []
+  ancestry: body < html   insideACard=false   scrim: body < html
+  sheet 720/280  max-width 720px  padding 8px 16px 0px
+  state cards present: [stale]  card padding: stale=16px
+  foot padding-top 12px border 1px; Save margin-top 0px, 12 px below the divider, 52 px min 52px font 16px
+  actions: none
+  scale5: 20 buttons 52px/css 52px/min auto
+  stepper: 2 buttons 60x60
+  --- targets walked: 26 ---
+        44 x     44  min 44px    button   Close the quick log
+        60 x     60  min auto    button   Down half a centimetre
+        52 x  130.4  min 52px    input    Waist in centimetres
+        60 x     60  min auto    button   Up half a centimetre
+        52 x  131.2  min auto    button   Energy, 1 of 5
+        52 x  131.2  min auto    button   Energy, 2 of 5
+        52 x  131.2  min auto    button   Energy, 3 of 5
+        52 x  131.2  min auto    button   Energy, 4 of 5
+        52 x  131.2  min auto    button   Energy, 5 of 5
+        52 x  131.2  min auto    button   Fatigue, 1 of 5
+        52 x  131.2  min auto    button   Fatigue, 2 of 5
+        52 x  131.2  min auto    button   Fatigue, 3 of 5
+        52 x  131.2  min auto    button   Fatigue, 4 of 5
+        52 x  131.2  min auto    button   Fatigue, 5 of 5
+        52 x  131.2  min auto    button   Hunger, 1 of 5
+        52 x  131.2  min auto    button   Hunger, 2 of 5
+        52 x  131.2  min auto    button   Hunger, 3 of 5
+        52 x  131.2  min auto    button   Hunger, 4 of 5
+        52 x  131.2  min auto    button   Hunger, 5 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 1 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 2 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 3 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 4 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 5 of 5
+        80 x    688  min 80px    textarea Note
+        52 x    688  min 52px    button   Save
+  targets under 44 px: 0 of 26 walked
+
+=== chrome 1280x900 loaded ===
+  opacity at capture 1  transform none  animations []
+  ancestry: body < html   insideACard=false   scrim: body < html
+  sheet 720/280  max-width 720px  padding 8px 16px 0px
+  state cards present: []  card padding: none
+  foot padding-top 12px border 1px; Save margin-top 0px, 12 px below the divider, 52 px min 52px font 16px
+  actions: none
+  scale5: 20 buttons 52px/css 52px/min auto
+  stepper: 2 buttons 60x60
+  --- targets walked: 26 ---
+        44 x     44  min 44px    button   Close the quick log
+        60 x     60  min auto    button   Down half a centimetre
+        52 x  130.4  min 52px    input    Waist in centimetres
+        60 x     60  min auto    button   Up half a centimetre
+        52 x  131.2  min auto    button   Energy, 1 of 5
+        52 x  131.2  min auto    button   Energy, 2 of 5
+        52 x  131.2  min auto    button   Energy, 3 of 5
+        52 x  131.2  min auto    button   Energy, 4 of 5
+        52 x  131.2  min auto    button   Energy, 5 of 5
+        52 x  131.2  min auto    button   Fatigue, 1 of 5
+        52 x  131.2  min auto    button   Fatigue, 2 of 5
+        52 x  131.2  min auto    button   Fatigue, 3 of 5
+        52 x  131.2  min auto    button   Fatigue, 4 of 5
+        52 x  131.2  min auto    button   Fatigue, 5 of 5
+        52 x  131.2  min auto    button   Hunger, 1 of 5
+        52 x  131.2  min auto    button   Hunger, 2 of 5
+        52 x  131.2  min auto    button   Hunger, 3 of 5
+        52 x  131.2  min auto    button   Hunger, 4 of 5
+        52 x  131.2  min auto    button   Hunger, 5 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 1 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 2 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 3 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 4 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 5 of 5
+        80 x    688  min 80px    textarea Note
+        52 x    688  min 52px    button   Save
+  targets under 44 px: 0 of 26 walked
+
+=== chrome 1280x900 loading ===
+  opacity at capture 1  transform none  animations []
+  ancestry: body < html   insideACard=false   scrim: body < html
+  sheet 720/280  max-width 720px  padding 8px 16px 0px
+  state cards present: [loading]  card padding: loading=16px
+  foot padding-top 12px border 1px; Save margin-top 0px, 12 px below the divider, 52 px min 52px font 16px
+  actions: none
+  scale5: 20 buttons 52px/css 52px/min auto
+  stepper: 2 buttons 60x60
+  --- targets walked: 26 ---
+        44 x     44  min 44px    button   Close the quick log
+        60 x     60  min auto    button   Down half a centimetre
+        52 x  130.4  min 52px    input    Waist in centimetres
+        60 x     60  min auto    button   Up half a centimetre
+        52 x  131.2  min auto    button   Energy, 1 of 5
+        52 x  131.2  min auto    button   Energy, 2 of 5
+        52 x  131.2  min auto    button   Energy, 3 of 5
+        52 x  131.2  min auto    button   Energy, 4 of 5
+        52 x  131.2  min auto    button   Energy, 5 of 5
+        52 x  131.2  min auto    button   Fatigue, 1 of 5
+        52 x  131.2  min auto    button   Fatigue, 2 of 5
+        52 x  131.2  min auto    button   Fatigue, 3 of 5
+        52 x  131.2  min auto    button   Fatigue, 4 of 5
+        52 x  131.2  min auto    button   Fatigue, 5 of 5
+        52 x  131.2  min auto    button   Hunger, 1 of 5
+        52 x  131.2  min auto    button   Hunger, 2 of 5
+        52 x  131.2  min auto    button   Hunger, 3 of 5
+        52 x  131.2  min auto    button   Hunger, 4 of 5
+        52 x  131.2  min auto    button   Hunger, 5 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 1 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 2 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 3 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 4 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 5 of 5
+        80 x    688  min 80px    textarea Note
+        52 x    688  min 52px    button   Save
+  targets under 44 px: 0 of 26 walked
+
+=== chrome 1280x900 error ===
+  opacity at capture 1  transform none  animations []
+  ancestry: body < html   insideACard=false   scrim: body < html
+  sheet 720/280  max-width 720px  padding 8px 16px 0px
+  state cards present: [error]  card padding: error=16px
+  foot padding-top 12px border 1px; Save margin-top 0px, 12 px below the divider, 52 px min 52px font 16px
+  actions: error margin-top 12px drawn 12 px [Try again 52px min 52px]
+  scale5: 20 buttons 52px/css 52px/min auto
+  stepper: 2 buttons 60x60
+  --- targets walked: 27 ---
+        44 x     44  min 44px    button   Close the quick log
+        52 x    654  min 52px    button   Try again
+        60 x     60  min auto    button   Down half a centimetre
+        52 x  130.4  min 52px    input    Waist in centimetres
+        60 x     60  min auto    button   Up half a centimetre
+        52 x  131.2  min auto    button   Energy, 1 of 5
+        52 x  131.2  min auto    button   Energy, 2 of 5
+        52 x  131.2  min auto    button   Energy, 3 of 5
+        52 x  131.2  min auto    button   Energy, 4 of 5
+        52 x  131.2  min auto    button   Energy, 5 of 5
+        52 x  131.2  min auto    button   Fatigue, 1 of 5
+        52 x  131.2  min auto    button   Fatigue, 2 of 5
+        52 x  131.2  min auto    button   Fatigue, 3 of 5
+        52 x  131.2  min auto    button   Fatigue, 4 of 5
+        52 x  131.2  min auto    button   Fatigue, 5 of 5
+        52 x  131.2  min auto    button   Hunger, 1 of 5
+        52 x  131.2  min auto    button   Hunger, 2 of 5
+        52 x  131.2  min auto    button   Hunger, 3 of 5
+        52 x  131.2  min auto    button   Hunger, 4 of 5
+        52 x  131.2  min auto    button   Hunger, 5 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 1 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 2 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 3 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 4 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 5 of 5
+        80 x    688  min 80px    textarea Note
+        52 x    688  min 52px    button   Save
+  targets under 44 px: 0 of 27 walked
+
+=== chrome 1280x900 offline ===
+  opacity at capture 1  transform none  animations []
+  ancestry: body < html   insideACard=false   scrim: body < html
+  sheet 720/280  max-width 720px  padding 8px 16px 0px
+  state cards present: [offline, error]  card padding: error=16px
+  foot padding-top 12px border 1px; Save margin-top 0px, 12 px below the divider, 52 px min 52px font 16px
+  actions: error margin-top 12px drawn 12 px [Try again 52px min 52px]
+  scale5: 20 buttons 52px/css 52px/min auto
+  stepper: 2 buttons 60x60
+  --- targets walked: 27 ---
+        44 x     44  min 44px    button   Close the quick log
+        52 x    654  min 52px    button   Try again
+        60 x     60  min auto    button   Down half a centimetre
+        52 x  130.4  min 52px    input    Waist in centimetres
+        60 x     60  min auto    button   Up half a centimetre
+        52 x  131.2  min auto    button   Energy, 1 of 5
+        52 x  131.2  min auto    button   Energy, 2 of 5
+        52 x  131.2  min auto    button   Energy, 3 of 5
+        52 x  131.2  min auto    button   Energy, 4 of 5
+        52 x  131.2  min auto    button   Energy, 5 of 5
+        52 x  131.2  min auto    button   Fatigue, 1 of 5
+        52 x  131.2  min auto    button   Fatigue, 2 of 5
+        52 x  131.2  min auto    button   Fatigue, 3 of 5
+        52 x  131.2  min auto    button   Fatigue, 4 of 5
+        52 x  131.2  min auto    button   Fatigue, 5 of 5
+        52 x  131.2  min auto    button   Hunger, 1 of 5
+        52 x  131.2  min auto    button   Hunger, 2 of 5
+        52 x  131.2  min auto    button   Hunger, 3 of 5
+        52 x  131.2  min auto    button   Hunger, 4 of 5
+        52 x  131.2  min auto    button   Hunger, 5 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 1 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 2 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 3 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 4 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 5 of 5
+        80 x    688  min 80px    textarea Note
+        52 x    688  min 52px    button   Save
+  targets under 44 px: 0 of 27 walked
+  console errors in chrome 1280x900: 3 Failed to load resource: net::ERR_CONNECTION_FAILED | Failed to load resource: net::ERR_CONNECTION_FAILED | Failed to load resource: net::ERR_CONNECTION_FAILED
+  waist field value in empty: "" placeholder "--"
+
+=== chrome 1280x900 empty ===
+  opacity at capture 1  transform none  animations []
+  ancestry: body < html   insideACard=false   scrim: body < html
+  sheet 720/280  max-width 720px  padding 8px 16px 0px
+  state cards present: [empty]  card padding: empty=16px
+  foot padding-top 12px border 1px; Save margin-top 0px, 12 px below the divider, 52 px min 52px font 16px
+  actions: none
+  scale5: 20 buttons 52px/css 52px/min auto
+  stepper: 2 buttons 60x60
+  --- targets walked: 26 ---
+        44 x     44  min 44px    button   Close the quick log
+        60 x     60  min auto    button   Down half a centimetre
+        52 x  130.4  min 52px    input    Waist in centimetres
+        60 x     60  min auto    button   Up half a centimetre
+        52 x  131.2  min auto    button   Energy, 1 of 5
+        52 x  131.2  min auto    button   Energy, 2 of 5
+        52 x  131.2  min auto    button   Energy, 3 of 5
+        52 x  131.2  min auto    button   Energy, 4 of 5
+        52 x  131.2  min auto    button   Energy, 5 of 5
+        52 x  131.2  min auto    button   Fatigue, 1 of 5
+        52 x  131.2  min auto    button   Fatigue, 2 of 5
+        52 x  131.2  min auto    button   Fatigue, 3 of 5
+        52 x  131.2  min auto    button   Fatigue, 4 of 5
+        52 x  131.2  min auto    button   Fatigue, 5 of 5
+        52 x  131.2  min auto    button   Hunger, 1 of 5
+        52 x  131.2  min auto    button   Hunger, 2 of 5
+        52 x  131.2  min auto    button   Hunger, 3 of 5
+        52 x  131.2  min auto    button   Hunger, 4 of 5
+        52 x  131.2  min auto    button   Hunger, 5 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 1 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 2 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 3 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 4 of 5
+        52 x  131.2  min auto    button   Satiety after eating, 5 of 5
+        80 x    688  min 80px    textarea Note
+        52 x    688  min 52px    button   Save
+  targets under 44 px: 0 of 26 walked
+
+WROTE 18 state reads to /private/tmp/claude-501/-Users-lambertbouley-Claude-lbtbly-fitness-app/38530ca4-7aaa-4639-b52a-4d9b5f218876/scratchpad/shots/c5-measurements.json

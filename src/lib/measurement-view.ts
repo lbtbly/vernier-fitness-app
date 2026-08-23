@@ -20,6 +20,10 @@ export type MeasurementView = {
   value: number | null;
   unit: string;
   conversionFactor: number | null;
+  /** What the laboratory printed beside this result. Null on everything else. */
+  referenceLow: number | null;
+  referenceHigh: number | null;
+  referenceText: string | null;
   timeZone: string;
   source: string;
   measuredAt: string;

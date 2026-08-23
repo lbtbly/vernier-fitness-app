@@ -48,7 +48,7 @@ export default defineConfig({
   projects: [
     {
       name: 'webkit-iphone',
-      testIgnore: /focus\.spec\.ts|service-worker\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|launch-report\.spec\.ts|notices\.spec\.ts|withings\.spec\.ts/,
+      testIgnore: /focus\.spec\.ts|service-worker\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|launch-report\.spec\.ts|notices\.spec\.ts|withings\.spec\.ts|ingest\.spec\.ts|labs-scratch\.spec\.ts|nutrition\.spec\.ts|shopping\.spec\.ts|catalogue-offline\.spec\.ts|train-week\.spec\.ts|session-player\.spec\.ts|console-walk\.spec\.ts/,
       use: { ...devices['Desktop Safari'], viewport: { width: 393, height: 852 }, deviceScaleFactor: 3 },
     },
     {
@@ -57,7 +57,13 @@ export default defineConfig({
       // read back, and because what is being graded here is the worker's code
       // rather than an engine's rendering.
       name: 'chrome-worker',
-      testMatch: /service-worker\.spec\.ts/,
+      // catalogue-offline.spec.ts joined it in slice 8. F66 asks for a capture
+      // of five movement cards with the network disabled, and an offline test
+      // run with service workers blocked is a test with no worker to be
+      // offline: that is failure number one on this run's list and it is not
+      // being repeated. The file only READS, so it is safe at the live origin,
+      // which is where the worker really lives.
+      testMatch: /service-worker\.spec\.ts|catalogue-offline\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         channel: 'chrome',
@@ -96,6 +102,20 @@ export default defineConfig({
       // thirty-five and then exactly thirty-seven hours old. Both mean writing
       // rows, and `measurement` refuses DELETE, so they belong here.
       //
+      // ingest.spec.ts joined it in slice 6, and it is the clearest case of the
+      // rule so far. Every test in it writes: an ingest credential, a nonce,
+      // fourteen samples, five refused batches and a revocation. The owner's
+      // install holds the only copy of anything real in this product, backup
+      // and restore do not ship until slice 13, and `measurement` refuses
+      // DELETE, so a batch landed there is permanent. It runs where nothing
+      // anybody would miss lives.
+      // labs-scratch.spec.ts joined it in slice 7, and it is the clearest case
+      // yet. Every test in it writes rows into `measurement`, which refuses
+      // DELETE, and one of them deletes a file off a storage volume to prove
+      // F63. The owner's install holds the only copy of anything real in this
+      // product and backup does not ship until slice 13, so a laboratory import
+      // is graded against an installation whose rows nobody would miss.
+      //
       // launch-report.spec.ts joined it after the same lesson arrived through a
       // different door. It used to be a describe block in boundary.spec.ts,
       // driven at the live origin, and every run moved device_observation on
@@ -114,6 +134,14 @@ export default defineConfig({
       // WITHINGS_MODE=demo and an empty client pair, so the spec opens no
       // socket either: what it drives is the demonstration dataset, which is
       // the whole of what F36 asks to be proven.
+      // nutrition.spec.ts and shopping.spec.ts joined it in slice 9, and they
+      // are the largest arrivals so far. Everything those two grade is a write:
+      // a target row, a generated week, twenty-six meal decisions, a confirmed
+      // plan, a ticked box, an adjusted quantity and an item marked in stock.
+      // The owner's install holds his own rules, his own target and whatever
+      // week he accepted on Sunday, and driving either file at the live origin
+      // would overwrite all of it on every run. C12's six captures come from
+      // here for that reason, which is written down rather than discovered.
       //
       // Chrome, because that instance answers on plain loopback HTTP and the
       // session cookie is Secure. WebKit refuses a Secure cookie from an http
@@ -123,12 +151,24 @@ export default defineConfig({
       // tailnet behind a second HTTPS proxy, and it is written down rather than
       // discovered: what these files prove, they prove in Chrome.
       //
+      // train-week.spec.ts, session-player.spec.ts and console-walk.spec.ts
+      // joined it in slice 8, all three for the same reason: they WRITE. They
+      // propose weeks, accept and reject sessions, run whole sessions, log
+      // sets, store a media record and save a waist measurement through the
+      // quick log. On the owner's install a rejected session would move his
+      // adherence denominator overnight for no reason he could find, and
+      // `measurement` refuses DELETE, so a walked write there is permanent.
+      // session-player.spec.ts also freezes the page lifecycle to prove the
+      // clock, which is a Chromium protocol, so the engine is the price and it
+      // is written down: the wall-clock arithmetic under it is proven
+      // engine-free in tests/unit/session-clock.test.ts.
+      //
       // notices.spec.ts is the one exception and says so in its own header: it
       // injects the session the shipped recovery route minted with the Secure
       // attribute relaxed, so WebKit will carry it over loopback too, and it
       // grades its fold in both engines against one database.
       name: 'chrome-scratch',
-      testMatch: /launch-report\.spec\.ts|notices\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|withings\.spec\.ts/,
+      testMatch: /launch-report\.spec\.ts|notices\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|withings\.spec\.ts|ingest\.spec\.ts|labs-scratch\.spec\.ts|nutrition\.spec\.ts|shopping\.spec\.ts|train-week\.spec\.ts|session-player\.spec\.ts|console-walk\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         channel: 'chrome',

@@ -346,7 +346,16 @@ body{
   *{transition-duration:1ms !important}
 }
 
-a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible,[tabindex]:focus-visible{
+/*
+ * Focus, on everything, which DESIGN.md means literally.
+ *
+ * `select` and `textarea` were not on this list and both are now: the training
+ * media screen picks a movement with a select and the session player takes a
+ * note in a textarea, and a control the keyboard can reach with no ring on it
+ * is a control a keyboard user loses. The quick log's note field was already in
+ * that position and is covered by the same line.
+ */
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible,[tabindex]:focus-visible{
   outline:2px solid var(--focus);
   outline-offset:2px;
 }
@@ -504,6 +513,23 @@ a.value-link:active{opacity:.7}
 .was{color:var(--text-3)}
 
 /* ---------- the sheet, screen 03 ---------- */
+
+/*
+ * NOTHING SCOPED TO A SCREEN REACHES IN HERE, AND THAT IS ENFORCED IN THE DOM.
+ *
+ * `QuickLog` is mounted inside `section.card.day`, because the day card's rows
+ * are its children. The sheet itself is portalled to `document.body`, so its
+ * ancestry is `div.sheet < body` and not `div.sheet < section.card.day <
+ * div.today`. It used to be the second, and three Today rules crossed into
+ * screen 03 through it: the error card's action row lost 4 px of margin, Try
+ * again lost the 52 px escalation below, and Save sat 27 px under the foot
+ * divider where the sheet draws 12. That was defect 52's mechanism at three new
+ * properties, and scoping those three rules would have left the next Today rule
+ * free to do it again.
+ *
+ * So a rule that is meant to reach the sheet names the sheet. There is no other
+ * way in, and tests/e2e/layout.spec.ts fails if the portal is ever removed.
+ */
 
 .scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:30;border:0;width:100%;padding:0}
 
@@ -953,3 +979,550 @@ a.noticeline{min-height:var(--touch)}
  * box that no ancestor can scroll to.
  */
 .visually-hidden caption,.visually-hidden th,.visually-hidden td{white-space:nowrap}
+
+/*
+ * A numbered procedure, which the Shortcut guide is and nothing else in this
+ * app is.
+ *
+ * Ninety actions are not a paragraph. The owner reads one step, does it on the
+ * phone in his other hand, and comes back to find his place, so the number has
+ * to be findable without counting: it sits in the gutter, in tabular numerals,
+ * at the same weight as the action name it belongs to. The counter is CSS's
+ * rather than the markup's so the numbering can start anywhere, which is what
+ * lets Part C's steps carry the numbers the research gives them.
+ */
+.steps{list-style:none;counter-reset:none;margin-top:var(--s3)}
+.steps li{
+  display:grid;
+  grid-template-columns:26px 1fr;
+  gap:var(--s1) var(--s3);
+  padding:var(--s3) 0;
+  border-bottom:1px solid var(--line);
+}
+.steps li:last-child{border-bottom:0}
+.steps li::before{
+  content:attr(data-step);
+  grid-row:1 / span 2;
+  font-variant-numeric:tabular-nums;
+  font-size:var(--t-sub);
+  line-height:var(--t-head-lh);
+  color:var(--text-3);
+  text-align:right;
+}
+.steps li > .head{grid-column:2;margin:0}
+.steps li > .sub{grid-column:2}
+.steps li > .head + .sub{margin-top:var(--s1)}
+/* --------------------------------------------------------------------------
+ * Screen 05, the labs review. Copied from .forge/wireframes/05-labs-review.html
+ * with section 2b's resolutions applied: the base button is 48 px and 16 px,
+ * `.btn.quiet` carries all three declarations, and `.btn svg` is 20 px. Those
+ * three already live above; what is here is what only this screen draws.
+ * -------------------------------------------------------------------------- */
+
+/*
+ * One extracted row. It is a card in its own right rather than a `.row` inside
+ * one, because each one carries a decision and its own controls and the border
+ * is what says which state it is in: `--warn` while it waits on the owner,
+ * `--good` once it is stored, faded once it is rejected.
+ *
+ * Colour is state here and never origin, which is DESIGN.md's third
+ * un-improvisable decision. The source chip on a stored value stays neutral
+ * chrome on every other screen and does not appear on these rows at all,
+ * because nothing on this screen has a source yet.
+ */
+.lrow{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:var(--r-md);
+  padding:12px 14px;
+  margin-bottom:var(--s2);
+}
+.lrow.attn{border-color:var(--warn)}
+.lrow.done{border-color:var(--good)}
+.lrow.rej{opacity:.55}
+.lrow .name{font-weight:600}
+
+/*
+ * The conversion note, and the one line F61 turns on: printed original, factor,
+ * stored value, together, never the converted number alone. Tabular numerals so
+ * the three line up under each other down a panel of twenty-two.
+ */
+.conv{
+  font-size:var(--t-note);
+  line-height:1.5;
+  color:var(--text-2);
+  background:var(--surface-2);
+  border:1px solid var(--line);
+  border-radius:var(--r-sm);
+  padding:7px 9px;
+  margin-top:var(--s2);
+  font-variant-numeric:tabular-nums;
+}
+.conv + .conv{margin-top:6px}
+.conv b{color:var(--text);font-weight:600}
+
+/*
+ * The per-row control group: save, edit, reject. 44 px square, which is 2b's
+ * floor for an icon button, and each one carries its own accessible name with
+ * the analyte in it so a screen reader reading down the panel never hears
+ * "Save" twenty-two times with nothing to tell them apart.
+ */
+/* ---------------------------------------------------------------------------
+ * Eat: the nutrition week, the meal and the shopping list.
+ *
+ * Copied from .forge/wireframes/08-nutrition-week.html and 10-shopping-list.html
+ * so the shipped screens and the approved sheets draw the same shapes. Where
+ * the two sheets disagree with 00-patterns.html on button geometry, DESIGN.md
+ * section 2b settles it and the screens win: 48 px base, 44 px floor on an icon
+ * control, and 28 px checkbox glyphs inside 56 px rows.
+ * ------------------------------------------------------------------------- */
+
+.macro{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  font-size:var(--t-note);
+  line-height:var(--t-note-lh);
+  color:var(--text-2);
+  font-variant-numeric:tabular-nums;
+}
+.macro b{color:var(--text);font-weight:600}
+/* An unknown nutrient is drawn as a word, in the quiet ink, never as a zero. */
+.macro .unknown{color:var(--text-3);font-weight:400}
+
+/* Accept, edit and reject, one meal at a time. Three 44 px targets, the floor
+ * DESIGN.md 2b fixes for an icon control, side by side inside a 56 px row. */
+.seg{display:flex;gap:6px;flex:none}
+.seg button{
+  width:var(--touch);height:var(--touch);
+/* ---------- training, screens 06 and 07 ---------- */
+
+/*
+ * THE MEDIA PLATE, AND WHY IT IS LIGHT IN BOTH THEMES.
+ *
+ * Every bundled demonstration is white-background artwork: the Everkinetic SVGs
+ * paint a full-canvas white rectangle under dark line art, and the CDC Growing
+ * Stronger GIFs are colour cartoons on white. Two treatments were possible and
+ * only one of them is honest. Inverting in CSS, which
+ * .forge/research/exercise-media.md section 2.8 recommends as the way to get a
+ * dark-mode treatment without creating a derivative, works on the line art and
+ * turns the colour animations into negatives. So the media sits on a plate
+ * instead: a light surface in both themes, dimmed a step in dark so it is not a
+ * torch in a basement gym, with the artwork drawn on it at its own colours.
+ *
+ * Nothing about the file is modified, so no adapted material is created and the
+ * share-alike obligation never attaches to anything but the file itself.
+ */
+html[data-theme=dark]{--media-plate:#E4E4E9}
+html[data-theme=light]{--media-plate:#FFFFFF}
+
+.demo{
+  position:relative;
+  display:block;
+  margin:0 0 var(--s3);
+  border-radius:14px;
+  overflow:hidden;
+  background:var(--media-plate);
+  border:1px solid var(--line);
+}
+.demo img{
+  display:block;
+  width:100%;
+  height:168px;
+  object-fit:contain;
+  padding:8px;
+}
+.demo.small img{height:96px;padding:6px}
+.demo figcaption{
+  padding:6px 10px;
+  font-size:10.5px;
+  line-height:1.4;
+  color:var(--text-2);
+  background:var(--surface-2);
+  border-top:1px solid var(--line);
+}
+.demo.empty{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:96px;
+  background:var(--surface-2);
+  border-style:dashed;
+}
+
+/*
+ * The embedded player, which nothing is ever drawn over.
+ *
+ * The Required Minimum Functionality forbids overlays, frames or any visual
+ * element in front of an embedded player, including its controls, and forbids
+ * obscuring any part of it. So the rep counter, the set timer and the rest
+ * clock sit BESIDE this box and never on it: there is no scrim rule, no crop,
+ * no custom play chrome and no positioned child in this block, and there must
+ * never be one. The 16:9 box is above the 200x200 minimum the same document
+ * sets.
+ */
+.embed{
+  display:block;
+  width:100%;
+  aspect-ratio:16 / 9;
+  min-height:200px;
+  border:0;
+  border-radius:14px;
+  background:#000;
+}
+
+/* The three per-session controls on screen 06. 44 px square, the floor. */
+.seg{display:flex;gap:6px;flex:none}
+.seg button{
+  width:var(--touch);
+  height:var(--touch);
+  border-radius:10px;
+  border:1px solid var(--line-2);
+  background:var(--surface-2);
+  color:var(--text-2);
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+.seg button svg{width:20px;height:20px}
+.seg button:disabled{opacity:.4;cursor:default}
+.seg button[aria-pressed=true].ok{background:var(--good-soft);border-color:var(--good);color:var(--good)}
+.seg button[aria-pressed=true].no{background:var(--alert-soft);border-color:var(--alert);color:var(--alert)}
+.seg button.ed[aria-current=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+
+/* The unit picker on the edit screen. One row of options, 44 px tall. */
+.pick{display:flex;gap:6px;flex-wrap:wrap}
+.pick button{
+  flex:1 1 auto;min-width:80px;min-height:var(--touch);
+  border-radius:10px;
+  border:1px solid var(--line-2);
+  background:var(--surface-2);
+  color:var(--text-2);
+  font:inherit;font-size:var(--t-body);
+  cursor:pointer;
+}
+.pick button[aria-pressed=true]{
+  background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600;
+}
+
+/*
+ * The printed excerpt. Monospaced because it is a quotation of a table and the
+ * columns only read as columns in a fixed pitch. Every line in it went through
+ * the blood-pressure test again on the way here, so nothing this box can draw
+ * is a refused line.
+ */
+.pdf{
+  background:var(--surface-2);
+  border:1px solid var(--line-2);
+  border-radius:var(--r-sm);
+  padding:10px;
+  font-family:var(--font-mono);
+  font-size:11px;
+  line-height:1.7;
+  color:var(--text-2);
+  white-space:pre-wrap;
+  overflow-x:auto;
+}
+.pdf mark{
+  background:var(--accent-soft);
+  color:var(--text);
+  border-radius:3px;
+  padding:1px 3px;
+  box-shadow:inset 0 0 0 1px var(--accent);
+}
+
+/*
+ * The review footer. It COUNTS and it does not commit: its one action opens the
+ * keep-or-delete question. F59 and DESIGN.md section 5 both say no control
+ * commits a panel, and the sheet's "Save 18 rows" is the one place the
+ * wireframe disagrees with them.
+ */
+.stickybar{
+  position:sticky;bottom:0;
+  margin:var(--s3) calc(var(--s4) * -1) 0;
+  padding:12px var(--s4) var(--s5);
+  background:var(--surface);
+  border-top:1px solid var(--line);
+}
+.stickybar .btn{min-height:48px}
+
+/* The labs screens sit inside the shell scroller and need room under the footer. */
+.labs-scroll{padding-bottom:var(--s8)}
+.lab-head{display:flex;align-items:center;gap:10px;padding:var(--s2) 0 10px}
+.lab-head .grow{min-width:0}
+.lab-head .title-line{
+  font-size:var(--t-title);line-height:var(--t-title-lh);
+  letter-spacing:var(--t-title-ls);font-weight:700;
+}
+.filefield{display:block}
+.filefield input[type=file]{
+  display:block;width:100%;min-height:48px;
+  border:1px dashed var(--line-2);border-radius:var(--r-md);
+  background:var(--surface-2);color:var(--text);
+  font:inherit;font-size:var(--t-body);padding:11px 12px;
+}
+.filefield input[type=file]:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+/* One analyte row on the manual form: a name, then three fields under it. */
+.manualrow{
+  border-bottom:1px solid var(--line);
+  padding:var(--s3) 0;
+}
+.manualrow:last-of-type{border-bottom:0}
+.manualrow .fields{display:flex;gap:var(--s2);margin-top:var(--s2)}
+.manualrow .fields .input{font-size:16px}
+.manualrow .fields label{flex:1 1 0;min-width:0}
+.seg button:disabled{opacity:.5;cursor:default}
+.seg button[aria-pressed=true].ok{background:var(--good-soft);border-color:var(--good);color:var(--good)}
+.seg button[aria-pressed=true].ed{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.seg button[aria-pressed=true].no{background:var(--alert-soft);border-color:var(--alert);color:var(--alert)}
+
+.stickybar{
+  position:sticky;
+  bottom:0;
+  margin:0 calc(var(--s4) * -1);
+  padding:var(--s3) var(--s4) var(--s4);
+  background:var(--surface);
+  border-top:1px solid var(--line);
+}
+.stickybar .between{margin-bottom:10px}
+
+.card.pad{padding:var(--s4)}
+
+/* One shopping line. 56 px, because it is read with a trolley in one hand. */
+.item{
+  display:flex;gap:var(--s3);align-items:center;
+  min-height:56px;padding:6px 0;
+  border-bottom:1px solid var(--line);
+}
+.item:last-child{border-bottom:0}
+.item .name{font-size:var(--t-body);line-height:var(--t-body-lh)}
+.box{
+  width:28px;height:28px;border-radius:8px;
+  border:1.8px solid var(--line-2);
+  flex:none;display:flex;align-items:center;justify-content:center;
+  background:transparent;cursor:pointer;color:transparent;
+  padding:0;
+}
+.box svg{width:18px;height:18px}
+.box[aria-checked=true]{background:var(--good);border-color:var(--good);color:var(--accent-ink)}
+/* The 28 px glyph sits inside a 44 px target. The glyph is the drawing; the
+ * target is the thing a thumb has to hit, and DESIGN.md fixes it at 44. */
+.boxtap{
+  min-width:var(--touch);min-height:var(--touch);
+  display:flex;align-items:center;justify-content:center;flex:none;
+  background:transparent;border:0;padding:0;cursor:pointer;
+}
+.tap{min-width:var(--touch);min-height:var(--touch);display:flex;align-items:center;justify-content:center;flex:none}
+.tap svg{width:20px;height:20px;color:var(--text-3)}
+/* A deducted line stays on the list. Struck through, quieter, reason attached. */
+.item.off{opacity:.55}
+.item.off .name{text-decoration:line-through}
+.item .was{text-decoration:line-through;color:var(--text-3)}
+
+.qty{display:flex;align-items:center;gap:2px;flex:none}
+.qty button{
+  width:var(--touch);height:var(--touch);border-radius:10px;
+  border:1px solid var(--line-2);background:var(--surface-2);color:var(--text);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;
+}
+.qty button svg{width:18px;height:18px}
+.qty button:disabled{opacity:.4;cursor:default}
+.qty .v{min-width:64px;text-align:center;font-variant-numeric:tabular-nums;font-weight:600}
+
+.bars{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--surface-3);margin:10px 0 6px}
+.bars i{display:block;height:100%}
+.bars i.done{background:var(--good)}
+.bars i.left{background:var(--chart-daily)}
+.bars i.cut{background:var(--surface-3)}
+
+/* The activity-level picker on Targets, and the meal picker beside it. */
+.pick{display:flex;flex-direction:column;gap:var(--s2)}
+.pick button{
+  min-height:56px;padding:10px 14px;border-radius:12px;
+  border:1px solid var(--line-2);background:var(--surface-2);color:var(--text);
+  font:inherit;font-size:var(--t-body);cursor:pointer;text-align:left;
+  display:flex;flex-direction:column;gap:2px;
+}
+.pick button[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent)}
+.pick .note{margin:0}
+
+.daylabel{margin:var(--s4) 0 var(--s2)}
+.mealrow{align-items:center}
+.mealrow .grow{min-width:0}
+.mealrow .head{font-size:var(--t-body);line-height:var(--t-body-lh);font-weight:600;margin:0}
+.daytotal{border-top:1px solid var(--line);margin-top:6px;padding-top:var(--s3)}
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.seg button svg{width:20px;height:20px}
+.seg button[aria-pressed=true][data-decision=accept]{background:var(--good-soft);border-color:var(--good);color:var(--good)}
+.seg button[aria-pressed=true][data-decision=edit]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.seg button[aria-pressed=true][data-decision=reject]{background:var(--alert-soft);border-color:var(--alert);color:var(--alert)}
+.seg button:disabled{opacity:.5;cursor:default}
+
+/* The cause, in the owner's language, under the row it explains. */
+.reason{
+  font-size:var(--t-note);
+  color:var(--text-2);
+  line-height:1.5;
+  background:var(--surface-2);
+  border-radius:var(--r-sm);
+  padding:9px 11px;
+  margin-top:10px;
+}
+
+/* Screen 06 frame 2's time and duration slots. */
+.slot{display:flex;gap:var(--s2);margin-bottom:var(--s2)}
+.slot button{
+  flex:1;
+  min-height:56px;
+  border-radius:var(--r-md);
+  border:1px solid var(--line-2);
+  background:var(--surface-2);
+  color:var(--text);
+  font:inherit;
+  font-size:14px;
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:2px;
+  font-variant-numeric:tabular-nums;
+}
+.slot button[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+
+/* The sticky footer on screen 06, which counts and never commits. */
+.stickyfoot{
+  position:sticky;
+  bottom:0;
+  margin:0 calc(var(--gutter) * -1);
+  padding:var(--s3) var(--gutter) var(--s4);
+  background:var(--surface);
+  border-top:1px solid var(--line);
+  z-index:10;
+}
+
+/* ---------- the session player, screen 07 ---------- */
+
+/*
+ * 56 px on everything you touch mid-set and 88 px on the one you touch most.
+ * DESIGN.md section 2b: sweaty hands, mid-set, no second attempt. C11 measures
+ * all three of these numbers on the shipped screen.
+ */
+.player .btn{min-height:56px;font-size:16px;border-radius:14px}
+.player .btn.icon{width:48px;height:48px;min-height:48px;border-radius:14px}
+.player .btn.setdone{
+  min-height:88px;
+  font-size:22px;
+  font-weight:700;
+  border-radius:18px;
+  letter-spacing:-.01em;
+}
+.player .grid3{display:flex;gap:var(--s2)}
+.player .grid3 .btn{flex:1;font-size:14px;min-height:56px}
+
+.player{display:flex;flex-direction:column;min-height:100%}
+.player .hdr{display:flex;align-items:center;gap:10px;padding:6px 0 10px}
+.player .fill{flex:1;display:flex;flex-direction:column}
+.player .spacer{flex:1;min-height:var(--s3)}
+
+/* One bar per block, done, now and to come. */
+.blocks{display:flex;gap:4px;margin-bottom:14px;list-style:none}
+.blocks li{flex:1;height:5px;border-radius:3px;background:var(--surface-3);display:block}
+.blocks li[data-block=done]{background:var(--good)}
+.blocks li[data-block=now]{background:var(--accent)}
+
+.move{font-size:var(--t-display);line-height:var(--t-display-lh);letter-spacing:var(--t-display-ls);font-weight:700}
+
+/* The set figure and the load, side by side, at 26 px as screen 07 sets them. */
+.setfig{font-size:26px;line-height:30px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+
+.chip.now{color:var(--accent);border-color:var(--accent);background:var(--accent-soft);font-weight:600}
+
+/* The rest countdown: the biggest thing on the phone, read at arm's length. */
+.restring{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding-bottom:var(--s3)}
+.restring svg{width:220px;height:220px;display:block}
+.restring text{
+  font-family:var(--font);
+  font-size:var(--t-timer);
+  letter-spacing:var(--t-timer-ls);
+  font-weight:700;
+  fill:var(--text);
+  font-variant-numeric:tabular-nums;
+}
+.restring .track{stroke:var(--surface-3)}
+.restring .run{stroke:var(--accent)}
+
+/*
+ * THE ONE MOMENT OF MOTION IN THIS PRODUCT.
+ *
+ * DESIGN.md section 4: the completion ring closes and fills over 900 ms, once,
+ * at the end of a session, and it is the only motion beyond the 120 to 200 ms
+ * fades and translates anywhere in the app. It belongs here because finishing a
+ * session is the only moment the owner has completed something.
+ *
+ * `--dur-slow` is the token and it is 900 ms. The dash offset animates from the
+ * full circumference to zero, which is a ring closing rather than a spinner.
+ */
+.doneRing{display:flex;flex-direction:column;align-items:center;padding:16px 0 8px}
+.doneRing svg{width:150px;height:150px}
+.doneRing .track{stroke:var(--surface-3)}
+.doneRing .run{
+  stroke:var(--good);
+  stroke-dasharray:427;
+  stroke-dashoffset:0;
+  animation:ring-close var(--dur-slow) var(--ease) 1;
+}
+.doneRing .tick{
+  stroke:var(--good);
+  stroke-dasharray:60;
+  stroke-dashoffset:0;
+  animation:ring-tick var(--dur-slow) var(--ease) 1;
+}
+@keyframes ring-close{from{stroke-dashoffset:427}to{stroke-dashoffset:0}}
+@keyframes ring-tick{0%{stroke-dashoffset:60}60%{stroke-dashoffset:60}100%{stroke-dashoffset:0}}
+@media (prefers-reduced-motion: reduce){
+  .doneRing .run,.doneRing .tick{animation:none}
+}
+
+/* The 0-to-10 and 1-to-10 answers, five to a row, 56 px targets. */
+.scale10{display:flex;gap:5px;flex-wrap:wrap}
+.scale10 button{
+  flex:1;
+  min-width:56px;
+  height:56px;
+  border-radius:var(--r-md);
+  border:1px solid var(--line-2);
+  background:var(--surface-2);
+  color:var(--text-2);
+  font:inherit;
+  font-size:var(--t-head);
+  font-variant-numeric:tabular-nums;
+  cursor:pointer;
+}
+.scale10 button[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+
+/* Where it hurt, if anywhere. Chips, 48 px, wrapping. */
+.pick{display:flex;gap:6px;flex-wrap:wrap}
+.pick button{
+  min-height:48px;
+  padding:0 14px;
+  border-radius:var(--r-md);
+  border:1px solid var(--line-2);
+  background:var(--surface-2);
+  color:var(--text-2);
+  font:inherit;
+  font-size:var(--t-body);
+  cursor:pointer;
+}
+.pick button[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+
+/* The catalogue grid: one card per movement, two up past the phone. */
+.movements{display:grid;grid-template-columns:1fr;gap:var(--s3)}
+@media (min-width: 700px){.movements{grid-template-columns:1fr 1fr}}
+
+.mediarow{display:flex;flex-direction:column;gap:2px;padding:10px 0;border-bottom:1px solid var(--line)}
+.mediarow:last-child{border-bottom:0}
+.mediarow .head{font-size:var(--t-body);line-height:var(--t-body-lh)}

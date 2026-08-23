@@ -139,6 +139,19 @@ run strings || exit 2
 # yesterday's words to a phone with no signal. Cheap, no stack, runs per edit.
 run sw:check || exit 2
 
+# R2, and it is here because slice 7 found it the way this run finds everything:
+# `compliance` was defined in package.json and called by nothing. That is the
+# same defect as `strings`, which was defined and never called for three
+# verifications and cost five, and as `lint`, which this file NAMED and
+# package.json never defined. Three instances of one shape in one project.
+#
+# It walks every laboratory explanation template against a banned-phrase list
+# and checks docs/product.md makes its five required claims. It needs no stack,
+# no browser and no container and answers in well under a second, so it belongs
+# in the per-edit run rather than only in the per-dispatch one. A regulatory
+# line whose check runs once a day is a regulatory line nobody is holding.
+run compliance || exit 2
+
 if [ "${FORGE_CHECKS_FULL:-0}" = "1" ]; then
   # strings:rendered launches a browser at the LIVE ORIGIN, and the live origin
   # serves the primary tree. Run from a worktree it would grade main's shipped

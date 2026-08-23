@@ -1,17 +1,20 @@
 import { redirect } from 'next/navigation';
+import { IngestPanel } from '@/components/IngestPanel';
 import { OperatorPanel } from '@/components/OperatorPanel';
 import { ScreenTitle } from '@/components/ScreenTitle';
 import { WithingsPanel } from '@/components/WithingsPanel';
 import { listCredentials } from '@/db/auth';
+import { readLastAcceptedBatch, readLiveCredential } from '@/db/ingest';
 import { describeIntegrations } from '@/db/integrations';
 import { readOpenQuestions } from '@/db/measurements';
 import { getConfig } from '@/lib/config';
 import { readCsrfToken } from '@/lib/csrf';
 import { deviceTypeLabel } from '@/lib/display';
-import { longDate, time24 } from '@/lib/format';
+import { hoursBetween, longDate, shortDateTime, time24 } from '@/lib/format';
 import { readSession } from '@/lib/session';
 import { strings } from '@/lib/strings';
 import { describeConnection } from '@/lib/withings/service';
+import { STALE_HOURS } from '@/lib/trend';
 
 export const metadata = { title: strings.settings.title };
 export const dynamic = 'force-dynamic';
@@ -21,13 +24,22 @@ export default async function SettingsPage() {
   const session = await readSession();
   if (!session) redirect('/sign-in');
 
-  const [integrations, passkeys, csrfToken, withings, questions] = await Promise.all([
-    describeIntegrations(),
-    listCredentials(session.ownerId),
-    readCsrfToken(),
-    describeConnection(),
-    readOpenQuestions(),
-  ]);
+  const [integrations, passkeys, csrfToken, withings, questions, ingestCredential, lastBatch] =
+    await Promise.all([
+      describeIntegrations(),
+      listCredentials(session.ownerId),
+      readCsrfToken(),
+      describeConnection(),
+      readOpenQuestions(),
+      readLiveCredential(),
+      readLastAcceptedBatch(),
+    ]);
+
+  // The age of the last accepted batch, in hours, against the one threshold
+  // this app has for a source going quiet. 36 falls inside a day boundary, so
+  // it is counted in hours and never in calendar days.
+  const now = new Date();
+  const lastBatchAgeHours = lastBatch ? hoursBetween(lastBatch.receivedAt, now) : null;
 
   const rows: Array<[string, string]> = [
     [strings.settings.fieldAppName, config.appName],
@@ -106,6 +118,29 @@ export default async function SettingsPage() {
         timeZone={config.timeZone}
         csrfToken={csrfToken}
         openQuestions={questions.length}
+      />
+
+      {/*
+        * The Apple Health card, above the generic integration list because it
+        * is the only integration whose credential this app mints rather than
+        * receives, and because the two screens it owns are reached from it.
+        * `12-settings-integrations.html` frame 1 draws it in this shape: name,
+        * the last time it actually worked, a state chip, and two controls.
+        */}
+      <IngestPanel
+        credential={
+          ingestCredential
+            ? {
+                keyId: ingestCredential.keyId,
+                createdAt: ingestCredential.createdAt.toISOString(),
+                lastUsedAt: ingestCredential.lastUsedAt?.toISOString() ?? null,
+              }
+            : null
+        }
+        lastBatchAt={lastBatch ? shortDateTime(lastBatch.receivedAt, config.timeZone) : null}
+        lastBatchAgeHours={lastBatchAgeHours}
+        stale={lastBatchAgeHours === null || lastBatchAgeHours >= STALE_HOURS}
+        csrfToken={csrfToken}
       />
 
       <OperatorPanel

@@ -303,3 +303,160 @@ export function ChevronIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+/**
+ * Screen 05's three, lifted from .forge/wireframes/05-labs-review.html so the
+ * shipped review and the approved sheet draw the same shapes. `aria-hidden`
+ * like every other glyph here: the control around them carries the name, and a
+ * title inside an svg would be a second spoken string with no key.
+ */
+export function EditIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} aria-hidden="true" focusable="false">
+      <path
+        d="M4 16.5h3.2l8.6-8.6-3.2-3.2L4 13.3v3.2z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function TrashIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} aria-hidden="true" focusable="false">
+      <path
+        d="M4.4 6h11.2M8 6V4.4h4V6M6 6l.7 10.4h6.6L14 6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function ShieldIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} aria-hidden="true" focusable="false">
+      <path
+        d="M10 2.6 16.4 5v5.4c0 3.6-2.6 6-6.4 7-3.8-1-6.4-3.4-6.4-7V5z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M7 10.2 9.2 12.4l4-4.4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+/** The recipe box, on a line the box supplies. Chrome, never a colour. */
+export function BoxIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} aria-hidden="true" focusable="false">
+      <path
+        d="M2.6 6.4 10 3l7.4 3.4v7.2L10 17l-7.4-3.4z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      <path d="M2.6 6.4 10 9.8l7.4-3.4M10 9.8V17" fill="none" stroke="currentColor" strokeWidth="1.3" />
+    </svg>
+  );
+}
+
+/** The cupboard, on a line already in stock. */
+export function HomeIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} aria-hidden="true" focusable="false">
+      <path
+        d="M3.2 8.6 10 3.4l6.8 5.2V16a1 1 0 0 1-1 1H4.2a1 1 0 0 1-1-1z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      <path d="M8 17v-4.4h4V17" fill="none" stroke="currentColor" strokeWidth="1.4" />
+    </svg>
+  );
+}
+
+/** The swap arrows on the player's Replace control, from 07-session-player.html. */
+export function SwapIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} aria-hidden="true" focusable="false">
+      <path
+        d="M3.4 7h11.2M12 4.4 14.6 7 12 9.6M16.6 13H5.4M8 10.4 5.4 13 8 15.6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+/** Spoken cues on. */
+export function SoundIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} aria-hidden="true" focusable="false">
+      <path
+        d="M4 7.6h3.2L11 4.2v11.6L7.2 12.4H4z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M13.6 7.4a3.6 3.6 0 0 1 0 5.2M15.8 5.2a6.8 6.8 0 0 1 0 9.6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+/** Spoken cues muted. The visible cue does not change when this is on. */
+export function MuteIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} aria-hidden="true" focusable="false">
+      <path
+        d="M4 7.6h3.2L11 4.2v11.6L7.2 12.4H4z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M13.6 7.6 18 12M18 7.6l-4.4 4.4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+export function PlayIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} aria-hidden="true" focusable="false">
+      <path d="M6.5 4.2 15.5 10l-9 5.8z" fill="currentColor" />
+    </svg>
+  );
+}

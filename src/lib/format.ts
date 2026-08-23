@@ -63,7 +63,42 @@ const PRECISION: Record<string, number> = {
   'mmol/L': 2,
   'g/L': 2,
   'µg/L': 0,
+  // The laboratory units slice 7 stores. Precision follows what a French sheet
+  // actually prints: two places on a concentration, none on an enzyme activity,
+  // one on a percentage. A stored value that renders 62.0 where the sheet said
+  // 62 is a number the owner cannot check against his own paper.
+  '%': 1,
+  'U/L': 0,
+  'IU/L': 0,
+  'UI/L': 0,
+  'µkat/L': 2,
+  'µmol/L': 0,
+  'mg/L': 1,
+  'mg/dL': 1,
+  'ng/mL': 0,
+  'µg/dL': 1,
 };
+
+/**
+ * The same number with the same precision and NO thousands separator, for a
+ * value that is about to be stored rather than drawn.
+ *
+ * `formatNumber` groups, because "9,412 steps" is what a person reads. A stored
+ * `raw_value` is read back with `Number()` by every validator in
+ * `src/lib/provenance.ts` and by the next import that compares against it, and
+ * `Number('4,995')` is NaN. A day of hourly steps summing past a thousand went
+ * into the roll-up through `formatNumber`, came back refused as "not a number",
+ * and the day was dropped with a reason that named the wrong cause. Two
+ * functions, one precision table, and the difference stated where it is made.
+ */
+export function plainNumber(value: number, unit: string): string {
+  const digits = PRECISION[unit] ?? 1;
+  return new Intl.NumberFormat('en-GB', {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+    useGrouping: false,
+  }).format(value);
+}
 
 /** The number alone, grouped and fixed to its unit's precision. No unit on it. */
 export function formatNumber(value: number, unit: string): string {

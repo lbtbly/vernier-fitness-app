@@ -118,6 +118,26 @@ export async function forgetIntegrationSecret(provider: IntegrationProvider): Pr
 }
 
 /**
+ * Move an integration's last successful sync, and nothing else.
+ *
+ * Only ever called after a write has committed. The whole point of the column
+ * is that Today and Health measure silence against it, so a run that failed and
+ * moved it anyway would be the app showing a green light for a sync that stored
+ * nothing. That exact defect is on record: a fitness app whose locked-phone run
+ * advanced its checkpoint and permanently skipped a day nobody knew to look for.
+ */
+export async function markIntegrationSynced(
+  provider: IntegrationProvider,
+  at: Date,
+): Promise<void> {
+  const db = getDb();
+  await db
+    .update(integrationCredential)
+    .set({ lastSuccessfulSyncAt: at, lastError: null, updatedAt: new Date() })
+    .where(eq(integrationCredential.provider, provider));
+}
+
+/**
  * The one read path. It throws a named error when the key does not match rather
  * than returning an empty string, because an empty string reads downstream as
  * "nothing stored" and that is how a credential store starts lying.

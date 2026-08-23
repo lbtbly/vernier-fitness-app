@@ -22,10 +22,12 @@
     "strings": "node scripts/strings.mjs --check",
     "strings:rendered": "node scripts/rendered-strings.mjs",
     "sw": "node scripts/build-sw.mjs",
-    "sw:check": "node scripts/build-sw.mjs --check"
+    "sw:check": "node scripts/build-sw.mjs --check",
+    "compliance": "node scripts/compliance.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.120.0",
+    "@napi-rs/canvas": "1.0.7",
     "@simplewebauthn/browser": "13.3.0",
     "@simplewebauthn/server": "13.3.2",
     "d3-scale": "4.0.2",
@@ -36,6 +38,7 @@
     "pg": "8.23.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
+    "tesseract.js": "7.0.0",
     "unpdf": "1.8.1",
     "web-push": "3.6.7"
   },

@@ -1,5 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
+import { readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 /**
@@ -522,4 +523,189 @@ export function liveProvenanceCensus(): string {
          || (select count(*) from source_record) || ' source_record, '
          || (select count(*) from measurement where not seed) || ' measurement not seeded'`,
   );
+}
+
+/**
+ * ---------------------------------------------------------------------------
+ * The Apple Health ingest, on the scratch instance. Slice 6.
+ * ---------------------------------------------------------------------------
+ */
+
+/**
+ * The four ingest tables, emptied, on the scratch database and nowhere else.
+ *
+ * TRUNCATE rather than DELETE, for the same reason `resetScratchProvenance`
+ * uses it: `health_sample` carries a trigger that refuses DELETE outright,
+ * because a stored sample is evidence of what a device said. TRUNCATE is a
+ * table-level operation the owner can run at a prompt and the app cannot reach
+ * from any code path.
+ *
+ * The order does not matter because they go in one statement, which is what
+ * lets `health_sample`'s foreign key into `ingest_batch` be dropped and
+ * recreated atomically by Postgres.
+ */
+export function resetScratchIngest(): void {
+  scratchQuery('truncate health_sample, ingest_batch, ingest_nonce, ingest_credential');
+}
+
+/** How many raw samples the scratch instance holds. The number F47 watches. */
+export function scratchSampleCount(): number {
+  return Number(scratchQuery('select count(*) from health_sample'));
+}
+
+/** Rows in `measurement` from the shortcut, which is what a roll-up produces. */
+export function scratchShortcutReadingCount(): number {
+  return Number(
+    scratchQuery("select count(*) from measurement where source = 'apple_health_shortcut'"),
+  );
+}
+
+/**
+ * Every table in the scratch database that could hold a blood-pressure value,
+ * asked for one, with the population it walked printed beside the answer.
+ *
+ * F48 says no row is written. A count of zero over three empty tables is not
+ * evidence of a refusal, it is evidence of an empty database, so this returns
+ * the total row count of each table alongside the count of matches.
+ */
+export function scratchBloodPressureCensus(): string {
+  return scratchQuery(`
+    select 'health_sample ' || count(*) || ' rows, ' ||
+           count(*) filter (where lower(type) like '%blood%pressure%'
+                              or lower(metric) like '%blood%pressure%') || ' blood pressure'
+      from health_sample
+    union all
+    select 'measurement ' || count(*) || ' rows, ' ||
+           count(*) filter (where lower(metric) like '%blood%pressure%'
+                              or lower(raw_value) like '%blood%pressure%') || ' blood pressure'
+      from measurement
+    union all
+    select 'ingest_batch ' || count(*) || ' rows, ' ||
+           count(*) filter (where outcome = 'forbidden_type') || ' refused for it'
+      from ingest_batch
+  `);
+}
+
+export type IngestReport = {
+  status: number;
+  nonce: string;
+  digest: string;
+  body: Record<string, unknown>;
+};
+
+/**
+ * One signed request to the ingest endpoint, through the shipped command.
+ *
+ * It runs `scripts/ingest-fixture.sh`, which is the recorded command F53 asks
+ * for and which computes the two-pass digest in the shell with shasum. That is
+ * deliberate and it is the strongest thing about this helper: the server
+ * computes its digest in TypeScript with node crypto, this computes one in
+ * bash, and a test driving it is comparing two implementations of the contract
+ * rather than asking one implementation about itself. Importing the app's own
+ * `twoPassDigest` here would make every digest assertion true by construction.
+ *
+ * A body given as an object is written to a temporary file first, so a refusal
+ * that needs a malformed batch takes exactly the same path as a good one.
+ */
+export function postScratchIngest(input: {
+  token: string;
+  secret: string;
+  body?: unknown;
+  nonce?: string;
+  idempotency?: string;
+  timestamp?: string;
+  digest?: string;
+  keyId?: string;
+  noBearer?: boolean;
+}): IngestReport {
+  const stamp = randomUUID();
+  const reportPath = `/tmp/vernier-ingest-${stamp}.json`;
+  const args = ['scripts/ingest-fixture.sh', '--url', scratchUrl, '--report', reportPath];
+  if (input.body !== undefined) {
+    const bodyPath = `/tmp/vernier-ingest-body-${stamp}.json`;
+    writeFileSync(bodyPath, JSON.stringify(input.body), 'utf8');
+    args.push('--body', bodyPath);
+  }
+  if (input.nonce) args.push('--nonce', input.nonce);
+  if (input.idempotency) args.push('--idempotency', input.idempotency);
+  if (input.timestamp) args.push('--timestamp', input.timestamp);
+  if (input.digest) args.push('--digest', input.digest);
+  if (input.keyId) args.push('--key-id', input.keyId);
+  if (input.noBearer) args.push('--no-bearer');
+
+  const printed = execFileSync('bash', args, {
+    cwd: projectRoot,
+    encoding: 'utf8',
+    env: { ...process.env, INGEST_TOKEN: input.token, INGEST_SECRET: input.secret },
+  });
+  // The command's own output, so a run's evidence carries the canonical string
+  // and the digest it sent rather than only what came back.
+  console.log(printed.trim());
+  const report = JSON.parse(readFileSync(reportPath, 'utf8')) as IngestReport;
+  rmSync(reportPath, { force: true });
+  return report;
+}
+
+/**
+ * The laboratory files on the SCRATCH instance's storage volume, names only.
+ *
+ * F63 asks for a directory listing before and after a delete, and the listing
+ * has to come off the filesystem rather than out of the database: those two
+ * disagreeing is the interesting case and a helper that read the row would hide
+ * it. It runs inside the scratch container by name, like every other write in
+ * this file, and the owner's volume is never read or touched by the suite.
+ *
+ * It lives here rather than in the spec that wants it for the same reason every
+ * other command does: one file in this suite reaches for a container, and a spec
+ * that spawns its own is a failing unit test before anyone reads its arguments.
+ */
+export function scratchLabFiles(): string[] {
+  const listed = execFileSync(
+    'docker',
+    ['exec', SCRATCH_CONTAINER, 'sh', '-c', 'ls -1 /app/storage/labs 2>/dev/null || true'],
+    { cwd: projectRoot, encoding: 'utf8' },
+  ).trim();
+  return listed === '' ? [] : listed.split('\n').map((name) => name.trim()).filter(Boolean);
+}
+
+/**
+ * The whole of the scratch database asked one question: does any table, any
+ * column, anywhere, hold something that reads as a blood-pressure value.
+ *
+ * F60 asks for "a query across every table", and a query naming the three tables
+ * somebody remembered is not that. This walks `information_schema` for every
+ * text and json column in the public schema and searches all of them, so a
+ * column added next year is covered without anybody editing this helper. It
+ * returns the matches, and the only passing answer is none.
+ */
+export function scratchBloodPressureSearch(): string {
+  return scratchQuery(`
+    do $$
+    declare
+      column_row record;
+      found bigint;
+    begin
+      create temporary table if not exists bp_matches (place text, sample text) on commit preserve rows;
+      delete from bp_matches;
+      for column_row in
+        select table_name, column_name
+        from information_schema.columns
+        where table_schema = 'public'
+          and data_type in ('text','character varying','json','jsonb')
+      loop
+        execute format(
+          'insert into bp_matches select %L, left(%I::text, 120) from %I where %I::text ~* %L',
+          column_row.table_name || '.' || column_row.column_name,
+          column_row.column_name,
+          column_row.table_name,
+          column_row.column_name,
+          '(mmhg|tension arterielle|pression arterielle|blood pressure|systolic|diastolic|128/82)'
+        );
+      end loop;
+      select count(*) into found from bp_matches;
+      raise notice 'blood pressure matches: %', found;
+    end
+    $$;
+    select coalesce(string_agg(place || ' = ' || sample, ' | '), 'none') from bp_matches
+  `);
 }

@@ -179,11 +179,18 @@ export function isMetric(value: string): value is Metric {
 }
 
 /**
- * The metrics a laboratory prints, which are the ones the panel card lists.
- * Slice 7 owns the review screen and the rest of the analytes; this is what a
- * trend screen needs to know to tell a blood value from a body one.
+ * The metrics a laboratory prints.
+ *
+ * THIS LIST IS GONE AND `src/lib/labs.ts` HOLDS THE ANSWER NOW. Slice 3 kept one
+ * analyte here because one was all there was. Slice 7 seeds thirteen into the
+ * `lab_analyte` table and lets the owner add a fourteenth through the interface,
+ * and a list compiled into this file could not know about that fourteenth
+ * without a source edit, which is exactly what F64 forbids.
+ *
+ * A screen asking "is this metric a blood value" reads the catalogue.
+ * `BUILT_IN_ANALYTE_KEYS` in src/lib/labs.ts is the seeded thirteen, for the
+ * places that need the answer without a database round trip.
  */
-export const LAB_METRICS = ['ldl_cholesterol'] as const;
 
 /** The six the quick-log sheet commits, in the order the sheet draws them. */
 export const QUICK_LOG_METRICS = [

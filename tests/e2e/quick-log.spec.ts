@@ -1,4 +1,4 @@
-import { expect, test, type BrowserContext, type Page } from './fixtures';
+import { expect, test, typeKeyByKey, typedSoFar, type BrowserContext, type Page } from './fixtures';
 import {
   ensureScratchOwner,
   resetScratchProvenance,
@@ -771,6 +771,178 @@ test.describe('the quick log', () => {
 });
 
 /**
+ * WHAT SCREEN 03 AND SCREEN 00 FIX, AS NUMBERS, SO THE CHECKS BELOW CAN ASK.
+ *
+ * Every one of these is read off an approved artifact and not off the build:
+ *
+ *   `03-quick-log.html` line 64  .sheetfoot{padding:12px 0 28px}, and no margin
+ *                                on the button inside it
+ *   `03-quick-log.html` line 68  .scale5 button{height:52px}
+ *   `00-patterns.html`  line 159 an error card's action row at margin-top:12px
+ *   `00-patterns.html`  line 32  .card{padding:16px}
+ *   DESIGN.md section 2b         44 px is the floor no control goes under
+ *
+ * The sheet escalates its own buttons to 52, which is why 44 is the wrong
+ * question to ask about one: a control that lost the escalation and came back
+ * at exactly 44 answers "yes" and is still not screen 03.
+ */
+const SHEET_BUTTON = 52;
+const TOUCH_FLOOR = 44;
+const FOOT_PADDING_TOP = '12px';
+const SAVE_BELOW_THE_DIVIDER = 12;
+const ACTIONS_MARGIN_TOP = '12px';
+const CARD_PADDING = '16px';
+
+/** One target on the sheet, with the floor the sheet itself sets for it. */
+type SheetTarget = {
+  label: string;
+  height: number;
+  width: number;
+  minHeight: string;
+  fontSize: string;
+  floor: number;
+  classes: string;
+};
+
+/** Everything C5 names about the sheet, in one read, for one state. */
+type SheetGeometry = {
+  width: number;
+  x: number;
+  targets: SheetTarget[];
+  actions: Array<{ where: string; marginTop: string; gapAboveIt: number | null }>;
+  cardPadding: string[];
+  saveMarginTop: string;
+  saveBelowTheDivider: number;
+  footPaddingTop: string;
+  ancestry: string;
+  insideAScreenCard: boolean;
+};
+
+/**
+ * The sheet measured the way C5's line reads, rather than the way it is easy to
+ * measure.
+ *
+ * WHAT THIS REPLACES AND WHY. Two checks graded this line and both passed by not
+ * looking. One walked the targets on the LOADED sheet only, so the error state's
+ * Try again had never been measured once; it asserted `>= 44`, so the button
+ * that lost the sheet's own 52 px escalation answered yes. The other compared
+ * the sheet's outer width and x between states, which no card rule inside the
+ * sheet can move, so `.actions` margin-top and the margin on Save were outside
+ * what it looked at. Three properties were wrong in Chrome and in WebKit at all
+ * three viewports while both were green.
+ *
+ * So the read is one function, it takes everything the line names, and every
+ * state is put through it.
+ */
+async function readTheSheet(page: Page): Promise<SheetGeometry> {
+  return page.evaluate(
+    ({ sheetButton, touchFloor }) => {
+      const round = (value: number) => Math.round(value * 10) / 10;
+      const sheet = document.querySelector<HTMLElement>('.sheet')!;
+      const box = sheet.getBoundingClientRect();
+      const foot = sheet.querySelector<HTMLElement>('.sheetfoot')!;
+      const footStyle = getComputedStyle(foot);
+      const save = foot.querySelector<HTMLElement>('.btn.primary')!;
+
+      const targets = [...sheet.querySelectorAll<HTMLElement>('button, input, textarea, a')].map(
+        (node) => {
+          const style = getComputedStyle(node);
+          const shape = node.getBoundingClientRect();
+          // A field carries no text of its own, so it is named by the label
+          // that points at it. Without this the waist field would be measured
+          // and then reported as an empty string.
+          const labelled = node.id
+            ? document.querySelector(`label[for="${node.id}"]`)?.textContent?.trim()
+            : undefined;
+          const named =
+            node.getAttribute('aria-label') ?? labelled ?? node.textContent?.trim().slice(0, 24);
+          return {
+            label: named && named !== '' ? named : node.tagName.toLowerCase(),
+            height: Math.round(shape.height),
+            width: Math.round(shape.width),
+            minHeight: style.minHeight,
+            fontSize: style.fontSize,
+            // The floor this control is held to is the one the sheet sets for
+            // it: 52 for a button on screen 03, 44 for the icon button and for
+            // anything the sheet does not escalate.
+            floor: node.matches('.btn:not(.icon)') ? sheetButton : touchFloor,
+            classes: node.className,
+          };
+        },
+      );
+
+      const actions = [...sheet.querySelectorAll<HTMLElement>('.actions')].map((node) => {
+        const previous = node.previousElementSibling;
+        return {
+          where: node.closest('[data-state]')?.getAttribute('data-state') ?? 'sheet',
+          marginTop: getComputedStyle(node).marginTop,
+          gapAboveIt: previous
+            ? round(node.getBoundingClientRect().top - previous.getBoundingClientRect().bottom)
+            : null,
+        };
+      });
+
+      // The ancestry, because the cause of all three defects was ancestry: a
+      // sheet inside `section.card.day` inherits Today's card rules.
+      const ancestry: string[] = [];
+      for (let hop = sheet.parentElement; hop; hop = hop.parentElement) {
+        ancestry.push(
+          `${hop.tagName.toLowerCase()}${hop.className ? `.${String(hop.className).trim().split(/\s+/).join('.')}` : ''}`,
+        );
+      }
+
+      return {
+        width: round(box.width),
+        x: round(box.x),
+        targets,
+        actions,
+        cardPadding: [...sheet.querySelectorAll<HTMLElement>('.card')].map(
+          (card) => getComputedStyle(card).padding,
+        ),
+        saveMarginTop: getComputedStyle(save).marginTop,
+        saveBelowTheDivider: round(
+          save.getBoundingClientRect().top -
+            (foot.getBoundingClientRect().top + parseFloat(footStyle.borderTopWidth)),
+        ),
+        footPaddingTop: footStyle.paddingTop,
+        ancestry: ancestry.join(' < '),
+        insideAScreenCard: Boolean(sheet.closest('.card')),
+      };
+    },
+    { sheetButton: SHEET_BUTTON, touchFloor: TOUCH_FLOOR },
+  );
+}
+
+/**
+ * Every target on the sheet, in one state, against the floor the sheet sets.
+ *
+ * GOES RED IF: any control on the sheet is under 44 px, or any `.btn` that is
+ * not the icon button is under the 52 px screen 03 escalates it to, or has lost
+ * `min-height:52px` to a rule that outranks `.sheet .btn`. That last clause is
+ * the one that was missing: Try again shipped at exactly 44 with
+ * `min-height:44px`, which is a pass under `>= 44` and is not screen 03.
+ */
+function walkTheTargets(state: string, sheet: SheetGeometry): void {
+  console.log(`--- targets, ${state}, ${sheet.targets.length} of them ---`);
+  for (const target of sheet.targets) {
+    console.log(
+      `  ${String(target.height).padStart(3)} px  min-height ${target.minHeight.padEnd(6)} ` +
+        `floor ${target.floor}  ${target.fontSize}  ${target.label}`,
+    );
+    expect(
+      target.height,
+      `${state}: ${target.label} is ${target.height} px, under the ${target.floor} px floor this sheet sets for it`,
+    ).toBeGreaterThanOrEqual(target.floor);
+    if (target.floor === SHEET_BUTTON) {
+      expect(
+        target.minHeight,
+        `${state}: ${target.label} lost the sheet's 52 px escalation to a rule that outranks .sheet .btn`,
+      ).toBe(`${SHEET_BUTTON}px`);
+    }
+  }
+}
+
+/**
  * C5. The quick log against screen 03 at three viewports, and the five states
  * against the geometry screen 00 defines once.
  *
@@ -792,7 +964,9 @@ test.describe('the quick log against screen 03', () => {
     ['1280', 1280, 900],
   ];
 
-  test('matches screen 03 at three viewports, with 44 px targets or better', async ({ page }) => {
+  test('matches screen 03 at three viewports, every target at the floor this sheet sets', async ({
+    page,
+  }) => {
     resetScratchProvenance();
     await signIn(page);
 
@@ -811,38 +985,41 @@ test.describe('the quick log against screen 03', () => {
       // shipped at 133x40 under a line that says 44: the walk read buttons,
       // textareas and links, the one field on the sheet was in none of those,
       // and three viewports of green said the targets were fine.
-      const targets = await page
-        .locator('.sheet button, .sheet input, .sheet textarea, .sheet a')
-        .evaluateAll((nodes) =>
-          nodes.map((node) => {
-            const box = node.getBoundingClientRect();
-            const style = getComputedStyle(node);
-            // A field carries no text of its own, so it is named by the label
-            // that points at it. Without this the waist field would be measured
-            // and then reported as an empty string.
-            const labelled = node.id
-              ? document.querySelector(`label[for="${node.id}"]`)?.textContent?.trim()
-              : undefined;
-            const named = node.getAttribute('aria-label') ?? labelled ?? node.textContent?.trim().slice(0, 24);
-            return {
-              label: named && named !== '' ? named : node.tagName.toLowerCase(),
-              height: Math.round(box.height),
-              fontSize: style.fontSize,
-              classes: node.className,
-            };
-          }),
-        );
-      console.log(`--- ${name} px ---`);
-      for (const target of targets) {
-        console.log(`  ${target.height} px  ${target.fontSize}  ${target.label}`);
-        expect(target.height, `${target.label} is under the 44 px floor`).toBeGreaterThanOrEqual(44);
-      }
+      const sheet = await readTheSheet(page);
+      walkTheTargets(`loaded at ${name}`, sheet);
+
+      // AND THE SHEET IS NOT INSIDE THE SCREEN THAT RAISED IT. `QuickLog` is
+      // mounted in `section.card.day` because the day card's rows are its
+      // children, and the sheet used to render there too, so `.card.day .actions`,
+      // `.card.day .actions .btn` and `.card.day .btn.primary` all reached
+      // inside screen 03. The sheet is portalled to `document.body` now.
+      //
+      // GOES RED IF: the portal is removed, or the sheet is ever mounted inside
+      // a card again, which is the only way a screen-scoped rule can reach it.
+      console.log(`  the sheet at ${name} hangs off ${sheet.ancestry}`);
+      expect(
+        sheet.insideAScreenCard,
+        `at ${name} the sheet is inside a card (${sheet.ancestry}), so that card's rules reach into screen 03`,
+      ).toBe(false);
+      expect(sheet.ancestry).toBe('body < html');
 
       // Screen 03 escalates the committed action to 52 px, over the 48 px base
       // that DESIGN.md section 2b fixes for the shell.
-      const save = targets.find((target) => target.label === 'Save')!;
-      expect(save.height).toBe(52);
+      const save = sheet.targets.find((target) => target.label === 'Save')!;
+      expect(save.height).toBe(SHEET_BUTTON);
       expect(save.fontSize).toBe('16px');
+
+      // And it sits where `03-quick-log.html` line 64 draws it: 12 px of foot
+      // padding under the divider and no margin of its own. It shipped with
+      // `margin-top:14px` inherited from the day card, 27 px below the divider
+      // on a sheet that never wrote a margin.
+      console.log(
+        `  Save at ${name}: margin-top ${sheet.saveMarginTop}, ` +
+          `${sheet.saveBelowTheDivider} px below the foot divider, foot padding-top ${sheet.footPaddingTop}`,
+      );
+      expect(sheet.saveMarginTop, 'the sheet foot never writes a margin on Save').toBe('0px');
+      expect(sheet.footPaddingTop).toBe(FOOT_PADDING_TOP);
+      expect(sheet.saveBelowTheDivider).toBe(SAVE_BELOW_THE_DIVIDER);
 
       await page.setViewportSize({ width: 393, height: 852 });
     }
@@ -851,6 +1028,19 @@ test.describe('the quick log against screen 03', () => {
   test('draws loading, empty, error, offline and stale on screen 00 geometry', async ({ page, context }) => {
     resetScratchProvenance();
     await signIn(page);
+
+    /**
+     * Every state's full geometry, kept and compared at the end.
+     *
+     * This used to be four bounding boxes, and only the sheet's own width and x
+     * were compared between them. Nothing a card rule inside the sheet does can
+     * move either of those, so the check was blind to every property that was
+     * actually wrong: the error card's action row at 8 px where screen 00 draws
+     * 12, its Try again at 44 px where the sheet escalates to 52, and Save at
+     * 27 px below a divider the sheet draws 12 under. All three were wrong at
+     * all three viewports in both engines while this test was green.
+     */
+    const measured: Array<{ state: string; sheet: SheetGeometry }> = [];
 
     // Stale first, because that is the state the seed leaves the instance in:
     // the waist reading it writes is three days old, so the sheet says so with a
@@ -869,6 +1059,7 @@ test.describe('the quick log against screen 03', () => {
     console.log(`stale chip reads: ${staleChip}`);
     expect(staleChip).toMatch(/\d+ days old$/);
     await settle(page);
+    measured.push({ state: 'stale', sheet: await readTheSheet(page) });
     await page.screenshot({ path: `${CAPTURES}c5-state-stale.png` });
 
     // Loaded: a waist reading taken today, logged through the sheet that is
@@ -885,8 +1076,8 @@ test.describe('the quick log against screen 03', () => {
       `loaded sheet reads: ${await page.locator('#quick-log-waist').inputValue()} cm, ` +
         `${await page.locator('.sheet .src').count()} age chip(s)`,
     );
-    const loadedBox = await page.locator('.sheet').boundingBox();
     await settle(page);
+    measured.push({ state: 'loaded', sheet: await readTheSheet(page) });
     await page.screenshot({ path: `${CAPTURES}c5-state-loaded.png` });
     await page.locator('.sheet').getByRole('button', { name: 'Close the quick log' }).click();
 
@@ -901,8 +1092,8 @@ test.describe('the quick log against screen 03', () => {
     });
     await page.getByRole('button', { name: 'Quick log', exact: true }).click();
     await expect(page.locator('[data-state="loading"]')).toBeVisible();
-    const loadingBox = await page.locator('.sheet').boundingBox();
     await settle(page);
+    measured.push({ state: 'loading', sheet: await readTheSheet(page) });
     await page.screenshot({ path: `${CAPTURES}c5-state-loading.png` });
     console.log(`loading skeletons: ${await page.locator('[data-state="loading"] .skel').count()}`);
     expect(await page.locator('[data-state="loading"] .skel').count()).toBeGreaterThan(0);
@@ -918,8 +1109,8 @@ test.describe('the quick log against screen 03', () => {
     const errorText = await page.locator('[data-state="error"]').textContent();
     console.log(`error card reads: ${errorText}`);
     expect(errorText).toContain('The sheet still saves');
-    const errorBox = await page.locator('.sheet').boundingBox();
     await settle(page);
+    measured.push({ state: 'error', sheet: await readTheSheet(page) });
     await page.screenshot({ path: `${CAPTURES}c5-state-error.png` });
 
     // Offline: a write commits with the origin still gone, and the banner
@@ -931,21 +1122,11 @@ test.describe('the quick log against screen 03', () => {
     const offlineText = await page.locator('.sheet [data-state="offline"]').textContent();
     console.log(`offline banner reads: ${offlineText}`);
     expect(offlineText).toMatch(/entr(y|ies) (is|are) waiting to upload/);
-    const offlineBox = await page.locator('.sheet').boundingBox();
     await settle(page);
+    measured.push({ state: 'offline', sheet: await readTheSheet(page) });
     await page.screenshot({ path: `${CAPTURES}c5-state-offline.png` });
 
     await goOnline(context, page);
-
-    // Geometry does not move between states, which is the whole of screen 00's
-    // rule: a state change never reflows the page.
-    console.log(
-      `sheet width and left, per state: loaded ${loadedBox?.width}/${loadedBox?.x}, loading ${loadingBox?.width}/${loadingBox?.x}, error ${errorBox?.width}/${errorBox?.x}, offline ${offlineBox?.width}/${offlineBox?.x}`,
-    );
-    for (const box of [loadingBox, errorBox, offlineBox]) {
-      expect(box?.width).toBe(loadedBox?.width);
-      expect(box?.x).toBe(loadedBox?.x);
-    }
 
     // Empty: a database holding no waist reading at all. Truncated without the
     // re-seed, so the absence is real rather than routed around.
@@ -957,12 +1138,81 @@ test.describe('the quick log against screen 03', () => {
     console.log(`empty card reads: ${emptyText}`);
     expect(emptyText).toContain('No waist measurement yet');
     await settle(page);
+    measured.push({ state: 'empty', sheet: await readTheSheet(page) });
     await page.screenshot({ path: `${CAPTURES}c5-state-empty.png` });
     // The value is `--` and it is a placeholder, not a number: screen 03 frame 3
     // draws it muted and the footer says blank fields stay blank. A field
     // holding "" sends nothing; a field holding 0 would store a zero.
     await expect(page.locator('#quick-log-waist')).toHaveValue('');
     await expect(page.locator('#quick-log-waist')).toHaveAttribute('placeholder', '--');
+
+    // ---- and now the five states, against the geometry, all in one place ----
+
+    // Every target in every state, at the floor the sheet sets for it.
+    //
+    // The error state's Try again had never been measured by anything: the
+    // target walk ran on the loaded sheet only. It shipped at 44 px, which is
+    // the shell's floor and not this sheet's 52.
+    //
+    // GOES RED IF: any control in any state is under its own floor, or a `.btn`
+    // on the sheet loses `min-height:52px` to a rule that outranks `.sheet .btn`.
+    for (const { state, sheet } of measured) {
+      walkTheTargets(state, sheet);
+    }
+
+    const loaded = measured.find((entry) => entry.state === 'loaded')!.sheet;
+
+    // Geometry does not move between states, which is the whole of screen 00's
+    // rule: a state change never reflows the page. Compared property by property
+    // rather than by the sheet's outer box, because the outer box is the one
+    // thing a card rule inside the sheet cannot move.
+    //
+    // GOES RED IF: any state draws its card padding, its foot, its Save or its
+    // action row differently from the loaded sheet, or differently from what
+    // screen 03 and screen 00 fix.
+    for (const { state, sheet } of measured) {
+      console.log(
+        `${state.padEnd(8)} sheet ${sheet.width}/${sheet.x}  cards ${sheet.cardPadding.join(',') || 'none'}  ` +
+          `foot padding-top ${sheet.footPaddingTop}  Save margin-top ${sheet.saveMarginTop} at ` +
+          `${sheet.saveBelowTheDivider} px below the divider  ` +
+          `actions ${sheet.actions.map((row) => `${row.where} ${row.marginTop}/${row.gapAboveIt}`).join(', ') || 'none'}`,
+      );
+
+      expect(sheet.width, `${state} draws the sheet at a different width`).toBe(loaded.width);
+      expect(sheet.x, `${state} draws the sheet at a different left edge`).toBe(loaded.x);
+      expect(sheet.footPaddingTop, `${state} draws the foot differently`).toBe(FOOT_PADDING_TOP);
+      expect(sheet.saveMarginTop, `${state} writes a margin on Save the sheet never wrote`).toBe('0px');
+      expect(sheet.saveBelowTheDivider, `${state} moves Save away from the foot divider`).toBe(
+        SAVE_BELOW_THE_DIVIDER,
+      );
+
+      // Screen 00 state 2 to 6: every state card is a card, at card padding.
+      for (const padding of sheet.cardPadding) {
+        expect(padding, `${state} draws a card at ${padding}`).toBe(CARD_PADDING);
+      }
+
+      // `00-patterns.html` line 159 draws the error card's action row 12 px
+      // under the sentence above it. It shipped at 8, from `.card.day .actions`.
+      for (const row of sheet.actions) {
+        expect(row.marginTop, `${state}: the ${row.where} action row sits at ${row.marginTop}`).toBe(
+          ACTIONS_MARGIN_TOP,
+        );
+        expect(row.gapAboveIt, `${state}: the ${row.where} action row is drawn at the wrong gap`).toBe(
+          Number(ACTIONS_MARGIN_TOP.replace('px', '')),
+        );
+      }
+
+      // And no state's sheet is inside the screen that raised it, which is the
+      // one condition under which any of the above can silently change again.
+      expect(sheet.insideAScreenCard, `${state}: the sheet hangs off ${sheet.ancestry}`).toBe(false);
+    }
+
+    // The error state is the one that carries an action row, so the comparison
+    // above says nothing unless it was really reached.
+    expect(
+      measured.find((entry) => entry.state === 'error')!.sheet.actions,
+      'the error state drew no action row, so its geometry was never compared',
+    ).toHaveLength(1);
 
     resetScratchProvenance();
   });
@@ -1069,8 +1319,28 @@ test.describe('the quick log tells the truth about what it queued', () => {
     await page.goto('/');
     await page.getByRole('button', { name: 'Quick log', exact: true }).click();
     await expect(page.locator('[data-state="empty"]')).toBeVisible({ timeout: 20_000 });
-    await page.locator('#quick-log-waist').fill('0.5');
-    await expect(page.locator('#quick-log-waist')).toHaveValue('0.5');
+    // TYPED, KEY BY KEY, IN A TEST NAMED FOR THE MOMENT IT IS TYPED.
+    //
+    // This line was `fill('0.5')` followed by `toHaveValue('0.5')`, which sets
+    // the whole value in one input event and never moves a caret. It stayed
+    // green for four rounds over a field that could not be typed into at all,
+    // in a test whose own title says "at the moment it is typed". The refusal
+    // below is only worth anything if the value reached the field the way the
+    // owner puts one there.
+    //
+    // GOES RED IF: any keystroke comes back reformatted, so what the field
+    // holds after the nth key is not the first n characters of 0.5.
+    const field = page.locator('#quick-log-waist');
+    await field.click();
+    const typed = await typeKeyByKey(field, ['0', '.', '5']);
+    for (const step of typed) {
+      console.log(`typing a refusable waist: "${step.key}" -> "${step.value}" caret ${step.caret}`);
+    }
+    expect(
+      typed.map((step) => step.value),
+      'typing 0.5 into an empty field did not produce 0.5',
+    ).toEqual(typedSoFar('0.5'));
+    await expect(field).toHaveValue('0.5');
 
     await page.getByRole('button', { name: 'Save', exact: true }).click();
 

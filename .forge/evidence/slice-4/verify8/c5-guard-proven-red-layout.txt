@@ -1,0 +1,80 @@
+suite-role: vernier_suite is current on the owner's database.
+  role vernier_suite: superuser false, createdb false, createrole false, bypassrls false
+  grant app_meta SELECT
+  grant auth_attempt INSERT,SELECT
+  grant device_observation SELECT
+  grant goal SELECT
+  grant idempotency_key SELECT
+  grant import_question SELECT
+  grant integration_credential SELECT
+  grant measurement SELECT
+  grant owner SELECT
+  grant planned_session SELECT
+  grant recovery_grant INSERT,SELECT
+  grant request_origin SELECT
+  grant session SELECT
+  grant source_record SELECT
+  grant webauthn_challenge SELECT
+  grant webauthn_credential SELECT
+  grant write_request SELECT
+  execute suite_forget_passkey(credential text)
+setup: the owner's database holds 91 measurement, 39 source_record, 1 measurement not seeded. Nothing in this run may lower it.
+setup: its device signals read passkey_registered=true@2026-08-23 08:56:13.874+02/2026-08-23 12:04:11.234345+02/unattributed, standalone_seen=true@2026-08-23 08:54:07.155+02/2026-08-23 08:55:51.125086+02/100.121.138.9, wake_lock_available=true@2026-08-23 08:54:07.158+02/2026-08-23 08:55:51.125811+02/100.121.138.9. Nothing in this run may write them.
+
+Running 2 tests using 1 worker
+
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+SHEET 393x852 loaded  ancestry section.card.day < div.today < main.app-scroll < div.app < body < html, 393/0, foot padding-top 12px, Save margin-top 14px at 26 px below the divider
+  ✘  1 [webkit-iphone] › tests/e2e/layout.spec.ts:262:3 › no screen rule reaches inside the quick-log sheet › the sheet hangs off the document and keeps screen 03 geometry (3.6s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+SHEET 393x852 loaded  ancestry section.card.day < div.today < main.app-scroll < div.app < body < html, 393/0, foot padding-top 12px, Save margin-top 14px at 26 px below the divider
+  ✘  2 [chrome-layout] › tests/e2e/layout.spec.ts:262:3 › no screen rule reaches inside the quick-log sheet › the sheet hangs off the document and keeps screen 03 geometry (2.9s)
+teardown: the owner's database holds 91 measurement, 39 source_record, 1 measurement not seeded.
+teardown: its device signals read passkey_registered=true@2026-08-23 08:56:13.874+02/2026-08-23 12:04:11.234345+02/unattributed, standalone_seen=true@2026-08-23 08:54:07.155+02/2026-08-23 08:55:51.125086+02/100.121.138.9, wake_lock_available=true@2026-08-23 08:54:07.158+02/2026-08-23 08:55:51.125811+02/100.121.138.9.
+teardown: test-stack: stopped
+teardown: it held 91 measurement, 39 source_record, 1 measurement not seeded before the run, so nothing of the owner's was taken.
+
+
+  1) [webkit-iphone] › tests/e2e/layout.spec.ts:262:3 › no screen rule reaches inside the quick-log sheet › the sheet hangs off the document and keeps screen 03 geometry 
+
+    Error: the sheet is inside a card at 393x852 (section.card.day < div.today < main.app-scroll < div.app < body < html), so that card's rules reach into screen 03
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: false
+    Received: true
+
+      280 |         loaded.insideAScreenCard,
+      281 |         `the sheet is inside a card at ${viewport.name} (${loaded.ancestry}), so that card's rules reach into screen 03`,
+    > 282 |       ).toBe(false);
+          |         ^
+      283 |       expect(loaded.ancestry).toBe('body < html');
+      284 |       expect(loaded.footPaddingTop).toBe(FOOT_PADDING_TOP);
+      285 |       expect(loaded.saveMarginTop, 'the sheet foot never writes a margin on Save').toBe('0px');
+        at /Users/lambertbouley/Claude/lbtbly-fitness-app/tests/e2e/layout.spec.ts:282:9
+
+    Error Context: test-results/layout-no-screen-rule-reac-8dae9-nd-keeps-screen-03-geometry-webkit-iphone/error-context.md
+
+  2) [chrome-layout] › tests/e2e/layout.spec.ts:262:3 › no screen rule reaches inside the quick-log sheet › the sheet hangs off the document and keeps screen 03 geometry 
+
+    Error: the sheet is inside a card at 393x852 (section.card.day < div.today < main.app-scroll < div.app < body < html), so that card's rules reach into screen 03
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: false
+    Received: true
+
+      280 |         loaded.insideAScreenCard,
+      281 |         `the sheet is inside a card at ${viewport.name} (${loaded.ancestry}), so that card's rules reach into screen 03`,
+    > 282 |       ).toBe(false);
+          |         ^
+      283 |       expect(loaded.ancestry).toBe('body < html');
+      284 |       expect(loaded.footPaddingTop).toBe(FOOT_PADDING_TOP);
+      285 |       expect(loaded.saveMarginTop, 'the sheet foot never writes a margin on Save').toBe('0px');
+        at /Users/lambertbouley/Claude/lbtbly-fitness-app/tests/e2e/layout.spec.ts:282:9
+
+    Error Context: test-results/layout-no-screen-rule-reac-8dae9-nd-keeps-screen-03-geometry-chrome-layout/error-context.md
+
+  2 failed
+    [webkit-iphone] › tests/e2e/layout.spec.ts:262:3 › no screen rule reaches inside the quick-log sheet › the sheet hangs off the document and keeps screen 03 geometry 
+    [chrome-layout] › tests/e2e/layout.spec.ts:262:3 › no screen rule reaches inside the quick-log sheet › the sheet hangs off the document and keeps screen 03 geometry 

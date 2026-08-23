@@ -135,7 +135,7 @@ advance, so the budget does not have to be re-argued once per slice.
   highlighted, the photo and the model reply, the derivation, and the demonstration
   record. Evidence: six captures, one per source, all landing on the same screen
   shape.
-- [ ] **F23.** Waist, energy, fatigue, hunger, satiety and a free note each commit
+- [x] **F23.** Waist, energy, fatigue, hunger, satiety and a free note each commit
   from Today in six taps or fewer. Evidence: a scripted interaction printing the
   tap count for each of the six.
 - [x] **F24.** With the origin unreachable, a quick-log write commits locally,
@@ -633,7 +633,7 @@ their interaction detail in `.forge/wireframes/`, and the standards skill.
   password second, the one-time owner creation, and the host-unreachable state.
   Every interactive element shows a 2 px focus outline at 2 px offset. Evidence:
   three captures plus a keyboard-traversal capture.
-- [ ] **C5.** Quick log matches screen 03 at three viewports, presented as a sheet
+- [x] **C5.** Quick log matches screen 03 at three viewports, presented as a sheet
   with 44 px minimum targets, and the loading, empty, error, offline and stale
   states render with the geometry defined once on screen 00. Evidence: three
   captures plus five state captures overlaid on the screen-00 geometry.

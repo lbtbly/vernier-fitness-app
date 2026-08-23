@@ -332,6 +332,89 @@ const DATA_QUERIES = [
   ],
   ['integration_credential.scope', 'select distinct scope from integration_credential'],
   ['webauthn_credential.label', 'select distinct label from webauthn_credential'],
+  /*
+   * The two fields the iPhone shortcut authors, and they are here for the same
+   * reason a typed note is: the owner wrote them, into a Text action on his own
+   * phone, and this app has no say in either.
+   *
+   * `device` is what he calls the phone. `metric` is the slug he chose from the
+   * guide's list, and the diagnostics screen prints it per metric so a slug
+   * spelled differently from the guide shows as rows with no reading rather
+   * than as silence.
+   *
+   * `ingest_batch.outcome` is deliberately NOT here. It is a token from a fixed
+   * set, the screen renders it through the catalogue's own lookup, and a raw
+   * token reaching a chip is exactly the defect this check exists to catch.
+   * That is the same line `integration_credential.state` sits on.
+   */
+  ['ingest_batch.device', "select distinct device from ingest_batch where device <> ''"],
+  ['health_sample.metric', 'select distinct metric from health_sample'],
+  /*
+   * The name of an analyte the OWNER added while reviewing a panel, and only
+   * his. `built_in` is the provenance, set true by the seed in
+   * drizzle/pending/07-blood.sql and by nothing else, exactly the way `seed`
+   * works on `measurement`: the thirteen this repository ships carry catalogue
+   * keys in `strings.metrics` and are read from there, so a built-in label
+   * reaching a screen without its key still fails here.
+   */
+  ['lab_analyte.label', 'select distinct label from lab_analyte where not built_in'],
+  /*
+   * The name of the owner's own file, and the laboratory as his own sheet names
+   * itself. Both are words off a document he holds, drawn on the labs archive
+   * beside the panel they belong to, and neither is copy this product authored.
+   */
+  ['lab_document.file_name', "select distinct file_name from lab_document where file_name <> ''"],
+  ['lab_document.laboratory', "select distinct laboratory from lab_document where laboratory <> ''"],
+  /*
+   * Every readable fragment the review holding carries: the label the sheet
+   * printed, the value it printed, the unit it printed and the excerpt quoted
+   * back under "As printed". All four are words off the owner's own document,
+   * and all four are drawn on the review screen.
+   *
+   * The review is in `unreachableBranches` below, because this walk will not
+   * upload a laboratory document onto the owner's storage volume to grade copy,
+   * so nothing here is reachable today. It is written now anyway: the day a
+   * slice makes that screen walkable, the vocabulary is already right, and the
+   * alternative is a blanket exemption for the surface, which is the shape of
+   * every hole this check exists to close.
+   */
+  [
+    'lab_document.extraction',
+    // `fragment.text`, qualified. `value` was ambiguous: jsonb_array_elements
+    // names its own output column `value` too, so Postgres refused the query
+    // outright and strings:rendered exited non-zero the first time it ran on a
+    // tree where lab_document existed. It could not have run in slice 7's
+    // worktree, because the table is created by the migration that main numbers
+    // on merge. Same cost as the trigger bug in 0007, and found the same way.
+    `select distinct fragment.text from lab_document,
+       jsonb_array_elements(extraction) as row_json,
+       lateral (
+         select row_json->>'printedLabel' as text
+         union all select row_json->>'printedValue'
+         union all select row_json->>'printedUnit'
+         union all select jsonb_array_elements_text(coalesce(row_json->'excerpt', '[]'::jsonb))
+       ) as fragment
+     where fragment.text is not null and fragment.text <> ''`,
+  ],
+  /*
+   * The name of a food, as Anses published it in Table Ciqual 2025. Two shipped
+   * screens draw it out of the column: the food detail and the ingredient rows
+   * on a recipe. It is French, it is not this repository's words, and it is
+   * outside C6 for exactly the reason the excerpt on a laboratory row is.
+   *
+   * Added on merge rather than in slice 9's worktree, because a query against a
+   * table that did not exist yet on main would have turned the gate red for the
+   * four builders merging ahead of it. The slice named it and main runs it,
+   * which is the only place it can be run rather than guessed at.
+   */
+  ['food.name_fr', 'select distinct name_fr from food'],
+  /*
+   * Anses's own tag for the edition it published, drawn beside the food rows as
+   * the provenance of every number on the screen. It is their version string,
+   * not a sentence this product wrote, and it is established by provenance the
+   * way every other exemption here is: it comes out of the column.
+   */
+  ['food.table_version', 'select distinct table_version from food'],
 ];
 
 let dataValues = 0;
@@ -942,6 +1025,10 @@ const PERMITTED_SOURCES = [
 const rowIds = db('select id from measurement order by measured_at desc');
 const ratingIds = db("select id from measurement where unit = 'point'");
 const sourceIds = db('select id from source_record order by recorded_at desc');
+// One food, for the detail screen. It renders name_fr straight out of the
+// column above, so the screen and the exemption have to be walked together or
+// neither proves anything.
+const foodIds = db('select id from food order by name_fr limit 1');
 const sourcesBehindAValue = db(
   `select distinct record.source from measurement value
    join source_record record on record.id = value.source_record_id`,
@@ -969,6 +1056,28 @@ const unreachableBranches = [
   ['a screen behind a connected integration', "select count(*) from integration_credential where state = 'connected'"],
   ['a screen behind a registered passkey', 'select count(*) from webauthn_credential'],
   ['a screen behind an open import question', "select count(*) from import_question where state = 'open'"],
+  /*
+   * Slice 6 adds two, and both are named rather than discovered.
+   *
+   * The ingest diagnostics screen has two shapes: with no credential it draws
+   * its empty state, which is what a fresh machine renders and what this walk
+   * reads; with one it draws the canonical string, the digest and the arrivals
+   * log. The second is walked by tests/e2e/ingest.spec.ts against the scratch
+   * instance, where a credential is created through the shipped screen.
+   *
+   * The Shortcut guide is walked in full either way: it is prose and a metric
+   * table, and the only live thing on it is one line naming this installation's
+   * own endpoint.
+   */
+  ['the diagnostics screen with a live credential', 'select count(*) from ingest_credential where live'],
+  ['the diagnostics screen with an arrival on it', 'select count(*) from ingest_batch'],
+  // Slice 7. The review, the row editor and the keep-or-delete question all
+  // need a laboratory document in review. This walk will not upload one: that
+  // would write a file onto the owner's storage volume and a holding into his
+  // database to grade copy. tests/e2e/labs-scratch.spec.ts walks all three on
+  // the scratch instance, and the count below is what says whether this run
+  // could have seen them.
+  ['a laboratory review with a document in it', "select count(*) from lab_document where state = 'review'"],
 ];
 
 const kindsBehindAValue = db(
@@ -1000,6 +1109,7 @@ const floor = [
   ['source records walked', sourceIds.length, 1],
   ['ratings on the one to five scale', ratingIds.length, 1],
   ['sources with a stored value behind them', sourcesBehindAValue.length, PERMITTED_SOURCES.length],
+  ['foods walked on their own screen', foodIds.length, 1],
 ];
 
 process.stdout.write('rendered strings: the population this walk covers\n');
@@ -1079,8 +1189,51 @@ async function walk() {
     await readSurface(page, path, 'empty');
   }
 
+  // The laboratory surfaces, slice 7. The archive and the manual form are
+  // reachable with nothing stored; the review, the row editor and the
+  // keep-or-delete question need a document in review, which this installation
+  // does not have and which this walk will not create, because an upload here
+  // would write a file onto the owner's storage volume and a review holding into
+  // his database. Those three are counted out of the database and printed under
+  // "not walked" beside the rest, so the gap is a list and not a guess.
+  for (const path of ['/health/labs', '/health/labs/new']) {
+    await page.goto(path);
+    await readSurface(page, path, 'no panel stored');
+  }
+
+  // The nutrition surfaces, slice 9. Five screens the closed-world check had
+  // never seen, two of which render food.name_fr out of the column exempted
+  // above. A surface not walked is a surface not checked, and this was the
+  // gap slice 9's builder named rather than left for the final pass to find.
+  for (const path of ['/eat/data-sources', '/eat/targets', '/eat/shopping']) {
+    await page.goto(path);
+    await readSurface(page, path, 'nutrition, whatever this installation holds');
+  }
+  for (const id of foodIds) {
+    await page.goto(`/eat/food/${id}`);
+    await readSurface(page, '/eat/food/[id]', `one food, ${id}`);
+  }
+
   await page.goto('/settings');
   await readSurface(page, '/settings', 'four integrations, no passkey');
+
+  // The two screens slice 6 added under Settings.
+  //
+  // The guide is the longest single surface in this product, about a hundred
+  // and thirty strings of procedure, and it names Apple's own actions. If one
+  // of those names were written inline in the component rather than keyed, no
+  // source scanner would ever call `Get Details of Health Sample` a sentence:
+  // it opens on a capital and it is four words of a proper noun. This walk is
+  // what catches it, and a surface not walked is a surface not checked.
+  //
+  // Diagnostics is walked in whatever state this installation is in. With no
+  // ingest credential it draws its empty state, which is the state a fresh
+  // machine is in and the one nothing else here reads.
+  await page.goto('/settings/shortcut');
+  await readSurface(page, '/settings/shortcut', 'the shortcut guide');
+
+  await page.goto('/settings/ingest');
+  await readSurface(page, '/settings/ingest', 'ingest diagnostics');
 
   await page.goto('/no-such-address');
   await readSurface(page, '/no-such-address', 'not found');

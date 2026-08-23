@@ -470,7 +470,59 @@ async function writeAllSix(page: import('@playwright/test').Page, context: impor
   await expect(page.getByRole('dialog', { name: 'Quick log' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Energy, 4 of 5' })).toBeEnabled();
 
-  await page.locator('#quick-log-waist').fill('99.0');
+  // TYPED, KEY BY KEY, BECAUSE THE COMMENT ABOVE SAYS IT IS.
+  //
+  // This was `fill('99.0')`, in a function whose own header says the waist is
+  // typed rather than stepped and that F23's tap count rests on it. `fill` sets
+  // the whole value in one input event and never moves a caret, so it says
+  // nothing at all about a field that reformats what is typed into it: the same
+  // call was green four times over a control that turned 99.0 into 9.1. The
+  // rest of this file types this field one key at a time; so does this.
+  //
+  // GOES RED IF: a keystroke comes back reformatted, so what the field holds
+  // after the nth key is not the first n characters of 99.0.
+  //
+  // The engine is read off the browser this page belongs to, because both are
+  // driven through here and a trace that names the wrong one is worse than a
+  // trace that names none.
+  const engine: Engine = page.context().browser()?.browserType().name() === 'webkit' ? 'webkit' : 'chrome';
+  const waist = page.locator('#quick-log-waist');
+
+  // AND THE SNAPSHOT HAS TO HAVE LANDED FIRST. The read fills this field with
+  // the last stored measurement, and a value typed while it is in flight is
+  // typed into a field that is about to be re-rendered. The rating buttons are
+  // live from the first paint, so waiting on one of those waits for nothing:
+  // the loading card leaving is the read resolving.
+  await expect(page.locator('.sheet [data-state="loading"]')).toHaveCount(0);
+
+  // THIS IS A CORRECTION, NOT A FIRST-EVER READING, SO IT IS CLEARED FIRST.
+  //
+  // `fill` replaced the whole value, which is why nobody noticed that this
+  // state has 84.0 already in the field. Typed straight over it the keys land
+  // at the caret and it reads "984.0", measured. A person taps past the last
+  // digit, backspaces the old number out and types the new one, so that is what
+  // happens here, and the tap is the same right-edge tap F23 measures: a value
+  // the stepper wrote leaves the caret at 0, where backspace deletes nothing.
+  const shape = (await waist.boundingBox())!;
+  await waist.click({ position: { x: shape.width - 4, y: shape.height / 2 } });
+  const onFile = await waist.inputValue();
+  const cleared = await typeIntoTheWaist(
+    page,
+    Array.from(onFile, () => 'Backspace'),
+  );
+  console.log(`F27  ${engine.padEnd(6)} the field held "${onFile}", cleared to "${cleared.at(-1)?.value ?? ''}"`);
+  expect(
+    cleared.at(-1)?.value ?? '',
+    'the waist field could not be emptied one key at a time',
+  ).toBe('');
+
+  const trace = await typeIntoTheWaist(page, ['9', '9', '.', '0']);
+  console.log(traceLines('F27', engine, 'all six  ', trace));
+  expect(
+    trace.map((step) => step.value),
+    'typing 99.0 into the waist field did not produce 99.0',
+  ).toEqual(typedSoFar('99.0'));
+
   await page.getByRole('button', { name: 'Energy, 4 of 5' }).click();
   await page.getByRole('button', { name: 'Fatigue, 2 of 5' }).click();
   await page.getByRole('button', { name: 'Hunger, 3 of 5' }).click();

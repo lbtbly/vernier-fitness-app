@@ -1,0 +1,85 @@
+suite-role: vernier_suite is current on the owner's database.
+  role vernier_suite: superuser false, createdb false, createrole false, bypassrls false
+  grant app_meta SELECT
+  grant auth_attempt INSERT,SELECT
+  grant device_observation SELECT
+  grant goal SELECT
+  grant idempotency_key SELECT
+  grant import_question SELECT
+  grant integration_credential SELECT
+  grant measurement SELECT
+  grant owner SELECT
+  grant planned_session SELECT
+  grant recovery_grant INSERT,SELECT
+  grant request_origin SELECT
+  grant session SELECT
+  grant source_record SELECT
+  grant webauthn_challenge SELECT
+  grant webauthn_credential SELECT
+  grant write_request SELECT
+  execute suite_forget_passkey(credential text)
+setup: the owner's database holds 91 measurement, 39 source_record, 1 measurement not seeded. Nothing in this run may lower it.
+setup: its device signals read passkey_registered=true@2026-08-23 08:56:13.874+02/2026-08-23 12:04:11.234345+02/unattributed, standalone_seen=true@2026-08-23 08:54:07.155+02/2026-08-23 08:55:51.125086+02/100.121.138.9, wake_lock_available=true@2026-08-23 08:54:07.158+02/2026-08-23 08:55:51.125811+02/100.121.138.9. Nothing in this run may write them.
+
+Running 2 tests using 1 worker
+
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+--- targets, loaded at 393, 26 of them ---
+   44 px  min-height 44px   floor 44  16px  Close the quick log
+   60 px  min-height auto   floor 44  13.3333px  Down half a centimetre
+   52 px  min-height 52px   floor 44  34px  Waist in centimetres
+   60 px  min-height auto   floor 44  13.3333px  Up half a centimetre
+   52 px  min-height auto   floor 44  17px  Energy, 1 of 5
+   52 px  min-height auto   floor 44  17px  Energy, 2 of 5
+   52 px  min-height auto   floor 44  17px  Energy, 3 of 5
+   52 px  min-height auto   floor 44  17px  Energy, 4 of 5
+   52 px  min-height auto   floor 44  17px  Energy, 5 of 5
+   52 px  min-height auto   floor 44  17px  Fatigue, 1 of 5
+   52 px  min-height auto   floor 44  17px  Fatigue, 2 of 5
+   52 px  min-height auto   floor 44  17px  Fatigue, 3 of 5
+   52 px  min-height auto   floor 44  17px  Fatigue, 4 of 5
+   52 px  min-height auto   floor 44  17px  Fatigue, 5 of 5
+   52 px  min-height auto   floor 44  17px  Hunger, 1 of 5
+   52 px  min-height auto   floor 44  17px  Hunger, 2 of 5
+   52 px  min-height auto   floor 44  17px  Hunger, 3 of 5
+   52 px  min-height auto   floor 44  17px  Hunger, 4 of 5
+   52 px  min-height auto   floor 44  17px  Hunger, 5 of 5
+   52 px  min-height auto   floor 44  17px  Satiety after eating, 1 of 5
+   52 px  min-height auto   floor 44  17px  Satiety after eating, 2 of 5
+   52 px  min-height auto   floor 44  17px  Satiety after eating, 3 of 5
+   52 px  min-height auto   floor 44  17px  Satiety after eating, 4 of 5
+   52 px  min-height auto   floor 44  17px  Satiety after eating, 5 of 5
+   80 px  min-height 80px   floor 44  15px  Note
+   52 px  min-height 52px   floor 52  16px  Save
+  the sheet at 393 hangs off section.card.day < div.today < main.app-scroll < div.app < body < html
+  ✘  1 [chrome-scratch] › tests/e2e/quick-log.spec.ts:967:3 › the quick log against screen 03 › matches screen 03 at three viewports, every target at the floor this sheet sets (5.7s)
+  -  2 [chrome-scratch] › tests/e2e/quick-log.spec.ts:1028:3 › the quick log against screen 03 › draws loading, empty, error, offline and stale on screen 00 geometry
+teardown: the owner's database holds 91 measurement, 39 source_record, 1 measurement not seeded.
+teardown: its device signals read passkey_registered=true@2026-08-23 08:56:13.874+02/2026-08-23 12:04:11.234345+02/unattributed, standalone_seen=true@2026-08-23 08:54:07.155+02/2026-08-23 08:55:51.125086+02/100.121.138.9, wake_lock_available=true@2026-08-23 08:54:07.158+02/2026-08-23 08:55:51.125811+02/100.121.138.9.
+teardown: test-stack: stopped
+teardown: it held 91 measurement, 39 source_record, 1 measurement not seeded before the run, so nothing of the owner's was taken.
+
+
+  1) [chrome-scratch] › tests/e2e/quick-log.spec.ts:967:3 › the quick log against screen 03 › matches screen 03 at three viewports, every target at the floor this sheet sets 
+
+    Error: at 393 the sheet is inside a card (section.card.day < div.today < main.app-scroll < div.app < body < html), so that card's rules reach into screen 03
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: false
+    Received: true
+
+      1001 |         sheet.insideAScreenCard,
+      1002 |         `at ${name} the sheet is inside a card (${sheet.ancestry}), so that card's rules reach into screen 03`,
+    > 1003 |       ).toBe(false);
+           |         ^
+      1004 |       expect(sheet.ancestry).toBe('body < html');
+      1005 |
+      1006 |       // Screen 03 escalates the committed action to 52 px, over the 48 px base
+        at /Users/lambertbouley/Claude/lbtbly-fitness-app/tests/e2e/quick-log.spec.ts:1003:9
+
+    Error Context: test-results/quick-log-the-quick-log-ag-09c52-t-the-floor-this-sheet-sets-chrome-scratch/error-context.md
+
+  1 failed
+    [chrome-scratch] › tests/e2e/quick-log.spec.ts:967:3 › the quick log against screen 03 › matches screen 03 at three viewports, every target at the floor this sheet sets 
+  1 did not run

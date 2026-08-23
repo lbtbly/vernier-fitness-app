@@ -50,6 +50,13 @@
       "when": 1787411425986,
       "tag": "0006_launch_attribution",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1787481838220,
+      "tag": "0007_wave_a",
+      "breakpoints": true
     }
   ]
 }

@@ -531,3 +531,54 @@ bounded by construction the same way the notice region's already is.
 **Disclosure.** Told to the user with the slice 4 ruling. The design gains one
 paragraph settling where a just-logged entry sits, and section 4's offline banner
 is unchanged and goes back on screen with its count visible.
+
+---
+
+## A7. The demonstration yields to measurement. 2026-08-23, architect.
+
+**Before.** `.forge/PLAN.md` slice 3: "The demo seed loads only under
+`DEMO_MODE=1` and stamps every row `demo`." Nothing says what the seed does once
+a real source delivers the same metric, and nothing says how a day holding both
+resolves on screen.
+
+**After.** Slice 5 gains one rule at two layers. The seed writes a metric only
+while that metric has no row with `seed = false`. And a day resolves to the
+measured reading when there is one: `seed = false` first, then the later
+`measured_at`, then the greater `id`, in one comparator used by every site that
+resolves a day or a metric.
+
+**Reason.** `decideDedup` at `src/lib/provenance.ts:313` ranks `withings` above
+`demo` and stores the real row, and it writes down the demo value it beat as
+`kept_over_duplicate`. The table refuses DELETE, so the seeded row stays. And
+`dailySeries` at `src/lib/trend.ts:77` resolves the day by clock alone:
+
+    if (!held || reading.measuredAt.getTime() > held.measuredAt.getTime()) byDay.set(on, reading);
+
+The seed writes weight at a fixed 06:52 (`src/db/demo.ts:590`). So a real
+weigh-in at 06:30 loses its own column to a fabrication, silently, and takes the
+7-day average, the headline, the week change, the pace and the goal delta with
+it, all of which are computed off the resolved series in `weight-summary.ts`.
+Equal timestamps are nondeterministic, because the comparison is strict.
+
+The write layer and the read layer answer the same question two ways. Five sites
+resolve which row stands, and only the one that wrote the answer down knows
+about rank. Full reasoning in `.forge/RULING-DEMO-COLLISION.md`.
+
+No rubric line is added, removed, softened or moved between slices. The count
+stands at one hundred and sixty-six. No row is deleted and the hatch past the
+append-only trigger is not widened, which is part of why this option was chosen
+over any that clears the demonstration series: it is safe before slice 13 ships
+backup and restore.
+
+**Two live holes the ruling exposed, carried into slice 5's dispatch.**
+`decideDedup` step 3 looks only for a row whose source DIFFERS, so two `demo`
+rows on one day store as `unique`, and A1's unique index does not cover it
+because demo mode has no external key. And `readFreshness` groups by
+`source_record.source` while the seed writes a Withings-shaped source record
+every morning, so Withings can never read stale on this install, which is F43.
+
+**Author.** Architect, asked by the lead after slice 5's builder found the
+collision and fixed only the half inside the importer.
+
+**Disclosure.** Told to the user with the slice 5 verdict, before he connects
+the scale.

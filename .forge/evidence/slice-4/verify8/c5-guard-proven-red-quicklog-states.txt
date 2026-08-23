@@ -1,0 +1,146 @@
+suite-role: vernier_suite is current on the owner's database.
+  role vernier_suite: superuser false, createdb false, createrole false, bypassrls false
+  grant app_meta SELECT
+  grant auth_attempt INSERT,SELECT
+  grant device_observation SELECT
+  grant goal SELECT
+  grant idempotency_key SELECT
+  grant import_question SELECT
+  grant integration_credential SELECT
+  grant measurement SELECT
+  grant owner SELECT
+  grant planned_session SELECT
+  grant recovery_grant INSERT,SELECT
+  grant request_origin SELECT
+  grant session SELECT
+  grant source_record SELECT
+  grant webauthn_challenge SELECT
+  grant webauthn_credential SELECT
+  grant write_request SELECT
+  execute suite_forget_passkey(credential text)
+setup: the owner's database holds 91 measurement, 39 source_record, 1 measurement not seeded. Nothing in this run may lower it.
+setup: its device signals read passkey_registered=true@2026-08-23 08:56:13.874+02/2026-08-23 12:04:11.234345+02/unattributed, standalone_seen=true@2026-08-23 08:54:07.155+02/2026-08-23 08:55:51.125086+02/100.121.138.9, wake_lock_available=true@2026-08-23 08:54:07.158+02/2026-08-23 08:55:51.125811+02/100.121.138.9. Nothing in this run may write them.
+
+Running 1 test using 1 worker
+
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+stale chip reads: Demo, 3 days old
+loaded sheet reads: 99.0 cm, 0 age chip(s)
+loading skeletons: 3
+error card reads: WaistThis screen failed to loadYour last measurements did not loadFailed to fetch The sheet still saves: a write goes to this phone first and uploads when the Mac mini answers.Try again
+offline banner reads: Saved on this phone 1 entry is waiting to upload. It keeps the time you typed it, not the time it arrives.
+empty card reads: No waist measurement yetTape at the navel, standing, breathing out. Same spot each time matters more than the exact number.
+--- targets, stale, 26 of them ---
+   44 px  min-height 44px   floor 44  16px  Close the quick log
+   60 px  min-height auto   floor 44  13.3333px  Down half a centimetre
+   52 px  min-height 52px   floor 44  34px  Waist in centimetres
+   60 px  min-height auto   floor 44  13.3333px  Up half a centimetre
+   52 px  min-height auto   floor 44  17px  Energy, 1 of 5
+   52 px  min-height auto   floor 44  17px  Energy, 2 of 5
+   52 px  min-height auto   floor 44  17px  Energy, 3 of 5
+   52 px  min-height auto   floor 44  17px  Energy, 4 of 5
+   52 px  min-height auto   floor 44  17px  Energy, 5 of 5
+   52 px  min-height auto   floor 44  17px  Fatigue, 1 of 5
+   52 px  min-height auto   floor 44  17px  Fatigue, 2 of 5
+   52 px  min-height auto   floor 44  17px  Fatigue, 3 of 5
+   52 px  min-height auto   floor 44  17px  Fatigue, 4 of 5
+   52 px  min-height auto   floor 44  17px  Fatigue, 5 of 5
+   52 px  min-height auto   floor 44  17px  Hunger, 1 of 5
+   52 px  min-height auto   floor 44  17px  Hunger, 2 of 5
+   52 px  min-height auto   floor 44  17px  Hunger, 3 of 5
+   52 px  min-height auto   floor 44  17px  Hunger, 4 of 5
+   52 px  min-height auto   floor 44  17px  Hunger, 5 of 5
+   52 px  min-height auto   floor 44  17px  Satiety after eating, 1 of 5
+   52 px  min-height auto   floor 44  17px  Satiety after eating, 2 of 5
+   52 px  min-height auto   floor 44  17px  Satiety after eating, 3 of 5
+   52 px  min-height auto   floor 44  17px  Satiety after eating, 4 of 5
+   52 px  min-height auto   floor 44  17px  Satiety after eating, 5 of 5
+   80 px  min-height 80px   floor 44  15px  Note
+   52 px  min-height 52px   floor 52  16px  Save
+--- targets, loaded, 26 of them ---
+   44 px  min-height 44px   floor 44  16px  Close the quick log
+   60 px  min-height auto   floor 44  13.3333px  Down half a centimetre
+   52 px  min-height 52px   floor 44  34px  Waist in centimetres
+   60 px  min-height auto   floor 44  13.3333px  Up half a centimetre
+   52 px  min-height auto   floor 44  17px  Energy, 1 of 5
+   52 px  min-height auto   floor 44  17px  Energy, 2 of 5
+   52 px  min-height auto   floor 44  17px  Energy, 3 of 5
+   52 px  min-height auto   floor 44  17px  Energy, 4 of 5
+   52 px  min-height auto   floor 44  17px  Energy, 5 of 5
+   52 px  min-height auto   floor 44  17px  Fatigue, 1 of 5
+   52 px  min-height auto   floor 44  17px  Fatigue, 2 of 5
+   52 px  min-height auto   floor 44  17px  Fatigue, 3 of 5
+   52 px  min-height auto   floor 44  17px  Fatigue, 4 of 5
+   52 px  min-height auto   floor 44  17px  Fatigue, 5 of 5
+   52 px  min-height auto   floor 44  17px  Hunger, 1 of 5
+   52 px  min-height auto   floor 44  17px  Hunger, 2 of 5
+   52 px  min-height auto   floor 44  17px  Hunger, 3 of 5
+   52 px  min-height auto   floor 44  17px  Hunger, 4 of 5
+   52 px  min-height auto   floor 44  17px  Hunger, 5 of 5
+   52 px  min-height auto   floor 44  17px  Satiety after eating, 1 of 5
+   52 px  min-height auto   floor 44  17px  Satiety after eating, 2 of 5
+   52 px  min-height auto   floor 44  17px  Satiety after eating, 3 of 5
+   52 px  min-height auto   floor 44  17px  Satiety after eating, 4 of 5
+   52 px  min-height auto   floor 44  17px  Satiety after eating, 5 of 5
+   80 px  min-height 80px   floor 44  15px  Note
+   52 px  min-height 52px   floor 52  16px  Save
+--- targets, loading, 26 of them ---
+   44 px  min-height 44px   floor 44  16px  Close the quick log
+   60 px  min-height auto   floor 44  13.3333px  Down half a centimetre
+   52 px  min-height 52px   floor 44  34px  Waist in centimetres
+   60 px  min-height auto   floor 44  13.3333px  Up half a centimetre
+   52 px  min-height auto   floor 44  17px  Energy, 1 of 5
+   52 px  min-height auto   floor 44  17px  Energy, 2 of 5
+   52 px  min-height auto   floor 44  17px  Energy, 3 of 5
+   52 px  min-height auto   floor 44  17px  Energy, 4 of 5
+   52 px  min-height auto   floor 44  17px  Energy, 5 of 5
+   52 px  min-height auto   floor 44  17px  Fatigue, 1 of 5
+   52 px  min-height auto   floor 44  17px  Fatigue, 2 of 5
+   52 px  min-height auto   floor 44  17px  Fatigue, 3 of 5
+   52 px  min-height auto   floor 44  17px  Fatigue, 4 of 5
+   52 px  min-height auto   floor 44  17px  Fatigue, 5 of 5
+   52 px  min-height auto   floor 44  17px  Hunger, 1 of 5
+   52 px  min-height auto   floor 44  17px  Hunger, 2 of 5
+   52 px  min-height auto   floor 44  17px  Hunger, 3 of 5
+   52 px  min-height auto   floor 44  17px  Hunger, 4 of 5
+   52 px  min-height auto   floor 44  17px  Hunger, 5 of 5
+   52 px  min-height auto   floor 44  17px  Satiety after eating, 1 of 5
+   52 px  min-height auto   floor 44  17px  Satiety after eating, 2 of 5
+   52 px  min-height auto   floor 44  17px  Satiety after eating, 3 of 5
+   52 px  min-height auto   floor 44  17px  Satiety after eating, 4 of 5
+   52 px  min-height auto   floor 44  17px  Satiety after eating, 5 of 5
+   80 px  min-height 80px   floor 44  15px  Note
+   52 px  min-height 52px   floor 52  16px  Save
+--- targets, error, 27 of them ---
+   44 px  min-height 44px   floor 44  16px  Close the quick log
+   44 px  min-height 44px   floor 52  16px  Try again
+  ✘  1 [chrome-scratch] › tests/e2e/quick-log.spec.ts:1028:3 › the quick log against screen 03 › draws loading, empty, error, offline and stale on screen 00 geometry (7.1s)
+teardown: the owner's database holds 91 measurement, 39 source_record, 1 measurement not seeded.
+teardown: its device signals read passkey_registered=true@2026-08-23 08:56:13.874+02/2026-08-23 12:04:11.234345+02/unattributed, standalone_seen=true@2026-08-23 08:54:07.155+02/2026-08-23 08:55:51.125086+02/100.121.138.9, wake_lock_available=true@2026-08-23 08:54:07.158+02/2026-08-23 08:55:51.125811+02/100.121.138.9.
+teardown: test-stack: stopped
+teardown: it held 91 measurement, 39 source_record, 1 measurement not seeded before the run, so nothing of the owner's was taken.
+
+
+  1) [chrome-scratch] › tests/e2e/quick-log.spec.ts:1028:3 › the quick log against screen 03 › draws loading, empty, error, offline and stale on screen 00 geometry 
+
+    Error: error: Try again is 44 px, under the 52 px floor this sheet sets for it
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 52
+    Received:    44
+
+      933 |       target.height,
+      934 |       `${state}: ${target.label} is ${target.height} px, under the ${target.floor} px floor this sheet sets for it`,
+    > 935 |     ).toBeGreaterThanOrEqual(target.floor);
+          |       ^
+      936 |     if (target.floor === SHEET_BUTTON) {
+      937 |       expect(
+      938 |         target.minHeight,
+        at walkTheTargets (/Users/lambertbouley/Claude/lbtbly-fitness-app/tests/e2e/quick-log.spec.ts:935:7)
+        at /Users/lambertbouley/Claude/lbtbly-fitness-app/tests/e2e/quick-log.spec.ts:1160:7
+
+    Error Context: test-results/quick-log-the-quick-log-ag-862c8-stale-on-screen-00-geometry-chrome-scratch/error-context.md
+
+  1 failed
+    [chrome-scratch] › tests/e2e/quick-log.spec.ts:1028:3 › the quick log against screen 03 › draws loading, empty, error, offline and stale on screen 00 geometry 

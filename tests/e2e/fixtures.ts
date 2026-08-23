@@ -184,6 +184,44 @@ export async function fillWhenLive(control: Locator, text: string, timeout = 15_
   await (await waitUntilLive(control, timeout)).fill(text);
 }
 
+/** What one keystroke did: the key, what the field held after it, where the caret sat. */
+export type Keystroke = { key: string; value: string; caret: number | null };
+
+/**
+ * A value typed the way a person types one, one key at a time, read back after
+ * every key.
+ *
+ * IT LIVES BESIDE `fillWhenLive` BECAUSE `fill` IS WHAT LET THE DEFECT THROUGH.
+ * `fill` sets a whole value in one input event and never moves a caret, so it
+ * is a fine way to get a form into a state and a useless way to prove a field
+ * can be typed into. The waist field was proven four times with
+ * `fill('99.0')` over a control that turned `99.0` into `9.1` in both engines:
+ * it was controlled on `waist.toFixed(1)`, every keystroke came back
+ * reformatted, and the caret went with it. Four green rounds, one field the
+ * owner could not use, and waist is a metric no import can ever supply.
+ *
+ * The trace comes back rather than the final value, because what has to hold
+ * has to hold after every keystroke and not only at the end: `9.1` is a correct
+ * final value for somebody who typed `9.1`.
+ */
+export async function typeKeyByKey(control: Locator, keys: string[]): Promise<Keystroke[]> {
+  const trace: Keystroke[] = [];
+  for (const key of keys) {
+    await control.press(key);
+    const read = await control.evaluate((node) => ({
+      value: (node as HTMLInputElement).value,
+      caret: (node as HTMLInputElement).selectionStart,
+    }));
+    trace.push({ key, ...read });
+  }
+  return trace;
+}
+
+/** Every character typed so far, and nothing else, after every keystroke. */
+export function typedSoFar(text: string): string[] {
+  return [...text].map((_, index) => text.slice(0, index + 1));
+}
+
 /**
  * The same walk in both engines, from inside one test.
  *

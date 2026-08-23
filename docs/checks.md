@@ -92,3 +92,46 @@ because a half-installed tree produces "command not found" and blocking on it
 stalls the install that would clear it. That rule is right for a missing binary
 and wrong for a missing stack: an unreachable app is exactly the state in which
 this check would have found something.
+
+## The compliance check, added in slice 7
+
+`npm run compliance` is the third checker and it guards R2 rather than C6. It
+renders every laboratory explanation the shipped code can produce, for every
+analyte in the catalogue, and scans the result against a banned-phrase list
+covering assessment of the reader, clinical instruction and urgency. One match
+fails the run.
+
+It grades the shipped renderer. `renderExplanation` in `src/lib/labs.ts` is the
+function the screens call, and the script calls that same function with the same
+catalogue subtree from `src/lib/strings.ts`. It does not read the templates as
+text and it does not re-implement the wording: it renders them, the way a person
+reads them, and scans the result. A checker that grades its own paraphrase of
+the code is instance number two of this run's failure class.
+
+Four other things it does, each one a lesson this run has already paid for:
+
+- It prints the population it walked on every run, and it FAILS if the catalogue
+  holds fewer analytes than the rubric names. A clean walk over an empty
+  catalogue reads exactly like a clean walk over a full one.
+- It asserts the positive half, by structure rather than by keyword: every
+  explanation states a general reference range, names the laboratory's own
+  interval as the one that belongs with the number, says the product stores
+  rather than reads, invites a professional, and cites a public source with a
+  URL. A banned-phrase list alone can only prove the absence of a fourth thing.
+- It reads `docs/product.md` and fails if the intended-purpose statement stops
+  making any of its five required claims.
+- It carries four sentences that MUST be caught and fails if any of them comes
+  back clean, so the check is watched refusing something on every single run.
+  The same four are in `tests/unit/compliance.test.ts`.
+
+It found something on the day it was written. `strings.labs.trendsNote` read
+"One trend per analyte you have stored", and `you have` is on the list because
+it is how a sentence starts telling somebody what is wrong with them. The phrase
+was innocent and the rule is right to be blunt about it, so the copy moved
+rather than the rule.
+
+**It needs wiring into `scripts/checks.sh` on merge.** It was written in the
+slice-7 worktree, where `scripts/checks.sh` is shared by five parallel builders
+and by main's gate, so it is defined in `package.json` and called by nothing yet.
+It belongs beside `strings` and `sw:check` in the per-edit run: it needs no
+stack, no browser and no container, and it answers in well under a second.

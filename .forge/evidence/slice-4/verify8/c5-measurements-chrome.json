@@ -1,0 +1,8486 @@
+[
+ {
+  "ancestry": "body < html",
+  "insideACard": false,
+  "opacity": "1",
+  "transform": "none",
+  "animations": [],
+  "width": 393,
+  "x": 0,
+  "sheetPadding": "8px 16px 0px",
+  "maxWidth": "720px",
+  "footPaddingTop": "12px",
+  "footBorderTop": "1px",
+  "saveMarginTop": "0px",
+  "saveMinHeight": "52px",
+  "saveHeight": 52,
+  "saveFontSize": "16px",
+  "saveBelowTheDivider": 12,
+  "cardPadding": [
+   {
+    "state": "stale",
+    "padding": "16px"
+   }
+  ],
+  "stateCards": [
+   "stale"
+  ],
+  "targets": [
+   {
+    "label": "Close the quick log",
+    "tag": "button",
+    "classes": "btn icon",
+    "height": 44,
+    "width": 44,
+    "minHeight": "44px",
+    "cssHeight": "44px",
+    "fontSize": "16px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Down half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Waist in centimetres",
+    "tag": "input",
+    "classes": "metric waistfield",
+    "height": 52,
+    "width": 130.4,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "34px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Up half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Energy, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Note",
+    "tag": "textarea",
+    "classes": "ta",
+    "height": 80,
+    "width": 361,
+    "minHeight": "80px",
+    "cssHeight": "80px",
+    "fontSize": "15px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Save",
+    "tag": "button",
+    "classes": "btn primary block",
+    "height": 52,
+    "width": 361,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "16px",
+    "display": "inline-flex",
+    "visible": true
+   }
+  ],
+  "actions": [],
+  "scale5": [
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   }
+  ],
+  "stepper": [
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   },
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   }
+  ],
+  "scrimAncestry": "body < html",
+  "engine": "chrome",
+  "viewport": "393x852",
+  "state": "stale",
+  "file": "/private/tmp/claude-501/-Users-lambertbouley-Claude-lbtbly-fitness-app/38530ca4-7aaa-4639-b52a-4d9b5f218876/scratchpad/shots/c5-chrome-393x852-stale.png",
+  "tag": ""
+ },
+ {
+  "ancestry": "body < html",
+  "insideACard": false,
+  "opacity": "1",
+  "transform": "none",
+  "animations": [],
+  "width": 393,
+  "x": 0,
+  "sheetPadding": "8px 16px 0px",
+  "maxWidth": "720px",
+  "footPaddingTop": "12px",
+  "footBorderTop": "1px",
+  "saveMarginTop": "0px",
+  "saveMinHeight": "52px",
+  "saveHeight": 52,
+  "saveFontSize": "16px",
+  "saveBelowTheDivider": 12,
+  "cardPadding": [],
+  "stateCards": [],
+  "targets": [
+   {
+    "label": "Close the quick log",
+    "tag": "button",
+    "classes": "btn icon",
+    "height": 44,
+    "width": 44,
+    "minHeight": "44px",
+    "cssHeight": "44px",
+    "fontSize": "16px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Down half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Waist in centimetres",
+    "tag": "input",
+    "classes": "metric waistfield",
+    "height": 52,
+    "width": 130.4,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "34px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Up half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Energy, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Note",
+    "tag": "textarea",
+    "classes": "ta",
+    "height": 80,
+    "width": 361,
+    "minHeight": "80px",
+    "cssHeight": "80px",
+    "fontSize": "15px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Save",
+    "tag": "button",
+    "classes": "btn primary block",
+    "height": 52,
+    "width": 361,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "16px",
+    "display": "inline-flex",
+    "visible": true
+   }
+  ],
+  "actions": [],
+  "scale5": [
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   }
+  ],
+  "stepper": [
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   },
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   }
+  ],
+  "scrimAncestry": "body < html",
+  "engine": "chrome",
+  "viewport": "393x852",
+  "state": "loaded",
+  "file": "/private/tmp/claude-501/-Users-lambertbouley-Claude-lbtbly-fitness-app/38530ca4-7aaa-4639-b52a-4d9b5f218876/scratchpad/shots/c5-chrome-393x852-loaded.png",
+  "tag": ""
+ },
+ {
+  "ancestry": "body < html",
+  "insideACard": false,
+  "opacity": "1",
+  "transform": "none",
+  "animations": [],
+  "width": 393,
+  "x": 0,
+  "sheetPadding": "8px 16px 0px",
+  "maxWidth": "720px",
+  "footPaddingTop": "12px",
+  "footBorderTop": "1px",
+  "saveMarginTop": "0px",
+  "saveMinHeight": "52px",
+  "saveHeight": 52,
+  "saveFontSize": "16px",
+  "saveBelowTheDivider": 12,
+  "cardPadding": [
+   {
+    "state": "loading",
+    "padding": "16px"
+   }
+  ],
+  "stateCards": [
+   "loading"
+  ],
+  "targets": [
+   {
+    "label": "Close the quick log",
+    "tag": "button",
+    "classes": "btn icon",
+    "height": 44,
+    "width": 44,
+    "minHeight": "44px",
+    "cssHeight": "44px",
+    "fontSize": "16px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Down half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Waist in centimetres",
+    "tag": "input",
+    "classes": "metric waistfield",
+    "height": 52,
+    "width": 130.4,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "34px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Up half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Energy, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Note",
+    "tag": "textarea",
+    "classes": "ta",
+    "height": 80,
+    "width": 361,
+    "minHeight": "80px",
+    "cssHeight": "80px",
+    "fontSize": "15px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Save",
+    "tag": "button",
+    "classes": "btn primary block",
+    "height": 52,
+    "width": 361,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "16px",
+    "display": "inline-flex",
+    "visible": true
+   }
+  ],
+  "actions": [],
+  "scale5": [
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   }
+  ],
+  "stepper": [
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   },
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   }
+  ],
+  "scrimAncestry": "body < html",
+  "engine": "chrome",
+  "viewport": "393x852",
+  "state": "loading",
+  "file": "/private/tmp/claude-501/-Users-lambertbouley-Claude-lbtbly-fitness-app/38530ca4-7aaa-4639-b52a-4d9b5f218876/scratchpad/shots/c5-chrome-393x852-loading.png",
+  "tag": ""
+ },
+ {
+  "ancestry": "body < html",
+  "insideACard": false,
+  "opacity": "1",
+  "transform": "none",
+  "animations": [],
+  "width": 393,
+  "x": 0,
+  "sheetPadding": "8px 16px 0px",
+  "maxWidth": "720px",
+  "footPaddingTop": "12px",
+  "footBorderTop": "1px",
+  "saveMarginTop": "0px",
+  "saveMinHeight": "52px",
+  "saveHeight": 52,
+  "saveFontSize": "16px",
+  "saveBelowTheDivider": 12,
+  "cardPadding": [
+   {
+    "state": "error",
+    "padding": "16px"
+   }
+  ],
+  "stateCards": [
+   "error"
+  ],
+  "targets": [
+   {
+    "label": "Close the quick log",
+    "tag": "button",
+    "classes": "btn icon",
+    "height": 44,
+    "width": 44,
+    "minHeight": "44px",
+    "cssHeight": "44px",
+    "fontSize": "16px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Try again",
+    "tag": "button",
+    "classes": "btn grow",
+    "height": 52,
+    "width": 327,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "16px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Down half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Waist in centimetres",
+    "tag": "input",
+    "classes": "metric waistfield",
+    "height": 52,
+    "width": 130.4,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "34px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Up half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Energy, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Note",
+    "tag": "textarea",
+    "classes": "ta",
+    "height": 80,
+    "width": 361,
+    "minHeight": "80px",
+    "cssHeight": "80px",
+    "fontSize": "15px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Save",
+    "tag": "button",
+    "classes": "btn primary block",
+    "height": 52,
+    "width": 361,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "16px",
+    "display": "inline-flex",
+    "visible": true
+   }
+  ],
+  "actions": [
+   {
+    "where": "error",
+    "marginTop": "12px",
+    "gapAboveIt": 12,
+    "buttons": [
+     {
+      "label": "Try again",
+      "height": 52,
+      "minHeight": "52px"
+     }
+    ]
+   }
+  ],
+  "scale5": [
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   }
+  ],
+  "stepper": [
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   },
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   }
+  ],
+  "scrimAncestry": "body < html",
+  "engine": "chrome",
+  "viewport": "393x852",
+  "state": "error",
+  "file": "/private/tmp/claude-501/-Users-lambertbouley-Claude-lbtbly-fitness-app/38530ca4-7aaa-4639-b52a-4d9b5f218876/scratchpad/shots/c5-chrome-393x852-error.png",
+  "tag": ""
+ },
+ {
+  "ancestry": "body < html",
+  "insideACard": false,
+  "opacity": "1",
+  "transform": "none",
+  "animations": [],
+  "width": 393,
+  "x": 0,
+  "sheetPadding": "8px 16px 0px",
+  "maxWidth": "720px",
+  "footPaddingTop": "12px",
+  "footBorderTop": "1px",
+  "saveMarginTop": "0px",
+  "saveMinHeight": "52px",
+  "saveHeight": 52,
+  "saveFontSize": "16px",
+  "saveBelowTheDivider": 12,
+  "cardPadding": [
+   {
+    "state": "error",
+    "padding": "16px"
+   }
+  ],
+  "stateCards": [
+   "offline",
+   "error"
+  ],
+  "targets": [
+   {
+    "label": "Close the quick log",
+    "tag": "button",
+    "classes": "btn icon",
+    "height": 44,
+    "width": 44,
+    "minHeight": "44px",
+    "cssHeight": "44px",
+    "fontSize": "16px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Try again",
+    "tag": "button",
+    "classes": "btn grow",
+    "height": 52,
+    "width": 327,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "16px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Down half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Waist in centimetres",
+    "tag": "input",
+    "classes": "metric waistfield",
+    "height": 52,
+    "width": 130.4,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "34px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Up half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Energy, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Note",
+    "tag": "textarea",
+    "classes": "ta",
+    "height": 80,
+    "width": 361,
+    "minHeight": "80px",
+    "cssHeight": "80px",
+    "fontSize": "15px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Save",
+    "tag": "button",
+    "classes": "btn primary block",
+    "height": 52,
+    "width": 361,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "16px",
+    "display": "inline-flex",
+    "visible": true
+   }
+  ],
+  "actions": [
+   {
+    "where": "error",
+    "marginTop": "12px",
+    "gapAboveIt": 12,
+    "buttons": [
+     {
+      "label": "Try again",
+      "height": 52,
+      "minHeight": "52px"
+     }
+    ]
+   }
+  ],
+  "scale5": [
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   }
+  ],
+  "stepper": [
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   },
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   }
+  ],
+  "scrimAncestry": "body < html",
+  "engine": "chrome",
+  "viewport": "393x852",
+  "state": "offline",
+  "file": "/private/tmp/claude-501/-Users-lambertbouley-Claude-lbtbly-fitness-app/38530ca4-7aaa-4639-b52a-4d9b5f218876/scratchpad/shots/c5-chrome-393x852-offline.png",
+  "tag": ""
+ },
+ {
+  "ancestry": "body < html",
+  "insideACard": false,
+  "opacity": "1",
+  "transform": "none",
+  "animations": [],
+  "width": 393,
+  "x": 0,
+  "sheetPadding": "8px 16px 0px",
+  "maxWidth": "720px",
+  "footPaddingTop": "12px",
+  "footBorderTop": "1px",
+  "saveMarginTop": "0px",
+  "saveMinHeight": "52px",
+  "saveHeight": 52,
+  "saveFontSize": "16px",
+  "saveBelowTheDivider": 12,
+  "cardPadding": [
+   {
+    "state": "empty",
+    "padding": "16px"
+   }
+  ],
+  "stateCards": [
+   "empty"
+  ],
+  "targets": [
+   {
+    "label": "Close the quick log",
+    "tag": "button",
+    "classes": "btn icon",
+    "height": 44,
+    "width": 44,
+    "minHeight": "44px",
+    "cssHeight": "44px",
+    "fontSize": "16px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Down half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Waist in centimetres",
+    "tag": "input",
+    "classes": "metric mut waistfield",
+    "height": 52,
+    "width": 130.4,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "34px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Up half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Energy, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 65.8,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Note",
+    "tag": "textarea",
+    "classes": "ta",
+    "height": 80,
+    "width": 361,
+    "minHeight": "80px",
+    "cssHeight": "80px",
+    "fontSize": "15px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Save",
+    "tag": "button",
+    "classes": "btn primary block",
+    "height": 52,
+    "width": 361,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "16px",
+    "display": "inline-flex",
+    "visible": true
+   }
+  ],
+  "actions": [],
+  "scale5": [
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   }
+  ],
+  "stepper": [
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   },
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   }
+  ],
+  "scrimAncestry": "body < html",
+  "engine": "chrome",
+  "viewport": "393x852",
+  "state": "empty",
+  "file": "/private/tmp/claude-501/-Users-lambertbouley-Claude-lbtbly-fitness-app/38530ca4-7aaa-4639-b52a-4d9b5f218876/scratchpad/shots/c5-chrome-393x852-empty.png",
+  "tag": ""
+ },
+ {
+  "ancestry": "body < html",
+  "insideACard": false,
+  "opacity": "1",
+  "transform": "none",
+  "animations": [],
+  "width": 720,
+  "x": 24,
+  "sheetPadding": "8px 16px 0px",
+  "maxWidth": "720px",
+  "footPaddingTop": "12px",
+  "footBorderTop": "1px",
+  "saveMarginTop": "0px",
+  "saveMinHeight": "52px",
+  "saveHeight": 52,
+  "saveFontSize": "16px",
+  "saveBelowTheDivider": 12,
+  "cardPadding": [
+   {
+    "state": "stale",
+    "padding": "16px"
+   }
+  ],
+  "stateCards": [
+   "stale"
+  ],
+  "targets": [
+   {
+    "label": "Close the quick log",
+    "tag": "button",
+    "classes": "btn icon",
+    "height": 44,
+    "width": 44,
+    "minHeight": "44px",
+    "cssHeight": "44px",
+    "fontSize": "16px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Down half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Waist in centimetres",
+    "tag": "input",
+    "classes": "metric waistfield",
+    "height": 52,
+    "width": 130.4,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "34px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Up half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Energy, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Note",
+    "tag": "textarea",
+    "classes": "ta",
+    "height": 80,
+    "width": 688,
+    "minHeight": "80px",
+    "cssHeight": "80px",
+    "fontSize": "15px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Save",
+    "tag": "button",
+    "classes": "btn primary block",
+    "height": 52,
+    "width": 688,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "16px",
+    "display": "inline-flex",
+    "visible": true
+   }
+  ],
+  "actions": [],
+  "scale5": [
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   }
+  ],
+  "stepper": [
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   },
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   }
+  ],
+  "scrimAncestry": "body < html",
+  "engine": "chrome",
+  "viewport": "768x1024",
+  "state": "stale",
+  "file": "/private/tmp/claude-501/-Users-lambertbouley-Claude-lbtbly-fitness-app/38530ca4-7aaa-4639-b52a-4d9b5f218876/scratchpad/shots/c5-chrome-768x1024-stale.png",
+  "tag": ""
+ },
+ {
+  "ancestry": "body < html",
+  "insideACard": false,
+  "opacity": "1",
+  "transform": "none",
+  "animations": [],
+  "width": 720,
+  "x": 24,
+  "sheetPadding": "8px 16px 0px",
+  "maxWidth": "720px",
+  "footPaddingTop": "12px",
+  "footBorderTop": "1px",
+  "saveMarginTop": "0px",
+  "saveMinHeight": "52px",
+  "saveHeight": 52,
+  "saveFontSize": "16px",
+  "saveBelowTheDivider": 12,
+  "cardPadding": [],
+  "stateCards": [],
+  "targets": [
+   {
+    "label": "Close the quick log",
+    "tag": "button",
+    "classes": "btn icon",
+    "height": 44,
+    "width": 44,
+    "minHeight": "44px",
+    "cssHeight": "44px",
+    "fontSize": "16px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Down half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Waist in centimetres",
+    "tag": "input",
+    "classes": "metric waistfield",
+    "height": 52,
+    "width": 130.4,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "34px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Up half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Energy, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Note",
+    "tag": "textarea",
+    "classes": "ta",
+    "height": 80,
+    "width": 688,
+    "minHeight": "80px",
+    "cssHeight": "80px",
+    "fontSize": "15px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Save",
+    "tag": "button",
+    "classes": "btn primary block",
+    "height": 52,
+    "width": 688,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "16px",
+    "display": "inline-flex",
+    "visible": true
+   }
+  ],
+  "actions": [],
+  "scale5": [
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   }
+  ],
+  "stepper": [
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   },
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   }
+  ],
+  "scrimAncestry": "body < html",
+  "engine": "chrome",
+  "viewport": "768x1024",
+  "state": "loaded",
+  "file": "/private/tmp/claude-501/-Users-lambertbouley-Claude-lbtbly-fitness-app/38530ca4-7aaa-4639-b52a-4d9b5f218876/scratchpad/shots/c5-chrome-768x1024-loaded.png",
+  "tag": ""
+ },
+ {
+  "ancestry": "body < html",
+  "insideACard": false,
+  "opacity": "1",
+  "transform": "none",
+  "animations": [],
+  "width": 720,
+  "x": 24,
+  "sheetPadding": "8px 16px 0px",
+  "maxWidth": "720px",
+  "footPaddingTop": "12px",
+  "footBorderTop": "1px",
+  "saveMarginTop": "0px",
+  "saveMinHeight": "52px",
+  "saveHeight": 52,
+  "saveFontSize": "16px",
+  "saveBelowTheDivider": 12,
+  "cardPadding": [
+   {
+    "state": "loading",
+    "padding": "16px"
+   }
+  ],
+  "stateCards": [
+   "loading"
+  ],
+  "targets": [
+   {
+    "label": "Close the quick log",
+    "tag": "button",
+    "classes": "btn icon",
+    "height": 44,
+    "width": 44,
+    "minHeight": "44px",
+    "cssHeight": "44px",
+    "fontSize": "16px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Down half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Waist in centimetres",
+    "tag": "input",
+    "classes": "metric waistfield",
+    "height": 52,
+    "width": 130.4,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "34px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Up half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Energy, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Note",
+    "tag": "textarea",
+    "classes": "ta",
+    "height": 80,
+    "width": 688,
+    "minHeight": "80px",
+    "cssHeight": "80px",
+    "fontSize": "15px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Save",
+    "tag": "button",
+    "classes": "btn primary block",
+    "height": 52,
+    "width": 688,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "16px",
+    "display": "inline-flex",
+    "visible": true
+   }
+  ],
+  "actions": [],
+  "scale5": [
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   }
+  ],
+  "stepper": [
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   },
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   }
+  ],
+  "scrimAncestry": "body < html",
+  "engine": "chrome",
+  "viewport": "768x1024",
+  "state": "loading",
+  "file": "/private/tmp/claude-501/-Users-lambertbouley-Claude-lbtbly-fitness-app/38530ca4-7aaa-4639-b52a-4d9b5f218876/scratchpad/shots/c5-chrome-768x1024-loading.png",
+  "tag": ""
+ },
+ {
+  "ancestry": "body < html",
+  "insideACard": false,
+  "opacity": "1",
+  "transform": "none",
+  "animations": [],
+  "width": 720,
+  "x": 24,
+  "sheetPadding": "8px 16px 0px",
+  "maxWidth": "720px",
+  "footPaddingTop": "12px",
+  "footBorderTop": "1px",
+  "saveMarginTop": "0px",
+  "saveMinHeight": "52px",
+  "saveHeight": 52,
+  "saveFontSize": "16px",
+  "saveBelowTheDivider": 12,
+  "cardPadding": [
+   {
+    "state": "error",
+    "padding": "16px"
+   }
+  ],
+  "stateCards": [
+   "error"
+  ],
+  "targets": [
+   {
+    "label": "Close the quick log",
+    "tag": "button",
+    "classes": "btn icon",
+    "height": 44,
+    "width": 44,
+    "minHeight": "44px",
+    "cssHeight": "44px",
+    "fontSize": "16px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Try again",
+    "tag": "button",
+    "classes": "btn grow",
+    "height": 52,
+    "width": 654,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "16px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Down half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Waist in centimetres",
+    "tag": "input",
+    "classes": "metric waistfield",
+    "height": 52,
+    "width": 130.4,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "34px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Up half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Energy, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Note",
+    "tag": "textarea",
+    "classes": "ta",
+    "height": 80,
+    "width": 688,
+    "minHeight": "80px",
+    "cssHeight": "80px",
+    "fontSize": "15px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Save",
+    "tag": "button",
+    "classes": "btn primary block",
+    "height": 52,
+    "width": 688,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "16px",
+    "display": "inline-flex",
+    "visible": true
+   }
+  ],
+  "actions": [
+   {
+    "where": "error",
+    "marginTop": "12px",
+    "gapAboveIt": 12,
+    "buttons": [
+     {
+      "label": "Try again",
+      "height": 52,
+      "minHeight": "52px"
+     }
+    ]
+   }
+  ],
+  "scale5": [
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   }
+  ],
+  "stepper": [
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   },
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   }
+  ],
+  "scrimAncestry": "body < html",
+  "engine": "chrome",
+  "viewport": "768x1024",
+  "state": "error",
+  "file": "/private/tmp/claude-501/-Users-lambertbouley-Claude-lbtbly-fitness-app/38530ca4-7aaa-4639-b52a-4d9b5f218876/scratchpad/shots/c5-chrome-768x1024-error.png",
+  "tag": ""
+ },
+ {
+  "ancestry": "body < html",
+  "insideACard": false,
+  "opacity": "1",
+  "transform": "none",
+  "animations": [],
+  "width": 720,
+  "x": 24,
+  "sheetPadding": "8px 16px 0px",
+  "maxWidth": "720px",
+  "footPaddingTop": "12px",
+  "footBorderTop": "1px",
+  "saveMarginTop": "0px",
+  "saveMinHeight": "52px",
+  "saveHeight": 52,
+  "saveFontSize": "16px",
+  "saveBelowTheDivider": 12,
+  "cardPadding": [
+   {
+    "state": "error",
+    "padding": "16px"
+   }
+  ],
+  "stateCards": [
+   "offline",
+   "error"
+  ],
+  "targets": [
+   {
+    "label": "Close the quick log",
+    "tag": "button",
+    "classes": "btn icon",
+    "height": 44,
+    "width": 44,
+    "minHeight": "44px",
+    "cssHeight": "44px",
+    "fontSize": "16px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Try again",
+    "tag": "button",
+    "classes": "btn grow",
+    "height": 52,
+    "width": 654,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "16px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Down half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Waist in centimetres",
+    "tag": "input",
+    "classes": "metric waistfield",
+    "height": 52,
+    "width": 130.4,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "34px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Up half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Energy, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Note",
+    "tag": "textarea",
+    "classes": "ta",
+    "height": 80,
+    "width": 688,
+    "minHeight": "80px",
+    "cssHeight": "80px",
+    "fontSize": "15px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Save",
+    "tag": "button",
+    "classes": "btn primary block",
+    "height": 52,
+    "width": 688,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "16px",
+    "display": "inline-flex",
+    "visible": true
+   }
+  ],
+  "actions": [
+   {
+    "where": "error",
+    "marginTop": "12px",
+    "gapAboveIt": 12,
+    "buttons": [
+     {
+      "label": "Try again",
+      "height": 52,
+      "minHeight": "52px"
+     }
+    ]
+   }
+  ],
+  "scale5": [
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   }
+  ],
+  "stepper": [
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   },
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   }
+  ],
+  "scrimAncestry": "body < html",
+  "engine": "chrome",
+  "viewport": "768x1024",
+  "state": "offline",
+  "file": "/private/tmp/claude-501/-Users-lambertbouley-Claude-lbtbly-fitness-app/38530ca4-7aaa-4639-b52a-4d9b5f218876/scratchpad/shots/c5-chrome-768x1024-offline.png",
+  "tag": ""
+ },
+ {
+  "ancestry": "body < html",
+  "insideACard": false,
+  "opacity": "1",
+  "transform": "none",
+  "animations": [],
+  "width": 720,
+  "x": 24,
+  "sheetPadding": "8px 16px 0px",
+  "maxWidth": "720px",
+  "footPaddingTop": "12px",
+  "footBorderTop": "1px",
+  "saveMarginTop": "0px",
+  "saveMinHeight": "52px",
+  "saveHeight": 52,
+  "saveFontSize": "16px",
+  "saveBelowTheDivider": 12,
+  "cardPadding": [
+   {
+    "state": "empty",
+    "padding": "16px"
+   }
+  ],
+  "stateCards": [
+   "empty"
+  ],
+  "targets": [
+   {
+    "label": "Close the quick log",
+    "tag": "button",
+    "classes": "btn icon",
+    "height": 44,
+    "width": 44,
+    "minHeight": "44px",
+    "cssHeight": "44px",
+    "fontSize": "16px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Down half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Waist in centimetres",
+    "tag": "input",
+    "classes": "metric mut waistfield",
+    "height": 52,
+    "width": 130.4,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "34px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Up half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Energy, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Note",
+    "tag": "textarea",
+    "classes": "ta",
+    "height": 80,
+    "width": 688,
+    "minHeight": "80px",
+    "cssHeight": "80px",
+    "fontSize": "15px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Save",
+    "tag": "button",
+    "classes": "btn primary block",
+    "height": 52,
+    "width": 688,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "16px",
+    "display": "inline-flex",
+    "visible": true
+   }
+  ],
+  "actions": [],
+  "scale5": [
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   }
+  ],
+  "stepper": [
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   },
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   }
+  ],
+  "scrimAncestry": "body < html",
+  "engine": "chrome",
+  "viewport": "768x1024",
+  "state": "empty",
+  "file": "/private/tmp/claude-501/-Users-lambertbouley-Claude-lbtbly-fitness-app/38530ca4-7aaa-4639-b52a-4d9b5f218876/scratchpad/shots/c5-chrome-768x1024-empty.png",
+  "tag": ""
+ },
+ {
+  "ancestry": "body < html",
+  "insideACard": false,
+  "opacity": "1",
+  "transform": "none",
+  "animations": [],
+  "width": 720,
+  "x": 280,
+  "sheetPadding": "8px 16px 0px",
+  "maxWidth": "720px",
+  "footPaddingTop": "12px",
+  "footBorderTop": "1px",
+  "saveMarginTop": "0px",
+  "saveMinHeight": "52px",
+  "saveHeight": 52,
+  "saveFontSize": "16px",
+  "saveBelowTheDivider": 12,
+  "cardPadding": [
+   {
+    "state": "stale",
+    "padding": "16px"
+   }
+  ],
+  "stateCards": [
+   "stale"
+  ],
+  "targets": [
+   {
+    "label": "Close the quick log",
+    "tag": "button",
+    "classes": "btn icon",
+    "height": 44,
+    "width": 44,
+    "minHeight": "44px",
+    "cssHeight": "44px",
+    "fontSize": "16px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Down half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Waist in centimetres",
+    "tag": "input",
+    "classes": "metric waistfield",
+    "height": 52,
+    "width": 130.4,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "34px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Up half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Energy, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Note",
+    "tag": "textarea",
+    "classes": "ta",
+    "height": 80,
+    "width": 688,
+    "minHeight": "80px",
+    "cssHeight": "80px",
+    "fontSize": "15px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Save",
+    "tag": "button",
+    "classes": "btn primary block",
+    "height": 52,
+    "width": 688,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "16px",
+    "display": "inline-flex",
+    "visible": true
+   }
+  ],
+  "actions": [],
+  "scale5": [
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   }
+  ],
+  "stepper": [
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   },
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   }
+  ],
+  "scrimAncestry": "body < html",
+  "engine": "chrome",
+  "viewport": "1280x900",
+  "state": "stale",
+  "file": "/private/tmp/claude-501/-Users-lambertbouley-Claude-lbtbly-fitness-app/38530ca4-7aaa-4639-b52a-4d9b5f218876/scratchpad/shots/c5-chrome-1280x900-stale.png",
+  "tag": ""
+ },
+ {
+  "ancestry": "body < html",
+  "insideACard": false,
+  "opacity": "1",
+  "transform": "none",
+  "animations": [],
+  "width": 720,
+  "x": 280,
+  "sheetPadding": "8px 16px 0px",
+  "maxWidth": "720px",
+  "footPaddingTop": "12px",
+  "footBorderTop": "1px",
+  "saveMarginTop": "0px",
+  "saveMinHeight": "52px",
+  "saveHeight": 52,
+  "saveFontSize": "16px",
+  "saveBelowTheDivider": 12,
+  "cardPadding": [],
+  "stateCards": [],
+  "targets": [
+   {
+    "label": "Close the quick log",
+    "tag": "button",
+    "classes": "btn icon",
+    "height": 44,
+    "width": 44,
+    "minHeight": "44px",
+    "cssHeight": "44px",
+    "fontSize": "16px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Down half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Waist in centimetres",
+    "tag": "input",
+    "classes": "metric waistfield",
+    "height": 52,
+    "width": 130.4,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "34px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Up half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Energy, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Note",
+    "tag": "textarea",
+    "classes": "ta",
+    "height": 80,
+    "width": 688,
+    "minHeight": "80px",
+    "cssHeight": "80px",
+    "fontSize": "15px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Save",
+    "tag": "button",
+    "classes": "btn primary block",
+    "height": 52,
+    "width": 688,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "16px",
+    "display": "inline-flex",
+    "visible": true
+   }
+  ],
+  "actions": [],
+  "scale5": [
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   }
+  ],
+  "stepper": [
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   },
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   }
+  ],
+  "scrimAncestry": "body < html",
+  "engine": "chrome",
+  "viewport": "1280x900",
+  "state": "loaded",
+  "file": "/private/tmp/claude-501/-Users-lambertbouley-Claude-lbtbly-fitness-app/38530ca4-7aaa-4639-b52a-4d9b5f218876/scratchpad/shots/c5-chrome-1280x900-loaded.png",
+  "tag": ""
+ },
+ {
+  "ancestry": "body < html",
+  "insideACard": false,
+  "opacity": "1",
+  "transform": "none",
+  "animations": [],
+  "width": 720,
+  "x": 280,
+  "sheetPadding": "8px 16px 0px",
+  "maxWidth": "720px",
+  "footPaddingTop": "12px",
+  "footBorderTop": "1px",
+  "saveMarginTop": "0px",
+  "saveMinHeight": "52px",
+  "saveHeight": 52,
+  "saveFontSize": "16px",
+  "saveBelowTheDivider": 12,
+  "cardPadding": [
+   {
+    "state": "loading",
+    "padding": "16px"
+   }
+  ],
+  "stateCards": [
+   "loading"
+  ],
+  "targets": [
+   {
+    "label": "Close the quick log",
+    "tag": "button",
+    "classes": "btn icon",
+    "height": 44,
+    "width": 44,
+    "minHeight": "44px",
+    "cssHeight": "44px",
+    "fontSize": "16px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Down half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Waist in centimetres",
+    "tag": "input",
+    "classes": "metric waistfield",
+    "height": 52,
+    "width": 130.4,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "34px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Up half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Energy, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Note",
+    "tag": "textarea",
+    "classes": "ta",
+    "height": 80,
+    "width": 688,
+    "minHeight": "80px",
+    "cssHeight": "80px",
+    "fontSize": "15px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Save",
+    "tag": "button",
+    "classes": "btn primary block",
+    "height": 52,
+    "width": 688,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "16px",
+    "display": "inline-flex",
+    "visible": true
+   }
+  ],
+  "actions": [],
+  "scale5": [
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   }
+  ],
+  "stepper": [
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   },
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   }
+  ],
+  "scrimAncestry": "body < html",
+  "engine": "chrome",
+  "viewport": "1280x900",
+  "state": "loading",
+  "file": "/private/tmp/claude-501/-Users-lambertbouley-Claude-lbtbly-fitness-app/38530ca4-7aaa-4639-b52a-4d9b5f218876/scratchpad/shots/c5-chrome-1280x900-loading.png",
+  "tag": ""
+ },
+ {
+  "ancestry": "body < html",
+  "insideACard": false,
+  "opacity": "1",
+  "transform": "none",
+  "animations": [],
+  "width": 720,
+  "x": 280,
+  "sheetPadding": "8px 16px 0px",
+  "maxWidth": "720px",
+  "footPaddingTop": "12px",
+  "footBorderTop": "1px",
+  "saveMarginTop": "0px",
+  "saveMinHeight": "52px",
+  "saveHeight": 52,
+  "saveFontSize": "16px",
+  "saveBelowTheDivider": 12,
+  "cardPadding": [
+   {
+    "state": "error",
+    "padding": "16px"
+   }
+  ],
+  "stateCards": [
+   "error"
+  ],
+  "targets": [
+   {
+    "label": "Close the quick log",
+    "tag": "button",
+    "classes": "btn icon",
+    "height": 44,
+    "width": 44,
+    "minHeight": "44px",
+    "cssHeight": "44px",
+    "fontSize": "16px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Try again",
+    "tag": "button",
+    "classes": "btn grow",
+    "height": 52,
+    "width": 654,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "16px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Down half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Waist in centimetres",
+    "tag": "input",
+    "classes": "metric waistfield",
+    "height": 52,
+    "width": 130.4,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "34px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Up half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Energy, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Note",
+    "tag": "textarea",
+    "classes": "ta",
+    "height": 80,
+    "width": 688,
+    "minHeight": "80px",
+    "cssHeight": "80px",
+    "fontSize": "15px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Save",
+    "tag": "button",
+    "classes": "btn primary block",
+    "height": 52,
+    "width": 688,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "16px",
+    "display": "inline-flex",
+    "visible": true
+   }
+  ],
+  "actions": [
+   {
+    "where": "error",
+    "marginTop": "12px",
+    "gapAboveIt": 12,
+    "buttons": [
+     {
+      "label": "Try again",
+      "height": 52,
+      "minHeight": "52px"
+     }
+    ]
+   }
+  ],
+  "scale5": [
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   }
+  ],
+  "stepper": [
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   },
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   }
+  ],
+  "scrimAncestry": "body < html",
+  "engine": "chrome",
+  "viewport": "1280x900",
+  "state": "error",
+  "file": "/private/tmp/claude-501/-Users-lambertbouley-Claude-lbtbly-fitness-app/38530ca4-7aaa-4639-b52a-4d9b5f218876/scratchpad/shots/c5-chrome-1280x900-error.png",
+  "tag": ""
+ },
+ {
+  "ancestry": "body < html",
+  "insideACard": false,
+  "opacity": "1",
+  "transform": "none",
+  "animations": [],
+  "width": 720,
+  "x": 280,
+  "sheetPadding": "8px 16px 0px",
+  "maxWidth": "720px",
+  "footPaddingTop": "12px",
+  "footBorderTop": "1px",
+  "saveMarginTop": "0px",
+  "saveMinHeight": "52px",
+  "saveHeight": 52,
+  "saveFontSize": "16px",
+  "saveBelowTheDivider": 12,
+  "cardPadding": [
+   {
+    "state": "error",
+    "padding": "16px"
+   }
+  ],
+  "stateCards": [
+   "offline",
+   "error"
+  ],
+  "targets": [
+   {
+    "label": "Close the quick log",
+    "tag": "button",
+    "classes": "btn icon",
+    "height": 44,
+    "width": 44,
+    "minHeight": "44px",
+    "cssHeight": "44px",
+    "fontSize": "16px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Try again",
+    "tag": "button",
+    "classes": "btn grow",
+    "height": 52,
+    "width": 654,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "16px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Down half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Waist in centimetres",
+    "tag": "input",
+    "classes": "metric waistfield",
+    "height": 52,
+    "width": 130.4,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "34px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Up half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Energy, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Note",
+    "tag": "textarea",
+    "classes": "ta",
+    "height": 80,
+    "width": 688,
+    "minHeight": "80px",
+    "cssHeight": "80px",
+    "fontSize": "15px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Save",
+    "tag": "button",
+    "classes": "btn primary block",
+    "height": 52,
+    "width": 688,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "16px",
+    "display": "inline-flex",
+    "visible": true
+   }
+  ],
+  "actions": [
+   {
+    "where": "error",
+    "marginTop": "12px",
+    "gapAboveIt": 12,
+    "buttons": [
+     {
+      "label": "Try again",
+      "height": 52,
+      "minHeight": "52px"
+     }
+    ]
+   }
+  ],
+  "scale5": [
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   }
+  ],
+  "stepper": [
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   },
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   }
+  ],
+  "scrimAncestry": "body < html",
+  "engine": "chrome",
+  "viewport": "1280x900",
+  "state": "offline",
+  "file": "/private/tmp/claude-501/-Users-lambertbouley-Claude-lbtbly-fitness-app/38530ca4-7aaa-4639-b52a-4d9b5f218876/scratchpad/shots/c5-chrome-1280x900-offline.png",
+  "tag": ""
+ },
+ {
+  "ancestry": "body < html",
+  "insideACard": false,
+  "opacity": "1",
+  "transform": "none",
+  "animations": [],
+  "width": 720,
+  "x": 280,
+  "sheetPadding": "8px 16px 0px",
+  "maxWidth": "720px",
+  "footPaddingTop": "12px",
+  "footBorderTop": "1px",
+  "saveMarginTop": "0px",
+  "saveMinHeight": "52px",
+  "saveHeight": 52,
+  "saveFontSize": "16px",
+  "saveBelowTheDivider": 12,
+  "cardPadding": [
+   {
+    "state": "empty",
+    "padding": "16px"
+   }
+  ],
+  "stateCards": [
+   "empty"
+  ],
+  "targets": [
+   {
+    "label": "Close the quick log",
+    "tag": "button",
+    "classes": "btn icon",
+    "height": 44,
+    "width": 44,
+    "minHeight": "44px",
+    "cssHeight": "44px",
+    "fontSize": "16px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Down half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Waist in centimetres",
+    "tag": "input",
+    "classes": "metric mut waistfield",
+    "height": 52,
+    "width": 130.4,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "34px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Up half a centimetre",
+    "tag": "button",
+    "classes": "",
+    "height": 60,
+    "width": 60,
+    "minHeight": "auto",
+    "cssHeight": "60px",
+    "fontSize": "13.3333px",
+    "display": "flex",
+    "visible": true
+   },
+   {
+    "label": "Energy, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Energy, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Fatigue, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Hunger, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 1 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 2 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 3 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 4 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Satiety after eating, 5 of 5",
+    "tag": "button",
+    "classes": "",
+    "height": 52,
+    "width": 131.2,
+    "minHeight": "auto",
+    "cssHeight": "52px",
+    "fontSize": "17px",
+    "display": "block",
+    "visible": true
+   },
+   {
+    "label": "Note",
+    "tag": "textarea",
+    "classes": "ta",
+    "height": 80,
+    "width": 688,
+    "minHeight": "80px",
+    "cssHeight": "80px",
+    "fontSize": "15px",
+    "display": "inline-block",
+    "visible": true
+   },
+   {
+    "label": "Save",
+    "tag": "button",
+    "classes": "btn primary block",
+    "height": 52,
+    "width": 688,
+    "minHeight": "52px",
+    "cssHeight": "52px",
+    "fontSize": "16px",
+    "display": "inline-flex",
+    "visible": true
+   }
+  ],
+  "actions": [],
+  "scale5": [
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   },
+   {
+    "h": 52,
+    "css": "52px",
+    "min": "auto"
+   }
+  ],
+  "stepper": [
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   },
+   {
+    "h": 60,
+    "w": 60,
+    "css": "60px",
+    "min": "auto"
+   }
+  ],
+  "scrimAncestry": "body < html",
+  "engine": "chrome",
+  "viewport": "1280x900",
+  "state": "empty",
+  "file": "/private/tmp/claude-501/-Users-lambertbouley-Claude-lbtbly-fitness-app/38530ca4-7aaa-4639-b52a-4d9b5f218876/scratchpad/shots/c5-chrome-1280x900-empty.png",
+  "tag": ""
+ }
+]

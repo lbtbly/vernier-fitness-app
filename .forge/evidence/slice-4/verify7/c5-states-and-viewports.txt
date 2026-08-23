@@ -1,0 +1,243 @@
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+C5   chrome stale   the card reads: WaistDemo, 3 days oldWaist last measured 3 days agoMeasure again at the navel, standing, breathing out.
+C5   chrome stale    sheet x=0 width=393 radius=22px  first field-block top=310
+C5   chrome stale    card  card[stale]                padding 16px 16px 16px 16px  margin-bottom 12px  radius 16px  border 1px solid  361x109 at x=16
+C5   chrome stale   console errors 0
+C5   chrome loading aria-busy=true label="Reading your last measurements"
+C5   chrome loading  sheet x=0 width=393 radius=22px  first field-block top=324
+C5   chrome loading  card  card[loading]              padding 16px 16px 16px 16px  margin-bottom 12px  radius 16px  border 1px solid  361x119 at x=16
+C5   chrome loading  skeletons 74x22 r6px, 186x34 r6px, 250x13 r6px
+C5   chrome loading console errors 0
+C5   chrome error   the card reads: WaistThis screen failed to loadYour last measurements did not loadThe Mac mini answered 503 at 10:43 and gave no reason. The sheet still saves: a write goes to this phone first and uploads when the Mac mini answers.Try again
+C5   chrome error    sheet x=0 width=393 radius=22px  first field-block top=406
+C5   chrome error    card  card error[error]          padding 16px 16px 16px 16px  margin-bottom 12px  radius 16px  border 1px solid  361x201 at x=16
+C5   chrome error   console errors 1
+C5   chrome loaded  key "9" -> "998.5"
+C5   chrome loaded  key "8" -> "9898.5"
+C5   chrome loaded  key "." -> "98.98.5"
+C5   chrome loaded  key "0" -> "98.098.5"
+C5   chrome loaded  the waist typed today stored as 98.5 cm
+C5   chrome 393       44 x    44  min    44  ok        button.btn icon                 "Close the quick log"
+C5   chrome 393       60 x    60  min    60  ok        button.                         "Down half a centimetre"
+C5   chrome 393    130.4 x    52  min    52  ok        input.metric waistfield        "Waist in centimetres"
+C5   chrome 393       60 x    60  min    60  ok        button.                         "Up half a centimetre"
+C5   chrome 393     65.8 x    52  min    52  ok        button.                         "Energy, 1 of 5"
+C5   chrome 393     65.8 x    52  min    52  ok        button.                         "Energy, 2 of 5"
+C5   chrome 393     65.8 x    52  min    52  ok        button.                         "Energy, 3 of 5"
+C5   chrome 393     65.8 x    52  min    52  ok        button.                         "Energy, 4 of 5"
+C5   chrome 393     65.8 x    52  min    52  ok        button.                         "Energy, 5 of 5"
+C5   chrome 393     65.8 x    52  min    52  ok        button.                         "Fatigue, 1 of 5"
+C5   chrome 393     65.8 x    52  min    52  ok        button.                         "Fatigue, 2 of 5"
+C5   chrome 393     65.8 x    52  min    52  ok        button.                         "Fatigue, 3 of 5"
+C5   chrome 393     65.8 x    52  min    52  ok        button.                         "Fatigue, 4 of 5"
+C5   chrome 393     65.8 x    52  min    52  ok        button.                         "Fatigue, 5 of 5"
+C5   chrome 393     65.8 x    52  min    52  ok        button.                         "Hunger, 1 of 5"
+C5   chrome 393     65.8 x    52  min    52  ok        button.                         "Hunger, 2 of 5"
+C5   chrome 393     65.8 x    52  min    52  ok        button.                         "Hunger, 3 of 5"
+C5   chrome 393     65.8 x    52  min    52  ok        button.                         "Hunger, 4 of 5"
+C5   chrome 393     65.8 x    52  min    52  ok        button.                         "Hunger, 5 of 5"
+C5   chrome 393     65.8 x    52  min    52  ok        button.                         "Satiety after eating, 1 of 5"
+C5   chrome 393     65.8 x    52  min    52  ok        button.                         "Satiety after eating, 2 of 5"
+C5   chrome 393     65.8 x    52  min    52  ok        button.                         "Satiety after eating, 3 of 5"
+C5   chrome 393     65.8 x    52  min    52  ok        button.                         "Satiety after eating, 4 of 5"
+C5   chrome 393     65.8 x    52  min    52  ok        button.                         "Satiety after eating, 5 of 5"
+C5   chrome 393      361 x    80  min    80  ok        textarea.ta                       "Note"
+C5   chrome 393      361 x    52  min    52  ok        button.btn primary block        "Save"
+C5   chrome 393   26 interactive targets in the sheet, smallest dimension 44 px against a 44 px floor
+C5   chrome 393   sheet x=0 width=393 radius=22px  first field-block top=306
+C5   chrome 393   card  card[stale]                padding 16px 16px 16px 16px  margin-bottom 12px  radius 16px  border 1px solid  361x109 at x=16
+C5   chrome 393  horizontal overflow: document 0 px, sheet 0 px
+C5   chrome 393  accented actions in the sheet: 1
+C5   chrome 393  console errors 0, failed requests 0
+C5   chrome 768       44 x    44  min    44  ok        button.btn icon                 "Close the quick log"
+C5   chrome 768       60 x    60  min    60  ok        button.                         "Down half a centimetre"
+C5   chrome 768    130.4 x    52  min    52  ok        input.metric waistfield        "Waist in centimetres"
+C5   chrome 768       60 x    60  min    60  ok        button.                         "Up half a centimetre"
+C5   chrome 768    131.2 x    52  min    52  ok        button.                         "Energy, 1 of 5"
+C5   chrome 768    131.2 x    52  min    52  ok        button.                         "Energy, 2 of 5"
+C5   chrome 768    131.2 x    52  min    52  ok        button.                         "Energy, 3 of 5"
+C5   chrome 768    131.2 x    52  min    52  ok        button.                         "Energy, 4 of 5"
+C5   chrome 768    131.2 x    52  min    52  ok        button.                         "Energy, 5 of 5"
+C5   chrome 768    131.2 x    52  min    52  ok        button.                         "Fatigue, 1 of 5"
+C5   chrome 768    131.2 x    52  min    52  ok        button.                         "Fatigue, 2 of 5"
+C5   chrome 768    131.2 x    52  min    52  ok        button.                         "Fatigue, 3 of 5"
+C5   chrome 768    131.2 x    52  min    52  ok        button.                         "Fatigue, 4 of 5"
+C5   chrome 768    131.2 x    52  min    52  ok        button.                         "Fatigue, 5 of 5"
+C5   chrome 768    131.2 x    52  min    52  ok        button.                         "Hunger, 1 of 5"
+C5   chrome 768    131.2 x    52  min    52  ok        button.                         "Hunger, 2 of 5"
+C5   chrome 768    131.2 x    52  min    52  ok        button.                         "Hunger, 3 of 5"
+C5   chrome 768    131.2 x    52  min    52  ok        button.                         "Hunger, 4 of 5"
+C5   chrome 768    131.2 x    52  min    52  ok        button.                         "Hunger, 5 of 5"
+C5   chrome 768    131.2 x    52  min    52  ok        button.                         "Satiety after eating, 1 of 5"
+C5   chrome 768    131.2 x    52  min    52  ok        button.                         "Satiety after eating, 2 of 5"
+C5   chrome 768    131.2 x    52  min    52  ok        button.                         "Satiety after eating, 3 of 5"
+C5   chrome 768    131.2 x    52  min    52  ok        button.                         "Satiety after eating, 4 of 5"
+C5   chrome 768    131.2 x    52  min    52  ok        button.                         "Satiety after eating, 5 of 5"
+C5   chrome 768      688 x    80  min    80  ok        textarea.ta                       "Note"
+C5   chrome 768      688 x    52  min    52  ok        button.btn primary block        "Save"
+C5   chrome 768   26 interactive targets in the sheet, smallest dimension 44 px against a 44 px floor
+C5   chrome 768   sheet x=24 width=720 radius=22px  first field-block top=327
+C5   chrome 768   card  card[stale]                padding 16px 16px 16px 16px  margin-bottom 12px  radius 16px  border 1px solid  688x109 at x=40
+C5   chrome 768  horizontal overflow: document 0 px, sheet 0 px
+C5   chrome 768  accented actions in the sheet: 1
+C5   chrome 768  console errors 0, failed requests 2
+C5   chrome 1280      44 x    44  min    44  ok        button.btn icon                 "Close the quick log"
+C5   chrome 1280      60 x    60  min    60  ok        button.                         "Down half a centimetre"
+C5   chrome 1280   130.4 x    52  min    52  ok        input.metric waistfield        "Waist in centimetres"
+C5   chrome 1280      60 x    60  min    60  ok        button.                         "Up half a centimetre"
+C5   chrome 1280   131.2 x    52  min    52  ok        button.                         "Energy, 1 of 5"
+C5   chrome 1280   131.2 x    52  min    52  ok        button.                         "Energy, 2 of 5"
+C5   chrome 1280   131.2 x    52  min    52  ok        button.                         "Energy, 3 of 5"
+C5   chrome 1280   131.2 x    52  min    52  ok        button.                         "Energy, 4 of 5"
+C5   chrome 1280   131.2 x    52  min    52  ok        button.                         "Energy, 5 of 5"
+C5   chrome 1280   131.2 x    52  min    52  ok        button.                         "Fatigue, 1 of 5"
+C5   chrome 1280   131.2 x    52  min    52  ok        button.                         "Fatigue, 2 of 5"
+C5   chrome 1280   131.2 x    52  min    52  ok        button.                         "Fatigue, 3 of 5"
+C5   chrome 1280   131.2 x    52  min    52  ok        button.                         "Fatigue, 4 of 5"
+C5   chrome 1280   131.2 x    52  min    52  ok        button.                         "Fatigue, 5 of 5"
+C5   chrome 1280   131.2 x    52  min    52  ok        button.                         "Hunger, 1 of 5"
+C5   chrome 1280   131.2 x    52  min    52  ok        button.                         "Hunger, 2 of 5"
+C5   chrome 1280   131.2 x    52  min    52  ok        button.                         "Hunger, 3 of 5"
+C5   chrome 1280   131.2 x    52  min    52  ok        button.                         "Hunger, 4 of 5"
+C5   chrome 1280   131.2 x    52  min    52  ok        button.                         "Hunger, 5 of 5"
+C5   chrome 1280   131.2 x    52  min    52  ok        button.                         "Satiety after eating, 1 of 5"
+C5   chrome 1280   131.2 x    52  min    52  ok        button.                         "Satiety after eating, 2 of 5"
+C5   chrome 1280   131.2 x    52  min    52  ok        button.                         "Satiety after eating, 3 of 5"
+C5   chrome 1280   131.2 x    52  min    52  ok        button.                         "Satiety after eating, 4 of 5"
+C5   chrome 1280   131.2 x    52  min    52  ok        button.                         "Satiety after eating, 5 of 5"
+C5   chrome 1280     688 x    80  min    80  ok        textarea.ta                       "Note"
+C5   chrome 1280     688 x    52  min    52  ok        button.btn primary block        "Save"
+C5   chrome 1280  26 interactive targets in the sheet, smallest dimension 44 px against a 44 px floor
+C5   chrome 1280  sheet x=280 width=720 radius=22px  first field-block top=300
+C5   chrome 1280  card  card[stale]                padding 16px 16px 16px 16px  margin-bottom 12px  radius 16px  border 1px solid  688x109 at x=296
+C5   chrome 1280 horizontal overflow: document 0 px, sheet 0 px
+C5   chrome 1280 accented actions in the sheet: 1
+C5   chrome 1280 console errors 0, failed requests 1
+C5   chrome smallest interactive dimension across all three viewports: 44 px
+C5   chrome offline the origin is reachable: false
+C5   chrome offline the line reads: Saved on this phone 1 entry is waiting to upload. It keeps the time you typed it, not the time it arrives.
+C5   chrome offline  sheet x=0 width=393 radius=22px  first field-block top=407
+C5   chrome offline  card  card[stale]                padding 16px 16px 16px 16px  margin-bottom 12px  radius 16px  border 1px solid  361x109 at x=16
+C5   chrome offline  banner banner[offline]           padding 11px 12px 11px 12px  margin-bottom 12px  radius 12px  361x81 at x=16
+C5   chrome offline console errors 3
+C5 chrome done
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+C5   webkit stale   the card reads: WaistDemo, 3 days oldWaist last measured 3 days agoMeasure again at the navel, standing, breathing out.
+C5   webkit stale    sheet x=0 width=393 radius=22px  first field-block top=307
+C5   webkit stale    card  card[stale]                padding 16px 16px 16px 16px  margin-bottom 12px  radius 16px  border 1px solid  361x109 at x=16
+C5   webkit stale   console errors 0
+C5   webkit loading aria-busy=true label="Reading your last measurements"
+C5   webkit loading  sheet x=0 width=393 radius=22px  first field-block top=324
+C5   webkit loading  card  card[loading]              padding 16px 16px 16px 16px  margin-bottom 12px  radius 16px  border 1px solid  361x119 at x=16
+C5   webkit loading  skeletons 74x22 r6px, 186x34 r6px, 250x13 r6px
+C5   webkit loading console errors 0
+C5   webkit error   the card reads: WaistThis screen failed to loadYour last measurements did not loadThe Mac mini answered 503 at 10:46 and gave no reason. The sheet still saves: a write goes to this phone first and uploads when the Mac mini answers.Try again
+C5   webkit error    sheet x=0 width=393 radius=22px  first field-block top=404
+C5   webkit error    card  card error[error]          padding 16px 16px 16px 16px  margin-bottom 12px  radius 16px  border 1px solid  361x201 at x=16
+C5   webkit error   console errors 1
+C5   webkit loaded  key "9" -> "9"
+C5   webkit loaded  key "8" -> "98"
+C5   webkit loaded  key "." -> "98."
+C5   webkit loaded  key "0" -> "98.0"
+C5   webkit loaded  the waist typed today stored as 98.0 cm
+C5   webkit 393       44 x    44  min    44  ok        button.btn icon                 "Close the quick log"
+C5   webkit 393       60 x    60  min    60  ok        button.                         "Down half a centimetre"
+C5   webkit 393    132.7 x    52  min    52  ok        input.metric waistfield        "Waist in centimetres"
+C5   webkit 393       60 x    60  min    60  ok        button.                         "Up half a centimetre"
+C5   webkit 393     65.8 x    52  min    52  ok        button.                         "Energy, 1 of 5"
+C5   webkit 393     65.8 x    52  min    52  ok        button.                         "Energy, 2 of 5"
+C5   webkit 393     65.8 x    52  min    52  ok        button.                         "Energy, 3 of 5"
+C5   webkit 393     65.8 x    52  min    52  ok        button.                         "Energy, 4 of 5"
+C5   webkit 393     65.8 x    52  min    52  ok        button.                         "Energy, 5 of 5"
+C5   webkit 393     65.8 x    52  min    52  ok        button.                         "Fatigue, 1 of 5"
+C5   webkit 393     65.8 x    52  min    52  ok        button.                         "Fatigue, 2 of 5"
+C5   webkit 393     65.8 x    52  min    52  ok        button.                         "Fatigue, 3 of 5"
+C5   webkit 393     65.8 x    52  min    52  ok        button.                         "Fatigue, 4 of 5"
+C5   webkit 393     65.8 x    52  min    52  ok        button.                         "Fatigue, 5 of 5"
+C5   webkit 393     65.8 x    52  min    52  ok        button.                         "Hunger, 1 of 5"
+C5   webkit 393     65.8 x    52  min    52  ok        button.                         "Hunger, 2 of 5"
+C5   webkit 393     65.8 x    52  min    52  ok        button.                         "Hunger, 3 of 5"
+C5   webkit 393     65.8 x    52  min    52  ok        button.                         "Hunger, 4 of 5"
+C5   webkit 393     65.8 x    52  min    52  ok        button.                         "Hunger, 5 of 5"
+C5   webkit 393     65.8 x    52  min    52  ok        button.                         "Satiety after eating, 1 of 5"
+C5   webkit 393     65.8 x    52  min    52  ok        button.                         "Satiety after eating, 2 of 5"
+C5   webkit 393     65.8 x    52  min    52  ok        button.                         "Satiety after eating, 3 of 5"
+C5   webkit 393     65.8 x    52  min    52  ok        button.                         "Satiety after eating, 4 of 5"
+C5   webkit 393     65.8 x    52  min    52  ok        button.                         "Satiety after eating, 5 of 5"
+C5   webkit 393      361 x    80  min    80  ok        textarea.ta                       "Note"
+C5   webkit 393      361 x    52  min    52  ok        button.btn primary block        "Save"
+C5   webkit 393   26 interactive targets in the sheet, smallest dimension 44 px against a 44 px floor
+C5   webkit 393   sheet x=0 width=393 radius=22px  first field-block top=185
+C5   webkit 393  horizontal overflow: document 0 px, sheet 0 px
+C5   webkit 393  accented actions in the sheet: 1
+C5   webkit 393  console errors 0, failed requests 0
+C5   webkit 768       44 x    44  min    44  ok        button.btn icon                 "Close the quick log"
+C5   webkit 768       60 x    60  min    60  ok        button.                         "Down half a centimetre"
+C5   webkit 768    132.7 x    52  min    52  ok        input.metric waistfield        "Waist in centimetres"
+C5   webkit 768       60 x    60  min    60  ok        button.                         "Up half a centimetre"
+C5   webkit 768    131.2 x    52  min    52  ok        button.                         "Energy, 1 of 5"
+C5   webkit 768    131.2 x    52  min    52  ok        button.                         "Energy, 2 of 5"
+C5   webkit 768    131.2 x    52  min    52  ok        button.                         "Energy, 3 of 5"
+C5   webkit 768    131.2 x    52  min    52  ok        button.                         "Energy, 4 of 5"
+C5   webkit 768    131.2 x    52  min    52  ok        button.                         "Energy, 5 of 5"
+C5   webkit 768    131.2 x    52  min    52  ok        button.                         "Fatigue, 1 of 5"
+C5   webkit 768    131.2 x    52  min    52  ok        button.                         "Fatigue, 2 of 5"
+C5   webkit 768    131.2 x    52  min    52  ok        button.                         "Fatigue, 3 of 5"
+C5   webkit 768    131.2 x    52  min    52  ok        button.                         "Fatigue, 4 of 5"
+C5   webkit 768    131.2 x    52  min    52  ok        button.                         "Fatigue, 5 of 5"
+C5   webkit 768    131.2 x    52  min    52  ok        button.                         "Hunger, 1 of 5"
+C5   webkit 768    131.2 x    52  min    52  ok        button.                         "Hunger, 2 of 5"
+C5   webkit 768    131.2 x    52  min    52  ok        button.                         "Hunger, 3 of 5"
+C5   webkit 768    131.2 x    52  min    52  ok        button.                         "Hunger, 4 of 5"
+C5   webkit 768    131.2 x    52  min    52  ok        button.                         "Hunger, 5 of 5"
+C5   webkit 768    131.2 x    52  min    52  ok        button.                         "Satiety after eating, 1 of 5"
+C5   webkit 768    131.2 x    52  min    52  ok        button.                         "Satiety after eating, 2 of 5"
+C5   webkit 768    131.2 x    52  min    52  ok        button.                         "Satiety after eating, 3 of 5"
+C5   webkit 768    131.2 x    52  min    52  ok        button.                         "Satiety after eating, 4 of 5"
+C5   webkit 768    131.2 x    52  min    52  ok        button.                         "Satiety after eating, 5 of 5"
+C5   webkit 768      688 x    80  min    80  ok        textarea.ta                       "Note"
+C5   webkit 768      688 x    52  min    52  ok        button.btn primary block        "Save"
+C5   webkit 768   26 interactive targets in the sheet, smallest dimension 44 px against a 44 px floor
+C5   webkit 768   sheet x=24 width=720 radius=22px  first field-block top=206
+C5   webkit 768  horizontal overflow: document 0 px, sheet 0 px
+C5   webkit 768  accented actions in the sheet: 1
+C5   webkit 768  console errors 0, failed requests 0
+C5   webkit 1280      44 x    44  min    44  ok        button.btn icon                 "Close the quick log"
+C5   webkit 1280      60 x    60  min    60  ok        button.                         "Down half a centimetre"
+C5   webkit 1280   132.7 x    52  min    52  ok        input.metric waistfield        "Waist in centimetres"
+C5   webkit 1280      60 x    60  min    60  ok        button.                         "Up half a centimetre"
+C5   webkit 1280   131.2 x    52  min    52  ok        button.                         "Energy, 1 of 5"
+C5   webkit 1280   131.2 x    52  min    52  ok        button.                         "Energy, 2 of 5"
+C5   webkit 1280   131.2 x    52  min    52  ok        button.                         "Energy, 3 of 5"
+C5   webkit 1280   131.2 x    52  min    52  ok        button.                         "Energy, 4 of 5"
+C5   webkit 1280   131.2 x    52  min    52  ok        button.                         "Energy, 5 of 5"
+C5   webkit 1280   131.2 x    52  min    52  ok        button.                         "Fatigue, 1 of 5"
+C5   webkit 1280   131.2 x    52  min    52  ok        button.                         "Fatigue, 2 of 5"
+C5   webkit 1280   131.2 x    52  min    52  ok        button.                         "Fatigue, 3 of 5"
+C5   webkit 1280   131.2 x    52  min    52  ok        button.                         "Fatigue, 4 of 5"
+C5   webkit 1280   131.2 x    52  min    52  ok        button.                         "Fatigue, 5 of 5"
+C5   webkit 1280   131.2 x    52  min    52  ok        button.                         "Hunger, 1 of 5"
+C5   webkit 1280   131.2 x    52  min    52  ok        button.                         "Hunger, 2 of 5"
+C5   webkit 1280   131.2 x    52  min    52  ok        button.                         "Hunger, 3 of 5"
+C5   webkit 1280   131.2 x    52  min    52  ok        button.                         "Hunger, 4 of 5"
+C5   webkit 1280   131.2 x    52  min    52  ok        button.                         "Hunger, 5 of 5"
+C5   webkit 1280   131.2 x    52  min    52  ok        button.                         "Satiety after eating, 1 of 5"
+C5   webkit 1280   131.2 x    52  min    52  ok        button.                         "Satiety after eating, 2 of 5"
+C5   webkit 1280   131.2 x    52  min    52  ok        button.                         "Satiety after eating, 3 of 5"
+C5   webkit 1280   131.2 x    52  min    52  ok        button.                         "Satiety after eating, 4 of 5"
+C5   webkit 1280   131.2 x    52  min    52  ok        button.                         "Satiety after eating, 5 of 5"
+C5   webkit 1280     688 x    80  min    80  ok        textarea.ta                       "Note"
+C5   webkit 1280     688 x    52  min    52  ok        button.btn primary block        "Save"
+C5   webkit 1280  26 interactive targets in the sheet, smallest dimension 44 px against a 44 px floor
+C5   webkit 1280  sheet x=280 width=720 radius=22px  first field-block top=179
+C5   webkit 1280 horizontal overflow: document 0 px, sheet 0 px
+C5   webkit 1280 accented actions in the sheet: 1
+C5   webkit 1280 console errors 0, failed requests 0
+C5   webkit smallest interactive dimension across all three viewports: 44 px
+C5   webkit offline the origin is reachable: false
+C5   webkit offline the line reads: Saved on this phone 1 entry is waiting to upload. It keeps the time you typed it, not the time it arrives.
+C5   webkit offline  sheet x=0 width=393 radius=22px  first field-block top=480
+C5   webkit offline  card  card error[error]          padding 16px 16px 16px 16px  margin-bottom 12px  radius 16px  border 1px solid  361x182 at x=16
+C5   webkit offline  banner banner[offline]           padding 11px 12px 11px 12px  margin-bottom 12px  radius 12px  361x81 at x=16
+C5   webkit offline console errors 3
+C5 webkit done
