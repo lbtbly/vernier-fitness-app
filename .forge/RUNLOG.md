@@ -3214,3 +3214,4 @@
 2026-08-23T07:25:04Z | aa540b5757b0c7078 | stopped | 49s
 2026-08-23T07:25:55Z | a409bc145a5e86eed | stopped | 51s
 2026-08-23T07:25:59Z | builder | stopped | 4s
+2026-08-23T08:50:35Z | verifier | stopped | 5076s
