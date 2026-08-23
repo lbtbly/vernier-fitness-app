@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { INTEGRATIONS } from '@/db/integrations';
 import { FORBIDDEN_SCOPES, GOOGLE_SCOPES, SCOPE_PARAM } from '@/lib/google/scopes';
 import { authorizeUrl, scopesOf } from '@/lib/google/protocol';
 
@@ -103,6 +104,18 @@ describe('F102, the scope list', () => {
     // And the two that matter most, by name, so the assertion reads as the rule.
     expect(everywhere).not.toContain('https://www.googleapis.com/auth/calendar');
     expect(everywhere).not.toContain('https://www.googleapis.com/auth/calendar.events');
+  });
+
+  it('is the same list the settings screen prints beside the integration', () => {
+    // A second list of scopes in a repository is a list that drifts. The
+    // integration catalogue read three strings that were guessed before the
+    // research note existed, one of which would have authorized writing to
+    // calendars this app did not create, and the settings screen printed them
+    // as fact.
+    const catalogue = INTEGRATIONS.find((entry) => entry.provider === 'google_calendar');
+    console.log(`integration catalogue scope: ${catalogue?.scope}`);
+    expect(catalogue?.scope).toBe(SCOPE_PARAM);
+    expect(catalogue?.scope.split(' ')).toEqual([...GOOGLE_SCOPES]);
   });
 
   it('puts exactly those three on the authorization request and nothing else', () => {
