@@ -447,7 +447,7 @@ export async function ensureScratchOwner(): Promise<void> {
  * the run, and a row written through the shipped quick log a second later
  * counted as the run's own and was taken. The owner watched one die.
  */
-export function resetScratchProvenance(): void {
+export function emptyScratchProvenance(): void {
   // CASCADE, and the list is derived rather than written out.
   //
   // This named five tables. Slice 10 then added meal_entry.source_record and
@@ -462,6 +462,12 @@ export function resetScratchProvenance(): void {
   // slice. CASCADE follows the graph the database already knows, and the
   // statement below names the roots and lets Postgres find the rest.
   //
+  // AND IT LIVES IN ONE PLACE. CASCADE was added here on the last fix pass and
+  // the same statement stayed written out by hand in three other spots:
+  // `anchorScratchDemo` below and two tests inside quick-log.spec.ts. All three
+  // kept failing on the same foreign key for the same reason, which is what a
+  // copy of a statement is for. There is one copy now and everything calls it.
+  //
   // GOES RED IF: a later slice adds a table referencing these and this stops
   // clearing it. The count printed by every caller's own census is what shows
   // that, which is why each spec prints its population rather than trusting
@@ -469,6 +475,14 @@ export function resetScratchProvenance(): void {
   scratchQuery(
     'truncate measurement, source_record, import_question, idempotency_key, write_request cascade',
   );
+}
+
+/**
+ * The same clearing, plus the restart that re-seeds, which is the state the
+ * quick-log suite starts every destructive test from.
+ */
+export function resetScratchProvenance(): void {
+  emptyScratchProvenance();
   execFileSync('docker', ['restart', SCRATCH_CONTAINER], { cwd: projectRoot, encoding: 'utf8' });
   execFileSync(
     'bash',
@@ -568,7 +582,7 @@ export function anchorScratchDemo(daysAgo: number): string {
   if (!Number.isInteger(daysAgo) || daysAgo < 1 || daysAgo > 3650) {
     throw new Error(`an anchor of ${daysAgo} days is not a day count`);
   }
-  scratchQuery('truncate measurement, source_record, import_question, idempotency_key, write_request');
+  emptyScratchProvenance();
   scratchQuery("delete from app_meta where key in ('demo.anchor_day', 'demo.filled_through')");
   scratchQuery(
     `insert into app_meta (key, value) values ('demo.anchor_day', to_char(current_date - ${daysAgo}, 'YYYY-MM-DD'))`,

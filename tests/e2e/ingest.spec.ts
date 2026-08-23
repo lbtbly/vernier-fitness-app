@@ -568,10 +568,11 @@ test('F55. the guide names every action, carries no blood-pressure row, and says
   const text = (await page.locator('main, body').first().textContent())!.replace(/\s+/g, ' ');
 
   // Every action name the guide tells the owner to look for, asserted one by
-  // one against the screen. These are the names read out of Apple's own shipped
-  // action definitions; a guide naming an action that does not exist is the
-  // failure this slice is measured against.
-  const actions = [
+  // one against the screen. These twelve are the names read out of Apple's own
+  // shipped action definitions, and research sections 1, 2 and 4 carry an
+  // identifier for every one of them; a guide naming an action that does not
+  // exist is the failure this slice is measured against.
+  const verified = [
     'Find Health Samples',
     'Get Details of Health Sample',
     'Format Date',
@@ -584,13 +585,46 @@ test('F55. the guide names every action, carries no blood-pressure row, and says
     'Set Dictionary Value',
     'Get Contents of URL',
     'Get Dictionary Value',
-    'Show Notification',
-    'Run Shortcut',
   ];
-  for (const action of actions) {
+  for (const action of verified) {
     expect(text, `the guide never names ${action}`).toContain(action);
   }
-  console.log(`F55  the guide names all ${actions.length} actions it tells the owner to add`);
+  console.log(`F55  the guide names all ${verified.length} verified actions it tells the owner to add`);
+
+  /*
+   * AND THE TWO IT COULD NOT VERIFY ARE DECLARED, NOT PRINTED AS FACT.
+   *
+   * `Show Notification` and `Run Shortcut` were in the list above, asserted in
+   * the same breath as the twelve that came out of Apple's shipped definitions.
+   * Neither appears in research section 1, 2 or 4, neither carries a BINARY,
+   * APPLE or COMMUNITY mark, and no identifier for either exists anywhere in
+   * this repository: they come from the build recipe in section 8 and nothing
+   * checked them. The guide now prints them under a heading that says so.
+   *
+   * The union is what is graded, because that is the property that matters: the
+   * guide's whole action vocabulary is either verified or declared unverified,
+   * and nothing sits in between. The two lists are printed rather than counted.
+   *
+   * GOES RED IF: an unverified name is moved back into the ordinary steps with
+   * no marker, or the marker card is emptied, or a thirteenth verified name is
+   * quietly added to the declared list to make a step disappear.
+   */
+  const declared = await page
+    .locator('[data-unverified-action]')
+    .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-unverified-action')!));
+  console.log(`F55  the guide declares these action names unverified: ${declared.join(', ')}`);
+  expect(declared).toEqual(['Show Notification', 'Run Shortcut']);
+  for (const action of declared) {
+    expect(text, `the guide never names ${action}`).toContain(action);
+    expect(verified, `${action} is declared unverified and asserted as verified`).not.toContain(
+      action,
+    );
+  }
+  const unverifiedCard = page.locator('[data-card="unverified"]');
+  await expect(unverifiedCard).toBeVisible();
+  const saidAboutNames = (await unverifiedCard.textContent())!.trim().replace(/\s+/g, ' ');
+  console.log(`F55  the unverified-name card reads: ${saidAboutNames}`);
+  expect(saidAboutNames).toContain('not checked against Apple');
 
   // And the ten metric blocks, by slug, so a verifier can see the list is the
   // list rather than a sentence about it.
@@ -602,12 +636,83 @@ test('F55. the guide names every action, carries no blood-pressure row, and says
   expect(slugs).not.toContain('blood_pressure');
   for (const slug of slugs) expect(String(slug).toLowerCase()).not.toContain('pressure');
 
-  // The absence is a decision, and it says so in one sentence.
+  /*
+   * THE UNCERTAINTY NOTE POINTS AT ROWS THAT ARE ON THE SCREEN, AND COUNTS ITS
+   * OWN LIST.
+   *
+   * It read "Four of those labels ... Resting Heart Rate, Heart Rate
+   * Variability, VO2 Max and Cycling Distance". Cycling Distance is derived in
+   * research section 1.6 and it is not one of the ten rows this guide ships, so
+   * the note sent the owner looking for a row that is not there and then
+   * miscounted the list it had just written. Both halves are graded here: the
+   * number word matches the number of labels, and every label it names is a
+   * label the table actually prints.
+   *
+   * The picker labels the table prints are read off the screen rather than
+   * typed again here, so this cannot pass by agreeing with a stale copy of the
+   * table.
+   *
+   * GOES RED IF: the note names a label the table does not carry, or its count
+   * word and its list disagree.
+   */
+  const printedLabels = await page
+    .locator('[data-metric] .note')
+    .evaluateAll((nodes) => nodes.map((node) => node.textContent!.trim()));
+  console.log(`F55  the picker labels the table prints: ${printedLabels.join(' | ')}`);
+  expect(printedLabels).toHaveLength(10);
+  const note = (await page.locator('[data-card="metrics"] .note').last().textContent())!
+    .trim()
+    .replace(/\s+/g, ' ');
+  console.log(`F55  the guide's uncertainty note: ${note}`);
+  //
+  // The list is parsed out of the sentence rather than searched for inside it.
+  // `printedLabels.filter((label) => note.includes(label))` was the obvious
+  // shape and it is one of the ways a check passes without checking: "Heart
+  // Rate" is a substring of two other labels, so it would have counted itself
+  // in, and "VO2 Max, or Cardio Fitness" would never have matched the "VO2 Max"
+  // the note names. Three by two accidents that cancel.
+  const sentence = note.slice(0, note.indexOf('.'));
+  const claimed = sentence.match(/^(One|Two|Three|Four|Five|Six)\b/)![1];
+  const namedLabels = sentence
+    .slice(sentence.indexOf(':') + 1)
+    .split(/,\s*|\s+and\s+/)
+    .map((part) => part.trim())
+    .filter((part) => part.length > 0);
+  console.log(`F55  it claims ${claimed} and lists ${namedLabels.length}: ${namedLabels.join(' / ')}`);
+  const words: Record<string, number> = { One: 1, Two: 2, Three: 3, Four: 4, Five: 5, Six: 6 };
+  expect(words[claimed], 'the note counts its own list wrong').toBe(namedLabels.length);
+  for (const label of namedLabels) {
+    // The table prints "VO2 Max, or Cardio Fitness" where the note says "VO2
+    // Max", so a row matches on the whole label or on the label followed by its
+    // own comma. Nothing else matches, which is what refuses Cycling Distance.
+    const row = printedLabels.find((printed) => printed === label || printed.startsWith(`${label},`));
+    console.log(`F55  "${label}" -> table row ${row ? `"${row}"` : 'NOT IN THE TABLE'}`);
+    expect(row, `the note names ${label}, which is not a row in the table`).toBeDefined();
+  }
+
+  /*
+   * THE ABSENCE IS A DECISION, AND IT SAYS SO IN ONE SENTENCE.
+   *
+   * This asserted the single word 'deliberate'. F55 asks for "one sentence
+   * saying the absence is deliberate", which is a claim and not a word, and the
+   * shipped sentence says it in the other four letters English has for it: "on
+   * purpose". The test was measuring a synonym rather than the claim, so the
+   * copy and the assertion disagreed while both were right.
+   *
+   * GOES RED IF: the card stops saying the absence was chosen. A sentence that
+   * merely lists the reason, or one that reads as an oversight, matches neither
+   * alternative and fails here.
+   */
   const line = page.locator('[data-card="blood-pressure"]');
   await expect(line).toBeVisible();
   const said = (await line.textContent())!.trim().replace(/\s+/g, ' ');
   console.log(`F55  the guide's blood pressure line: ${said}`);
-  expect(said.toLowerCase()).toContain('deliberate');
+  const intent = said.toLowerCase().match(/on purpose|deliberate/);
+  console.log(`F55  it states the absence is a decision with: ${intent?.[0] ?? 'nothing at all'}`);
+  expect(intent, 'the blood pressure card never says the absence was chosen').not.toBeNull();
+  // And it gives the reason, so the sentence is a decision with a cause behind
+  // it rather than an assertion the owner has to take on trust.
+  expect(said).toContain('the endpoint refuses any batch that mentions it');
 
   await page.screenshot({ path: `${CAPTURES}/f55-guide.png`, fullPage: true });
 });

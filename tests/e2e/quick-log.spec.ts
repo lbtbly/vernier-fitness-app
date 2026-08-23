@@ -1,5 +1,6 @@
 import { expect, test, typeKeyByKey, typedSoFar, type BrowserContext, type Page } from './fixtures';
 import {
+  emptyScratchProvenance,
   ensureScratchOwner,
   resetScratchProvenance,
   scratchQuery,
@@ -1130,7 +1131,7 @@ test.describe('the quick log against screen 03', () => {
 
     // Empty: a database holding no waist reading at all. Truncated without the
     // re-seed, so the absence is real rather than routed around.
-    scratchQuery('truncate measurement, source_record, import_question, idempotency_key, write_request');
+    emptyScratchProvenance();
     await page.goto('/');
     await page.getByRole('button', { name: 'Quick log', exact: true }).click();
     await expect(page.locator('[data-state="empty"]')).toBeVisible({ timeout: 20_000 });
@@ -1315,7 +1316,7 @@ test.describe('the quick log tells the truth about what it queued', () => {
     // as saved. It cannot any more, which is defect 60 closed at the other end,
     // so the value is typed. The refusal being graded is the same one: an entry
     // the flush is certain to reject must never be accepted here and called safe.
-    scratchQuery('truncate measurement, source_record, import_question, idempotency_key, write_request');
+    emptyScratchProvenance();
     await page.goto('/');
     await page.getByRole('button', { name: 'Quick log', exact: true }).click();
     await expect(page.locator('[data-state="empty"]')).toBeVisible({ timeout: 20_000 });
