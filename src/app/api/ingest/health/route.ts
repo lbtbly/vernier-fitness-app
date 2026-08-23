@@ -24,6 +24,7 @@ import {
   digestMatches,
   expandBatch,
   parseBatch,
+  readSampleTimestamp,
   readTimestamp,
   rollupDays,
   skewSeconds,
@@ -110,7 +111,9 @@ function messageFor(error: IngestError): string {
     case 'too_large':
       return copy.tooLarge(at.found ?? '', at.limit ?? '');
     case 'bad_timestamp_format':
-      return copy.badTimestampFormat(at.series ?? '', at.field ?? '', at.found ?? '');
+      return at.where === 'envelope'
+        ? copy.badEnvelopeTimestamp(at.field ?? '', at.found ?? '')
+        : copy.badTimestampFormat(at.series ?? '', at.field ?? '', at.found ?? '');
   }
 }
 
@@ -332,7 +335,7 @@ async function store(input: {
   if (!stamped) {
     return refuse({
       code: 'bad_timestamp_format',
-      params: { series: HEADERS.timestamp, field: HEADERS.timestamp, found: input.headerTimestamp },
+      params: { where: 'envelope', field: HEADERS.timestamp, found: input.headerTimestamp },
     });
   }
   const skew = skewSeconds(stamped.at, now);
@@ -344,6 +347,28 @@ async function store(input: {
         direction: stamped.at.getTime() > now.getTime() ? 'future' : 'past',
       },
     });
+  }
+
+  // The envelope's own three timestamps, read against the offset the batch
+  // declared, exactly as a sample's are.
+  //
+  // `parseBatch` only asks that they be non-empty strings, because the digest
+  // covers whatever they say and does not care whether it is a date. This is
+  // where they have to be legible: the window is what the arrivals log shows
+  // and what the source record names, and a `Z` on the window inside a +02:00
+  // batch is the same mis-wired Format Date the sample check catches, arriving
+  // one field earlier.
+  for (const [field, value] of [
+    ['window_start', batch.windowStart],
+    ['window_end', batch.windowEnd],
+    ['generated_at', batch.generatedAt],
+  ] as const) {
+    if (!readSampleTimestamp(value, stamped.offsetMinutes)) {
+      return refuse({
+        code: 'bad_timestamp_format',
+        params: { where: 'envelope', field, found: value },
+      });
+    }
   }
 
   // 5b. The digest, recomputed here from the PARSED body and the headers. The

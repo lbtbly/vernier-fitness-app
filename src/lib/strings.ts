@@ -506,6 +506,14 @@ export const strings = {
         `That batch carried ${found} where this app accepts ${limit}. Shorten the window in the shortcut, or group the busy metrics by hour, and run it again.`,
       badTimestampFormat: (series: string, field: string, found: string) =>
         `The ${series} block sent ${found} as its ${field} time. Every time has to carry a numeric offset, which is what the date format in the guide produces. Nothing was stored.`,
+      /**
+       * The same fault one field earlier, on the envelope rather than inside a
+       * metric block. It reads differently because "the health.ingest.v1 block"
+       * is not a thing the owner can go and look at, and a message that names
+       * nothing findable is a message that helps nobody.
+       */
+      badEnvelopeTimestamp: (field: string, found: string) =>
+        `The shortcut sent ${found} as ${field}. Every time has to carry a numeric offset, which is what the date format in the guide produces. Check the Format Date actions in Part B. Nothing was stored.`,
       failed:
         'The Mac mini could not finish storing that batch. Nothing was half stored. Run the shortcut again, and if it keeps failing the Mac mini is the place to look.',
       /** What a batch's outcome is called where the diagnostics screen lists it. */
