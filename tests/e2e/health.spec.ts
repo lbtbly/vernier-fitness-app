@@ -32,6 +32,27 @@ test.skip(
   'no owner account on this installation yet',
 );
 
+/** DESIGN.md section 4, and src/lib/trend.ts: three days with nothing is a gap. */
+const GAP_DAYS = 3;
+
+/** Every run of empty days three long or more, taken from a chart's own table. */
+function runsOfAbsence(hasReading: boolean[], minimum = GAP_DAYS) {
+  const runs: Array<{ from: number; to: number }> = [];
+  let start = -1;
+  hasReading.forEach((held, index) => {
+    if (!held) {
+      if (start === -1) start = index;
+      return;
+    }
+    if (start !== -1 && index - start >= minimum) runs.push({ from: start, to: index - 1 });
+    start = -1;
+  });
+  if (start !== -1 && hasReading.length - start >= minimum) {
+    runs.push({ from: start, to: hasReading.length - 1 });
+  }
+  return runs;
+}
+
 async function signIn(page: Page) {
   await page.goto(mintSignInLink());
   await page.waitForURL(/\/$/);
@@ -74,15 +95,74 @@ test.describe('screen 04, Health', () => {
     expect(await waistPoints.count()).toBeGreaterThan(1);
     expect(await page.locator('[data-chart="health-body"]').count()).toBe(1);
 
-    // The gap cuts both bands: two hatched rectangles from one gap, one in each
-    // band, at the same x.
+    /*
+     * ONE AXIS, PROVEN ON A DATE THE TWO SERIES SHARE.
+     *
+     * This used to be proven through the hatch: one gap in the weight series
+     * cuts both bands at the same x, so two rectangles, same x, different y.
+     * That reads well and it rests on data this installation can no longer
+     * produce. The gap came from the four days the demonstration seed leaves
+     * empty, the Withings demonstration import fills any day no reading stands
+     * on, and `measurement` refuses DELETE: on 23 August 2026 the count was 0
+     * and F31 failed on a hole rather than on an axis. The hatch clause is
+     * proven over a seeded hole in tests/e2e/absence-scratch.spec.ts now.
+     *
+     * What is asserted here instead is the axis itself, which is what the line
+     * is about and which holds over any series: a date carrying both a weight
+     * reading and a waist reading puts both marks on the same column. Two
+     * scales would put them on two.
+     *
+     * GOES RED IF: the waist series is drawn against its own time domain, which
+     * is what a second `wholeDomain` over the waist days alone would do.
+     */
+    const columnsOf = (selector: string) =>
+      chart.locator(selector).evaluateAll((nodes) =>
+        nodes.map((node) => ({
+          at: node.getAttribute('data-reading') ?? '',
+          cx: node.querySelector('circle')?.getAttribute('cx') ?? '',
+        })),
+      );
+    const weightColumns = await columnsOf('g[data-dots] a');
+    const waistColumns = await columnsOf('g[data-points] a');
+    const byDate = new Map(weightColumns.map((column) => [column.at, column.cx]));
+    const shared = waistColumns.filter((column) => byDate.has(column.at));
+    console.log(
+      `F31  ${weightColumns.length} weight columns, ${waistColumns.length} waist columns, ` +
+        `${shared.length} date(s) carrying both`,
+    );
+    expect(
+      shared.length,
+      'no date carries both a weight and a waist reading, so the shared axis is not measured here',
+    ).toBeGreaterThan(1);
+    for (const column of shared) {
+      expect(
+        column.cx,
+        `${column.at} puts the waist mark at ${column.cx} and the weight mark at ${byDate.get(column.at)}`,
+      ).toBe(byDate.get(column.at));
+    }
+    console.log(`F31  every shared date puts both marks on one column`);
+
+    // And where the scale did go silent, the hole cuts both bands in the same
+    // place. Graded against the runs of absence in the chart's own table, so
+    // this is a fact about the drawing and not about today's data: one pair of
+    // rectangles per run, and never a rectangle without one.
+    const weightRows = await page
+      .locator('[data-chart-table="health-body"] tbody tr')
+      .evaluateAll((nodes) => nodes.map((node) => node.querySelectorAll('td')[0]?.textContent?.trim() ?? ''));
+    const runs = runsOfAbsence(weightRows.map((value) => value !== strings.trend.noReading));
     const bands = await chart.locator('rect[fill="url(#health-body-hatch)"]').evaluateAll((nodes) =>
       nodes.map((node) => ({ x: node.getAttribute('x'), y: node.getAttribute('y') })),
     );
-    console.log(`F31  hatched bands: ${JSON.stringify(bands)}`);
-    expect(bands.length).toBe(2);
-    expect(bands[0].x).toBe(bands[1].x);
-    expect(bands[0].y).not.toBe(bands[1].y);
+    console.log(
+      `F31  the weight table holds ${weightRows.length} day(s) with ${runs.length} run(s) of absence, ` +
+        `and the chart draws ${bands.length} hatched rectangle(s): ${JSON.stringify(bands)}`,
+    );
+    expect(weightRows.length, 'the body chart drew no table to read').toBeGreaterThan(20);
+    expect(bands.length, 'the hatch and the holes in the table disagree').toBe(runs.length * 2);
+    for (let index = 0; index < runs.length; index += 1) {
+      expect(bands[index * 2].x).toBe(bands[index * 2 + 1].x);
+      expect(bands[index * 2].y).not.toBe(bands[index * 2 + 1].y);
+    }
 
     // Tap 1: a point on the waist series opens its value sheet.
     await waistPoints.last().click();

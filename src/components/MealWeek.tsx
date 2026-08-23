@@ -232,7 +232,18 @@ export function MealWeek({
           <button
             type="button"
             className="btn quiet"
-            style={{ minHeight: '32px', padding: 0 }}
+            /*
+             * Padding only. The height is the base.
+             *
+             * This carried min-height 32, transcribed from
+             * 08-nutrition-week.html line 185. DESIGN.md 2b resolves that
+             * against the sheets: 48 px on every shell screen, and 44 is a floor
+             * a control may not go under rather than a size to choose. 32 is
+             * under the floor. `.stickybar .btn` already writes the base, so
+             * only the padding is left here, which is what keeps the label flush
+             * with the right edge of the row the sheet draws.
+             */
+            style={{ padding: 0 }}
             disabled={busy === 'regenerate'}
             onClick={() =>
               void post(PLAN_ENDPOINT, { action: 'generate', maxCookMinutes: Number(minutes) }, 'regenerate')

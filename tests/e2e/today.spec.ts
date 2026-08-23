@@ -1,6 +1,7 @@
 import { mkdirSync } from 'node:fs';
 import { expect, test, type Page } from './fixtures';
 import { mintSignInLink, projectRoot, query } from './host';
+import { strings } from '@/lib/strings';
 
 /**
  * Today and the weight trend, screen 02.
@@ -19,6 +20,53 @@ const CAPTURES = `${projectRoot}.forge/evidence/slice-4/captures`;
 
 /** DESIGN.md: 852 minus a 54 px status bar and an 83 px tab bar. */
 const FOLD = 715;
+
+/** What the chart's own table prints on a day with nothing in it. */
+const NO_READING = strings.trend.noReading;
+
+/** DESIGN.md section 4, and src/lib/trend.ts: three days with nothing is a gap. */
+const GAP_DAYS = 3;
+
+/** The rolling window, and the count below which it is not drawn at all. */
+const AVERAGE_WINDOW = 7;
+const AVERAGE_MINIMUM = 5;
+
+/** Every run of empty days three long or more, taken from a chart's own table. */
+function runsOfAbsence(hasReading: boolean[], minimum = GAP_DAYS) {
+  const runs: Array<{ from: number; to: number }> = [];
+  let start = -1;
+  hasReading.forEach((held, index) => {
+    if (!held) {
+      if (start === -1) start = index;
+      return;
+    }
+    if (start !== -1 && index - start >= minimum) runs.push({ from: start, to: index - 1 });
+    start = -1;
+  });
+  if (start !== -1 && hasReading.length - start >= minimum) {
+    runs.push({ from: start, to: hasReading.length - 1 });
+  }
+  return runs;
+}
+
+/**
+ * How many of the seven days ending at `index` carried a reading.
+ *
+ * The same arithmetic `rollingAverage` in src/lib/trend.ts does, including at
+ * the front of the window: a day off the start of the table is not counted and
+ * does not end the count, so column 4 sits on five readings and is drawable
+ * while column 3 sits on four and is not. Getting that wrong in the other
+ * direction is how a prediction of the rendered line quietly stops predicting.
+ */
+function windowCount(days: Array<{ value: string }>, index: number, absent: string): number {
+  let held = 0;
+  for (let step = 0; step < AVERAGE_WINDOW; step += 1) {
+    const at = index - step;
+    if (at < 0) continue;
+    if (days[at].value !== absent) held += 1;
+  }
+  return held;
+}
 
 const VIEWPORTS = [
   { name: '393x852', width: 393, height: 852 },
@@ -192,37 +240,134 @@ test.describe('screen 02, Today', () => {
     }
   });
 
+  /**
+   * F30, on the owner's own installation, over the series it actually holds.
+   *
+   * THIS TEST USED TO REQUIRE A HATCHED BAND AND IT CANNOT ANY MORE. The band it
+   * looked for came from the four days the demonstration seed leaves empty at
+   * anchor offsets 10 to 13. The Withings demonstration import inserts on any
+   * day no reading stands on, so on 23 August 2026 it filled all four, keyed
+   * demo:4100028:1 to demo:4100031:1, and `measurement` refuses DELETE. The
+   * thirty-day window behind Today has held thirty readings ever since. A test
+   * that demands a hole on an install where no hole can be made again is a test
+   * that fails on the data rather than on the product, and it was the third
+   * failure of that shape on this run.
+   *
+   * `.forge/RULING-DEMO-COLLISION.md` section 5 ruled the move: F30 is not
+   * falsified, it is re-observed where a hole can still be seeded, which is
+   * tests/e2e/absence-scratch.spec.ts on the scratch instance. The hatch, its
+   * angle, its date labels, the break in the line and the dashed short window
+   * are all asserted there over a seeded four-day hole.
+   *
+   * WHAT IS LEFT HERE IS NOT WEAKER, IT IS DIFFERENT. The clause this install
+   * can still fail is the one about invention: no interpolated, carried-forward
+   * or zero-filled point appears in the rendered path. That is asserted against
+   * the chart's own hidden data table, day by day, over a population this test
+   * prints before it asserts anything. And the hatch is still graded, both ways:
+   * one band per run of absence the table holds, and never a band without one.
+   *
+   * GOES RED IF: the chart draws a dot on a day the table calls "No reading",
+   * draws fewer dots than the table holds readings, hatches a range that is not
+   * absent, leaves a run of three absent days unhatched, or draws the average
+   * across a window of fewer than five days.
+   */
   test('F30. absence is drawn, and the line does not cross it', async ({ page }) => {
     await signIn(page);
     await page.goto('/');
     const chart = page.locator('[data-chart="today-weight"]');
     await chart.waitFor();
 
-    // The hatch: 45 degrees, in warn, over the missing range.
+    // The population, printed before anything is claimed about it.
+    const days = await page
+      .locator('[data-chart-table="today-weight"] tbody tr')
+      .evaluateAll((nodes) =>
+        nodes.map((node) => ({
+          when: node.querySelector('th')?.textContent?.trim() ?? '',
+          value: node.querySelector('td')?.textContent?.trim() ?? '',
+        })),
+      );
+    const held = days.filter((day) => day.value !== NO_READING);
+    const runs = runsOfAbsence(days.map((day) => day.value !== NO_READING));
+    console.log(
+      `F30  the chart's own table holds ${days.length} day(s), ${held.length} with a reading, ` +
+        `${days.length - held.length} without`,
+    );
+    console.log(
+      `F30  runs of three days or more with nothing in them: ` +
+        (runs.length === 0
+          ? 'none in this window, and the hatch is graded against that'
+          : runs.map((run) => `${days[run.from].when} to ${days[run.to].when}`).join(', ')),
+    );
+    expect(days.length, 'the chart drew no table, so there is no population to read').toBeGreaterThan(20);
+    expect(held.length, 'the window holds no readings at all').toBeGreaterThan(20);
+
+    // The hatch, graded in both directions against that population: one band per
+    // run, and never a band without a run. The 45 degrees is a property of the
+    // pattern and is asserted whether or not a band uses it today.
     const pattern = chart.locator('pattern#today-weight-hatch');
     expect(await pattern.getAttribute('patternTransform')).toBe('rotate(45)');
-    const hatched = chart.locator('rect[fill="url(#today-weight-hatch)"]');
-    expect(await hatched.count()).toBeGreaterThan(0);
-    const band = await hatched.first().evaluate((node) => ({
-      x: Number(node.getAttribute('x')),
-      width: Number(node.getAttribute('width')),
-    }));
-    console.log(`F30  hatched band x=${band.x} width=${band.width}`);
+    const bands = await chart
+      .locator('rect[fill="url(#today-weight-hatch)"]')
+      .evaluateAll((nodes) =>
+        nodes.map((node) => ({
+          x: Number(node.getAttribute('x')),
+          width: Number(node.getAttribute('width')),
+        })),
+      );
+    console.log(`F30  hatched bands: ${bands.length} for ${runs.length} run(s) of absence`);
+    expect(bands.length, 'the hatch and the holes in the table disagree').toBe(runs.length);
+    for (const run of runs) {
+      const label = strings.stale.affectedRange(days[run.from].when, days[run.to].when);
+      console.log(`F30  the range is labelled: ${label}`);
+      expect(await chart.locator('text.axis.warn').allTextContents()).toContain(label);
+    }
 
-    // The dates, on the axis, in the warn colour.
-    const warnLabels = await chart.locator('text.axis.warn').allTextContents();
-    console.log(`F30  the range is labelled: ${warnLabels.join(' | ')}`);
-    expect(warnLabels.join(' ')).toMatch(/\d+ \w+ to \d+ \w+/);
-
-    // No dot inside the band, and no average path point inside it either. This
-    // is the assertion the whole line turns on: a path crossing the band is a
-    // straight line through four days nobody measured.
-    const dots = await chart.locator('g[data-dots] circle[r="2.1"]').evaluateAll((nodes) =>
-      nodes.map((node) => Number(node.getAttribute('cx'))),
+    // AND THE TABLE IS CHECKED AGAINST THE DATABASE, not against the chart.
+    //
+    // The hidden table and the dots are both built from the same `days` array,
+    // so counting one against the other would prove that a component agrees
+    // with itself. What F30's clause about interpolated, carried-forward and
+    // zero-filled points actually asserts is that the screen holds no reading
+    // the database does not: so the days holding a stored weight are counted in
+    // Postgres, over the same thirty-day window `windowDays` builds, and the
+    // screen has to hold exactly that many.
+    // Chain heads only, which is the rule `heads()` in src/db/trends.ts applies
+    // before anything is drawn: a corrected reading is one reading and the value
+    // that stands is the last correction of it.
+    const storedDays = Number(
+      query(`select count(distinct (measured_at at time zone 'Europe/Paris')::date)
+             from (
+               select distinct on (root_id) root_id, measured_at
+               from measurement
+               where metric = 'weight'
+               order by root_id, correction_index desc
+             ) heads
+             where (measured_at at time zone 'Europe/Paris')::date
+                   > (now() at time zone 'Europe/Paris')::date - 30`).trim(),
     );
-    const inside = dots.filter((x) => x > band.x && x < band.x + band.width);
-    console.log(`F30  daily dots inside the band: ${inside.length}`);
-    expect(inside).toHaveLength(0);
+    const dots = await chart.locator('g[data-dots] a').evaluateAll((nodes) =>
+      nodes.map((node) => ({
+        at: node.getAttribute('data-reading') ?? '',
+        cx: Number(node.querySelector('circle')?.getAttribute('cx')),
+      })),
+    );
+    console.log(
+      `F30  the database holds weight on ${storedDays} of the last 30 days; ` +
+        `the table shows ${held.length} and the chart draws ${dots.length} dots`,
+    );
+    expect(storedDays, 'the window holds no stored weight at all, so nothing here is measured').toBeGreaterThan(20);
+    expect(held.length, 'the table shows more or fewer days than the database holds').toBe(storedDays);
+    expect(dots.length, 'the chart drew a different number of dots than the database holds days').toBe(
+      storedDays,
+    );
+    expect(new Set(dots.map((dot) => dot.at)).size, 'two dots claim the same day').toBe(dots.length);
+
+    // Nothing inside any band, dots or average vertices alike.
+    for (const band of bands) {
+      const insideBand = dots.filter((dot) => dot.cx > band.x && dot.cx < band.x + band.width);
+      console.log(`F30  daily dots inside the band at x=${band.x}: ${insideBand.length}`);
+      expect(insideBand, 'a dot is drawn inside a range the table says is empty').toEqual([]);
+    }
 
     const paths = await chart
       .locator('g[data-average-segments] path')
@@ -233,25 +378,53 @@ test.describe('screen 02, Today', () => {
         .split(' ')
         .filter((_, index) => index % 2 === 0)
         .map(Number);
-      const crosses = Math.min(...xs) < band.x && Math.max(...xs) > band.x + band.width;
-      expect(crosses, `a path crosses the gap: ${d}`).toBe(false);
-      for (const x of xs) expect(x > band.x && x < band.x + band.width).toBe(false);
+      for (const band of bands) {
+        const crosses = Math.min(...xs) < band.x && Math.max(...xs) > band.x + band.width;
+        expect(crosses, `a path crosses the gap: ${d}`).toBe(false);
+        for (const x of xs) expect(x > band.x && x < band.x + band.width).toBe(false);
+      }
     }
     console.log(`F30  ${paths.length} average paths, none crossing and none inside`);
 
-    // A short window states its count in words, on the screen.
-    const shortWindow = page.locator('[data-window="lastweek"]');
-    await expect(shortWindow).toBeVisible();
-    const sentence = (await shortWindow.textContent())!.trim();
-    console.log(`F30  ${sentence}`);
-    expect(sentence).toMatch(/used \d days of 7/);
+    // The average, against the windows the table itself holds. Below five days
+    // of seven it is not drawn at all, so the number of vertices it draws is a
+    // fact the table can predict: one per drawable day, less any drawable day
+    // that stands alone between two undrawable ones, because a run of one point
+    // is not a path. Geometry-free on purpose, so this holds at any viewport.
+    const vertices = new Set<number>();
+    for (const d of paths) {
+      const xs = d
+        .replace('M', '')
+        .split(' ')
+        .filter((_, index) => index % 2 === 0)
+        .map(Number);
+      for (const x of xs) vertices.add(x);
+    }
+    const counts = days.map((_, index) => windowCount(days, index, NO_READING));
+    // A day inside a run of absence is undrawn whatever its window held, which
+    // is what makes the break across a hole a break rather than a lighter line.
+    const inAGap = new Set<number>();
+    for (const run of runs) for (let at = run.from; at <= run.to; at += 1) inAGap.add(at);
+    const drawable = counts.map(
+      (count, index) => count >= AVERAGE_MINIMUM && !inAGap.has(index),
+    );
+    const alone = drawable.filter(
+      (yes, index) => yes && !drawable[index - 1] && !drawable[index + 1],
+    ).length;
+    const expected = drawable.filter(Boolean).length - alone;
+    console.log(
+      `F30  windows under five days: ${counts.filter((count) => count < AVERAGE_MINIMUM).length}, ` +
+        `at five or six: ${counts.filter((count) => count === 5 || count === 6).length}, ` +
+        `whole: ${counts.filter((count) => count === AVERAGE_WINDOW).length}, ` +
+        `${inAGap.size} column(s) inside a hole and undrawn whatever their window held`,
+    );
+    console.log(`F30  the average draws ${vertices.size} vertices where the table predicts ${expected}`);
+    expect(
+      vertices.size,
+      'the average is drawn on more days than the table has windows of five or more',
+    ).toBe(expected);
 
-    // And a dashed segment exists, which is what 5 or 6 of 7 looks like.
-    const dashed = await chart.locator('path[data-window="short"]').count();
-    console.log(`F30  average paths drawn on a short window: ${dashed}`);
-    expect(dashed).toBeGreaterThan(0);
-
-    await page.screenshot({ path: `${CAPTURES}/f30-today-gap.png`, fullPage: true });
+    await page.screenshot({ path: `${CAPTURES}/f30-today-absence.png`, fullPage: true });
   });
 
   test('F35. no daily body-composition reading is the headline', async ({ page }) => {

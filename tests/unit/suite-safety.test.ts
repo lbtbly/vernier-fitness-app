@@ -280,11 +280,18 @@ describe('the suite against the owner\'s installation', () => {
    *                           printed beside it.
    *   trend-scratch:201       REAL. The age of the newest sample, read back out
    *                           of the database after landing it.
-   *   today.spec.ts:125       REAL. The scroll offset, on a page that scrolls.
-   *   today.spec.ts:158       REAL. The dots group exists on the chart and the
+   *   today.spec.ts:169       REAL. The scroll offset, on a page that scrolls.
+   *   today.spec.ts:202       REAL. The dots group exists on the chart and the
    *                           line being defended is that no path joins them.
-   *   today.spec.ts:225,281   REAL. Both filter a list the same run printed.
-   *   today.spec.ts:374-375   REAL. Console errors and failed requests, over a
+   *   today.spec.ts:358       REAL. Dots inside a hatched band, and the loop it
+   *                           sits in runs once per band the chart drew. The
+   *                           band count is asserted equal to the runs of
+   *                           absence in the chart's own table one screen above,
+   *                           and the table is itself asserted against a count
+   *                           of days taken from Postgres, so an empty loop is a
+   *                           chart with nothing to hatch and the run says so.
+   *   today.spec.ts:436       REAL. Filters a list the same run printed.
+   *   today.spec.ts:529-530   REAL. Console errors and failed requests, over a
    *                           walk whose surfaces are counted and printed.
    *   notices.spec.ts:246     REAL. The route's own answer, whose `questions`
    *                           array is asserted non-empty one line away.
@@ -528,6 +535,18 @@ describe('the suite against the owner\'s installation', () => {
    *                           and the same expression logs the count it walked.
    *   Slice 13 added one file with twelve members, and every one was read
    *   against the same question before it was written down here. Eight of them
+   *   absence-scratch:1        REAL, and it is the whole of what that file measures.
+   *                           Daily dots falling inside the hatched band, on a
+   *                           chart whose own hidden table is read first and
+   *                           printed: the day count, the readings in it and the
+   *                           runs of absence are all asserted non-empty before
+   *                           this line is reached, and the dot count is asserted
+   *                           equal to the reading count on the line above. A
+   *                           chart that drew nothing fails four assertions
+   *                           before this one.
+   *
+   *   Slice 13 added one file with eleven members, and every one was read
+   *   against the same question before it was written down here. Seven of them
    *   are a different shape from the rest of this inventory and are worth
    *   naming: an EXIT CODE is not a count over a population, it is a verdict a
    *   process reached, and each one has that process's whole output printed
@@ -611,6 +630,7 @@ describe('the suite against the owner\'s installation', () => {
       ['review.spec.ts', 2],
       ['push.spec.ts', 3],
       ['backup.spec.ts', 12],
+      ['absence-scratch.spec.ts', 1],
     ]);
     // `toHaveCount(0, { timeout: 3_000 })` was invisible to this pattern until
     // slice 5 wrote one: the closing paren was required right after the zero, so

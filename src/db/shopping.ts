@@ -56,6 +56,38 @@ export async function clearStock(aliasId: string): Promise<boolean> {
   return removed.length > 0;
 }
 
+/**
+ * Every list holding an ingredient, rebuilt, because the cupboard changed.
+ *
+ * F89 asks that an item marked in stock renders as visibly deducted. It did
+ * not: `setStock` writes a `stock_item` row and `shopping_item.deduction` is
+ * decided in `buildShoppingList` at build time, so the line the owner had just
+ * marked stayed a bought line until something else rebuilt the list. Walked on
+ * the scratch instance on 2026-08-23: apple marked in stock, `stock_item` 1,
+ * and the deduction counts unchanged at box 5, none 32, stock 0.
+ *
+ * The cupboard is an input to the list, so a change to it rebuilds the list.
+ * The rebuild is the shipped one, `buildListForPlan`, which keeps the ticks and
+ * the adjusted quantities on every line whose ingredient and deduction are
+ * unchanged; the line that just became a deduction loses its tick, which is
+ * correct, because a deducted line is not in the trolley and cannot be ticked.
+ *
+ * Nothing here is a search: the lists are found through the rows that already
+ * name the ingredient, so an ingredient no list wants rebuilds nothing.
+ */
+export async function rebuildListsHolding(aliasId: string): Promise<string[]> {
+  const db = getDb();
+  const rows = await db
+    .select({ listId: shoppingItem.listId })
+    .from(shoppingItem)
+    .where(eq(shoppingItem.aliasId, aliasId));
+  const listIds = [...new Set(rows.map((row) => row.listId))];
+  if (listIds.length === 0) return [];
+  const lists = await db.select().from(shoppingList).where(inArray(shoppingList.id, listIds));
+  for (const list of lists) await buildListForPlan(list.planId);
+  return lists.map((list) => list.planId);
+}
+
 export type BuildResult = {
   listId: string;
   items: number;

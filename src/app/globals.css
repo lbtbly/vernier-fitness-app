@@ -904,18 +904,21 @@ a.value-link:active{opacity:.7}
 }
 
 /*
- * Undo and Edit, at the 44 px floor rather than the 48 px base.
+ * Undo and Edit, on the shell base like every other button on this screen.
  *
- * DESIGN.md section 2b: 44 is the floor a control may not go under and never the
- * size a primary action should be. This is the one place on Today where that is
- * the right reading. The primary here is Quick log, the thing due now, and it
- * keeps its 48; the reversal pair is a second thought about a write that is
- * already committed, and `02-today.html` frame 1 draws exactly this distinction
- * on the waist card, where Measure carries `min-height:44px` beside a 48 px
- * primary elsewhere on the screen.
+ * This carried `min-height:var(--touch)`, 44 px, argued from the Measure
+ * button on `02-today.html` frame 1. That is a different control on a
+ * different card. Amendment A6 makes `03-quick-log.html` frame 2 authoritative
+ * for what the just-logged row carries, and line 200 of that sheet draws Undo
+ * and Edit as plain `.btn`, with no override, on the sheet's own base. Neither
+ * authoritative sheet writes 44 on either of them, and DESIGN.md 2b fixes the
+ * shell base at 48 and calls 44 a floor rather than a size to choose.
+ *
+ * GOES RED IF: this comes back. button-geometry.spec.ts walks `/` measuring
+ * every `.btn:not(.icon)` on it, and the pair renders there for as long as an
+ * entry sits in the queue.
  */
 .card.day .actions{margin-top:var(--s2)}
-.card.day .actions .btn{min-height:var(--touch)}
 
 /*
  * THE OFFLINE LINE, AND ITS BOUND.
@@ -1387,8 +1390,10 @@ html[data-theme=light]{--media-plate:#FFFFFF}
 }
 .tap{min-width:var(--touch);min-height:var(--touch);display:flex;align-items:center;justify-content:center;flex:none}
 .tap svg{width:20px;height:20px;color:var(--text-3)}
-/* A deducted line stays on the list. Struck through, quieter, reason attached. */
-.item.off{opacity:.55}
+/* A deducted line stays on the list. Struck through, quieter, reason attached.
+ * .5 rather than .55, which is what 10-shopping-list.html line 48 writes. The
+ * heavier value had no sheet behind it and C12 is measured against that one. */
+.item.off{opacity:.5}
 .item.off .name{text-decoration:line-through}
 .item .was{text-decoration:line-through;color:var(--text-3)}
 
@@ -1422,7 +1427,20 @@ html[data-theme=light]{--media-plate:#FFFFFF}
 .daylabel{margin:var(--s4) 0 var(--s2)}
 .mealrow{align-items:center}
 .mealrow .grow{min-width:0}
-.mealrow .head{font-size:var(--t-body);line-height:var(--t-body-lh);font-weight:600;margin:0}
+/*
+ * The meal title, which is a link and must not look like one.
+ *
+ * 08-nutrition-week.html draws it as plain text at weight 600 in the reading
+ * ink. The build makes it a link so a meal reaches its recipe, and this rule
+ * carried type and no colour, so it rendered in the engine's own link blue,
+ * underlined, measured at rgb(158,158,255) on all three viewports. The nearest
+ * precedent in this stylesheet is `.noticeline`, a link the design draws as a
+ * line of text, and it writes both declarations.
+ */
+.mealrow .head{
+  font-size:var(--t-body);line-height:var(--t-body-lh);font-weight:600;margin:0;
+  color:var(--text);text-decoration:none;
+}
 .daytotal{border-top:1px solid var(--line);margin-top:6px;padding-top:var(--s3)}
 
 .seg button[aria-pressed=true][data-decision=accept]{background:var(--good-soft);border-color:var(--good);color:var(--good)}

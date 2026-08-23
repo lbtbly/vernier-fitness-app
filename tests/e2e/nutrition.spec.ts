@@ -354,6 +354,53 @@ test.describe('F86 and C12: the week generates, and each meal is decided on its 
       await expect(page.locator('[data-card="target"]')).toBeVisible();
       await expect(page.locator('[data-card="rules"]')).toBeVisible();
       await expect(page.locator('[data-meal]').first()).toBeVisible();
+
+      /*
+       * WHAT THE CAPTURE CANNOT FAIL ON, MEASURED.
+       *
+       * These six captures were taken and read while two whole groups of rules
+       * were dead: a merge splice tore `.seg button{` in half on 2026-08-22 and
+       * every rule after it shipped as `.seg button <selector>`, so about
+       * seventy of them matched nothing. The meal titles rendered as the
+       * engine's own links, rgb(158,158,255) and underlined, and the three
+       * decision controls rendered as square grey boxes with no accepted
+       * colour, at all three viewports, in a test that was green.
+       *
+       * A capture is evidence a person reads. These are the values that go red
+       * on their own.
+       *
+       * GOES RED IF: the stylesheet is torn again, or `.mealrow .head` loses the
+       * two declarations that keep a link from looking like one.
+       */
+      const drawn = await page.locator('[data-meal]').first().evaluate((node) => {
+        const title = node.querySelector('.head') as HTMLElement;
+        const accept = node.querySelector('[data-decision=accept]') as HTMLElement;
+        return {
+          title: {
+            colour: getComputedStyle(title).color,
+            decoration: getComputedStyle(title).textDecorationLine,
+            weight: getComputedStyle(title).fontWeight,
+          },
+          accept: {
+            radius: getComputedStyle(accept).borderRadius,
+            width: getComputedStyle(accept).width,
+            height: getComputedStyle(accept).height,
+            pressed: accept.getAttribute('aria-pressed'),
+            background: getComputedStyle(accept).backgroundColor,
+          },
+          // The row's own inherited ink, so the title can be compared with the
+          // text beside it rather than with a token spelled a second way.
+          rowInk: getComputedStyle(node).color,
+        };
+      });
+      console.log(`C12  ${viewport.name} ${JSON.stringify(drawn)}`);
+      expect(drawn.title.decoration, 'the meal title is drawn as a link').toBe('none');
+      expect(drawn.title.colour, 'the meal title is not the ink the row reads in').toBe(drawn.rowInk);
+      expect(drawn.title.weight, 'screen 08 draws the meal title at weight 600').toBe('600');
+      expect(drawn.accept.radius, 'the decision controls are square').not.toBe('0px');
+      expect(drawn.accept.width, 'a decision control is under the 44 px floor').toBe('44px');
+      expect(drawn.accept.height, 'a decision control is under the 44 px floor').toBe('44px');
+
       await page.screenshot({
         path: `${CAPTURES}/08-nutrition-week-${viewport.name}.png`,
         fullPage: true,
