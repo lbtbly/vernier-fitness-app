@@ -332,6 +332,22 @@ const DATA_QUERIES = [
   ],
   ['integration_credential.scope', 'select distinct scope from integration_credential'],
   ['webauthn_credential.label', 'select distinct label from webauthn_credential'],
+  /*
+   * The name of an analyte the OWNER added while reviewing a panel, and only
+   * his. `built_in` is the provenance, set true by the seed in
+   * drizzle/pending/07-blood.sql and by nothing else, exactly the way `seed`
+   * works on `measurement`: the thirteen this repository ships carry catalogue
+   * keys in `strings.metrics` and are read from there, so a built-in label
+   * reaching a screen without its key still fails here.
+   */
+  ['lab_analyte.label', 'select distinct label from lab_analyte where not built_in'],
+  /*
+   * The name of the owner's own file, and the laboratory as his own sheet names
+   * itself. Both are words off a document he holds, drawn on the labs archive
+   * beside the panel they belong to, and neither is copy this product authored.
+   */
+  ['lab_document.file_name', "select distinct file_name from lab_document where file_name <> ''"],
+  ['lab_document.laboratory', "select distinct laboratory from lab_document where laboratory <> ''"],
 ];
 
 let dataValues = 0;
@@ -969,6 +985,13 @@ const unreachableBranches = [
   ['a screen behind a connected integration', "select count(*) from integration_credential where state = 'connected'"],
   ['a screen behind a registered passkey', 'select count(*) from webauthn_credential'],
   ['a screen behind an open import question', "select count(*) from import_question where state = 'open'"],
+  // Slice 7. The review, the row editor and the keep-or-delete question all
+  // need a laboratory document in review. This walk will not upload one: that
+  // would write a file onto the owner's storage volume and a holding into his
+  // database to grade copy. tests/e2e/labs-scratch.spec.ts walks all three on
+  // the scratch instance, and the count below is what says whether this run
+  // could have seen them.
+  ['a laboratory review with a document in it', "select count(*) from lab_document where state = 'review'"],
 ];
 
 const kindsBehindAValue = db(
@@ -1077,6 +1100,18 @@ async function walk() {
   for (const path of ['/health', '/train', '/eat']) {
     await page.goto(path);
     await readSurface(page, path, 'empty');
+  }
+
+  // The laboratory surfaces, slice 7. The archive and the manual form are
+  // reachable with nothing stored; the review, the row editor and the
+  // keep-or-delete question need a document in review, which this installation
+  // does not have and which this walk will not create, because an upload here
+  // would write a file onto the owner's storage volume and a review holding into
+  // his database. Those three are counted out of the database and printed under
+  // "not walked" beside the rest, so the gap is a list and not a guess.
+  for (const path of ['/health/labs', '/health/labs/new']) {
+    await page.goto(path);
+    await readSurface(page, path, 'no panel stored');
   }
 
   await page.goto('/settings');

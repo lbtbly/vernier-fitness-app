@@ -332,6 +332,7 @@ describe('the suite against the owner\'s installation', () => {
       ['today.spec.ts', 6],
       ['notices.spec.ts', 3],
       ['suite-privilege.spec.ts', 1],
+      ['labs-scratch.spec.ts', 6],
     ]);
     const zeroish = /toHaveCount\(0\)|\.toBe\(0\)|toEqual\(\[\]\)|toHaveLength\(0\)|not\.toBeVisible\(|toBeHidden\(/;
     const counted: string[] = [];
