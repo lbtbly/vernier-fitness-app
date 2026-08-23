@@ -63,10 +63,29 @@ remove_container() {
   docker rm -f "$CONTAINER" >/dev/null 2>&1 || true
 }
 
+#
+# The scratch instance runs Anthropic in DEMONSTRATION MODE WITH A REAL RATE
+# TABLE, which is a deliberate combination and the only one that makes the
+# monthly ceiling testable with no key and no money.
+#
+# No key, so nothing leaves this machine and nothing is charged. Rates, so a
+# demonstration call is priced the way a real one would be and the ledger
+# accumulates. A small ceiling, so the refusal arrives on the third call rather
+# than after two thousand. The published rates are not what matters here; what
+# is being graded is the arithmetic and the refusal.
+ANTHROPIC_DEMO_INPUT_RATE=${ANTHROPIC_INPUT_USD_PER_MTOK:-3}
+ANTHROPIC_DEMO_OUTPUT_RATE=${ANTHROPIC_OUTPUT_USD_PER_MTOK:-15}
+ANTHROPIC_DEMO_CAP=${ANTHROPIC_MONTHLY_CAP_USD:-0.03}
+
 start() {
   local key=$1
   remove_container
   docker run -d --name "$CONTAINER" --network "$NETWORK" \
+    -e ANTHROPIC_MODE=demo \
+    -e ANTHROPIC_MODEL=demonstration \
+    -e ANTHROPIC_INPUT_USD_PER_MTOK="$ANTHROPIC_DEMO_INPUT_RATE" \
+    -e ANTHROPIC_OUTPUT_USD_PER_MTOK="$ANTHROPIC_DEMO_OUTPUT_RATE" \
+    -e ANTHROPIC_MONTHLY_CAP_USD="$ANTHROPIC_DEMO_CAP" \
     -e APP_URL="$ORIGIN" \
     -e APP_NAME=Vernier \
     -e WEBAUTHN_RP_ID=localhost \

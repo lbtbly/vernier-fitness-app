@@ -107,3 +107,17 @@ export function jpegFromCanvas(width = 1092, height = 819): Uint8Array {
     ...EOI,
   ]);
 }
+
+/**
+ * The APP1 segment on its own, marker and length included.
+ *
+ * The browser walk needs it. A synthetic JPEG cannot be decoded by
+ * `createImageBitmap`, so the end-to-end proof of the device re-encode has to
+ * start from a picture a browser actually drew: the page encodes a canvas to
+ * JPEG, splices these bytes in after the two-byte start marker, and what
+ * reaches the file input is a real photograph carrying a real GPS directory.
+ */
+export function exifApp1Segment(): Uint8Array {
+  const payload = exifWithGps();
+  return Uint8Array.from([0xff, 0xe1, ...be16(payload.length + 2), ...payload]);
+}
