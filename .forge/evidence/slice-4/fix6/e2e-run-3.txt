@@ -1,0 +1,109 @@
+suite-role: vernier_suite is current on the owner's database.
+  role vernier_suite: superuser false, createdb false, createrole false, bypassrls false
+  grant app_meta SELECT
+  grant auth_attempt INSERT,SELECT
+  grant device_observation SELECT
+  grant goal SELECT
+  grant idempotency_key SELECT
+  grant import_question SELECT
+  grant integration_credential SELECT
+  grant measurement SELECT
+  grant owner SELECT
+  grant planned_session SELECT
+  grant recovery_grant INSERT,SELECT
+  grant request_origin SELECT
+  grant session SELECT
+  grant source_record SELECT
+  grant webauthn_challenge SELECT
+  grant webauthn_credential SELECT
+  grant write_request SELECT
+  execute suite_forget_passkey(credential text)
+setup: the owner's database holds 91 measurement, 39 source_record, 1 measurement not seeded. Nothing in this run may lower it.
+setup: its device signals read passkey_registered=true@2026-08-23 08:56:13.874+02/2026-08-23 09:06:36.283674+02/unattributed, standalone_seen=true@2026-08-23 08:54:07.155+02/2026-08-23 08:55:51.125086+02/100.121.138.9, wake_lock_available=true@2026-08-23 08:54:07.158+02/2026-08-23 08:55:51.125811+02/100.121.138.9. Nothing in this run may write them.
+
+Running 73 tests using 1 worker
+
+first attempt: 201 {"ownerId":"9fa4983c-f7fc-4da7-81fb-0fb512457ce4","displayName":"Owner","created":true}
+second attempt: 409 {"error":"The owner account already exists.","detail":"Vernier holds exactly one account and it is created once. Sign in with your passkey or the backup password."}
+bootstrap | success | the owner account was created
+bootstrap | refused | the owner account already exists
+bootstrap | refused | the owner account already exists
+CREATE UNIQUE INDEX owner_singleton ON public.owner USING btree (singleton)
+  ✓   1 [webkit-iphone] › tests/e2e/bootstrap.spec.ts:15:3 › first run › creates the owner once and refuses the second attempt with 409 (2.9s)
+  ✓   2 [webkit-iphone] › tests/e2e/bootstrap.spec.ts:61:3 › first run › refuses a password that is too weak, and creates nothing (3.4s)
+route table against https://lamberts-mac-mini.tailda76d6.ts.net, 24 routes on disk
+
+GET  /                                            protected 307  refused  redirected to sign-in (307)
+POST /api/auth/bootstrap                          gate      403  refused  refuses an unauthenticated request
+POST /api/auth/passkey/authentication/options     gate      403  refused  refuses an unauthenticated request
+POST /api/auth/passkey/authentication/verify      gate      403  refused  refuses an unauthenticated request
+POST /api/auth/passkey/registration/options       protected 401  refused  401 with no session
+POST /api/auth/passkey/registration/verify        protected 401  refused  401 with no session
+POST /api/auth/password                           gate      403  refused  refuses an unauthenticated request
+POST /api/auth/sign-out                           protected 401  refused  401 with no session
+GET  /api/diagnostics/device                      public    200  open     answers without a session, as it must
+POST /api/diagnostics/launch                      protected 401  refused  401 with no session
+POST /api/goal                                    protected 401  refused  401 with no session
+GET  /api/log                                     protected 401  refused  401 with no session
+POST /api/log                                     protected 401  refused  401 with no session
+GET  /api/settings/integrations                   protected 401  refused  401 with no session
+POST /api/settings/integrations                   protected 401  refused  401 with no session
+GET  /eat                                         protected 307  refused  redirected to sign-in (307)
+GET  /health                                      protected 307  refused  redirected to sign-in (307)
+GET  /healthz                                     public    200  open     answers without a session, as it must
+GET  /manifest.webmanifest                        public    200  open     answers without a session, as it must
+GET  /offline                                     public    200  open     answers without a session, as it must
+GET  /settings                                    protected 307  refused  redirected to sign-in (307)
+GET  /sign-in                                     public    200  open     answers without a session, as it must
+GET  /sign-in/recover                             gate      401  refused  refuses an unauthenticated request
+GET  /source/[id]                                 protected 307  refused  redirected to sign-in (307)
+GET  /train                                       protected 307  refused  redirected to sign-in (307)
+GET  /value/[id]                                  protected 307  refused  redirected to sign-in (307)
+
+GET  /favicon.ico                                 shell     200  open     static shell
+GET  /icons/apple-touch-icon-180.png              shell     200  open     static shell
+GET  /icons/favicon-32.png                        shell     200  open     static shell
+GET  /icons/icon-192.png                          shell     200  open     static shell
+GET  /icons/icon-512.png                          shell     200  open     static shell
+GET  /icons/vernier-mark.svg                      shell     200  open     static shell
+GET  /sw.js                                       shell     200  open     static shell
+
+33 requests, 0 failing. Public routes answer, gate routes refuse, everything else needs a session.
+
+  ✓   3 [webkit-iphone] › tests/e2e/boundary.spec.ts:14:3 › the route table › every route answers what it should to a caller with no session (395ms)
+  ✓   4 [webkit-iphone] › tests/e2e/boundary.spec.ts:26:3 › the route table › a document redirects and an API path answers 401 (953ms)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+no anti-forgery header: 403 {"error":"Anti-forgery check failed.","detail":"This request carried no x-vernier-csrf header. Nothing was written."}
+stored row: withings | connected | user.metrics | axgyF8Iu2CtBu4BXc5AqSxEMC7l0KtMzk0i9bA== | sHsmZk5IO-m18Rsy
+  ✓   5 [webkit-iphone] › tests/e2e/boundary.spec.ts:54:3 › the credential boundary › settings renders state, scope and last sync, and never the credential (2.3s)
+the owner's device signals before: passkey_registered=true@2026-08-23 08:56:13.874+02/2026-08-23 09:06:36.283674+02/unattributed, standalone_seen=true@2026-08-23 08:54:07.155+02/2026-08-23 08:55:51.125086+02/100.121.138.9, wake_lock_available=true@2026-08-23 08:54:07.158+02/2026-08-23 08:55:51.125811+02/100.121.138.9
+launch reports raised by the sign-in screen: 0
+navigator.webdriver in this browser: false
+display-mode standalone in this browser: true
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+launch reports this worker answered itself: 1
+the owner's device signals after: passkey_registered=true@2026-08-23 08:56:13.874+02/2026-08-23 09:06:36.283674+02/unattributed, standalone_seen=true@2026-08-23 08:54:07.155+02/2026-08-23 08:55:51.125086+02/100.121.138.9, wake_lock_available=true@2026-08-23 08:54:07.158+02/2026-08-23 08:55:51.125811+02/100.121.138.9
+  ✓   6 [webkit-iphone] › tests/e2e/boundary.spec.ts:156:1 › C2. this suite cannot report a launch to the owner's install, whatever the page claims (3.1s)
+gate  52px  16px  Sign in with passkey
+gate  52px  16px  Use the backup password
+  ✓   7 [webkit-iphone] › tests/e2e/button-geometry.spec.ts:33:1 › the gate keeps its 52 px escalation (463ms)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+/  48px  16px  Quick log
+/  48px  16px  Measure
+/  48px  16px  Run the shortcut on the iPhone
+/settings  48px  16px  Save the credential
+/settings  48px  16px  Add a passkey on this device
+/settings  48px  16px  Sign out
+/health  48px  16px  Save the goal
+/train  48px  16px  Set up the owner account
+/eat  48px  16px  Set up the owner account
+operator panel quiet buttons: [{"label":"Sign out","classes":"btn quiet block","minHeight":"48px","height":"48px","fontSize":"16px"}]
+  ✓   8 [webkit-iphone] › tests/e2e/button-geometry.spec.ts:44:1 › every shell button sits on the 48 px, 16 px base (1.9s)
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+icon buttons: [{"label":"Close the quick log","classes":"btn icon","minHeight":"44px","height":"44px","fontSize":"16px"}]
+  ✓   9 [webkit-iphone] › tests/e2e/button-geometry.spec.ts:70:1 › an icon button is 44 square, which is the floor and not the target (1.6s)
+test-stack: ready at http://127.0.0.1:3101
+  ✓  10 [webkit-iphone] › tests/e2e/demo-seed.spec.ts:37:3 › the demonstration seed › writes nothing at all with demonstration mode off (4.1s)
+test-stack: ready at http://127.0.0.1:3101
+the seed wrote 89 measurement(s); the series holds 89
+the seed wrote weight on 38 distinct days, and left 4 out

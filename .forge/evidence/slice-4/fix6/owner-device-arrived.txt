@@ -1,0 +1,47 @@
+The owner's iPhone reached this install during my first stability run.
+Read-only, from the suite's role. Reported, not ruled, and nothing ticked.
+
+device_observation now:
+       signal        | observed |     first_observed_at      |       last_reported_at        | reported_from 
+---------------------+----------+----------------------------+-------------------------------+---------------
+ passkey_registered  | t        | 2026-08-23 08:56:13.874+02 | 2026-08-23 08:59:07.08446+02  | 
+ standalone_seen     | t        | 2026-08-23 08:54:07.155+02 | 2026-08-23 08:55:51.125086+02 | 100.121.138.9
+ wake_lock_available | t        | 2026-08-23 08:54:07.158+02 | 2026-08-23 08:55:51.125811+02 | 100.121.138.9
+(3 rows)
+
+request_origin now:
+ peer_address  | via_tailscale |         last_seen_at          
+---------------+---------------+-------------------------------
+ 100.121.138.9 | t             | 2026-08-23 08:56:19.933445+02
+ 100.65.127.62 | t             | 2026-08-23 08:59:28.743206+02
+(2 rows)
+
+webauthn_credential now:
+             id              |    label    | device_type | backed_up |          created_at           
+-----------------------------+-------------+-------------+-----------+-------------------------------
+ ZQUmZHVRYqHNFaqEV0ujngp4yiY | This device | multiDevice | t         | 2026-08-23 08:56:13.873363+02
+(1 row)
+
+
+What this is, and why it is not the suite.
+
+standalone_seen and wake_lock_available carry first_observed_at 2026-08-23
+08:54:07, where the two false rows carried 2026-08-22 16:13:55. The upsert
+coalesces first_observed_at, so that column cannot move: the rows were
+deleted and written again, which is the psql step the C2 defect named as the
+owner's to take. reported_from on both is 100.121.138.9, and every browser
+this suite drives runs on this Mac and reaches the origin as 100.65.127.62.
+request_origin holds a second address for the first time in its life.
+
+The credential is ZQUmZHVRYqHNFaqEV0ujngp4yiY, twenty-seven characters with
+no vernierSuite prefix, created 08:56:13. Every credential this suite mints
+opens with that marker and is removed in a finally, and suite_forget_passkey
+refuses anything else by name. passkey.spec.ts read 0 registered at 08:53:31
+and left the signal absent, three minutes before this row existed.
+
+The suite holds against the new state, which is the branch it was rewritten
+for and which had never executed:
+  the settings screen was read with 1 passkey(s) already registered
+  forgot 1 credential(s), 1 left, signal kept
+  device_observation: passkey_registered was true before this test and is true after it
+  5 passed
