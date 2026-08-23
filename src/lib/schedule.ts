@@ -133,3 +133,75 @@ export function sweepWindowKey(at: Date, timeZone: string, minutes = SWEEP_MINUT
   const floored = Math.floor(minute / minutes) * minutes;
   return `${day}T${wallTime(hour, floored)}`;
 }
+
+/**
+ * ---------------------------------------------------------------------------
+ * The daily archive. Slice 13.
+ * ---------------------------------------------------------------------------
+ */
+
+export type DailySchedule = { hour: number; minute: number };
+
+/**
+ * 03:00 Europe/Paris.
+ *
+ * Late enough that the day's writes are done, early enough that iCloud has all
+ * morning to carry the file off this machine before the owner opens the app.
+ * The hour is local for the same reason the Sunday run's is: a key computed off
+ * an instant moves its boundary by an hour twice a year, and two keys for one
+ * night is two claims and two archives.
+ */
+export const DAILY_ARCHIVE_SCHEDULE: DailySchedule = { hour: 3, minute: 0 };
+
+/** The archive's job name in the `job_run` ledger. */
+export const DAILY_ARCHIVE_JOB = 'daily_archive';
+
+/**
+ * The key of the archive period an instant falls in: today at 03:00, or
+ * yesterday at 03:00 when the hour has not come round yet.
+ *
+ * Read off the local calendar, never by subtracting milliseconds. On the last
+ * Sunday in October the Paris day is twenty-five hours long and 03:00 happens
+ * once; on the last Sunday in March the day is twenty-three hours long and
+ * 03:00 does not happen at all. In both cases the KEY is the calendar day and
+ * the wall time, so the period exists either way and the catch-up at boot
+ * claims it.
+ */
+export function dailyPeriodKey(
+  at: Date,
+  schedule: DailySchedule = DAILY_ARCHIVE_SCHEDULE,
+  timeZone = 'Europe/Paris',
+): string {
+  const today = localDayKey(at, timeZone);
+  const before = localWallTime(at, timeZone) < wallTime(schedule.hour, schedule.minute);
+  const day = before ? dayAfter(today, -1) : today;
+  return `${day}T${wallTime(schedule.hour, schedule.minute)}`;
+}
+
+/**
+ * The archive periods a boot owes, oldest first, bounded.
+ *
+ * One by default, and F120's reasoning applies unchanged: a machine that was off
+ * for a week owes seven archives of a database that only has one current state,
+ * and writing seven copies of tonight's data under seven yesterday's names
+ * would be a lie about what was backed up when. The most recent period is
+ * claimed and the older ones stand unclaimed, which is the honest record.
+ */
+export function missedDailyPeriods(
+  since: Date,
+  now: Date,
+  schedule: DailySchedule = DAILY_ARCHIVE_SCHEDULE,
+  timeZone = 'Europe/Paris',
+  limit = 1,
+): string[] {
+  const keys: string[] = [];
+  let day = dailyPeriodKey(now, schedule, timeZone).slice(0, 10);
+  while (keys.length < limit) {
+    const key = `${day}T${wallTime(schedule.hour, schedule.minute)}`;
+    const due = instantOnDay(day, schedule.hour, schedule.minute, timeZone);
+    if (due.getTime() < since.getTime() || due.getTime() > now.getTime()) break;
+    keys.push(key);
+    day = dayAfter(day, -1);
+  }
+  return keys.reverse();
+}

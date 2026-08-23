@@ -104,6 +104,9 @@ export const ALERT_ROUTES: Record<string, string> = {
   anthropic: '/settings/ai',
 };
 
+/** Jobs whose failure is already reported by the subsystem that failed. */
+export const JOBS_WITH_THEIR_OWN_ALERT = ['daily_archive'];
+
 function routeFor(surface: string): string {
   return ALERT_ROUTES[surface] ?? '/settings';
 }
@@ -174,6 +177,11 @@ export function deriveAlerts(facts: AlertFacts): AlertDescriptor[] {
 
   for (const job of facts.jobs) {
     if (job.state !== 'failed') continue;
+    // The archive keeps its own alert, with its own cause and its own path in
+    // it, raised from `backup_run` above. A second one off the ledger would be
+    // one failure told twice, in two different amounts of detail, and F133 asks
+    // for ONE notification and ONE banner per failing thing.
+    if (JOBS_WITH_THEIR_OWN_ALERT.includes(job.jobName)) continue;
     alerts.push({
       key: `job:${job.jobName}`,
       surface: job.jobName,
