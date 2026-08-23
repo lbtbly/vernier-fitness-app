@@ -280,6 +280,23 @@ test('F95 F96 the estimate is a range, and abandoning it leaves zero rows', asyn
   await turnOnPhotoAnalysis(page);
 
   const entriesBefore = Number(scratchQuery('select count(*) from meal_entry'));
+
+  // C13's first state: the consent card, before a photograph exists. Both
+  // lists, what goes and what stays, and the cost of the call.
+  await page.goto('/eat/estimate');
+  await page.waitForLoadState('networkidle');
+  await expect(page.locator('[data-card="leaves"]')).toBeVisible();
+  await expect(page.locator('[data-card="stays"]')).toBeVisible();
+  await expect(page.locator('[data-card="cost"]')).toBeVisible();
+  for (const viewport of VIEWPORTS) {
+    await page.setViewportSize({ width: viewport.width, height: viewport.height });
+    await page.screenshot({
+      path: `${CAPTURES}/estimate-consent-${viewport.name}.png`,
+      fullPage: true,
+    });
+  }
+  await page.setViewportSize({ width: 393, height: 852 });
+
   await sendPhoto(page);
 
   // Demonstration mode, badged as demonstration, with no key anywhere.
@@ -385,7 +402,9 @@ test('F97 after confirmation and three edits the entry still says estimate and r
    */
   await page.goto('/eat');
   await page.waitForLoadState('networkidle');
-  await page.locator('[data-entry]').first().click();
+  // The entry this test just saved, which is the latest of the day. The Today
+  // card sorts by the instant the meal was eaten.
+  await page.locator('[data-entry]').last().click();
   await page.waitForURL(/\/eat\/entry\//);
   await page.locator('[data-tap="2"]').click();
   await page.waitForURL(/\/source\//);
@@ -483,7 +502,7 @@ test('F92 two takeaway meals are proposed as dish types with a search link and n
   await typeInto(page, '#target-weight', '92');
   await page.locator('[data-level="light"]').click();
   await typeInto(page, '#target-rate', '0.50');
-  await page.locator('[data-action="save-target"]').click().catch(() => undefined);
+  await page.locator('[data-control="save-target"]').click();
   await page.waitForLoadState('networkidle');
 
   await page.goto('/eat');

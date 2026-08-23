@@ -67,7 +67,15 @@ type Failure =
   | { title: string; detail: string; authored: 'vernier' }
   | { title: string; caught: unknown; authored: 'platform' };
 
-type Prepared = { blob: Blob; width: number; height: number; kilobytes: number };
+/**
+ * The re-encoded photograph, and the one object URL that shows it.
+ *
+ * The URL is minted once, when the file is prepared, and revoked when another
+ * one replaces it. Minting it inside the render would create a new blob URL on
+ * every keystroke elsewhere on the screen and never release any of them, which
+ * on a phone is a leak the owner would feel.
+ */
+type Prepared = { blob: Blob; width: number; height: number; kilobytes: number; url: string };
 
 const EMPTY: MacroSet = { kcal: null, proteinG: null, carbG: null, fatG: null, fibreG: null };
 
@@ -110,11 +118,15 @@ export function MealEstimate({
       // Step 1 of the mandatory sequence, and it happens here, in the browser,
       // before any request exists.
       const shrunk = await downscaleToJpeg(file, LONG_EDGE_PX);
-      setPrepared({
-        blob: shrunk.blob,
-        width: shrunk.width,
-        height: shrunk.height,
-        kilobytes: Math.round(shrunk.blob.size / 1024),
+      setPrepared((held) => {
+        if (held) URL.revokeObjectURL(held.url);
+        return {
+          blob: shrunk.blob,
+          width: shrunk.width,
+          height: shrunk.height,
+          kilobytes: Math.round(shrunk.blob.size / 1024),
+          url: URL.createObjectURL(shrunk.blob),
+        };
       });
     } catch (error) {
       setFailure({ title: strings.meals.photoRejectedTitle, caught: error, authored: 'platform' });
@@ -298,6 +310,44 @@ export function MealEstimate({
     <div data-meal-estimate={holding ? 'estimate' : 'consent'}>
       {holding === null ? (
         <>
+          <div className="photo" data-photo={prepared ? 'ready' : 'empty'}>
+            {prepared ? (
+              <>
+                {/* The bytes that will be sent, drawn from the same blob, so
+                    what is on screen is what leaves. eslint-disable-next-line
+                    matches the precedent in MovementMedia.tsx: a blob URL has
+                    no loader and next/image cannot optimise it. */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img alt={strings.meals.photoTitle} src={prepared.url} />
+                <span className="tagline num">
+                  {strings.meals.photoReady(prepared.width, prepared.height, prepared.kilobytes)}
+                </span>
+              </>
+            ) : (
+              <span className="ph">
+                <CameraIcon />
+                {strings.meals.photoTitle}
+              </span>
+            )}
+          </div>
+          <p className="note" style={{ margin: 'var(--s2) 0 var(--s3)' }}>
+            {strings.meals.photoBody}
+          </p>
+
+          <label className="filefield" htmlFor="meal-photo">
+            <span className="lbl">{strings.meals.choosePhoto}</span>
+            <input
+              id="meal-photo"
+              ref={fileInput}
+              type="file"
+              accept="image/jpeg,image/png,image/heic,image/*"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (file) void prepare(file);
+              }}
+            />
+          </label>
+
           <section className="card" data-card="leaves">
             <div className="between" style={{ marginBottom: 'var(--s2)' }}>
               <span className="lbl">{strings.meals.leaves}</span>
@@ -346,44 +396,6 @@ export function MealEstimate({
             </div>
           </section>
 
-          <div className="photo" data-photo={prepared ? 'ready' : 'empty'}>
-            {prepared ? (
-              <>
-                {/* The bytes that will be sent, drawn from the same blob, so
-                    what is on screen is what leaves. eslint-disable-next-line
-                    matches the precedent in MovementMedia.tsx: a blob URL has
-                    no loader and next/image cannot optimise it. */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img alt={strings.meals.photoTitle} src={URL.createObjectURL(prepared.blob)} />
-                <span className="tagline num">
-                  {strings.meals.photoReady(prepared.width, prepared.height, prepared.kilobytes)}
-                </span>
-              </>
-            ) : (
-              <span className="ph">
-                <CameraIcon />
-                {strings.meals.photoTitle}
-              </span>
-            )}
-          </div>
-          <p className="note" style={{ margin: 'var(--s2) 0 var(--s3)' }}>
-            {strings.meals.photoBody}
-          </p>
-
-          <label className="filefield" htmlFor="meal-photo">
-            <span className="lbl">{strings.meals.choosePhoto}</span>
-            <input
-              id="meal-photo"
-              ref={fileInput}
-              type="file"
-              accept="image/jpeg,image/png,image/heic,image/*"
-              onChange={(event) => {
-                const file = event.target.files?.[0];
-                if (file) void prepare(file);
-              }}
-            />
-          </label>
-
           <button
             type="button"
             className="btn primary block"
@@ -430,6 +442,23 @@ export function MealEstimate({
           >
             {strings.meals.typeInstead}
           </button>
+
+          {/*
+            * The sheet's own last row. The switch is drawn and not operated
+            * here, because its own copy says where it is turned off: a control
+            * that contradicts the sentence beside it is worse than a link.
+            */}
+          <section className="card" data-card="ask-every-time">
+            <div className="between">
+              <div className="stack grow">
+                <span>{strings.meals.askEveryTime}</span>
+                <span className="note">{strings.meals.askEveryTimeNote}</span>
+              </div>
+              <Link className="btn quiet" href="/settings/ai">
+                {strings.meals.consentScreenTitle}
+              </Link>
+            </div>
+          </section>
         </>
       ) : (
         <>
@@ -440,6 +469,13 @@ export function MealEstimate({
                 {holding.mode === 'demo' ? strings.meals.demoChip : strings.meals.estimateChip}
               </span>
               <span className="note num">{holding.model}</span>
+            </div>
+          )}
+
+          {typing || !prepared ? null : (
+            <div className="photo" style={{ height: '150px', marginBottom: 'var(--s3)' }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img alt={strings.meals.photoTitle} src={prepared.url} />
             </div>
           )}
 
@@ -605,7 +641,10 @@ export function MealEstimate({
               data-action="discard"
               onClick={() => {
                 setHolding(null);
-                setPrepared(null);
+                setPrepared((held) => {
+                  if (held) URL.revokeObjectURL(held.url);
+                  return null;
+                });
                 if (fileInput.current) fileInput.current.value = '';
               }}
             >
