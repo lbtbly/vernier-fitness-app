@@ -441,7 +441,7 @@ advance, so the budget does not have to be re-argued once per slice.
   re-encoded on the device before upload, and the stored file carries no camera
   metadata and no location. Evidence: the uploaded dimensions and a metadata dump
   of the stored file showing zero tags.
-- [ ] **F94.** The consent screen names the exact data categories sent for each
+- [x] **F94.** The consent screen names the exact data categories sent for each
   kind of analysis before the first send, and photo analysis, menu generation,
   health explanations and calendar event titles each toggle independently; with a
   toggle off no outbound request is made for that category. Evidence: the capture
@@ -460,7 +460,7 @@ advance, so the budget does not have to be re-argued once per slice.
   transaction as the result; and the model identifier is read from configuration
   and validated once at boot so an unknown identifier fails at startup with a named
   error. Evidence: the refused call, the usage rows, and the failed boot.
-- [ ] **F99.** With the model provider unreachable the Eat tab still renders the
+- [x] **F99.** With the model provider unreachable the Eat tab still renders the
   week, the meals and the shopping list, and the estimate control names the cause
   rather than hanging. Evidence: a capture with the provider blocked.
 - [ ] **F100.** **[OPERATOR]** A real vision call returns an estimate for a real
