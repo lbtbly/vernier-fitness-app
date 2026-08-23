@@ -1,0 +1,59 @@
+PROVENANCE LOSS ON THE OWNER'S LIVE INSTALL, 2026-08-23 around 08:51:53.
+Found while proving suite stability. Reported, not ruled. Nothing ticked.
+
+--- what the five tables hold now ---
+        t        | count |            oldest             
+-----------------+-------+-------------------------------
+ measurement     |    91 | 2026-08-23 08:51:53.984632+02
+ source_record   |    39 | 2026-08-23 08:51:53.981521+02
+ import_question |     0 | 
+ idempotency_key |   141 | 2026-08-23 08:52:48.052599+02
+ write_request   |   141 | 2026-08-23 08:52:48.064422+02
+(5 rows)
+
+--- and one that was not touched, for contrast ---
+        t        | count |            oldest             
+-----------------+-------+-------------------------------
+ auth_attempt    |  5500 | 2026-08-22 01:20:00.123189+02
+ planned_session |    14 | 
+ app_meta        |     4 | 2026-08-21 23:36:55.343837+02
+(3 rows)
+
+
+measurement, source_record, import_question, idempotency_key and write_request
+hold nothing older than 08:51:53. auth_attempt still holds 4,851 rows from
+2026-08-22 and app_meta still carries demo.anchor_day written 2026-08-22
+15:29:21, so the database is continuous and only those five tables were
+emptied. Those five are exactly the list in the scratch reset:
+  tests/e2e/host.ts:347  truncate measurement, source_record, import_question, idempotency_key, write_request
+which names vernier_scratch and cannot be shown to have named it here.
+
+--- what the owner lost ---
+One real measurement. f636c7bf-aee7-4127-b3b1-26b178ab378e, a waist of
+99.0 cm recorded 22 Aug 10:04 through the quick log, with its source record
+src_c47b7429-5f13-4278-a71b-60ac8f86ef87. It is in yesterday's evidence as
+F31's first tap, .forge/evidence/slice-4/fix5/e2e-suite.txt, and it is in a
+capture this dispatch took at 08:51 today,
+.forge/evidence/slice-4/fix6/source-reference-row-webkit-393x852.png, which
+shows that source record with its one row reading Waist 99.0 cm. Neither id
+resolves now. The whole of import_question, idempotency_key and
+write_request before 08:52:48 went with it.
+
+--- why nothing caught it ---
+The append-only trigger could not: measurement_append_only is BEFORE UPDATE
+OR DELETE FOR EACH ROW, and TRUNCATE fires no row-level trigger. It is
+present and enabled and it was never weakened.
+
+The census could not: global-setup and global-teardown compare TOTALS.
+The seed refilled 90 demonstration rows on the boot one second later and
+the owner made a new waist entry from his iPhone at 08:54:34, so the count
+landed back on 91 measurement, 39 source_record, 1 measurement not seeded.
+Every one of this dispatch's three stability runs read that line at setup
+and at teardown and printed 'nothing of the owner's was taken'. It was
+true of the count and false of the data. A guard that counts a population
+cannot see a row replaced by another row.
+
+--- and there is no backup ---
+scripts/snapshot.sh copies five .forge documents and takes no dump, and no
+.dump or .sql.gz exists anywhere in the tree. Nothing on this machine can
+put that row back.
