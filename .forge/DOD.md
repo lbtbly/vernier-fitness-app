@@ -446,16 +446,16 @@ advance, so the budget does not have to be re-argued once per slice.
   health explanations and calendar event titles each toggle independently; with a
   toggle off no outbound request is made for that category. Evidence: the capture
   and a request log recorded with each toggle off in turn.
-- [ ] **F95.** In demonstration mode the whole photo flow runs with no API key and
+- [x] **F95.** In demonstration mode the whole photo flow runs with no API key and
   returns an estimate badged as demonstration. Evidence: the flow captured with the
   key absent.
 - [ ] **F96.** An estimate renders as a range on a coarse grid, never a bare point,
   and nothing is stored until the owner confirms or corrects it: abandoning the
   screen leaves zero rows. Evidence: the capture and the row count.
-- [ ] **F97.** After confirmation and after three subsequent edits the entry still
+- [x] **F97.** After confirmation and after three subsequent edits the entry still
   carries its estimate origin and still reaches the photo and the model reply in
   two taps. Evidence: the stored row after each edit and the two-tap walk.
-- [ ] **F98.** A monthly cost ceiling refuses the call when month-to-date plus the
+- [x] **F98.** A monthly cost ceiling refuses the call when month-to-date plus the
   pre-flight token count would cross it; usage rows are written in the same
   transaction as the result; and the model identifier is read from configuration
   and validated once at boot so an unknown identifier fails at startup with a named
