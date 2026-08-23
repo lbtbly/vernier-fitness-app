@@ -1,58 +1,110 @@
 # Resume
 
-## HANDOFF, 2026-08-23, end of session. Read this, then PROCESS.md, then carry on.
+## HANDOFF, 2026-08-23, session three. Read this, then PROCESS.md, then carry on.
 
-**Phase:** the run is **STOPPED at the owner's instruction.** `.forge/ARMED` is removed and the Stop gate is off. Nothing is in flight. The greenlight is closed and is never re-opened; re-arming means creating `.forge/ARMED` again, not re-running the gate.
+**Phase:** 8 BUILD, running. The run is **ARMED** again: `.forge/ARMED` exists,
+the Stop gate is live, `.forge/PARKED` is retired. The greenlight was not
+re-opened and never will be.
 
-**Checked: 41 of 166.** Slices 1, 2 and 3 closed. Slice 4 closed but for F23, C5 and C9.
+**Checked: 41 of 166** at the moment this was written. Two dispatches are in
+flight and both move that number.
 
-**Current slice:** 4, finishing. **Next action:** verify the F23 and C5 fixes that landed at `f5bff8a` and `cb8887e` and were never ruled, then start slice 5 (Withings) under the parallel-worktree rule in PROCESS.md.
+### In flight
 
-**Nothing is in flight.** The stabilisation dispatch completed and its work is committed at `64822a5` and `676b673`.
+1. **Stabilisation verify**, two scoped verifiers, run `wf_0b05b8b1-bd5`.
+   - F4, R1, C2. The owner cleared these on 2026-08-23 and they had never been
+     ruled. The verifier is told to prove the second-device claim IS a second
+     device, because a row a local headless browser can author is not evidence
+     of a phone, and that is exactly the defect the owner cleared two rows for.
+   - F23, C5. Fixes landed at `f5bff8a` and `cb8887e` and were never ruled. The
+     verifier is told to type rather than `fill()`, print six tap counts, and
+     measure the 44 px floor on every target in the sheet.
 
-### Health of the build, verified this session
+2. **Wave A**, five builders in five git worktrees, run `wf_8bd5b2cc-58d`:
+   slices 5 Withings, 6 Apple Health, 7 blood tests, 8 Train, 9 nutrition.
 
-The app is live and healthy at `https://lamberts-mac-mini.tailda76d6.ts.net`, HTTP 200, publicly trusted certificate, both containers healthy, listener on `127.0.0.1` only. Suites: **140 unit, 72 end-to-end passed with 1 skipped and 0 failed, three consecutive runs.** The gate runs five named steps and now **returns 2 when it names a step `package.json` does not define**, so it can no longer report a check it did not run.
+### The parallel layout, and the three holes that had to be closed first
 
-### Open lines, by id
+Slices 5 to 13 build in worktrees under
+`/Users/lambertbouley/Claude/lbtbly-fitness-app-trees/`, one per slice, managed
+by `scripts/worktree.sh` (`new`, `list`, `gate`, `merge`, `drop`).
 
-| Line | State | What |
-|---|---|---|
-| **F23** | fix landed, never verified | The waist field could not be typed into; `99.0` yielded `9.1`. Fixed at `f5bff8a`/`cb8887e`, tests now type character by character in both engines. **Needs a verifier dispatch.** |
-| **C5** | fix landed, never verified | The typing race (a value typed while the sheet's read was in flight was silently replaced) and the 40 px target against section 2b's 44 px floor. Same commits. **Needs a verifier dispatch.** |
-| **C9** | not slice 4's | Moved to slice 8 by the architect; it names the session player. |
-| **F4, R1, C2** | evidence now exists, unruled | The owner completed both device steps on 2026-08-23. See below. |
-| **F24** | low, latent | When the origin answers a queued write with one of `PARK_ON`'s six statuses the offline line vanishes and the chip claims Stored on a row that does not exist. No shipped request produces those statuses today. |
-| **F27** | note, not a failure | The maxima sum to 679 and leave 24 px of slack. Anything wanting its own element above the trend has 24 px. |
-| **F34** | low | The suite-safety sweep's regex does not reach `expect(query(...)).toBe('0')`; 16 such assertions exist and all 16 are real today. |
-| **C4** | ticked, with a recorded product characteristic | A painted, enabled, dead control exists during hydration: a click before React attaches is delivered and does nothing. Recorded for the final pass rather than fixed, because disabling it changes the gate C4 is ticked against. |
+Three hooks assumed one tree and each would have failed silently:
 
-### The three lines the owner unblocked, ready to rule
+- `checks.sh` cd'd to `CLAUDE_PROJECT_DIR`, so a builder editing a worktree got
+  **main** graded and green on a tree it had never read. It resolves the tree
+  from the edited file now. Proven both ways: a planted type error turns the
+  worktree gate red at the same moment main's gate is green.
+- `checks.sh` would also have run `strings:rendered` from a worktree against the
+  live origin, which serves main. It **defers** it there, loudly, and writes
+  `.forge/.rendered-deferred`; `worktree.sh merge` refuses to close a slice while
+  that marker stands.
+- `commit.sh` cd'd to the same place, found main clean, exited reporting success.
+  **A worktree builder's work was never checkpointed at all.** It takes `--tree`
+  now and `runlog.sh` walks every worktree.
 
-On 2026-08-23 the owner cleared the two false `device_observation` rows, launched Vernier from the iPhone Home Screen at 08:54:07 reporting from `100.121.138.9`, and registered a passkey at 08:56:13 with no suite marker. The endpoint now reads `standaloneSeen`, `wakeLockAvailable` and `passkeyRegistered` all true, and `request_origin` holds a second address for the first time in the run.
+That is **seven** for this run's one recurring class, a check that passes by not
+checking. Six were found after the fact. This one was found before it ran. An
+eighth was written INTO the fix and caught the same hour: the tree fallback could
+be `"."`, and `"."` compared against an absolute path is not equal, so main
+graded itself as a worktree and deferred its own rendered check. Caught by running
+the gate with the environment set and without it, instead of the one way that worked.
 
-**F4, R1 and C2 are now provable and are not ruled.** A verifier dispatch closes them. `pushSubscription` stays false, correctly: push arrives in slice 12.
+### The rules the parallel build runs under
+
+- **Migrations are numbered on merge, never in a tree.** Drizzle's snapshots are
+  a chain, so a number is not a name a merge can change. A slice edits
+  `src/db/schema.ts` and writes raw DDL to `drizzle/pending/<slug>.sql`, a file
+  only it owns. Main runs `db:generate` once per slice, in order. Contract is in
+  `drizzle/pending/README.md`.
+- **`.forge/` is main's.** It is committed, so every worktree carries a stale
+  copy. Builders never write to it and `worktree.sh merge` takes main's copy
+  unconditionally.
+- **No line is ticked from a worktree.** Verification happens on main, after
+  merge, with the stack rebuilt, by a verifier.
+- **Builders never run the e2e suite and never touch the stack.** One origin,
+  `workers: 1`. They write specs; main runs them.
+- The complete dependency list at PLAN.md line 30 was installed on main once,
+  before the trees forked, so nine lock files cannot diverge.
+
+### Real dependencies, which is why wave A is five and not nine
+
+- Wave A, independent: **5, 6, 7, 8, 9.**
+- Wave B, after A merges: **10** needs 9's food and target tables. **11** needs
+  8's session model. **12**'s weekly review reads 5, 6, 8 and 9.
+- Wave C: **13** exports and dumps everything, so it wants every table.
+
+### Merge runbook, per slice, in this order
+
+1. `scripts/worktree.sh merge <slug>` (gates the tree, merges, keeps main's `.forge/`)
+2. `npm run db:generate`
+3. append `drizzle/pending/<slug>.sql` to the generated migration, delete the pending file
+4. `scripts/up.sh` so the live origin serves the slice
+5. `FORGE_CHECKS_FULL=1 scripts/checks.sh` (five checks, `strings:rendered` included)
+6. `rm .forge/.rendered-deferred`, only after step 5 exits 0
+7. commit, then dispatch that slice's verifier
+
+### Machine facts that bind this run
+
+**8 cores, 8 GB of RAM, and the disk was at 94 percent with 13 GiB free.**
+19 GB of stale Docker build cache older than twelve hours was pruned; the last
+twelve hours were kept so a rebuild is not cold. Free space is 29 GiB. The five
+worktrees cost about 1 GiB because `node_modules` is cloned with APFS
+copy-on-write rather than copied.
+
+**There is still no backup in the tree.** Slice 13 ships it. Until then the only
+copy of anything real is the running database, and `measurement` refuses DELETE
+by design, so a bad write is permanent.
+
+`DEMO_MODE` is fixed and no longer a hazard: `.env.example` and `gen-env.mjs`
+carry it and `docker compose config` resolves it to `1`, so a rebuild keeps
+demonstration data. RESUME's older note that it was unreproducible is stale.
 
 ### Owner actions outstanding
 
-**None blocking.** Both ordering-critical actions are done, in the right order: the false rows were cleared before the launch, so `first_observed_at` records the owner's own device rather than a headless browser; and the fabricated waist row went before slice 5 could put real history beside it.
-
-One optional, low: two published `SharedShortcut` records named "Test" under his Apple ID, left by a research probe. Remove via Stop Sharing in the Shortcuts app.
-
-### Two guards that would not catch a real loss
-
-1. **`measurement_append_only` is a row-level trigger, and TRUNCATE fires no row-level trigger.** The append-only guarantee holds against UPDATE, DELETE and upsert, and has one documented way past it, which is the owner's deliberate escape hatch.
-2. **The census compares totals, so it cannot see a clear followed by a refill.** Three stability runs printed that nothing of the owner's was taken while five tables had in fact been emptied, because the seed refilled and the owner logged a waist seconds later. True of the count, false of the data.
-
-**There is no backup in the tree.** Slice 13 ships backup and restore. Until then the only copy of anything real is the running database.
-
-### The defect class to carry into every remaining slice
-
-**Five instances of a check that passes by not checking**, four found by a verifier attacking the check rather than the code, none by the suite: an offline test with service workers blocked; a string checker never wired into the gate; an assertion over an empty population; `fill()` instead of typing, which hid an unusable field for four rounds; and a `lint` step that did not exist and stood down silently on every run this project ever had. When a check is green, ask what it would take for it to be red.
-
-### State files, all current
-
-`PROCESS.md` (the 2026-08-23 process change), `GOAL.md`, `BRIEF.md`, `DESIGN.md`, `PLAN.md`, `DOD.md` (166 lines, 41 checked), `PREFLIGHT.md`, `EVIDENCE.md`, `DEFECTS.md`, `AMENDMENTS.md` (A1 to A6; A4 and A5 edited DOD.md and both came out tighter), `RULING-SLICE-3.md`, `RULING-SLICE-4.md`, `GREENLIGHT.md`.
+**None blocking.** One optional, low: two published `SharedShortcut` records
+named "Test" under his Apple ID, left by a research probe. Remove via Stop
+Sharing in the Shortcuts app.
 
 ---
 
