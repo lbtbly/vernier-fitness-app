@@ -223,9 +223,14 @@ test.describe('reminders', () => {
     // keystroke after it is dropped. Focusing selects the first segment, which
     // is the hour, every time. `Control+a` went with the click; it selects
     // nothing in a segmented control and only moved the state around.
+    //
+    // AND FOCUS ONCE, THEN THE KEYBOARD. `locator.press` focuses the element
+    // before every keystroke, and a segmented control re-entered between digits
+    // could read 2, 1, 3, 0 as four attempts at the hour rather than one hour
+    // and one minute. The keyboard sends to whatever holds focus already.
     const from = page.locator('#quiet-from');
     await from.focus();
-    for (const digit of ['2', '1', '3', '0']) await from.press(digit);
+    for (const digit of ['2', '1', '3', '0']) await page.keyboard.press(digit);
 
     /*
      * THE CHECK THAT WAS MISSING, and it is the whole of why this line went red
