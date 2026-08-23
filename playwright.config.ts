@@ -48,7 +48,7 @@ export default defineConfig({
   projects: [
     {
       name: 'webkit-iphone',
-      testIgnore: /focus\.spec\.ts|service-worker\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|launch-report\.spec\.ts|notices\.spec\.ts|withings\.spec\.ts|ingest\.spec\.ts|labs-scratch\.spec\.ts|nutrition\.spec\.ts|shopping\.spec\.ts|catalogue-offline\.spec\.ts|train-week\.spec\.ts|session-player\.spec\.ts|console-walk\.spec\.ts|settings-integrations\.spec\.ts|meals\.spec\.ts|calendar\.spec\.ts|review\.spec\.ts|push\.spec\.ts|backup\.spec\.ts/,
+      testIgnore: /focus\.spec\.ts|service-worker\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|absence-scratch\.spec\.ts|launch-report\.spec\.ts|notices\.spec\.ts|withings\.spec\.ts|ingest\.spec\.ts|labs-scratch\.spec\.ts|nutrition\.spec\.ts|shopping\.spec\.ts|catalogue-offline\.spec\.ts|train-week\.spec\.ts|session-player\.spec\.ts|console-walk\.spec\.ts|settings-integrations\.spec\.ts|meals\.spec\.ts|calendar\.spec\.ts|review\.spec\.ts|push\.spec\.ts|backup\.spec\.ts/,
       use: { ...devices['Desktop Safari'], viewport: { width: 393, height: 852 }, deviceScaleFactor: 3 },
     },
     {
@@ -101,6 +101,15 @@ export default defineConfig({
       // body signals in it, and a phone source whose newest sample is exactly
       // thirty-five and then exactly thirty-seven hours old. Both mean writing
       // rows, and `measurement` refuses DELETE, so they belong here.
+      //
+      // absence-scratch.spec.ts joined it after the owner's install stopped
+      // being able to show absence at all. F30's evidence rested on the four
+      // days the demonstration seed leaves empty at anchor offsets 10 to 13, and
+      // the Withings demonstration import fills any day no reading stands on, so
+      // four rows landed on 9 to 12 August 2026 and `measurement` refuses
+      // DELETE. .forge/RULING-DEMO-COLLISION.md section 5 ruled where the line
+      // is re-observed after that: here, where the anchor can be moved and the
+      // seed re-run, which is the same door notices.spec.ts uses.
       //
       // ingest.spec.ts joined it in slice 6, and it is the clearest case of the
       // rule so far. Every test in it writes: an ingest credential, a nonce,
@@ -200,7 +209,7 @@ export default defineConfig({
       // attribute relaxed, so WebKit will carry it over loopback too, and it
       // grades its fold in both engines against one database.
       name: 'chrome-scratch',
-      testMatch: /launch-report\.spec\.ts|notices\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|withings\.spec\.ts|ingest\.spec\.ts|labs-scratch\.spec\.ts|nutrition\.spec\.ts|shopping\.spec\.ts|train-week\.spec\.ts|session-player\.spec\.ts|console-walk\.spec\.ts|settings-integrations\.spec\.ts|meals\.spec\.ts|calendar\.spec\.ts|review\.spec\.ts|push\.spec\.ts|backup\.spec\.ts/,
+      testMatch: /launch-report\.spec\.ts|absence-scratch\.spec\.ts|notices\.spec\.ts|quick-log\.spec\.ts|recovery\.spec\.ts|trend-scratch\.spec\.ts|withings\.spec\.ts|ingest\.spec\.ts|labs-scratch\.spec\.ts|nutrition\.spec\.ts|shopping\.spec\.ts|train-week\.spec\.ts|session-player\.spec\.ts|console-walk\.spec\.ts|settings-integrations\.spec\.ts|meals\.spec\.ts|calendar\.spec\.ts|review\.spec\.ts|push\.spec\.ts|backup\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         channel: 'chrome',

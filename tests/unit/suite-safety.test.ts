@@ -526,6 +526,16 @@ describe('the suite against the owner\'s installation', () => {
    *                           renders. That screen carries eleven diagnostic
    *                           rows, four category switches and two time fields,
    *                           and the same expression logs the count it walked.
+   *   absence-scratch:1        REAL, and it is the whole of what that file measures.
+   *                           Daily dots falling inside the hatched band, on a
+   *                           chart whose own hidden table is read first and
+   *                           printed: the day count, the readings in it and the
+   *                           runs of absence are all asserted non-empty before
+   *                           this line is reached, and the dot count is asserted
+   *                           equal to the reading count on the line above. A
+   *                           chart that drew nothing fails four assertions
+   *                           before this one.
+   *
    *   Slice 13 added one file with eleven members, and every one was read
    *   against the same question before it was written down here. Seven of them
    *   are a different shape from the rest of this inventory and are worth
@@ -593,6 +603,7 @@ describe('the suite against the owner\'s installation', () => {
       ['review.spec.ts', 2],
       ['push.spec.ts', 3],
       ['backup.spec.ts', 11],
+      ['absence-scratch.spec.ts', 1],
     ]);
     // `toHaveCount(0, { timeout: 3_000 })` was invisible to this pattern until
     // slice 5 wrote one: the closing paren was required right after the zero, so
