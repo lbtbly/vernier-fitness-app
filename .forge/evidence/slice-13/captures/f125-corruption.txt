@@ -1,0 +1,4 @@
+whole      exit 0
+truncate   exit 3  restore: archive_truncated: the archive is TRUNCATED: it ends without the chunk that marks the end at chunk 2
+reorder    exit 3  restore: archive_chunk_unauthenticated: a chunk did not verify: it has been altered, moved, or written under a different secret at chunk 0
+flip       exit 3  restore: archive_chunk_unauthenticated: a chunk did not verify: it has been altered, moved, or written under a different secret at chunk 2

@@ -2900,10 +2900,19 @@ export const strings = {
     ruleExcluded: (subject: string) => `No ${subject} in any meal this week, by exclusion.`,
     ruleAllergy: (subject: string) =>
       `No ${subject} in any meal this week, and none in the shopping list, by allergy.`,
+    /*
+     * The subject stands as its own word.
+     *
+     * This built a hyphenated compound out of an interpolated value,
+     * `${subject}-free`, so "lactose" and "free" fused into one word no
+     * catalogue key contains. Amendment A4 named that case exactly: C6 covers a
+     * fragment "however few words it is, including one hyphenated word". The
+     * rendered check found it on the first walk of this screen.
+     */
     ruleIntolerance: (subject: string, days: number) =>
       days === 1
-        ? `A ${subject}-free alternative on 1 day, by intolerance.`
-        : `A ${subject}-free alternative on ${days} days, by intolerance.`,
+        ? `An alternative free of ${subject} on 1 day, by intolerance.`
+        : `An alternative free of ${subject} on ${days} days, by intolerance.`,
     /*
      * "Allowed and used" leads, and the subject follows it.
      *
