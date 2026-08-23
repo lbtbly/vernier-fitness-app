@@ -195,6 +195,26 @@ body{
 }
 .row:last-child{border-bottom:0}
 .grow{flex:1;min-width:0}
+/*
+ * A label may not be squeezed out of existence by its own value.
+ *
+ * `.grow` is flex-basis 0, so when a row overflows it absorbs none of the
+ * shrink and lands at whatever is left after the value has taken everything.
+ * On the owner's own install, at 393 px, /source's "Reference" row measured the
+ * label at 10.7 px against a 36-character identifier at 304.3 px, and "Method"
+ * at 31.6 px against the tape-measure note at 283.4. The words still paint,
+ * because nothing clips them, so what the owner reads is a label lying across
+ * its own value. It is also how the same row lands at exactly 0 px on some
+ * identifiers and not others: the two rendered widths differ by a few pixels of
+ * proportional type, which is why the walk over all six sources passed twice
+ * and failed on the third run with the label reported hidden.
+ *
+ * Basis auto makes the shrink proportional, so the name keeps most of its
+ * width and the value wraps, which is the order of importance the screen
+ * already draws. A row that fits is unaffected: with positive free space the
+ * extra goes by grow factor, and `.grow` is still the only thing growing.
+ */
+.row > .grow{flex-basis:auto}
 .between{display:flex;align-items:center;justify-content:space-between;gap:var(--s3)}
 .stack{display:flex;flex-direction:column;gap:2px}
 

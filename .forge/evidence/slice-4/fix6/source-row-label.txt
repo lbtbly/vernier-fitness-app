@@ -1,0 +1,84 @@
+The Reference row on /source, at 393x852, before and after.
+
+.grow is flex-basis 0. Under negative free space it absorbs no shrink, so
+the value takes everything and the label lands on whatever is left. The
+words still paint, because nothing clips them, so the label lies across its
+own value. Measured on the owner's live install, both engines agreeing.
+
+BEFORE, webkit
+webkit /source/src_c47b7429-5f13-4278-a71b-60ac8f86ef87
+   label "Reference" 10.7px | value "c47b7429-5f13-4278-a71b-60ac8f86ef87" 304.3px | row 327x44
+   label "Method" 31.6px | value "Tape at the navel, standing, breathing o" 283.4px | row 327x44
+
+AFTER, webkit and chrome, identical to the tenth of a pixel
+webkit /source/src_c47b7429-5f13-4278-a71b-60ac8f86ef87
+   label "Reference" 52.9px | value "c47b7429-5f13-4278-a71b-60ac8f86ef87" 262.1px | row 327x59
+   label "Method" 44.3px | value "Tape at the navel, standing, breathing o" 270.7px | row 327x58
+
+The label keeps its name and the value wraps, which is the order of
+importance the screen already draws. A row that fits does not move: every
+other row above measures the same before and after.
+
+This is also what made quick-log.spec.ts:698 flaky. The label lands at 0 px
+on some identifiers and a few pixels on others, because proportional type
+renders two 36-character UUIDs to different widths, and Playwright reports
+a zero box as hidden. The walk passed twice and failed on the third run.
+
+--- the full measurement, after ---
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+webkit /source/src_c47b7429-5f13-4278-a71b-60ac8f86ef87
+   label "Reference" 52.9px | value "c47b7429-5f13-4278-a71b-60ac8f86ef87" 262.1px | row 327x59
+   label "Recorded" 216.4px | value "22 Aug, 10:04" 98.6px | row 327x44
+   label "Stored" 216.4px | value "22 Aug, 10:04" 98.6px | row 327x44
+   label "Import version" 236.8px | value "2026-08-3" 78.2px | row 327x44
+   label "Entered on" 250.5px | value "Quick log" 64.5px | row 327x44
+   label "Rows received" 305.8px | value "1" 9.2px | row 327x44
+   label "Waist" 228.2px | value "99.0 cm" 56.8px | row 327x44
+webkit /source/demo_src_ldl
+   label "Reference" 221.2px | value "page 2, row 7" 93.8px | row 327x44
+   label "Recorded" 216.4px | value "13 Aug, 08:05" 98.6px | row 327x44
+   label "Stored" 216.4px | value "22 Aug, 09:32" 98.6px | row 327x44
+   label "Import version" 236.8px | value "2026-08-3" 78.2px | row 327x44
+   label "Laboratory" 253px | value "Biogroup" 62px | row 327x44
+   label "Page" 305.8px | value "2" 9.2px | row 327x44
+   label "Printed value" 257.6px | value "1.44 g/L" 57.4px | row 327x44
+   label "Conversion factor" 273.9px | value "2.586" 41.1px | row 327x44
+   label "Stored value" 228.7px | value "3.72 mmol/L" 86.3px | row 327x44
+   label "LDL cholesterol" 198.7px | value "3.72 mmol/L" 86.3px | row 327x44
+webkit /source/demo_src_waist
+   label "Reference" 250.8px | value "quick-log" 64.3px | row 327x44
+   label "Recorded" 216.4px | value "19 Aug, 07:20" 98.6px | row 327x44
+   label "Stored" 216.4px | value "22 Aug, 09:32" 98.6px | row 327x44
+   label "Import version" 236.8px | value "2026-08-3" 78.2px | row 327x44
+   label "Entered on" 268.2px | value "iPhone" 46.8px | row 327x44
+   label "Method" 44.3px | value "Tape at the navel, standing, breathing o" 270.7px | row 327x58
+   label "Waist" 228.2px | value "98.5 cm" 56.8px | row 327x44
+recovery: one use, valid for 10 minutes. Open it on the device you want signed in.
+chrome /source/src_c47b7429-5f13-4278-a71b-60ac8f86ef87
+   label "Reference" 0px | value "c47b7429-5f13-4278-a71b-60ac8f86ef87" 0px | row 0x0
+   label "Recorded" 0px | value "22 Aug, 10:04" 0px | row 0x0
+   label "Stored" 0px | value "22 Aug, 10:04" 0px | row 0x0
+   label "Import version" 0px | value "2026-08-3" 0px | row 0x0
+   label "Entered on" 0px | value "Quick log" 0px | row 0x0
+   label "Rows received" 0px | value "1" 0px | row 0x0
+   label "Waist" 0px | value "99.0 cm" 0px | row 0x0
+chrome /source/demo_src_ldl
+   label "Reference" 0px | value "page 2, row 7" 0px | row 0x0
+   label "Recorded" 0px | value "13 Aug, 08:05" 0px | row 0x0
+   label "Stored" 0px | value "22 Aug, 09:32" 0px | row 0x0
+   label "Import version" 0px | value "2026-08-3" 0px | row 0x0
+   label "Laboratory" 0px | value "Biogroup" 0px | row 0x0
+   label "Page" 0px | value "2" 0px | row 0x0
+   label "Printed value" 0px | value "1.44 g/L" 0px | row 0x0
+   label "Conversion factor" 0px | value "2.586" 0px | row 0x0
+   label "Stored value" 0px | value "3.72 mmol/L" 0px | row 0x0
+   label "LDL cholesterol" 0px | value "3.72 mmol/L" 0px | row 0x0
+chrome /source/demo_src_waist
+   label "Reference" 250.8px | value "quick-log" 64.3px | row 327x44
+   label "Recorded" 216.4px | value "19 Aug, 07:20" 98.6px | row 327x44
+   label "Stored" 216.4px | value "22 Aug, 09:32" 98.6px | row 327x44
+   label "Import version" 236.8px | value "2026-08-3" 78.2px | row 327x44
+   label "Entered on" 268.2px | value "iPhone" 46.8px | row 327x44
+   label "Method" 44.3px | value "Tape at the navel, standing, breathing o" 270.7px | row 327x58
+   label "Waist" 228.2px | value "98.5 cm" 56.8px | row 327x44
