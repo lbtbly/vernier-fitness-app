@@ -2,109 +2,105 @@
 
 ## HANDOFF, 2026-08-23, session three. Read this, then PROCESS.md, then carry on.
 
-**Phase:** 8 BUILD, running. The run is **ARMED** again: `.forge/ARMED` exists,
-the Stop gate is live, `.forge/PARKED` is retired. The greenlight was not
-re-opened and never will be.
+**Phase:** 8 BUILD and VERIFY, running. **ARMED.** The greenlight was not
+re-opened.
 
-**Checked: 41 of 166** at the moment this was written. Two dispatches are in
-flight and both move that number.
+**Checked: 83 of 166**, from 41 when this session opened. Slices 1 to 9 are all
+built, merged and live on the origin. Wave B (10, 11, 12) is built and waiting
+on its branches. Nothing softened, no threshold moved, no line re-ruled.
 
 ### In flight
 
-1. **Stabilisation verify**, two scoped verifiers, run `wf_0b05b8b1-bd5`.
-   - F4, R1, C2. The owner cleared these on 2026-08-23 and they had never been
-     ruled. The verifier is told to prove the second-device claim IS a second
-     device, because a row a local headless browser can author is not evidence
-     of a phone, and that is exactly the defect the owner cleared two rows for.
-   - F23, C5. Fixes landed at `f5bff8a` and `cb8887e` and were never ruled. The
-     verifier is told to type rather than `fill()`, print six tap counts, and
-     measure the 44 px floor on every target in the sheet.
+**Fix wave**, three builders in three worktrees, run `wf_95961e9d-773`:
+`fix-suite` (the red gate and the red suite), `fix-craft` (F42, F55, F79, C10,
+C11), `fix-checks` (R2, F62, F65, F66).
 
-2. **Wave A**, five builders in five git worktrees, run `wf_8bd5b2cc-58d`:
-   slices 5 Withings, 6 Apple Health, 7 blood tests, 8 Train, 9 nutrition.
+### The two red states the fix wave must clear
 
-### The parallel layout, and the three holes that had to be closed first
+1. **The gate is red.** `strings:rendered` finds one unkeyed fragment on
+   `/value/[id]`, "The number it should be", built as a two-branch template
+   conditioned on the unit so no single key can equal it.
+2. **The suite is red.** 95 passed, 14 failed, 1 skipped, **56 DID NOT RUN.**
+   `tests/e2e/ingest.spec.ts:158` asserts a generated boolean reads `'t'` where
+   Postgres renders `'true'`; serial mode then skips thirteen, so slice 6's
+   end-to-end suite has never executed on main.
 
-Slices 5 to 13 build in worktrees under
-`/Users/lambertbouley/Claude/lbtbly-fitness-app-trees/`, one per slice, managed
-by `scripts/worktree.sh` (`new`, `list`, `gate`, `merge`, `drop`).
+### Open lines, 83 of them, and what each is waiting on
 
-Three hooks assumed one tree and each would have failed silently:
+| Slice | Open | Waiting on |
+|---|---|---|
+| 1 | F4, R1, C2 | **the owner's iPhone screenshot** |
+| 5 | F42 | fix-craft |
+| 5 | F44 | **the owner's Withings credential**, after slice 5 passes |
+| 6 | F55 | fix-craft and fix-suite |
+| 6 | F56 | **the owner's iPhone**, building the Shortcut |
+| 7 | F62, F65, C10, R2 | fix-checks and fix-craft |
+| 8 | F66, C11, F72, C9 | fix-checks, fix-craft, fix-suite |
+| 8, 9 | **F77, F82, F87, F89, C12** | **NOBODY HAS RULED THESE.** Not refused, not reached. |
+| 9 | F79, F88 | fix-craft |
+| 10 to 14 | the rest | built or not yet built |
 
-- `checks.sh` cd'd to `CLAUDE_PROJECT_DIR`, so a builder editing a worktree got
-  **main** graded and green on a tree it had never read. It resolves the tree
-  from the edited file now. Proven both ways: a planted type error turns the
-  worktree gate red at the same moment main's gate is green.
-- `checks.sh` would also have run `strings:rendered` from a worktree against the
-  live origin, which serves main. It **defers** it there, loudly, and writes
-  `.forge/.rendered-deferred`; `worktree.sh merge` refuses to close a slice while
-  that marker stands.
-- `commit.sh` cd'd to the same place, found main clean, exited reporting success.
-  **A worktree builder's work was never checkpointed at all.** It takes `--tree`
-  now and `runlog.sh` walks every worktree.
+**F77, F82, F87, F89 and C12 carry no evidence line and no defect line.** Slice
+8b's and slice 9's verifiers ran out of turns after recording what they had.
+An unchecked box that is not in DEFECTS.md loses the difference between refused
+and not reached, so those five need their own dispatch and must not be assumed
+either way.
 
-That is **seven** for this run's one recurring class, a check that passes by not
-checking. Six were found after the fact. This one was found before it ran. An
-eighth was written INTO the fix and caught the same hour: the tree fallback could
-be `"."`, and `"."` compared against an absolute path is not equal, so main
-graded itself as a worktree and deferred its own rendered check. Caught by running
-the gate with the environment set and without it, instead of the one way that worked.
+### Owner actions outstanding, in this order
 
-### The rules the parallel build runs under
+1. **The iPhone Settings screenshot.** Open Vernier from the Home Screen icon,
+   go to Settings, screenshot it. One image closes F4, R1 and C2: Settings
+   renders the application origin from config, so it carries C2's "no browser
+   chrome" and is the second-device response F4 and R1 name.
+2. **Withings developer credentials**, for F44, AFTER slice 5 passes.
+   RULING-DEMO-COLLISION section 4 says not before.
+3. **Build the Shortcut on the iPhone**, for F56. Two one-time settings first:
+   Settings > Shortcuts > Advanced > Allow Sharing Large Amounts of Data, and
+   Health > Sources > Shortcuts > allow read per type.
+4. Optional, low: two published `SharedShortcut` records named "Test" under his
+   Apple ID.
 
-- **Migrations are numbered on merge, never in a tree.** Drizzle's snapshots are
-  a chain, so a number is not a name a merge can change. A slice edits
-  `src/db/schema.ts` and writes raw DDL to `drizzle/pending/<slug>.sql`, a file
-  only it owns. Main runs `db:generate` once per slice, in order. Contract is in
-  `drizzle/pending/README.md`.
-- **`.forge/` is main's.** It is committed, so every worktree carries a stale
-  copy. Builders never write to it and `worktree.sh merge` takes main's copy
-  unconditionally.
-- **No line is ticked from a worktree.** Verification happens on main, after
-  merge, with the stack rebuilt, by a verifier.
-- **Builders never run the e2e suite and never touch the stack.** One origin,
-  `workers: 1`. They write specs; main runs them.
-- The complete dependency list at PLAN.md line 30 was installed on main once,
-  before the trees forked, so nine lock files cannot diverge.
+**Closed without him:** the VAPID pair already exists, so slice 12's preflight
+item needed nothing.
 
-### Real dependencies, which is why wave A is five and not nine
+### What the parallel build cost and what it bought
 
-- Wave A, independent: **5, 6, 7, 8, 9.**
-- Wave B, after A merges: **10** needs 9's food and target tables. **11** needs
-  8's session model. **12**'s weekly review reads 5, 6, 8 and 9.
-- Wave C: **13** exports and dumps everything, so it wants every table.
+Five slices built at once, then three, in git worktrees under
+`lbtbly-fitness-app-trees/`, managed by `scripts/worktree.sh`. It works. Three
+things it cost, all found the same afternoon rather than at the final pass:
 
-### Merge runbook, per slice, in this order
+- **Three bugs no worktree could catch**, because they were written against a
+  table that only exists once the merge numbers the migration: a PL/pgSQL
+  trigger that read `NEW.metric` before branching on the firing table and so
+  raised on every boot; a hand-written `any(ids)` that drizzle rendered as
+  `any(($1, $2))` so no recipe nutrition computed at all; and an ambiguous
+  column in the rendered-strings query.
+- **A recurring merge shape.** Git splices two sides between one shared opener
+  and one shared closer, so the second side's doc comment loses its `/**` and
+  the first side's construct loses its brace. It broke files in every merge and
+  typecheck caught every one. `icons.tsx` is rebuilt as HEAD plus the branch's
+  additions rather than repaired splice by splice.
+- **One lost verification dispatch.** A verifier ran 164 tool calls against
+  slice 5, hit `maxTurns: 150`, and recorded nothing at all. Now: `maxTurns:
+  400`, and **record each line as you finish it** is rule one in both standing
+  briefs. Four later verifiers also ended without structured verdicts and lost
+  nothing, because their ticks and defects were already on disk.
 
-1. `scripts/worktree.sh merge <slug>` (gates the tree, merges, keeps main's `.forge/`)
-2. `npm run db:generate`
-3. append `drizzle/pending/<slug>.sql` to the generated migration, delete the pending file
-4. `scripts/up.sh` so the live origin serves the slice
-5. `FORGE_CHECKS_FULL=1 scripts/checks.sh` (five checks, `strings:rendered` included)
-6. `rm .forge/.rendered-deferred`, only after step 5 exits 0
-7. commit, then dispatch that slice's verifier
+### The defect class, twelfth instance, and the sharpest one yet
 
-### Machine facts that bind this run
+`npm run compliance` was defined in `package.json` and called by nothing. It was
+wired into the gate this afternoon. It then passed while a verifier had planted
+"Your result is abnormal and you should see a doctor." in
+`explanation.unstated`, because that template is outside its walk. **Being in
+the gate is not the same as covering the line.**
 
-**8 cores, 8 GB of RAM, and the disk was at 94 percent with 13 GiB free.**
-19 GB of stale Docker build cache older than twelve hours was pruned; the last
-twelve hours were kept so a rebuild is not cold. Free space is 29 GiB. The five
-worktrees cost about 1 GiB because `node_modules` is cloned with APFS
-copy-on-write rather than copied.
+### Machine
 
-**There is still no backup in the tree.** Slice 13 ships it. Until then the only
-copy of anything real is the running database, and `measurement` refuses DELETE
-by design, so a bad write is permanent.
-
-`DEMO_MODE` is fixed and no longer a hazard: `.env.example` and `gen-env.mjs`
-carry it and `docker compose config` resolves it to `1`, so a rebuild keeps
-demonstration data. RESUME's older note that it was unreproducible is stale.
-
-### Owner actions outstanding
-
-**None blocking.** One optional, low: two published `SharedShortcut` records
-named "Test" under his Apple ID, left by a research probe. Remove via Stop
-Sharing in the Shortcuts app.
+8 cores, 8 GB. Disk 88 percent, 24 GiB free after pruning 21 GB of Docker build
+cache and dropping the five merged wave A worktrees. **There is still no backup
+in the tree.** A `pg_dump` was taken before each migration and both are in
+`backups/`. The owner's live database holds 91 measurement rows, exactly one of
+them real: `a7bf989c`, waist 101.5 cm, 2026-08-23 08:54:34, from his phone.
 
 ---
 
