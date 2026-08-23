@@ -183,3 +183,50 @@ why the token opens the ingest endpoint and nothing else, in both directions:
 presenting it anywhere a session is expected reaches nothing, and a live browser
 session cannot post a batch. Rotation is two steps: revoke in Settings, paste
 the new pair into the shortcut.
+
+## The archive, and what it protects
+
+The nightly archive is a single encrypted file: chunk-framed AES-256-GCM from
+Node's own crypto, with a header that is the additional authenticated data of
+every chunk and a per-chunk sequence and final flag, so truncation, reordering
+and a flipped byte each fail the tag by name. The key is scrypt over a salt that
+is different in every archive, derived from `BACKUP_PASSPHRASE` when one is set
+and from `MASTER_KEY` when it is not.
+
+What that buys, precisely: a file syncing to iCloud Drive that Apple cannot
+read, and a copy of this owner's whole record on a machine that is not this one.
+What it does not buy: anything at all if the secret is lost with it. Keep a copy
+of the environment file somewhere that is not this Mac.
+
+**The plaintext never touches the destination.** The dump and the volume are
+written to a temporary directory on the container's own disk, encrypted from
+there, and the encrypted file is what lands in the folder that syncs. A dump
+written into iCloud Drive and encrypted afterwards would have been readable by
+Apple for the seconds in between, which is not a window this product opens.
+
+`docs/backup-restore.md` holds the whole procedure, the three deliberately
+corrupted cases and their exit codes.
+
+## The append-only guarantee, and the three ways past it
+
+`measurement`, `health_sample`, `meal_entry`, `meal_entry_item` and
+`calendar_write` carry triggers that refuse UPDATE and DELETE outright. That is
+the spine of this product: a stored reading is a fact about a moment, and
+rewriting one destroys the history everything else is built on.
+
+There are exactly three ways past it, all three need a person at this machine,
+and all three are written down in `docs/backup-restore.md`:
+
+1. `TRUNCATE` at a psql prompt. It fires no row-level trigger, it needs shell
+   access, and the application cannot reach it.
+2. A restore, which replaces a whole database rather than editing a row.
+   `scripts/restore.mjs` refuses the live database unless the operator types a
+   phrase at the terminal.
+3. `vernier_delete_category`, the database function behind the permanent delete
+   control. It recomputes the typed phrase from the category and refuses
+   anything else, it can never reach the account, the passkeys, the sealed
+   credentials, the audit trail or the migration ledger whatever a caller asks,
+   and it names every trigger it stepped past in what it returns.
+
+Nothing else in this application can reach any of the three, and a route that
+stopped checking the phrase would still be refused by the database.
