@@ -70,6 +70,32 @@ html[data-theme=light]{
 
 *{box-sizing:border-box;margin:0;padding:0}
 
+/*
+ * EVERY ICON HAS A SIZE, AND IT DOES NOT DEPEND ON AN ANCESTOR MATCHING.
+ *
+ * An inline svg with no width has no intrinsic size, so it takes the width of
+ * whatever box it lands in and scales its height to the viewBox. Verifiers
+ * measured that in five places on the shipped build: an info glyph 245 px
+ * square inside the Target range card on /train, 234 and 215 px on
+ * /settings/ingest, 142 on /settings/shortcut, about 130 on the credential card
+ * on /settings. Every one of them was sized only by a rule carrying an ancestor,
+ * `.row svg.ch` or `.tabbar svg`, and every one of them sat in a `.between`
+ * header that matched neither. The comment on `svg.ch` further down this file
+ * already records the first time this shipped.
+ *
+ * So the floor lives on the element itself. Specificity 0,0,1: every rule here
+ * that names a class still outranks it, `.chart` and `.restring svg` included,
+ * and a glyph nobody thought about is 18 px rather than the width of its card.
+ * 18 is the size the rest of this file already agrees on: `.banner svg`,
+ * `.hint svg`, `.box svg` and `svg.ch` are all 18, and 00-patterns.html draws
+ * `.btn svg` at 18 as well.
+ *
+ * `flex:none` belongs here for the same reason. Nine rules below repeat it, one
+ * per context, and the tenth context is always the one where an icon is
+ * squashed to nothing between two labels.
+ */
+svg{width:18px;height:18px;flex:none}
+
 html,body{background:var(--bg);color:var(--text)}
 
 body{
@@ -141,6 +167,21 @@ body{
 
 .tabbar a[aria-current=page]{color:var(--accent)}
 .tabbar svg{width:24px;height:24px}
+
+/*
+ * AND THE SCREEN THAT HAS NO TAB BAR RESERVES NO ROOM FOR ONE.
+ *
+ * `TabBar` returns null on `/train/session/<id>`, so on the player the padding
+ * above is 77 px of nothing at the bottom of a flex column that is trying to
+ * pin Set done above the fold. That is how the 88 px control ended up measured
+ * at y771 to y859 in an 852 px viewport, seven pixels of it past the bottom
+ * edge with the tab bar drawn across the rest.
+ *
+ * `:has` keys this to the one thing that is true of exactly those screens: the
+ * player root. Supported since Safari 15.4 and Chrome 105, and this product
+ * ships to one iPhone on iOS 18 and one Mac mini.
+ */
+.app-scroll:has(.player){padding-bottom:max(var(--s4), env(safe-area-inset-bottom))}
 
 /* ---------- type ---------- */
 
@@ -495,9 +536,14 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
  * A chevron at the end of a row is 18 px, from .forge/wireframes/02-today.html.
  * Without this it inherits the row's flex sizing and fills the card, which is
  * exactly what it did the first time it shipped.
+ *
+ * AND THE ANCESTOR IS GONE FROM THE SELECTOR, which is what let it ship a
+ * second time. `.row svg.ch` sized a chevron in a row and left the same class
+ * unsized inside a `.between` header, where /train drew it 245 px square. A
+ * class that names a size is a class that carries it everywhere; the base rule
+ * at the top of this file is the floor under everything else.
  */
-.row svg.ch{width:18px;height:18px;color:var(--text-3);flex:none}
-.banner svg.ch{width:18px;height:18px;flex:none}
+svg.ch{width:18px;height:18px;color:var(--text-3);flex:none}
 
 /*
  * A value that walks back to its origin. One tap, and it looks like one. It is

@@ -22,8 +22,22 @@ export const dynamic = 'force-dynamic';
  * that does not appear.
  *
  * The band is the pre-session target and it uses ONE anchoring method, decided
- * by whether a resting heart rate is stored. It is only drawn on a cardio
- * session, where an intensity to aim at means something.
+ * by whether a resting heart rate is stored.
+ *
+ * IT IS DRAWN ON EVERY SESSION, INCLUDING STRENGTH. It used to be null unless
+ * the kind was cardio, intervals or walk, and `07-session-player.html` draws
+ * the Target range card on a HOME STRENGTH session with its caption calling the
+ * heart-rate number part of the working set. Strength is two to three of the
+ * three to five sessions the plan proposes, so the card was missing from most
+ * of them. The sheet is the specification and it wins.
+ *
+ * The band a strength session gets is the moderate one, the same band a walk or
+ * a steady cardio session gets, because the alternative is inventing a
+ * prescription for resistance work that no paper in
+ * .forge/research/training-rules.md supports. Only intervals ask for vigorous.
+ * The card says in its own words that this app does not read heart rate and
+ * does not pretend to, which is the sentence that keeps a range from reading as
+ * a measurement.
  */
 export default async function SessionPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -102,11 +116,8 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
   ]);
   const lastById = new Map(last.map((entry) => [entry.movementId, entry]));
 
-  const cardio = proposal.kind === 'cardio' || proposal.kind === 'intervals' || proposal.kind === 'walk';
   const guidance = guidanceFor(resting);
-  const band = cardio
-    ? bandOf(guidance, proposal.kind === 'intervals' ? 'vigorous' : 'moderate')
-    : null;
+  const band = bandOf(guidance, proposal.kind === 'intervals' ? 'vigorous' : 'moderate');
 
   const session: PlayerSession = {
     proposalId: proposal.id,
@@ -131,13 +142,11 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
           : null,
       };
     }),
-    band: band
-      ? {
-          label: strings.intensity.bands[band.band],
-          low: band.low,
-          high: band.high,
-        }
-      : null,
+    band: {
+      label: strings.intensity.bands[band.band],
+      low: band.low,
+      high: band.high,
+    },
   };
 
   return <SessionPlayer csrfToken={csrfToken} timeZone={timeZone} session={session} />;
