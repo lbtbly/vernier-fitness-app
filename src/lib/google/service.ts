@@ -461,6 +461,13 @@ export async function buildPlan(run: RunContext): Promise<BuildResult> {
       start: event.start.toISOString(),
       end: event.end.toISOString(),
     })),
+    unplaceable: diff.unplaceable.map((entry) => ({
+      sessionId: entry.sessionId,
+      title: entry.title,
+      plannedFor: entry.plannedFor.toISOString(),
+      blockedFrom: entry.blockedFrom.toISOString(),
+      blockedTo: entry.blockedTo.toISOString(),
+    })),
     totalChanges: diff.totalChanges,
     heldBack: diff.heldBack,
     rows,
@@ -933,6 +940,13 @@ export type PlanView = {
   totalChanges: number;
   heldBack: number;
   beforeEvents: ColumnEvent[];
+  unplaceable: Array<{
+    sessionId: string;
+    title: string;
+    plannedFor: string;
+    blockedFrom: string;
+    blockedTo: string;
+  }>;
   rows: PlanRowView[];
 };
 
@@ -969,6 +983,7 @@ export async function planView(stored: StoredPlan): Promise<PlanView> {
     totalChanges: stored.plan.totalChanges,
     heldBack: stored.plan.heldBack,
     beforeEvents: beforeEvents.map((event) => ({ ...event, change: 'same' as const })),
+    unplaceable: (Array.isArray(stored.plan.unplaceable) ? stored.plan.unplaceable : []) as PlanView['unplaceable'],
     rows: stored.rows.map((row) => ({
       id: row.id,
       verb: row.verb,

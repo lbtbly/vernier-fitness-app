@@ -331,6 +331,7 @@ export type NewPlan = {
   availabilityStale: boolean;
   failures: number;
   beforeEvents: Array<{ eventId: string; title: string; start: string; end: string }>;
+  unplaceable: Array<{ sessionId: string; title: string; plannedFor: string; blockedFrom: string; blockedTo: string }>;
   totalChanges: number;
   heldBack: number;
   rows: Array<{
@@ -378,6 +379,7 @@ export async function storePlan(input: NewPlan): Promise<StoredPlan> {
         availabilityStale: input.availabilityStale,
         failures: input.failures,
         beforeEvents: input.beforeEvents,
+        unplaceable: input.unplaceable,
         totalChanges: input.totalChanges,
         heldBack: input.heldBack,
       })

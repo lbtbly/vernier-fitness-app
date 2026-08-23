@@ -1817,6 +1817,15 @@ export const calendarPlan = pgTable(
      * differ exactly when something went wrong.
      */
     beforeEvents: jsonb('before_events').notNull().default([]),
+    /**
+     * Sessions with nowhere free inside the search window.
+     *
+     * They are not changes, so they are not rows, and they are stored anyway
+     * because the alternative is a session quietly missing from the diff. A
+     * plan that drops something without saying so is the failure class this
+     * whole slice is built against.
+     */
+    unplaceable: jsonb('unplaceable').notNull().default([]),
     totalChanges: integer('total_changes').notNull().default(0),
     heldBack: integer('held_back').notNull().default(0),
     appliedAt: timestamp('applied_at', { withTimezone: true }),

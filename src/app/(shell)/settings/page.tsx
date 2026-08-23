@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { GooglePanel } from '@/components/GooglePanel';
 import { IngestPanel } from '@/components/IngestPanel';
 import { OperatorPanel } from '@/components/OperatorPanel';
 import { ScreenTitle } from '@/components/ScreenTitle';
@@ -13,6 +14,7 @@ import { deviceTypeLabel } from '@/lib/display';
 import { hoursBetween, longDate, shortDateTime, time24 } from '@/lib/format';
 import { readSession } from '@/lib/session';
 import { strings } from '@/lib/strings';
+import { describeConnection as describeCalendar } from '@/lib/google/service';
 import { describeConnection } from '@/lib/withings/service';
 import { STALE_HOURS } from '@/lib/trend';
 
@@ -24,12 +26,13 @@ export default async function SettingsPage() {
   const session = await readSession();
   if (!session) redirect('/sign-in');
 
-  const [integrations, passkeys, csrfToken, withings, questions, ingestCredential, lastBatch] =
+  const [integrations, passkeys, csrfToken, withings, calendar, questions, ingestCredential, lastBatch] =
     await Promise.all([
       describeIntegrations(),
       listCredentials(session.ownerId),
       readCsrfToken(),
       describeConnection(),
+      describeCalendar(),
       readOpenQuestions(),
       readLiveCredential(),
       readLastAcceptedBatch(),
@@ -142,6 +145,17 @@ export default async function SettingsPage() {
         stale={lastBatchAgeHours === null || lastBatchAgeHours >= STALE_HOURS}
         csrfToken={csrfToken}
       />
+
+      {/*
+        * Google Calendar, after the two sources and before the credential list.
+        *
+        * `12-settings-integrations.html` frame 1 gives every integration a
+        * status line, a cause and its own actions, and this is the card that
+        * draws them for the calendar: the state, the calendar this app made,
+        * how many calendars it reads for availability, the three scopes in
+        * full, and the one reconnect Google's permanent refusal leaves.
+        */}
+      <GooglePanel view={calendar} timeZone={config.timeZone} csrfToken={csrfToken} />
 
       <OperatorPanel
         integrations={integrations}
