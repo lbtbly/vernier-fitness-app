@@ -81,6 +81,19 @@ export const GATE_PATHS: string[] = [
    * all it answers 400.
    */
   '/api/withings/callback',
+  /**
+   * The Google consent page coming back, on this list for exactly the reason the
+   * Withings one above is: the session cookie is `SameSite=Strict`, a top-level
+   * navigation from `accounts.google.com` is cross-site, and a protected route
+   * would answer the owner's own consent with a 401.
+   *
+   * What stands in for the session is the `state` this app minted: its SHA-256
+   * is on the connection row, the comparison is constant time, and the pair is
+   * spent whatever the outcome. No state, no write, 400. A mismatched state,
+   * 403. It issues no session and it never will, and with no parameters at all
+   * it answers 400, which is what scripts/route-table.mjs grades a gate route on.
+   */
+  '/api/integrations/google/callback',
   /*
    * The Apple Health ingest endpoint, and it is in this class for the mirror of
    * the reason the four above are.

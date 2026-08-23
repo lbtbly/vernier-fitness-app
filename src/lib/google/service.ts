@@ -30,6 +30,7 @@ import {
 } from '@/db/google';
 import { getConfig } from '@/lib/config';
 import { type CalendarFailure } from '@/lib/google/availability';
+import type { ColumnEvent } from '@/lib/google/columns';
 import {
   type CalendarChoice,
   type ClientPorts,
@@ -454,6 +455,12 @@ export async function buildPlan(run: RunContext): Promise<BuildResult> {
     availabilityAt,
     availabilityStale: stale,
     failures: failures.length,
+    beforeEvents: events.map((event) => ({
+      eventId: event.id,
+      title: event.title,
+      start: event.start.toISOString(),
+      end: event.end.toISOString(),
+    })),
     totalChanges: diff.totalChanges,
     heldBack: diff.heldBack,
     rows,
@@ -890,4 +897,133 @@ export type { Confirmation };
 /** The deterministic identifier a session's event carries, for a report or a test. */
 export function eventIdOf(sessionId: string): string {
   return eventIdFor(sessionId);
+}
+
+// --------------------------------------------------------------------------
+// What the confirm screen is handed.
+
+export type PlanRowView = {
+  id: string;
+  verb: string;
+  site: string;
+  eventId: string;
+  sessionId: string | null;
+  title: string;
+  cause: string;
+  causeKey: string;
+  beforeStart: string | null;
+  beforeEnd: string | null;
+  afterStart: string | null;
+  afterEnd: string | null;
+  defaultSelected: boolean;
+  state: string;
+  outcomeDetail: string | null;
+  writeId: string | null;
+};
+
+export type PlanView = {
+  id: string;
+  builtAt: string;
+  state: string;
+  mode: string;
+  availabilityAt: string | null;
+  availabilityStale: boolean;
+  failures: CalendarFailure[];
+  counts: { added: number; moved: number; removed: number };
+  totalChanges: number;
+  heldBack: number;
+  beforeEvents: ColumnEvent[];
+  rows: PlanRowView[];
+};
+
+/**
+ * The plan, in the shape a screen may hold.
+ *
+ * Serialisable, because it crosses to the browser, and complete, because the
+ * confirm screen must be able to draw the counts, both columns and every row
+ * from this alone. Nothing here carries a token, a client secret or a calendar
+ * identifier the owner did not choose.
+ */
+export async function planView(stored: StoredPlan): Promise<PlanView> {
+  const failures = (await readAvailability()).failures;
+  const beforeEvents = (Array.isArray(stored.plan.beforeEvents) ? stored.plan.beforeEvents : []) as Array<{
+    eventId: string;
+    title: string;
+    start: string;
+    end: string;
+  }>;
+
+  return {
+    id: stored.plan.id,
+    builtAt: stored.plan.builtAt.toISOString(),
+    state: stored.plan.state,
+    mode: stored.plan.mode,
+    availabilityAt: stored.plan.availabilityAt?.toISOString() ?? null,
+    availabilityStale: stored.plan.availabilityStale,
+    failures,
+    counts: {
+      added: stored.rows.filter((row) => row.verb === 'added').length,
+      moved: stored.rows.filter((row) => row.verb === 'moved').length,
+      removed: stored.rows.filter((row) => row.verb === 'removed').length,
+    },
+    totalChanges: stored.plan.totalChanges,
+    heldBack: stored.plan.heldBack,
+    beforeEvents: beforeEvents.map((event) => ({ ...event, change: 'same' as const })),
+    rows: stored.rows.map((row) => ({
+      id: row.id,
+      verb: row.verb,
+      site: row.site,
+      eventId: row.eventId,
+      sessionId: row.sessionId,
+      title: row.title,
+      cause: row.cause,
+      causeKey: row.causeKey,
+      beforeStart: row.beforeStart?.toISOString() ?? null,
+      beforeEnd: row.beforeEnd?.toISOString() ?? null,
+      afterStart: row.afterStart?.toISOString() ?? null,
+      afterEnd: row.afterEnd?.toISOString() ?? null,
+      defaultSelected: row.defaultSelected,
+      state: row.state,
+      outcomeDetail: row.outcomeDetail,
+      writeId: row.writeId,
+    })),
+  };
+}
+
+export type WriteLogView = {
+  id: string;
+  at: string;
+  site: string;
+  verb: string;
+  eventId: string;
+  title: string;
+  beforeStart: string | null;
+  beforeEnd: string | null;
+  afterStart: string | null;
+  afterEnd: string | null;
+  outcome: string;
+  mode: string;
+  undoesWriteId: string | null;
+  undoneByWriteId: string | null;
+};
+
+/** The permanent log, in the shape the screen holds. Undo is offered off this. */
+export async function writeLogView(limit = 100): Promise<WriteLogView[]> {
+  const rows = await readWriteLog(limit);
+  return rows.map((row) => ({
+    id: row.id,
+    at: row.at.toISOString(),
+    site: row.site,
+    verb: row.verb,
+    eventId: row.eventId,
+    title: row.title,
+    beforeStart: row.beforeStart?.toISOString() ?? null,
+    beforeEnd: row.beforeEnd?.toISOString() ?? null,
+    afterStart: row.afterStart?.toISOString() ?? null,
+    afterEnd: row.afterEnd?.toISOString() ?? null,
+    outcome: row.outcome,
+    mode: row.mode,
+    undoesWriteId: row.undoesWriteId,
+    undoneByWriteId: row.undoneByWriteId,
+  }));
 }

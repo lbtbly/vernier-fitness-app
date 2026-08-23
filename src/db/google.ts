@@ -330,6 +330,7 @@ export type NewPlan = {
   availabilityAt: Date | null;
   availabilityStale: boolean;
   failures: number;
+  beforeEvents: Array<{ eventId: string; title: string; start: string; end: string }>;
   totalChanges: number;
   heldBack: number;
   rows: Array<{
@@ -376,6 +377,7 @@ export async function storePlan(input: NewPlan): Promise<StoredPlan> {
         availabilityAt: input.availabilityAt,
         availabilityStale: input.availabilityStale,
         failures: input.failures,
+        beforeEvents: input.beforeEvents,
         totalChanges: input.totalChanges,
         heldBack: input.heldBack,
       })

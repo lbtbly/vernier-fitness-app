@@ -1807,6 +1807,16 @@ export const calendarPlan = pgTable(
     /** True when the plan was built on stored availability rather than a fresh read. */
     availabilityStale: boolean('availability_stale').notNull().default(false),
     failures: integer('failures').notNull().default(0),
+    /**
+     * The app calendar's events at the moment the plan was built, which is the
+     * "before" column the owner actually read.
+     *
+     * Stored rather than recomputed at render time, because a column recomputed
+     * later is a different column: it would show what the calendar holds now
+     * rather than what it held when the change was worked out, and the two
+     * differ exactly when something went wrong.
+     */
+    beforeEvents: jsonb('before_events').notNull().default([]),
     totalChanges: integer('total_changes').notNull().default(0),
     heldBack: integer('held_back').notNull().default(0),
     appliedAt: timestamp('applied_at', { withTimezone: true }),
