@@ -94,8 +94,23 @@ cmd_merge() {
   path=$(path_of "$slug"); branch=$(branch_of "$slug")
   [ -d "$path" ] || die "no tree at $path"
 
-  [ -z "$(git -C "$path" status --porcelain)" ] || die "$branch has uncommitted work; commit it first"
-  [ -z "$(git -C "$PRIMARY" status --porcelain)" ] || die "main is dirty; commit or stash it first"
+  # .forge/ is main's, and the gate writes two machine-local files into whatever
+  # tree it runs in: .checks-stamp and .rendered-deferred. Those are state, not
+  # work, and holding a merge on them would mean hand-cleaning five trees every
+  # round. Reset them here and judge dirt on everything else.
+  git -C "$path" checkout -- .forge/ 2>/dev/null || true
+  DIRT=$(git -C "$path" status --porcelain | grep -v '^.. \.forge/' || true)
+  [ -z "$DIRT" ] || die "$branch has uncommitted work outside .forge/; commit it first:
+$DIRT"
+  MAINDIRT=$(git -C "$PRIMARY" status --porcelain | grep -v '^.. \.forge/' || true)
+  [ -z "$MAINDIRT" ] || die "main is dirty outside .forge/; commit or stash it first:
+$MAINDIRT"
+  # Main's own .forge/ churn is the verifier's evidence and progress files. Commit
+  # it rather than merging on top of an index that has it half-staged.
+  if [ -n "$(git -C "$PRIMARY" status --porcelain)" ]; then
+    git -C "$PRIMARY" add -A .forge >/dev/null 2>&1 || true
+    git -C "$PRIMARY" commit -q -m "forge: state before merging $branch" >/dev/null 2>&1 || true
+  fi
 
   # The tree's own gate must be green before its code is allowed near main.
   say "gating $branch in its own tree"
@@ -120,6 +135,12 @@ cmd_merge() {
   # Whatever the merge did to .forge/, main's copy wins. The verifier's ticks
   # and the evidence log only ever move forward.
   git -C "$PRIMARY" checkout HEAD -- .forge/ 2>/dev/null || true
+  # The two gate artifacts are machine-local and must never ride a merge onto
+  # main. .rendered-deferred especially: main clears it only after
+  # strings:rendered has actually run there, and a copy arriving from a branch
+  # would make that clearing meaningless.
+  git -C "$PRIMARY" rm -q --cached --ignore-unmatch \
+    .forge/.rendered-deferred .forge/.checks-stamp >/dev/null 2>&1 || true
   git -C "$PRIMARY" add -A >/dev/null
 
   say "merged into the index. Next, in this order, by hand:"

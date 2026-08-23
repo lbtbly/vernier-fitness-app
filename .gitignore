@@ -55,4 +55,6 @@ logs/
 
 # Forge working state that is machine-local
 .forge/ARMED
+.forge/.checks-stamp
+.forge/.rendered-deferred
 .orch/journal/
