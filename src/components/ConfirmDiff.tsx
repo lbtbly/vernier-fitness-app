@@ -238,7 +238,18 @@ function ConfirmRowCard({
       <div className="between" style={{ alignItems: 'flex-start' }}>
         <div className="stack grow">
           {row.label ? <span className="lbl">{row.label}</span> : null}
-          <span className="strong">{removal ? <s>{row.title}</s> : row.title}</span>
+          {/*
+            * `.head` rather than the 15 px the pattern sheet draws the row title
+            * at. `00-patterns.html` is authoritative for the confirm diff and it
+            * is, for the structure: counts, groups, causes, per-row confirm,
+            * sticky footer. The type step is the one place screen 06 already
+            * shipped, at `.head`, and DESIGN.md 2b's rule for exactly this
+            * collision is that where the pattern sheet disagrees with the screen
+            * that draws the real thing, the screen wins.
+            */}
+          <span className="head" style={{ margin: '2px 0 0' }}>
+            {removal ? <s>{row.title}</s> : row.title}
+          </span>
           <span className="sub num" data-confirm-when>
             {row.wasWhen ? (
               <>

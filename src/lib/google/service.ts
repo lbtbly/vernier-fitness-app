@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm';
+import { and, eq, ne } from 'drizzle-orm';
 import { getDb } from '@/db/client';
 import { plannedSession } from '@/db/schema';
 import {
@@ -616,9 +616,13 @@ export async function applyPlan(
     const answer = await writeSite(site).run(run.ports, confirmation, input);
     const ok = wroteSomething(site, answer);
 
+    // The calendar that was just created, and the identifier it came back with.
+    // There is no lookup path back to it under `calendar.app.created`, so it is
+    // stored before anything else in this loop can need it.
+    let created = '';
     if (ok && site === 'calendars.insert') {
       const body = (answer.outcome === 'ok' ? answer.body : {}) as Record<string, unknown>;
-      const created = typeof body.id === 'string' ? body.id : '';
+      created = typeof body.id === 'string' ? body.id : '';
       calendarId = created;
       await updateConnection({
         appCalendarId: created,
@@ -632,7 +636,11 @@ export async function applyPlan(
       planRowId: row.id,
       site,
       verb: row.verb as 'added' | 'moved' | 'removed',
-      eventId: site === 'calendars.insert' ? row.eventId : row.eventId,
+      // WHAT WAS WRITTEN, which for the calendar row is the calendar itself.
+      // The log has to hold the thing the undo will name, and the undo of a
+      // created calendar names that calendar rather than the placeholder the
+      // plan row carried before it existed.
+      eventId: created !== '' ? created : row.eventId,
       sessionId: row.sessionId,
       title: row.title,
       beforeStart: row.beforeStart,
@@ -652,6 +660,7 @@ export async function applyPlan(
     if (ok && row.sessionId && row.afterStart) {
       await movePlannedSession(row.sessionId, row.afterStart, row.cause);
     }
+
 
     await markPlanRow(row.id, {
       state: ok ? 'applied' : 'failed',
@@ -717,13 +726,28 @@ function detailOf(answer: GoogleAnswer): string {
   return '';
 }
 
-/** The plan follows the calendar, with the cause the owner read frozen on it. */
+/**
+ * The plan follows the calendar, with the cause the owner read frozen on it.
+ *
+ * ONLY WHEN THE TIME ACTUALLY CHANGED. A session written into the calendar at
+ * exactly the time the training week already said is not a session that moved,
+ * and rewriting its cause would replace the reason the week placed it, "you
+ * finished a session on 3 of the last 4 Mondays", with a sentence about a
+ * calendar that agreed with it. The condition is in the WHERE clause rather than
+ * in a branch above it, so a caller cannot forget it.
+ */
 async function movePlannedSession(sessionId: string, start: Date, cause: string): Promise<void> {
   const db = getDb();
   await db
     .update(plannedSession)
     .set({ plannedFor: start, cause })
-    .where(and(eq(plannedSession.id, sessionId), eq(plannedSession.state, 'planned')));
+    .where(
+      and(
+        eq(plannedSession.id, sessionId),
+        eq(plannedSession.state, 'planned'),
+        ne(plannedSession.plannedFor, start),
+      ),
+    );
 }
 
 // --------------------------------------------------------------------------
@@ -791,13 +815,32 @@ export async function undoWrite(run: RunContext, writeId: string): Promise<UndoR
     mode: run.mode === 'demo' ? DEMONSTRATION_MODE : run.mode,
   };
 
-  const answer = await writeSite(site).run(run.ports, confirmation, input);
-  const ok = wroteSomething(site, answer);
+  let answer = await writeSite(site).run(run.ports, confirmation, input);
+  let landedSite = site;
+
+  /*
+   * PUTTING BACK AN EVENT THAT WAS DELETED, and the one place Google's own
+   * behaviour needs a second call.
+   *
+   * A deleted event is not gone from the calendar's history: it is cancelled,
+   * and its identifier stays taken. So re-inserting a removal by its
+   * deterministic id can come back 409, and the way to restore it is an update
+   * that sets the whole event again. That is `events.update`, which is already
+   * one of the enumerated sites and is driven with the same confirmation the
+   * owner gave for this undo, so nothing here reaches a write site the confirm
+   * step did not open.
+   */
+  if (site === 'events.insert' && answer.outcome === 'failed' && answer.status === 409) {
+    landedSite = 'events.update';
+    answer = await writeSite(landedSite).run(run.ports, confirmation, input);
+  }
+
+  const ok = wroteSomething(landedSite, answer);
 
   await appendWrite({
     planId: entry.planId,
     planRowId: entry.planRowId,
-    site,
+    site: landedSite,
     verb: 'undo',
     eventId: entry.eventId,
     sessionId: entry.sessionId,
