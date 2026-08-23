@@ -432,7 +432,7 @@ advance, so the budget does not have to be re-argued once per slice.
   contains no stored recipe-box credential, no crawler and no scheduled fetch
   against that provider. Evidence: four successful imports and a repository search
   for the provider hostname across scheduled jobs and credential storage.
-- [ ] **F92.** Two takeaway meals a week are proposed as dish types compatible
+- [x] **F92.** Two takeaway meals a week are proposed as dish types compatible
   with the stored targets and exclusions; the link opens a search page, no
   item-level link is constructed, no menu item or price is stored, and any
   nutrition figure is badged as an estimate or rendered "unknown". Evidence: the
@@ -718,7 +718,7 @@ Done level: deployed and reachable, from this machine, over Tailscale Serve HTTP
   context, cites a public source and invites a professional. Evidence: the
   statement, and a check over every explanation template against the banned-phrase
   list returning zero matches.
-- [ ] **R3.** `docs/product.md` records the third-party terms position for the
+- [x] **R3.** `docs/product.md` records the third-party terms position for the
   recipe-box and takeaway providers: neither has a public consumer interface, the
   only import is one artifact the owner already holds parsed locally, the takeaway
   link resolves to a search page, and no menu, price or credential is stored. Each
