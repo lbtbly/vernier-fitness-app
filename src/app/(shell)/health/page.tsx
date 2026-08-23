@@ -168,9 +168,28 @@ export default async function HealthPage({
     <>
       <ScreenTitle label={longDate(now, timeZone)} title={strings.health.title} />
 
+      {/*
+        * NO PREFETCH, HERE AND ON EVERY LINK THE FOUR C9 SURFACES DRAW.
+        *
+        * The precedent is `src/components/TabBar.tsx`, which stated the reason
+        * in slice 4 and is where this rule comes from: every shell route is
+        * `force-dynamic`, so a prefetch is a whole server render thrown away on
+        * a machine one room away that answers in milliseconds. What it costs is
+        * measured. Chrome recorded 17 to 19 `net::ERR_ABORTED` requests per
+        * viewport over the Today, quick-log, Health and player walk, and 5 to 6
+        * on a read-only Today plus Health walk against the live origin at 393,
+        * 768 and 1280: aborted prefetches of these four ranges and of a value
+        * sheet. A prefetch in flight when the owner taps is a prefetch the
+        * browser cancels, and C9 counts a cancelled request as a failed one.
+        *
+        * `prefetch={false}` disables it on viewport entry AND on hover, which is
+        * what next@16.3.2 documents on the prop itself. Four ranges no longer
+        * fetch four whole screens the owner has not asked for.
+        */}
       <nav className="segctl" aria-label={strings.health.rangeLabel}>
         {RANGES.map((days) => (
           <Link
+            prefetch={false}
             key={days}
             href={`/health?range=${days}`}
             aria-current={days === range ? 'page' : undefined}
@@ -350,7 +369,7 @@ export default async function HealthPage({
             <div className="head">{strings.signals.stepsEmptyTitle}</div>
             <p className="sub">{strings.signals.stepsEmptyBody}</p>
             <div className="actions">
-              <Link className="btn" href="/settings">
+              <Link prefetch={false} className="btn" href="/settings">
                 {strings.signals.openIntegrations}
               </Link>
             </div>
@@ -382,7 +401,7 @@ export default async function HealthPage({
             <div className="head">{strings.signals.sleepEmptyTitle}</div>
             <p className="sub">{strings.signals.sleepEmptyBody}</p>
             <div className="actions">
-              <Link className="btn" href="/settings">
+              <Link prefetch={false} className="btn" href="/settings">
                 {strings.signals.openIntegrations}
               </Link>
             </div>
@@ -421,7 +440,7 @@ export default async function HealthPage({
             <div className="head">{strings.signals.restingEmptyTitle}</div>
             <p className="sub">{strings.signals.restingEmptyBody}</p>
             <div className="actions">
-              <Link className="btn" href="/settings">
+              <Link prefetch={false} className="btn" href="/settings">
                 {strings.signals.openIntegrations}
               </Link>
             </div>
@@ -475,6 +494,7 @@ export default async function HealthPage({
         */}
       {openReviews.map((review) => (
         <Link
+          prefetch={false}
           className="card tight row value-link"
           key={review.id}
           href={`/health/labs/${review.id}`}
@@ -534,7 +554,7 @@ export default async function HealthPage({
             {strings.panel.note}
           </p>
           <div className="actions">
-            <Link className="btn block" href="/health/labs">
+            <Link prefetch={false} className="btn block" href="/health/labs">
               {strings.labs.openLabs}
             </Link>
           </div>

@@ -1,5 +1,5 @@
 import { mkdirSync } from 'node:fs';
-import { expect, test, type Page } from './fixtures';
+import { expect, retypeInto, test, type Page } from './fixtures';
 import {
   ensureScratchOwner,
   projectRoot,
@@ -63,15 +63,17 @@ async function signIn(page: Page) {
  * four rounds of this project over a field that could not be typed into at all.
  * If what is being proven is that a person can put a number in this box, the
  * test has to put it in the way a person does.
+ *
+ * It clears through `retypeInto` now. The version here pressed `Meta+A` and
+ * `Control+A`, and Playwright reads a capital A as a SHIFTED key, so what was
+ * sent was Cmd+Shift+A and Ctrl+Shift+A: neither selects anything. The single
+ * Backspace after it then deleted nothing, because a programmatic focus leaves
+ * the caret at index 0, and every value typed here landed in FRONT of the one
+ * already in the field. `#target-rate` read back "0.330.33" and F80 and F88
+ * both failed on it.
  */
 async function typeInto(page: Page, selector: string, value: string) {
-  const field = page.locator(selector);
-  await field.click();
-  await field.press('Meta+A').catch(() => undefined);
-  await field.press('Control+A').catch(() => undefined);
-  await field.press('Backspace');
-  await field.pressSequentially(value, { delay: 15 });
-  await expect(field).toHaveValue(value);
+  await retypeInto(page.locator(selector), value);
 }
 
 async function setBody(

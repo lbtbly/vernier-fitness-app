@@ -210,6 +210,7 @@ export function TrainWeek({
                 <OkIcon />
               </button>
               <Link
+                prefetch={false}
                 className="btn icon"
                 data-decision="edit"
                 href={`/train/session/${row.id}/edit`}
@@ -267,7 +268,7 @@ export function TrainWeek({
           <div className="between" style={{ marginTop: '10px' }}>
             <span className="chip">{STATES[row.state] ?? row.state}</span>
             {row.state === 'accepted' ? (
-              <Link className="btn quiet" href={`/train/session/${row.id}`}>
+              <Link prefetch={false} className="btn quiet" href={`/train/session/${row.id}`}>
                 {strings.trainWeek.startSession}
               </Link>
             ) : null}
@@ -304,17 +305,29 @@ export function TrainWeek({
           <span className="sub" data-decided>
             {strings.trainWeek.decided(accepted, rejected)}
           </span>
+          {/*
+            * The 48 px base, not the 44 px floor.
+            *
+            * `06-training-week.html:202` draws this one at 32, which is under
+            * the floor a control may not go under at all, and it shipped at 44
+            * as a compromise between the two. DESIGN.md section 2b settles it
+            * and says it wins over any sheet: the base is 48 on every shell
+            * screen, and 44 is the accessibility minimum for a tab item or an
+            * icon button and never the size of a named action. Only the padding
+            * is kept, so a borderless quiet button still sits flush with the
+            * right edge of the row it shares.
+            */}
           <button
             type="button"
             className="btn quiet"
-            style={{ minHeight: 'var(--touch)', padding: 0 }}
+            style={{ padding: 0 }}
             disabled={busy !== null}
             onClick={() => void post({ action: 'propose' }, null)}
           >
             {strings.trainWeek.askAgain}
           </button>
         </div>
-        <Link className="btn block" href="/">
+        <Link prefetch={false} className="btn block" href="/">
           {strings.trainWeek.seeToday}
         </Link>
         <p className="note centre" style={{ marginTop: '8px' }}>

@@ -153,7 +153,7 @@ export default async function TrainPage() {
           <div className="head">{strings.trainWeek.errorTitle}</div>
           <p className="sub">{strings.trainWeek.errorBody}</p>
           <div className="actions">
-            <Link className="btn block" href="/train">
+            <Link prefetch={false} className="btn block" href="/train">
               {strings.common.retry}
             </Link>
           </div>
@@ -168,6 +168,7 @@ export default async function TrainPage() {
           <p className="sub">{strings.readiness.notAnsweredBody}</p>
           <div className="actions">
             <Link
+              prefetch={false}
               className={accent === 'readiness' ? 'btn primary block' : 'btn block'}
               href="/train/readiness"
             >
@@ -177,7 +178,7 @@ export default async function TrainPage() {
         </section>
       ) : (
         <section className="card tight" data-card="readiness-done">
-          <Link className="row value-link" href="/train/readiness">
+          <Link prefetch={false} className="row value-link" href="/train/readiness">
             <div className="stack grow">
               <span className="head">{strings.readiness.title}</span>
               <span className="note">
@@ -276,14 +277,14 @@ export default async function TrainPage() {
 
       {/* ---------- the catalogue and its provenance ---------- */}
       <section className="card" data-card="links">
-        <Link className="row value-link" href="/train/catalogue">
+        <Link prefetch={false} className="row value-link" href="/train/catalogue">
           <div className="stack grow">
             <span className="head">{strings.catalogue.title}</span>
             <span className="note">{strings.catalogue.sub}</span>
           </div>
           <ChevronIcon className="ch" />
         </Link>
-        <Link className="row value-link" href="/train/media">
+        <Link prefetch={false} className="row value-link" href="/train/media">
           <div className="stack grow">
             <span className="head">{strings.media.title}</span>
             <span className="note">{strings.media.sub}</span>

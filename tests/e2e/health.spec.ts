@@ -1,6 +1,7 @@
 import { mkdirSync } from 'node:fs';
 import { clickWhenLive, expect, fillWhenLive, test, type Page } from './fixtures';
 import { mintSignInLink, projectRoot, query } from './host';
+import { strings } from '@/lib/strings';
 
 /**
  * Health, screen 04, and the two lines that only this screen can prove: the
@@ -163,26 +164,62 @@ test.describe('screen 04, Health', () => {
     for (const path of ['/', '/health']) {
       await page.goto(path);
       await page.waitForLoadState('networkidle');
-      const charts = await page.locator('svg.chart').evaluateAll((nodes) =>
-        nodes.map((node) => {
-          const id = node.getAttribute('data-chart') ?? '';
-          const table = node.parentElement?.querySelector('table');
-          return {
-            id,
-            role: node.getAttribute('role'),
-            labelledBy: node.getAttribute('aria-labelledby'),
-            title: node.querySelector('title')?.textContent ?? '',
-            desc: node.querySelector('desc')?.textContent ?? '',
-            rows: table ? table.querySelectorAll('tbody tr').length : 0,
-            columns: table ? table.querySelectorAll('thead th').length : 0,
-            caption: table?.querySelector('caption')?.textContent ?? '',
-          };
-        }),
+      const charts = await page.locator('svg.chart').evaluateAll(
+        (nodes, noReading) =>
+          nodes.map((node) => {
+            const id = node.getAttribute('data-chart') ?? '';
+            const table = node.parentElement?.querySelector('table');
+            /*
+             * Every table this chart owns. `health-body` draws two series in one
+             * svg and writes them as two tables, weight in the chart's own
+             * wrapper and waist immediately beside it, so the prefix is what
+             * finds both. Every other chart has exactly one.
+             */
+            const owned = [
+              ...node.ownerDocument.querySelectorAll(
+                `[data-chart-table="${id}"], [data-chart-table^="${id}-"]`,
+              ),
+            ].flatMap((wrapper) => [...wrapper.querySelectorAll('table')]);
+            const bodies = owned.flatMap((one) => [...one.querySelectorAll('tbody tr')]);
+            return {
+              id,
+              role: node.getAttribute('role'),
+              labelledBy: node.getAttribute('aria-labelledby'),
+              title: node.querySelector('title')?.textContent ?? '',
+              desc: node.querySelector('desc')?.textContent ?? '',
+              rows: table ? table.querySelectorAll('tbody tr').length : 0,
+              columns: table ? table.querySelectorAll('thead th').length : 0,
+              caption: table?.querySelector('caption')?.textContent ?? '',
+              tables: owned.length,
+              /*
+               * The rows across every table this chart owns that carry a real
+               * reading, as against the rows that say a day held none. A day
+               * with nothing in it is a row saying so and it is not a data
+               * point, so it is counted separately rather than folded in.
+               */
+              valueRows: bodies.filter(
+                (row) => (row.querySelector('td')?.textContent ?? '').trim() !== noReading,
+              ).length,
+              blankRows: bodies.filter(
+                (row) => (row.querySelector('td')?.textContent ?? '').trim() === noReading,
+              ).length,
+              /*
+               * Every mark the eye can see: one per dot, per bar, per point,
+               * each carrying the date it was drawn for.
+               */
+              marks: node.querySelectorAll('[data-reading]').length,
+            };
+          }),
+        strings.trend.noReading,
       );
       expect(charts.length).toBeGreaterThan(0);
       for (const chart of charts) {
         console.log(
           `C8  ${path} ${chart.id}: role=${chart.role}, ${chart.rows} data rows in ${chart.columns} columns`,
+        );
+        console.log(
+          `C8      ${chart.tables} table(s), ${chart.valueRows} row(s) carrying a reading, ` +
+            `${chart.blankRows} saying the day held none, against ${chart.marks} mark(s) drawn`,
         );
         console.log(`C8      title: ${chart.title}`);
         console.log(`C8      desc:  ${chart.desc}`);
@@ -190,9 +227,27 @@ test.describe('screen 04, Health', () => {
         expect(chart.labelledBy).toBe(`${chart.id}-title ${chart.id}-desc`);
         expect(chart.title.length).toBeGreaterThan(10);
         expect(chart.desc.length).toBeGreaterThan(30);
-        expect(chart.rows).toBeGreaterThan(5);
         expect(chart.caption.length).toBeGreaterThan(10);
-        seen.push(`${path} ${chart.id}`);
+        /*
+         * ONE ROW PER POINT, AND THE POINTS ARE COUNTED OFF THE CHART ITSELF.
+         *
+         * This used to read `rows > 5`, which is true of a chart drawing a
+         * month of mornings and false of a blood panel: an analyte with one
+         * stored panel draws one dot and writes one row, honestly, and the
+         * assertion failed the product for telling the truth. It was also the
+         * wrong shape of guard. A number of rows says nothing about whether
+         * those rows are the data; what says it is that the reader is handed
+         * exactly what the eye is shown.
+         *
+         * So the chart is asked how many marks it drew and the table has to
+         * carry one reading for each. It goes red on a chart that draws thirty
+         * dots and writes one summary row, which is the failure C8 names, and it
+         * goes red on a chart that draws a point it never wrote down.
+         */
+        expect(chart.marks).toBeGreaterThan(0);
+        expect(chart.tables).toBeGreaterThan(0);
+        expect(chart.valueRows).toBe(chart.marks);
+        seen.push(`${path} ${chart.id} ${chart.marks} point(s)`);
       }
     }
     console.log(`C8  charts walked: ${seen.length} (${seen.join(', ')})`);

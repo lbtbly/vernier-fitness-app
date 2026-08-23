@@ -1,5 +1,5 @@
 import { mkdirSync } from 'node:fs';
-import { expect, test, type Page } from './fixtures';
+import { expect, retypeInto, test, type Page } from './fixtures';
 import {
   ensureScratchOwner,
   projectRoot,
@@ -52,15 +52,17 @@ async function signIn(page: Page) {
   await page.waitForLoadState('networkidle');
 }
 
-/** Typed one keystroke at a time, never `fill()`. */
+/**
+ * Typed one keystroke at a time, never `fill()`, and emptied with a real
+ * select-all first.
+ *
+ * `Meta+A` reads as a SHIFTED A in Playwright, so the clear this used to do
+ * selected nothing, the Backspace after it deleted nothing, and the value typed
+ * next went in front of the value already there: "0.330.33" in `#target-rate`,
+ * which is where F88 failed.
+ */
 async function typeInto(page: Page, selector: string, value: string) {
-  const field = page.locator(selector);
-  await field.click();
-  await field.press('Meta+A').catch(() => undefined);
-  await field.press('Control+A').catch(() => undefined);
-  await field.press('Backspace');
-  await field.pressSequentially(value, { delay: 15 });
-  await expect(field).toHaveValue(value);
+  await retypeInto(page.locator(selector), value);
 }
 
 /**

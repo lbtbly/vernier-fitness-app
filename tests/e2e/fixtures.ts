@@ -184,6 +184,38 @@ export async function fillWhenLive(control: Locator, text: string, timeout = 15_
   await (await waitUntilLive(control, timeout)).fill(text);
 }
 
+/**
+ * Empty a field that already holds something, then type the new value into it.
+ *
+ * WHY IT EXISTS. `locator.press()` and `locator.pressSequentially()` focus the
+ * element first, and a programmatic focus on an `<input>` in Chrome puts the
+ * caret at index 0 rather than after the last character. So the widespread
+ * shape `press('Backspace')` then `pressSequentially(value)` deletes nothing at
+ * all and inserts the new value IN FRONT of the old one. Measured on the
+ * shipped product on 2026-08-23: `#target-rate` held "0.33" and read back
+ * "0.330.33"; the quick log's waist field held "98.5", was typed "92.5", and
+ * read back "92.598.5", so the write never landed and console-walk.spec.ts
+ * failed at all three viewports for a reason that had nothing to do with C9.
+ *
+ * WHAT IT DOES NOT DO. It does not use `fill`. `fill` sets a whole value in one
+ * input event and never moves a caret, and it is what let a field that turned
+ * `99.0` into `9.1` pass four rounds. Everything here is keys.
+ *
+ * WHAT WOULD MAKE IT GO RED. A field that cannot be emptied fails on the first
+ * assertion, with the value it refused to give up in the message, instead of
+ * silently concatenating. A field that reformats what is typed into it fails on
+ * the second. Both are real defects this repository has already shipped once.
+ */
+export async function retypeInto(control: Locator, text: string, timeout = 15_000): Promise<void> {
+  await waitUntilLive(control, timeout);
+  await control.click();
+  await control.press('ControlOrMeta+a');
+  await control.press('Backspace');
+  await baseExpect(control, 'the field would not give up the value it held').toHaveValue('');
+  await control.pressSequentially(text, { delay: 15 });
+  await baseExpect(control, 'the field did not take what was typed into it').toHaveValue(text);
+}
+
 /** What one keystroke did: the key, what the field held after it, where the caret sat. */
 export type Keystroke = { key: string; value: string; caret: number | null };
 

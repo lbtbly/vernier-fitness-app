@@ -411,7 +411,7 @@ export default async function TodayPage() {
             */}
           {summary.latest && summary.latestAt ? (
             <p className="note" style={{ marginTop: 'var(--s2)' }} data-daily="secondary">
-              <Link className="value-link" href={`/value/${summary.latest.id}`}>
+              <Link prefetch={false} className="value-link" href={`/value/${summary.latest.id}`}>
                 {strings.trend.legendDaily}, {dayLabel(summary.latestAt)}:{' '}
                 {formatNumber(summary.latest.value, unit)} {kg}.
               </Link>{' '}
@@ -650,7 +650,7 @@ export default async function TodayPage() {
           * where the shortcut is set up, and the label says what actually
           * fixes it.
           */}
-        <Link className="btn block" href="/settings" style={{ marginTop: 'var(--s3)' }}>
+        <Link prefetch={false} className="btn block" href="/settings" style={{ marginTop: 'var(--s3)' }}>
           <SyncIcon />
           {strings.signals.runShortcut}
         </Link>
@@ -668,7 +668,7 @@ export default async function TodayPage() {
           {labValues.slice(0, PANEL_ROWS_ON_TODAY).map((view) => {
             const label = valueLabel(view);
             return (
-              <Link className="row value-link" key={view.id} href={`/value/${view.id}`}>
+              <Link prefetch={false} className="row value-link" key={view.id} href={`/value/${view.id}`}>
                 <span className="grow">{metricLabel(view.metric)}</span>
                 <span className="num">
                   {label.number} {label.unit}
@@ -678,7 +678,7 @@ export default async function TodayPage() {
             );
           })}
           {labValues.length > PANEL_ROWS_ON_TODAY ? (
-            <Link className="row value-link" href="/health">
+            <Link prefetch={false} className="row value-link" href="/health">
               <span className="grow note">
                 {strings.labs.seeAllOnHealth(labValues.length - PANEL_ROWS_ON_TODAY)}
               </span>
@@ -710,7 +710,7 @@ export default async function TodayPage() {
                * not an inspector hidden behind a long press: it is one tap from
                * anywhere the number appears.
                */
-              <Link className="row value-link" key={view.id} href={`/value/${view.id}`}>
+              <Link prefetch={false} className="row value-link" key={view.id} href={`/value/${view.id}`}>
                 <div className="stack grow">
                   <span className="head">{metricLabel(view.metric)}</span>
                   <span className="sub num">

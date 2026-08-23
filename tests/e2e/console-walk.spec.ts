@@ -1,5 +1,5 @@
 import { mkdirSync } from 'node:fs';
-import { expect, test, type Page } from './fixtures';
+import { expect, retypeInto, test, type Page } from './fixtures';
 import {
   ensureScratchOwner,
   projectRoot,
@@ -32,10 +32,16 @@ import {
 
 const CAPTURES = `${projectRoot}.forge/evidence/slice-8/captures`;
 
+/*
+ * A different waist per viewport, so each of the three walks is a write of its
+ * own and not the same number sent three times. The provenance spine drops the
+ * identical fact from the same source on the same day, correctly, and three
+ * identical sends would have left two of these three walks proving a render.
+ */
 const VIEWPORTS = [
-  { name: '393x852', width: 393, height: 852 },
-  { name: '768x1024', width: 768, height: 1024 },
-  { name: '1280x800', width: 1280, height: 800 },
+  { name: '393x852', width: 393, height: 852, waist: '92.5' },
+  { name: '768x1024', width: 768, height: 1024, waist: '92.6' },
+  { name: '1280x800', width: 1280, height: 800, waist: '92.7' },
 ];
 
 type Watch = {
@@ -93,12 +99,20 @@ test.describe('C9, four surfaces at three viewports', () => {
       // proven is that the field takes typing, and `fill` sets a whole value in
       // one input event, which passed for four rounds over a field nobody could
       // type into.
+      //
+      // AND THE FIELD IS EMPTIED FIRST. The sheet prefills the waist with the
+      // last stored reading, and a click plus `keyboard.type` leaves the caret
+      // where a programmatic focus put it, which is index 0. So "92.5" typed
+      // over "98.5" produced "92.598.5", the save was refused for a waist no
+      // band accepts, `[data-just-logged]` never appeared, and this test failed
+      // at all three viewports on a step that has nothing to do with C9. Zero
+      // manual waist rows landed on any of the three runs, which is what the
+      // check below reads back.
       walked.push('/ quick log, as a write');
       await page.getByRole('button', { name: 'Quick log' }).first().click();
       const sheet = page.locator('.sheet');
       await expect(sheet).toBeVisible();
-      await page.locator('#quick-log-waist').click();
-      await page.keyboard.type('92.5');
+      await retypeInto(page.locator('#quick-log-waist'), viewport.waist);
       await sheet.getByRole('button', { name: 'Energy, 4 of 5' }).click();
       await sheet.getByRole('button', { name: 'Save' }).click();
       await expect(page.locator('[data-just-logged]')).toBeVisible();
