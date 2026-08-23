@@ -77,6 +77,7 @@ async function handle(request: Request) {
   }
 
   const action = typeof body.action === 'string' ? body.action : '';
+  if (action === 'preview') return preview(body);
   if (action === 'correct') return correct(body);
   if (action === 'confirm' || action === 'typed') return store(action, body);
   return refuse(422, strings.api.meals.badArtifact, strings.api.meals.badArtifactDetail);
@@ -109,6 +110,24 @@ function portionsOf(items: unknown): { ok: true; portions: PortionRange[] } | { 
     portions.push({ aliasId, gramsLow: low, gramsHigh: high, exactGrams: null, evidence });
   }
   return { ok: true, portions };
+}
+
+/**
+ * The totals for a plate, computed and not stored.
+ *
+ * The estimate screen needs it twice: when the owner weighs a line or adds
+ * something the model missed, and when he types a meal with no model involved
+ * at all. Both change what the plate is, and a sticky button that still says
+ * 750 kcal over a plate that lost its potatoes is a lie the size of a portion.
+ *
+ * It writes nothing. F96's zero covers this route as well as the estimate one:
+ * the only action here that stores a row is the one the owner presses Save on.
+ */
+async function preview(body: Record<string, unknown>) {
+  const parsed = portionsOf(body.items);
+  if (!parsed.ok) return refuse(422, strings.api.meals.badPortion, strings.api.meals.badPortionDetail);
+  const lookup = await aliasFoodLookup(parsed.portions.map((portion) => portion.aliasId));
+  return ok({ totals: totalsOf(parsed.portions, lookup), stored: 0 });
 }
 
 async function store(action: 'confirm' | 'typed', body: Record<string, unknown>) {

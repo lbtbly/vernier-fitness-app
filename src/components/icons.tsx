@@ -460,3 +460,24 @@ export function PlayIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+/**
+ * The camera, from `.forge/wireframes/09-meal-estimate.html`'s own symbol
+ * sheet: a body, a lens and the little hump over the viewfinder. Same five
+ * strokes, same 20-unit box as every other glyph here.
+ */
+export function CameraIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} aria-hidden="true" focusable="false">
+      <rect x="2.4" y="5.4" width="15.2" height="11.2" rx="2.6" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="10" cy="11" r="3.2" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <path
+        d="M7.2 5.4 8.4 3.4h3.2l1.2 2"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}

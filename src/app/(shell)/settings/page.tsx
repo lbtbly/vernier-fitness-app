@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { IngestPanel } from '@/components/IngestPanel';
 import { OperatorPanel } from '@/components/OperatorPanel';
@@ -54,6 +55,26 @@ export default async function SettingsPage() {
   return (
     <>
       <ScreenTitle title={strings.settings.title} sub={strings.settings.sub} />
+
+      {/*
+        * The AI consent, which is an integration like any other and belongs on
+        * the screen that owns them. Four switches, one per category, and the
+        * detail of what each one sends is on the screen behind this link rather
+        * than summarised here where it would drift.
+        */}
+      <section className="card" data-card="ai-consent">
+        <div className="between">
+          <div className="stack grow">
+            <span className="head">{strings.meals.consentScreenTitle}</span>
+            <span className="note">{strings.meals.consentScreenSub}</span>
+          </div>
+        </div>
+        <div className="actions">
+          <Link className="btn block" href="/settings/ai">
+            {strings.meals.consentScreenTitle}
+          </Link>
+        </div>
+      </section>
 
       <section className="card">
         <span className="lbl">{strings.settings.installationTitle}</span>

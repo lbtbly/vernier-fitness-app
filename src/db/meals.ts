@@ -304,3 +304,24 @@ export async function countMealRows(): Promise<{ entries: number; items: number 
   const [items] = await db.select({ count: sql<string>`count(*)` }).from(mealEntryItem);
   return { entries: Number(entries?.count ?? 0), items: Number(items?.count ?? 0) };
 }
+
+/**
+ * The entry a source record produced, if it produced one.
+ *
+ * The source screen asks it so a photo estimate can draw its own photograph:
+ * one record, one meal, and the record is what tap 2 lands on. It reads the
+ * chain's first row, because the photograph belongs to the estimate and not to
+ * the corrections that followed it.
+ */
+export async function readEntryOfSourceRecord(
+  sourceRecordId: string,
+): Promise<MealEntryRow | undefined> {
+  const db = getDb();
+  const [row] = await db
+    .select()
+    .from(mealEntry)
+    .where(eq(mealEntry.sourceRecordId, sourceRecordId))
+    .orderBy(asc(mealEntry.correctionIndex))
+    .limit(1);
+  return row;
+}
