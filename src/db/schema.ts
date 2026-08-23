@@ -500,3 +500,413 @@ export const writeRequest = pgTable(
   },
   (table) => [index('write_request_key').on(table.key)],
 );
+
+/**
+ * ---------------------------------------------------------------------------
+ * Nutrition. Slice 9.
+ *
+ * The food table, the recipe catalogue with its versioned per-serving
+ * snapshots, the four dietary rules, the daily targets, the generated week and
+ * the shopping list it builds.
+ *
+ * ONE COLUMN CONVENTION RUNS THROUGH ALL OF IT AND IT IS THE POINT: EVERY
+ * NUTRIENT IS NULLABLE. A missing nutrient is stored null and rendered
+ * "unknown", never 0. Anses leaves fibre out on seventy of its three and a half
+ * thousand rows and leaves energy out on eighty-one, and a schema that made
+ * those columns NOT NULL DEFAULT 0 would turn "we do not know" into "there is
+ * none of it" at the moment of the insert, where no screen could ever get it
+ * back.
+ * ---------------------------------------------------------------------------
+ */
+
+/**
+ * One food, as Anses published it.
+ *
+ * Seeded at boot from drizzle/seed/foods.csv, which scripts/build-food-seed.mjs
+ * derives from the Table Ciqual 2025 spreadsheet. Licence Ouverte 2.0 permits
+ * the redistribution; `tableVersion` and the publisher are what the licence
+ * obliges in return, and the data-sources screen reads both off this table
+ * rather than off a constant in a component.
+ *
+ * `energySource` is F79's marker. Anses publishes an energy value for most rows
+ * and not all; the rest are computed here by the EU Regulation 1169/2011 Annex
+ * XIV conversion factors, which is the same basis Anses uses for the ones it
+ * publishes. The column keeps the two tellable apart for ever, and it is null
+ * on a row that has no energy at all, which is a third state and not a zero.
+ *
+ * `censoredFields` names the fields where Anses printed "traces" or "< 0,5" and
+ * this app stored 0. A censored zero is a ceiling somebody measured against,
+ * and it is not the same fact as a measured zero.
+ */
+export const food = pgTable(
+  'food',
+  {
+    /** 'ciqual:26038'. The source and its own reference, never a bare number. */
+    id: text('id').primaryKey(),
+    source: text('source').notNull(),
+    sourceRef: text('source_ref').notNull(),
+    nameFr: text('name_fr').notNull(),
+    groupCode: text('group_code').notNull(),
+    subgroupCode: text('subgroup_code').notNull(),
+    kcal100g: doublePrecision('kcal_100g'),
+    proteinG: doublePrecision('protein_g'),
+    carbG: doublePrecision('carb_g'),
+    fatG: doublePrecision('fat_g'),
+    fibreG: doublePrecision('fibre_g'),
+    energySource: text('energy_source'),
+    censoredFields: text('censored_fields').array().notNull().default([]),
+    tableVersion: text('table_version').notNull(),
+    fetchedAt: timestamp('fetched_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('food_subgroup').on(table.subgroupCode),
+    index('food_energy_source').on(table.energySource),
+    unique('food_source_ref').on(table.source, table.sourceRef),
+  ],
+);
+
+/**
+ * A recipe. Either one Vernier ships, or one the owner imported.
+ *
+ * `nameKey` names a line in the string catalogue and `name` holds free text,
+ * and exactly one of them is set. A recipe this app authored is copy like every
+ * other word it authored, so it takes a key: C6 does not stop caring because a
+ * sentence went through a database column on its way to the screen, and slice
+ * 3 already paid for that lesson twice. A recipe the owner imports in slice 10
+ * carries his own words and takes the free-text column.
+ */
+export const recipe = pgTable(
+  'recipe',
+  {
+    id: text('id').primaryKey(),
+    nameKey: text('name_key'),
+    name: text('name'),
+    servings: integer('servings').notNull(),
+    cookMinutes: integer('cook_minutes').notNull(),
+    /** breakfast, lunch, dinner or snack. What the generator will place it as. */
+    slot: text('slot').notNull(),
+    /** 'vernier' for the shipped catalogue, 'recipe_box' or 'import' later. */
+    origin: text('origin').notNull(),
+    originRef: text('origin_ref'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index('recipe_slot').on(table.slot, table.cookMinutes)],
+);
+
+/**
+ * One ingredient line of one recipe, in grams.
+ *
+ * `aliasId` is the everyday name, which lives in src/lib/food-aliases.ts with
+ * its aisle, its shop unit and its free-from alternative, because a name a
+ * person reads is copy and belongs in the catalogue. `foodId` is the Anses row
+ * the nutrition is summed from, and it is nullable on purpose: an ingredient
+ * that resolves to nothing is counted as unresolved in the snapshot's coverage
+ * rather than quietly dropped, which is the difference between a recipe that
+ * says 82 percent and one that says a number it has not earned.
+ */
+export const recipeIngredient = pgTable(
+  'recipe_ingredient',
+  {
+    id: text('id').primaryKey(),
+    recipeId: text('recipe_id')
+      .notNull()
+      .references(() => recipe.id),
+    aliasId: text('alias_id').notNull(),
+    foodId: text('food_id').references(() => food.id),
+    grams: doublePrecision('grams').notNull(),
+    position: integer('position').notNull(),
+    /** True when the recipe box supplies it, so the shopping list deducts it. */
+    boxSupplied: boolean('box_supplied').notNull().default(false),
+  },
+  (table) => [index('recipe_ingredient_recipe').on(table.recipeId, table.position)],
+);
+
+/**
+ * The versioned per-serving snapshot, and it is a snapshot rather than a view
+ * for two reasons the research names: the weekly review has to show what the
+ * owner ate under the food data as it stood then, and recomputing every recipe
+ * on every render is waste.
+ *
+ * `sourceFoodIdsHash` is what makes the first reason enforceable. It covers
+ * every ingredient's food id and its stored nutrients, so a change to any Anses
+ * row behind this recipe changes the hash. A changed hash RAISES A QUESTION and
+ * never replaces the row: 0009's trigger refuses UPDATE on the figures outright,
+ * so the quiet unapproved write the panel named cannot happen from any code
+ * path, present or future. A recompute writes a new version and supersedes this
+ * one; the old one stays readable.
+ *
+ * `coveragePct` is the share of recipe mass that resolved to a food row.
+ * `fibreCoveragePct` is the same share counted only where fibre was not null,
+ * and it is a separate number because fibre is the field most likely to be
+ * missing and a single coverage figure would hide exactly that.
+ */
+export const recipeNutrition = pgTable(
+  'recipe_nutrition',
+  {
+    id: text('id').primaryKey(),
+    recipeId: text('recipe_id')
+      .notNull()
+      .references(() => recipe.id),
+    version: integer('version').notNull(),
+    computedAt: timestamp('computed_at', { withTimezone: true }).notNull().defaultNow(),
+    perServingKcal: doublePrecision('per_serving_kcal'),
+    perServingProteinG: doublePrecision('per_serving_protein_g'),
+    perServingCarbG: doublePrecision('per_serving_carb_g'),
+    perServingFatG: doublePrecision('per_serving_fat_g'),
+    perServingFibreG: doublePrecision('per_serving_fibre_g'),
+    provenance: text('provenance').notNull(),
+    coveragePct: doublePrecision('coverage_pct').notNull(),
+    fibreCoveragePct: doublePrecision('fibre_coverage_pct').notNull(),
+    sourceFoodIdsHash: text('source_food_ids_hash').notNull(),
+    /** How many ingredients carry an energy Vernier computed rather than Anses. */
+    computedEnergyCount: integer('computed_energy_count').notNull().default(0),
+    ingredientCount: integer('ingredient_count').notNull(),
+    unresolvedCount: integer('unresolved_count').notNull().default(0),
+    supersededAt: timestamp('superseded_at', { withTimezone: true }),
+  },
+  (table) => [
+    unique('recipe_nutrition_version').on(table.recipeId, table.version),
+    index('recipe_nutrition_current').on(table.recipeId, table.supersededAt),
+  ],
+);
+
+/**
+ * A recipe whose ingredient rows no longer hash to what its stored snapshot was
+ * computed from.
+ *
+ * The same shape as `import_question` next door and for the same reason: a
+ * silently replaced number is a wrong number nobody knows to look for. Both
+ * figures are held, the stored snapshot has not moved, and the owner answers.
+ */
+export const recipeQuestion = pgTable(
+  'recipe_question',
+  {
+    id: text('id').primaryKey(),
+    recipeId: text('recipe_id')
+      .notNull()
+      .references(() => recipe.id),
+    snapshotId: text('snapshot_id')
+      .notNull()
+      .references(() => recipeNutrition.id),
+    storedHash: text('stored_hash').notNull(),
+    incomingHash: text('incoming_hash').notNull(),
+    raisedAt: timestamp('raised_at', { withTimezone: true }).notNull().defaultNow(),
+    state: text('state').notNull().default('open'),
+    answeredAt: timestamp('answered_at', { withTimezone: true }),
+    answer: text('answer'),
+  },
+  (table) => [index('recipe_question_state').on(table.state, table.raisedAt)],
+);
+
+/**
+ * A dietary rule, and the kind is the whole of it.
+ *
+ * FOUR KINDS, FOUR BEHAVIOURS, AND NOTHING RESOLVES ONE AS ANOTHER. An allergy
+ * is refused, an intolerance is substituted, an exclusion is omitted and a
+ * preference is ranked. They are four different verbs, so nuts as a preference
+ * and shellfish as an exclusion cannot collapse into each other however the
+ * generator is later rewritten: `src/lib/dietary-rules.ts` dispatches on the
+ * kind to four separate functions and there is no shared matcher underneath
+ * them, and `tests/unit/dietary-rules.test.ts` asserts exactly that.
+ *
+ * The check constraint on `kind` lives in the database, in 0009, so a fifth
+ * kind cannot be written by any handler that forgets.
+ */
+export const dietaryRule = pgTable(
+  'dietary_rule',
+  {
+    id: text('id').primaryKey(),
+    kind: text('kind').notNull(),
+    /** A token: 'shellfish', 'lactose', 'nuts'. The words for it are copy. */
+    subject: text('subject').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [unique('dietary_rule_kind_subject').on(table.kind, table.subject)],
+);
+
+/**
+ * The daily target, and every number that produced it.
+ *
+ * One row, forever, the way the owner is one row. The equation, the activity
+ * level and the planned rate are stored beside the answer, so a target can be
+ * read back and re-derived rather than taken on trust, and so F80's two figures
+ * are checkable against the row that produced them.
+ *
+ * `hardFloorConfirmedAt` is the only way a target under 1500 kcal exists at all.
+ * The route refuses to write one without it and the screen that sets it names a
+ * professional, which is F81's middle tier implemented rather than promised.
+ */
+export const nutritionTarget = pgTable(
+  'nutrition_target',
+  {
+    id: text('id').primaryKey(),
+    singleton: boolean('singleton').notNull().default(true),
+    sex: text('sex').notNull(),
+    ageYears: integer('age_years').notNull(),
+    heightCm: doublePrecision('height_cm').notNull(),
+    weightKg: doublePrecision('weight_kg').notNull(),
+    equation: text('equation').notNull(),
+    activityLevel: text('activity_level').notNull(),
+    pal: doublePrecision('pal').notNull(),
+    rmrKcal: doublePrecision('rmr_kcal').notNull(),
+    tdeeKcal: doublePrecision('tdee_kcal').notNull(),
+    rateKgPerWeek: doublePrecision('rate_kg_per_week').notNull(),
+    kcalTarget: integer('kcal_target').notNull(),
+    proteinG: integer('protein_g').notNull(),
+    carbG: integer('carb_g').notNull(),
+    fatG: integer('fat_g').notNull(),
+    fibreG: integer('fibre_g').notNull(),
+    belowResting: boolean('below_resting').notNull().default(false),
+    hardFloorConfirmedAt: timestamp('hard_floor_confirmed_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [uniqueIndex('nutrition_target_singleton').on(table.singleton)],
+);
+
+/** One generated week. `maxCookMinutes` is the limit F86 measures against. */
+export const mealPlan = pgTable(
+  'meal_plan',
+  {
+    id: text('id').primaryKey(),
+    weekStart: timestamp('week_start', { withTimezone: true }).notNull(),
+    generatedAt: timestamp('generated_at', { withTimezone: true }).notNull().defaultNow(),
+    maxCookMinutes: integer('max_cook_minutes').notNull(),
+    kcalTarget: integer('kcal_target').notNull(),
+    state: text('state').notNull().default('draft'),
+    confirmedAt: timestamp('confirmed_at', { withTimezone: true }),
+    /** The generation this plan is, so two runs at 20 and 60 both keep a row. */
+    generation: integer('generation').notNull().default(1),
+  },
+  (table) => [
+    uniqueIndex('meal_plan_week').on(table.weekStart),
+    index('meal_plan_generated').on(table.generatedAt),
+  ],
+);
+
+/**
+ * One meal in one week, decided on its own.
+ *
+ * F86's "one at a time" is the state column and the per-row route behind it.
+ * There is no accept-all and there is no autosave: a meal is proposed until the
+ * owner says otherwise, and saying otherwise about Tuesday's lunch says nothing
+ * about Tuesday's dinner.
+ *
+ * `snapshotId` names the exact `recipe_nutrition` version the day totals were
+ * added from, so a recompute next month does not silently rewrite what last
+ * week's plan said it was.
+ */
+export const plannedMeal = pgTable(
+  'planned_meal',
+  {
+    id: text('id').primaryKey(),
+    planId: text('plan_id')
+      .notNull()
+      .references(() => mealPlan.id),
+    /** 0 is the Monday the week starts on. */
+    dayIndex: integer('day_index').notNull(),
+    slot: text('slot').notNull(),
+    recipeId: text('recipe_id')
+      .notNull()
+      .references(() => recipe.id),
+    snapshotId: text('snapshot_id').references(() => recipeNutrition.id),
+    state: text('state').notNull().default('proposed'),
+    decidedAt: timestamp('decided_at', { withTimezone: true }),
+    /** True once the lactose-free alternative has been chosen for this meal. */
+    lactoseFree: boolean('lactose_free').notNull().default(false),
+    position: integer('position').notNull(),
+  },
+  (table) => [
+    index('planned_meal_plan').on(table.planId, table.dayIndex, table.position),
+    unique('planned_meal_slot').on(table.planId, table.dayIndex, table.slot),
+  ],
+);
+
+/** The list built from one confirmed week. One list per plan. */
+export const shoppingList = pgTable(
+  'shopping_list',
+  {
+    id: text('id').primaryKey(),
+    planId: text('plan_id')
+      .notNull()
+      .references(() => mealPlan.id),
+    builtAt: timestamp('built_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [uniqueIndex('shopping_list_plan').on(table.planId)],
+);
+
+/**
+ * One line of the shopping list.
+ *
+ * `deduction` is F89 and it is why the original quantity has its own column. A
+ * line the recipe box supplies, or one the owner has marked in stock, STAYS ON
+ * THE LIST with its original quantity struck through. It does not disappear.
+ * A line that vanishes is a line nobody can check, and the whole value of a
+ * deduction is that the owner sees it happen rather than trusts that it did.
+ */
+export const shoppingItem = pgTable(
+  'shopping_item',
+  {
+    id: text('id').primaryKey(),
+    listId: text('list_id')
+      .notNull()
+      .references(() => shoppingList.id),
+    aliasId: text('alias_id').notNull(),
+    aisle: text('aisle').notNull(),
+    /** 'g', 'kg' or 'count'. Nothing else, and no millilitres anywhere. */
+    unit: text('unit').notNull(),
+    /** What the recipes actually need, before rounding to a shop unit. */
+    neededQuantity: doublePrecision('needed_quantity').notNull(),
+    /** What the list first said to buy, kept so a deduction can strike it. */
+    originalQuantity: doublePrecision('original_quantity').notNull(),
+    /** What it says now, after any edit the owner made this week. */
+    quantity: doublePrecision('quantity').notNull(),
+    countNoun: text('count_noun'),
+    deduction: text('deduction').notNull().default('none'),
+    /** The day the box arrives, for a box deduction. Null otherwise. */
+    deductionDayIndex: integer('deduction_day_index'),
+    checked: boolean('checked').notNull().default(false),
+    checkedAt: timestamp('checked_at', { withTimezone: true }),
+    removed: boolean('removed').notNull().default(false),
+    position: integer('position').notNull(),
+  },
+  (table) => [
+    index('shopping_item_list').on(table.listId, table.aisle, table.position),
+    unique('shopping_item_alias').on(table.listId, table.aliasId),
+  ],
+);
+
+/** Which meal wants how much of a line, so "where this comes from" is data. */
+export const shoppingItemSource = pgTable(
+  'shopping_item_source',
+  {
+    id: text('id').primaryKey(),
+    itemId: text('item_id')
+      .notNull()
+      .references(() => shoppingItem.id),
+    plannedMealId: text('planned_meal_id')
+      .notNull()
+      .references(() => plannedMeal.id),
+    grams: doublePrecision('grams').notNull(),
+  },
+  (table) => [index('shopping_item_source_item').on(table.itemId)],
+);
+
+/**
+ * What the owner says is already in the cupboard.
+ *
+ * Marked by hand and never inferred. The app does not watch a quantity go down
+ * and decide it was used up, because it cannot see the cupboard and a guess
+ * here shows up as a missing ingredient on a Tuesday night.
+ */
+export const stockItem = pgTable(
+  'stock_item',
+  {
+    id: text('id').primaryKey(),
+    aliasId: text('alias_id').notNull(),
+    quantity: doublePrecision('quantity').notNull(),
+    unit: text('unit').notNull(),
+    markedAt: timestamp('marked_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [uniqueIndex('stock_item_alias').on(table.aliasId)],
+);
