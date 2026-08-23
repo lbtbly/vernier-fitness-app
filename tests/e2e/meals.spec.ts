@@ -10,6 +10,7 @@ import {
 } from './host';
 import { scanJpeg } from '../../src/lib/jpeg';
 import { exifApp1Segment, jpegWithGps } from '../unit/jpeg-fixture';
+import { buildLabPdf } from '../unit/lab-pdf';
 import { strings } from '../../src/lib/strings';
 
 /**
@@ -275,11 +276,11 @@ test('F93 the photo is 1092 px, re-encoded on the device, and stored with zero t
   expect(storedScan.markerNames.filter((name) => name.startsWith('APP'))).toHaveLength(0);
 });
 
-test('F95 F96 the estimate is a range, and abandoning it leaves zero rows', async ({ page }) => {
+test('F95 F96 the estimate is a range, and abandoning one leaves the tables where they were', async ({
+  page,
+}) => {
   await signIn(page);
   await turnOnPhotoAnalysis(page);
-
-  const entriesBefore = Number(scratchQuery('select count(*) from meal_entry'));
 
   // C13's first state: the consent card, before a photograph exists. Both
   // lists, what goes and what stays, and the cost of the call.
@@ -321,23 +322,41 @@ test('F95 F96 the estimate is a range, and abandoning it leaves zero rows', asyn
   }
   await page.setViewportSize({ width: 393, height: 852 });
 
-  // Abandon it. Not a discard button: leave the screen, which is what a person
-  // who changes his mind actually does.
+  /*
+   * SAVE THIS ONE, so the tables are not empty when the next one is abandoned.
+   *
+   * A count of zero over a table nothing has ever been written to reads exactly
+   * like a table that refused a write, and only one of those is evidence. The
+   * population these zeros are read against is the rows this save puts there.
+   */
+  await page.locator('[data-action="save"]').click();
+  await page.waitForURL(/\/eat\/entry\//);
+  const entriesAfterSave = Number(scratchQuery('select count(*) from meal_entry'));
+  const itemsAfterSave = Number(scratchQuery('select count(*) from meal_entry_item'));
+  const callsAfterSave = Number(scratchQuery('select count(*) from ai_call'));
+  expect(entriesAfterSave).toBeGreaterThan(0);
+  expect(itemsAfterSave).toBeGreaterThan(0);
+
+  // A second estimate, and this one is abandoned. Not a discard button: leave
+  // the screen, which is what a person who changes his mind actually does.
+  await sendPhoto(page);
+  await expect(page.locator('[data-meal-estimate="estimate"]')).toBeVisible();
   await page.goto('/eat');
   await page.waitForLoadState('networkidle');
 
-  const entriesAfter = Number(scratchQuery('select count(*) from meal_entry'));
-  const items = Number(scratchQuery('select count(*) from meal_entry_item'));
-  const calls = Number(scratchQuery('select count(*) from ai_call'));
+  const entriesAfterAbandon = Number(scratchQuery('select count(*) from meal_entry'));
+  const itemsAfterAbandon = Number(scratchQuery('select count(*) from meal_entry_item'));
+  const callsAfterAbandon = Number(scratchQuery('select count(*) from ai_call'));
   console.log(
-    `F96: meal_entry ${entriesBefore} before, ${entriesAfter} after; meal_entry_item ${items}; ` +
-      `ai_call ${calls}, which is the record of the call that was paid for and not a meal`,
+    `F96: meal_entry ${entriesAfterSave} then ${entriesAfterAbandon}, ` +
+      `meal_entry_item ${itemsAfterSave} then ${itemsAfterAbandon}, ` +
+      `ai_call ${callsAfterSave} then ${callsAfterAbandon}`,
   );
-  expect(entriesAfter).toBe(entriesBefore);
-  expect(items).toBe(0);
+  expect(entriesAfterAbandon).toBe(entriesAfterSave);
+  expect(itemsAfterAbandon).toBe(itemsAfterSave);
   // The call itself IS recorded, because it cost money. That is the honest half
   // of "nothing is stored": the day did not move, and the spend is not hidden.
-  expect(calls).toBeGreaterThan(0);
+  expect(callsAfterAbandon).toBe(callsAfterSave + 1);
 });
 
 test('F97 after confirmation and three edits the entry still says estimate and reaches the reply in two taps', async ({
@@ -445,32 +464,103 @@ test('F90 F91 two recipes of two portions become four meals, and each asks separ
   await page.locator('[data-action="import"]').click();
   await page.locator('[data-state="imported"]').waitFor();
 
-  const recipes = Number(
+  // 3. A downloaded document. Read by the same local parser the laboratory
+  // sheets go through, on this machine, with no network anywhere in it.
+  await page.locator('[data-kind="document"]').click();
+  await page.setInputFiles('#box-file', {
+    name: 'card.pdf',
+    mimeType: 'application/pdf',
+    buffer: Buffer.from(
+      buildLabPdf([lines.split('\n').map((line) => ({ plain: line }))]),
+    ),
+  });
+  await typeInto(page, '#box-name', 'Salmon traybake');
+  await typeInto(page, '#box-servings', '2');
+  await page.locator('[data-action="import"]').click();
+  await page.locator('[data-state="imported"]').waitFor();
+
+  /*
+   * 4. A photograph of the card, through the same local recogniser slice 7
+   * ships for a scanned laboratory page.
+   *
+   * TWO OUTCOMES ARE LEGITIMATE AND ONLY TWO. Either it reads the card, or it
+   * refuses BY NAME because the French language data is not on the storage
+   * volume, which is the same file F65 needs and which nothing in this
+   * repository downloads. What is graded here is that there is no third
+   * outcome: no silent success over an empty read, and nothing stored on the
+   * refusal path.
+   */
+  const recipesBeforePhoto = Number(
     scratchQuery("select count(*) from recipe where origin = 'recipe_box'"),
+  );
+  await page.locator('[data-kind="photo"]').click();
+  await page.setInputFiles('#box-file', {
+    name: 'card.jpg',
+    mimeType: 'image/jpeg',
+    buffer: Buffer.from(jpegWithGps(1092, 819)),
+  });
+  await typeInto(page, '#box-name', 'Photographed card');
+  await typeInto(page, '#box-servings', '2');
+  await page.locator('[data-action="import"]').click();
+  const imported = page.locator('[data-state="imported"]');
+  const refused = page.locator('.card.error[data-state="error"]');
+  await Promise.race([
+    imported.waitFor({ timeout: 120_000 }).catch(() => undefined),
+    refused.waitFor({ timeout: 120_000 }).catch(() => undefined),
+  ]);
+  const photoRead = await imported.isVisible();
+  const recipesAfterPhoto = Number(
+    scratchQuery("select count(*) from recipe where origin = 'recipe_box'"),
+  );
+  console.log(
+    `F91: the photographed card was ${photoRead ? 'read' : 'refused by name'}; ` +
+      `box recipes ${recipesBeforePhoto} before, ${recipesAfterPhoto} after`,
+  );
+  if (photoRead) {
+    expect(recipesAfterPhoto).toBe(recipesBeforePhoto + 1);
+  } else {
+    await expect(refused).toContainText(strings.api.labs.languageDataAbsent);
+    expect(recipesAfterPhoto).toBe(recipesBeforePhoto);
+  }
+
+  const recipes = Number(
+    scratchQuery("select count(*) from recipe where origin = 'recipe_box' and name is not null"),
   );
   const placed = Number(
     scratchQuery("select count(*) from meal_entry where origin = 'recipe_box'"),
   );
   console.log(`F90: ${recipes} box recipes imported, ${placed} meals placed`);
-  expect(recipes).toBe(2);
-  expect(placed).toBe(4);
+  // Three artifacts read for certain, and the fourth reported above. Every one
+  // of them placed two portions.
+  expect(recipes).toBeGreaterThanOrEqual(3);
+  expect(placed).toBe(recipes * 2);
 
   // Two questions, answered separately, and the answers are stored per recipe.
   await page.goto('/eat');
   await page.waitForLoadState('networkidle');
   const cards = page.locator('[data-box-recipe]');
-  await expect(cards).toHaveCount(2);
+  expect(await cards.count()).toBe(recipes);
 
+  /*
+   * TWO RECIPES, TWO QUESTIONS, TWO DIFFERENT ANSWERS. The first is answered
+   * one way and the second another, and then BOTH are read back: an answer that
+   * leaked from one recipe to the other would make the two rows equal, which is
+   * exactly what F90's "separately" forbids.
+   */
   await cards.nth(0).locator('[data-answer="next_day"]').click();
   await expect(cards.nth(0)).toHaveAttribute('data-answered', 'next_day');
+  await expect(cards.nth(1)).toHaveAttribute('data-answered', 'none');
   await cards.nth(1).locator('[data-answer="frozen"]').click();
   await expect(cards.nth(1)).toHaveAttribute('data-answered', 'frozen');
+  await expect(cards.nth(0)).toHaveAttribute('data-answered', 'next_day');
 
   const answers = scratchQuery(
     'select second_portion_answer from recipe_box_item order by created_at',
   );
-  console.log(`F90: the two stored answers are ${answers.replace('\n', ' and ')}`);
-  expect(answers.split('\n').sort()).toEqual(['frozen', 'next_day']);
+  console.log(`F90: the stored answers, one per recipe, are ${answers.split('\n').join(', ')}`);
+  const stored = answers.split('\n');
+  expect(stored[0]).toBe('next_day');
+  expect(stored[1]).toBe('frozen');
 
   // The frozen portion left the week as a correction, not as a deletion.
   const frozen = Number(
