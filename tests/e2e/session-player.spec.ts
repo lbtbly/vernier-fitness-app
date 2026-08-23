@@ -145,8 +145,10 @@ test.describe('F74, the player runs offline and reads the clock', () => {
     await expect(page.locator('[data-phase="rest"]')).toBeVisible();
 
     const startedAt = Date.now();
-    const before = await page.locator('[data-timer]').innerText();
-    const total = Number((await page.locator('.restring .sub').innerText()).replace(/\D/g, ''));
+    // textContent, not innerText: the timer is an SVG <text> node and
+    // `innerText` is an HTMLElement property that an SVG element does not have.
+    const before = (await page.locator('[data-timer]').textContent()) ?? '';
+    const total = Number(((await page.locator('.restring .sub').textContent()) ?? '').replace(/\D/g, ''));
     console.log(`rest of ${total} s, showing ${before} at the moment it opened`);
 
     // Freeze the page. Timers stop being delivered, exactly as they do on a
@@ -158,7 +160,7 @@ test.describe('F74, the player runs offline and reads the clock', () => {
     await cdp.send('Page.setWebLifecycleState', { state: 'active' });
 
     const elapsed = (Date.now() - startedAt) / 1000;
-    const after = await page.locator('[data-timer]').innerText();
+    const after = (await page.locator('[data-timer]').textContent()) ?? '';
     const [minutes, seconds] = after.split(':').map(Number);
     const remaining = minutes * 60 + seconds;
     const expected = Math.max(0, total - elapsed);
