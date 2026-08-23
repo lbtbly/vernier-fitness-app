@@ -1,5 +1,5 @@
 import { mkdirSync } from 'node:fs';
-import { expect, retypeInto, test, type Page } from './fixtures';
+import { countWhenDrawn, expect, retypeInto, test, type Page } from './fixtures';
 import {
   ensureScratchOwner,
   projectRoot,
@@ -213,8 +213,10 @@ test.describe('F86 and C12: the week generates, and each meal is decided on its 
     await page.waitForURL(/\/eat$/);
     await page.waitForLoadState('networkidle');
 
+    // `countWhenDrawn` rather than `count`: /eat has a loading.tsx, and
+    // `networkidle` fires while the skeleton is still the screen.
     const meals = page.locator('[data-meal]');
-    const count = await meals.count();
+    const count = await countWhenDrawn(meals);
     const breakfasts = Number(
       scratchQuery("select count(*) from planned_meal where slot = 'breakfast'"),
     );
@@ -237,7 +239,7 @@ test.describe('F86 and C12: the week generates, and each meal is decided on its 
     await page.waitForLoadState('networkidle');
 
     const rows = page.locator('[data-meal]');
-    const total = await rows.count();
+    const total = await countWhenDrawn(rows);
     expect(total).toBeGreaterThan(0);
     for (let index = 0; index < total; index += 1) {
       const row = rows.nth(index);

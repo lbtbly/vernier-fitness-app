@@ -1,5 +1,5 @@
 import { mkdirSync } from 'node:fs';
-import { expect, retypeInto, test, type Page } from './fixtures';
+import { countWhenDrawn, expect, retypeInto, test, type Page } from './fixtures';
 import {
   ensureScratchOwner,
   projectRoot,
@@ -89,8 +89,12 @@ async function buildAWeek(page: Page) {
   await page.waitForLoadState('networkidle');
 
   // Accept every meal, one at a time, which is the only way this product has.
+  //
+  // `countWhenDrawn` rather than `count`, because /eat has a loading.tsx and
+  // `networkidle` fires while the skeleton is still the screen. This counted 0
+  // against a page that read "Building next week".
   const rows = page.locator('[data-meal]');
-  const total = await rows.count();
+  const total = await countWhenDrawn(rows);
   expect(total).toBeGreaterThan(0);
   for (let index = 0; index < total; index += 1) {
     await rows.nth(index).locator('[data-control="accept"]').click();
