@@ -178,7 +178,13 @@ test('F36. connect, import, sync and status all complete with no client id and n
     'select state || \'|\' || mode || \'|\' || (cursor is not null) from withings_connection',
   );
   console.log(`the connection row after the run: ${connected}`);
-  expect(connected).toBe('connected|demo|t');
+  // 'true', not 't'. psql -tA renders a bare boolean column as t/f, but this
+  // query CONCATENATES with ||, and Postgres casts boolean to text as
+  // true/false. Same shape as the ingest.spec assertion that hid thirteen tests
+  // behind it: a test asserting how a value is printed rather than what it is.
+  // GOES RED IF: the connection stops being connected, stops being demo, or
+  // stops carrying a cursor.
+  expect(connected).toBe('connected|demo|true');
 });
 
 test('F38. the cursor is a stored fact and it names what was committed', async () => {
