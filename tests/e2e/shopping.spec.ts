@@ -119,7 +119,12 @@ test.describe('F88: one list, grouped by aisle, whose ticks survive a reload', (
     await page.goto('/eat/shopping');
     await page.waitForLoadState('networkidle');
 
-    const aisles = await page.locator('[data-aisle]').evaluateAll((nodes) =>
+    // /eat/shopping has a loading.tsx of its own, and `evaluateAll` reads the
+    // document once with no wait, exactly as `count` does. The wait first, so
+    // an empty array here means an empty list rather than an early look.
+    const aisleGroups = page.locator('[data-aisle]');
+    await countWhenDrawn(aisleGroups);
+    const aisles = await aisleGroups.evaluateAll((nodes) =>
       nodes.map((node) => node.getAttribute('data-aisle')),
     );
     const items = Number(scratchQuery('select count(*) from shopping_item'));
