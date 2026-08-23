@@ -125,7 +125,7 @@ async function handle(request: Request) {
 
   let opticalPages: PageItems[] = [];
   if (imageOnly.length > 0) {
-    const outcome = await recognisePages(bytes, imageOnly);
+    const outcome = await recognisePages(forRecognition, imageOnly);
     if (!outcome.available) {
       await removeDocument(id);
       console.error(`[vernier] lab ${id}: optical recognition ${outcome.reason}, ${outcome.detail}`);

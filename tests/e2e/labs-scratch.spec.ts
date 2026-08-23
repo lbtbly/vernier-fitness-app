@@ -12,7 +12,7 @@ import {
   testStack,
   waitForScratch,
 } from './host';
-import { garbledPanelPdf, panelPdf, scannedPanelPdf } from '../unit/lab-pdf';
+import { garbledPanelPdf, imageOnlyPdf, panelPdf } from '../unit/lab-pdf';
 
 /**
  * Slice 7 end to end, on the scratch instance.
@@ -410,10 +410,20 @@ test('F65. a page with no text layer is detected, counted and routed', async ({ 
   const filesBefore = scratchLabFiles();
   await page.goto('/health/labs');
   await page.waitForLoadState('networkidle');
+  // A PAGE THAT CARRIES INK AND NO TEXT LAYER, which is what a photocopy is.
+  // The fixture used to be a page with an empty content stream: image-only by
+  // the census, and also blank, so recognition read a white sheet and returned
+  // no words. Correct, and it could never prove the half of F65 that says every
+  // RECOGNISED row arrives flagged. This one draws four analyte lines and
+  // embeds them as an image.
   await page
     .locator('#lab-file')
-    .setInputFiles({ name: 'scan.pdf', mimeType: 'application/pdf', buffer: Buffer.from(scannedPanelPdf()) });
-  await page.waitForTimeout(3000);
+    .setInputFiles({
+      name: 'scan.pdf',
+      mimeType: 'application/pdf',
+      buffer: Buffer.from(await imageOnlyPdf()),
+    });
+  await page.waitForTimeout(6000);
   await page.waitForLoadState('networkidle');
 
   // Two outcomes and both are honest. Either the recogniser is installed, the
@@ -453,12 +463,26 @@ test('F65. a page with no text layer is detected, counted and routed', async ({ 
     return;
   }
 
+  const rows = await page.locator('[data-row]').count();
   const optical = await page.locator('[data-row]').filter({ hasText: /optical recognition/i }).count();
   const blocked = await page.locator('[data-row][data-blocked="true"]').count();
-  console.log(`F65  ${optical} row(s) came from optical recognition, ${blocked} are blocked`);
-  expect(optical).toBeGreaterThan(0);
+  const read = await page
+    .locator('[data-row]')
+    .evaluateAll((nodes) => nodes.map((node) => (node.textContent ?? '').replace(/\s+/g, ' ').trim()));
+  console.log(`F65  ${rows} rows off the photocopied page, ${optical} say optical recognition, ${blocked} blocked`);
+  for (const [index, line] of read.entries()) console.log(`F65    row ${index + 1}: ${line}`);
+  // The population first. A zero here would make the two claims below vacuous,
+  // and the whole point is that recognition really produced rows.
+  expect(rows).toBeGreaterThan(0);
+  expect(optical).toBe(rows);
   // EVERY recognised row arrives flagged. Not most of them.
-  expect(blocked).toBeGreaterThanOrEqual(optical);
+  expect(blocked).toBe(rows);
+  // And the mode is recorded, so this cannot pass over a document that quietly
+  // came off a text layer after all.
+  const mode = scratchQuery('select mode from lab_document order by uploaded_at desc limit 1');
+  console.log(`F65  the review holding was stored in mode ${mode}`);
+  expect(mode.trim()).toBe('ocr');
+  expect(measurementCount()).toBe(before);
   await page.screenshot({ path: `${CAPTURES}/f65-optical-rows-flagged.png`, fullPage: true });
 });
 

@@ -51,14 +51,64 @@ export type OcrOutcome =
       detail: string;
     };
 
-type RecognisedWord = {
+export type RecognisedWord = {
   text: string;
   bbox: { x0: number; y0: number; x1: number; y1: number };
   confidence: number;
 };
 
+/**
+ * What tesseract.js 7 actually hands back, which is not what this file assumed.
+ *
+ * It assumed `data.words`. Measured against tesseract.js 7.0.0 on this Mac with
+ * the French model on the volume: `recognize()` answered and `data.words` was
+ * undefined, so the recognition path threw "Cannot read properties of undefined
+ * (reading 'filter')" and every scanned upload came back as
+ * `recognition_failed`. Version 7 nests words under blocks, paragraphs and
+ * lines, and returns `blocks: null` unless the call asks for them.
+ *
+ * Both shapes are read below. The flattening is one function so a unit test can
+ * hand it either and watch the words come out.
+ */
+type RecognisedLine = { words?: RecognisedWord[] };
+type RecognisedParagraph = { lines?: RecognisedLine[] };
+type RecognisedBlock = { paragraphs?: RecognisedParagraph[] };
+export type RecognisedPage = {
+  blocks?: RecognisedBlock[] | null;
+  words?: RecognisedWord[];
+};
+
+/**
+ * Every word on a recognised page, whichever shape the library returned, and
+ * `null` when it returned no layout at all.
+ *
+ * The distinction is the whole point. An empty array is a page that was really
+ * read and carries no words, which a blank back side of a scan genuinely is.
+ * `null` is a library that answered with neither `words` nor `blocks`, which is
+ * a recognition that did not happen wearing the clothes of one that found
+ * nothing. The first is a fact about the paper and the second is a defect, and
+ * they must not read the same way to the caller.
+ */
+export function wordsFromResult(data: RecognisedPage): RecognisedWord[] | null {
+  if (Array.isArray(data.words)) return data.words;
+  if (!Array.isArray(data.blocks)) return null;
+  const words: RecognisedWord[] = [];
+  for (const block of data.blocks ?? []) {
+    for (const paragraph of block.paragraphs ?? []) {
+      for (const line of paragraph.lines ?? []) {
+        for (const word of line.words ?? []) words.push(word);
+      }
+    }
+  }
+  return words;
+}
+
 type Worker = {
-  recognize: (image: Buffer) => Promise<{ data: { words: RecognisedWord[] } }>;
+  recognize: (
+    image: Buffer,
+    options?: Record<string, unknown>,
+    output?: Record<string, boolean>,
+  ) => Promise<{ data: RecognisedPage }>;
   terminate: () => Promise<void>;
 };
 
@@ -208,8 +258,21 @@ export async function recognisePages(bytes: Uint8Array, pages: number[]): Promis
       if (!size) {
         return { available: false, reason: 'recognition_failed', detail: String(page) };
       }
-      const result = await worker.recognize(Buffer.from(image));
-      recognised.push({ page, items: itemsFromWords(result.data.words, size.height, scale) });
+      // `blocks: true` is what makes version 7 return the word boxes at all.
+      // Without it `data.blocks` is null, `data.words` does not exist, and the
+      // page comes back as one string with no layout, which this parser cannot
+      // read a column out of.
+      const result = await worker.recognize(Buffer.from(image), undefined, { blocks: true });
+      const words = wordsFromResult(result.data);
+      if (words === null) {
+        // No layout at all, which is a recognition that did not happen wearing
+        // the clothes of one that found nothing. A page of zero words IS kept:
+        // the blank back side of a scan is a real page and the route's own
+        // "no result rows" refusal is what answers a document made only of
+        // those.
+        return { available: false, reason: 'recognition_failed', detail: `no-layout-on-page-${page}` };
+      }
+      recognised.push({ page, items: itemsFromWords(words, size.height, scale) });
     }
     return { available: true, pages: recognised };
   } catch (error) {
