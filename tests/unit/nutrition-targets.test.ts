@@ -76,6 +76,28 @@ describe('the three floors, implemented rather than promised', () => {
     expect(maxWeeklyLossKg(140)).toBe(1.0);
   });
 
+  test('the offered ceiling is always a rate the database will accept', () => {
+    // The check constraint in 0009 computes `least(1.0, weight_kg * 0.01)`
+    // exactly, so a ceiling rounded to the NEAREST hundredth would offer 0.56
+    // to a 55.5 kg body whose real ceiling is 0.555 and then be refused by the
+    // row it was offered for. Rounded down it is always inside the guideline.
+    for (const weight of [89.0, 55, 55.5, 61.3, 76, 87, 140]) {
+      const offered = maxWeeklyLossKg(weight);
+      const exact = Math.min(NUTRITION.maxWeeklyLossKg, weight * 0.01);
+      expect(offered, `${weight} kg was offered a rate over its own ceiling`).toBeLessThanOrEqual(
+        exact + 0.0001,
+      );
+      // And the offer is never a rate the screen would refuse in turn.
+      const verdict = planTarget({
+        body: { sex: 'male', ageYears: 38, heightCm: 183, weightKg: weight },
+        level: 'light',
+        rateKgPerWeek: offered,
+        hardFloorConfirmed: true,
+      });
+      expect(verdict.outcome).not.toBe('rate_refused');
+    }
+  });
+
   test('no confirmation exists that unlocks a refused rate', () => {
     const confirmed = planTarget({
       body: OWNER,

@@ -154,7 +154,14 @@ export function maxWeeklyLossKg(weightKg: number): number {
   const fraction = weightKg * NUTRITION.maxWeeklyLossFractionOfBodyWeight;
   // Two decimals, because the number is offered back to the owner as the rate
   // he may have, and 0.8900000000000001 is not an offer.
-  return Math.round(Math.min(NUTRITION.maxWeeklyLossKg, fraction) * 100) / 100;
+  //
+  // DOWN AND NEVER TO THE NEAREST. Rounding to the nearest would offer 0.56 to
+  // a 55.5 kg body whose real ceiling is 0.555, and the check constraint in
+  // 0009 computes the real ceiling: the screen would offer a rate the database
+  // then refused, which is the worst shape a refusal can take. Rounding down is
+  // always inside the guideline and is at most a hundredth of a kilogram
+  // slower than it needs to be.
+  return Math.floor(Math.min(NUTRITION.maxWeeklyLossKg, fraction) * 100) / 100;
 }
 
 /** The daily deficit a weekly rate implies, at the static 7700 kcal per kg. */
