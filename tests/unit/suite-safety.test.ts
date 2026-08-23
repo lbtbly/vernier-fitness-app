@@ -280,11 +280,18 @@ describe('the suite against the owner\'s installation', () => {
    *                           printed beside it.
    *   trend-scratch:201       REAL. The age of the newest sample, read back out
    *                           of the database after landing it.
-   *   today.spec.ts:125       REAL. The scroll offset, on a page that scrolls.
-   *   today.spec.ts:158       REAL. The dots group exists on the chart and the
+   *   today.spec.ts:169       REAL. The scroll offset, on a page that scrolls.
+   *   today.spec.ts:202       REAL. The dots group exists on the chart and the
    *                           line being defended is that no path joins them.
-   *   today.spec.ts:225,281   REAL. Both filter a list the same run printed.
-   *   today.spec.ts:374-375   REAL. Console errors and failed requests, over a
+   *   today.spec.ts:358       REAL. Dots inside a hatched band, and the loop it
+   *                           sits in runs once per band the chart drew. The
+   *                           band count is asserted equal to the runs of
+   *                           absence in the chart's own table one screen above,
+   *                           and the table is itself asserted against a count
+   *                           of days taken from Postgres, so an empty loop is a
+   *                           chart with nothing to hatch and the run says so.
+   *   today.spec.ts:436       REAL. Filters a list the same run printed.
+   *   today.spec.ts:529-530   REAL. Console errors and failed requests, over a
    *                           walk whose surfaces are counted and printed.
    *   notices.spec.ts:246     REAL. The route's own answer, whose `questions`
    *                           array is asserted non-empty one line away.
