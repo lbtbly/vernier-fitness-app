@@ -525,40 +525,40 @@ advance, so the budget does not have to be re-argued once per slice.
   the app refuses to send push when it is absent, and only the public half is ever
   present in anything the browser receives. Evidence: the script run, the refused
   send, and a search of the served markup and bundles for the private half.
-- [ ] **F114.** Subscription runs inside the tap handler with no awaited call
+- [x] **F114.** Subscription runs inside the tap handler with no awaited call
   before the permission request, and the diagnostics screen reports secure context,
   installed state, notification availability, platform version, permission,
   worker state, local subscription, key match, server-side knowledge of this
   endpoint, and the last delivery status code, each as its own row with its own
   remedy, stopping at the first failure. Evidence: the handler source and captures
   of the screen in a passing and a failing state.
-- [ ] **F115.** The worker shows a notification on every push it receives, a send
+- [x] **F115.** The worker shows a notification on every push it receives, a send
   that would show none is refused at the source, and the payload also carries the
   declarative shape with a non-empty title. Evidence: the refused send, and a
   payload capture showing both shapes.
-- [ ] **F116.** A 404 or 410 from the push service deletes the stored subscription;
+- [x] **F116.** A 404 or 410 from the push service deletes the stored subscription;
   400, 403, 413 and 429 do not. The app re-reads its subscription on every launch
   and re-posts it when the endpoint differs from the last one sent. Evidence: six
   status responses with the row state after each, plus the rotated-endpoint test.
-- [ ] **F117.** Reminders for session, measurements, menu confirmation and missing
+- [x] **F117.** Reminders for session, measurements, menu confirmation and missing
   data are enabled per category, group into one notification per window, are
   suppressed during the configured quiet hours, and each carries an action that
   closes the item. Evidence: the settings capture, a grouped notification, a
   suppressed one, and the item state after the action.
-- [ ] **F118.** The weekly review renders in a local preview with no mail transport
+- [x] **F118.** The weekly review renders in a local preview with no mail transport
   configured, holding weight and waist, adherence, activity, sleep, training,
   nutrition, what went well, what was hard, and the proposal for next week.
   Evidence: the rendered preview with all nine sections.
-- [ ] **F119.** The Sunday 20:00 Europe/Paris run claims its period in the run
+- [x] **F119.** The Sunday 20:00 Europe/Paris run claims its period in the run
   ledger before doing any work, with the period computed in Paris local time: five
   ticks inside one period, and a tick on each side of the October clock change,
   produce exactly one ledger row and one plan per period. Evidence: the ledger rows
   and the plan counts.
-- [ ] **F120.** A container down across the scheduled window fires the run exactly
+- [x] **F120.** A container down across the scheduled window fires the run exactly
   once on next boot and no more, and a run still marked running past its timeout is
   marked failed at startup rather than blocking its period. Evidence: the ledger
   after a simulated outage and after a simulated crash mid-run.
-- [ ] **F121.** The weekly review reads the week back and proposes the next one as
+- [x] **F121.** The weekly review reads the week back and proposes the next one as
   a confirmable diff, carries no score, applies no colour to a missed session, and
   contains no guilt wording. Evidence: the capture and a copy check against the
   denylist with zero matches.
