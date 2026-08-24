@@ -467,34 +467,34 @@ advance, so the budget does not have to be re-argued once per slice.
   meal photo and the usage ledger records its input and output token counts.
   Evidence: the capture and the ledger row. Sibling: F95, which proves the same
   flow with no API key.
-- [ ] **F101.** In demonstration mode the whole calendar flow runs with no client
+- [x] **F101.** In demonstration mode the whole calendar flow runs with no client
   identifier: calendar picker, busy periods, dedicated calendar, diff and write all
   complete against a seeded calendar and every event is marked demonstration.
   Evidence: the five steps captured.
-- [ ] **F102.** The authorization request carries exactly three scopes, the
+- [x] **F102.** The authorization request carries exactly three scopes, the
   calendar-list read scope, the free-busy scope and the app-created-calendar scope,
   and neither the full calendar scope nor the all-events scope. The scope list in
   the request matches the list recorded in the integration document character for
   character. Evidence: the request URL and a test comparing both lists.
-- [ ] **F103.** Authorization carries offline access and a forced consent prompt on
+- [x] **F103.** Authorization carries offline access and a forced consent prompt on
   every run, validates the returned state before touching the code, persists the
   refresh token before the handler returns, and redirects to a URL containing no
   authorization code. Evidence: the request, a rejected mismatched state, the
   stored token, and the final URL.
-- [ ] **F104.** Availability is read only through the free-busy query: no event
+- [x] **F104.** Availability is read only through the free-busy query: no event
   listing is issued against any calendar other than the app-created one, and a
   per-calendar error in the response is surfaced on screen rather than treated as
   free time. Evidence: a repository search over the request builders, and a capture
   of the surfaced error from a seeded unshared calendar.
-- [ ] **F105.** Every write targets the stored app-created calendar identifier: no
+- [x] **F105.** Every write targets the stored app-created calendar identifier: no
   request path contains the primary keyword or any other calendar identifier, and a
   missing stored identifier alongside a live grant surfaces as an error rather than
   creating a second calendar. Evidence: the recorded request paths and the error
   capture.
-- [ ] **F106.** Event identifiers are derived deterministically from the app's own
+- [x] **F106.** Event identifiers are derived deterministically from the app's own
   record, so re-applying the same confirmed plan produces no duplicate: the event
   count is identical before and after the second apply. Evidence: both counts.
-- [ ] **F107.** Nothing writes before the diff is confirmed. The diff shows counts
+- [x] **F107.** Nothing writes before the diff is confirmed. The diff shows counts
   first in the order added, moved, removed; the dedicated calendar before and after
   as two columns; rows grouped by verb each naming the cause in plain words;
   per-row confirmation with additions and moves selected by default and removals
@@ -504,17 +504,17 @@ advance, so the budget does not have to be re-argued once per slice.
   the permanent write log keeps undo available for every past write: a write from
   two sessions earlier undoes successfully. Evidence: three event listings, before,
   after and after undo, plus the older undo.
-- [ ] **F109.** An invalid-grant response deletes the stored refresh token, sets
+- [x] **F109.** An invalid-grant response deletes the stored refresh token, sets
   the integration to disconnected with a timestamp and the raw error body, stops
   background synchronisation, and shows one reconnect action. It is never retried.
   Evidence: the stored state, the capture, and a request log showing exactly one
   attempt.
-- [ ] **F110.** No outbound write reaches a third party outside a confirmed diff.
+- [x] **F110.** No outbound write reaches a third party outside a confirmed diff.
   Every outbound write call site is enumerated, each is reachable only from a
   confirmation handler, and driving each one with the confirmation step skipped
   writes nothing. Evidence: the enumerated call-site list and one skipped-confirm
   test per call site with its zero-write assertion.
-- [ ] **F111.** With the calendar provider unreachable the training week still
+- [x] **F111.** With the calendar provider unreachable the training week still
   proposes from the last stored availability and names the stale calendar by cause.
   Evidence: a capture with the provider blocked.
 - [ ] **F112.** **[OPERATOR]** A real authorization round trip completes, the
@@ -677,7 +677,7 @@ their interaction detail in `.forge/wireframes/`, and the standards skill.
 - [ ] **C13.** Meal estimate matches screen 09 at three viewports: consent, then
   portions as ranges, then the saved entry with its estimate badge. Evidence: nine
   captures, three states at three viewports.
-- [ ] **C14.** The training week and the calendar write render the same confirm
+- [x] **C14.** The training week and the calendar write render the same confirm
   component with different rows, matching the definition on screen 00 at three
   viewports. Evidence: six captures plus the shared component reference.
 - [ ] **C15.** Weekly review matches screen 11 at three viewports. On the calendar
