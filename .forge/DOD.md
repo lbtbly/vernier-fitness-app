@@ -314,7 +314,7 @@ advance, so the budget does not have to be re-argued once per slice.
   characters is detected as image-only, routed to optical recognition, and every
   recognised row arrives flagged for confirmation. Evidence: the detection count
   per page, the routing log and the flags.
-- [ ] **F66.** The movement catalogue holds at least 30 movements, each with cue
+- [x] **F66.** The movement catalogue holds at least 30 movements, each with cue
   text and a bundled still or animation that renders with the network disabled.
   Evidence: the count, and a capture of five movement cards offline.
 - [x] **F67.** Every media record carries source URL, author or source name,
