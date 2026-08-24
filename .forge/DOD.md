@@ -568,12 +568,12 @@ advance, so the budget does not have to be re-argued once per slice.
 - [ ] **F123.** **[OPERATOR]** A real weekly review sends through the configured
   mail adapter and arrives. Evidence: the sent record and the received message.
   Sibling: F118, which proves the same render with no mail transport.
-- [ ] **F124.** The daily archive is authenticated and self-describing: it holds a
+- [x] **F124.** The daily archive is authenticated and self-describing: it holds a
   database dump, the media and document volume, and a version manifest, encrypted
   with a chunk-framed authenticated cipher, produced using only software already
   present on this Mac. Evidence: the archive listing after decryption, and a
   process trace showing no external encryption binary invoked.
-- [ ] **F125.** Integrity fails loudly on corruption: a truncated archive, an
+- [x] **F125.** Integrity fails loudly on corruption: a truncated archive, an
   archive with two chunks swapped, and an archive with one byte flipped each exit
   non-zero with a named error. Evidence: three runs with their exit codes and
   messages.
@@ -584,23 +584,23 @@ advance, so the budget does not have to be re-argued once per slice.
   path unavailable they land in the local fallback and the machine status screen
   raises an alert naming both the path and the cause. Evidence: a listing in each
   destination and the alert capture.
-- [ ] **F128.** Retention is configurable and enforced: with retention set to 3, a
+- [x] **F128.** Retention is configurable and enforced: with retention set to 3, a
   fourth run leaves exactly three archives. Evidence: the directory listing after
   each of the four runs.
-- [ ] **F129.** Database, media and document storage each live on a declared
+- [x] **F129.** Database, media and document storage each live on a declared
   volume, no product data is written inside an image, and no script or document in
   the repository contains a command that removes volumes. Evidence: the volume
   declarations, a listing of the image's writable paths, and a repository search.
-- [ ] **F130.** A full structured export and a full tabular export download from
+- [x] **F130.** A full structured export and a full tabular export download from
   the interface and re-import into a scratch instance with identical row counts,
   and a readable report exports as a document. Evidence: both files, both row-count
   sets, and the report.
-- [ ] **F131.** Permanent deletion removes every row for the chosen category behind
+- [x] **F131.** Permanent deletion removes every row for the chosen category behind
   a typed confirmation phrase, and a query afterwards returns zero. The retention
   period stated per data category in the privacy document matches the value the
   code enforces. Evidence: the capture, the zero-row query, and the two matching
   values per category.
-- [ ] **F132.** The machine status screen shows container state, disk headroom,
+- [x] **F132.** The machine status screen shows container state, disk headroom,
   time of the last archive, time of the last restore check, and last successful sync
   per integration, turns warn at its stated thresholds, and reveals no credential.
   Evidence: the capture in a healthy and a degraded state, plus a search of the
@@ -686,7 +686,7 @@ their interaction detail in `.forge/wireframes/`, and the standards skill.
   confirm screen can produce as well as at a two-row diff; the row list below them
   states its own length as a number before it is scrolled. Evidence: three
   captures, both timed reads each with its row count, and the stated length.
-- [ ] **C16.** Settings and integrations matches screen 12 at three viewports,
+- [x] **C16.** Settings and integrations matches screen 12 at three viewports,
   carrying integration status with last successful sync and a test control, the AI
   consent switches, export, permanent delete, archive status and machine state.
   Evidence: three captures.
@@ -724,7 +724,7 @@ Done level: deployed and reachable, from this machine, over Tailscale Serve HTTP
   link resolves to a search page, and no menu, price or credential is stored. Each
   claim names the terms page consulted and its verification date. Evidence: the
   section, plus the repository search results it cites.
-- [ ] **R4.** Personal health data processed under the household exemption is
+- [x] **R4.** Personal health data processed under the household exemption is
   covered by artifacts, not claims: a privacy notice written for a human naming a
   lawful basis per purpose, a stated retention period per data category, every
   processor that receives data named with what it receives, and a captured export

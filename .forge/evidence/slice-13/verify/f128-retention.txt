@@ -1,0 +1,26 @@
+F128 [verifier], 2026-08-24, SCRATCH INSTANCE started with SCRATCH_BACKUP_RETENTION=3.
+$ docker exec vernier-scratch printenv BACKUP_RETENTION_DAYS  ->  3   (the live app reads 30)
+Four runs, each driven by pressing Back up now on /settings/data in a browser.
+retention configured at 3
+before any run the configured directory holds 1 archive(s)
+after run 1: 2 archive(s)
+after run 2: 3 archive(s)
+after run 3: 3 archive(s)
+after run 4: 3 archive(s)
+backup_run kept/removed: 3/1
+after run 1: 2 archive(s)
+    vernier-20260824T013157Z.archive
+    vernier-20260824T013222Z.archive
+after run 2: 3 archive(s)
+    vernier-20260824T013157Z.archive
+    vernier-20260824T013222Z.archive
+    vernier-20260824T013224Z.archive
+after run 3: 3 archive(s)
+    vernier-20260824T013222Z.archive
+    vernier-20260824T013224Z.archive
+    vernier-20260824T013226Z.archive
+after run 4: 3 archive(s)
+    vernier-20260824T013224Z.archive
+    vernier-20260824T013226Z.archive
+    vernier-20260824T013228Z.archive
+backup_run kept/removed: 3/1

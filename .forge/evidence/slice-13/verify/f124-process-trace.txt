@@ -1,0 +1,8 @@
+F124 process trace [verifier], 2026-08-24, SCRATCH INSTANCE.
+A poller reading /proc/<pid>/comm inside the app container with shell builtins only,
+running across one whole archive run started by pressing Back up now on /settings/data.
+255857 process samples taken in total, 168620 of them during the archive run.
+Every distinct process name observed inside the container, with its sample count:
+  next-server (v       127929
+  sh                   127928
+Encryption, archive or dump binaries among them: none

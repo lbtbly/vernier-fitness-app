@@ -1,0 +1,39 @@
+F130 [verifier], 2026-08-24.
+
+A. BOTH FILES DOWNLOADED FROM THE INTERFACE, by clicking the download control on
+   /settings/data in a browser (an anchor with download, [data-export=json|csv|pdf]):
+   json: vernier-export-2026-08-24.json, 134864 bytes
+   csv: vernier-export-2026-08-24.zip, 74375 bytes
+   pdf: vernier-health-report-2026-08-24.pdf, 4581 bytes
+   capture f130-export.png
+
+   the zip holds 47 members, one CSV per exported table plus its manifest;
+   the JSON carries 46 tables, names 27 exclusions with a reason each, 333 rows,
+   and holds none of owner, session, integration_credential, webauthn_credential.
+
+B. RE-IMPORTED INTO A SCRATCH INSTANCE. Not a hand-made database: a second
+   container of the same image on 127.0.0.1:3102 against its own database
+   vernier_verify_import, so migrations and the reference seed ran the way they do
+   on a fresh install (movement 44, food 3483, measurement 0 before the import).
+
+   $ node scripts/import-export.mjs vernier-export-2026-08-24.json --into vernier_verify_import --truncate
+     shopping_item_source                   0             0
+   
+   333 rows loaded into vernier_verify_import across 46 tables
+   every table holds exactly what the file carried
+   EXIT=0
+
+   $ node scripts/import-export.mjs vernier-export-2026-08-24.zip --into vernier_verify_import --truncate
+     shopping_item_source                   0             0
+   
+   333 rows loaded into vernier_verify_import across 46 tables
+   every table holds exactly what the file carried
+   EXIT=0
+
+C. THE REPORT, read by a parser rather than looked at: 1 page, opening
+   'Vernier health report / Prepared Monday 24 August from what is stored on your
+   Mac mini', with the source beside every value and the laboratory's own printed
+   interval and conversion beside the blood result.
+
+Files kept: .forge/evidence/slice-13/downloads-verify/
+Capture: .forge/evidence/slice-13/verify/f130-export.png

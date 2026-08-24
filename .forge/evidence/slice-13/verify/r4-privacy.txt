@@ -1,0 +1,35 @@
+R4 [verifier], 2026-08-24.
+
+1. A PRIVACY NOTICE WRITTEN FOR A HUMAN: docs/privacy.md, 129 lines, plain English,
+   no em dashes, opening with what the household exemption is and why the document
+   is short but not vague.
+
+2. A LAWFUL BASIS PER PURPOSE: a seven-row table, purpose by purpose, each naming
+   what it processes and the basis it would rest on if the exemption did not apply.
+   Recording measurements, reading the scale, extracting a laboratory PDF, estimating
+   a meal, writing a calendar, sending a weekly review, notifying a failure.
+
+3. A STATED RETENTION PERIOD PER DATA CATEGORY, compared to the code BOTH WAYS by
+   the verifier's own script rather than by the product's checker:
+     the document's table names 15 categories; the code declares 15; 0 disagreements
+   and the four enforced numbers (session 8 hours, challenge 120 seconds, ingest
+   nonce 24 hours, archives 30) are the constants the enforcing modules use.
+
+4. EVERY PROCESSOR NAMED WITH WHAT IT RECEIVES: six, plus a Tailscale paragraph.
+   Checked against every external host reachable from src/: googleapis.com and
+   oauth2.googleapis.com (Google), wbsapi.withings.net and account.withings.com
+   (Withings), the push service (Apple), the mail relay, Anthropic, and iCloud Drive.
+   commons.wikimedia.org, raw.githubusercontent.com and db.everkinetic.com appear
+   only as attribution URLs: all 44 movement_media rows are embedding_mode=bundled
+   with local paths under /movements/, so nothing is fetched from them at run time.
+   ONE LIMIT, NAMED RATHER THAN HIDDEN: src/components/MediaEditor.tsx can render a
+   youtube-nocookie iframe if the owner pastes a video link, and the document's
+   'Six, and this is all of them' does not name a video host. No row on this build
+   uses it, and the product discloses it at the moment of use in strings.media.
+   embedNote. Carried to the final full-scope pass rather than dropped.
+
+5. A CAPTURED EXPORT AND A CAPTURED PERMANENT DELETION, BOTH IN A REAL SESSION:
+   signed in through a one-time link on the scratch instance, in a browser.
+   f130-export.png, taken after JSON, CSV and PDF all downloaded from the screen.
+   f131-before.png, the typed phrase 'delete body' in the field and the button live.
+   f131-after.png, '127 rows deleted. Nothing is left in this category.'

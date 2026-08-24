@@ -1,0 +1,40 @@
+F133 [verifier], 2026-08-24, SCRATCH INSTANCE. THREE SEEDED FAILURES, ONE PER CLASS.
+
+F133 before seeding: operator_alert=0, push_delivery(operator)=0
+F133 seeded: one failed backup_run, one failed job_run (weekly_review), one integration_credential in error, and one push subscription.
+F133 the container was restarted and answered /healthz. NOTHING has been opened in a browser yet.
+F133 open alerts after the boot sweep, before any page load:
+backup | surface=backup | cause=not_writable | action=/settings/data | severity=alert
+ backup_stale | surface=backup | cause=archive_stale | action=/settings/data | severity=warn
+ integration:withings | surface=withings | cause=invalid_grant | action=/settings | severity=alert
+ job:weekly_review | surface=weekly_review | cause=stale-timeout | action=/review | severity=alert
+F133 one row per failing thing: backup=1, backup_stale=1, job:weekly_review=1, integration:withings=1
+F133 notifications sent, before any page load: none
+F133 total operator notifications: 0 for 4 open alert(s)
+F133 banner on /settings/data: present
+   4 things need you | The Withings scale | Google refused the stored token permanently. That happens when access is revoked, when six months pass with no use, or when a time-limited grant ends. Reconnecting is the only fix, and nothing is retried in the meantime. | Since 24 Aug, 03:43 Held until quiet hours end. | Open Settings | The Sunday review | A scheduled job stopped halfway through and the container restarted under it. Period 2026-08-30T20:00 | Since 24 Aug, 03:43 Held until quiet hours end. | Open Your week | The nightly backup | The newest archive is older than it should be. 50 hours old, and it should be under 36. | Since 24 Aug, 03:43 Held until quiet hours end. | Open Data and backups | The nightly backup | The backup folder refused the write, so the archive stayed on this Mac mini. Folder: /Users/lambertbouley/Library/Mobile Documents/com~apple~CloudDocs/lbtbly-backups The filesystem answered EACCES. | Since 24 Aug, 03:43 Held until quiet hours end. | Open Data and backups
+F133 banner on /settings: present
+   4 things need you | The Withings scale | Google refused the stored token permanently. That happens when access is revoked, when six months pass with no use, or when a time-limited grant ends. Reconnecting is the only fix, and nothing is retried in the meantime. | Since 24 Aug, 03:43 Held until quiet hours end. | Open Settings | The Sunday review | A scheduled job stopped halfway through and the container restarted under it. Period 2026-08-30T20:00 | Since 24 Aug, 03:43 Held until quiet hours end. | Open Your week | The nightly backup | The newest archive is older than it should be. 50 hours old, and it should be under 36. | Since 24 Aug, 03:43 Held until quiet hours end. | Open Data and backups | The nightly backup | The backup folder refused the write, so the archive stayed on this Mac mini. Folder: /Users/lambertbouley/Library/Mobile Documents/com~apple~CloudDocs/lbtbly-backups The filesystem answered EACCES. | Since 24 Aug, 03:43 Held until quiet hours end. | Open Data and backups
+F133 banner on /: ABSENT
+F133 after the integration was fixed, its alert cleared: 1
+--- the notification half, chased down ---
+The four alerts were raised with notify_detail = 'quiet_hours' (it was 03:43 and the
+quiet window is 22:00 to 07:00). So quiet hours were taken away on the scratch
+instance (reminder_preference set to 00:00/00:00, which inQuietHours reads as no
+window at all) and the container restarted so the boot sweep ran again.
+
+  push_subscription: verifier-seeded-device, https://127.0.0.1:9/push/verifier
+  after the sweep, outside quiet hours:
+    backup            notified=false  notify_detail=no-keys
+    backup_stale      notified=false  notify_detail=no-keys
+    job:weekly_review notified=false  notify_detail=no-keys
+  select count(*) from push_delivery  ->  0
+
+The cause is not the scratch instance. compose.yaml passes no VAPID variable into
+the app container at all, and the LIVE app container has zero variables whose name
+begins with VAPID:
+  $ docker compose exec -T app sh -c 'printenv | grep -c "^VAPID"'  ->  0
+src/lib/push/keys.ts refuses to send when either half is empty, so no operator
+notification can be raised on any instance of this build.
+
+Captures: f133-data.png, f133-settings.png, f133-today.png

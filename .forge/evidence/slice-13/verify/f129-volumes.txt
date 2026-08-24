@@ -1,0 +1,38 @@
+F129 [verifier], 2026-08-24.
+
+1. THE VOLUME DECLARATIONS, compose.yaml:
+   volumes: pgdata (name: vernier_pgdata), storage (name: vernier_storage)
+   db:  pgdata:/var/lib/postgresql            <- the database
+   app: storage:/app/storage                  <- media and documents
+   app: "${BACKUP_DIR:-./backups}":/app/backups  <- the archive destination, a host bind
+
+2. THE RUNNING MOUNT TABLE:
+   volume vernier_storage/var/lib/docker/volumes/vernier_storage/_data -> /app/storage
+   bind /host_mnt/Users/lambertbouley/Library/Mobile Documents/com~apple~CloudDocs/lbtbly-backups -> /app/backups
+
+   volume vernier_pgdata/var/lib/docker/volumes/vernier_pgdata/_data -> /var/lib/postgresql
+
+3. THE IMAGE'S WRITABLE DATA PATHS, run with no volumes mounted:
+   /app/storage             exists, 0 file(s)
+   /app/backups             absent
+   /var/lib/postgresql      absent
+   So the image carries an empty mount point and no product data at all.
+
+4. THE REPOSITORY SEARCH, over all 2475 tracked files, for down -v, down --volumes,
+   docker volume rm, docker volume prune, system prune --volumes and rm -rf on the
+   postgres data path. Eight matches, EVERY ONE inside .forge/, which is the run's
+   own record and not the product:
+   .forge/EVIDENCE.md:5:2026-08-21T21:42:26Z | F5 | scripts/up.sh, scripts/down.sh and scripts/status.sh each run twice against the running stack: exit 0 six times, and docker compose ps -q --all prints the same two ids (d590869cf57a, 17c3e7217d76) at all seven checkpoints. down.sh stops rather than removes, so the ids survive; grep -rn 'down -v' scripts/ returns nothing. Both named volumes present after. Transcript: .forge/evidence/slice-1/f5-scripts.txt
+   .forge/EVIDENCE.md:13:2026-08-21T22:13:12Z | F1 [verifier] | Re-tested, not accepted. docker compose down (no -v) then docker compose up -d --build: both services healthy in 15 s against the 120 s bar, vernier-app:local and postgres:18-alpine both linux/arm64, vernier_pgdata and vernier_storage both present after the down. Transcript: .forge/evidence/slice-1/verify/verify-operations.txt
+   .forge/EVIDENCE.md:16:2026-08-21T22:13:13Z | F5 [verifier] | Re-tested. up.sh, status.sh and down.sh each run twice against the running stack: six runs, six exit 0, and docker compose ps -q --all prints the same two ids at all five checkpoints. down.sh stops rather than removes, both named volumes survive, and grep -rn 'down -v' scripts/ returns nothing. Transcript: .forge/evidence/slice-1/verify/verify-operations.txt
+   .forge/GOAL.md:313:- aucun `docker compose down -v` dans les procédures ordinaires.
+   .forge/PLAN.md:654:Retention is enforced. Volumes are explicit and `down -v` appears nowhere.
+   .forge/evidence/slice-1/f1-cold-start.txt:3:$ docker compose down && docker volume rm vernier_pgdata vernier_storage
+   .forge/evidence/slice-1/f5-scripts.txt:51:$ grep -n 'down -v' scripts/*.sh    (must be empty)
+   .forge/evidence/slice-1/verify/verify-operations.txt:33:$ grep -rn 'down -v|down --volumes' scripts/  ->  none
+
+   Six of the eight are the rule being quoted or a grep pattern searching FOR it.
+   One is GOAL.md stating the rule in the owner's own words. Exactly ONE is a
+   transcript of a command that was run: slice 1's cold-start proof, on a database
+   that held nothing. Nothing under scripts/, docs/, src/, compose.yaml, Dockerfile,
+   package.json or README contains any of them.

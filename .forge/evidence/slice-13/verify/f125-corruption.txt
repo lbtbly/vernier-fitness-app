@@ -1,0 +1,23 @@
+F125 [verifier], 2026-08-24. Three deliberately damaged copies of the live nightly archive vernier-20260824T010000Z.archive (10 chunks, 9462530 bytes), written to scratch, never beside the original.
+
+$ node scripts/restore.mjs corrupt <archive> --mode truncate --out $S/dmg-truncate.archive
+$ node scripts/restore.mjs corrupt <archive> --mode reorder --out $S/dmg-reorder.archive
+$ node scripts/restore.mjs corrupt <archive> --mode flip --out $S/dmg-flip.archive
+
+Byte-level proof the damage is what it claims:
+  truncate: exact prefix of the original, 25109 bytes removed (the whole final frame)
+  reorder : frames 0 and 1 swapped byte for byte, every other byte identical, same length
+  flip    : exactly one byte at offset 9449970, 0xD2 -> 0x92, one bit, same length
+  header  : the 48-byte header is identical in all three
+
+$ node scripts/restore.mjs verify $S/dmg-truncate.archive
+restore: archive_truncated: the archive is TRUNCATED: it ends without the chunk that marks the end at chunk 9
+EXIT=3
+
+$ node scripts/restore.mjs verify $S/dmg-reorder.archive
+restore: archive_chunk_unauthenticated: a chunk did not verify: it has been altered, moved, or written under a different secret at chunk 0
+EXIT=3
+
+$ node scripts/restore.mjs verify $S/dmg-flip.archive
+restore: archive_chunk_unauthenticated: a chunk did not verify: it has been altered, moved, or written under a different secret at chunk 9
+EXIT=3

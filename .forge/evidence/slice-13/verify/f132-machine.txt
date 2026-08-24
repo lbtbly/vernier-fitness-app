@@ -1,0 +1,18 @@
+F132 [verifier], 2026-08-24, SCRATCH INSTANCE at 127.0.0.1:3101, screen /settings/data.
+
+F132 HEALTHY, every field on the machine card:
+   THIS MACHINE | App container | Running since 24 Aug, 03:31 | Database container | Running since 22 Aug, 23:06 | Database container | PostgreSQL 18.6 | Disk headroom | 217.2 GB free of 240.1 GB | Disk headroom | 5691.0 GB free of 62747.4 GB | Last archive | 24 Aug, 02:40 | Last restore check | 24 Aug, 03:40 | Last successful sync: Withings | 24 Aug, 02:40 | Last successful sync: Apple Health | No successful sync yet | Last successful sync: Google Calendar | No successful sync yet | Last successful sync: Mail relay | No successful sync yet | Listening on | 127.0.0.1:3000 | Reachable at | http://127.0.0.1:3101 | Passkey RP ID | localhost | Warns at | under 10.7 GB free, an archive over 36 hours old, a source quiet over 36 hours |  | No LAN port is open and Funnel is off. Tailscale is the network barrier, never the authentication.
+   withings sync row: Last successful sync: Withings 24 Aug, 02:40  class="num"
+   archive row: 24 Aug, 02:40 class="num"
+   restore row: 24 Aug, 03:40 class="num"
+F132 with the Withings sync 35 hours old: Last successful sync: Withings 22 Aug, 16:41  class="num"
+F132 with the Withings sync 37 hours old: Last successful sync: Withings 22 Aug, 14:41  class="num warn"
+F132 DEGRADED, every field on the machine card:
+   THIS MACHINE | App container | Running since 24 Aug, 03:31 | Database container | Running since 22 Aug, 23:06 | Database container | PostgreSQL 18.6 | Disk headroom | 217.2 GB free of 240.1 GB | Disk headroom | 5691.0 GB free of 62747.4 GB | Last archive | 22 Aug, 01:41 | Last restore check | Never | Last successful sync: Withings | 22 Aug, 14:41 | Last successful sync: Apple Health | No successful sync yet | Last successful sync: Google Calendar | No successful sync yet | Last successful sync: Mail relay | No successful sync yet | Listening on | 127.0.0.1:3000 | Reachable at | http://127.0.0.1:3101 | Passkey RP ID | localhost | Warns at | under 10.7 GB free, an archive over 36 hours old, a source quiet over 36 hours |  | No LAN port is open and Funnel is off. Tailscale is the network barrier, never the authentication.
+   archive card: LAST BACKUP | Saturday 22 August, 01:41 | 2.8 MB, encrypted | Integrity checked | Destination | /app/backups | Retention | 3 archives | Restore tested | Never | Archives on this machine | 3 archives | Back up now | Restore guide | DELETE PERMANENTLY |  | Removes every row of the category you choose from this Mac mini, and every file that belongs to it. Archives already written are not touched, so a restore can still bring it back. |  | WHAT TO DELETE | Body measurements | Apple Health samples | Blood tests and documents | Training | Meals, recipes and shopping | Assistant history | Calendar, reminders and reviews | Everything above | Body measurements | Nothing stored in this category yet | TYPE DELETE BODY TO CONFIRM |  | No undo, no grace period, no soft delete. |  | Delete permanently |  | Your account, your passkeys and the record of these deletions are never removed by this control.
+--- the credential search, from the same walk (walk3.log) ---
+F132 the rendered markup is 56586 characters; it contains the seeded value: false
+F132 the rendered markup contains the master key: false (key length 43)
+F132 control: the same markup search for a string that IS on the screen ("Warns at"): true
+
+Captures: f132-healthy.png, f132-degraded.png

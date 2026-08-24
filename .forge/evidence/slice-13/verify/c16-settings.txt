@@ -1,0 +1,50 @@
+C16 [verifier], 2026-08-24. Compared against the LOCAL approved export
+.forge/screens/12-settings-integrations.png and .forge/wireframes/12-settings-integrations.html.
+
+C16 /settings at 393: overflow 0px, page height 4893px, main width 393px, capture c16-settings-393.png
+C16 /settings/ai at 393: overflow 0px, page height 1146px, main width 393px, capture c16-ai-393.png
+C16 /settings/data at 393: overflow 0px, page height 3590px, main width 393px, capture c16-data-393.png
+C16 /settings at 768: overflow 0px, page height 4218px, main width 720px, capture c16-settings-768.png
+C16 /settings/ai at 768: overflow 0px, page height 1051px, main width 720px, capture c16-ai-768.png
+C16 /settings/data at 768: overflow 0px, page height 3065px, main width 720px, capture c16-data-768.png
+C16 /settings at 1280: overflow 0px, page height 4218px, main width 720px, capture c16-settings-1280.png
+C16 /settings/ai at 1280: overflow 0px, page height 1051px, main width 720px, capture c16-ai-1280.png
+C16 /settings/data at 1280: overflow 0px, page height 3065px, main width 720px, capture c16-data-1280.png
+C16 integration rows carrying a last successful sync on /settings: 0
+C16 "Last successful sync" appears 5 times on /settings
+C16 test controls on /settings: 1
+C16 AI consent screen title: What Claude may do
+C16 switch controls on /settings/ai: 4
+C16 the three uses named: Photo meal estimation=false, Menu generation=true, Health explanations=true
+C16 /settings/data carries export: true
+C16 /settings/data carries permanent delete: true
+C16 /settings/data carries archive status: true
+C16 /settings/data carries machine state: true
+C16 console errors across the whole walk: 0
+--- what each of C16's six named elements is, and where ---
+integration status with last successful sync and a test control: /settings, the
+  INTEGRATIONS section, one row per integration over a population where TWO of the
+  four have really synced:
+    Withings        Last successful sync: 24 Aug, 01:59   Connected      Check it still opens / Disconnect
+    Apple Health    Last successful sync: No successful sync yet   Not connected
+    Google Calendar Last successful sync: 20 Aug, 09:59   Connected      Check it still opens / Disconnect
+    Mail relay      Last successful sync: No successful sync yet   Not connected
+the AI consent switches: /settings/ai, 'What Claude may do', four switches
+  (Photo analysis, Menu generation, Health explanations, Calendar event titles),
+  each naming exactly what leaves the machine, plus the month's spend and call list.
+export, permanent delete, archive status, machine state: /settings/data, all four.
+
+--- departures from the drawn screen, named rather than implied ---
+1. Screen 12 frame 1 draws the alert then INTEGRATIONS. The build draws the alert,
+   then What Claude may do, This installation, Passkeys, the three per-provider
+   connect cards, Notifications, Data and backups, and only then the compact
+   INTEGRATIONS status table. Nothing C16 enumerates is missing; the order differs.
+2. Screen 12 frame 3 draws Last backup, Export everything, This machine, Delete.
+   The build draws Last backup with the delete control inside that card, then
+   Export everything, then This machine.
+3. The design draws three AI switches; the build has four. Calendar event titles
+   arrived with slice 11. An addition, not a subtraction.
+4. The design draws delete as 'Delete all data' behind the word delete. The build
+   deletes BY CATEGORY behind 'delete <category>', which is what F131 requires.
+
+Captures: c16-{settings,ai,data}-{393,768,1280}.png, nine of them.

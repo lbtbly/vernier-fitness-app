@@ -1,0 +1,32 @@
+F131 the screen offers 8 categories: body, phone_health, laboratory, training, nutrition, assistant, planning, everything
+   body               offers 127 row(s)  "Body measurements"
+   phone_health       offers 0 row(s)  "Apple Health samples"
+   laboratory         offers 0 row(s)  "Blood tests and documents"
+   training           offers 55 row(s)  "Training"
+   nutrition          offers 144 row(s)  "Meals, recipes and shopping"
+   assistant          offers 1 row(s)  "Assistant history"
+   planning           offers 6 row(s)  "Calendar, reminders and reviews"
+   everything         offers 333 row(s)  "Everything above"
+F131 chosen category: body, 127 rows offered
+F131 BEFORE, per table: {"measurement":89,"source_record":37,"import_question":0,"goal":1,"write_request":0,"idempotency_key":0}
+F131 the button is disabled before the phrase is typed: true
+F131 with the WRONG phrase "delete everything" typed, the button is disabled: true
+F131 typed "delete body" character by character; the button is enabled: true
+F131 the screen says: 127 rows deleted. Nothing is left in this category.
+F131 AFTER, per table: {"measurement":0,"source_record":0,"import_question":0,"goal":0,"write_request":0,"idempotency_key":0}
+F131 deletion_run: body done before={"goal": 1, "measurement": 89, "source_record": 37, "write_request": 0, "idempotency_key": 0, "import_question": 0}
+The database door, called directly at a psql prompt on the SCRATCH instance:
+  select vernier_delete_category('nutrition','delete everything',array['recipe'])
+  ERROR: vernier_delete_category: the typed phrase does not match this category
+  recipe held 22 rows before and 22 rows after, so nothing moved.
+  select vernier_delete_category('account','delete account',array['owner'])
+  ERROR: vernier_delete_category: owner is never deletable through a category
+
+Retention, compared BOTH WAYS by the verifier's own script rather than by the
+product's checker (scratchpad/s13/retention.mjs):
+  the document's table names 15 categories; the code declares 15; 0 disagreements
+  body/phone_health/laboratory/training/nutrition/assistant/planning until-deleted
+  account until-revoked, sign_in_session 8-hours, sign_in_challenge 2-minutes,
+  ingest_nonce 24-hours, audit/operations/reference life-of-install,
+  archives 30-archives
+Captures: .forge/evidence/slice-13/verify/f131-before.png and f131-after.png

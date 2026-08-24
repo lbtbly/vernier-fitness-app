@@ -1,0 +1,39 @@
+F127 [verifier], 2026-08-24.
+
+A. THE CONFIGURED DESTINATION, on the LIVE install.
+   total 34016
+   -rw-r--r--@ 1 lambertbouley  staff  7948504 Aug 23 22:12 vernier-20260823T201215Z.archive
+   -rw-r--r--@ 1 lambertbouley  staff  9462530 Aug 24 03:00 vernier-20260824T010000Z.archive
+   backup_run, read through vernier_suite:
+     2026-08-24 03:00:00 | scheduled | ok | configured | verified | 9462530 bytes
+     2026-08-23 22:12:15 | scheduled | ok | configured | verified | 7948504 bytes
+
+B. THE CONFIGURED DESTINATION, on the SCRATCH instance, BACKUP_DIR naming a real
+   host path and the bind mounted read WRITE, archive started from the screen:
+   F127 [configured] configured host directory holds 3 archive(s) before the run
+   F127 [configured] configured host directory holds 3 archive(s) after: vernier-20260824T013752Z.archive, vernier-20260824T013809Z.archive, vernier-20260824T014708Z.archive
+   F127 [configured] the container fallback /app/storage/backups holds: (nothing)
+   F127 [configured] backup_run: configured | cause= | ok | verified
+   F127 [configured] the archive card destination attribute: configured
+   F127 [configured] the archive card destination row reads: /private/tmp/claude-501/-Users-lambertbouley-Claude-lbtbly-fitness-app/38530ca4-7aaa-4639-b52a-4d9b5f218876/scratchpad/s13/backupdir
+   F127 [configured] the alert reads: 3 things need you | The Sunday review | A scheduled job stopped halfway through and the container restarted under it. Period 2026-08-30T20:00 | Since 24 Aug, 03:43 | Open Your week | The nightly backup | The newest archive is older than it should be. 50 hours old, and it should be under 36. | Since 24 Aug, 03:43 | Open Data and backups | The nightly backup | The backup folder refused the write, so the archive stayed on this Mac mini. Folder: /Users/lambertbouley/Library/Mobile Documents/com~apple~CloudDocs/lbtbly-backups The filesystem answered EACCES. | Since 24 Aug, 03:43 | Open Data and backups
+C. THE SAME INSTANCE with the same host path mounted READ ONLY, which is what an
+   unavailable configured destination looks like from inside the container:
+   F127 [fallback-alert] configured host directory holds 3 archive(s) before the run
+   F127 [fallback-alert] configured host directory holds 3 archive(s) after: vernier-20260824T013752Z.archive, vernier-20260824T013809Z.archive, vernier-20260824T014708Z.archive
+   F127 [fallback-alert] the container fallback /app/storage/backups holds: vernier-20260824T014734Z.archive, vernier-20260824T015040Z.archive
+   F127 [fallback-alert] backup_run: fallback | cause=not_writable | ok | verified
+   F127 [fallback-alert] the archive card destination attribute: fallback
+   F127 [fallback-alert] the archive card destination row reads: On this machine
+   F127 [fallback-alert] the alert reads: 2 things need you | The nightly backup | The backup folder refused the write, so the archive stayed on this Mac mini. Folder: /app/storage/backups The filesystem answered EROFS. | Since 24 Aug, 03:50 | Open Data and backups | The Sunday review | A scheduled job stopped halfway through and the container restarted under it. Period 2026-08-30T20:00 | Since 24 Aug, 03:43 | Open Your week
+   docker exec vernier-scratch touch /app/backups/.probe
+     touch: cannot touch '/app/backups/.probe': Read-only file system
+
+   The alert row's own detail HOLDS the configured path:
+     {"errno":"EROFS","mount":"/app/backups","fallback":"/app/storage/backups",
+      "directory":"/app/storage/backups","configured":"<the host path>"}
+   and src/lib/display.ts alertBody renders detail.directory only, never
+   detail.configured, so the sentence on screen names the container's fallback
+   path instead of the folder the owner set.
+
+Captures: f127-configured.png, f127-fallback.png, f127-fallback-alert.png

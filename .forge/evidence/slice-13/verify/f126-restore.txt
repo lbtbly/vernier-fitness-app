@@ -1,0 +1,34 @@
+F126 [verifier], 2026-08-24. THE RESTORE DOES NOT LOAD, ON MAIN.
+
+A. THE LIVE NIGHTLY ARCHIVE, rebuilt into a scratch database, never the live one:
+   $ node scripts/restore.mjs restore vernier-20260824T010000Z.archive --into vernier_verify_restore
+   rebuilding vernier_verify_restore from /Users/lambertbouley/Library/Mobile Documents/com~apple~CloudDocs/lbtbly-backups/vernier-20260824T010000Z.archive
+   restore: psql refused the load: psql:<stdin>:8: ERROR:  relation "drizzle.__drizzle_migrations" does not exist
+   LINE 1: insert into "drizzle"."__drizzle_migrations" ("id", "hash", ...
+                       ^
+   EXIT=5
+
+   verify passed on the same file in the same run: every chunk authenticated and
+   every member matched its digest, 74 tables, 17988 rows. The archive is intact.
+   What fails is loading it: schema.sql creates no drizzle schema, and the data
+   section's FIRST statement inserts into drizzle.__drizzle_migrations.
+
+B. THE SAME FAILURE ON AN ARCHIVE THIS BUILD WROTE MINUTES EARLIER, inside the
+   automated suite, on temporary data, which is the second half of F126:
+   $ npx playwright test --project=chrome-scratch tests/e2e/backup.spec.ts
+     rebuilding vernier_restore_check from .../vernier-20260824T012610Z.archive
+     restore: psql refused the load: psql:<stdin>:8: ERROR: relation
+     "drizzle.__drizzle_migrations" does not exist
+     x  F126. a restore rebuilds a database whose row counts match the archive exactly
+        expect(restored.status).toBe(0)  Expected: 0  Received: 5
+
+C. AND BECAUSE THE FILE IS test.describe.configure({ mode: 'serial' }), SEVEN TESTS
+   AFTER IT DID NOT RUN AT ALL on the first pass: F128, F130, F131, F132, F133,
+   F127 and C16. Result line: '1 failed, 7 did not run, 2 passed'.
+
+D. There are no source rows and no restored rows to print, because no database was
+   rebuilt. The comparison F126 asks for cannot be made on this build.
+
+The fix exists on slice/fix-round3 at 1051b37, 'fix: a restore can actually load
+the archive it verified'. git merge-base --is-ancestor 1051b37 main -> NO.
+The image the origin serves was built from main and does not carry it.
