@@ -882,6 +882,18 @@ export function testStackWithBackupDir(
   ...args: string[]
 ): string {
   const env = { ...process.env } as NodeJS.ProcessEnv;
+  // DEMO_MODE on, because F131 deletes a category and asserts the count BEFORE
+  // the deletion is greater than zero. The demonstration seed is the only
+  // writer of `health_sample`, `scripts/test-stack.sh` defaults DEMO_MODE to 0,
+  // and this helper never set it, so that assertion ran over an empty table.
+  // A deletion proven over nothing is the standing rule's own example: a zero
+  // is evidence only beside the population it covered.
+  //
+  // The builder that found this named it and deliberately did not fix it,
+  // because turning the seed on changes the conditions F124, F125 and F126 run
+  // under. Those three now pass with an archive that genuinely loads, so this
+  // is the moment to turn it on.
+  env.DEMO_MODE = '1';
   if (directory === null) delete env.SCRATCH_BACKUP_DIR;
   else env.SCRATCH_BACKUP_DIR = directory;
   if (retention === null) delete env.SCRATCH_BACKUP_RETENTION;
