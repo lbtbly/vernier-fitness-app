@@ -146,14 +146,50 @@ function storageTarEntries(entries: StorageEntry[]): TarEntry[] {
   }));
 }
 
+/**
+ * The migrator's own schema and ledger, which no migration file creates.
+ *
+ * READ THIS BEFORE DELETING IT. `drizzle.__drizzle_migrations` is created by
+ * drizzle-orm in code, in `PgDialect.migrate`, before it applies the first
+ * generated file. Nothing under `drizzle/` mentions it. The dump keeps that
+ * table, deliberately and with a test on it, because an archive that restored
+ * without the ledger would come back up and try to migrate the whole schema a
+ * second time. So the schema section has to be able to build it, and the
+ * concatenated migrations cannot.
+ *
+ * F126 is the line that found this: a restore loaded the data section into a
+ * database with no `drizzle` schema at all, the first insert raised, psql
+ * stopped on it and the script exited 5 with `psql refused the load`. Every
+ * archive this product had ever written was unrestorable and every check up to
+ * that point had passed.
+ *
+ * The statements are the ones drizzle-orm issues, with the same names, the same
+ * types and the same `if not exists` guards, so applying this into a database
+ * the migrator has already touched changes nothing.
+ *
+ * LOWER CASE AND NO FULL STOP, like every other statement dump.ts writes. C6's
+ * source checker reads every literal under src/ whatever it is for, and machine
+ * text stays machine shaped so the words that belong to a screen stay the only
+ * things that look like sentences.
+ */
+export const MIGRATOR_LEDGER_SQL =
+  '\n-- the migrator ledger, which drizzle-orm creates in code and not in a file\n' +
+  'create schema if not exists "drizzle";\n' +
+  'create table if not exists "drizzle"."__drizzle_migrations" (\n' +
+  '  id serial primary key,\n' +
+  '  hash text not null,\n' +
+  '  created_at bigint\n' +
+  ');\n';
+
 /** Every generated migration, concatenated, which is the schema this data fits. */
-async function schemaSql(folder: string): Promise<string> {
+export async function schemaSql(folder: string): Promise<string> {
   const names = (await readdir(folder).catch(() => [] as string[]))
     .filter((name) => name.endsWith('.sql'))
     .sort();
   const parts: string[] = [
     '-- vernier schema section, every generated migration in order\n',
     '-- apply with psql into an empty database, then load the data section\n',
+    MIGRATOR_LEDGER_SQL,
   ];
   for (const name of names) {
     parts.push(`\n-- ${name}\n`);

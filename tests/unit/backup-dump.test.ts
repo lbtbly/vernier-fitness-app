@@ -7,6 +7,7 @@ import {
   dumpData,
   dumpOrder,
   dumpTable,
+  emptyTables,
   planDump,
   qualify,
 } from '@/lib/backup/dump';
@@ -214,6 +215,37 @@ describe('the SQL a dump writes', () => {
     }
     expect(code).toBe('dump_row_not_json');
     expect(broken.statements.some((statement) => statement.startsWith('close'))).toBe(true);
+  });
+
+  it('empties every table it loads, in one statement, before the first insert', async () => {
+    const plan = await planDump(fakeClient({}), MODELLED);
+    const ordered = dumpOrder(plan, ['source_record', 'measurement']);
+    const client = fakeClient({ '"public"."source_record"': [{ id: 'a', source: 'manual' }] });
+    const tally: Array<{ table: string; rows: number }> = [];
+    let sql = '';
+    for await (const piece of dumpData(client, ordered, [], tally)) sql += piece;
+    const truncate = /^truncate table .+;$/m.exec(sql)?.[0] ?? '';
+    console.log(truncate);
+
+    /*
+     * The schema section a restore applies is the migrations concatenated, and
+     * six of them end in a seeded INSERT. Without this line the archive's own
+     * copy of those rows collides on the primary key and psql stops the load.
+     *
+     * GOES RED IF: the truncate goes away, or it is split into one statement
+     * per table, which Postgres refuses on any table another one references.
+     */
+    expect(truncate).toContain('"drizzle"."__drizzle_migrations"');
+    expect(truncate).toContain('"public"."source_record"');
+    expect(truncate).toContain('"public"."measurement"');
+    // No CASCADE. It would reach a table this plan does not know about.
+    expect(truncate.toLowerCase()).not.toContain('cascade');
+    expect(sql.indexOf('truncate table')).toBeGreaterThan(sql.indexOf('begin;'));
+    expect(sql.indexOf('truncate table')).toBeLessThan(sql.indexOf('insert into'));
+  });
+
+  it('writes nothing at all when there is no table to empty', () => {
+    expect([...emptyTables([])]).toEqual([]);
   });
 
   it('wraps the load in one transaction and moves the sequences after it', async () => {

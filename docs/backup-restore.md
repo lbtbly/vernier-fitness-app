@@ -23,8 +23,8 @@ Inside, after decryption, is a plain tar with four members:
 | Member | What it is |
 |---|---|
 | `manifest.json` | What this archive is: when, by which version, against which schema, how many rows in each table, the SHA-256 of every other member |
-| `schema.sql` | Every generated migration in order. Enough to build an empty database from nothing |
-| `data.sql` | Every row of every table, as `insert ... select ... from json_populate_recordset(...)`. Postgres formatted every value and Postgres parses it back |
+| `schema.sql` | The migrator's own ledger, then every generated migration in order. Enough to build an empty database from nothing |
+| `data.sql` | Every table emptied, then every row of every table, as `insert ... select ... from json_populate_recordset(...)`. Postgres formatted every value and Postgres parses it back |
 | `storage.tar` | The media and document volume: laboratory PDFs, meal photographs, everything under `/app/storage` except the archives themselves |
 
 `tar -tvf` lists it and `tar -xf` unpacks it, on any machine, with no copy of
@@ -38,6 +38,18 @@ database holds and the app does not model is archived anyway and named in the
 manifest as unmodelled. There is one of those, `drizzle.__drizzle_migrations`,
 and it is the difference between an archive that restores into an installation
 that boots and one whose migrator immediately tries to migrate again.
+
+Two things follow from that and both are in the archive rather than in a person's
+memory. drizzle-orm creates `drizzle.__drizzle_migrations` in code and not in a
+migration file, so `schema.sql` carries the two statements that build it before
+the first migration. And six migrations end in a seeded INSERT, guarded by
+`ON CONFLICT DO NOTHING` so a redeploy leaves the owner's settings alone, which
+means a freshly built restore target already holds those rows: `data.sql` opens
+its transaction with one `TRUNCATE` naming every table it is about to load, so
+the archive's copy replaces the seed rather than colliding with it. TRUNCATE
+fires no row trigger, which is the second of the three doors through the
+append-only guarantee, and the third of the file's own properties: the data
+section can be loaded twice and the database is the same afterwards.
 
 ## How it is encrypted
 

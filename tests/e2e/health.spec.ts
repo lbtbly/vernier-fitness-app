@@ -219,16 +219,38 @@ test.describe('screen 04, Health', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
+    /*
+     * THE WINDOW HAS TWO ENDS AND THE HAND COMPUTATION ONLY HAD ONE.
+     *
+     * "The last 7 days" is seven days ENDING TODAY. src/lib/trend.ts adherence()
+     * builds the set of day keys from windowDays(now, days, timeZone) and counts
+     * the sessions whose day is in it, so tomorrow's session is outside it; and
+     * readAdherenceScreen only loads as far as now plus one day in the first
+     * place. This query said `planned_for >= today - 6 days` and stopped, so
+     * every session the training week has proposed for NEXT week landed in the
+     * denominator it was checking the screen against. The screen was right and
+     * the arithmetic beside it was counting a different window.
+     *
+     * The count of what sits beyond the window is printed rather than assumed
+     * away, so a zero here reads as a zero over a real population.
+     */
+    const window = (days: number) =>
+      `planned_for >= date_trunc('day', now()) - interval '${days - 1} days'
+       and planned_for < date_trunc('day', now()) + interval '1 day'`;
+
+    const ahead = query(
+      "select count(*) from planned_session where planned_for >= date_trunc('day', now()) + interval '1 day'",
+    ).trim();
+    console.log(`F33  sessions planned beyond today, which no window counts: ${ahead}`);
+
     for (const days of [7, 28]) {
       const onScreen = (
         await page.locator(`[data-adherence-window="${days}"]`).textContent()
       )!.trim();
       // The hand computation, off the rows the demonstration seed wrote.
-      const planned = query(
-        `select count(*) from planned_session where planned_for >= date_trunc('day', now()) - interval '${days - 1} days'`,
-      ).trim();
+      const planned = query(`select count(*) from planned_session where ${window(days)}`).trim();
       const completed = query(
-        `select count(*) from planned_session where state = 'completed' and planned_for >= date_trunc('day', now()) - interval '${days - 1} days'`,
+        `select count(*) from planned_session where state = 'completed' and ${window(days)}`,
       ).trim();
       console.log(`F33  ${days} days: screen "${onScreen}", database ${completed} of ${planned}`);
       expect(onScreen).toBe(`${completed} of ${planned}`);

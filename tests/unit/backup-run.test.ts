@@ -25,7 +25,7 @@ import {
 } from '@/lib/backup/manifest';
 import { applyRetention, archiveName, isArchiveName, selectForRemoval } from '@/lib/backup/retention';
 import { archiveSecret } from '@/lib/backup/secret';
-import { walkStorage } from '@/lib/backup/run';
+import { MIGRATOR_LEDGER_SQL, schemaSql, walkStorage } from '@/lib/backup/run';
 
 /**
  * The archive path over real files, real streams and a real directory.
@@ -420,5 +420,40 @@ describe('the archive secret', () => {
     expect(() => archiveSecret({ BACKUP_PASSPHRASE: '   ', MASTER_KEY: '' })).toThrow(
       /archive_secret_missing/,
     );
+  });
+});
+
+describe('the schema section a restore applies', () => {
+  const folder = new URL('../../drizzle', import.meta.url).pathname;
+
+  it('carries the migrator ledger, which no generated migration creates', async () => {
+    const names = (await readdir(folder)).filter((name) => name.endsWith('.sql')).sort();
+    const migrations = (
+      await Promise.all(names.map((name) => readFile(join(folder, name), 'utf8')))
+    ).join('\n');
+
+    /*
+     * THE POPULATION BESIDE THE ZERO. Twelve generated files, none of which
+     * mentions the ledger the dump keeps. That absence is the whole reason the
+     * schema section carries the two statements below: drizzle-orm creates them
+     * in code before it applies the first file, so an archive restored from the
+     * migrations alone has no `drizzle` schema and the data section's first
+     * insert raises.
+     *
+     * GOES RED IF: the preamble is dropped, or a migration starts creating the
+     * ledger itself, in which case the preamble is the thing to delete.
+     */
+    console.log(`${names.length} generated migrations, ${migrations.length} characters`);
+    expect(names.length).toBeGreaterThan(10);
+    expect(migrations).not.toContain('__drizzle_migrations');
+
+    const section = await schemaSql(folder);
+    console.log(MIGRATOR_LEDGER_SQL.trim());
+    expect(section).toContain('create schema if not exists "drizzle";');
+    expect(section).toContain('create table if not exists "drizzle"."__drizzle_migrations"');
+    // Before the first migration, because a load is applied in file order.
+    expect(section.indexOf('__drizzle_migrations')).toBeLessThan(section.indexOf(names[0]));
+    // And every migration is still in it, in order.
+    for (const name of names) expect(section).toContain(`-- ${name}`);
   });
 });

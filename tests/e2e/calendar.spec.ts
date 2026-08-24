@@ -139,11 +139,65 @@ async function acceptSessions(page: Page, howMany = 3) {
   return ids.slice(0, howMany);
 }
 
-/** Work out what would change, and wait for the rows to be on screen. */
+/**
+ * What this screen is showing right now, as one comparable string.
+ *
+ * The plan's row identifiers, and the state markers beside them: a plan is
+ * stored with fresh row identifiers on every build, so a build that returns
+ * rows moves this string, and a build that returns none of them because the
+ * connection is gone or the calendar is unreadable moves it through the card
+ * that says so.
+ */
+async function planOnScreen(page: Page): Promise<string> {
+  return page.evaluate(() => {
+    const rows = [...document.querySelectorAll('[data-confirm-row]')]
+      .map((node) => node.getAttribute('data-confirm-row') ?? '')
+      .join(',');
+    const cards = [...document.querySelectorAll('[data-calendar], [data-state]')]
+      .map((node) => node.getAttribute('data-calendar') ?? node.getAttribute('data-state') ?? '')
+      .join(',');
+    return `${rows} | ${cards}`;
+  });
+}
+
+/**
+ * Work out what would change, and wait for the NEW plan to be on screen.
+ *
+ * THE WAIT IS THE WHOLE OF THIS FUNCTION. A plan that has been applied still
+ * draws its rows, deliberately: it is the record of what was written, with the
+ * outcome on each row and a rebuild control beside it. So arriving on this
+ * screen after an earlier test applied a plan means rows are visible before
+ * anything is clicked, and `networkidle` after a click that fires a fetch which
+ * has not started yet resolves at once.
+ *
+ * F107 read that stale plan. It graded the create-the-calendar row F101 had
+ * applied two tests earlier, whose cause names the calendar rather than a
+ * placement, and reported the product had no cause on a row. The defaults it
+ * was about to grade would have been wrong for the same reason: a settled plan
+ * marks a row selected when it was APPLIED, not when it was proposed.
+ *
+ * A build stores a new plan with new row identifiers, so the rows changing is
+ * the signal that the answer came back. An empty rebuild changes them too, to
+ * nothing at all, which is the state F106 needs.
+ */
 async function buildPlan(page: Page) {
   await openCalendar(page);
+  const before = await planOnScreen(page);
   const build = page.locator('[data-control="build-plan"], [data-control="rebuild"]').first();
+  // A screen with no build control on it cannot propose anything: the grant is
+  // gone and the card says so. That is a state two tests below put it in on
+  // purpose, and it is said here rather than waited out on a click.
+  if ((await build.count()) === 0) {
+    console.log(`no build control on the calendar screen, so nothing was asked for: ${before}`);
+    return;
+  }
   await build.click();
+  await expect
+    .poll(() => planOnScreen(page), {
+      timeout: 30_000,
+      message: 'the calendar screen never changed, so what is on it belongs to the previous build',
+    })
+    .not.toBe(before);
   await page.waitForLoadState('networkidle');
 }
 
