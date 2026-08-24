@@ -335,12 +335,21 @@ export async function recogniseImageLines(bytes: Uint8Array): Promise<OcrTextOut
   }
 
   try {
-    const result = await worker.recognize(Buffer.from(bytes));
-    // Through wordsFromResult, not straight off `.words`. Tesseract returns the
-    // words either flat or nested under blocks depending on the build, and its
-    // real types make the flat one optional. While the package was absent this
-    // file typechecked against a structural stand-in that did not, so the merge
-    // that finally put tesseract in the image is what surfaced it.
+    // `{ blocks: true }`, the same third argument the PDF path passes seventy
+    // lines above, with the same reason: it is what makes version 7 return the
+    // word boxes at all. Without it `data.blocks` is null and `data.words` does
+    // not exist, so `wordsFromResult` returns null and every photographed
+    // recipe card was refused with "the recogniser returned a page with no
+    // readable words". A verifier proved it on the same bytes outside the app:
+    // 0 words without the flag, 18 words and the full card with it.
+    //
+    // One call site in this file knew this and its neighbour did not, and the
+    // comment that used to sit here guessed at "flat or nested depending on the
+    // build" rather than reading the one seventy lines up.
+    const result = await worker.recognize(Buffer.from(bytes), undefined, { blocks: true });
+    // And read through wordsFromResult, not straight off `.words`: the real
+    // types make the flat form optional, and while the package was absent this
+    // file typechecked against a structural stand-in that did not.
     //
     // A `?? []` here would have typechecked and read as zero recognised lines,
     // which is the shape of every check that passes by not checking. A page
